@@ -1,0 +1,42 @@
+name: Keep Streamlit App Awake
+
+# 일정 시간마다 실행 (매일 9시, 15시, 21시 KST = UTC 0, 6, 12)
+on:
+  schedule:
+    - cron: '0 0,6,12 * * *'
+  # 수동으로도 실행 가능
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1단계: 저장소 코드 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # 2단계: 자동 커밋을 위해 Git 설정
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      # 3단계: 빈 커밋 생성 (repository activity trigger)
+      - name: Create empty commit to keep app alive
+        run: |
+          git commit --allow-empty -m "Keep Streamlit app awake - $(date +'%Y-%m-%d %H:%M:%S %Z')"
+      
+      # 4단계: 커밋을 main 브랜치로 푸시
+      - name: Push changes
+        run: git push origin main
+      
+      # 5단계: Streamlit 앱 URL 접속 (옵션)
+      - name: Wake up Streamlit app (HTTP request)
+        run: |
+          curl -X GET https://ahpkrj.streamlit.app/ \
+            -H "User-Agent: GitHub-Actions-Bot/1.0" \
+            --max-time 30 \
+            --retry 3 \
+            --retry-delay 5 || true
+        continue-on-error: true
