@@ -1684,44 +1684,94 @@ if uploaded_file:
                     sub_results_storage = {}
                     total_excl_df_list = [main_excluded_df]
                     
-                    for i, sub_sheet_name in enumerate(sheet_names[1:]):
-                        try:
-                            parent_factor = main_factors[i]
-                            df_sub = pd.read_excel(uploaded_file, sheet_name=sub_sheet_name)
-                            sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
-                                df_sub, cr_threshold, max_iter_val, learning_rate, mean_method
-                            )
-                            
-                            if sub_res_df.empty:
-                                raise ValueError(f"'{sub_sheet_name}' 시트에 유효한 분석 데이터가 없습니다.")
-                                
-                            # 통계 계산 로직
-                            sub_w_cols = [f"Weight_{f}" for f in sub_facts]
-                            group_sub_w = sub_res_df[sub_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(sub_res_df[sub_w_cols].values, axis=0)
-                            group_sub_w = group_sub_w / group_sub_w.sum()
-                            sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
-                            sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
-                            sub_grp_cr, _, _ = calculate_consistency(sub_group_matrix, method=mean_method)
-                            
+                    is_single_sheet = (len(sheet_names) == 1)
+                    
+                    if is_single_sheet:
+                        for parent_factor in main_factors:
+                            # 1단계 분석인 경우 (하위 시트가 없음), 
+                            # 하위 가중치 1.0을 가지는 더미 데이터를 자동으로 생성하여 연산을 마칩니다.
+                            dummy_list = []
+                            for idx, row in main_results_df.iterrows():
+                                dummy_list.append({
+                                    "ID": row['ID'],
+                                    "Type": row['Type'],
+                                    "Original_CI": 0.0,
+                                    "Original_CR": 0.0,
+                                    "Final_CI": 0.0,
+                                    "Final_CR": 0.0,
+                                    "Iterations": 0,
+                                    "Corrected": False,
+                                    "Matrix_Object": np.array([[1.0]]),
+                                    f"Weight_{parent_factor}": 1.0
+                                })
+                            dummy_df = pd.DataFrame(dummy_list)
                             sub_results_storage[parent_factor] = {
-                                'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
-                                'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr
+                                'weights': np.array([1.0]),
+                                'factors': [parent_factor],
+                                'cr': 0.0,
+                                'df': dummy_df,
+                                'group_matrix': np.array([[1.0]]),
+                                'group_cr': 0.0
                             }
-                            if not sub_excl_df.empty:
-                                sub_excl_df['Sheet'] = sub_sheet_name
-                                total_excl_df_list.append(sub_excl_df)
+                    else:
+                        for parent_factor in main_factors:
+                            # 대분류 항목명과 일치하는 시트명 찾기 (대소문자, 공백 무시 및 31자 제한 고려)
+                            target_name = parent_factor.strip().lower()
+                            target_name_31 = parent_factor[:31].strip().lower()
+                            
+                            matched_sheet_name = None
+                            for sn in sheet_names[1:]:
+                                sn_clean = sn.strip().lower()
+                                if sn_clean == target_name or sn_clean == target_name_31:
+                                    matched_sheet_name = sn
+                                    break
+                            
+                            if matched_sheet_name is None:
+                                st.error(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.")
+                                with st.expander("💡 이유 및 해결 방법 보기", expanded=True):
+                                    st.markdown(f"""
+                                    **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 엑셀 파일 내에 존재하지 않거나 시트 이름이 다릅니다.
+                                    **해결 방법:**
+                                    1. 업로드한 엑셀 파일 내에 **'{parent_factor}'** (또는 31자 이내로 앞부분이 일치하는 명칭)의 시트가 존재하는지 확인하세요.
+                                    2. 시트 이름의 앞뒤 공백이나 오탈자(예: '리드타임민감도'와 '리드타임 민감도')가 없는지 확인하고 시트명을 맞춰주세요.
+                                    """)
+                                st.stop()
+                            
+                            try:
+                                df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
+                                sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
+                                    df_sub, cr_threshold, max_iter_val, learning_rate, mean_method
+                                )
                                 
-                        except Exception as e:
-                            st.error(f"❌ [세부 시트: {sub_sheet_name}] 분석 중 오류가 발생했습니다.")
-                            with st.expander("💡 이유 및 해결 방법 보기", expanded=True):
-                                st.markdown(f"""
-                                **원인:** 시트 이름이 대분류 항목명과 다르거나, 해당 시트의 응답자들이 모두 일관성 기준을 통과하지 못했습니다. (Error: {e})
-                                **해결 방법:**
-                                1. 엑셀 시트 이름이 메인 시트에 적힌 **대분류 명칭**과 정확히 일치하는지 확인하세요.
-                                2. 해당 시트의 데이터에 빈 칸이나 문자가 섞여 있는지 확인하세요.
-                                3. CR 임계값을 높여서 다시 분석해 보세요.
-                                """)
-                            st.stop()
+                                if sub_res_df.empty:
+                                    raise ValueError(f"'{matched_sheet_name}' 시트에 유효한 분석 데이터가 없습니다.")
+                                    
+                                # 통계 계산 로직
+                                sub_w_cols = [f"Weight_{f}" for f in sub_facts]
+                                group_sub_w = sub_res_df[sub_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(sub_res_df[sub_w_cols].values, axis=0)
+                                group_sub_w = group_sub_w / group_sub_w.sum()
+                                sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
+                                sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
+                                sub_grp_cr, _, _ = calculate_consistency(sub_group_matrix, method=mean_method)
+                                
+                                sub_results_storage[parent_factor] = {
+                                    'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
+                                    'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr
+                                }
+                                if not sub_excl_df.empty:
+                                    sub_excl_df['Sheet'] = parent_factor
+                                    total_excl_df_list.append(sub_excl_df)
+                                    
+                            except Exception as e:
+                                st.error(f"❌ [세부 시트: {matched_sheet_name}] 분석 중 오류가 발생했습니다.")
+                                with st.expander("💡 이유 및 해결 방법 보기", expanded=True):
+                                    st.markdown(f"""
+                                    **원인:** 시트 내부의 데이터 구조가 올바르지 않거나, 해당 시트의 응답자들이 모두 일관성 기준을 통과하지 못했습니다. (Error: {e})
+                                    **해결 방법:**
+                                    1. 해당 세부 시트의 데이터에 빈 칸이나 문자가 섞여 있는지 확인하세요.
+                                    2. CR 임계값을 높여서 다시 분석해 보세요.
+                                    """)
+                                st.stop()
 
                     # 분석 헤더 윗쪽에 제외된 사례수 표시
                     total_excluded = main_excluded
@@ -1996,6 +2046,38 @@ if uploaded_file:
                         for r_idx, row_content in enumerate(theory_text):
                             fmt = theory_title_fmt if r_idx == 0 else theory_body_fmt
                             theory_ws.write(r_idx, 0, row_content[0], fmt)
+
+                        if is_single_sheet:
+                            guide_ws = workbook.add_worksheet("Single_Sheet_Guide")
+                            guide_title_fmt = workbook.add_format({'bold': True, 'font_size': 14, 'font_name': 'NanumGothic', 'bg_color': '#D9E1F2', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+                            guide_section_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'font_name': 'NanumGothic', 'bg_color': '#F2F2F2', 'border': 1, 'valign': 'vcenter', 'align': 'center'})
+                            guide_body_fmt = workbook.add_format({'text_wrap': True, 'valign': 'top', 'font_name': 'NanumGothic', 'border': 1})
+                            
+                            guide_ws.set_column('A:A', 25)
+                            guide_ws.set_column('B:B', 75)
+                            
+                            # Merge title row
+                            guide_ws.merge_range('A1:B1', "1단계 AHP 분석 결과 해석 및 주의사항", guide_title_fmt)
+                            guide_ws.set_row(0, 35)
+                            
+                            guide_data = [
+                                ("분류", "상세 내용"),
+                                ("1. 분석 개요", "본 보고서는 하위 요소 없이 대분류(1단계) 평가 기준만을 비교한 단일 계층 AHP 분석 결과입니다."),
+                                ("2. 결과 해석 방법", "하위 가중치가 1.0으로 고정되어 '대분류 가중치'와 'Global Weight(종합 가중치)'가 동일한 수치로 산출되었습니다. 따라서 'Global Weight'를 각 항목의 최종 중요도로 해석하시면 됩니다."),
+                                ("3. 내부 가상 연산 안내", "AHP 분석 시스템의 2단계 연산 일관성 유지를 위해, 시스템 내부적으로 대분류 항목 하위에 가중치 1.0을 가지는 더미 세부 항목을 자동 생성하여 연산하였습니다. 이로 인해 결과 다운로드 파일에 'Result_[대분류명]' 시트가 1x1 행렬로 존재하지만 이는 정상적인 가상 연산 결과입니다."),
+                                ("4. 일관성 비율(CR) 주의사항", "제공된 일관성 비율은 대분류 쌍대비교의 일관성 비율(CR)만을 나타냅니다. 하위 요소가 존재하지 않으므로 '중분류 일관성 비율(CR)'은 무조건 0.000으로 표기되며 이는 오류가 아닙니다."),
+                                ("5. 학술/보고서 기재 팁", "학술 연구나 보고서에 활용 시 '단일 계층(1단계) 계층 구조 하에서 쌍대비교 분석을 수행하였다'고 명시적으로 기재하시기 바랍니다.")
+                            ]
+                            
+                            for r_idx, (section, content) in enumerate(guide_data, start=1):
+                                if r_idx == 1:
+                                    # Header row
+                                    guide_ws.write(r_idx, 0, section, workbook.add_format({'bold': True, 'align': 'center', 'bg_color': '#A6A6A6', 'border': 1}))
+                                    guide_ws.write(r_idx, 1, content, workbook.add_format({'bold': True, 'align': 'center', 'bg_color': '#A6A6A6', 'border': 1}))
+                                else:
+                                    guide_ws.write(r_idx, 0, section, guide_section_fmt)
+                                    guide_ws.write(r_idx, 1, content, guide_body_fmt)
+                                guide_ws.set_row(r_idx, 60 if r_idx > 1 else 20)
 
                 st.success("분석이 완료되었습니다.")
                 if st.session_state.user_role == 'official':
