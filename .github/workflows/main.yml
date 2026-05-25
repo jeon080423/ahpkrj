@@ -17,7 +17,7 @@ jobs:
     steps:
       # 1단계: 저장소 코드 체크아웃
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       # 2단계: 자동 커밋을 위해 Git 설정
       - name: Configure Git
