@@ -7,6 +7,9 @@ on:
   # 수동으로도 실행 가능
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
