@@ -13,6 +13,30 @@ import smtplib
 import json
 import platform
 import os
+import hashlib
+import random
+import string
+
+def hash_password(password: str) -> str:
+    """SHA-256 Hash a password with a fixed salt for security."""
+    salt = "ahp_master_secure_salt_2026"
+    return hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
+
+def generate_temp_password() -> str:
+    """가입 시 비밀번호 유효성 검사를 통과하는 8자리 임시 비밀번호를 생성합니다."""
+    chars = string.ascii_letters + string.digits
+    specials = "!@#$%^&*"
+    # 최소 1개 영문자, 1개 숫자, 1개 특수문자를 포함하도록 구성
+    temp = [
+        random.choice(string.ascii_lowercase),
+        random.choice(string.ascii_uppercase),
+        random.choice(string.digits),
+        random.choice(specials)
+    ]
+    # 나머지 4자리는 영문/숫자 중 무작위 선택
+    temp += [random.choice(chars) for _ in range(4)]
+    random.shuffle(temp)
+    return "".join(temp)
 import matplotlib.font_manager as fm
 from matplotlib import rc
 from email.mime.text import MIMEText
@@ -514,17 +538,17 @@ def send_approval_email(user_email):
         return True
     except: return False
 
-def send_password_recovery_email(user_email, user_pw):
+def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
     password = "csuh xxru wqdy mttt"
     recipient_email = user_email
-    subject = "[AHP 마스터] 비밀번호 안내"
-    body = f"""안녕하세요. 요청하신 계정 정보를 안내해 드립니다.
+    subject = "[AHP 마스터] 임시 비밀번호 안내"
+    body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
 
 ID: {user_email}
-PW: {user_pw}
+임시 비밀번호: {temp_pw}
 
-로그인 후 비밀번호를 변경하시기를 권장합니다.
+로그인 후 즉시 비밀번호를 변경하시기를 권장합니다.
 감사합니다.
 """
     msg = MIMEText(body)
@@ -571,14 +595,47 @@ def add_user(user_id, pw, role, agree_info="Y"):
         conn.close()
     return success
 
+def upgrade_user_password_to_hash(user_id, pw):
+    """기존 사용자의 평문 비밀번호를 암호화(해시) 버전으로 자동 승급합니다."""
+    hashed_pw = hash_password(pw)
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("UPDATE users SET pw=? WHERE id=?", (hashed_pw, user_id))
+    conn.commit()
+    conn.close()
+    
+    try:
+        client = get_gspread_client()
+        if client:
+            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+            sheet = spreadsheet.sheet1
+            cell = sheet.find(user_id)
+            if cell:
+                # 구글 시트의 PW 컬럼은 4번째(D)
+                sheet.update_cell(cell.row, 4, hashed_pw)
+    except Exception:
+        pass
+
 def check_login(user_id, pw):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    # [수정] 컬럼 순서 변경에 따른 SELECT 쿼리 수정 (role, expiry_date 위치 확인)
-    c.execute("SELECT role, expiry_date FROM users WHERE id=? AND pw=?", (user_id, pw))
-    result = c.fetchone()
+    # 평문 패스워드 로그인 및 자동 업그레이드를 지원하기 위해 pw 컬럼도 함께 조회합니다.
+    c.execute("SELECT role, expiry_date, pw FROM users WHERE id=?", (user_id,))
+    row = c.fetchone()
     conn.close()
-    return result
+    
+    if row:
+        stored_role, stored_expiry, stored_pw = row
+        hashed_pw = hash_password(pw)
+        
+        # 평문 패스워드가 정확히 일치하거나 해시 패스워드가 일치하는 경우
+        if stored_pw == pw or stored_pw == hashed_pw:
+            # 평문 패스워드로 로그인 성공한 경우, 즉시 해시 패스워드로 업데이트 (보안 승급)
+            if stored_pw == pw:
+                upgrade_user_password_to_hash(user_id, pw)
+            return stored_role, stored_expiry
+            
+    return None
 
 def get_user_password(user_id):
     conn = sqlite3.connect('users.db')
@@ -589,9 +646,10 @@ def get_user_password(user_id):
     return result[0] if result else None
 
 def change_user_password(user_id, new_pw):
+    hashed_pw = hash_password(new_pw)
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    c.execute("UPDATE users SET pw=? WHERE id=?", (new_pw, user_id))
+    c.execute("UPDATE users SET pw=? WHERE id=?", (hashed_pw, user_id))
     conn.commit()
     conn.close()
 
@@ -603,7 +661,7 @@ def change_user_password(user_id, new_pw):
             cell = sheet.find(user_id)
             if cell:
                 # 구글 시트의 PW 컬럼은 4번째(D)
-                sheet.update_cell(cell.row, 4, new_pw)
+                sheet.update_cell(cell.row, 4, hashed_pw)
     except Exception:
         pass
     return True
@@ -1199,16 +1257,26 @@ with st.sidebar:
 
         with tab_find_pw:
             st.header("🔑 비밀번호 찾기")
-            st.write("가입 시 사용한 이메일 주소를 입력해주세요.")
+            st.write("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.")
             f_id = st.text_input("가입한 아이디 (이메일)", key="f_id")
-            if st.button("비밀번호 이메일 전송"):
+            if st.button("임시 비밀번호 전송"):
                 if not f_id:
                     st.warning("이메일 주소를 입력해주세요.")
                 else:
-                    found_pw = get_user_password(f_id.strip())
-                    if found_pw:
-                        if send_password_recovery_email(f_id.strip(), found_pw):
-                            st.success(f"'{f_id}'로 비밀번호를 전송했습니다.\n이메일을 확인해주세요.")
+                    # 사용자 존재 여부 확인을 위해 비밀번호 가져오기
+                    conn = sqlite3.connect('users.db')
+                    c = conn.cursor()
+                    c.execute("SELECT id FROM users WHERE id=?", (f_id.strip(),))
+                    user_exists = c.fetchone()
+                    conn.close()
+                    
+                    if user_exists:
+                        # 임시 비밀번호 생성 및 변경 (암호화하여 저장)
+                        temp_pw = generate_temp_password()
+                        change_user_password(f_id.strip(), temp_pw)
+                        
+                        if send_password_recovery_email(f_id.strip(), temp_pw):
+                            st.success(f"'{f_id}'로 임시 비밀번호를 전송했습니다.\n이메일을 확인해주세요.")
                         else:
                             st.error("이메일 전송 중 오류가 발생했습니다.")
                     else:
