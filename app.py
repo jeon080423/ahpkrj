@@ -373,9 +373,12 @@ def sync_db_from_sheets():
     st.write("---")
     # ★★★ 디버깅 끝 ★★★
     
+    conn = None
     try:
         client = get_gspread_client()
-        if not client: return -1
+        if not client: 
+            st.error("❌ 구글 시트 인증(gspread client)에 실패했습니다.")
+            return -1
         
         spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
         sheet = spreadsheet.sheet1
@@ -383,27 +386,31 @@ def sync_db_from_sheets():
         
         # 데이터가 헤더 포함 2줄 이상일 때만 진행
         if len(all_values) > 1:
-            conn = sqlite3.connect('users.db')
+            # 30초 타임아웃 추가 및 안전한 커넥션
+            conn = sqlite3.connect('users.db', timeout=30.0)
             c = conn.cursor()
             
             cnt = 0
+            processed_ids = set()
             for row in all_values[1:]:
-                # row 구조: [ID, Role, SignupDate, PW, agree_info]
+                # row 구조: [ID, Role, SignupDate, PW, expiry_date, agree_info]
                 if len(row) >= 4:
-                    user_id = row[0].strip()
-                    if not user_id:
+                    user_id = str(row[0]).strip()
+                    if not user_id or user_id in processed_ids:
                         continue
-                    role = row[1]
-                    signup_date = row[2]
-                    pw = row[3]
+                    processed_ids.add(user_id)
+                    
+                    role = str(row[1]).strip()
+                    signup_date = str(row[2]).strip()
+                    pw = str(row[3]).strip()
                     
                     # 6개 컬럼 대응 및 자가 치유
                     if len(row) >= 6:
-                        expiry_date = row[4]
-                        agree_info = row[5]
+                        expiry_date = str(row[4]).strip()
+                        agree_info = str(row[5]).strip()
                     elif len(row) == 5:
                         expiry_date = '9999-12-31'
-                        agree_info = row[4]
+                        agree_info = str(row[4]).strip()
                     else:
                         expiry_date = '9999-12-31'
                         agree_info = 'Y'
@@ -434,12 +441,22 @@ def sync_db_from_sheets():
                             cnt += 1
             
             conn.commit()
-            conn.close()
             return cnt
     except Exception as e:
         st.error(f"🔍 동기화 에러 상세: {str(e)}")
         st.error(f"에러 타입: {type(e).__name__}")
+        if conn:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
         return -1
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
     return 0
 
 # 방문자 추적 및 구글 시트 실시간 저장
@@ -1416,6 +1433,11 @@ with st.expander("🎓 학술 논문 및 연구 보고서 기재 방법 예시",
             
 
 if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
+    # 세션 스테이트 기반 성공 메시지 잔존 출력
+    if "sync_success_msg" in st.session_state:
+        st.success(st.session_state["sync_success_msg"])
+        del st.session_state["sync_success_msg"]
+
     st.subheader("👥 가입자 현황 및 관리")
     
     col_sync1, col_sync2 = st.columns([2, 8])
@@ -1426,10 +1448,10 @@ if st.session_state.get('admin_mode', False) and st.session_state.user_role == '
                 get_cached_visit_logs.clear()
                 added_count = sync_db_from_sheets()
             if added_count >= 0:
-                st.success(f"동기화 완료! (복구된 회원 수: {added_count}명)")
+                st.session_state["sync_success_msg"] = f"🎉 동기화 완료! (보정 및 복구된 데이터: {added_count}건)"
                 st.rerun()
             else:
-                st.error("동기화 중 오류가 발생했습니다.")
+                st.error("동기화 중 오류가 발생했습니다. 화면상의 에러 메시지를 확인해 주세요.")
     
     try:
         # [최적화] 구글 시트 API 분당 호출 제한(429)을 피하기 위해 5분 캐시 처리된 함수를 사용합니다.
