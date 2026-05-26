@@ -5,6 +5,12 @@ from google.oauth2.service_account import Credentials
 from datetime import datetime, timezone, timedelta
 import json
 import base64
+import hashlib
+
+def hash_password(password: str) -> str:
+    """SHA-256 Hash a password with a fixed salt for security."""
+    salt = "ahp_master_secure_salt_2026"
+    return hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
 
 # 수집되는 개인정보 항목
 PERSONAL_INFO_ITEMS = {
@@ -134,11 +140,12 @@ def save_agreement_to_sheets(email, password, agreements, user_type):
         kst_now = datetime.now(timezone(timedelta(hours=9)))
         timestamp = kst_now.strftime("%Y-%m-%d %H:%M:%S")
         
+        hashed_password = hash_password(password)
         new_row = [
             email,  # user_id
             user_type,  # role (임시/정식)
             timestamp,  # signup_date
-            password,  # password
+            hashed_password,  # password (암호화하여 저장)
             "9999-12-31", # expiry_date (기본 만료일 추가로 컬럼 쉬프트 수정)
             "예" if agreements["agree_personal_info"] else "아니오",  # agree_info
         ]
