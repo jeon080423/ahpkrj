@@ -192,6 +192,22 @@ def get_gspread_client():
     creds = Credentials.from_service_account_info(auth_info, scopes=scope)
     return gspread.authorize(creds)
 
+# [신규] 관리자 페이지 방문 로그 조회를 위한 캐싱 함수 (읽기 요청 최적화 - 5분 TTL)
+@st.cache_data(ttl=300)
+def get_cached_visit_logs(spreadsheet_id):
+    try:
+        client = get_gspread_client()
+        if client:
+            spreadsheet = client.open_by_key(spreadsheet_id)
+            try:
+                visit_sheet = spreadsheet.worksheet("Visit_Logs")
+                return visit_sheet.get_all_records()
+            except gspread.exceptions.WorksheetNotFound:
+                return []
+    except Exception as e:
+        st.error(f"구글 시트 방문 로그 캐싱 조회 오류: {e}")
+    return []
+
 # DB 초기화 및 구글 시트로부터 데이터(회원+방문로그) 복구 로직
 def init_db():
     conn = sqlite3.connect('users.db')
@@ -389,10 +405,9 @@ def track_visitor():
                     visit_sheet = spreadsheet.add_worksheet(title="Visit_Logs", rows="1000", cols="10")
                     visit_sheet.append_row(["IP", "Date", "Country", "Region", "City", "Latitude", "Longitude"])
                 
-                existing_logs = visit_sheet.get_all_values()
-                # 시간 정보가 포함되므로 동일 IP여도 시각이 다르면 개별 기록됨
-                if [ip, now_ts] not in [row[:2] for row in existing_logs]:
-                    visit_sheet.append_row([ip, now_ts, country, region, city, lat, lon])
+                # [최적화] API 읽기 제한(429)을 피하기 위해 전체 로그를 매번 가져와 중복을 대조하던 읽기 요청(get_all_values)을 제거합니다.
+                # 세션 상태(st.session_state.visited)가 작동 중이고 초 단위의 고유 타임스탬프를 쓰므로 바로 추가합니다.
+                visit_sheet.append_row([ip, now_ts, country, region, city, lat, lon])
                 
                 st.session_state.visited = True
             
@@ -1015,49 +1030,8 @@ def calculate_anova_and_posthoc(full_data):
     return pd.DataFrame(results)
 
 # -----------------------------------------------------------------------------
-# [신규] 좋아요 기능 데이터베이스 및 UI 로직 (구글 시트 연동)
+# [삭제] 좋아요 기능 제거됨
 # -----------------------------------------------------------------------------
-
-def handle_service_like():
-    """구글 시트에 좋아요 클릭을 기록하고 저장합니다."""
-    try:
-        client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-            try:
-                # 시트가 존재하는지 확인 시도
-                sheet = spreadsheet.worksheet("Service_Likes")
-            except gspread.exceptions.WorksheetNotFound:
-                # 없으면 새로 생성 (타임스탬프, 유저ID 컬럼)
-                sheet = spreadsheet.add_worksheet(title="Service_Likes", rows="1000", cols="3")
-                sheet.append_row(["Timestamp", "User_ID", "IP_Address"]) # 헤더 추가
-
-            # 현재 시간 및 유저 정보
-            kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
-            uid = st.session_state.user_id if st.session_state.user_id else "Guest"
-            
-            # 좋아요 기록 추가 (Append)
-            sheet.append_row([kst_now, uid, "Recorded"])
-            return True
-    except Exception as e:
-        st.error(f"좋아요 저장 중 오류 발생: {e}")
-        return False
-
-def get_service_like_count():
-    """현재까지의 좋아요 총 개수를 가져옵니다."""
-    try:
-        client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-            try:
-                sheet = spreadsheet.worksheet("Service_Likes")
-                # 전체 행 수에서 헤더(1행)를 뺀 값을 반환
-                return len(sheet.col_values(1)) - 1
-            except gspread.exceptions.WorksheetNotFound:
-                return 0
-    except:
-        return 0
-    return 0
 
 # -----------------------------------------------------------------------------
 # 2. Setup & Layout
@@ -1132,19 +1106,7 @@ with st.sidebar:
         
         """)        
     
-    # [수정] 좋아요(응원하기) 버튼 추가
-    st.write("---")
-    st.write("### ❤️ 서비스 응원하기")
-    if st.button("좋아요 👍", use_container_width=True, type="primary"):
-        if handle_service_like():
-            st.toast("응원해주셔서 감사합니다! 🎉")
-        else:
-            st.toast("잠시 후 다시 시도해주세요.")
-    
-    # 좋아요 수 표시
-    like_count = get_service_like_count()
-    if like_count > 0:
-        st.caption(f"현재 {like_count}명이 응원했습니다!")
+
     
     if st.session_state.user_id is None:
         tab_login, tab_signup, tab_find_pw = st.tabs(["로그인", "회원가입", "비밀번호 찾기"])
@@ -1314,6 +1276,8 @@ if st.session_state.get('admin_mode', False) and st.session_state.user_role == '
     with col_sync1:
         if st.button("🔄 구글 시트와 동기화"):
             with st.spinner("구글 시트 데이터 불러오는 중..."):
+                # 캐시 수동 비우기
+                get_cached_visit_logs.clear()
                 added_count = sync_db_from_sheets()
             if added_count >= 0:
                 st.success(f"동기화 완료! (복구된 회원 수: {added_count}명)")
@@ -1322,52 +1286,45 @@ if st.session_state.get('admin_mode', False) and st.session_state.user_role == '
                 st.error("동기화 중 오류가 발생했습니다.")
     
     try:
-        client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-            try:
-                visit_sheet = spreadsheet.worksheet("Visit_Logs")
-                visit_data_gs = visit_sheet.get_all_records()
-                daily_df_logs = pd.DataFrame(visit_data_gs)
-                if not daily_df_logs.empty:
-                    daily_df_logs['Date_Only'] = daily_df_logs['Date'].astype(str).str[:10]
-                    daily_df_counts = daily_df_logs.groupby('Date_Only').size().reset_index(name='count')
-                    total_visits = len(daily_df_logs)
+        # [최적화] 구글 시트 API 분당 호출 제한(429)을 피하기 위해 5분 캐시 처리된 함수를 사용합니다.
+        visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
+        daily_df_logs = pd.DataFrame(visit_data_gs)
+        if not daily_df_logs.empty:
+            daily_df_logs['Date_Only'] = daily_df_logs['Date'].astype(str).str[:10]
+            daily_df_counts = daily_df_logs.groupby('Date_Only').size().reset_index(name='count')
+            total_visits = len(daily_df_logs)
 
-                    st.write("#### 🗺️ 접속자 실시간 위치 분포")
-                    if 'Latitude' in daily_df_logs.columns and 'Longitude' in daily_df_logs.columns:
-                        map_data = daily_df_logs[daily_df_logs['Latitude'].astype(str).str.strip() != ""].copy()
-                        if not map_data.empty:
-                            map_data['lat'] = pd.to_numeric(map_data['Latitude'], errors='coerce')
-                            map_data['lon'] = pd.to_numeric(map_data['Longitude'], errors='coerce')
-                            map_data = map_data.dropna(subset=['lat', 'lon'])
-                            if not map_data.empty:
-                                map_display = map_data.groupby(['lat', 'lon']).size().reset_index(name='visit_count')
-                                map_display['size'] = map_display['visit_count'] * 20
-                                st.map(map_display, latitude='lat', longitude='lon', size='size')
-                            else:
-                                st.info("유효한 좌표 데이터가 없습니다.")
-                        else:
-                            st.info("지도에 표시할 위치 정보 데이터가 아직 수집되지 않았습니다.")
+            st.write("#### 🗺️ 접속자 실시간 위치 분포")
+            if 'Latitude' in daily_df_logs.columns and 'Longitude' in daily_df_logs.columns:
+                map_data = daily_df_logs[daily_df_logs['Latitude'].astype(str).str.strip() != ""].copy()
+                if not map_data.empty:
+                    map_data['lat'] = pd.to_numeric(map_data['Latitude'], errors='coerce')
+                    map_data['lon'] = pd.to_numeric(map_data['Longitude'], errors='coerce')
+                    map_data = map_data.dropna(subset=['lat', 'lon'])
+                    if not map_data.empty:
+                        map_display = map_data.groupby(['lat', 'lon']).size().reset_index(name='visit_count')
+                        map_display['size'] = map_display['visit_count'] * 20
+                        st.map(map_display, latitude='lat', longitude='lon', size='size')
                     else:
-                        st.info("위치 정보 컬럼이 존재하지 않습니다.")
+                        st.info("유효한 좌표 데이터가 없습니다.")
                 else:
-                    total_visits = 0
-                    daily_df_counts = pd.DataFrame()
-            except gspread.exceptions.WorksheetNotFound:
-                total_visits = 0
-                daily_df_counts = pd.DataFrame()
-
-            st.write(f"**총 누적 방문자 수 (시간 기반):** {total_visits:,}회")
-            st.write("#### 📅 일별 방문자 현황 (날짜별 합산)")
-            if not daily_df_counts.empty:
-                fig_visit = px.bar(daily_df_counts, x='Date_Only', y='count', text='count',
-                                    labels={'Date_Only': '날짜', 'count': '방문자 수'})
-                fig_visit.update_traces(textposition='outside')
-                fig_visit.update_layout(xaxis_title="날짜", yaxis_title="방문자 수", showlegend=False, xaxis={'type': 'category'})
-                st.plotly_chart(fig_visit, use_container_width=True)
+                    st.info("지도에 표시할 위치 정보 데이터가 아직 수집되지 않았습니다.")
             else:
-                st.info("방문 기록이 없습니다.")
+                st.info("위치 정보 컬럼이 존재하지 않습니다.")
+        else:
+            total_visits = 0
+            daily_df_counts = pd.DataFrame()
+
+        st.write(f"**총 누적 방문자 수 (시간 기반):** {total_visits:,}회")
+        st.write("#### 📅 일별 방문자 현황 (날짜별 합산)")
+        if not daily_df_counts.empty:
+            fig_visit = px.bar(daily_df_counts, x='Date_Only', y='count', text='count',
+                                labels={'Date_Only': '날짜', 'count': '방문자 수'})
+            fig_visit.update_traces(textposition='outside')
+            fig_visit.update_layout(xaxis_title="날짜", yaxis_title="방문자 수", showlegend=False, xaxis={'type': 'category'})
+            st.plotly_chart(fig_visit, use_container_width=True)
+        else:
+            st.info("방문 기록이 없습니다.")
     except Exception as e:
         st.error(f"통계 오류: {e}")
     st.divider()
