@@ -139,6 +139,7 @@ def save_agreement_to_sheets(email, password, agreements, user_type):
             user_type,  # role (임시/정식)
             timestamp,  # signup_date
             password,  # password
+            "9999-12-31", # expiry_date (기본 만료일 추가로 컬럼 쉬프트 수정)
             "예" if agreements["agree_personal_info"] else "아니오",  # agree_info
         ]
         
