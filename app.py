@@ -243,6 +243,11 @@ def init_db():
                 spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
                 sheet = spreadsheet.sheet1
 
+                # [헤더 보정] 구글 시트의 헤더가 5개인 경우 6개 컬럼으로 보정
+                all_values = sheet.get_all_values()
+                if all_values and len(all_values[0]) == 5:
+                    sheet.update(range_name='A1:F1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info']])
+
                 records = sheet.get_all_records()  # 1행 header 사용
                 if records:
                     def pick(row, *keys, default=""):
@@ -264,7 +269,16 @@ def init_db():
                         role = pick(r, "role", "Role", default="temp")
                         signupdate = pick(r, "signup_date", "signup_tate", "signupdate", "SignupDate", default=kst_today)
                         expirydate = pick(r, "expiry_date", "expirydate", "ExpiryDate", default="9999-12-31")
-                        agreeinfo = pick(r, "agree_info", "agreeinfo", "Agree", default="Y")
+                        agreeinfo = pick(r, "agree_info", "agreeinfo", "Agree", default="")
+
+                        # [자가 치유] 구글 시트 컬럼 쉬프트 오류 복구 (expiry_date에 동의 여부가 잘못 적힌 경우)
+                        if expirydate in ["Y", "N", "예", "아니오", "yes", "no"]:
+                            if not agreeinfo:
+                                agreeinfo = expirydate
+                            expirydate = "9999-12-31"
+
+                        if not agreeinfo:
+                            agreeinfo = "Y"
 
                         if role not in ("temp", "official", "admin"):
                             role = "temp"
@@ -340,9 +354,24 @@ def sync_db_from_sheets():
                     role = row[1]
                     signup_date = row[2]
                     pw = row[3]
-                    expiry_date = '9999-12-31' # 기본 만료일
-                    agree_info = row[4] if len(row) >= 5 else "Y"
                     
+                    # 6개 컬럼 대응 및 자가 치유
+                    if len(row) >= 6:
+                        expiry_date = row[4]
+                        agree_info = row[5]
+                    elif len(row) == 5:
+                        expiry_date = '9999-12-31'
+                        agree_info = row[4]
+                    else:
+                        expiry_date = '9999-12-31'
+                        agree_info = 'Y'
+                        
+                    # [자가 치유] 구글 시트 오류 복구 (expiry_date에 동의 여부가 잘못 들어갔을 때)
+                    if expiry_date in ["Y", "N", "예", "아니오", "yes", "no"]:
+                        if agree_info in ["", None, "Y"]:
+                            agree_info = expiry_date
+                        expiry_date = "9999-12-31"
+
                     # 이미 존재하는지 확인 후 없으면 INSERT
                     c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)", 
                               (user_id, role, signup_date, pw, expiry_date, agree_info))
@@ -512,14 +541,14 @@ PW: {user_pw}
 
 # --- DB CRUD ---
 
-def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y"):
+def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31"):
     try:
         client = get_gspread_client()
         if client:
             spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
             sheet = spreadsheet.sheet1
-            # [수정] 구글 시트 컬럼 순서 및 agree_info 저장 보장
-            sheet.append_row([user_id, role, str(signup_date), pw, agree_info])
+            # [수정] 구글 시트 6개 컬럼 순서(id, role, signup_date, pw, expiry_date, agree_info) 보장
+            sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info])
     except Exception as e:
         st.error(f"Google Sheets 로깅 오류: {e}")
 
@@ -534,7 +563,7 @@ def add_user(user_id, pw, role, agree_info="Y"):
         c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)", 
                   (user_id, role, signup_date, pw, expiry_date, agree_info))
         conn.commit()
-        log_to_sheets(user_id, role, signup_date, pw, agree_info)
+        log_to_sheets(user_id, role, signup_date, pw, agree_info, expiry_date)
         success = True
     except sqlite3.IntegrityError:
         success = False
@@ -605,18 +634,19 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry):
             
             if cell:
                 row_num = cell.row
-                # 기존 데이터 보존을 위해 현재 시트 데이터 로드 (agree_info 등 보존)
+                # 기존 데이터 보존을 위해 현재 시트 데이터 로드 (6개 컬럼 대응)
                 current_row_data = sheet.row_values(row_num)
-                agree_info = current_row_data[4] if len(current_row_data) >= 5 else "Y"
+                # agree_info는 6번째 컬럼(index 5)에 있어야 합니다. 없으면 5번째(index 4) 혹은 기본값 "Y"
+                agree_info = current_row_data[5] if len(current_row_data) >= 6 else (current_row_data[4] if len(current_row_data) >= 5 else "Y")
                 
                 final_pw = new_pw if (new_pw and new_pw != "") else (current_row_data[3] if len(current_row_data) >= 4 else "")
-                # 시트 순서: ID, Role, SignupDate, PW, agree_info
-                sheet.update(range_name=f'A{row_num}:E{row_num}', values=[[user_id, new_role, kst_today, final_pw, agree_info]])
+                # 시트 순서: ID, Role, SignupDate, PW, expiry_date, agree_info (A:F)
+                sheet.update(range_name=f'A{row_num}:F{row_num}', values=[[user_id, new_role, kst_today, final_pw, new_expiry, agree_info]])
             else:
-                if new_pw is not None and new_pw != "":
-                    sheet.append_row([user_id, new_role, kst_today, new_pw, "Y"])
-    except Exception:
-        pass 
+                final_pw = new_pw if (new_pw and new_pw != "") else ""
+                sheet.append_row([user_id, new_role, kst_today, final_pw, new_expiry, "Y"])
+    except Exception as e:
+        st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}") 
 
 def delete_user(user_id):
     conn = sqlite3.connect('users.db')
