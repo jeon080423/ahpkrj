@@ -255,6 +255,23 @@ def init_db():
         c.execute("INSERT OR IGNORE INTO users VALUES (?, ?, ?, ?, ?, ?)", 
                   ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y'))
         conn.commit()
+
+        # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가
+        try:
+            client = get_gspread_client()
+            if client:
+                spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+                sheet = spreadsheet.sheet1
+                # 헤더 보정
+                all_values = sheet.get_all_values()
+                if all_values and len(all_values[0]) == 5:
+                    sheet.update(range_name='A1:F1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info']])
+                
+                cell = sheet.find('shjeon')
+                if not cell:
+                    sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y'])
+        except Exception:
+            pass
     except sqlite3.IntegrityError:
         pass 
 
@@ -339,7 +356,7 @@ def init_db():
 
 # [신규 기능 1] 구글 시트의 내용을 강제로 DB에 동기화하는 함수
 def sync_db_from_sheets():
-    """구글 시트의 데이터를 읽어와 DB에 없는 유저를 강제로 추가합니다."""
+    """구글 시트의 데이터를 읽어와 DB에 없으면 유저를 추가하고, 이미 있다면 구글 시트 기준으로 보정(업데이트)합니다."""
     # ★★★ 임시 디버깅 코드 ★★★
     st.write("🔍 **Secrets 디버깅**")
     st.write("사용 가능한 최상위 키:", list(st.secrets.keys()))
@@ -369,12 +386,13 @@ def sync_db_from_sheets():
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
             
-            # 구글 시트의 모든 행을 순회하며 DB에 없으면 추가
             cnt = 0
             for row in all_values[1:]:
                 # row 구조: [ID, Role, SignupDate, PW, agree_info]
                 if len(row) >= 4:
-                    user_id = row[0]
+                    user_id = row[0].strip()
+                    if not user_id:
+                        continue
                     role = row[1]
                     signup_date = row[2]
                     pw = row[3]
@@ -396,11 +414,24 @@ def sync_db_from_sheets():
                             agree_info = expiry_date
                         expiry_date = "9999-12-31"
 
-                    # 이미 존재하는지 확인 후 없으면 INSERT
-                    c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)", 
-                              (user_id, role, signup_date, pw, expiry_date, agree_info))
-                    if c.rowcount > 0:
+                    # 이미 존재하는지 확인 후 없으면 INSERT, 있으면 정보 보정 업데이트
+                    c.execute("SELECT id, role, signup_date, pw, expiry_date, agree_info FROM users WHERE id=?", (user_id,))
+                    db_user = c.fetchone()
+                    if not db_user:
+                        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)", 
+                                  (user_id, role, signup_date, pw, expiry_date, agree_info))
                         cnt += 1
+                    else:
+                        db_role, db_signup_date, db_pw, db_expiry_date, db_agree_info = db_user[1], db_user[2], db_user[3], db_user[4], db_user[5]
+                        # 변경 사항이 하나라도 있으면 구글 시트 기준으로 강제 업데이트 보정
+                        if (db_role != role or db_signup_date != signup_date or 
+                            db_pw != pw or db_expiry_date != expiry_date or db_agree_info != agree_info):
+                            c.execute("""
+                                UPDATE users 
+                                SET role=?, signup_date=?, pw=?, expiry_date=?, agree_info=? 
+                                WHERE id=?
+                            """, (role, signup_date, pw, expiry_date, agree_info, user_id))
+                            cnt += 1
             
             conn.commit()
             conn.close()
@@ -690,6 +721,16 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry):
             cell = sheet.find(user_id)
             kst_today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
             
+            # SQLite DB에서 실제 저장된 기존 가입 날짜 조회 (가입일 훼손 방지)
+            db_signup_date = None
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("SELECT signup_date FROM users WHERE id=?", (user_id,))
+            res = c.fetchone()
+            if res:
+                db_signup_date = res[0]
+            conn.close()
+            
             if cell:
                 row_num = cell.row
                 # 기존 데이터 보존을 위해 현재 시트 데이터 로드 (6개 컬럼 대응)
@@ -697,12 +738,19 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry):
                 # agree_info는 6번째 컬럼(index 5)에 있어야 합니다. 없으면 5번째(index 4) 혹은 기본값 "Y"
                 agree_info = current_row_data[5] if len(current_row_data) >= 6 else (current_row_data[4] if len(current_row_data) >= 5 else "Y")
                 
+                # 구글 시트 기존 가입일 확인
+                sheet_signup_date = current_row_data[2] if len(current_row_data) >= 3 else None
+                
+                # DB의 가입일을 우선순위로 하고, 없으면 구글 시트 기존 가입일, 그마저도 없으면 kst_today 사용
+                final_signup_date = db_signup_date or sheet_signup_date or kst_today
+                
                 final_pw = new_pw if (new_pw and new_pw != "") else (current_row_data[3] if len(current_row_data) >= 4 else "")
                 # 시트 순서: ID, Role, SignupDate, PW, expiry_date, agree_info (A:F)
-                sheet.update(range_name=f'A{row_num}:F{row_num}', values=[[user_id, new_role, kst_today, final_pw, new_expiry, agree_info]])
+                sheet.update(range_name=f'A{row_num}:F{row_num}', values=[[user_id, new_role, final_signup_date, final_pw, new_expiry, agree_info]])
             else:
                 final_pw = new_pw if (new_pw and new_pw != "") else ""
-                sheet.append_row([user_id, new_role, kst_today, final_pw, new_expiry, "Y"])
+                final_signup_date = db_signup_date or kst_today
+                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y"])
     except Exception as e:
         st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}") 
 
