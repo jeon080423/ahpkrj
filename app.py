@@ -2088,6 +2088,42 @@ if uploaded_file:
                                     ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
                                     if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
                             
+                            # [신규 추가] 전체 종합 행렬 오른쪽에 전체 CR, CI 값 표시
+                            n_dim = len(matrix_df)
+                            cr_val, ci_val, _ = calculate_consistency(matrix_df, mean_method)
+                            
+                            ci_cr_header_fmt = workbook.add_format({
+                                'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1,
+                                'font_name': 'NanumGothic'
+                            })
+                            ci_cr_label_fmt = workbook.add_format({
+                                'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                'bg_color': '#D9E1F2', 'border': 1,
+                                'font_name': 'NanumGothic'
+                            })
+                            ci_cr_val_fmt = workbook.add_format({
+                                'align': 'center', 'valign': 'vcenter', 'border': 1,
+                                'num_format': '0.000',
+                                'font_name': 'NanumGothic'
+                            })
+                            if cr_val > 0.1:
+                                ci_cr_val_fmt = workbook.add_format({
+                                    'align': 'center', 'valign': 'vcenter', 'border': 1,
+                                    'num_format': '0.000',
+                                    'bg_color': '#FFC7CE', 'font_color': '#9C0006',
+                                    'font_name': 'NanumGothic'
+                                })
+                            
+                            ws.set_column(n_dim + 2, n_dim + 2, 12)
+                            ws.set_column(n_dim + 3, n_dim + 3, 12)
+                            
+                            ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, "전체 일관성 지표", ci_cr_header_fmt)
+                            ws.write(s_row_det + 1, n_dim + 2, "전체 CI", ci_cr_label_fmt)
+                            ws.write(s_row_det + 1, n_dim + 3, ci_val, ci_cr_val_fmt)
+                            ws.write(s_row_det + 2, n_dim + 2, "전체 CR", ci_cr_label_fmt)
+                            ws.write(s_row_det + 2, n_dim + 3, cr_val, ci_cr_val_fmt)
+                            
                             s_row_det += len(matrix_df) + 3
                             
                             if group_matrices:
@@ -2102,6 +2138,28 @@ if uploaded_file:
                                             val = 1 if r==c else g_mat[r][c]
                                             ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
                                             if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
+                                    
+                                    # [신규 추가] 그룹 종합 행렬 오른쪽에 그룹 CR, CI 값 표시
+                                    g_cr_val, g_ci_val, _ = calculate_consistency(g_mat, mean_method)
+                                    g_ci_cr_val_fmt = workbook.add_format({
+                                        'align': 'center', 'valign': 'vcenter', 'border': 1,
+                                        'num_format': '0.000',
+                                        'font_name': 'NanumGothic'
+                                    })
+                                    if g_cr_val > 0.1:
+                                        g_ci_cr_val_fmt = workbook.add_format({
+                                            'align': 'center', 'valign': 'vcenter', 'border': 1,
+                                            'num_format': '0.000',
+                                            'bg_color': '#FFC7CE', 'font_color': '#9C0006',
+                                            'font_name': 'NanumGothic'
+                                        })
+                                    
+                                    ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, "그룹 일관성 지표", ci_cr_header_fmt)
+                                    ws.write(s_row_det + 1, n_dim + 2, "그룹 CI", ci_cr_label_fmt)
+                                    ws.write(s_row_det + 1, n_dim + 3, g_ci_val, g_ci_cr_val_fmt)
+                                    ws.write(s_row_det + 2, n_dim + 2, "그룹 CR", ci_cr_label_fmt)
+                                    ws.write(s_row_det + 2, n_dim + 3, g_cr_val, g_ci_cr_val_fmt)
+                                    
                                     s_row_det += len(g_mat) + 3
                             
                             detail_df.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det, index=False)
