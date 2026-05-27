@@ -1722,9 +1722,9 @@ def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, format
 
     worksheet.write(current_row, 0, "합계", sum_row_fmt)
     worksheet.write(current_row, 1, 1, formats['sum_val'])
-    worksheet.write(current_row, 2, "합계", sum_row_fmt)
+    worksheet.write_blank(current_row, 2, "", sum_row_fmt)
     worksheet.write_blank(current_row, 3, "", sum_row_fmt)
-    worksheet.write(current_row, 4, 1, formats['sum_val'])
+    worksheet.write_blank(current_row, 4, "", sum_row_fmt)
     worksheet.write_blank(current_row, 5, "", sum_row_fmt)
     worksheet.write_blank(current_row, 6, "", sum_row_fmt)
     
