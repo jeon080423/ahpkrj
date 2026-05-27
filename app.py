@@ -1838,7 +1838,8 @@ if uploaded_file:
                                 'ci': 0.0,
                                 'df': dummy_df,
                                 'group_matrix': np.array([[1.0]]),
-                                'group_cr': 0.0
+                                'group_cr': 0.0,
+                                'group_ci': 0.0
                             }
                     else:
                         for parent_factor in main_factors:
@@ -1879,12 +1880,13 @@ if uploaded_file:
                                 group_sub_w = group_sub_w / group_sub_w.sum()
                                 sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
                                 sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
-                                sub_grp_cr, _, _ = calculate_consistency(sub_group_matrix, method=mean_method)
+                                sub_grp_cr, sub_grp_ci, _ = calculate_consistency(sub_group_matrix, method=mean_method)
                                 
                                 sub_results_storage[parent_factor] = {
                                     'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
                                     'ci': sub_res_df['Final_CI'].mean(),
-                                    'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr
+                                    'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr,
+                                    'group_ci': sub_grp_ci
                                 }
                                 if not sub_excl_df.empty:
                                     sub_excl_df['Sheet'] = parent_factor
@@ -1953,8 +1955,8 @@ if uploaded_file:
                             global_w = m_weight * s_weight
                             summary_rows.append({
                                 "대분류": main_f, "대분류 가중치": m_weight, "중분류": sub_f, "중분류 가중치": s_weight,
-                                "Global Weight": global_w, "CR(대분류)": main_cr_final_avg, "CR(중분류)": sub_info['cr'],
-                                "CI(중분류)": sub_info['ci']
+                                "Global Weight": global_w, "CR(대분류)": main_cr_final_avg, "CR(중분류)": sub_info['group_cr'],
+                                "CI(중분류)": sub_info['group_ci']
                             })
                     
                     final_df = pd.DataFrame(summary_rows)
