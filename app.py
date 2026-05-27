@@ -1687,6 +1687,7 @@ def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, format
         n_subs = len(sub_df)
         main_w = sub_df.iloc[0]['대분류 가중치']
         sub_cr = sub_df.iloc[0]['CR(중분류)']
+        sub_ci = sub_df.iloc[0]['CI(중분류)'] if 'CI(중분류)' in sub_df.columns else 0.0
         sum_sub_w = sub_df['중분류 가중치'].sum()
         
         merge_span = n_subs + 2 
@@ -1714,8 +1715,8 @@ def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, format
         
         worksheet.write(current_row, 2, "일관성 비율(CR)", sum_row_fmt)
         worksheet.write(current_row, 3, sub_cr, formats['num_sum'])
-        worksheet.write_blank(current_row, 4, "", sum_row_fmt)
-        worksheet.write_blank(current_row, 5, "", sum_row_fmt)
+        worksheet.write(current_row, 4, "일관성 지수(CI)", sum_row_fmt)
+        worksheet.write(current_row, 5, sub_ci, formats['num_sum'])
         worksheet.write_blank(current_row, 6, "", sum_row_fmt)
         current_row += 1
 
@@ -1834,6 +1835,7 @@ if uploaded_file:
                                 'weights': np.array([1.0]),
                                 'factors': [parent_factor],
                                 'cr': 0.0,
+                                'ci': 0.0,
                                 'df': dummy_df,
                                 'group_matrix': np.array([[1.0]]),
                                 'group_cr': 0.0
@@ -1881,6 +1883,7 @@ if uploaded_file:
                                 
                                 sub_results_storage[parent_factor] = {
                                     'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
+                                    'ci': sub_res_df['Final_CI'].mean(),
                                     'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr
                                 }
                                 if not sub_excl_df.empty:
@@ -1950,12 +1953,13 @@ if uploaded_file:
                             global_w = m_weight * s_weight
                             summary_rows.append({
                                 "대분류": main_f, "대분류 가중치": m_weight, "중분류": sub_f, "중분류 가중치": s_weight,
-                                "Global Weight": global_w, "CR(대분류)": main_cr_final_avg, "CR(중분류)": sub_info['cr']
+                                "Global Weight": global_w, "CR(대분류)": main_cr_final_avg, "CR(중분류)": sub_info['cr'],
+                                "CI(중분류)": sub_info['ci']
                             })
                     
                     final_df = pd.DataFrame(summary_rows)
                     final_df['Global Rank'] = final_df['Global Weight'].rank(ascending=False, method='min').astype(int)
-                    cols_order = ["대분류", "대분류 가중치", "중분류", "중분류 가중치", "Global Weight", "Global Rank", "CR(대분류)", "CR(중분류)"]
+                    cols_order = ["대분류", "대분류 가중치", "중분류", "중분류 가중치", "Global Weight", "Global Rank", "CR(대분류)", "CR(중분류)", "CI(중분류)"]
                     final_df = final_df[cols_order]
 
                     unique_groups = sorted(main_results_df['Type'].astype(str).unique())
@@ -1983,11 +1987,12 @@ if uploaded_file:
                             g_sub_w = g_sub_w / g_sub_w.sum()
                             g_sub_mats = np.stack(grp_sub_df['Matrix_Object'].values)
                             g_sub_mat_obj = np.mean(g_sub_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_sub_mats, axis=0)
-                            g_sub_cr, _, _ = calculate_consistency(g_sub_mat_obj, method=mean_method)
+                            g_sub_cr, g_sub_ci, _ = calculate_consistency(g_sub_mat_obj, method=mean_method)
                             for s_idx, sf in enumerate(sub_facts):
                                 grp_rows.append({
                                     "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": g_sub_w[s_idx],
-                                    "Global Weight": m_w * g_sub_w[s_idx], "CR(대분류)": g_main_cr, "CR(중분류)": g_sub_cr
+                                    "Global Weight": m_w * g_sub_w[s_idx], "CR(대분류)": g_main_cr, "CR(중분류)": g_sub_cr,
+                                    "CI(중분류)": g_sub_ci
                                 })
                         g_df = pd.DataFrame(grp_rows)
                         if not g_df.empty:
