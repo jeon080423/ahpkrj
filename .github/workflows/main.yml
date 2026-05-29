@@ -25,11 +25,3 @@ jobs:
             --retry-delay 5 || true
         continue-on-error: true
 
-      # 2단계: 저장소 코드 체크아웃 (keepalive-workflow를 위해 필요)
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 3단계: GitHub Action이 60일 비활성화되는 것을 방지
-      # (마지막 커밋 이후 50일이 지났을 때만 빈 커밋을 생성하여 히스토리를 지저분하게 만들지 않음)
-      - name: Keepalive Workflow
-        uses: gautamkrishnar/keepalive-workflow@v2
