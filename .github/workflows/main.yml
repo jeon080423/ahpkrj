@@ -15,26 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1단계: 저장소 코드 체크아웃
-      - name: Checkout repository
-        uses: actions/checkout@v5
-      
-      # 2단계: 자동 커밋을 위해 Git 설정
-      - name: Configure Git
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      
-      # 3단계: 빈 커밋 생성 (repository activity trigger)
-      - name: Create empty commit to keep app alive
-        run: |
-          git commit --allow-empty -m "Keep Streamlit app awake - $(date +'%Y-%m-%d %H:%M:%S %Z')"
-      
-      # 4단계: 커밋을 main 브랜치로 푸시
-      - name: Push changes
-        run: git push origin main
-      
-      # 5단계: Streamlit 앱 URL 접속 (옵션)
+      # 1단계: Streamlit 앱 URL 접속 (앱을 깨우기 위함)
       - name: Wake up Streamlit app (HTTP request)
         run: |
           curl -X GET https://ahpkrj.streamlit.app/ \
@@ -43,3 +24,12 @@ jobs:
             --retry 3 \
             --retry-delay 5 || true
         continue-on-error: true
+
+      # 2단계: 저장소 코드 체크아웃 (keepalive-workflow를 위해 필요)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 3단계: GitHub Action이 60일 비활성화되는 것을 방지
+      # (마지막 커밋 이후 50일이 지났을 때만 빈 커밋을 생성하여 히스토리를 지저분하게 만들지 않음)
+      - name: Keepalive Workflow
+        uses: gautamkrishnar/keepalive-workflow@v2
