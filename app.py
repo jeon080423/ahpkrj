@@ -1215,7 +1215,10 @@ st.markdown("""
         color: black !important;
         border: none !important;
     }
-
+    /* 본문 상단 여백 축소로 좌측 로고와 수평 정렬 */
+    .block-container, div[data-testid="stAppViewBlockContainer"] {
+        padding-top: 2.0rem !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1457,7 +1460,7 @@ with st.sidebar:
 # =============================================================================
 
 # 메인 헤더 영역
-st.title("AHP 마스터: 분석 자동화 시스템")
+st.title("AHP 분석 자동화 시스템")
 
 st.markdown("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다. 엑셀 파일을 업로드하면 개인별 가중치 산출, 일관성 보정(CR), 그룹별 집계 결과를 제공합니다.")
 
