@@ -2470,6 +2470,30 @@ if uploaded_file:
                 st.stop()
         else:
             st.warning(message)
+            if role_chk == 'temp' and "5개 표본" in message:
+                st.markdown("---")
+                with st.container(border=True):
+                    st.markdown("### 💳 정식 사용자 즉시 승격 및 무제한 분석")
+                    st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
+                    
+                    # 브라우저의 도메인을 동적으로 감지하여 리턴 URL 구성
+                    current_origin = st_javascript("window.location.origin")
+                    if not current_origin or current_origin == 0:
+                        current_origin = "http://localhost:8501"
+                    
+                    paypal_base = "https://www.paypal.com/cgi-bin/webscr"
+                    business_email = "jeon080423@gmail.com"  # 정산용 페이팔 이메일 주소
+                    item_name = f"AHP Master Official Account Upgrade ({st.session_state.user_id})"
+                    amount = "330.00"  # 결제 금액 (USD)
+                    currency = "USD"
+                    
+                    # 주소 조작 방지용 보안 토큰 생성
+                    token = hashlib.sha256((st.session_state.user_id + "ahp_master_secure_salt_2026").encode('utf-8')).hexdigest()[:16]
+                    return_url = f"{current_origin}/?payment=success&user_id={st.session_state.user_id}&token={token}"
+                    
+                    paypal_url = f"{paypal_base}?cmd=_xclick&business={business_email}&item_name={item_name}&amount={amount}&currency_code={currency}&return={return_url}"
+                    
+                    st.link_button("Pay with PayPal (USD 330) - 즉시 업그레이드", paypal_url, use_container_width=True)
     except Exception as e:
         st.error(f"파일 처리 오류 발생: {e}")
 
