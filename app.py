@@ -1215,6 +1215,15 @@ st.markdown("""
         color: black !important;
         border: none !important;
     }
+    /* 사이드바 로그인 정보 박스 (stAlert) 패딩 및 여백 축소 */
+    section[data-testid="stSidebar"] div[data-testid="stAlert"] {
+        padding: 0.4rem 0.75rem !important;
+        min-height: auto !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stAlert"] div[data-testid="stMarkdownContainer"] p {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
