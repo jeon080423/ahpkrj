@@ -1430,10 +1430,13 @@ with st.sidebar:
 
     st.markdown("---")
     
-    st.markdown("### 📞 문의처")
-    st.markdown("- **이메일**: jeon080423@gmail.com")
-    st.markdown("- **카톡ID**: AHPkr")
-    st.markdown("- **전화**: 010-2142-2610")
+    st.markdown("""
+    ### 📞 문의처
+    - **이메일**: jeon080423@gmail.com
+    - **카톡ID**: AHPkr
+    - **전화**: 010-2142-2610  
+      <span style="color: gray; font-size: 0.85em;">(문자로 문의 하시면 전화 드립니다)</span>
+    """, unsafe_allow_html=True)
 
 # =============================================================================
 # 4. Main Content Logic
