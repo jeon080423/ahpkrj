@@ -1284,8 +1284,6 @@ with st.sidebar:
                         st.rerun()
                 else:
                     st.error("아이디 또는 비밀번호가 일치하지 않습니다.")
-            
-            st.markdown(fee_info_text)
 
         with tab_signup:
             st.header("📝 회원가입")
@@ -1317,8 +1315,6 @@ with st.sidebar:
                         st.success("무료사용자로 가입 완료 되었습니다")
                     else:
                         st.error("이미 존재하는 아이디입니다.")
-            
-            st.markdown(fee_info_text)
 
         with tab_find_pw:
             st.header("🔑 비밀번호 찾기")
@@ -1402,6 +1398,8 @@ with st.sidebar:
     # [신규 추가] 보정 강도(Learning Rate) 선택 옵션
     learning_rate = st.slider("보정 강도 (Learning Rate)", min_value=0.1, max_value=0.9, value=0.6, step=0.1, help="낮을수록 원본 응답을 많이 보존하며, 높을수록 수학적 일관성을 빠르게 확보합니다.")
 
+    st.markdown(fee_info_text)
+
     st.markdown("---")
     with st.expander("💡 사용자 권한 안내", expanded=False):
         st.info("**비로그인(Guest)**: 샘플 파일 분석만 가능")
@@ -1412,7 +1410,7 @@ with st.sidebar:
     st.markdown("- **이메일**: jeon080423@gmail.com")
     st.markdown("- **카톡ID**: AHPkr")
     st.markdown("- **전화**: 010-2142-2610")
-    st.markdown("- **[사용설명서](https://morison.tistory.com/97)**")
+    st.markdown("- **[사용설명서](https://morison.tistory.com/103)**")
 
 # =============================================================================
 # 4. Main Content Logic
