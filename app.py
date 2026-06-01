@@ -1277,14 +1277,7 @@ fee_info_text = """
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 무료 (5표본 제한 외 기능제한 없음)</li>
-    <li style="margin-bottom: 2px;"><b>학위논문</b>: 40만원</li>
-    <li style="margin-bottom: 2px;"><b>일반연구</b>: 50만원</li>
-  </ul>
-  <div style="font-weight: bold; margin-bottom: 4px; margin-top: 10px;">결제 정보</div>
-  <ul style="margin: 0; padding-left: 20px;">
-    <li style="margin-bottom: 2px;"><b>계좌번호</b>: 카카오뱅크 3333-23-8667708</li>
-    <li style="margin-bottom: 2px;"><b>예금주</b>: ㅈㅅㅎ</li>
-    <li style="margin-bottom: 2px;"><b>주의</b>: 송금자명에 <b>가입한 이메일 주소</b>를 기입해주세요.</li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 330 달러 (USD 330 / 2개월 무제한)</li>
   </ul>
 </div>
 """
@@ -1408,7 +1401,7 @@ with st.sidebar:
                 paypal_base = "https://www.paypal.com/cgi-bin/webscr"
                 business_email = "jeon080423@gmail.com"  # 정산용 페이팔 이메일 주소
                 item_name = f"AHP Master Official Account Upgrade ({st.session_state.user_id})"
-                amount = "300.00"  # 결제 금액 (USD)
+                amount = "330.00"  # 결제 금액 (USD)
                 currency = "USD"
                 
                 # 주소 조작 방지용 보안 토큰 생성
@@ -1417,14 +1410,7 @@ with st.sidebar:
                 
                 paypal_url = f"{paypal_base}?cmd=_xclick&business={business_email}&item_name={item_name}&amount={amount}&currency_code={currency}&return={return_url}"
                 
-                st.link_button("Pay with PayPal (USD 300)", paypal_url, use_container_width=True)
-            
-            with st.expander("무통장 입금 수동 승격 요청", expanded=False):
-                if st.button("정식 사용자 전환 요청", use_container_width=True):
-                    if send_conversion_request_email(st.session_state.user_id):
-                        st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                    else:
-                        st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+                st.link_button("Pay with PayPal (USD 330)", paypal_url, use_container_width=True)
         
         if st.session_state.user_role == 'admin':
             if st.button("🔧 관리자 화면 접속"):
