@@ -1215,29 +1215,7 @@ st.markdown("""
         color: black !important;
         border: none !important;
     }
-    /* 사이드바 로그인 정보 박스 (stAlert) 높이를 42px로 통일, 가로 100% 유지 및 세로 정중앙 정렬 */
-    section[data-testid="stSidebar"] div[data-testid="stAlert"] {
-        height: 42px !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-        display: flex !important;
-        align-items: center !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        margin-top: -8px !important;
-        margin-bottom: -8px !important;
-    }
-    section[data-testid="stSidebar"] div[data-testid="stAlert"] > div {
-        display: flex !important;
-        align-items: center !important;
-        height: 100% !important;
-        width: 100% !important;
-    }
-    section[data-testid="stSidebar"] div[data-testid="stAlert"] p {
-        margin: 0 !important;
-        padding: 0 !important;
-        line-height: 1.0 !important;
-    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1359,20 +1337,37 @@ with st.sidebar:
                     else:
                         st.error("등록되지 않은 아이디입니다.")
 
-    else:
-        st.success(f"**{st.session_state.user_id}** 님")
         role_disp = "관리자" if st.session_state.user_role == 'admin' else ("정식 사용자" if st.session_state.user_role == 'official' else "무료사용자")
-        st.info(f"권한: {role_disp}")
+        
+        # 만료일 정보 처리
+        expiry_info = ""
+        if st.session_state.expiry_date:
+            expiry_info = f"""
+            <div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #fffde7; border: 1px solid #fff9c4; border-radius: 6px; color: #f57f17; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">
+              📅 사용 만료일: {st.session_state.expiry_date}
+            </div>
+            """
+            
+        # 세련된 HTML 로그인 정보 카드 렌더링
+        info_html = f"""
+        <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 10px;">
+          <div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">
+            {st.session_state.user_id} 님
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; color: #1565c0; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">
+            권한: {role_disp}
+          </div>
+          {expiry_info}
+        </div>
+        """
+        st.markdown(info_html, unsafe_allow_html=True)
         
         if st.session_state.user_role == 'temp':
-            if st.button("정식 사용자 전환 요청"):
+            if st.button("정식 사용자 전환 요청", use_container_width=True):
                 if send_conversion_request_email(st.session_state.user_id):
                     st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
                 else:
                     st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
-
-        if st.session_state.expiry_date:
-            st.warning(f"📅 사용 만료일: {st.session_state.expiry_date}")
         
         if st.session_state.user_role == 'admin':
             if st.button("🔧 관리자 화면 접속"):
