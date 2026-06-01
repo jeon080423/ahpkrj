@@ -1230,16 +1230,21 @@ if 'page' not in st.session_state: st.session_state.page = "main"
 # =============================================================================
 
 fee_info_text = """
----
-### 💰 서비스 이용료
-- **무료사용자**: 무료 (5표본 제한 외 기능제한 없음)
-- **학위논문**: 40만원
-- **일반연구**: 50만원
-
-**결제 정보**
-- **계좌번호**: 카카오뱅크 3333-23-8667708
-- **예금주**: ㅈㅅㅎ
-- **주의**: 송금자명에 **가입한 이메일 주소**를 기입해주세요.
+<div style="line-height: 1.4; font-size: 0.95rem;">
+  <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
+  <h3 style="margin-top: 0; margin-bottom: 8px;">💰 서비스 이용료</h3>
+  <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
+    <li style="margin-bottom: 2px;"><b>무료사용자</b>: 무료 (5표본 제한 외 기능제한 없음)</li>
+    <li style="margin-bottom: 2px;"><b>학위논문</b>: 40만원</li>
+    <li style="margin-bottom: 2px;"><b>일반연구</b>: 50만원</li>
+  </ul>
+  <div style="font-weight: bold; margin-bottom: 4px; margin-top: 10px;">결제 정보</div>
+  <ul style="margin: 0; padding-left: 20px;">
+    <li style="margin-bottom: 2px;"><b>계좌번호</b>: 카카오뱅크 3333-23-8667708</li>
+    <li style="margin-bottom: 2px;"><b>예금주</b>: ㅈㅅㅎ</li>
+    <li style="margin-bottom: 2px;"><b>주의</b>: 송금자명에 <b>가입한 이메일 주소</b>를 기입해주세요.</li>
+  </ul>
+</div>
 """
 
 with st.sidebar:
@@ -1426,7 +1431,7 @@ with st.sidebar:
     # [신규 추가] 보정 강도(Learning Rate) 선택 옵션
     learning_rate = st.slider("보정 강도 (Learning Rate)", min_value=0.1, max_value=0.9, value=0.6, step=0.1, help="낮을수록 원본 응답을 많이 보존하며, 높을수록 수학적 일관성을 빠르게 확보합니다.")
 
-    st.markdown(fee_info_text)
+    st.markdown(fee_info_text, unsafe_allow_html=True)
 
     st.markdown("---")
     
