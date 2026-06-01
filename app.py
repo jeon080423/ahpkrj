@@ -1337,6 +1337,7 @@ with st.sidebar:
                     else:
                         st.error("등록되지 않은 아이디입니다.")
 
+    else:
         role_disp = "관리자" if st.session_state.user_role == 'admin' else ("정식 사용자" if st.session_state.user_role == 'official' else "무료사용자")
         
         # 만료일 정보 처리
