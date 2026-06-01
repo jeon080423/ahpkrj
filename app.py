@@ -1248,19 +1248,7 @@ with st.sidebar:
     except:
         st.subheader("📊 AHP 마스터")
     
-    with st.expander("ℹ️ 일관성 보정 기준", expanded=False):
-        st.markdown("""
-        **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
-        가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
-        
-        **현재 방법의 특징:**
-        1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
-        2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
-        
-        """)        
-    
 
-    
     if st.session_state.user_id is None:
         tab_login, tab_signup, tab_find_pw = st.tabs(["로그인", "회원가입", "비밀번호 찾기"])
         
@@ -1388,7 +1376,20 @@ with st.sidebar:
             st.session_state.admin_mode = False
             st.rerun()
 
-    st.markdown("- **[이용자 가이드](https://morison.tistory.com/103)**")
+    with st.expander("📖 이용자 가이드", expanded=False):
+        st.markdown("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.")
+        st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
+
+    with st.expander("ℹ️ 일관성 보정 기준", expanded=False):
+        st.markdown("""
+        **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
+        가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
+        
+        **현재 방법의 특징:**
+        1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
+        2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
+        
+        """)
     st.markdown("---")
     st.header("분석 설정")
     mean_method_label = st.radio("평균 산출 방식", ('기하평균 (Geometric)', '산술평균 (Arithmetic)'), index=0)
