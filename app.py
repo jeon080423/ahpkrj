@@ -1390,6 +1390,11 @@ with st.sidebar:
         2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
         
         """)
+
+    with st.expander("💡 사용자 권한 안내", expanded=False):
+        st.info("**비로그인(Guest)**: 샘플 파일 분석만 가능")
+        st.info("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)")
+        st.info("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)")
     st.markdown("---")
     analysis_settings_help = """
 ### ⚙️ 분석 설정 상세 안내
@@ -1424,10 +1429,6 @@ with st.sidebar:
     st.markdown(fee_info_text)
 
     st.markdown("---")
-    with st.expander("💡 사용자 권한 안내", expanded=False):
-        st.info("**비로그인(Guest)**: 샘플 파일 분석만 가능")
-        st.info("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)")
-        st.info("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)")
     
     st.markdown("### 📞 문의처")
     st.markdown("- **이메일**: jeon080423@gmail.com")
