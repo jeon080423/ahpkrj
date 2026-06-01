@@ -1343,24 +1343,14 @@ with st.sidebar:
         # 만료일 정보 처리
         expiry_info = ""
         if st.session_state.expiry_date:
-            expiry_info = f"""
-            <div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #fffde7; border: 1px solid #fff9c4; border-radius: 6px; color: #f57f17; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">
-              📅 사용 만료일: {st.session_state.expiry_date}
-            </div>
-            """
+            expiry_info = f'<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #fffde7; border: 1px solid #fff9c4; border-radius: 6px; color: #f57f17; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">📅 사용 만료일: {st.session_state.expiry_date}</div>'
             
-        # 세련된 HTML 로그인 정보 카드 렌더링
-        info_html = f"""
-        <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 10px;">
-          <div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">
-            {st.session_state.user_id} 님
-          </div>
-          <div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; color: #1565c0; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">
-            권한: {role_disp}
-          </div>
-          {expiry_info}
-        </div>
-        """
+        # 세련된 HTML 로그인 정보 카드 렌더링 (인덴트 제거로 마크다운 코드블록 변환 방지)
+        info_html = f"""<div style="display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 10px;">
+<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">{st.session_state.user_id} 님</div>
+<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; color: #1565c0; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">권한: {role_disp}</div>
+{expiry_info}
+</div>"""
         st.markdown(info_html, unsafe_allow_html=True)
         
         if st.session_state.user_role == 'temp':
