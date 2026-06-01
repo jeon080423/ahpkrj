@@ -1413,6 +1413,9 @@ with st.sidebar:
                 st.markdown("##### 💳 정식 사용자 즉시 승격")
                 st.caption("페이팔 또는 신용카드로 결제 후 즉각 정식 사용자(2개월)로 자동 승격됩니다.")
                 
+                # 국내 사용자용 안내 추가
+                st.warning("⚠️ **국내 계정 간 결제 불가 안내**\n\n대한민국 외국환거래법 및 페이팔 정책 상 **한국에 등록된 계정 간의 거래는 금지**되어 있습니다. 국내 카드로 결제하시는 분은 아래 **[무통장 입금]**을 이용해 주세요. (페이팔은 해외 사용자용입니다.)")
+                
                 # 브라우저의 도메인을 동적으로 감지하여 리턴 URL 구성
                 current_origin = st_javascript("window.location.origin")
                 if not current_origin or current_origin == 0:
@@ -1433,7 +1436,8 @@ with st.sidebar:
                 st.link_button("Pay with PayPal (USD 330)", paypal_url, use_container_width=True)
             
             with st.expander("무통장 입금 수동 승격 요청 (국내 전용)", expanded=False):
-                if st.button("정식 사용자 전환 요청", use_container_width=True):
+                st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 버튼을 클릭해 주세요.\n(학위논문: 40만원 / 일반연구: 50만원)")
+                if st.button("정식 사용자 전환 요청", use_container_width=True, key="sidebar_upgrade_btn"):
                     if send_conversion_request_email(st.session_state.user_id):
                         st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
                     else:
@@ -2502,6 +2506,9 @@ if uploaded_file:
                 with st.container(border=True):
                     st.markdown("### 💳 정식 사용자 즉시 승격 및 무제한 분석")
                     st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
+                    
+                    # 국내 사용자용 안내 추가
+                    st.warning("⚠️ **국내 계정 간 결제 불가 안내**\n\n대한민국 외국환거래법 및 페이팔 정책 상 **한국에 등록된 계정 간의 거래는 금지**되어 있습니다. 국내 카드로 결제하시는 분은 아래 **[무통장 입금]**을 이용해 주세요. (페이팔은 해외 사용자용입니다.)")
                     
                     # 브라우저의 도메인을 동적으로 감지하여 리턴 URL 구성
                     current_origin = st_javascript("window.location.origin")
