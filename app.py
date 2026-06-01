@@ -1277,7 +1277,14 @@ fee_info_text = """
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 무료 (5표본 제한 외 기능제한 없음)</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 330 달러 (USD 330 / 2개월 무제한)</li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자 (PayPal)</b>: 330 달러 (USD 330 / 2개월 무제한)</li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자 (계좌이체)</b>: 학위논문 40만원 / 일반연구 50만원 (2개월 무제한)</li>
+  </ul>
+  <div style="font-weight: bold; margin-bottom: 4px; margin-top: 10px;">계좌이체 결제 정보 (국내 회원용)</div>
+  <ul style="margin: 0; padding-left: 20px;">
+    <li style="margin-bottom: 2px;"><b>계좌번호</b>: 카카오뱅크 3333-23-8667708</li>
+    <li style="margin-bottom: 2px;"><b>예금주</b>: ㅈㅅㅎ</li>
+    <li style="margin-bottom: 2px;"><b>주의</b>: 송금 후 하단의 [무통장 입금 수동 승격 요청]을 클릭해 주세요.</li>
   </ul>
 </div>
 """
@@ -1424,6 +1431,13 @@ with st.sidebar:
                 paypal_url = f"{paypal_base}?cmd=_xclick&business={business_email}&item_name={item_name}&amount={amount}&currency_code={currency}&return={return_url}"
                 
                 st.link_button("Pay with PayPal (USD 330)", paypal_url, use_container_width=True)
+            
+            with st.expander("무통장 입금 수동 승격 요청 (국내 전용)", expanded=False):
+                if st.button("정식 사용자 전환 요청", use_container_width=True):
+                    if send_conversion_request_email(st.session_state.user_id):
+                        st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
+                    else:
+                        st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
         
         if st.session_state.user_role == 'admin':
             if st.button("🔧 관리자 화면 접속"):
@@ -2507,6 +2521,16 @@ if uploaded_file:
                     paypal_url = f"{paypal_base}?cmd=_xclick&business={business_email}&item_name={item_name}&amount={amount}&currency_code={currency}&return={return_url}"
                     
                     st.link_button("Pay with PayPal (USD 330) - 즉시 업그레이드", paypal_url, use_container_width=True)
+                    
+                    st.markdown("<div style='text-align: center; color: gray; margin: 10px 0;'>또는</div>", unsafe_allow_html=True)
+                    
+                    with st.expander("무통장 입금 수동 승격 요청 (국내 전용)", expanded=False):
+                        st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 버튼을 클릭해 주세요.\n(학위논문: 40만원 / 일반연구: 50만원)")
+                        if st.button("정식 사용자 전환 요청", use_container_width=True, key="main_upgrade_btn"):
+                            if send_conversion_request_email(st.session_state.user_id):
+                                st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
+                            else:
+                                st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
     except Exception as e:
         st.error(f"파일 처리 오류 발생: {e}")
 
