@@ -533,8 +533,8 @@ def validate_password(password):
 
 def send_application_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    # [Security] App Password Masked. Replace with your actual password.
-    password = "csuh xxru wqdy mttt"
+    # secrets.toml에서 이메일 비밀번호를 안전하게 로드합니다.
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식 사용자 승인 요청: {user_email}"
     # [수정] 대한민국 시간 기준 신청일 설정
@@ -548,12 +548,13 @@ def send_application_email(user_email):
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(sender_email, password)
             server.sendmail(sender_email, recipient_email, msg.as_string())
-    except: pass
+    except Exception as e:
+        print(f"send_application_email Error: {e}")
 
 # [추가 요청사항 반영] 전환 요청 이메일 발송 함수
 def send_conversion_request_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = "csuh xxru wqdy mttt"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식사용자 전환 요청: {user_email}"
     body = f"임시 사용자가 정식사용자로 전환 요청 했습니다\nID: {user_email}"
@@ -566,12 +567,13 @@ def send_conversion_request_email(user_email):
             server.login(sender_email, password)
             server.sendmail(sender_email, recipient_email, msg.as_string())
         return True
-    except: return False
+    except Exception as e:
+        print(f"send_conversion_request_email Error: {e}")
+        return False
 
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    # [Security] App Password Masked. Replace with your actual password.
-    password = "csuh xxru wqdy mttt"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
@@ -584,11 +586,13 @@ def send_approval_email(user_email):
             server.login(sender_email, password)
             server.sendmail(sender_email, recipient_email, msg.as_string())
         return True
-    except: return False
+    except Exception as e:
+        print(f"send_approval_email Error: {e}")
+        return False
 
 def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
-    password = "csuh xxru wqdy mttt"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
     subject = "[AHP 마스터] 임시 비밀번호 안내"
     body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
@@ -609,6 +613,7 @@ ID: {user_email}
             server.sendmail(sender_email, recipient_email, msg.as_string())
         return True
     except Exception as e:
+        print(f"send_password_recovery_email Error: {e}")
         return False
 
 # --- DB CRUD ---
