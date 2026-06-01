@@ -1391,7 +1391,28 @@ with st.sidebar:
         
         """)
     st.markdown("---")
-    st.header("분석 설정")
+    analysis_settings_help = """
+### ⚙️ 분석 설정 상세 안내
+
+1. **평균 산출 방식 (Aggregation)**
+   - **기하평균 (Geometric)**: AHP 분석에서 개별 의사결정을 통합하는 표준 방식입니다. 응답의 승법 성격을 보존하고 극단치 왜곡을 줄입니다. (학계 권장)
+   - **산술평균 (Arithmetic)**: 가중치 값을 단순히 더해 평균하는 직관적인 방식입니다.
+
+2. **일관성 비율(CR) 임계값 (CR Threshold)**
+   - 응답의 일관성 신뢰 기준입니다.
+   - **0.1**: Saaty 교수의 표준 기준으로, 높은 신뢰도를 요하는 연구에 적합합니다.
+   - **0.2**: 일반 대중 설문이나 복잡한 모형에서 넓게 사용되는 완화된 기준입니다.
+
+3. **최대 보정 반복 횟수 (Max Iterations)**
+   - 비일관적 응답 보정을 알고리즘이 시도하는 최대 횟수입니다.
+   - 이 횟수 내에 임계값 이하로 수렴하지 못하면 보정 실패로 분류되어 제외됩니다.
+
+4. **보정 강도 (Learning Rate)**
+   - 1회 반복당 이상적 일관성 데이터에 근접시키는 학습률입니다.
+   - **낮음 (0.1~0.3)**: 원본 설문 값을 최대한 보존하지만 보정 속도가 느립니다.
+   - **높음 (0.7~0.9)**: 수학적 일관성을 신속하게 확보하나 원본 변형이 더 커질 수 있습니다.
+"""
+    st.header("분석 설정", help=analysis_settings_help)
     mean_method_label = st.radio("평균 산출 방식", ('기하평균 (Geometric)', '산술평균 (Arithmetic)'), index=0)
     mean_method = 'geometric' if '기하' in mean_method_label else 'arithmetic'
     cr_threshold = st.selectbox("일관성 비율(CR) 임계값", [0.1, 0.2], index=0)
