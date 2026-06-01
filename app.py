@@ -1538,6 +1538,15 @@ with st.sidebar:
     - **카톡ID**: AHPkr
     - **전화**: 010-2142-2610  
       <span style="color: gray; font-size: 0.85em;">(문자로 문의 하시면 전화 드립니다)</span>
+      
+    <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
+    
+    <div style="font-size: 0.82rem; color: #555; line-height: 1.6;">
+      <b style="font-size: 0.88rem; color: #333;">사업자 정보</b><br>
+      • <b>상호명</b>: 프레쉬푸드(Fresh food)<br>
+      • <b>사업자등록번호</b>: 683-27-00122<br>
+      • <b>대표자명</b>: 전상현
+    </div>
     """, unsafe_allow_html=True)
 
 # =============================================================================
