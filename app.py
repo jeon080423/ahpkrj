@@ -1215,21 +1215,28 @@ st.markdown("""
         color: black !important;
         border: none !important;
     }
-    /* 사이드바 로그인 정보 박스 (stAlert) 패딩, 세로 중앙 정렬 및 박스 간 간격 축소 */
+    /* 사이드바 로그인 정보 박스 (stAlert) 높이를 42px로 통일, 가로 100% 유지 및 세로 정중앙 정렬 */
     section[data-testid="stSidebar"] div[data-testid="stAlert"] {
-        padding-top: 0.45rem !important;
-        padding-bottom: 0.45rem !important;
-        min-height: auto !important;
+        height: 42px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
         margin-top: -8px !important;
         margin-bottom: -8px !important;
     }
     section[data-testid="stSidebar"] div[data-testid="stAlert"] > div {
+        display: flex !important;
         align-items: center !important;
+        height: 100% !important;
+        width: 100% !important;
     }
     section[data-testid="stSidebar"] div[data-testid="stAlert"] p {
         margin: 0 !important;
         padding: 0 !important;
-        line-height: 1.2 !important;
+        line-height: 1.0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
