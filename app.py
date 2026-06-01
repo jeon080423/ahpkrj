@@ -1232,7 +1232,7 @@ if 'page' not in st.session_state: st.session_state.page = "main"
 fee_info_text = """
 <div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <h3 style="margin-top: 0; margin-bottom: 8px;">💰 서비스 이용료</h3>
+  <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 무료 (5표본 제한 외 기능제한 없음)</li>
     <li style="margin-bottom: 2px;"><b>학위논문</b>: 40만원</li>
@@ -1436,7 +1436,7 @@ with st.sidebar:
     st.markdown("---")
     
     st.markdown("""
-    ### 📞 문의처
+    ### 문의처
     - **이메일**: jeon080423@gmail.com
     - **카톡ID**: AHPkr
     - **전화**: 010-2142-2610  
