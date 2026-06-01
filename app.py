@@ -1303,7 +1303,20 @@ with st.sidebar:
                     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
                     expiry_date_val = datetime.datetime.strptime(result[1], "%Y-%m-%d").date()
                     if today > expiry_date_val:
-                        st.error(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})")
+                        if result[0] == 'official':
+                            # 정식 사용자가 만료된 경우 -> 자동으로 무료사용자(temp)로 즉시 안전 승격 해제 및 전환
+                            try:
+                                update_user_full_info(l_id.strip(), None, "temp", "9999-12-31")
+                                st.session_state.user_id = l_id.strip()
+                                st.session_state.user_role = "temp"
+                                st.session_state.expiry_date = "9999-12-31"
+                                st.toast("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.")
+                                st.success(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 제한) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}")
+                        else:
+                            st.error(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})")
                     else:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
