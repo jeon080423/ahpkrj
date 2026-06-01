@@ -1388,6 +1388,7 @@ with st.sidebar:
             st.session_state.admin_mode = False
             st.rerun()
 
+    st.markdown("- **[이용자 가이드](https://morison.tistory.com/103)**")
     st.markdown("---")
     st.header("분석 설정")
     mean_method_label = st.radio("평균 산출 방식", ('기하평균 (Geometric)', '산술평균 (Arithmetic)'), index=0)
@@ -1410,7 +1411,6 @@ with st.sidebar:
     st.markdown("- **이메일**: jeon080423@gmail.com")
     st.markdown("- **카톡ID**: AHPkr")
     st.markdown("- **전화**: 010-2142-2610")
-    st.markdown("- **[사용설명서](https://morison.tistory.com/103)**")
 
 # =============================================================================
 # 4. Main Content Logic
