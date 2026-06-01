@@ -1230,6 +1230,44 @@ if 'model_structure' not in st.session_state: st.session_state.model_structure =
 if 'page' not in st.session_state: st.session_state.page = "main"
 
 # =============================================================================
+# 페이팔 성공 결제 리디렉션 감지 및 정식 사용자 자동 승격 보안 로직
+# =============================================================================
+query_params = st.query_params
+if "payment" in query_params and query_params["payment"] == "success":
+    pay_user = query_params.get("user_id")
+    token = query_params.get("token")
+    if pay_user and token:
+        # 어뷰징(임의 URL 조작)을 방지하기 위한 일회성 안전 토큰 교차 검증
+        expected_token = hashlib.sha256((pay_user + "ahp_master_secure_salt_2026").encode('utf-8')).hexdigest()[:16]
+        if token == expected_token:
+            try:
+                # 대한민국 시간(KST) 기준 오늘 날짜 구하기
+                kst_tz = datetime.timezone(datetime.timedelta(hours=9))
+                today_kst = datetime.datetime.now(kst_tz).date()
+                expiry_date_val = today_kst + relativedelta(months=2)
+                expiry_date_str = expiry_date_val.strftime("%Y-%m-%d")
+                
+                # DB 및 구글 시트에 업데이트 반영 (비밀번호는 None을 넘겨 유지)
+                update_user_full_info(pay_user, None, "official", expiry_date_str)
+                
+                # 현재 로그인 유저와 일치할 경우 즉각 반영
+                if st.session_state.user_id == pay_user:
+                    st.session_state.user_role = "official"
+                    st.session_state.expiry_date = expiry_date_str
+                
+                st.toast("🎉 정식 사용자 결제가 확인되어 계정이 즉시 승격되었습니다!")
+                st.success(f"🎉 결제 완료: '{pay_user}' 님의 계정이 정식 사용자(2개월 만료일: {expiry_date_str})로 자동 전환되었습니다!")
+            except Exception as e:
+                st.error(f"결제 후 권한 승격 처리 중 오류가 발생했습니다: {e}")
+            
+            # 파라미터 클리어 및 리프레시
+            st.query_params.clear()
+            st.rerun()
+        else:
+            st.error("❌ 유효하지 않은 결제 인증 토큰입니다. 결제 확인에 실패했습니다.")
+
+
+# =============================================================================
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
@@ -1357,11 +1395,36 @@ with st.sidebar:
         st.markdown(info_html, unsafe_allow_html=True)
         
         if st.session_state.user_role == 'temp':
-            if st.button("정식 사용자 전환 요청", use_container_width=True):
-                if send_conversion_request_email(st.session_state.user_id):
-                    st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                else:
-                    st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+            # 페이팔 간편 결제 자동 연동 영역
+            with st.container(border=True):
+                st.markdown("##### 💳 정식 사용자 즉시 승격")
+                st.caption("페이팔 또는 신용카드로 결제 후 즉각 정식 사용자(2개월)로 자동 승격됩니다.")
+                
+                # 브라우저의 도메인을 동적으로 감지하여 리턴 URL 구성
+                current_origin = st_javascript("window.location.origin")
+                if not current_origin or current_origin == 0:
+                    current_origin = "http://localhost:8501"
+                
+                paypal_base = "https://www.paypal.com/cgi-bin/webscr"
+                business_email = "jeon080423@gmail.com"  # 정산용 페이팔 이메일 주소
+                item_name = f"AHP Master Official Account Upgrade ({st.session_state.user_id})"
+                amount = "300.00"  # 결제 금액 (USD)
+                currency = "USD"
+                
+                # 주소 조작 방지용 보안 토큰 생성
+                token = hashlib.sha256((st.session_state.user_id + "ahp_master_secure_salt_2026").encode('utf-8')).hexdigest()[:16]
+                return_url = f"{current_origin}/?payment=success&user_id={st.session_state.user_id}&token={token}"
+                
+                paypal_url = f"{paypal_base}?cmd=_xclick&business={business_email}&item_name={item_name}&amount={amount}&currency_code={currency}&return={return_url}"
+                
+                st.link_button("Pay with PayPal (USD 300)", paypal_url, use_container_width=True)
+            
+            with st.expander("무통장 입금 수동 승격 요청", expanded=False):
+                if st.button("정식 사용자 전환 요청", use_container_width=True):
+                    if send_conversion_request_email(st.session_state.user_id):
+                        st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
+                    else:
+                        st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
         
         if st.session_state.user_role == 'admin':
             if st.button("🔧 관리자 화면 접속"):
