@@ -1435,9 +1435,8 @@ with st.sidebar:
     
     with st.expander("💳 PG 심사용 카드 결제창 (테스트)", expanded=True):
         st.write("한국결제네트웍스 심사 제출용 결제창 캡처를 위한 테스트 도구입니다.")
-        st.info("💡 **안내**: 아래 [테스트 결제창 열기] 버튼을 누르면 새로운 웹 브라우저 창(탭)에서 결제 전용 페이지가 열립니다. 그곳에서 결제창을 띄우시면 보안 제약 없이 100% 정상 작동합니다.")
-        st.link_button("💳 테스트 결제창 열기 (새 창)", "/app/static/pay_test.html", use_container_width=True)
-        st.link_button("💳 테스트 결제창 열기 (백업 링크)", "/static/pay_test.html", use_container_width=True)
+        st.info("💡 **안내**: 아래 [테스트 결제창 열기] 버튼을 누르면 새 창에서 카드 결제 테스트 페이지가 열립니다. 결제창을 띄우신 후 '하나카드'를 선택하여 화면을 캡처하십시오.")
+        st.link_button("💳 테스트 결제창 열기", "https://htmlpreview.github.io/?https://github.com/jeon080423/ahpkrj/blob/main/static/pay_test.html", use_container_width=True)
 
     st.markdown("---")
     analysis_settings_help = """
