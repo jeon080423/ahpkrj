@@ -649,12 +649,13 @@ def add_user(user_id, pw, role, agree_info="Y"):
     # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
     signup_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
     expiry_date = "9999-12-31"
+    hashed_pw = hash_password(pw)
     try:
         # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info)
         c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)", 
-                  (user_id, role, signup_date, pw, expiry_date, agree_info))
+                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info))
         conn.commit()
-        log_to_sheets(user_id, role, signup_date, pw, agree_info, expiry_date)
+        log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date)
         success = True
     except sqlite3.IntegrityError:
         success = False
