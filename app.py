@@ -1310,6 +1310,16 @@ st.markdown("""
     .block-container, div[data-testid="stAppViewBlockContainer"] {
         padding-top: 2.0rem !important;
     }
+    /* 사이드바 여백 극대 축소 */
+    section[data-testid="stSidebar"] .block-container {
+        padding-top: 1.0rem !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] {
+        gap: 0.4rem !important;
+    }
+    section[data-testid="stSidebar"] div.stElementContainer {
+        margin-bottom: 0.2rem !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1587,7 +1597,6 @@ with st.sidebar:
                 if not f_id:
                     st.warning(_("이메일 주소를 입력해주세요.", "Please enter your email address."))
                 else:
-                    # 사용자 존재 여부 확인을 위해 비밀번호 가져오기
                     conn = sqlite3.connect('users.db')
                     c = conn.cursor()
                     c.execute("SELECT id FROM users WHERE id=?", (f_id.strip(),))
@@ -1595,7 +1604,6 @@ with st.sidebar:
                     conn.close()
                     
                     if user_exists:
-                        # 임시 비밀번호 생성 및 변경 (암호화하여 저장)
                         temp_pw = generate_temp_password()
                         change_user_password(f_id.strip(), temp_pw)
                         
@@ -1609,13 +1617,11 @@ with st.sidebar:
     else:
         role_disp = _("관리자", "Admin") if st.session_state.user_role == 'admin' else (_("정식 사용자", "Official User") if st.session_state.user_role == 'official' else _("무료사용자", "Free User"))
         
-        # 만료일 정보 처리
         expiry_info = ""
         if st.session_state.expiry_date:
             expiry_label = _("만료일: ", "Expiry: ")
             expiry_info = f' | {expiry_label}{st.session_state.expiry_date}'
             
-        # 세련된 HTML 로그인 정보 카드 렌더링 (인덴트 제거로 마크다운 코드블록 변환 방지)
         info_html = f"""<div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.85rem; padding: 8px 10px; text-align: center; margin-bottom: 8px;">
 👤 {st.session_state.user_id} ({role_disp}{expiry_info})
 </div>"""
@@ -1670,7 +1676,6 @@ with st.sidebar:
                 else:
                     st.markdown("##### 💳 정식 사용자 승격 요청")
                     
-                    # 계좌 정보 및 간편 복사 버튼 추가
                     acc_info_html = """
                     <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
                       <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
@@ -1701,17 +1706,29 @@ with st.sidebar:
                         else:
                             st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
         
+    st.header(_("분석 설정", "Analysis Settings"))
+    ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
+    ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
+    mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
+    mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
+    cr_threshold = st.selectbox(_("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), [0.1, 0.2], index=0)
+    max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
+    learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
+
+    st.markdown(get_fee_info_text(), unsafe_allow_html=True)
+
+    if st.session_state.user_id is not None:
         if st.session_state.user_role == 'admin':
             if st.button(_("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")):
                 st.session_state.admin_mode = not st.session_state.admin_mode
                 st.rerun()
 
         with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
-            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur")
-            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new")
-            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf")
+            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
+            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_new")
+            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_new")
             
-            if st.button(_("비밀번호 변경", "Change Password")):
+            if st.button(_("비밀번호 변경", "Change Password"), key="btn_chg_pw_new"):
                 if new_pw_val != confirm_pw:
                     st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
                 elif not validate_password(new_pw_val):
@@ -1724,67 +1741,12 @@ with st.sidebar:
                     else:
                         st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
 
-        if st.button(_("로그아웃", "Log Out")):
+        if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
             st.session_state.user_id = None
             st.session_state.user_role = None
             st.session_state.expiry_date = None
             st.session_state.admin_mode = False
             st.rerun()
-
-    st.markdown("---")
-    analysis_settings_help = """
-### ⚙️ 분석 설정 상세 안내
-
-1. **평균 산출 방식 (Aggregation)**
-   - **기하평균 (Geometric)**: AHP 분석에서 개별 의사결정을 통합하는 표준 방식입니다. 응답의 승법 성격을 보존하고 극단치 왜곡을 줄입니다. (학계 권장)
-   - **산술평균 (Arithmetic)**: 가중치 값을 단순히 더해 평균하는 직관적인 방식입니다.
-
-2. **일관성 비율(CR) 임계값 (CR Threshold)**
-   - 응답의 일관성 신뢰 기준입니다.
-   - **0.1**: Saaty 교수의 표준 기준으로, 높은 신뢰도를 요하는 연구에 적합합니다.
-   - **0.2**: 일반 대중 설문이나 복잡한 모형에서 넓게 사용되는 완화된 기준입니다.
-
-3. **최대 보정 반복 횟수 (Max Iterations)**
-   - 비일관적 응답 보정을 알고리즘이 시도하는 최대 횟수입니다.
-   - 이 횟수 내에 임계값 이하로 수렴하지 못하면 보정 실패로 분류되어 제외됩니다.
-
-4. **보정 강도 (Learning Rate)**
-   - 1회 반복당 이상적 일관성 데이터에 근접시키는 학습률입니다.
-   - **낮음 (0.1~0.3)**: 원본 설문 값을 최대한 보존하지만 보정 속도가 느립니다.
-   - **높음 (0.7~0.9)**: 수학적 일관성을 신속하게 확보하나 원본 변형이 더 커질 수 있습니다.
-"""
-    analysis_settings_help_en = """
-### ⚙️ Detailed Analysis Settings
-
-1. **Aggregation Method**
-   - **Geometric Mean**: The standard method in AHP for integrating individual decisions. Preserves multiplicative characteristics and minimizes outlier distortion (recommended for academia).
-   - **Arithmetic Mean**: A simple intuitive method of averaging weights.
-
-2. **Consistency Ratio (CR) Threshold**
-   - Criteria for consistency reliability.
-   - **0.1**: Saaty's standard threshold, suitable for high-precision academic research.
-   - **0.2**: Relaxed threshold widely used for public surveys or complex models.
-
-3. **Max Correction Iterations**
-   - The maximum number of correction attempts. If convergence below the threshold fails within this limit, the response is excluded.
-
-4. **Correction Intensity (Learning Rate)**
-   - The step rate to shift towards the ideal consistency data in each iteration.
-   - **Low (0.1~0.3)**: Maximum preservation of original responses, but slower convergence.
-   - **High (0.7~0.9)**: Quick mathematical consistency, but may alter original responses more.
-"""
-    st.header(_("분석 설정", "Analysis Settings"), help=_(analysis_settings_help, analysis_settings_help_en))
-    ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
-    ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
-    mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
-    mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
-    cr_threshold = st.selectbox(_("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), [0.1, 0.2], index=0)
-    max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
-    
-    # [신규 추가] 보정 강도(Learning Rate) 선택 옵션
-    learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1, help=_("낮을수록 원본 응답을 많이 보존하며, 높을수록 수학적 일관성을 빠르게 확보합니다.", "Lower values preserve original responses; higher values converge faster."))
-
-    st.markdown(get_fee_info_text(), unsafe_allow_html=True)
 
     st.markdown("---")
 
