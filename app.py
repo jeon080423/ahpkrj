@@ -3323,7 +3323,7 @@ if uploaded_file:
                             fig_all.update_layout(
                                 template="simple_white",
                                 font=dict(family="Arial, sans-serif", size=14, color="black"),
-                                title_font=dict(size=16, family="Arial, sans-serif", color="black", color="black"),
+                                title_font=dict(size=16, family="Arial, sans-serif", color="black"),
                                 xaxis=dict(showline=True, linewidth=1.5, linecolor='black', mirror=True, tickfont=dict(color="black")),
                                 yaxis=dict(showline=True, linewidth=1.5, linecolor='black', mirror=True, tickfont=dict(color="black")),
                                 plot_bgcolor="white",
