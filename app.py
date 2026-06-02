@@ -1244,14 +1244,31 @@ fee_info_text = """
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 무료 (5표본 제한 외 기능제한 없음)</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자 (계좌이체)</b>: 서비스 이용요금 50만원 (2개월 무제한)</li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월 기능 무제한)</li>
   </ul>
-  <div style="font-weight: bold; margin-bottom: 4px; margin-top: 10px;">계좌이체 결제 정보 (국내 회원용)</div>
-  <ul style="margin: 0; padding-left: 20px;">
-    <li style="margin-bottom: 2px;"><b>계좌번호</b>: 카카오뱅크 3333-23-8667708</li>
-    <li style="margin-bottom: 2px;"><b>예금주</b>: ㅈㅅㅎ</li>
-    <li style="margin-bottom: 2px;"><b>주의</b>: 송금 후 하단의 [무통장 입금 수동 승격 요청]을 클릭해 주세요.</li>
-  </ul>
+  <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 10px;">
+    <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 계좌이체 입금 정보</div>
+    <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
+      • <b>은행명</b>: 카카오뱅크<br>
+      • <b>예금주</b>: ㅈㅅㅎ<br>
+      • <b>이용요금</b>: 50만원<br>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+        <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
+        <button onclick="(function(){
+          const el = document.createElement('textarea');
+          el.value = '3333-23-8667708';
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+          alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
+        })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
+      </div>
+      <div style="margin-top: 6px; font-size: 0.75rem; color: #718096; line-height: 1.3;">
+        * 주의: 송금 후 하단의 <b>[정식 사용자 전환 요청]</b>을 클릭해 주세요.
+      </div>
+    </div>
+  </div>
 </div>
 """
 
@@ -1376,7 +1393,32 @@ with st.sidebar:
         if st.session_state.user_role == 'temp':
             with st.container(border=True):
                 st.markdown("##### 💳 정식 사용자 승격 요청")
-                st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 아래 버튼을 클릭해 주세요.\n(서비스 이용요금: 50만원)")
+                
+                # 계좌 정보 및 간편 복사 버튼 추가
+                acc_info_html = """
+                <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                  <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
+                    • <b>은행명</b>: 카카오뱅크<br>
+                    • <b>예금주</b>: ㅈㅅㅎ<br>
+                    • <b>이용요금</b>: 50만원 (2개월 무제한)<br>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                      <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
+                      <button onclick="(function(){
+                        const el = document.createElement('textarea');
+                        el.value = '3333-23-8667708';
+                        document.body.appendChild(el);
+                        el.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(el);
+                        alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
+                      })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
+                    </div>
+                  </div>
+                </div>
+                """
+                st.markdown(acc_info_html, unsafe_allow_html=True)
+                st.info("입금 완료 후 아래 버튼을 클릭하시면 승격 요청이 관리자에게 즉시 전송됩니다.")
+                
                 if st.button("정식 사용자 전환 요청", use_container_width=True, key="sidebar_upgrade_btn"):
                     if send_conversion_request_email(st.session_state.user_id):
                         st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
@@ -1433,11 +1475,6 @@ with st.sidebar:
         st.info("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)")
         st.info("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)")
     
-    with st.expander("💳 PG 심사용 카드 결제창 (테스트)", expanded=True):
-        st.write("한국결제네트웍스 심사 제출용 결제창 캡처를 위한 테스트 도구입니다.")
-        st.info("💡 **안내**: 아래 [테스트 결제창 열기] 버튼을 누르면 새 창에서 카드 결제 테스트 페이지가 열립니다. 결제창을 띄우신 후 '하나카드'를 선택하여 화면을 캡처하십시오.")
-        st.link_button("💳 테스트 결제창 열기", "https://htmlpreview.github.io/?https://github.com/jeon080423/ahpkrj/blob/main/static/pay_test.html", use_container_width=True)
-
     st.markdown("---")
     analysis_settings_help = """
 ### ⚙️ 분석 설정 상세 안내
