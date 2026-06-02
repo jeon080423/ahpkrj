@@ -1362,6 +1362,35 @@ if st.session_state.user_id is None and "login_user" in q_params and "login_toke
             st.session_state.user_role = db_user[0]
             st.session_state.expiry_date = db_user[1]
 
+
+# 자동 로그아웃 처리 (30분 미활동 시)
+import time
+TIMEOUT_LIMIT = 1800 # 30분 (초 단위)
+current_time = int(time.time())
+
+if st.session_state.user_id is not None:
+    last_act = q_params.get("last_activity")
+    if isinstance(last_act, list): last_act = last_act[0]
+    
+    if last_act:
+        try:
+            elapsed = current_time - int(last_act)
+            if elapsed > TIMEOUT_LIMIT:
+                # 세션 및 쿼리 파라미터 초기화
+                st.session_state.user_id = None
+                st.session_state.user_role = None
+                st.session_state.expiry_date = None
+                st.session_state.admin_mode = False
+                st.query_params.clear()
+                st.toast(_("🔒 30분간 활동이 없어 보안을 위해 자동 로그아웃되었습니다.", "🔒 Logged out automatically due to 30 minutes of inactivity."))
+                st.rerun()
+            else:
+                st.query_params["last_activity"] = str(current_time)
+        except ValueError:
+            st.query_params["last_activity"] = str(current_time)
+    else:
+        st.query_params["last_activity"] = str(current_time)
+
 # 다국어 처리
 if "lang" in q_params:
     lang_val = q_params["lang"]
@@ -1506,6 +1535,7 @@ with st.sidebar:
                                 st.session_state.expiry_date = "9999-12-31"
                                 st.query_params["login_user"] = l_id.strip()
                                 st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+                                st.query_params["last_activity"] = str(int(time.time()))
                                 st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Automatically downgraded to Free User."))
                                 st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 제한) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
                                              f"Welcome, {l_id}! Your subscription expired and you were automatically downgraded to a Free User (5-sample limit). You can extend your subscription anytime in the sidebar!"))
@@ -1520,6 +1550,7 @@ with st.sidebar:
                         st.session_state.expiry_date = result[1]
                         st.query_params["login_user"] = l_id.strip()
                         st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+                        st.query_params["last_activity"] = str(int(time.time()))
                         if 'signup_paypal_user' in st.session_state:
                             del st.session_state.signup_paypal_user
                         st.success(_(f"환영합니다, {l_id}님!", f"Welcome, {l_id}!"))
