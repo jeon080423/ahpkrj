@@ -1448,29 +1448,7 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 무료 (5표본 제한 외 기능제한 없음)</li>
     <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월 기능 무제한)</li>
   </ul>
-  <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 10px;">
-    <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 계좌이체 입금 정보</div>
-    <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-      • <b>은행명</b>: 카카오뱅크<br>
-      • <b>예금주</b>: ㅈㅅㅎ<br>
-      • <b>이용요금</b>: 50만원<br>
-      <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-        <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
-        <button onclick="(function(){
-          const el = document.createElement('textarea');
-          el.value = '3333-23-8667708';
-          document.body.appendChild(el);
-          el.select();
-          document.execCommand('copy');
-          document.body.removeChild(el);
-          alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
-        })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
-      </div>
-      <div style="margin-top: 6px; font-size: 0.75rem; color: #718096; line-height: 1.3;">
-        * 주의: 송금 후 하단의 <b>[정식 사용자 전환 요청]</b>을 클릭해 주세요.
-      </div>
-    </div>
-  </div>
+
 </div>""",
         """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
@@ -1479,16 +1457,7 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
     <li style="margin-bottom: 2px;"><b>Official User</b>: $330 USD (2 months unlimited)</li>
   </ul>
-  <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 10px;">
-    <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">💳 PayPal Instant Upgrade</div>
-    <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-      • <b>Method</b>: PayPal Smart Checkout<br>
-      • <b>Fee</b>: $330.00 USD<br>
-      <div style="margin-top: 6px; font-size: 0.75rem; color: #718096; line-height: 1.3;">
-        * Note: Please register a Free account and log in. Once logged in, you can instantly upgrade your account to Official User using the PayPal button in the sidebar.
-      </div>
-    </div>
-  </div>
+
 </div>"""
     )
 
