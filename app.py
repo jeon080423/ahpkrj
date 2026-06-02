@@ -1900,8 +1900,8 @@ if st.session_state.get('page', 'main') == 'guide':
 # 메인 헤더 영역
 st.title(_("AHP 분석 자동화 시스템", "AHP Automated Decision System"))
 
-st.markdown(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다. 일반 AHP뿐만 아니라 삼각퍼지수(TFN)를 활용한 퍼지 AHP(Fuzzy AHP) 분석도 함께 지원하며, 엑셀 파일을 업로드하면 개인별 가중치 산출, 일관성 보정(CR), 그룹별 집계 결과를 제공합니다.",
-              "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool. It supports both traditional AHP and Fuzzy AHP analysis utilizing Triangular Fuzzy Numbers (TFN), and provides individual weights, Consistency Ratio (CR) correction, and group aggregation results upon uploading an Excel file."))
+st.markdown(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 AHP뿐만 아니라 삼각퍼지수(TFN)를 활용한 **퍼지 AHP(Fuzzy AHP)** 분석도 함께 지원하며, 엑셀 파일을 업로드하면 개인별 가중치 산출, 일관성 보정(CR), 그룹별 집계 결과를 제공합니다.",
+              "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional AHP and **Fuzzy AHP** analysis utilizing Triangular Fuzzy Numbers (TFN), and provides individual weights, Consistency Ratio (CR) correction, and group aggregation results upon uploading an Excel file."))
 
 with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
     st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
