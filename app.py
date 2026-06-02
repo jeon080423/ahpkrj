@@ -536,6 +536,47 @@ if 'visited' not in st.session_state:
     st.session_state.visited = False
 track_visitor()
 
+def verify_paypal_payment(order_id):
+    """Verify PayPal order status on the backend using credentials from secrets."""
+    client_id = st.secrets.get("PAYPAL_CLIENT_ID", "")
+    client_secret = st.secrets.get("PAYPAL_CLIENT_SECRET", "")
+    mode = st.secrets.get("PAYPAL_MODE", "sandbox")
+    
+    if not client_id or not client_secret:
+        return False, "PayPal credentials not configured."
+        
+    base_url = "https://api-m.paypal.com" if mode == "live" else "https://api-m.sandbox.paypal.com"
+    
+    try:
+        auth_response = requests.post(
+            f"{base_url}/v1/oauth2/token",
+            auth=(client_id, client_secret),
+            data={"grant_type": "client_credentials"},
+            headers={"Accept": "application/json", "Accept-Language": "en_US"}
+        )
+        if auth_response.status_code != 200:
+            return False, "Failed to authenticate with PayPal API."
+        access_token = auth_response.json().get("access_token")
+        
+        order_response = requests.get(
+            f"{base_url}/v2/checkout/orders/{order_id}",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
+        )
+        if order_response.status_code != 200:
+            return False, "Failed to retrieve order details from PayPal."
+            
+        order_data = order_response.json()
+        status = order_data.get("status")
+        
+        if status == "COMPLETED":
+            return True, "Payment verified."
+        return False, f"Payment status is {status}."
+    except Exception as e:
+        return False, f"Error verifying payment: {str(e)}"
+
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
@@ -1400,12 +1441,14 @@ if "lang" in q_params:
     elif str(lang_val).lower() in ["ko", "korean"]:
         st.session_state.lang = "ko"
 
-# 페이팔 자동 결제 승격 처리
-if "pay_success" in q_params:
-    pay_success_val = q_params["pay_success"]
-    if isinstance(pay_success_val, list):
-        pay_success_val = pay_success_val[0]
-    if str(pay_success_val).lower() == "true":
+# 페이팔 자동 결제 승격 처리 (서버 검증 포함)
+if "paypal_order_id" in q_params:
+    order_id_val = q_params["paypal_order_id"]
+    if isinstance(order_id_val, list):
+        order_id_val = order_id_val[0]
+        
+    is_valid, msg = verify_paypal_payment(order_id_val)
+    if is_valid:
         current_user = st.session_state.get("user_id")
         user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
         target_user = current_user or user_id_param
@@ -1418,8 +1461,11 @@ if "pay_success" in q_params:
                 st.session_state.user_role = "official"
                 st.session_state.expiry_date = new_expiry_date
             st.toast("🎉 PayPal Payment successful! Account upgraded to Official User.")
-            st.query_params.clear()
-            st.rerun()
+    else:
+        st.error(f"Payment verification failed: {msg}")
+        
+    st.query_params.clear()
+    st.rerun()
 
 # 정식 회원 자동 만료 체크 (로그인 상태)
 if st.session_state.user_id is not None and st.session_state.user_role == 'official':
@@ -1560,7 +1606,7 @@ with st.sidebar:
                     }},
                     onApprove: function(data, actions) {{
                       return actions.order.capture().then(function(details) {{
-                        window.top.location.href = window.top.location.origin + window.top.location.pathname + "?pay_success=true&user_id=" + encodeURIComponent("{user_id}");
+                        window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
                       }});
                     }},
                     onError: function(err) {{
@@ -1708,7 +1754,7 @@ with st.sidebar:
                         }},
                         onApprove: function(data, actions) {{
                           return actions.order.capture().then(function(details) {{
-                            window.top.location.href = window.top.location.origin + window.top.location.pathname + "?pay_success=true&user_id=" + encodeURIComponent("{user_id}");
+                            window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
                           }});
                         }},
                         onError: function(err) {{
@@ -3376,7 +3422,7 @@ if uploaded_file:
                             }},
                             onApprove: function(data, actions) {{
                               return actions.order.capture().then(function(details) {{
-                                window.top.location.href = window.top.location.origin + window.top.location.pathname + "?pay_success=true&user_id=" + encodeURIComponent("{user_id}");
+                                window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
                               }});
                             }},
                             onError: function(err) {{
