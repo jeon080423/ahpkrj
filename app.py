@@ -931,7 +931,7 @@ def calculate_consistency(matrix, method='geometric'):
 def improve_consistency(matrix, threshold, min_val, max_val, max_iter=500, learning_rate=0.6, method='geometric'):
     current_matrix = matrix.copy()
     n = current_matrix.shape[0]
-    cr, ci, _ = calculate_consistency(current_matrix, method)
+    cr, ci, _unused_lambda = calculate_consistency(current_matrix, method)
     iterations = 0
     if cr <= threshold: return current_matrix, cr, iterations, False
     
@@ -978,7 +978,7 @@ def improve_consistency(matrix, threshold, min_val, max_val, max_iter=500, learn
         new_matrix.T[triu_indices] = 1.0 / final_vals
         
         current_matrix = new_matrix
-        cr, ci, _ = calculate_consistency(current_matrix, method)
+        cr, ci, _unused_lambda = calculate_consistency(current_matrix, method)
         iterations += 1
         
     was_corrected = iterations > 0
@@ -1022,7 +1022,7 @@ def calculate_pairwise_ttest(df, factors):
                 col2 = weight_cols[j]
                 if col1 in df.columns and col2 in df.columns and len(df) > 1:
                     try:
-                        _, p = ttest_rel(df[col1], df[col2], nan_policy='omit')
+                        _unused_t, p = ttest_rel(df[col1], df[col2], nan_policy='omit')
                         p_values.iloc[i, j] = p
                     except:
                         p_values.iloc[i, j] = np.nan
@@ -1061,7 +1061,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
                     matrix[j, i] = 1.0 / ahp_val
                     col_idx += 1
         
-        orig_cr, orig_ci, _ = calculate_consistency(matrix, method)
+        orig_cr, orig_ci, _unused_lambda = calculate_consistency(matrix, method)
         final_matrix = matrix.copy()
         final_cr = orig_cr
         iterations = 0
@@ -1091,7 +1091,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
                 else: final_raw_val = int(round(1.0/val)) # 오른쪽 우선 (양수)
                 final_raw_values.append(final_raw_val)
 
-        _, final_ci, _ = calculate_consistency(final_matrix, method)
+        _unused_cr, final_ci, _unused_lambda = calculate_consistency(final_matrix, method)
         final_weights = calculate_weights(final_matrix, method)
         
         # 결과 딕셔너리 구성 (요청사항 5 재배치 반영)
@@ -2415,7 +2415,7 @@ if uploaded_file:
                                 group_sub_w = group_sub_w / group_sub_w.sum()
                                 sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
                                 sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
-                                sub_grp_cr, sub_grp_ci, _ = calculate_consistency(sub_group_matrix, method=mean_method)
+                                sub_grp_cr, sub_grp_ci, _not_used_lambda = calculate_consistency(sub_group_matrix, method=mean_method)
                                 
                                 sub_results_storage[parent_factor] = {
                                     'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
@@ -2460,7 +2460,7 @@ if uploaded_file:
                     
                     main_matrices = np.stack(main_results_df['Matrix_Object'].values)
                     main_group_matrix = np.mean(main_matrices, axis=0) if mean_method == 'arithmetic' else gmean(main_matrices, axis=0)
-                    main_grp_cr, main_grp_ci, _ = calculate_consistency(main_group_matrix, mean_method)
+                    main_grp_cr, main_grp_ci, _not_used_lambda = calculate_consistency(main_group_matrix, mean_method)
                     
                     indiv_global_data = []
                     all_ids = main_results_df['ID'].unique()
@@ -2519,7 +2519,7 @@ if uploaded_file:
                         g_main_w = g_main_w / g_main_w.sum()
                         g_main_mats = np.stack(grp_main_df['Matrix_Object'].values)
                         g_main_mat_obj = np.mean(g_main_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_main_mats, axis=0)
-                        g_main_cr, g_main_ci, _ = calculate_consistency(g_main_mat_obj, method=mean_method)
+                        g_main_cr, g_main_ci, _not_used_lambda = calculate_consistency(g_main_mat_obj, method=mean_method)
                         
                         grp_rows = []
                         for idx, main_f in enumerate(main_factors):
@@ -2533,7 +2533,7 @@ if uploaded_file:
                             g_sub_w = g_sub_w / g_sub_w.sum()
                             g_sub_mats = np.stack(grp_sub_df['Matrix_Object'].values)
                             g_sub_mat_obj = np.mean(g_sub_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_sub_mats, axis=0)
-                            g_sub_cr, g_sub_ci, _ = calculate_consistency(g_sub_mat_obj, method=mean_method)
+                            g_sub_cr, g_sub_ci, _not_used_lambda = calculate_consistency(g_sub_mat_obj, method=mean_method)
                             for s_idx, sf in enumerate(sub_facts):
                                 grp_rows.append({
                                     "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": g_sub_w[s_idx],
@@ -2685,7 +2685,7 @@ if uploaded_file:
                             
                             # [신규 추가] 전체 종합 행렬 오른쪽에 전체 CR, CI 값 표시
                             n_dim = len(matrix_df)
-                            cr_val, ci_val, _ = calculate_consistency(matrix_df, mean_method)
+                            cr_val, ci_val, _unused_lambda = calculate_consistency(matrix_df, mean_method)
                             
                             ci_cr_header_fmt = workbook.add_format({
                                 'bold': True, 'align': 'center', 'valign': 'vcenter',
@@ -2735,7 +2735,7 @@ if uploaded_file:
                                             if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
                                     
                                     # [신규 추가] 그룹 종합 행렬 오른쪽에 그룹 CR, CI 값 표시
-                                    g_cr_val, g_ci_val, _ = calculate_consistency(g_mat, mean_method)
+                                    g_cr_val, g_ci_val, _unused_lambda = calculate_consistency(g_mat, mean_method)
                                     g_ci_cr_val_fmt = workbook.add_format({
                                         'align': 'center', 'valign': 'vcenter', 'border': 1,
                                         'num_format': '0.000',
