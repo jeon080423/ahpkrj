@@ -1480,7 +1480,8 @@ with st.sidebar:
       <b style="font-size: 0.88rem; color: #333;">사업자 정보</b><br>
       • <b>상호명</b>: 프레쉬푸드(Fresh food)<br>
       • <b>사업자등록번호</b>: 683-27-00122<br>
-      • <b>대표자명</b>: 전상현
+      • <b>대표자명</b>: 전상현<br>
+      • <b>서비스 제공기간</b>: 1주일 이내
     </div>
     """, unsafe_allow_html=True)
 
