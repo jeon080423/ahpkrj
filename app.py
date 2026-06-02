@@ -2068,18 +2068,23 @@ if st.session_state.user_id is None:
               "🔒 **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
 else:
     saved_model = load_user_model(st.session_state.user_id)
-    default_main = _("거버넌스, 계획타당성, 실현가능성, 사업효과", "Governance, Planning, Feasibility, Effectiveness")
-    default_subs = {
-        "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
-        "계획타당성": "현안적정성, 대안적정성, 목표구체성",
-        "실현가능성": "부지확보, 사업구체화, 사업비적정성",
-        "사업효과": "경제적효과, 사회적효과, 성과관리",
-        # English defaults
-        "Governance": "AdminSupport, Community, PM",
-        "Planning": "IssueFit, AlternativeFit, GoalClarity",
-        "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
-        "Effectiveness": "Economic, Social, Performance"
-    }
+    is_en = st.session_state.get('lang', 'ko') == 'en'
+    if is_en:
+        default_main = "Governance, Planning, Feasibility, Effectiveness"
+        default_subs = {
+            "Governance": "AdminSupport, Community, PM",
+            "Planning": "IssueFit, AlternativeFit, GoalClarity",
+            "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
+            "Effectiveness": "Economic, Social, Performance"
+        }
+    else:
+        default_main = "거버넌스, 계획타당성, 실현가능성, 사업효과"
+        default_subs = {
+            "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
+            "계획타당성": "현안적정성, 대안적정성, 목표구체성",
+            "실현가능성": "부지확보, 사업구체화, 사업비적정성",
+            "사업효과": "경제적효과, 사회적효과, 성과관리"
+        }
     
     if saved_model:
         default_main = saved_model.get('main', default_main)
