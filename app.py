@@ -1342,6 +1342,26 @@ except AttributeError:
     except:
         q_params = {}
 
+# 자동 로그인 처리 (쿼리 파라미터 기반)
+if st.session_state.user_id is None and "login_user" in q_params and "login_token" in q_params:
+    login_user_val = q_params["login_user"]
+    if isinstance(login_user_val, list): login_user_val = login_user_val[0]
+    login_token_val = q_params["login_token"]
+    if isinstance(login_token_val, list): login_token_val = login_token_val[0]
+    
+    # 토큰 검증
+    expected_token = hashlib.sha256(f"{login_user_val}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+    if login_token_val == expected_token:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute("SELECT role, expiry_date FROM users WHERE id=?", (login_user_val,))
+        db_user = c.fetchone()
+        conn.close()
+        if db_user:
+            st.session_state.user_id = login_user_val
+            st.session_state.user_role = db_user[0]
+            st.session_state.expiry_date = db_user[1]
+
 # 다국어 처리
 if "lang" in q_params:
     lang_val = q_params["lang"]
@@ -1484,6 +1504,8 @@ with st.sidebar:
                                 st.session_state.user_id = l_id.strip()
                                 st.session_state.user_role = "temp"
                                 st.session_state.expiry_date = "9999-12-31"
+                                st.query_params["login_user"] = l_id.strip()
+                                st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                                 st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Automatically downgraded to Free User."))
                                 st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 제한) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
                                              f"Welcome, {l_id}! Your subscription expired and you were automatically downgraded to a Free User (5-sample limit). You can extend your subscription anytime in the sidebar!"))
@@ -1496,6 +1518,8 @@ with st.sidebar:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
                         st.session_state.expiry_date = result[1]
+                        st.query_params["login_user"] = l_id.strip()
+                        st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                         if 'signup_paypal_user' in st.session_state:
                             del st.session_state.signup_paypal_user
                         st.success(_(f"환영합니다, {l_id}님!", f"Welcome, {l_id}!"))
@@ -1746,6 +1770,8 @@ with st.sidebar:
             st.session_state.user_role = None
             st.session_state.expiry_date = None
             st.session_state.admin_mode = False
+            st.query_params.pop("login_user", None)
+            st.query_params.pop("login_token", None)
             st.rerun()
 
     st.markdown("---")
