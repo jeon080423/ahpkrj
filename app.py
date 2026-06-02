@@ -2064,26 +2064,39 @@ if st.session_state.user_id is None:
 else:
     saved_model = load_user_model(st.session_state.user_id)
     is_en = st.session_state.get('lang', 'ko') == 'en'
-    if is_en:
-        default_main = "Governance, Planning, Feasibility, Effectiveness"
-        default_subs = {
-            "Governance": "AdminSupport, Community, PM",
-            "Planning": "IssueFit, AlternativeFit, GoalClarity",
-            "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
-            "Effectiveness": "Economic, Social, Performance"
-        }
-    else:
-        default_main = "거버넌스, 계획타당성, 실현가능성, 사업효과"
-        default_subs = {
-            "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
-            "계획타당성": "현안적정성, 대안적정성, 목표구체성",
-            "실현가능성": "부지확보, 사업구체화, 사업비적정성",
-            "사업효과": "경제적효과, 사회적효과, 성과관리"
-        }
     
+    en_default_main = "Governance, Planning, Feasibility, Effectiveness"
+    en_default_subs = {
+        "Governance": "AdminSupport, Community, PM",
+        "Planning": "IssueFit, AlternativeFit, GoalClarity",
+        "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
+        "Effectiveness": "Economic, Social, Performance"
+    }
+    ko_default_main = "거버넌스, 계획타당성, 실현가능성, 사업효과"
+    ko_default_subs = {
+        "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
+        "계획타당성": "현안적정성, 대안적정성, 목표구체성",
+        "실현가능성": "부지확보, 사업구체화, 사업비적정성",
+        "사업효과": "경제적효과, 사회적효과, 성과관리"
+    }
+
+    if is_en:
+        default_main = en_default_main
+        default_subs = en_default_subs
+    else:
+        default_main = ko_default_main
+        default_subs = ko_default_subs
+
     if saved_model:
-        default_main = saved_model.get('main', default_main)
-        default_subs = saved_model.get('subs', default_subs)
+        saved_main = saved_model.get('main', '')
+        # 만약 저장된 모델이 반대 언어의 기본 예시와 동일하거나 비어 있다면, 현재 언어의 기본 예시를 표시
+        if is_en and (saved_main == ko_default_main or not saved_main):
+            pass
+        elif not is_en and (saved_main == en_default_main or not saved_main):
+            pass
+        else:
+            default_main = saved_main
+            default_subs = saved_model.get('subs', default_subs)
 
     with st.expander(_("📌 나의 분석 모델 만들기", "📌 Create Custom AHP Model"), expanded=True):
         st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 삭제하시고 이용자님의 AHP 모델을 입력하세요.",
