@@ -3232,7 +3232,11 @@ if uploaded_file:
                             fig_all = px.violin(cr_df, y="CR", x="Sheet", box=True, points="all",
                                                hover_data=cr_df.columns, title=_("[전체 표본] 일관성 비율(CR) 분포", "[Overall Samples] Consistency Ratio (CR) Distribution"),
                                                color_discrete_sequence=["#7f7f7f"]) # 전체는 회색 계열
-                            fig_all.update_traces(spanmode='hard')
+                            fig_all.update_traces(spanmode='soft')
+                            cr_min = cr_df['CR'].min()
+                            cr_max = cr_df['CR'].max()
+                            cr_range = cr_max - cr_min if cr_max > cr_min else 0.1
+                            fig_all.update_layout(yaxis=dict(range=[cr_min - 0.4 * cr_range, cr_max + 0.4 * cr_range]))
                             st.plotly_chart(fig_all, use_container_width=True)
                             st.markdown("---")
  
@@ -3242,7 +3246,11 @@ if uploaded_file:
                             fig_violin = px.violin(g_df, y="CR", x="Sheet", box=True, points="all",
                                                    hover_data=g_df.columns, title=_(f"[{g_type}] 일관성 비율(CR) 분포", f"[{g_type}] Consistency Ratio (CR) Distribution"),
                                                    color_discrete_sequence=[color_map.get(g_type, "#1f77b4")])
-                            fig_violin.update_traces(spanmode='hard')
+                            fig_violin.update_traces(spanmode='soft')
+                            g_cr_min = g_df['CR'].min()
+                            g_cr_max = g_df['CR'].max()
+                            g_cr_range = g_cr_max - g_cr_min if g_cr_max > g_cr_min else 0.1
+                            fig_violin.update_layout(yaxis=dict(range=[g_cr_min - 0.4 * g_cr_range, g_cr_max + 0.4 * g_cr_range]))
                             st.plotly_chart(fig_violin, use_container_width=True)
 
                         if ahp_method == 'fuzzy':
