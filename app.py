@@ -3318,6 +3318,18 @@ if uploaded_file:
                                                hover_data=cr_df.columns, title=_("[전체 표본] 일관성 비율(CR) 분포", "[Overall Samples] Consistency Ratio (CR) Distribution"),
                                                color_discrete_sequence=["#7f7f7f"]) # 전체는 회색 계열
                             fig_all.update_traces(spanmode='soft', pointpos=0, jitter=0.5, marker=dict(opacity=0.6, size=5))
+                            
+                            # 학술 논문용(Publication-ready) 스타일 적용
+                            fig_all.update_layout(
+                                template="simple_white",
+                                font=dict(family="Arial, sans-serif", size=14, color="black"),
+                                title_font=dict(size=16, family="Arial, sans-serif", color="black", color="black"),
+                                xaxis=dict(showline=True, linewidth=1.5, linecolor='black', mirror=True, tickfont=dict(color="black")),
+                                yaxis=dict(showline=True, linewidth=1.5, linecolor='black', mirror=True, tickfont=dict(color="black")),
+                                plot_bgcolor="white",
+                                paper_bgcolor="white",
+                                margin=dict(l=60, r=40, t=60, b=40)
+                            )
                             # Y축 범위를 자동(Auto)으로 맡겨 꼬리(하단/상단)가 잘리지 않고 뾰족하게 보이도록 수정
                             st.plotly_chart(fig_all, use_container_width=True)
                             st.markdown("---")
@@ -3329,6 +3341,18 @@ if uploaded_file:
                                                    hover_data=g_df.columns, title=_(f"[{g_type}] 일관성 비율(CR) 분포", f"[{g_type}] Consistency Ratio (CR) Distribution"),
                                                    color_discrete_sequence=[color_map.get(g_type, "#1f77b4")])
                             fig_violin.update_traces(spanmode='soft', pointpos=0, jitter=0.5, marker=dict(opacity=0.6, size=5))
+                            
+                            # 학술 논문용(Publication-ready) 스타일 적용
+                            fig_violin.update_layout(
+                                template="simple_white",
+                                font=dict(family="Arial, sans-serif", size=14, color="black"),
+                                title_font=dict(size=16, family="Arial, sans-serif", color="black"),
+                                xaxis=dict(showline=True, linewidth=1.5, linecolor='black', mirror=True, tickfont=dict(color="black")),
+                                yaxis=dict(showline=True, linewidth=1.5, linecolor='black', mirror=True, tickfont=dict(color="black")),
+                                plot_bgcolor="white",
+                                paper_bgcolor="white",
+                                margin=dict(l=60, r=40, t=60, b=40)
+                            )
                             # Y축 범위를 자동(Auto)으로 맡겨 꼬리가 잘리지 않도록 수정
                             st.plotly_chart(fig_violin, use_container_width=True)
 
