@@ -1761,6 +1761,39 @@ with st.sidebar:
                         else:
                             st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
         
+    if st.session_state.user_id is not None:
+        if st.session_state.user_role == 'admin':
+            if st.button(_("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")):
+                st.session_state.admin_mode = not st.session_state.admin_mode
+                st.rerun()
+
+        with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
+            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
+            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_new")
+            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_new")
+            
+            if st.button(_("비밀번호 변경", "Change Password"), key="btn_chg_pw_new"):
+                if new_pw_val != confirm_pw:
+                    st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
+                elif not validate_password(new_pw_val):
+                    st.error(_("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.", "Password must be at least 4 characters and contain letters and special characters."))
+                else:
+                    chk_res = check_login(st.session_state.user_id, cur_pw)
+                    if chk_res:
+                        change_user_password(st.session_state.user_id, new_pw_val)
+                        st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
+                    else:
+                        st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
+
+        if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
+            st.session_state.user_id = None
+            st.session_state.user_role = None
+            st.session_state.expiry_date = None
+            st.session_state.admin_mode = False
+            st.query_params.pop("login_user", None)
+            st.query_params.pop("login_token", None)
+            st.rerun()
+
     # 분석 설정에만 세련된 스타일 적용 (Expander 내부에 마커를 삽입하여 타겟팅)
     st.markdown("""
     <style>
@@ -1797,39 +1830,6 @@ with st.sidebar:
         learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
-
-    if st.session_state.user_id is not None:
-        if st.session_state.user_role == 'admin':
-            if st.button(_("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")):
-                st.session_state.admin_mode = not st.session_state.admin_mode
-                st.rerun()
-
-        with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
-            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
-            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_new")
-            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_new")
-            
-            if st.button(_("비밀번호 변경", "Change Password"), key="btn_chg_pw_new"):
-                if new_pw_val != confirm_pw:
-                    st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
-                elif not validate_password(new_pw_val):
-                    st.error(_("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.", "Password must be at least 4 characters and contain letters and special characters."))
-                else:
-                    chk_res = check_login(st.session_state.user_id, cur_pw)
-                    if chk_res:
-                        change_user_password(st.session_state.user_id, new_pw_val)
-                        st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
-                    else:
-                        st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
-
-        if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
-            st.session_state.user_id = None
-            st.session_state.user_role = None
-            st.session_state.expiry_date = None
-            st.session_state.admin_mode = False
-            st.query_params.pop("login_user", None)
-            st.query_params.pop("login_token", None)
-            st.rerun()
 
     st.markdown("---")
 
