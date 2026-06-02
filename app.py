@@ -3045,6 +3045,187 @@ if uploaded_file:
                                     guide_ws.write(r_idx, 1, content, guide_body_fmt)
                                 guide_ws.set_row(r_idx, 60 if r_idx > 1 else 20)
 
+                        if ahp_method == 'fuzzy':
+                            # 1. Fuzzy AHP 가중치 분석 결과 시트 추가
+                            ws_fuzzy = workbook.add_worksheet('Fuzzy_AHP_Results')
+                            writer.sheets['Fuzzy_AHP_Results'] = ws_fuzzy
+                            ws_fuzzy.set_column('A:A', 25)
+                            ws_fuzzy.set_column('B:G', 20)
+                            
+                            fuzzy_header_fmt = workbook.add_format({
+                                'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                'bg_color': '#1F4E78', 'font_color': '#FFFFFF', 'border': 1,
+                                'font_name': 'NanumGothic'
+                            })
+                            title_fmt = workbook.add_format({
+                                'bold': True, 'font_size': 12, 'font_name': 'NanumGothic'
+                            })
+                            
+                            row_idx = 1
+                            
+                            ws_fuzzy.write_string(row_idx, 0, _("■ 대분류 (Main Criteria) 퍼지 AHP 분석 결과 (삼각피지수 적용)", "■ Main Criteria Fuzzy AHP Results (TFN Applied)"), title_fmt)
+                            row_idx += 1
+                            
+                            headers = [
+                                _("구분", "Criteria"), 
+                                _("Fuzzy 가중치 (Lower)", "Fuzzy Weight (Lower)"), 
+                                _("Fuzzy 가중치 (Medium)", "Fuzzy Weight (Medium)"), 
+                                _("Fuzzy 가중치 (Upper)", "Fuzzy Weight (Upper)"), 
+                                _("비퍼지화 (Crisp)", "Defuzzified (Crisp)"), 
+                                _("최종 가중치 (Norm)", "Final Weight (Norm)"), 
+                                _("순위", "Rank")
+                            ]
+                            
+                            for c_idx, h in enumerate(headers):
+                                ws_fuzzy.write(row_idx, c_idx, h, fuzzy_header_fmt)
+                            row_idx += 1
+                            
+                            main_rows = []
+                            for i, (l, m, u) in enumerate(main_group_Si):
+                                crisp = (l * m * u) ** (1/3)
+                                norm_w = group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
+                                main_rows.append([main_factors[i], l, m, u, crisp, norm_w])
+                            
+                            norm_w_list = [r[5] for r in main_rows]
+                            sorted_weights = sorted(list(set(norm_w_list)), reverse=True)
+                            ranks = [sorted_weights.index(w) + 1 for w in norm_w_list]
+                            
+                            for i, r in enumerate(main_rows):
+                                r.append(ranks[i])
+                                ws_fuzzy.write(row_idx, 0, r[0], formats['body'])
+                                for c_idx in range(1, 6):
+                                    ws_fuzzy.write_number(row_idx, c_idx, r[c_idx], formats['num'])
+                                ws_fuzzy.write_number(row_idx, 6, r[6], formats['body'])
+                                row_idx += 1
+                                
+                            row_idx += 2
+                            
+                            for parent_f, sub_info in sub_results_storage.items():
+                                if sub_info.get('group_Si'):
+                                    ws_fuzzy.write_string(row_idx, 0, _(f"■ 세부항목 [{parent_f}] 퍼지 AHP 분석 결과 (삼각피지수 적용)", f"■ Sub-Criteria [{parent_f}] Fuzzy AHP Results (TFN Applied)"), title_fmt)
+                                    row_idx += 1
+                                    
+                                    for c_idx, h in enumerate(headers):
+                                        ws_fuzzy.write(row_idx, c_idx, h, fuzzy_header_fmt)
+                                    row_idx += 1
+                                    
+                                    sub_factors = sub_info['factors']
+                                    sub_group_Si = sub_info['group_Si']
+                                    group_sub_w = sub_info['weights']
+                                    
+                                    sub_rows = []
+                                    for i, (l, m, u) in enumerate(sub_group_Si):
+                                        crisp = (l * m * u) ** (1/3)
+                                        norm_w = group_sub_w.iloc[i] if isinstance(group_sub_w, pd.Series) else group_sub_w[i]
+                                        sub_rows.append([sub_factors[i], l, m, u, crisp, norm_w])
+                                        
+                                    norm_w_list = [r[5] for r in sub_rows]
+                                    sorted_weights = sorted(list(set(norm_w_list)), reverse=True)
+                                    ranks = [sorted_weights.index(w) + 1 for w in norm_w_list]
+                                    
+                                    for i, r in enumerate(sub_rows):
+                                        r.append(ranks[i])
+                                        ws_fuzzy.write(row_idx, 0, r[0], formats['body'])
+                                        for c_idx in range(1, 6):
+                                            ws_fuzzy.write_number(row_idx, c_idx, r[c_idx], formats['num'])
+                                        ws_fuzzy.write_number(row_idx, 6, r[6], formats['body'])
+                                        row_idx += 1
+                                    
+                                    row_idx += 2
+
+                            # 2. 일관성 비율(CR) 분포 분석 결과 시트 추가
+                            ws_cr = workbook.add_worksheet('CR_Distribution')
+                            writer.sheets['CR_Distribution'] = ws_cr
+                            ws_cr.set_column('A:A', 25)
+                            ws_cr.set_column('B:H', 20)
+                            
+                            cr_header_fmt = workbook.add_format({
+                                'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                'bg_color': '#595959', 'font_color': '#FFFFFF', 'border': 1,
+                                'font_name': 'NanumGothic'
+                            })
+                            
+                            ws_cr.write_string(1, 0, _("■ 일관성 비율(CR) 분석 요약", "■ Consistency Ratio (CR) Analysis Summary"), title_fmt)
+                            
+                            cr_headers = [
+                                _("평가 시트명", "Sheet Name"),
+                                _("평균 CR", "Mean CR"),
+                                _("중앙값 CR", "Median CR"),
+                                _("최소 CR", "Min CR"),
+                                _("최대 CR", "Max CR"),
+                                _("통과 표본 수 (CR <= 0.1)", "Passed Samples (CR <= 0.1)"),
+                                _("전체 표본 수", "Total Samples"),
+                                _("통과율 (%)", "Pass Rate (%)")
+                            ]
+                            
+                            for c_idx, h in enumerate(cr_headers):
+                                ws_cr.write(2, c_idx, h, cr_header_fmt)
+                                
+                            cr_row_idx = 3
+                            
+                            sheets_to_process = [("Main_Criteria", main_results_df)]
+                            for mf, info in sub_results_storage.items():
+                                sheets_to_process.append((mf, info['df']))
+                                
+                            for sheet_name, df_s in sheets_to_process:
+                                if df_s.empty: continue
+                                cr_vals = df_s['Final_CR'].dropna().values
+                                if len(cr_vals) == 0: continue
+                                
+                                mean_cr = np.mean(cr_vals)
+                                median_cr = np.median(cr_vals)
+                                min_cr = np.min(cr_vals)
+                                max_cr = np.max(cr_vals)
+                                total_cnt = len(cr_vals)
+                                pass_cnt = np.sum(cr_vals <= 0.1)
+                                pass_rate = (pass_cnt / total_cnt) * 100
+                                
+                                ws_cr.write(cr_row_idx, 0, sheet_name, formats['body'])
+                                ws_cr.write_number(cr_row_idx, 1, mean_cr, formats['num'])
+                                ws_cr.write_number(cr_row_idx, 2, median_cr, formats['num'])
+                                ws_cr.write_number(cr_row_idx, 3, min_cr, formats['num'])
+                                ws_cr.write_number(cr_row_idx, 4, max_cr, formats['num'])
+                                ws_cr.write_number(cr_row_idx, 5, pass_cnt, formats['body'])
+                                ws_cr.write_number(cr_row_idx, 6, total_cnt, formats['body'])
+                                ws_cr.write_number(cr_row_idx, 7, pass_rate, formats['num'])
+                                cr_row_idx += 1
+                                
+                            cr_row_idx += 2
+                            ws_cr.write_string(cr_row_idx, 0, _("■ 개별 응답자별 일관성 비율(CR) 상세 내역", "■ Detailed Consistency Ratio (CR) by Respondent"), title_fmt)
+                            cr_row_idx += 1
+                            
+                            indiv_headers = [
+                                _("ID (설문자)", "Respondent ID"),
+                                _("그룹 (Type)", "Group Type"),
+                                _("평가 시트명", "Sheet Name"),
+                                _("일관성 비율 (CR)", "Consistency Ratio (CR)"),
+                                _("판정 (CR <= 0.1)", "Status (CR <= 0.1)")
+                            ]
+                            for c_idx, h in enumerate(indiv_headers):
+                                ws_cr.write(cr_row_idx, c_idx, h, cr_header_fmt)
+                            cr_row_idx += 1
+                            
+                            for idx_row, r in main_results_df.iterrows():
+                                cr_val = r['Final_CR']
+                                status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만족 (Fail)", "Fail")
+                                ws_cr.write(cr_row_idx, 0, r['ID'], formats['body'])
+                                ws_cr.write(cr_row_idx, 1, r['Type'], formats['body'])
+                                ws_cr.write(cr_row_idx, 2, "Main_Criteria", formats['body'])
+                                ws_cr.write_number(cr_row_idx, 3, cr_val, formats['num'])
+                                ws_cr.write(cr_row_idx, 4, status, formats['body'])
+                                cr_row_idx += 1
+                                
+                            for mf, info in sub_results_storage.items():
+                                for idx_row, r in info['df'].iterrows():
+                                    cr_val = r['Final_CR']
+                                    status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만족 (Fail)", "Fail")
+                                    ws_cr.write(cr_row_idx, 0, r['ID'], formats['body'])
+                                    ws_cr.write(cr_row_idx, 1, r['Type'], formats['body'])
+                                    ws_cr.write(cr_row_idx, 2, mf, formats['body'])
+                                    ws_cr.write_number(cr_row_idx, 3, cr_val, formats['num'])
+                                    ws_cr.write(cr_row_idx, 4, status, formats['body'])
+                                    cr_row_idx += 1
+
                 st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
                 if st.session_state.user_role == 'official':
                     save_analysis_to_db(st.session_state.user_id, f"{uploaded_file.name.split('.')[0]}_Result.xlsx", output_res.getvalue())
