@@ -18,6 +18,11 @@ PERSONAL_INFO_ITEMS = {
     "비밀번호": "계정 보안 및 본인확인 용도",
 }
 
+PERSONAL_INFO_ITEMS_EN = {
+    "Email Address": "For ID and login credentials",
+    "Password": "For account security and identity verification",
+}
+
 # 개인정보 수집 및 이용 동의 안내
 PERSONAL_INFO_AGREEMENT = """
 === 개인정보 수집 및 이용 동의서 ===
@@ -54,30 +59,74 @@ PERSONAL_INFO_AGREEMENT = """
 위 내용에 동의하십니까?
 """
 
+PERSONAL_INFO_AGREEMENT_EN = """
+=== Privacy Policy & Consent Agreement ===
+
+This AHP Master service collects and uses the following personal information:
+
+【 Personal Information Collected 】
+- Email Address
+- Password
+- Service authorization type (Temporary/Official User)
+- Access duration and timestamps
+- Device specifications
+
+【 Purpose of Collection & Use 】
+1. Service Provision
+   - User authentication and login management
+   - Usage record management
+   - Customer support and inquiry response
+
+2. Statistical Analysis
+   - Collection of usage metrics
+   - Service improvement analytics
+   - Compatibility testing
+
+【 Retention & Usage Period 】
+- Until account deletion/withdrawal
+- Legal retention obligation: 3 years (Telecommunications Privacy Act)
+
+【 Data Security 】
+- Secure storage with strong encryption
+- Periodic security inspections
+- Restricted access control
+
+Do you agree to the above terms?
+"""
+
 def show_agreement_ui():
     """
     회원가입 시 개인정보 수집 및 이용 동의서 UI 표시
     """
-    st.subheader(" 개인정보 수집 및 이용 안내")
+    lang = st.session_state.get('lang', 'ko')
     
-    # 수집 개인정보 표시
-    for item, purpose in PERSONAL_INFO_ITEMS.items():
-        st.write(f"• {item}: {purpose}")
-    
-    
-    # 개인정보 수집 및 이용 동의서
-    st.subheader(" 개인정보 수집 및 이용 동의서")
-    
-    # 동의서 텍스트 표시
-    with st.expander("동의서 전문 보기", expanded=False):
-        st.text(PERSONAL_INFO_AGREEMENT)
-    
-    # 동의 항목
-    agree_personal_info = st.checkbox(
-        "✓ 개인정보 수집·이용에 동의합니다",
-        key="agree_personal_info"
-    )
-    
+    if lang == 'en':
+        st.subheader(" Personal Information Collection & Usage Guide")
+        for item, purpose in PERSONAL_INFO_ITEMS_EN.items():
+            st.write(f"• {item}: {purpose}")
+            
+        st.subheader(" Privacy Policy Agreement")
+        with st.expander("View Full Agreement", expanded=False):
+            st.text(PERSONAL_INFO_AGREEMENT_EN)
+            
+        agree_personal_info = st.checkbox(
+            "✓ I agree to the collection and use of personal information",
+            key="agree_personal_info"
+        )
+    else:
+        st.subheader(" 개인정보 수집 및 이용 안내")
+        for item, purpose in PERSONAL_INFO_ITEMS.items():
+            st.write(f"• {item}: {purpose}")
+            
+        st.subheader(" 개인정보 수집 및 이용 동의서")
+        with st.expander("동의서 전문 보기", expanded=False):
+            st.text(PERSONAL_INFO_AGREEMENT)
+            
+        agree_personal_info = st.checkbox(
+            "✓ 개인정보 수집·이용에 동의합니다",
+            key="agree_personal_info"
+        )
+        
     return {
         "agree_personal_info": agree_personal_info
     }

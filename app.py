@@ -68,6 +68,18 @@ try:
 except ImportError:
     STATSMODELS_AVAILABLE = False
 
+
+# -----------------------------------------------------------------------------
+# 다국어(English/Korean) 번역 헬퍼 함수
+# -----------------------------------------------------------------------------
+if 'lang' not in st.session_state:
+    st.session_state.lang = 'ko'
+
+def _(ko_text, en_text):
+    if st.session_state.get('lang', 'ko') == 'en':
+        return en_text
+    return ko_text
+
 # =============================================================================
 # 0. 시스템 설정 및 유틸리티
 # =============================================================================
@@ -1116,34 +1128,64 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
 
 def create_sample_excel():
     output = io.BytesIO()
+    is_en = (st.session_state.get('lang', 'ko') == 'en')
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        main_cols = ["ID", "Type", "거버넌스_계획타당성", "거버넌스_실현가능성", "거버넌스_사업효과", 
-                      "계획타당성_실현가능성", "계획타당성_사업효과", "실현가능성_사업효과"]
-        main_data = [
-            [1, "전문가",-3,	-3, 3, 1, 1, 1],                
-            [2, "전문가", -5, 3, 3, 3, 3, 3],        
-            [3, "일반", 5, 1, 3, -5, -5, -3],
-            [4, "일반", -3,-3, 3, -3, 3, -3],
-            [5, "공무원", -5, 5, -5, -5, 5, -5]
-        ]
-        df_main = pd.DataFrame(main_data, columns=main_cols)
-        df_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
-        
-        inconsistent_pattern = [
-            [1, "전문가", 1, -3, 1],
-            [2, "전문가", -3, -3, -3],
-            [3, "일반", 3, -3, 1],
-            [4, "일반", -3, 5, 3],
-            [5, "공무원", -3, 5, 3]
-        ]
-        sub1_cols = ["ID", "Type", "행정지원_지역공동체", "행정지원_총괄사업관리자", "지역공동체_총괄사업관리자"]
-        pd.DataFrame(inconsistent_pattern, columns=sub1_cols).to_excel(writer, sheet_name="거버넌스", index=False)
-        sub2_cols = ["ID", "Type", "현안적정성_대안적정성", "현안적정성_목표구체성", "대안적정성_목표구체성"]
-        pd.DataFrame(inconsistent_pattern, columns=sub2_cols).to_excel(writer, sheet_name="계획타당성", index=False)
-        sub3_cols = ["ID", "Type", "부지확보_사업구체화", "부지확보_사업비적정성", "사업구체화_사업비적정성"]
-        pd.DataFrame(inconsistent_pattern, columns=sub3_cols).to_excel(writer, sheet_name="실현가능성", index=False)
-        sub4_cols = ["ID", "Type", "경제적효과_사회적효과", "경제적효과_성과관리", "사회적효과_성과관리"]
-        pd.DataFrame(inconsistent_pattern, columns=sub4_cols).to_excel(writer, sheet_name="사업효과", index=False)
+        if is_en:
+            main_cols = ["ID", "Type", "Governance_Planning", "Governance_Feasibility", "Governance_Effect", 
+                          "Planning_Feasibility", "Planning_Effect", "Feasibility_Effect"]
+            main_data = [
+                [1, "Expert", -3, -3, 3, 1, 1, 1],                
+                [2, "Expert", -5, 3, 3, 3, 3, 3],        
+                [3, "General", 5, 1, 3, -5, -5, -3],
+                [4, "General", -3, -3, 3, -3, 3, -3],
+                [5, "Official", -5, 5, -5, -5, 5, -5]
+            ]
+            df_main = pd.DataFrame(main_data, columns=main_cols)
+            df_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
+            
+            inconsistent_pattern = [
+                [1, "Expert", 1, -3, 1],
+                [2, "Expert", -3, -3, -3],
+                [3, "General", 3, -3, 1],
+                [4, "General", -3, 5, 3],
+                [5, "Official", -3, 5, 3]
+            ]
+            sub1_cols = ["ID", "Type", "AdminSupport_Community", "AdminSupport_PM", "Community_PM"]
+            pd.DataFrame(inconsistent_pattern, columns=sub1_cols).to_excel(writer, sheet_name="Governance", index=False)
+            sub2_cols = ["ID", "Type", "IssueFit_AlternativeFit", "IssueFit_GoalClarity", "AlternativeFit_GoalClarity"]
+            pd.DataFrame(inconsistent_pattern, columns=sub2_cols).to_excel(writer, sheet_name="Planning", index=False)
+            sub3_cols = ["ID", "Type", "LandAcquisition_ProjectDetail", "LandAcquisition_CostFit", "ProjectDetail_CostFit"]
+            pd.DataFrame(inconsistent_pattern, columns=sub3_cols).to_excel(writer, sheet_name="Feasibility", index=False)
+            sub4_cols = ["ID", "Type", "Economic_Social", "Economic_Performance", "Social_Performance"]
+            pd.DataFrame(inconsistent_pattern, columns=sub4_cols).to_excel(writer, sheet_name="Effectiveness", index=False)
+        else:
+            main_cols = ["ID", "Type", "거버넌스_계획타당성", "거버넌스_실현가능성", "거버넌스_사업효과", 
+                          "계획타당성_실현가능성", "계획타당성_사업효과", "실현가능성_사업효과"]
+            main_data = [
+                [1, "전문가",-3,	-3, 3, 1, 1, 1],                
+                [2, "전문가", -5, 3, 3, 3, 3, 3],        
+                [3, "일반", 5, 1, 3, -5, -5, -3],
+                [4, "일반", -3,-3, 3, -3, 3, -3],
+                [5, "공무원", -5, 5, -5, -5, 5, -5]
+            ]
+            df_main = pd.DataFrame(main_data, columns=main_cols)
+            df_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
+            
+            inconsistent_pattern = [
+                [1, "전문가", 1, -3, 1],
+                [2, "전문가", -3, -3, -3],
+                [3, "일반", 3, -3, 1],
+                [4, "일반", -3, 5, 3],
+                [5, "공무원", -3, 5, 3]
+            ]
+            sub1_cols = ["ID", "Type", "행정지원_지역공동체", "행정지원_총괄사업관리자", "지역공동체_총괄사업관리자"]
+            pd.DataFrame(inconsistent_pattern, columns=sub1_cols).to_excel(writer, sheet_name="거버넌스", index=False)
+            sub2_cols = ["ID", "Type", "현안적정성_대안적정성", "현안적정성_목표구체성", "대안적정성_목표구체성"]
+            pd.DataFrame(inconsistent_pattern, columns=sub2_cols).to_excel(writer, sheet_name="계획타당성", index=False)
+            sub3_cols = ["ID", "Type", "부지확보_사업구체화", "부지확보_사업비적정성", "사업구체화_사업비적정성"]
+            pd.DataFrame(inconsistent_pattern, columns=sub3_cols).to_excel(writer, sheet_name="실현가능성", index=False)
+            sub4_cols = ["ID", "Type", "경제적효과_사회적효과", "경제적효과_성과관리", "사회적효과_성과관리"]
+            pd.DataFrame(inconsistent_pattern, columns=sub4_cols).to_excel(writer, sheet_name="사업효과", index=False)
     output.seek(0)
     return output
 
@@ -1234,12 +1276,68 @@ if 'admin_mode' not in st.session_state: st.session_state.admin_mode = False
 if 'model_structure' not in st.session_state: st.session_state.model_structure = {}
 if 'page' not in st.session_state: st.session_state.page = "main"
 
+# -----------------------------------------------------------------------------
+# 쿼리 매개변수 확인 (다국어 선택 및 결제 완료 처리)
+# -----------------------------------------------------------------------------
+try:
+    q_params = st.query_params
+except AttributeError:
+    try:
+        q_params = st.experimental_get_query_params()
+    except:
+        q_params = {}
+
+# 다국어 처리
+if "lang" in q_params:
+    lang_val = q_params["lang"]
+    if isinstance(lang_val, list): lang_val = lang_val[0]
+    if str(lang_val).lower() in ["en", "english"]:
+        st.session_state.lang = "en"
+    elif str(lang_val).lower() in ["ko", "korean"]:
+        st.session_state.lang = "ko"
+
+# 페이팔 자동 결제 승격 처리
+if "pay_success" in q_params:
+    pay_success_val = q_params["pay_success"]
+    if isinstance(pay_success_val, list):
+        pay_success_val = pay_success_val[0]
+    if str(pay_success_val).lower() == "true":
+        current_user = st.session_state.get("user_id")
+        user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
+        target_user = current_user or user_id_param
+        if target_user:
+            kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+            new_expiry_date = (kst_now + relativedelta(months=2)).strftime("%Y-%m-%d")
+            update_user_full_info(target_user, None, "official", new_expiry_date)
+            
+            if st.session_state.get("user_id") == target_user:
+                st.session_state.user_role = "official"
+                st.session_state.expiry_date = new_expiry_date
+            st.toast("🎉 PayPal Payment successful! Account upgraded to Official User.")
+            st.query_params.clear()
+            st.rerun()
+
+# 정식 회원 자동 만료 체크 (로그인 상태)
+if st.session_state.user_id is not None and st.session_state.user_role == 'official':
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
+    try:
+        expiry_date_val_temp = datetime.datetime.strptime(st.session_state.expiry_date, "%Y-%m-%d").date()
+        if today > expiry_date_val_temp:
+            update_user_full_info(st.session_state.user_id, None, "temp", "9999-12-31")
+            st.session_state.user_role = "temp"
+            st.session_state.expiry_date = "9999-12-31"
+            st.toast("📅 Subscription expired. Automatically downgraded to Free User.")
+            st.rerun()
+    except Exception:
+        pass
+
 # =============================================================================
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
-fee_info_text = """
-<div style="line-height: 1.4; font-size: 0.95rem;">
+def get_fee_info_text():
+    return _(
+        """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
@@ -1269,24 +1367,69 @@ fee_info_text = """
       </div>
     </div>
   </div>
-</div>
-"""
+</div>""",
+        """<div style="line-height: 1.4; font-size: 0.95rem;">
+  <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
+  <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
+  <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
+    <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
+    <li style="margin-bottom: 2px;"><b>Official User</b>: $370 USD (2 months unlimited)</li>
+  </ul>
+  <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 10px;">
+    <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 Bank Transfer Info (Domestic)</div>
+    <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
+      • <b>Bank</b>: Kakao Bank<br>
+      • <b>Account Holder</b>: ㅈㅅㅎ<br>
+      • <b>Fee</b>: 500,000 KRW<br>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+        <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
+        <button onclick="(function(){
+          const el = document.createElement('textarea');
+          el.value = '3333-23-8667708';
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+          alert('Account number copied: 3333-23-8667708 (Kakao Bank)');
+        })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 Copy</button>
+      </div>
+      <div style="margin-top: 6px; font-size: 0.75rem; color: #718096; line-height: 1.3;">
+        * Note: After transfer, please click <b>[Request Membership Upgrade]</b> below.
+      </div>
+    </div>
+  </div>
+</div>"""
+    )
 
 with st.sidebar:
+    # 다국어 선택 (Language Switcher)
+    lang_options = {"한국어 🇰🇷": "ko", "English 🇺🇸": "en"}
+    selected_lang_label = st.selectbox(
+        "Language / 언어 선택", 
+        options=list(lang_options.keys()), 
+        index=0 if st.session_state.get('lang', 'ko') == 'ko' else 1,
+        key="sidebar_lang_selector"
+    )
+    new_lang = lang_options[selected_lang_label]
+    if new_lang != st.session_state.get('lang', 'ko'):
+        st.session_state.lang = new_lang
+        st.query_params["lang"] = new_lang
+        st.rerun()
+
     try:
         st.image("ahp_master_logo.png", use_container_width=True)
     except:
-        st.subheader("📊 AHP 마스터")
+        st.subheader(_("📊 AHP 마스터", "📊 AHP Master"))
     
 
     if st.session_state.user_id is None:
-        tab_login, tab_signup, tab_find_pw = st.tabs(["로그인", "회원가입", "비밀번호 찾기"])
+        tab_login, tab_signup, tab_find_pw = st.tabs([_("로그인", "Login"), _("회원가입", "Sign Up"), _("비밀번호 찾기", "Find Password")])
         
         with tab_login:
-            st.header("🔐 로그인")
-            l_id = st.text_input("아이디 (이메일 주소)", key="l_id")
-            l_pw = st.text_input("비밀번호 (PW)", type="password", key="l_pw")
-            if st.button("로그인 실행"):
+            st.header(_("🔐 로그인", "🔐 Login"))
+            l_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="l_id")
+            l_pw = st.text_input(_("비밀번호 (PW)", "Password (PW)"), type="password", key="l_pw")
+            if st.button(_("로그인 실행", "Login")):
                 result = check_login(l_id.strip(), l_pw)
                 if result:
                     # [수정] 대한민국 시간 기준 오늘 날짜 가져오기
@@ -1300,60 +1443,62 @@ with st.sidebar:
                                 st.session_state.user_id = l_id.strip()
                                 st.session_state.user_role = "temp"
                                 st.session_state.expiry_date = "9999-12-31"
-                                st.toast("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.")
-                                st.success(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 제한) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!")
+                                st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Automatically downgraded to Free User."))
+                                st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 제한) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
+                                             f"Welcome, {l_id}! Your subscription expired and you were automatically downgraded to a Free User (5-sample limit). You can extend your subscription anytime in the sidebar!"))
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}")
+                                st.error(_(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}", f"Error during automatic expiry downgrade: {e}"))
                         else:
-                            st.error(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})")
+                            st.error(_(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})", f"❌ Subscription expired. (Expiry date: {result[1]})"))
                     else:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
                         st.session_state.expiry_date = result[1]
-                        st.success(f"환영합니다, {l_id}님!")
+                        st.success(_(f"환영합니다, {l_id}님!", f"Welcome, {l_id}!"))
                         st.rerun()
                 else:
-                    st.error("아이디 또는 비밀번호가 일치하지 않습니다.")
+                    st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
 
         with tab_signup:
-            st.header("📝 회원가입")
+            st.header(_("📝 회원가입", "📝 Sign Up"))
             agreements = show_agreement_ui()
-            s_id = st.text_input("아이디 (이메일 주소)", key="s_id")
-            s_pw = st.text_input("비밀번호", type="password", key="s_pw")
-            s_role_selection = st.radio("이용 권한 선택", ("무료사용자", "정식 사용자 (2개월, 기능 무제한)"), index=0)
+            s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="s_id")
+            s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="s_pw")
+            s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (2개월, 기능 무제한)", "Official User (2 Months, Unlimited)")), index=0)
             
-            if "정식" in s_role_selection:
-                st.warning("⚠️ 정식 사용자 가입 안내")
-                st.info("정식 사용자는 입급 전까지 **무료사용자** 권한이 부여됩니다.")
-                st.info("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 2개월 입니다)")
+            if "정식" in s_role_selection or "Official" in s_role_selection:
+                st.warning(_("⚠️ 정식 사용자 가입 안내", "⚠️ Official User Signup Guide"))
+                st.info(_("정식 사용자는 입급 전까지 **무료사용자** 권한이 부여됩니다.", "Official users are granted **Free User** authority before payment."))
+                st.info(_("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 2개월 입니다)", "Authority will be upgraded to **Official User** once bank transfer is confirmed by the admin, or you can pay via PayPal for instant upgrade. (Access period is 2 months)"))
             
-            if st.button("가입신청"):
+            if st.button(_("가입신청", "Register")):
                 if not agreements.get("agree_personal_info"):
-                    st.error("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.")
+                    st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
                 elif not validate_email(s_id):
-                    st.error("올바른 이메일 형식이 아닙니다.")
+                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
                 elif not validate_password(s_pw):
-                    st.error("비밀번호는 문자+특수문자여야 합니다.")
+                    st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
                 else:
                     restore_from_deleted_sheet(s_id.strip())
                     initial_role = 'temp'
-                    actual_requested_role = 'official' if "정식" in s_role_selection else 'temp'
+                    actual_requested_role = 'official' if ("정식" in s_role_selection or "Official" in s_role_selection) else 'temp'
                     # 동의 기록을 'Y'로 저장
                     if add_user(s_id.strip(), s_pw, initial_role, agree_info="Y"):
                         if actual_requested_role == 'official':
                             send_application_email(s_id)
-                        st.success("무료사용자로 가입 완료 되었습니다")
+                        st.success(_("무료사용자로 가입 완료 되었습니다", "Successfully registered as a Free User."))
                     else:
-                        st.error("이미 존재하는 아이디입니다.")
+                        st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
         with tab_find_pw:
-            st.header("🔑 비밀번호 찾기")
-            st.write("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.")
-            f_id = st.text_input("가입한 아이디 (이메일)", key="f_id")
-            if st.button("임시 비밀번호 전송"):
+            st.header(_("🔑 비밀번호 찾기", "🔑 Find Password"))
+            st.write(_("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.",
+                       "Please enter the email address used at registration. A new temporary password will be sent to your email."))
+            f_id = st.text_input(_("가입한 아이디 (이메일)", "Registered ID (Email)"), key="f_id")
+            if st.button(_("임시 비밀번호 전송", "Send Temporary Password")):
                 if not f_id:
-                    st.warning("이메일 주소를 입력해주세요.")
+                    st.warning(_("이메일 주소를 입력해주세요.", "Please enter your email address."))
                 else:
                     # 사용자 존재 여부 확인을 위해 비밀번호 가져오기
                     conn = sqlite3.connect('users.db')
@@ -1368,99 +1513,147 @@ with st.sidebar:
                         change_user_password(f_id.strip(), temp_pw)
                         
                         if send_password_recovery_email(f_id.strip(), temp_pw):
-                            st.success(f"'{f_id}'로 임시 비밀번호를 전송했습니다.\n이메일을 확인해주세요.")
+                            st.success(_(f"'{f_id}'로 임시 비밀번호를 전송했습니다.\n이메일을 확인해주세요.", f"Temporary password sent to '{f_id}'.\nPlease check your email."))
                         else:
-                            st.error("이메일 전송 중 오류가 발생했습니다.")
+                            st.error(_("이메일 전송 중 오류가 발생했습니다.", "Error sending email."))
                     else:
-                        st.error("등록되지 않은 아이디입니다.")
+                        st.error(_("등록되지 않은 아이디입니다.", "ID is not registered."))
 
     else:
-        role_disp = "관리자" if st.session_state.user_role == 'admin' else ("정식 사용자" if st.session_state.user_role == 'official' else "무료사용자")
+        role_disp = _("관리자", "Admin") if st.session_state.user_role == 'admin' else (_("정식 사용자", "Official User") if st.session_state.user_role == 'official' else _("무료사용자", "Free User"))
         
         # 만료일 정보 처리
         expiry_info = ""
         if st.session_state.expiry_date:
-            expiry_info = f'<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #fffde7; border: 1px solid #fff9c4; border-radius: 6px; color: #f57f17; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">📅 사용 만료일: {st.session_state.expiry_date}</div>'
+            expiry_label = _("사용 만료일: ", "Expiry Date: ")
+            expiry_info = f'<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #fffde7; border: 1px solid #fff9c4; border-radius: 6px; color: #f57f17; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">📅 {expiry_label}{st.session_state.expiry_date}</div>'
             
         # 세련된 HTML 로그인 정보 카드 렌더링 (인덴트 제거로 마크다운 코드블록 변환 방지)
+        user_suffix = _(" 님", "")
+        role_label = _("권한: ", "Role: ")
         info_html = f"""<div style="display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 10px;">
-<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">{st.session_state.user_id} 님</div>
-<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; color: #1565c0; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">권한: {role_disp}</div>
+<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">{st.session_state.user_id}{user_suffix}</div>
+<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; color: #1565c0; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">{role_label}{role_disp}</div>
 {expiry_info}
 </div>"""
         st.markdown(info_html, unsafe_allow_html=True)
         
         if st.session_state.user_role == 'temp':
             with st.container(border=True):
-                st.markdown("##### 💳 정식 사용자 승격 요청")
-                
-                # 계좌 정보 및 간편 복사 버튼 추가
-                acc_info_html = """
-                <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                  <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-                    • <b>은행명</b>: 카카오뱅크<br>
-                    • <b>예금주</b>: ㅈㅅㅎ<br>
-                    • <b>이용요금</b>: 50만원 (2개월 무제한)<br>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                      <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
-                      <button onclick="(function(){
-                        const el = document.createElement('textarea');
-                        el.value = '3333-23-8667708';
-                        document.body.appendChild(el);
-                        el.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(el);
-                        alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
-                      })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
+                if st.session_state.lang == 'en':
+                    st.markdown("##### 💳 PayPal Membership Upgrade")
+                    st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$370.00 USD**.")
+                    
+                    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+                    user_id = st.session_state.user_id
+                    
+                    paypal_html = f"""
+                    <div id="paypal-button-container" style="text-align: center; max-width: 100%;"></div>
+                    <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD"></script>
+                    <script>
+                      paypal.Buttons({{
+                        style: {{
+                          layout: 'vertical',
+                          color:  'gold',
+                          shape:  'rect',
+                          label:  'paypal',
+                          height: 40
+                        }},
+                        createOrder: function(data, actions) {{
+                          return actions.order.create({{
+                            purchase_units: [{{
+                              amount: {{
+                                value: '370.00'
+                              }},
+                              payee: {{
+                                email_address: 'jeon080423@gmail.com'
+                              }}
+                            }}]
+                          }});
+                        }},
+                        onApprove: function(data, actions) {{
+                          return actions.order.capture().then(function(details) {{
+                            window.top.location.href = window.top.location.origin + window.top.location.pathname + "?pay_success=true&user_id=" + encodeURIComponent("{user_id}");
+                          }});
+                        }},
+                        onError: function(err) {{
+                          console.error(err);
+                          alert("Payment failed or was cancelled.");
+                        }}
+                      }}).render('#paypal-button-container');
+                    </script>
+                    """
+                    st.components.v1.html(paypal_html, height=180)
+                else:
+                    st.markdown("##### 💳 정식 사용자 승격 요청")
+                    
+                    # 계좌 정보 및 간편 복사 버튼 추가
+                    acc_info_html = """
+                    <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                      <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
+                        • <b>은행명</b>: 카카오뱅크<br>
+                        • <b>예금주</b>: ㅈㅅㅎ<br>
+                        • <b>이용요금</b>: 50만원 (2개월 무제한)<br>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                          <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
+                          <button onclick="(function(){
+                            const el = document.createElement('textarea');
+                            el.value = '3333-23-8667708';
+                            document.body.appendChild(el);
+                            el.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(el);
+                            alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
+                          })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                """
-                st.markdown(acc_info_html, unsafe_allow_html=True)
-                st.info("입금 완료 후 아래 버튼을 클릭하시면 승격 요청이 관리자에게 즉시 전송됩니다.")
-                
-                if st.button("정식 사용자 전환 요청", use_container_width=True, key="sidebar_upgrade_btn"):
-                    if send_conversion_request_email(st.session_state.user_id):
-                        st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                    else:
-                        st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+                    """
+                    st.markdown(acc_info_html, unsafe_allow_html=True)
+                    st.info("입금 완료 후 아래 버튼을 클릭하시면 승격 요청이 관리자에게 즉시 전송됩니다.")
+                    
+                    if st.button("정식 사용자 전환 요청", use_container_width=True, key="sidebar_upgrade_btn"):
+                        if send_conversion_request_email(st.session_state.user_id):
+                            st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
+                        else:
+                            st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
         
         if st.session_state.user_role == 'admin':
-            if st.button("🔧 관리자 화면 접속"):
+            if st.button(_("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")):
                 st.session_state.admin_mode = not st.session_state.admin_mode
                 st.rerun()
 
-        with st.expander("🔐 비밀번호 변경"):
-            cur_pw = st.text_input("현재 비밀번호", type="password", key="chg_cur")
-            new_pw_val = st.text_input("새 비밀번호", type="password", key="chg_new")
-            confirm_pw = st.text_input("새 비밀번호 확인", type="password", key="chg_conf")
+        with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
+            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur")
+            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new")
+            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf")
             
-            if st.button("비밀번호 변경"):
+            if st.button(_("비밀번호 변경", "Change Password")):
                 if new_pw_val != confirm_pw:
-                    st.error("새 비밀번호가 일치하지 않습니다.")
+                    st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
                 elif not validate_password(new_pw_val):
-                    st.error("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.")
+                    st.error(_("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.", "Password must be at least 4 characters and contain letters and special characters."))
                 else:
                     chk_res = check_login(st.session_state.user_id, cur_pw)
                     if chk_res:
                         change_user_password(st.session_state.user_id, new_pw_val)
-                        st.success("비밀번호가 변경되었습니다.")
+                        st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
                     else:
-                        st.error("현재 비밀번호가 올바르지 않습니다.")
+                        st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
 
-        if st.button("로그아웃"):
+        if st.button(_("로그아웃", "Log Out")):
             st.session_state.user_id = None
             st.session_state.user_role = None
             st.session_state.expiry_date = None
             st.session_state.admin_mode = False
             st.rerun()
 
-    with st.expander("📖 이용자 가이드", expanded=False):
-        st.markdown("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.")
-        st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
+    with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
+        st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
+        st.link_button(_("이용자 가이드 바로가기", "Go to User Guide"), "https://morison.tistory.com/103", use_container_width=True)
 
-    with st.expander("ℹ️ 일관성 보정 기준", expanded=False):
-        st.markdown("""
+    with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
+        st.markdown(_("""
         **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
         가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
         
@@ -1468,12 +1661,20 @@ with st.sidebar:
         1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
         2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
         
-        """)
+        """, """
+        **Correction Method: Iterative Adjustment**
+        If the judgment matrix is inconsistent (CR > threshold) based on Saaty's weight algorithm, it repeatedly adjusts the weights by mixing the original matrix with a mathematically consistent matrix.
+        
+        **Key Features:**
+        1. **Minimal Distortion of Judgments**: Preserves the trends of the original survey responses while securing mathematical consistency.
+        2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
+        
+        """))
 
-    with st.expander("💡 사용자 권한 안내", expanded=False):
-        st.info("**비로그인(Guest)**: 샘플 파일 분석만 가능")
-        st.info("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)")
-        st.info("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)")
+    with st.expander(_("💡 사용자 권한 안내", "💡 User Roles & Permissions"), expanded=False):
+        st.info(_("**비로그인(Guest)**: 샘플 파일 분석만 가능", "**Guest**: Sample file analysis only"))
+        st.info(_("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)", "**Free User**: Create custom models, analyze data (up to 5 samples)"))
+        st.info(_("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)", "**Official User**: All features unlimited (2 months, extensible by 1 month)"))
     
     st.markdown("---")
     analysis_settings_help = """
@@ -1497,16 +1698,36 @@ with st.sidebar:
    - **낮음 (0.1~0.3)**: 원본 설문 값을 최대한 보존하지만 보정 속도가 느립니다.
    - **높음 (0.7~0.9)**: 수학적 일관성을 신속하게 확보하나 원본 변형이 더 커질 수 있습니다.
 """
-    st.header("분석 설정", help=analysis_settings_help)
-    mean_method_label = st.radio("평균 산출 방식", ('기하평균 (Geometric)', '산술평균 (Arithmetic)'), index=0)
-    mean_method = 'geometric' if '기하' in mean_method_label else 'arithmetic'
-    cr_threshold = st.selectbox("일관성 비율(CR) 임계값", [0.1, 0.2], index=0)
-    max_iter_val = st.number_input("최대 보정 반복 횟수", min_value=10, max_value=500, value=500, step=50)
+    analysis_settings_help_en = """
+### ⚙️ Detailed Analysis Settings
+
+1. **Aggregation Method**
+   - **Geometric Mean**: The standard method in AHP for integrating individual decisions. Preserves multiplicative characteristics and minimizes outlier distortion (recommended for academia).
+   - **Arithmetic Mean**: A simple intuitive method of averaging weights.
+
+2. **Consistency Ratio (CR) Threshold**
+   - Criteria for consistency reliability.
+   - **0.1**: Saaty's standard threshold, suitable for high-precision academic research.
+   - **0.2**: Relaxed threshold widely used for public surveys or complex models.
+
+3. **Max Correction Iterations**
+   - The maximum number of correction attempts. If convergence below the threshold fails within this limit, the response is excluded.
+
+4. **Correction Intensity (Learning Rate)**
+   - The step rate to shift towards the ideal consistency data in each iteration.
+   - **Low (0.1~0.3)**: Maximum preservation of original responses, but slower convergence.
+   - **High (0.7~0.9)**: Quick mathematical consistency, but may alter original responses more.
+"""
+    st.header(_("분석 설정", "Analysis Settings"), help=_(analysis_settings_help, analysis_settings_help_en))
+    mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
+    mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
+    cr_threshold = st.selectbox(_("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), [0.1, 0.2], index=0)
+    max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
     
     # [신규 추가] 보정 강도(Learning Rate) 선택 옵션
-    learning_rate = st.slider("보정 강도 (Learning Rate)", min_value=0.1, max_value=0.9, value=0.6, step=0.1, help="낮을수록 원본 응답을 많이 보존하며, 높을수록 수학적 일관성을 빠르게 확보합니다.")
+    learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1, help=_("낮을수록 원본 응답을 많이 보존하며, 높을수록 수학적 일관성을 빠르게 확보합니다.", "Lower values preserve original responses; higher values converge faster."))
 
-    st.markdown(fee_info_text, unsafe_allow_html=True)
+    st.markdown(get_fee_info_text(), unsafe_allow_html=True)
 
     st.markdown("---")
     
@@ -1533,17 +1754,24 @@ with st.sidebar:
 # =============================================================================
 
 # 메인 헤더 영역
-st.title("AHP 분석 자동화 시스템")
+st.title(_("AHP 분석 자동화 시스템", "AHP Automated Decision System"))
 
-st.markdown("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다. 엑셀 파일을 업로드하면 개인별 가중치 산출, 일관성 보정(CR), 그룹별 집계 결과를 제공합니다.")
+st.markdown(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다. 엑셀 파일을 업로드하면 개인별 가중치 산출, 일관성 보정(CR), 그룹별 집계 결과를 제공합니다.",
+              "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool. Upload an Excel file to get individual weights, Consistency Ratio (CR) correction, and group aggregation results."))
 
-with st.expander("🎓 학술 논문 및 연구 보고서 기재 방법 예시", expanded=False):
-    st.info("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.")
-    st.markdown("""
+with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
+    st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
+              "When describing AHP analysis results in your thesis or research report, you can refer to and cite the example below."))
+    st.markdown(_("""
     > **[논문 기재 예시문]**
     > 
     > "본 연구에서 수집된 설문 데이터는 웹 기반 AHP 전용 분석 솔루션인 **'AHP 마스터'**를 활용하여 분석을 수행하였다. Saaty(1980)의 계층분석과정에 따라 쌍대비교 행렬을 구성하여 국지적 가중치와 종합 가중치(Global Weight)를 산출하였으며, 일관성 비율(CR)이 0.1 미만이 되도록 시스템의 보정 기능을 거쳐 결과의 타당성을 확보하였다."
-    """)
+    """,
+    """
+    > **[Example of Paper Citation]**
+    > 
+    > "The survey data collected in this study was analyzed using **'AHP Master'**, a web-based dedicated AHP analysis solution. Pairwise comparison matrices were constructed in accordance with Saaty's (1980) Analytic Hierarchy Process to calculate local and global weights, and the validity of the results was secured through the system's consistency ratio (CR) adjustment function to ensure CR was below 0.1."
+    """))
             
 
 if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
@@ -1552,7 +1780,7 @@ if st.session_state.get('admin_mode', False) and st.session_state.user_role == '
         st.success(st.session_state["sync_success_msg"])
         del st.session_state["sync_success_msg"]
 
-    st.subheader("👥 가입자 현황 및 관리")
+    st.subheader(_("👥 가입자 현황 및 관리", "👥 Registered Users & Admin Control"))
     
     col_sync1, col_sync2 = st.columns([2, 8])
     with col_sync1:
@@ -1646,27 +1874,34 @@ if st.session_state.get('admin_mode', False) and st.session_state.user_role == '
                 st.rerun()
     st.divider()
 
-st.subheader("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드")
+st.subheader(_("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "1. Setup AHP Decision Model & Download Template"))
 
 if st.session_state.user_id is None:
-    st.info("🔒 **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)")
+    st.info(_("🔒 **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
+              "🔒 **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
 else:
     saved_model = load_user_model(st.session_state.user_id)
-    default_main = "거버넌스, 계획타당성, 실현가능성, 사업효과"
+    default_main = _("거버넌스, 계획타당성, 실현가능성, 사업효과", "Governance, Planning, Feasibility, Effectiveness")
     default_subs = {
         "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
         "계획타당성": "현안적정성, 대안적정성, 목표구체성",
         "실현가능성": "부지확보, 사업구체화, 사업비적정성",
-        "사업효과": "경제적효과, 사회적효과, 성과관리"
+        "사업효과": "경제적효과, 사회적효과, 성과관리",
+        # English defaults
+        "Governance": "AdminSupport, Community, PM",
+        "Planning": "IssueFit, AlternativeFit, GoalClarity",
+        "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
+        "Effectiveness": "Economic, Social, Performance"
     }
     
     if saved_model:
         default_main = saved_model.get('main', default_main)
         default_subs = saved_model.get('subs', default_subs)
 
-    with st.expander("📌 나의 분석 모델 만들기", expanded=True):
-        st.info("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 삭제하시고 이용자님의 AHP 모델을 입력하세요.")
-        main_criteria_input = st.text_input("대항목 (Main Criteria, 콤마 구분)", value=default_main)
+    with st.expander(_("📌 나의 분석 모델 만들기", "📌 Create Custom AHP Model"), expanded=True):
+        st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 삭제하시고 이용자님의 AHP 모델을 입력하세요.",
+                  "Enter main criteria and sub-criteria to generate your custom Excel template.\n\nThe content below is a sample model. Feel free to clear it and enter your own AHP elements."))
+        main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
         main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
         
         model_structure = {}
@@ -1674,17 +1909,17 @@ else:
             for mc in main_criteria_list:
                 d_val = default_subs.get(mc, "")
                 if isinstance(d_val, list): d_val = ", ".join(d_val)
-                sub_input = st.text_input(f"'{mc}'의 세부항목", value=d_val, key=f"sub_{mc}")
+                sub_input = st.text_input(_(f"'{mc}'의 세부항목", f"Sub-criteria for '{mc}'"), value=d_val, key=f"sub_{mc}")
                 sub_list = [x.strip() for x in sub_input.split(',') if x.strip()]
                 model_structure[mc] = sub_list
         
-        if st.button("설정한 모델로 입력 엑셀 템플릿 생성"):
+        if st.button(_("설정한 모델로 입력 엑셀 템플릿 생성", "Generate Excel Template with this Model")):
             if not main_criteria_list:
-                st.error("대항목 입력 필요")
+                st.error(_("대항목 입력 필요", "Main criteria input is required"))
             else:
                 current_model = {'main': main_criteria_input, 'subs': model_structure}
                 save_user_model(st.session_state.user_id, current_model)
-                st.toast("모델 저장 완료")
+                st.toast(_("모델 저장 완료", "Model successfully saved"))
                 
                 output_template = io.BytesIO()
                 with pd.ExcelWriter(output_template, engine='xlsxwriter') as writer:
@@ -1706,13 +1941,13 @@ else:
                         df_sub.to_excel(writer, sheet_name=safe_sheet_name, index=False)
                 output_template.seek(0)
                 st.download_button(
-                    label="📥 엑셀 템플릿 다운로드",
+                    label=_("📥 엑셀 템플릿 다운로드", "📥 Download Excel Template"),
                     data=output_template,
                     file_name="AHP_Master_Template.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
 
-                st.markdown("""
+                st.markdown(_("""
                 ---
                 ### 📝 데이터 입력 가이드
                 1. **엑셀 파일 열기**: 위 버튼을 눌러 다운로드한 엑셀 파일을 실행합니다.
@@ -1721,16 +1956,28 @@ else:
                     - **오른쪽** 항목이 더 중요하면: **양수** 입력 (예: 3)
                     - **동등**하면: `1` 입력
                 3. **필수 정보 입력**: A열(ID), **B열(Type)에 그룹명 입력 (예: 전문가, 주민 등)**
-                """)
-                if os.path.exists("ahp_input_guide.png"):
-                    st.image("ahp_input_guide.png", caption="[참고] 설문 응답을 엑셀에 입력하는 방법")
+                """,
+                """
+                ---
+                ### 📝 Data Input Guide
+                1. **Open the Excel file**: Run the Excel template downloaded above.
+                2. **Enter pairwise comparisons**:
+                    - If the **left** item is more important: enter a **negative** value (e.g., -3)
+                    - If the **right** item is more important: enter a **positive** value (e.g., 3)
+                    - If they are **equal**: enter `1`
+                3. **Required Information**: Column A (ID), **Column B (Type) for group names (e.g., Expert, Public, etc.)**
+                """))
+                img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
+                caption_text = _("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel")
+                if os.path.exists(img_file):
+                    st.image(img_file, caption=caption_text)
 
 st.markdown("---")
 
 if st.session_state.user_role == 'official':
-    with st.expander("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요"):
+    with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
         my_analyses = get_user_analyses(st.session_state.user_id)
-        if not my_analyses: st.info("저장된 분석 없음")
+        if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
         else:
             for item in my_analyses:
                 a_id, filename, save_date = item
@@ -1748,15 +1995,17 @@ if st.session_state.user_role == 'official':
                         st.rerun()
 
 with st.container(border=True):
-    st.markdown("#### ⚡ 빠른 시작 (도시재생 사업 모델)")
-    st.info("아래 버튼을 누르면 테스트용 샘플 엑셀 파일이 다운로드 됩니다.\n\n"
-            "다운받은 테스트 샘플 엑셀 파일을 아래 '데이터 업로드 및 분석'에 업로드 하세요.")
+    st.markdown(_("#### ⚡ 빠른 시작 (도시재생 사업 모델)", "#### ⚡ Quick Start (Urban Regeneration Project Model)"))
+    st.info(_("아래 버튼을 누르면 테스트용 샘플 엑셀 파일이 다운로드 됩니다.\n\n"
+              "다운받은 테스트 샘플 엑셀 파일을 아래 '데이터 업로드 및 분석'에 업로드 하세요.",
+              "Click the button below to download the test sample Excel file.\n\n"
+              "Upload the downloaded sample file to '2. Data Upload & Analysis' below."))
     
     sample_excel = create_sample_excel()
     st.download_button(
-        label="📂 테스트용 샘플 데이터 다운로드",
+        label=_("📂 테스트용 샘플 데이터 다운로드", "📂 Download Test Sample Data"),
         data=sample_excel,
-        file_name="AHP_UrbanRegeneration_Sample.xlsx",
+        file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
@@ -1777,10 +2026,10 @@ def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, format
     
     # [신규 추가] 제외 사례수 및 제외 응답값 데이터 출력
     if excluded_df is not None:
-        worksheet.write(start_row, 0, f"※ 분석 제외 사례수: {len(excluded_df)}건", workbook.add_format({'bold': True, 'font_color': 'red'}))
+        worksheet.write(start_row, 0, _(f"※ 분석 제외 사례수: {len(excluded_df)}건", f"※ Number of cases excluded: {len(excluded_df)}"), workbook.add_format({'bold': True, 'font_color': 'red'}))
         start_row += 1
         if not excluded_df.empty:
-            worksheet.write(start_row, 0, "▶ 제외된 응답 데이터 (보정 실패)", workbook.add_format({'bold': True}))
+            worksheet.write(start_row, 0, _("▶ 제외된 응답 데이터 (보정 실패)", "▶ Excluded Response Data (Correction Failed)"), workbook.add_format({'bold': True}))
             start_row += 1
             excluded_df.to_excel(writer, sheet_name=sheet_name, startrow=start_row, index=False)
             start_row += len(excluded_df) + 2
@@ -1788,7 +2037,10 @@ def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, format
     worksheet.merge_range(start_row, 0, start_row, 6, title_text, workbook.add_format({'bold': True, 'font_size': 12}))
     start_row += 1
     
-    headers = ["대분류", "가중치(a)", "중분류", "가중치(b)", "종합 가중치(a x b)", "종합 순위", "비고"]
+    headers = _(
+        ["대분류", "가중치(a)", "중분류", "가중치(b)", "종합 가중치(a x b)", "종합 순위", "비고"],
+        ["Main Criteria", "Weight(a)", "Sub-Criteria", "Weight(b)", "Global Weight(a x b)", "Global Rank", "Remarks"]
+    )
     for col, h in enumerate(headers):
         worksheet.write(start_row, col, h, header_fmt)
     start_row += 1
@@ -1820,21 +2072,21 @@ def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, format
             worksheet.write(current_row, 6, "", body_fmt)
             current_row += 1
         
-        worksheet.write(current_row, 2, "합계", sum_row_fmt)
+        worksheet.write(current_row, 2, _("합계", "Total"), sum_row_fmt)
         worksheet.write(current_row, 3, sum_sub_w, formats['sum_val'])
         worksheet.write_blank(current_row, 4, "", sum_row_fmt)
         worksheet.write_blank(current_row, 5, "", sum_row_fmt)
         worksheet.write_blank(current_row, 6, "", sum_row_fmt)
         current_row += 1
         
-        worksheet.write(current_row, 2, "일관성 비율(CR)", sum_row_fmt)
+        worksheet.write(current_row, 2, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
         worksheet.write(current_row, 3, sub_cr, formats['num_sum'])
-        worksheet.write(current_row, 4, "일관성 지수(CI)", sum_row_fmt)
+        worksheet.write(current_row, 4, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
         worksheet.write(current_row, 5, sub_ci, formats['num_sum'])
         worksheet.write_blank(current_row, 6, "", sum_row_fmt)
         current_row += 1
 
-    worksheet.write(current_row, 0, "합계", sum_row_fmt)
+    worksheet.write(current_row, 0, _("합계", "Total"), sum_row_fmt)
     worksheet.write(current_row, 1, 1, formats['sum_val'])
     worksheet.write_blank(current_row, 2, "", sum_row_fmt)
     worksheet.write_blank(current_row, 3, "", sum_row_fmt)
@@ -1847,9 +2099,9 @@ def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, format
     main_ci = df.iloc[0]['CI(대분류)'] if 'CI(대분류)' in df.columns else 0.0
     
     current_row += 1
-    worksheet.write(current_row, 0, "일관성 비율(CR)", sum_row_fmt)
+    worksheet.write(current_row, 0, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
     worksheet.write(current_row, 1, main_cr, formats['num_sum'])
-    worksheet.write(current_row, 2, "일관성 지수(CI)", sum_row_fmt)
+    worksheet.write(current_row, 2, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
     worksheet.write(current_row, 3, main_ci, formats['num_sum'])
     worksheet.write_blank(current_row, 4, "", sum_row_fmt)
     worksheet.write_blank(current_row, 5, "", sum_row_fmt)
@@ -1867,8 +2119,8 @@ def add_borders_to_data(worksheet, start_row, start_col, df, border_fmt, has_hea
     worksheet.conditional_format(start_row, start_col, start_row+rows-1, start_col+cols-1,
                                   {'type': 'formula', 'criteria': '=TRUE', 'format': border_fmt})
 
-st.subheader("2. 데이터 업로드 및 분석")
-uploaded_file = st.file_uploader("작성된 엑셀 파일 업로드 (.xlsx)", type=['xlsx', 'xls'])
+st.subheader(_("2. 데이터 업로드 및 분석", "2. Data Upload & Analysis"))
+uploaded_file = st.file_uploader(_("작성된 엑셀 파일 업로드 (.xlsx)", "Upload completed Excel file (.xlsx)"), type=['xlsx', 'xls'])
 
 if uploaded_file:
     try:
@@ -1890,7 +2142,7 @@ if uploaded_file:
                 expiry_chk = datetime.datetime.strptime(st.session_state.expiry_date, "%Y-%m-%d").date()
                 if today_chk > expiry_chk:
                     permission_granted = False
-                    message = "⛔ 이용 기간이 만료되었습니다."
+                    message = _("⛔ 이용 기간이 만료되었습니다.", "⛔ Your subscription period has expired.")
         else: 
             rows_ok = True
             for sn in sheet_names:
@@ -1898,39 +2150,54 @@ if uploaded_file:
                     rows_ok = False
                     break
             if rows_ok: permission_granted = True
-            else: message = f"⛔ **무료사용자**는 시트당 최대 5개 표본까지만 분석 가능합니다."
+            else: message = _(f"⛔ **무료사용자**는 시트당 최대 5개 표본까지만 분석 가능합니다.", f"⛔ **Free Users** can only analyze up to 5 samples per sheet.")
 
         if permission_granted:
             try:
-                with st.spinner("계층 분석 수행 중..."):
+                with st.spinner(_("계층 분석 수행 중...", "Performing Analytic Hierarchy Process (AHP)...")):
                     # 1. 메인 시트 분석 시도
                     try:
                         main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(
                             df_main, cr_threshold, max_iter_val, learning_rate, mean_method
                         )
                     except Exception as e:
-                        st.error("❌ [메인 시트] 분석 중 오류가 발생했습니다.")
-                        with st.expander("💡 이유 및 해결 방법 보기", expanded=True):
-                            st.markdown(f"""
+                        st.error(_("❌ [메인 시트] 분석 중 오류가 발생했습니다.", "❌ Error occurred during [Main Criteria] analysis."))
+                        with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                            st.markdown(_(f"""
                             **원인:** 메인 시트의 데이터 구조가 올바르지 않거나 읽을 수 있는 유효 데이터가 없습니다. (Error: {e})
                             **해결 방법:**
                             1. 엑셀의 첫 번째 시트 이름이 `Main_Criteria`인지 확인하세요.
                             2. ID와 Type 열 다음에 쌍대비교 데이터가 올바르게 입력되었는지 확인하세요.
                             3. 빈 행이 포함되어 있다면 삭제 후 다시 시도하세요.
-                            """)
+                            """,
+                            f"""
+                            **Cause:** The structure of the main sheet is incorrect or contains no readable valid data. (Error: {e})
+                            **Solution:**
+                            1. Ensure that the first sheet name in Excel is `Main_Criteria`.
+                            2. Verify that pair-wise comparison data is correctly input after the 'ID' and 'Type' columns.
+                            3. If empty rows are included, delete them and try again.
+                            """))
                         st.stop()
 
                     # [방어 코드] 메인 결과 충분성 체크
                     if main_results_df.empty or len(main_results_df) < 1:
-                        st.error(f"⚠️ 분석 불가: 메인 기준 유효 응답자가 부족합니다. (현재 {len(main_results_df)}명)")
-                        with st.expander("💡 이유 및 해결 방법 보기", expanded=True):
-                            st.markdown(f"""
+                        st.error(_(f"⚠️ 분석 불가: 메인 기준 유효 응답자가 부족합니다. (현재 {len(main_results_df)}명)",
+                                   f"⚠️ Cannot Analyze: Insufficient valid respondents for Main Criteria. (Current: {len(main_results_df)} respondents)"))
+                        with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                            st.markdown(_(f"""
                             **원인:** 모든 응답자의 일관성 비율(CR)이 임계치({cr_threshold})를 초과하여 보정 후에도 수렴하지 못했습니다.
                             **해결 방법:**
                             1. 왼쪽 사이드바에서 **'일관성 비율(CR) 임계값'**을 0.2로 완화해 보세요.
                             2. **'보정 강도(Learning Rate)'**를 0.7 이상으로 높여보세요.
                             3. **'최대 보정 반복 횟수'**를 500회로 설정했는지 확인하세요.
-                            """)
+                            """,
+                            f"""
+                            **Cause:** The Consistency Ratio (CR) of all respondents exceeded the threshold ({cr_threshold}) and could not converge even after correction.
+                            **Solution:**
+                            1. Loosen the **'Consistency Ratio (CR) Threshold'** to 0.2 in the left sidebar.
+                            2. Increase the **'Correction Intensity (Learning Rate)'** to 0.7 or higher.
+                            3. Ensure **'Max Correction Iterations'** is set to 500.
+                            """))
                         st.stop()
 
                     # 2. 하위 시트 분석 및 저장
@@ -1982,14 +2249,20 @@ if uploaded_file:
                                     break
                             
                             if matched_sheet_name is None:
-                                st.error(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.")
-                                with st.expander("💡 이유 및 해결 방법 보기", expanded=True):
-                                    st.markdown(f"""
+                                st.error(_(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.", f"❌ [Detailed Sheet: {parent_factor}] Sheet not found."))
+                                with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                    st.markdown(_(f"""
                                     **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 엑셀 파일 내에 존재하지 않거나 시트 이름이 다릅니다.
                                     **해결 방법:**
                                     1. 업로드한 엑셀 파일 내에 **'{parent_factor}'** (또는 31자 이내로 앞부분이 일치하는 명칭)의 시트가 존재하는지 확인하세요.
                                     2. 시트 이름의 앞뒤 공백이나 오탈자(예: '리드타임민감도'와 '리드타임 민감도')가 없는지 확인하고 시트명을 맞춰주세요.
-                                    """)
+                                    """,
+                                    f"""
+                                    **Cause:** The detailed survey response sheet corresponding to the main criteria category **'{parent_factor}'** does not exist in the Excel file or has a different name.
+                                    **Solution:**
+                                    1. Check if a sheet named **'{parent_factor}'** (or a name matching the first 31 characters) exists in the uploaded Excel file.
+                                    2. Ensure there are no leading/trailing spaces or spelling discrepancies (e.g., 'Lead Time Sensitivity' vs 'LeadTime Sensitivity') and align the sheet names.
+                                    """))
                                 st.stop()
                             
                             try:
@@ -2020,19 +2293,25 @@ if uploaded_file:
                                     total_excl_df_list.append(sub_excl_df)
                                     
                             except Exception as e:
-                                st.error(f"❌ [세부 시트: {matched_sheet_name}] 분석 중 오류가 발생했습니다.")
-                                with st.expander("💡 이유 및 해결 방법 보기", expanded=True):
-                                    st.markdown(f"""
+                                st.error(_(f"❌ [세부 시트: {matched_sheet_name}] 분석 중 오류가 발생했습니다.", f"❌ Error occurred during [Detailed Sheet: {matched_sheet_name}] analysis."))
+                                with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                    st.markdown(_(f"""
                                     **원인:** 시트 내부의 데이터 구조가 올바르지 않거나, 해당 시트의 응답자들이 모두 일관성 기준을 통과하지 못했습니다. (Error: {e})
                                     **해결 방법:**
                                     1. 해당 세부 시트의 데이터에 빈 칸이나 문자가 섞여 있는지 확인하세요.
                                     2. CR 임계값을 높여서 다시 분석해 보세요.
-                                    """)
+                                    """,
+                                    f"""
+                                    **Cause:** The internal data structure of the sheet is incorrect, or all respondents for this sheet failed to pass the consistency ratio criteria. (Error: {e})
+                                    **Solution:**
+                                    1. Check if there are empty cells or text mixed in the data of the detailed sheet.
+                                    2. Try analyzing again with a higher CR threshold.
+                                    """))
                                 st.stop()
 
                     # 분석 헤더 윗쪽에 제외된 사례수 표시
                     total_excluded = main_excluded
-                    st.markdown(f"**분석 제외: {total_excluded}건**")
+                    st.markdown(f"**" + _(f"분석 제외: {total_excluded}건", f"Excluded from Analysis: {total_excluded} cases") + "**")
 
                     main_sig_df = calculate_pairwise_ttest(main_results_df, main_factors)
                     main_weight_cols = [f"Weight_{f}" for f in main_factors]
@@ -2159,16 +2438,17 @@ if uploaded_file:
                         fmt_diagonal = workbook.add_format({'num_format': '0', 'align': 'center', 'valign': 'vcenter', 'bg_color': '#E7E6E6', 'border': 1})
 
                         total_excluded_df = pd.concat(total_excl_df_list, ignore_index=True)
-                        current_row_ws = write_custom_ahp_table(writer, '종합분석', final_df, "1) 전체_종합결과", 1, formats, excluded_df=total_excluded_df)
+                        sheet_name_comp = _('종합분석', 'Comprehensive Analysis')
+                        current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
                         for grp in unique_groups:
                             if grp in group_full_dfs:
-                                current_row_ws = write_custom_ahp_table(writer, '종합분석', group_full_dfs[grp], f"▶ [그룹: {grp}] 분석 결과", current_row_ws, formats)
+                                current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
 
                         if len(unique_groups) >= 1:
                             ws_comp = workbook.add_worksheet('Group_Comparison')
                             writer.sheets['Group_Comparison'] = ws_comp
                             s_row_cp = 1
-                            ws_comp.write_string(s_row_cp, 0, "그룹 간 비교(일원배치 분산분석: ANOVA)", workbook.add_format({'bold': True, 'font_size': 12}))
+                            ws_comp.write_string(s_row_cp, 0, _("그룹 간 비교(일원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
                             s_row_cp += 1
                             
                             if not anova_df.empty:
@@ -2177,29 +2457,68 @@ if uploaded_file:
                             else:
                                 integrated_df = comparison_df
                             
-                            integrated_df.to_excel(writer, sheet_name='Group_Comparison', startrow=s_row_cp, index=False)
-                            add_borders_to_data(ws_comp, s_row_cp, 0, integrated_df, border_fmt)
+                            # English renaming logic for columns & significance
+                            if st.session_state.get('lang', 'ko') == 'en':
+                                rename_dict = {
+                                    '중분류': 'Sub-Criteria',
+                                    'Overall': 'Overall',
+                                    'F-값': 'F-Value',
+                                    'P-Value': 'P-Value',
+                                    '유의성': 'Significance',
+                                    '사후검정(Tukey HSD)': 'Post-hoc (Tukey HSD)'
+                                }
+                                integrated_df_excel = integrated_df.copy()
+                                integrated_df_excel.rename(columns=rename_dict, inplace=True)
+                                if 'Significance' in integrated_df_excel.columns:
+                                    integrated_df_excel['Significance'] = integrated_df_excel['Significance'].replace({
+                                        '유의함': 'Significant',
+                                        '유의하지 않음': 'Not Significant'
+                                    })
+                                if 'Post-hoc (Tukey HSD)' in integrated_df_excel.columns:
+                                    integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].replace({
+                                        '집단 간 구체적 차이 발견 못함': 'No specific difference found',
+                                        '계산 오류': 'Calculation Error'
+                                    })
+                                    integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].apply(
+                                        lambda x: x.replace(" 차이 있음", " Diff Exists") if isinstance(x, str) else x
+                                    )
+                            else:
+                                integrated_df_excel = integrated_df
+
+                            integrated_df_excel.to_excel(writer, sheet_name='Group_Comparison', startrow=s_row_cp, index=False)
+                            add_borders_to_data(ws_comp, s_row_cp, 0, integrated_df_excel, border_fmt)
                             
                             num_format_3 = workbook.add_format({'num_format': '0.000', 'border': 1, 'align': 'center'})
-                            for r in range(len(integrated_df)):
-                                for c in range(1, len(integrated_df.columns)):
-                                    val = integrated_df.iloc[r, c]
+                            for r in range(len(integrated_df_excel)):
+                                for c in range(1, len(integrated_df_excel.columns)):
+                                    val = integrated_df_excel.iloc[r, c]
                                     if pd.notnull(val) and isinstance(val, (int, float)):
                                         ws_comp.write_number(s_row_cp + 1 + r, c, val, num_format_3)
                                     elif pd.notnull(val):
                                         ws_comp.write(s_row_cp + 1 + r, c, val, border_fmt)
 
-                            guide_start_row = s_row_cp + len(integrated_df) + 3
+                            guide_start_row = s_row_cp + len(integrated_df_excel) + 3
                             bold_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'valign': 'vcenter', 'align': 'left', 'bg_color': '#F2F2F2', 'border': 1})
                             text_fmt = workbook.add_format({'font_size': 10, 'text_wrap': True, 'valign': 'top', 'align': 'left', 'border': 1})
                             ws_comp.set_column('A:G', 20) 
-                            ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, "※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유", bold_fmt)
+                            
+                            comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
+                                           "※ Reasons why group differences are not statistically significant despite variation in priorities")
+                            ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
 
-                            guide_content = [
+                            guide_content_ko = [
                                 ("1. 그룹 내 편차(분산)가 너무 큰 경우", "ANOVA는 '그룹 간의 차이'와 '그룹 내의 차이'를 비교합니다.\n\n■ 원리: 그룹 간 평균 차이가 크더라도, 각 그룹 내부 데이터들이 서로 들쭉날쭉(분산이 큼)하다면 통계적으로는 '이 차이가 우연히 발생했을 가능성이 높다'고 판단합니다."),
                                 ("2. 표본 크기(Sample Size)의 부족", "통계적 유의성은 표본의 수에 매우 민감합니다.\n\n■ 현상: 각 그룹의 데이터 개수(표본수)가 너무 적다면 통계적 힘(Power)이 부족하여 유의미한 차이를 찾아내지 못합니다."),
                                 ("3. 데이터의 단위(Scale)와 변동성", "표에 나타난 수치들이 대부분 매우 작은 소수점 단위입니다. 실제 계산 과정에서 표준오차 범위 내에 있다면 통계적으로는 측정 오차 범위 내의 흔들림으로 간주됩니다.")
                             ]
+                            
+                            guide_content_en = [
+                                ("1. Within-Group Variance is Too Large", "ANOVA compares variance between groups against variance within groups.\n\n■ Principle: Even if the mean difference between groups is large, if individual responses within each group are highly scattered (large variance), statistics will determine that the difference is likely due to chance."),
+                                ("2. Insufficient Sample Size", "Statistical significance is highly sensitive to the number of samples.\n\n■ Phenomenon: If the number of data points (sample size) in each group is too small, statistical power is insufficient to detect significant differences."),
+                                ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
+                            ]
+                            
+                            guide_content = guide_content_en if st.session_state.get('lang', 'ko') == 'en' else guide_content_ko
 
                             current_row_comp = guide_start_row + 1
                             for title, body in guide_content:
@@ -2214,7 +2533,8 @@ if uploaded_file:
                             writer.sheets[sheet_name] = ws
                             s_row_det = 0
                             
-                            ws.write(s_row_det, 0, f"분석 제외 사례수: {sheet_excl_count}건", workbook.add_format({'bold': True, 'font_color': 'red'}))
+                            excl_label = _(f"분석 제외 사례수: {sheet_excl_count}건", f"Excluded cases: {sheet_excl_count}")
+                            ws.write(s_row_det, 0, excl_label, workbook.add_format({'bold': True, 'font_color': 'red'}))
                             s_row_det += 1
                             
                             ws.write_string(s_row_det, 0, matrix_title)
@@ -2258,17 +2578,17 @@ if uploaded_file:
                             ws.set_column(n_dim + 2, n_dim + 2, 12)
                             ws.set_column(n_dim + 3, n_dim + 3, 12)
                             
-                            ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, "전체 일관성 지표", ci_cr_header_fmt)
-                            ws.write(s_row_det + 1, n_dim + 2, "전체 CI", ci_cr_label_fmt)
+                            ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("전체 일관성 지표", "Overall Consistency Indicators"), ci_cr_header_fmt)
+                            ws.write(s_row_det + 1, n_dim + 2, _("전체 CI", "Overall CI"), ci_cr_label_fmt)
                             ws.write(s_row_det + 1, n_dim + 3, ci_val, ci_cr_val_fmt)
-                            ws.write(s_row_det + 2, n_dim + 2, "전체 CR", ci_cr_label_fmt)
+                            ws.write(s_row_det + 2, n_dim + 2, _("전체 CR", "Overall CR"), ci_cr_label_fmt)
                             ws.write(s_row_det + 2, n_dim + 3, cr_val, ci_cr_val_fmt)
                             
                             s_row_det += len(matrix_df) + 3
                             
                             if group_matrices:
                                 for g_name, g_mat in group_matrices.items():
-                                    ws.write_string(s_row_det, 0, f"] 그룹 종합 행렬: {g_name}")
+                                    ws.write_string(s_row_det, 0, _(f"] 그룹 종합 행렬: {g_name}", f"] Group Combined Matrix: {g_name}"))
                                     s_row_det += 1
                                     gm_df_obj = pd.DataFrame(g_mat, index=row_labels, columns=row_labels)
                                     gm_df_obj.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det)
@@ -2294,10 +2614,10 @@ if uploaded_file:
                                             'font_name': 'NanumGothic'
                                         })
                                     
-                                    ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, "그룹 일관성 지표", ci_cr_header_fmt)
-                                    ws.write(s_row_det + 1, n_dim + 2, "그룹 CI", ci_cr_label_fmt)
+                                    ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("그룹 일관성 지표", "Group Consistency Indicators"), ci_cr_header_fmt)
+                                    ws.write(s_row_det + 1, n_dim + 2, _("그룹 CI", "Group CI"), ci_cr_label_fmt)
                                     ws.write(s_row_det + 1, n_dim + 3, g_ci_val, g_ci_cr_val_fmt)
-                                    ws.write(s_row_det + 2, n_dim + 2, "그룹 CR", ci_cr_label_fmt)
+                                    ws.write(s_row_det + 2, n_dim + 2, _("그룹 CR", "Group CR"), ci_cr_label_fmt)
                                     ws.write(s_row_det + 2, n_dim + 3, g_cr_val, g_ci_cr_val_fmt)
                                     
                                     s_row_det += len(g_mat) + 3
@@ -2331,7 +2651,7 @@ if uploaded_file:
                                 main_group_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
 
                         out_main = main_results_df.drop(columns=['Matrix_Object'], errors='ignore')
-                        write_detailed_sheet_ws('Result_Main', main_group_matrix, out_main, f"[1] 전체 종합 행렬", main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
+                        write_detailed_sheet_ws('Result_Main', main_group_matrix, out_main, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
                         for mf, info in sub_results_storage.items():
                             safe_name = f"Result_{mf}"[:31]
                             sub_grp_mats = {}
@@ -2348,23 +2668,38 @@ if uploaded_file:
                                      if mf in df_ex['Sheet'].unique():
                                          sub_excl_val = len(df_ex[df_ex['Sheet'] == mf])
                                          
-                            write_detailed_sheet_ws(safe_name, info['group_matrix'], out_sub, f"[1] 전체 종합 행렬", info['factors'], group_matrices=sub_grp_mats, sheet_excl_count=sub_excl_val)
+                            write_detailed_sheet_ws(safe_name, info['group_matrix'], out_sub, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), info['factors'], group_matrices=sub_grp_mats, sheet_excl_count=sub_excl_val)
 
+                        is_english = (st.session_state.get('lang', 'ko') == 'en')
                         theory_ws = workbook.add_worksheet("Consistency_Theory")
                         theory_title_fmt = workbook.add_format({'bold': True, 'font_size': 14, 'font_name': 'NanumGothic'})
                         theory_body_fmt = workbook.add_format({'text_wrap': True, 'valign': 'top', 'font_name': 'NanumGothic'})
-                        theory_text = [
-                            ["의사결정론적 관점에서의 AHP 일관성 보정 원리 및 학술적 근거"],
-                            [""],
-                            ["1. 서론: 계층분석과정(AHP)의 일관성 문제"],
-                            ["Saaty(1980)에 의해 제안된 계층분석과정은 인간의 주관적 판단을 정량화하는 다기준 의사결정 도구이다. 비일관적 판단이 발생할 경우 수학적으로 교정하여 분석의 신뢰성을 확보한다."],
-                            [""],
-                            ["2. 보정 알고리즘: 반복 수렴 조정법"],
-                            [f"원본 행렬 A와 이상적 행렬 W를 설정된 학습률(α={learning_rate})에 따라 선형 결합한다: A_new = (1-α)A + αW."],
-                            [""],
-                            ["3. 학술적 근거 및 효과"],
-                            ["원본 행렬과 일관 행렬의 가중 평균을 이용한 조정은 의사결정자의 원래 선호 경향성을 최대한 보존하면서 수학적 일관성을 향상시킨다."]
-                        ]
+                        if is_english:
+                            theory_text = [
+                                ["AHP Consistency Calibration Principle & Academic Foundation from a Decision-Making Perspective"],
+                                [""],
+                                ["1. Introduction: The Issue of Consistency in the Analytic Hierarchy Process (AHP)"],
+                                ["The Analytic Hierarchy Process, proposed by Saaty (1980), is a multi-criteria decision-making tool that quantifies human subjective judgment. When inconsistent judgments occur, they are mathematically corrected to ensure the reliability of the analysis."],
+                                [""],
+                                ["2. Calibration Algorithm: Iterative Convergence Adjusting Method"],
+                                [f"The original matrix A and the ideal matrix W are linearly combined according to the set learning rate (learning rate α={learning_rate}): A_new = (1-α)A + αW."],
+                                [""],
+                                ["3. Academic Foundation & Effects"],
+                                ["Adjustment using a weighted average of the original matrix and the consistent matrix preserves the decision maker's original preferences as much as possible while improving mathematical consistency."]
+                            ]
+                        else:
+                            theory_text = [
+                                ["의사결정론적 관점에서의 AHP 일관성 보정 원리 및 학술적 근거"],
+                                [""],
+                                ["1. 서론: 계층분석과정(AHP)의 일관성 문제"],
+                                ["Saaty(1980)에 의해 제안된 계층분석과정은 인간의 주관적 판단을 정량화하는 다기준 의사결정 도구이다. 비일관적 판단이 발생할 경우 수학적으로 교정하여 분석의 신뢰성을 확보한다."],
+                                [""],
+                                ["2. 보정 알고리즘: 반복 수렴 조정법"],
+                                [f"원본 행렬 A와 이상적 행렬 W를 설정된 학습률(α={learning_rate})에 따라 선형 결합한다: A_new = (1-α)A + αW."],
+                                [""],
+                                ["3. 학술적 근거 및 효과"],
+                                ["원본 행렬과 일관 행렬의 가중 평균을 이용한 조정은 의사결정자의 원래 선호 경향성을 최대한 보존하면서 수학적 일관성을 향상시킨다."]
+                            ]
                         theory_ws.set_column('A:A', 100)
                         for r_idx, row_content in enumerate(theory_text):
                             fmt = theory_title_fmt if r_idx == 0 else theory_body_fmt
@@ -2380,17 +2715,28 @@ if uploaded_file:
                             guide_ws.set_column('B:B', 75)
                             
                             # Merge title row
-                            guide_ws.merge_range('A1:B1', "1단계 AHP 분석 결과 해석 및 주의사항", guide_title_fmt)
+                            guide_title = _("1단계 AHP 분석 결과 해석 및 주의사항", "Step 1 AHP Analysis Result Interpretation and Guidelines")
+                            guide_ws.merge_range('A1:B1', guide_title, guide_title_fmt)
                             guide_ws.set_row(0, 35)
                             
-                            guide_data = [
-                                ("분류", "상세 내용"),
-                                ("1. 분석 개요", "본 보고서는 하위 요소 없이 대분류(1단계) 평가 기준만을 비교한 단일 계층 AHP 분석 결과입니다."),
-                                ("2. 결과 해석 방법", "하위 가중치가 1.0으로 고정되어 '대분류 가중치'와 'Global Weight(종합 가중치)'가 동일한 수치로 산출되었습니다. 따라서 'Global Weight'를 각 항목의 최종 중요도로 해석하시면 됩니다."),
-                                ("3. 내부 가상 연산 안내", "AHP 분석 시스템의 2단계 연산 일관성 유지를 위해, 시스템 내부적으로 대분류 항목 하위에 가중치 1.0을 가지는 더미 세부 항목을 자동 생성하여 연산하였습니다. 이로 인해 결과 다운로드 파일에 'Result_[대분류명]' 시트가 1x1 행렬로 존재하지만 이는 정상적인 가상 연산 결과입니다."),
-                                ("4. 일관성 비율(CR) 주의사항", "제공된 일관성 비율은 대분류 쌍대비교의 일관성 비율(CR)만을 나타냅니다. 하위 요소가 존재하지 않으므로 '중분류 일관성 비율(CR)'은 무조건 0.000으로 표기되며 이는 오류가 아닙니다."),
-                                ("5. 학술/보고서 기재 팁", "학술 연구나 보고서에 활용 시 '단일 계층(1단계) 계층 구조 하에서 쌍대비교 분석을 수행하였다'고 명시적으로 기재하시기 바랍니다.")
-                            ]
+                            if is_english:
+                                guide_data = [
+                                    ("Classification", "Detailed Content"),
+                                    ("1. Analysis Overview", "This report is a single-level AHP analysis result comparing only the main criteria (Step 1) evaluation criteria without sub-criteria."),
+                                    ("2. Result Interpretation Method", "Since the sub-weights are fixed at 1.0, the 'Main Criteria Weight' and the 'Global Weight' are calculated with the same values. Therefore, you can interpret the 'Global Weight' as the final importance of each item."),
+                                    ("3. Internal Virtual Operation Guide", "To maintain consistency of the 2-level operation of the AHP analysis system, the system internally auto-generated and computed dummy detailed items with a weight of 1.0 under the main criteria items. Due to this, the 'Result_[Main Criteria Name]' sheet exists in the results download file as a 1x1 matrix, which is a normal virtual operation result."),
+                                    ("4. Consistency Ratio (CR) Warnings", "The provided consistency ratio represents only the CR of the pairwise comparison of the main criteria. Since there are no sub-criteria, the 'Sub-Criteria Consistency Ratio (CR)' is unconditionally marked as 0.000, which is not an error."),
+                                    ("5. Academic/Report Writing Tip", "When utilizing this in academic research or reports, please explicitly state that 'pairwise comparison analysis was performed under a single-level (Step 1) hierarchical structure.'")
+                                ]
+                            else:
+                                guide_data = [
+                                    ("분류", "상세 내용"),
+                                    ("1. 분석 개요", "본 보고서는 하위 요소 없이 대분류(1단계) 평가 기준만을 비교한 단일 계층 AHP 분석 결과입니다."),
+                                    ("2. 결과 해석 방법", "하위 가중치가 1.0으로 고정되어 '대분류 가중치'와 'Global Weight(종합 가중치)'가 동일한 수치로 산출되었습니다. 따라서 'Global Weight'를 각 항목의 최종 중요도로 해석하시면 됩니다."),
+                                    ("3. 내부 가상 연산 안내", "AHP 분석 시스템의 2단계 연산 일관성 유지를 위해, 시스템 내부적으로 대분류 항목 하위에 가중치 1.0을 가지는 더미 세부 항목을 자동 생성하여 연산하였습니다. 이로 인해 결과 다운로드 파일에 'Result_[대분류명]' 시트가 1x1 행렬로 존재하지만 이는 정상적인 가상 연산 결과입니다."),
+                                    ("4. 일관성 비율(CR) 주의사항", "제공된 일관성 비율은 대분류 쌍대비교의 일관성 비율(CR)만을 나타냅니다. 하위 요소가 존재하지 않으므로 '중분류 일관성 비율(CR)'은 무조건 0.000으로 표기되며 이는 오류가 아닙니다."),
+                                    ("5. 학술/보고서 기재 팁", "학술 연구나 보고서에 활용 시 '단일 계층(1단계) 계층 구조 하에서 쌍대비교 분석을 수행하였다'고 명시적으로 기재하시기 바랍니다.")
+                                ]
                             
                             for r_idx, (section, content) in enumerate(guide_data, start=1):
                                 if r_idx == 1:
@@ -2402,42 +2748,113 @@ if uploaded_file:
                                     guide_ws.write(r_idx, 1, content, guide_body_fmt)
                                 guide_ws.set_row(r_idx, 60 if r_idx > 1 else 20)
 
-                st.success("분석이 완료되었습니다.")
+                st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
                 if st.session_state.user_role == 'official':
                     save_analysis_to_db(st.session_state.user_id, f"{uploaded_file.name.split('.')[0]}_Result.xlsx", output_res.getvalue())
 
-                tab1, tab2, tab3, tab4, tab5 = st.tabs(["🌐 종합 분석 (Global)", "👨‍👩‍👧‍👦 그룹별 분석", "🧪 통계 검정 (ANOVA)", "📊 시각화 센터", "📑 결과 다운로드"])
+                tab1, tab2, tab3, tab4, tab5 = st.tabs([
+                    _("🌐 종합 분석 (Global)", "🌐 Global Comprehensive Analysis"),
+                    _("👨‍👩‍👧‍👦 그룹별 분석", "👨‍👩‍👧‍👦 Group Analysis"),
+                    _("🧪 통계 검정 (ANOVA)", "🧪 Statistical Test (ANOVA)"),
+                    _("📊 시각화 센터", "📊 Visualization Center"),
+                    _("📑 결과 다운로드", "📑 Download Results")
+                ])
                 with tab1:
-                    st.subheader("🌐 종합 중요도 및 순위")
-                    st.dataframe(final_df.style.format(precision=3), use_container_width=True)
+                    st.subheader(_("🌐 종합 중요도 및 순위", "🌐 Global Weights & Rankings"))
+                    if is_english:
+                        disp_final_df = final_df.rename(columns={
+                            "대분류": "Main Criteria",
+                            "대분류 가중치": "Main Criteria Weight",
+                            "중분류": "Sub-Criteria",
+                            "중분류 가중치": "Sub-Criteria Weight",
+                            "Global Weight": "Global Weight",
+                            "Global Rank": "Global Rank",
+                            "CR(대분류)": "CR (Main Criteria)",
+                            "CI(대분류)": "CI (Main Criteria)",
+                            "CR(중분류)": "CR (Sub-Criteria)",
+                            "CI(중분류)": "CI (Sub-Criteria)"
+                        })
+                    else:
+                        disp_final_df = final_df
+                    st.dataframe(disp_final_df.style.format(precision=3), use_container_width=True)
                 with tab2:
-                    st.markdown("#### 그룹별 가중치 상세 비교")
-                    st.dataframe(comparison_df.style.format(precision=4), use_container_width=True)
+                    st.markdown(_("#### 그룹별 가중치 상세 비교", "#### Detailed Comparison of Weights by Group"))
+                    disp_comparison_df = comparison_df.copy()
+                    if is_english:
+                        disp_comparison_df.rename(columns={
+                            "중분류": "Sub-Criteria",
+                            "Overall": "Overall",
+                            "전문가": "Expert",
+                            "일반": "General",
+                            "공무원": "Public Official"
+                        }, inplace=True)
+                    st.dataframe(disp_comparison_df.style.format(precision=4), use_container_width=True)
                 with tab3:
-                    st.markdown("#### 집단 간 유의성 분석")
-                    if not anova_df.empty: st.dataframe(anova_df.style.format(precision=5), use_container_width=True)
-                    else: st.info("통계 검정을 위해 2개 이상의 그룹 데이터가 필요합니다.")
+                    st.markdown(_("#### 집단 간 유의성 분석", "#### Analysis of Significance Between Groups"))
+                    if not anova_df.empty:
+                        if is_english:
+                            disp_anova = anova_df.copy()
+                            disp_anova.rename(columns={
+                                "요인": "Factor/Criteria",
+                                "F-값": "F-Value",
+                                "P-Value": "P-Value",
+                                "유의성": "Significance",
+                                "사후검정(Tukey HSD)": "Post-Hoc (Tukey HSD)"
+                            }, inplace=True)
+                            
+                            # Map values in Significance
+                            disp_anova["Significance"] = disp_anova["Significance"].map({
+                                "유의함": "Significant",
+                                "유의하지 않음": "Not Significant"
+                            }).fillna(disp_anova["Significance"])
+                            
+                            # Map values in Post-Hoc
+                            def translate_posthoc(val):
+                                if not isinstance(val, str):
+                                    return val
+                                val = val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
+                                val = val.replace(" 차이 있음", " (Diff exists)")
+                                val = val.replace("집단 간 구체적 차이 발견 못함", "No significant pairwise difference found")
+                                val = val.replace("계산 오류", "Calculation Error")
+                                return val
+                            disp_anova["Post-Hoc (Tukey HSD)"] = disp_anova["Post-Hoc (Tukey HSD)"].apply(translate_posthoc)
+                        else:
+                            disp_anova = anova_df
+                        st.dataframe(disp_anova.style.format(precision=5), use_container_width=True)
+                    else:
+                        st.info(_("통계 검정을 위해 2개 이상의 그룹 데이터가 필요합니다.", "At least 2 group datasets are required for statistical testing (ANOVA)."))
                 with tab4:
-                    st.markdown("#### 📊 시각화 센터")
+                    st.markdown(_("#### 📊 시각화 센터", "#### 📊 Visualization Center"))
                     col_chart1, col_chart2 = st.columns(2)
                     with col_chart1:
-                        st.write("**종합 중요도 (Bar)**")
-                        fig_bar = px.bar(final_df.sort_values('Global Weight'), y='중분류', x='Global Weight', orientation='h', text_auto='.3f')
+                        st.write(_("**종합 중요도 (Bar)**", "**Global Importance (Bar)**"))
+                        chart_bar_df = final_df.sort_values('Global Weight').copy()
+                        if is_english:
+                            chart_bar_df.rename(columns={"중분류": "Sub-Criteria", "Global Weight": "Global Weight"}, inplace=True)
+                            y_col = "Sub-Criteria"
+                            x_col = "Global Weight"
+                        else:
+                            y_col = "중분류"
+                            x_col = "Global Weight"
+                        fig_bar = px.bar(chart_bar_df, y=y_col, x=x_col, orientation='h', text_auto='.3f')
                         st.plotly_chart(fig_bar, use_container_width=True)
                     with col_chart2:
-                        st.write("**그룹별 중요도 패턴 (Radar)**")
+                        st.write(_("**그룹별 중요도 패턴 (Radar)**", "**Importance Pattern by Group (Radar)**"))
                         indiv_global_radar = []
                         all_ids_r = main_results_df['ID'].unique()
                         for rid in all_ids_r:
                             m_row_rd = main_results_df[main_results_df['ID'] == rid].iloc[0]
                             rtype_rd = m_row_rd['Type']
+                            grp_name_en = rtype_rd
+                            if is_english:
+                                grp_name_en = str(rtype_rd).replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
                             for m_f_rd in main_factors:
                                 mw_indiv_rd = m_row_rd[f"Weight_{m_f_rd}"]
                                 s_row_df_rd = sub_results_storage[m_f_rd]['df']
                                 s_row_rd = s_row_df_rd[s_row_df_rd['ID'] == rid].iloc[0]
                                 for s_f_rd in sub_results_storage[m_f_rd]['factors']:
                                     indiv_global_radar.append({
-                                        "Type": rtype_rd, 
+                                        "Type": grp_name_en, 
                                         "Factor": s_f_rd, 
                                         "Global_Weight": mw_indiv_rd * s_row_rd[f"Weight_{s_f_rd}"]
                                     })
@@ -2451,60 +2868,125 @@ if uploaded_file:
                     
                     # [추가 수정 부분] 바이올린 플롯 (CR 분포 시각화)
                     st.markdown("---")
-                    st.write("**일관성 비율(CR) 분포 (Violin Plot)**")
+                    st.write(_("**일관성 비율(CR) 분포 (Violin Plot)**", "**Consistency Ratio (CR) Distribution (Violin Plot)**"))
                     
                     # CR 값 추출을 위한 데이터 정제
                     cr_dist_data = []
                     # 메인 시트 CR
                     for _, r in main_results_df.iterrows():
-                        cr_dist_data.append({"Type": str(r['Type']), "Sheet": "Main_Criteria", "CR": r['Final_CR']})
+                        g_type_val = str(r['Type'])
+                        if is_english:
+                            g_type_val = g_type_val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
+                        cr_dist_data.append({"Type": g_type_val, "Sheet": "Main_Criteria", "CR": r['Final_CR']})
                     # 하위 시트 CR
                     for mf, info in sub_results_storage.items():
                         for _, r in info['df'].iterrows():
-                            cr_dist_data.append({"Type": str(r['Type']), "Sheet": mf, "CR": r['Final_CR']})
+                            g_type_val = str(r['Type'])
+                            if is_english:
+                                g_type_val = g_type_val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
+                            cr_dist_data.append({"Type": g_type_val, "Sheet": mf, "CR": r['Final_CR']})
                     
                     if cr_dist_data:
                         cr_df = pd.DataFrame(cr_dist_data)
-                        color_map = {"전문가": "#1f77b4", "일반": "#d62728", "공무원": "#2ca02c"}
+                        color_map = {
+                            "전문가": "#1f77b4", "일반": "#d62728", "공무원": "#2ca02c",
+                            "Expert": "#1f77b4", "General": "#d62728", "Public Official": "#2ca02c"
+                        }
                         unique_types = cr_df['Type'].unique()
                         
                         # [1. 전체 표본 그래프 선행 출력]
                         if len(unique_types) > 1:
                             fig_all = px.violin(cr_df, y="CR", x="Sheet", box=True, points="all",
-                                               hover_data=cr_df.columns, title="[전체 표본] 일관성 비율(CR) 분포",
+                                               hover_data=cr_df.columns, title=_("[전체 표본] 일관성 비율(CR) 분포", "[Overall Samples] Consistency Ratio (CR) Distribution"),
                                                color_discrete_sequence=["#7f7f7f"]) # 전체는 회색 계열
                             st.plotly_chart(fig_all, use_container_width=True)
                             st.markdown("---")
-
+ 
                         # [2. 그룹별 별도 객체로 분리하여 출력]
                         for g_type in unique_types:
                             g_df = cr_df[cr_df['Type'] == g_type]
                             fig_violin = px.violin(g_df, y="CR", x="Sheet", box=True, points="all",
-                                                   hover_data=g_df.columns, title=f"[{g_type}] 일관성 비율(CR) 분포",
+                                                   hover_data=g_df.columns, title=_(f"[{g_type}] 일관성 비율(CR) 분포", f"[{g_type}] Consistency Ratio (CR) Distribution"),
                                                    color_discrete_sequence=[color_map.get(g_type, "#1f77b4")])
                             st.plotly_chart(fig_violin, use_container_width=True)
 
                 with tab5:
-                    st.download_button("📥 결과 파일 다운로드 (Excel)", data=output_res.getvalue(), file_name="AHP_Result.xlsx")
-                    st.dataframe(radar_indiv_df if 'radar_indiv_df' in locals() else pd.DataFrame(), use_container_width=True)
+                    st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx")
+                    if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
+                        disp_radar_df = radar_indiv_df.copy()
+                        if is_english:
+                            disp_radar_df.rename(columns={
+                                "Type": "Group/Type",
+                                "Factor": "Factor/Criteria",
+                                "Global_Weight": "Global Weight"
+                            }, inplace=True)
+                        st.dataframe(disp_radar_df.style.format(precision=4), use_container_width=True)
+                    else:
+                        st.dataframe(pd.DataFrame(), use_container_width=True)
 
             except Exception as e:
-                st.error(f"❌ 분석 시스템 내부 오류가 발생했습니다.")
-                st.info(f"상세 에러 내용: {e}")
+                st.error(_("❌ 분석 시스템 내부 오류가 발생했습니다.", "❌ An internal error occurred in the analysis system."))
+                st.info(_(f"상세 에러 내용: {e}", f"Detailed error: {e}"))
                 st.stop()
         else:
             st.warning(message)
-            if role_chk == 'temp' and "5개 표본" in message:
+            if role_chk == 'temp' and ("5개 표본" in message or "5 samples" in message):
                 st.markdown("---")
                 with st.container(border=True):
-                    st.markdown("### 💳 정식 사용자 승격 및 무제한 분석")
-                    st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
-                    st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 아래 버튼을 클릭해 주세요.\n(서비스 이용요금: 50만원)")
-                    if st.button("정식 사용자 전환 요청", use_container_width=True, key="main_upgrade_btn"):
-                        if send_conversion_request_email(st.session_state.user_id):
-                            st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                        else:
-                            st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+                    if is_english:
+                        st.markdown("### 💳 Official User Upgrade & Unlimited Analysis")
+                        st.markdown("Upgrading to an Official User **instantly removes the 5-sample limit** and allows unlimited access to all features.")
+                        st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$370.00 USD** via PayPal.")
+                        
+                        paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+                        user_id = st.session_state.user_id
+                        
+                        paypal_html = f"""
+                        <div id="paypal-button-container-main" style="text-align: center; max-width: 100%;"></div>
+                        <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD"></script>
+                        <script>
+                          paypal.Buttons({{
+                            style: {{
+                              layout: 'vertical',
+                              color:  'gold',
+                              shape:  'rect',
+                              label:  'paypal',
+                              height: 40
+                            }},
+                            createOrder: function(data, actions) {{
+                              return actions.order.create({{
+                                purchase_units: [{{
+                                  amount: {{
+                                    value: '370.00'
+                                  }},
+                                  payee: {{
+                                    email_address: 'jeon080423@gmail.com'
+                                  }}
+                                }}]
+                              }});
+                            }},
+                            onApprove: function(data, actions) {{
+                              return actions.order.capture().then(function(details) {{
+                                window.top.location.href = window.top.location.origin + window.top.location.pathname + "?pay_success=true&user_id=" + encodeURIComponent("{user_id}");
+                              }});
+                            }},
+                            onError: function(err) {{
+                              console.error(err);
+                              alert("Payment failed or was cancelled.");
+                            }}
+                          }}).render('#paypal-button-container-main');
+                        </script>
+                        """
+                        st.components.v1.html(paypal_html, height=180)
+                    else:
+                        st.markdown("### 💳 정식 사용자 승격 및 무제한 분석")
+                        st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
+                        st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 아래 버튼을 클릭해 주세요.\n(서비스 이용요금: 50만원)")
+                        if st.button("정식 사용자 전환 요청", use_container_width=True, key="main_upgrade_btn"):
+                            if send_conversion_request_email(st.session_state.user_id):
+                                st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
+                            else:
+                                st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
     except Exception as e:
         st.error(f"파일 처리 오류 발생: {e}")
 
