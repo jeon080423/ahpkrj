@@ -1432,6 +1432,69 @@ with st.sidebar:
         st.info("**비로그인(Guest)**: 샘플 파일 분석만 가능")
         st.info("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)")
         st.info("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)")
+    
+    with st.expander("💳 PG 심사용 카드 결제창 (테스트)", expanded=False):
+        st.write("한국결제네트웍스 심사 제출용 결제창 캡처를 위한 테스트 도구입니다.")
+        st.write("아래 버튼을 누르면 테스트 결제창이 호출됩니다. 결제창에서 **'하나카드'**를 선택한 후 최종 인증(비밀번호 입력 등) 직전 단계 화면을 캡처하십시오.")
+        
+        pay_html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    overflow: hidden;
+                }
+                .pay-btn {
+                    background-color: #2b6cb0;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 10px 16px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    width: 100%;
+                    text-align: center;
+                    transition: background-color 0.2s;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                }
+                .pay-btn:hover {
+                    background-color: #2c5282;
+                }
+            </style>
+        </head>
+        <body>
+            <button class="pay-btn" onclick="requestPay()">💳 테스트 결제창 열기</button>
+
+            <script>
+                IMP.init('imp00000000');
+                function requestPay() {
+                    IMP.request_pay({
+                        pg: 'html5_inicis', 
+                        pay_method: 'card',
+                        merchant_uid: 'merchant_' + new Date().getTime(),
+                        name: 'AHP 마스터 정식 이용권',
+                        amount: 1000,
+                        buyer_email: 'test@example.com',
+                        buyer_name: '테스트 구매자',
+                        buyer_tel: '010-1234-5678',
+                    }, function (rsp) {
+                        if (rsp.success) {
+                            alert('테스트 결제가 완료되었습니다. (실제 승인은 되지 않습니다)');
+                        }
+                    });
+                }
+            </script>
+        </body>
+        </html>
+        """
+        import streamlit.components.v1 as components
+        components.html(pay_html, height=45)
+
     st.markdown("---")
     analysis_settings_help = """
 ### ⚙️ 분석 설정 상세 안내
