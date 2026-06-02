@@ -2553,10 +2553,10 @@ if uploaded_file:
 
                     summary_rows = []
                     for idx, main_f in enumerate(main_factors):
-                        m_weight = group_main_weights[idx]
+                        m_weight = group_main_weights.iloc[idx] if isinstance(group_main_weights, pd.Series) else group_main_weights[idx]
                         sub_info = sub_results_storage[main_f]
                         for s_idx, sub_f in enumerate(sub_info['factors']):
-                            s_weight = sub_info['weights'][s_idx]
+                            s_weight = sub_info['weights'].iloc[s_idx] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][s_idx]
                             global_w = m_weight * s_weight
                             summary_rows.append({
                                 "대분류": main_f, "대분류 가중치": m_weight, "중분류": sub_f, "중분류 가중치": s_weight,
@@ -2592,7 +2592,7 @@ if uploaded_file:
                         
                         grp_rows = []
                         for idx, main_f in enumerate(main_factors):
-                            m_w = g_main_w[idx]
+                            m_w = g_main_w.iloc[idx] if isinstance(g_main_w, pd.Series) else g_main_w[idx]
                             full_sub_df = sub_results_storage[main_f]['df']
                             grp_sub_df = full_sub_df[full_sub_df['Type'].astype(str) == grp]
                             sub_facts = sub_results_storage[main_f]['factors']
@@ -2610,9 +2610,10 @@ if uploaded_file:
                                 g_sub_w = g_sub_w / g_sub_w.sum()
                                 
                             for s_idx, sf in enumerate(sub_facts):
+                                s_w_val = g_sub_w.iloc[s_idx] if isinstance(g_sub_w, pd.Series) else g_sub_w[s_idx]
                                 grp_rows.append({
-                                    "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": g_sub_w[s_idx],
-                                    "Global Weight": m_w * g_sub_w[s_idx], 
+                                    "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": s_w_val,
+                                    "Global Weight": m_w * s_w_val, 
                                     "CR(대분류)": g_main_cr, 
                                     "CI(대분류)": g_main_ci,
                                     "CR(중분류)": g_sub_cr, 
@@ -3169,8 +3170,11 @@ if uploaded_file:
                         st.dataframe(pd.DataFrame(), use_container_width=True)
 
             except Exception as e:
+                import traceback
                 st.error(_("❌ 분석 시스템 내부 오류가 발생했습니다.", "❌ An internal error occurred in the analysis system."))
                 st.info(_(f"상세 에러 내용: {e}", f"Detailed error: {e}"))
+                with st.expander(_("🔍 상세 스택 트레이스", "🔍 Detailed Stack Trace")):
+                    st.code(traceback.format_exc())
                 st.stop()
         else:
             st.warning(message)
