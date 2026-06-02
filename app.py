@@ -1433,9 +1433,10 @@ with st.sidebar:
         st.info("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)")
         st.info("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)")
     
-    with st.expander("💳 PG 심사용 카드 결제창 (테스트)", expanded=False):
+    with st.expander("💳 PG 심사용 카드 결제창 (테스트)", expanded=True):
         st.write("한국결제네트웍스 심사 제출용 결제창 캡처를 위한 테스트 도구입니다.")
-        st.write("아래 버튼을 누르면 테스트 결제창이 호출됩니다. 결제창에서 **'하나카드'**를 선택한 후 최종 인증(비밀번호 입력 등) 직전 단계 화면을 캡처하십시오.")
+        
+        st.info("💡 **안내**: 크롬/엣지 등 브라우저의 보안 정책 및 팝업 차단으로 인해 아래 버튼을 눌러도 반응이 없을 수 있습니다. 반응이 없는 경우 **[심사용 결제 파일 다운로드]** 버튼을 통해 파일을 다운받아 실행하시면 100% 정상 작동합니다.")
         
         pay_html = """
         <!DOCTYPE html>
@@ -1468,7 +1469,7 @@ with st.sidebar:
             </style>
         </head>
         <body>
-            <button class="pay-btn" onclick="requestPay()">💳 테스트 결제창 열기</button>
+            <button class="pay-btn" onclick="requestPay()">💳 테스트 결제창 열기 (브라우저에 따라 차단될 수 있음)</button>
 
             <script>
                 IMP.init('imp00000000');
@@ -1494,6 +1495,102 @@ with st.sidebar:
         """
         import streamlit.components.v1 as components
         components.html(pay_html, height=45)
+        
+        standalone_pay_html = """<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AHP 마스터 결제 심사용 테스트</title>
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f7fafc;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        p {
+            color: #4a5568;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .pay-btn {
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .pay-btn:hover {
+            background-color: #2c5282;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>💳 AHP 마스터 결제창 테스트</h2>
+        <p>
+            아래 버튼을 누르면 테스트용 PG 결제창이 팝업됩니다.<br><br>
+            결제창에서 <b>'하나카드'</b>를 선택하신 후,<br>
+            다음 단계인 카드사 본인인증(앱카드 또는 비밀번호 입력) 화면이 나오면 전체 화면을 캡처하십시오.
+        </p>
+        <button class="pay-btn" onclick="requestPay()">카드 결제창 띄우기 (테스트)</button>
+    </div>
+
+    <script>
+        IMP.init('imp00000000');
+        function requestPay() {
+            IMP.request_pay({
+                pg: 'html5_inicis', 
+                pay_method: 'card',
+                merchant_uid: 'merchant_' + new Date().getTime(),
+                name: 'AHP 마스터 정식 이용권 (테스트)',
+                amount: 1000,
+                buyer_email: 'test@example.com',
+                buyer_name: '테스트 구매자',
+                buyer_tel: '010-1234-5678',
+            }, function (rsp) {
+                if (rsp.success) {
+                    alert('테스트 결제가 성공적으로 완료되었습니다. (실제 출금은 되지 않습니다)');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+"""
+        st.download_button(
+            label="📥 심사용 결제 파일 다운로드 (추천)",
+            data=standalone_pay_html,
+            file_name="ahp_pay_test.html",
+            mime="text/html",
+            use_container_width=True
+        )
 
     st.markdown("---")
     analysis_settings_help = """
