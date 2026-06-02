@@ -2584,7 +2584,7 @@ if uploaded_file:
                         g_main_cr, g_main_ci, _not_used_lambda = calculate_consistency(g_main_mat_obj, method=mean_method)
                         
                         if ahp_method == 'fuzzy':
-                            mw_vals_grp, _ = fuzzy_ahp_analysis(g_main_mat_obj)
+                            mw_vals_grp, _unused_Si = fuzzy_ahp_analysis(g_main_mat_obj)
                             g_main_w = pd.Series(mw_vals_grp, index=main_weight_cols)
                         else:
                             g_main_w = grp_main_df[main_weight_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_main_df[main_weight_cols].values, axis=0)
@@ -2603,7 +2603,7 @@ if uploaded_file:
                             g_sub_cr, g_sub_ci, _not_used_lambda = calculate_consistency(g_sub_mat_obj, method=mean_method)
                             
                             if ahp_method == 'fuzzy':
-                                sw_vals_grp, _ = fuzzy_ahp_analysis(g_sub_mat_obj)
+                                sw_vals_grp, _unused_Si = fuzzy_ahp_analysis(g_sub_mat_obj)
                                 g_sub_w = pd.Series(sw_vals_grp, index=s_w_cols)
                             else:
                                 g_sub_w = grp_sub_df[s_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_sub_df[s_w_cols].values, axis=0)
