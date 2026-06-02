@@ -1376,13 +1376,13 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
-    <li style="margin-bottom: 2px;"><b>Official User</b>: $370 USD (2 months unlimited)</li>
+    <li style="margin-bottom: 2px;"><b>Official User</b>: $330 USD (2 months unlimited)</li>
   </ul>
   <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 10px;">
     <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">💳 PayPal Instant Upgrade</div>
     <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
       • <b>Method</b>: PayPal Smart Checkout<br>
-      • <b>Fee</b>: $370.00 USD<br>
+      • <b>Fee</b>: $330.00 USD<br>
       <div style="margin-top: 6px; font-size: 0.75rem; color: #718096; line-height: 1.3;">
         * Note: Please register a Free account and log in. Once logged in, you can instantly upgrade your account to Official User using the PayPal button in the sidebar.
       </div>
@@ -1476,7 +1476,7 @@ with st.sidebar:
                       return actions.order.create({{
                         purchase_units: [{{
                           amount: {{
-                            value: '370.00'
+                            value: '330.00'
                           }},
                           payee: {{
                             email_address: 'jeon080423@gmail.com'
@@ -1590,7 +1590,7 @@ with st.sidebar:
             with st.container(border=True):
                 if st.session_state.lang == 'en':
                     st.markdown("##### 💳 PayPal Membership Upgrade")
-                    st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$370.00 USD**.")
+                    st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$330.00 USD**.")
                     
                     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                     user_id = st.session_state.user_id
@@ -1611,7 +1611,7 @@ with st.sidebar:
                           return actions.order.create({{
                             purchase_units: [{{
                               amount: {{
-                                value: '370.00'
+                                value: '330.00'
                               }},
                               payee: {{
                                 email_address: 'jeon080423@gmail.com'
@@ -2984,7 +2984,7 @@ if uploaded_file:
                     if is_english:
                         st.markdown("### 💳 Official User Upgrade & Unlimited Analysis")
                         st.markdown("Upgrading to an Official User **instantly removes the 5-sample limit** and allows unlimited access to all features.")
-                        st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$370.00 USD** via PayPal.")
+                        st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$330.00 USD** via PayPal.")
                         
                         paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                         user_id = st.session_state.user_id
@@ -3005,7 +3005,7 @@ if uploaded_file:
                               return actions.order.create({{
                                 purchase_units: [{{
                                   amount: {{
-                                    value: '370.00'
+                                    value: '330.00'
                                   }},
                                   payee: {{
                                     email_address: 'jeon080423@gmail.com'
