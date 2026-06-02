@@ -1277,6 +1277,7 @@ if 'expiry_date' not in st.session_state: st.session_state.expiry_date = None
 if 'admin_mode' not in st.session_state: st.session_state.admin_mode = False
 if 'model_structure' not in st.session_state: st.session_state.model_structure = {}
 if 'page' not in st.session_state: st.session_state.page = "main"
+if 'signup_paypal_user' not in st.session_state: st.session_state.signup_paypal_user = None
 
 # -----------------------------------------------------------------------------
 # 쿼리 매개변수 확인 (다국어 선택 및 결제 완료 처리)
@@ -1378,25 +1379,12 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>Official User</b>: $370 USD (2 months unlimited)</li>
   </ul>
   <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 10px;">
-    <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 Bank Transfer Info (Domestic)</div>
+    <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">💳 PayPal Instant Upgrade</div>
     <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-      • <b>Bank</b>: Kakao Bank<br>
-      • <b>Account Holder</b>: ㅈㅅㅎ<br>
-      • <b>Fee</b>: 500,000 KRW<br>
-      <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-        <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
-        <button onclick="(function(){
-          const el = document.createElement('textarea');
-          el.value = '3333-23-8667708';
-          document.body.appendChild(el);
-          el.select();
-          document.execCommand('copy');
-          document.body.removeChild(el);
-          alert('Account number copied: 3333-23-8667708 (Kakao Bank)');
-        })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 Copy</button>
-      </div>
+      • <b>Method</b>: PayPal Smart Checkout<br>
+      • <b>Fee</b>: $370.00 USD<br>
       <div style="margin-top: 6px; font-size: 0.75rem; color: #718096; line-height: 1.3;">
-        * Note: After transfer, please click <b>[Request Membership Upgrade]</b> below.
+        * Note: Please register a Free account and log in. Once logged in, you can instantly upgrade your account to Official User using the PayPal button in the sidebar.
       </div>
     </div>
   </div>
@@ -1457,6 +1445,8 @@ with st.sidebar:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
                         st.session_state.expiry_date = result[1]
+                        if 'signup_paypal_user' in st.session_state:
+                            del st.session_state.signup_paypal_user
                         st.success(_(f"환영합니다, {l_id}님!", f"Welcome, {l_id}!"))
                         st.rerun()
                 else:
@@ -1464,34 +1454,90 @@ with st.sidebar:
 
         with tab_signup:
             st.header(_("📝 회원가입", "📝 Sign Up"))
-            agreements = show_agreement_ui()
-            s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="s_id")
-            s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="s_pw")
-            s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (2개월, 기능 무제한)", "Official User (2 Months, Unlimited)")), index=0)
-            
-            if "정식" in s_role_selection or "Official" in s_role_selection:
-                st.warning(_("⚠️ 정식 사용자 가입 안내", "⚠️ Official User Signup Guide"))
-                st.info(_("정식 사용자는 입급 전까지 **무료사용자** 권한이 부여됩니다.", "Official users are granted **Free User** authority before payment."))
-                st.info(_("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 2개월 입니다)", "Authority will be upgraded to **Official User** once bank transfer is confirmed by the admin, or you can pay via PayPal for instant upgrade. (Access period is 2 months)"))
-            
-            if st.button(_("가입신청", "Register")):
-                if not agreements.get("agree_personal_info"):
-                    st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
-                elif not validate_email(s_id):
-                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                elif not validate_password(s_pw):
-                    st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
-                else:
-                    restore_from_deleted_sheet(s_id.strip())
-                    initial_role = 'temp'
-                    actual_requested_role = 'official' if ("정식" in s_role_selection or "Official" in s_role_selection) else 'temp'
-                    # 동의 기록을 'Y'로 저장
-                    if add_user(s_id.strip(), s_pw, initial_role, agree_info="Y"):
-                        if actual_requested_role == 'official':
-                            send_application_email(s_id)
-                        st.success(_("무료사용자로 가입 완료 되었습니다", "Successfully registered as a Free User."))
+            if st.session_state.get('signup_paypal_user'):
+                user_id = st.session_state.signup_paypal_user
+                st.markdown("### 💳 Upgrade to Official User via PayPal")
+                st.info(f"You have registered successfully as **{user_id}**. To complete your upgrade to Official User immediately, please use the PayPal button below:")
+                
+                paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+                paypal_html = f"""
+                <div id="paypal-button-container-signup" style="text-align: center; max-width: 100%;"></div>
+                <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD"></script>
+                <script>
+                  paypal.Buttons({{
+                    style: {{
+                      layout: 'vertical',
+                      color:  'gold',
+                      shape:  'rect',
+                      label:  'paypal',
+                      height: 40
+                    }},
+                    createOrder: function(data, actions) {{
+                      return actions.order.create({{
+                        purchase_units: [{{
+                          amount: {{
+                            value: '370.00'
+                          }},
+                          payee: {{
+                            email_address: 'jeon080423@gmail.com'
+                          }}
+                        }}]
+                      }});
+                    }},
+                    onApprove: function(data, actions) {{
+                      return actions.order.capture().then(function(details) {{
+                        window.top.location.href = window.top.location.origin + window.top.location.pathname + "?pay_success=true&user_id=" + encodeURIComponent("{user_id}");
+                      }});
+                    }},
+                    onError: function(err) {{
+                      console.error(err);
+                      alert("Payment failed or was cancelled.");
+                    }}
+                  }}).render('#paypal-button-container-signup');
+                </script>
+                """
+                st.components.v1.html(paypal_html, height=180)
+                
+                if st.button("Back to Login / Sign Up", use_container_width=True, key="back_to_login_btn"):
+                    del st.session_state.signup_paypal_user
+                    st.rerun()
+            else:
+                agreements = show_agreement_ui()
+                s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="s_id")
+                s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="s_pw")
+                s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (2개월, 기능 무제한)", "Official User (2 Months, Unlimited)")), index=0)
+                
+                if "정식" in s_role_selection or "Official" in s_role_selection:
+                    if st.session_state.get('lang', 'ko') == 'en':
+                        st.warning("⚠️ Official User Signup Guide")
+                        st.info("Official users are registered as a **Free User** first.")
+                        st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 2 months)")
                     else:
-                        st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+                        st.warning("⚠️ 정식 사용자 가입 안내")
+                        st.info("정식 사용자는 입급 전까지 **무료사용자** 권한이 부여됩니다.")
+                        st.info("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 2개월 입니다)")
+                
+                if st.button(_("가입신청", "Register")):
+                    if not agreements.get("agree_personal_info"):
+                        st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
+                    elif not validate_email(s_id):
+                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                    elif not validate_password(s_pw):
+                        st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                    else:
+                        restore_from_deleted_sheet(s_id.strip())
+                        initial_role = 'temp'
+                        actual_requested_role = 'official' if ("정식" in s_role_selection or "Official" in s_role_selection) else 'temp'
+                        # 동의 기록을 'Y'로 저장
+                        if add_user(s_id.strip(), s_pw, initial_role, agree_info="Y"):
+                            if actual_requested_role == 'official':
+                                send_application_email(s_id.strip())
+                                if st.session_state.get('lang', 'ko') == 'en':
+                                    st.session_state.signup_paypal_user = s_id.strip()
+                            st.success(_("무료사용자로 가입 완료 되었습니다", "Successfully registered as a Free User."))
+                            st.rerun()
+                        else:
+                            st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
         with tab_find_pw:
             st.header(_("🔑 비밀번호 찾기", "🔑 Find Password"))
