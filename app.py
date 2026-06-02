@@ -1738,39 +1738,6 @@ with st.sidebar:
             st.session_state.admin_mode = False
             st.rerun()
 
-    with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
-        st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
-        if st.session_state.get('lang', 'ko') == 'en':
-            if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
-                st.session_state.page = "guide"
-                st.rerun()
-        else:
-            st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
-
-    with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
-        st.markdown(_("""
-        **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
-        가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
-        
-        **현재 방법의 특징:**
-        1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
-        2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
-        
-        """, """
-        **Correction Method: Iterative Adjustment**
-        If the judgment matrix is inconsistent (CR > threshold) based on Saaty's weight algorithm, it repeatedly adjusts the weights by mixing the original matrix with a mathematically consistent matrix.
-        
-        **Key Features:**
-        1. **Minimal Distortion of Judgments**: Preserves the trends of the original survey responses while securing mathematical consistency.
-        2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
-        
-        """))
-
-    with st.expander(_("💡 사용자 권한 안내", "💡 User Roles & Permissions"), expanded=False):
-        st.info(_("**비로그인(Guest)**: 샘플 파일 분석만 가능", "**Guest**: Sample file analysis only"))
-        st.info(_("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)", "**Free User**: Create custom models, analyze data (up to 5 samples)"))
-        st.info(_("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)", "**Official User**: All features unlimited (2 months, extensible by 1 month)"))
-    
     st.markdown("---")
     analysis_settings_help = """
 ### ⚙️ 분석 설정 상세 안내
@@ -1826,6 +1793,41 @@ with st.sidebar:
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
 
+    st.markdown("---")
+
+    with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
+        st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
+        if st.session_state.get('lang', 'ko') == 'en':
+            if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
+                st.session_state.page = "guide"
+                st.rerun()
+        else:
+            st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
+
+    with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
+        st.markdown(_("""
+        **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
+        가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
+        
+        **현재 방법의 특징:**
+        1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
+        2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
+        
+        """, """
+        **Correction Method: Iterative Adjustment**
+        If the judgment matrix is inconsistent (CR > threshold) based on Saaty's weight algorithm, it repeatedly adjusts the weights by mixing the original matrix with a mathematically consistent matrix.
+        
+        **Key Features:**
+        1. **Minimal Distortion of Judgments**: Preserves the trends of the original survey responses while securing mathematical consistency.
+        2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = Old^{(1-\\alpha)} \\times Ideal^{\\alpha}$)
+        
+        """))
+
+    with st.expander(_("💡 사용자 권한 안내", "💡 User Roles & Permissions"), expanded=False):
+        st.info(_("**비로그인(Guest)**: 샘플 파일 분석만 가능", "**Guest**: Sample file analysis only"))
+        st.info(_("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)", "**Free User**: Create custom models, analyze data (up to 5 samples)"))
+        st.info(_("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)", "**Official User**: All features unlimited (2 months, extensible by 1 month)"))
+    
     st.markdown("---")
     
     if st.session_state.get('lang', 'ko') == 'en':
