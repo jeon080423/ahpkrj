@@ -1588,7 +1588,29 @@ with st.sidebar:
                         st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 2 months)")
                     else:
                         st.warning("⚠️ 정식 사용자 가입 안내")
-                        st.info("정식 사용자는 입급 전까지 **무료사용자** 권한이 부여됩니다.")
+                        acc_info_html = """
+                        <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                          <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 계좌이체 입금 정보</div>
+                          <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
+                            • <b>은행명</b>: 카카오뱅크<br>
+                            • <b>예금주</b>: ㅈㅅㅎ<br>
+                            • <b>이용요금</b>: 50만원<br>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                              <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
+                              <button onclick="(function(){
+                                const el = document.createElement('textarea');
+                                el.value = '3333-23-8667708';
+                                document.body.appendChild(el);
+                                el.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(el);
+                                alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
+                              })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
+                            </div>
+                          </div>
+                        </div>
+                        """
+                        st.markdown(acc_info_html, unsafe_allow_html=True)
                         st.info("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 2개월 입니다)")
                 
                 if st.button(_("가입신청", "Register")):
