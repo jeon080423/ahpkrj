@@ -1698,7 +1698,12 @@ with st.sidebar:
 
     with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
         st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
-        st.link_button(_("이용자 가이드 바로가기", "Go to User Guide"), "https://morison.tistory.com/103", use_container_width=True)
+        if st.session_state.get('lang', 'ko') == 'en':
+            if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
+                st.session_state.page = "guide"
+                st.rerun()
+        else:
+            st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
 
     with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
         st.markdown(_("""
@@ -1800,6 +1805,87 @@ with st.sidebar:
 # =============================================================================
 # 4. Main Content Logic
 # =============================================================================
+
+if st.session_state.get('page', 'main') == 'guide':
+    if st.button("← Back to AHP Analysis Tool", use_container_width=True, key="btn_back_to_main"):
+        st.session_state.page = "main"
+        st.rerun()
+    
+    st.title("📖 AHP Master - English User Guide")
+    st.markdown("""
+    🚀 **Welcome!** **AHP Master** is a smart web service that automatically processes the entire Analytic Hierarchy Process (AHP) workflow in 1 second, without requiring complex equations or statistical software.
+    This guide is designed to walk first-time users through the step-by-step process of completing their academic thesis statistics and decision analysis smoothly.
+    
+    ---
+    
+    ### 📌 Step 1: Prepare the Excel Template (Write & Customize)
+    AHP Master uses a specifically formatted Excel file to read your survey data.
+    
+    1. **Download Template**: Go to the AHP Master website (https://ahpkrj.streamlit.app/) and click the **[Download Excel Template]** button on the home screen.
+    2. **🔥 Customize to Fit Your Model (Important)**:
+       * The default template items (evaluation criteria, alternatives, etc.) and hierarchical structure can be freely edited to match your specific research model.
+       * You can add or delete criteria to construct your own custom AHP model.
+    3. **Enter Survey Data**: Open the customized Excel template and enter your pairwise comparison survey responses.
+       * **Evaluation Scale**: Uses Saaty's 1-9 fundamental scale (e.g., enter 7 if item A is much more important than B, enter 1 if they are equally important).
+       * **Note**: Be careful not to break the core structure (sheet configuration, etc.) of the template.
+    
+    ### 📥 Step 2: Upload File & Run Basic Analysis
+    Once your data entry is complete, it's time to run the analysis.
+    
+    1. **File Upload**: Drag and drop your Excel file into the **[Drag and drop file here]** zone in the center of the screen, or click **[Browse files]** to select your file.
+    2. **Automatic Execution**: The system will instantly run the complex matrix calculations in the background. Basic analysis typically completes in 1 to 3 seconds.
+    
+    ### ⚙️ Step 3: Utilize [Analysis Settings] in the Sidebar
+    After uploading, you can fine-tune the analysis details through the "Analysis Settings" in the left sidebar to suit your research methodology.
+    
+    1. **Select Aggregation Method**:
+       * You can set specific parameters like the weight integration method (Geometric Mean vs. Arithmetic Mean) or the decimal precision required for your research.
+    2. **CR Calibration Settings (Optional)**:
+       * You can set boundaries such as how much you allow the original response to change (Correction Intensity/Learning Rate) when performing Consistency Ratio (CR) calibration.
+       * *(If accessing on a mobile device, tap the `>` icon in the top left to reveal the sidebar menu.)*
+    
+    ### 📊 Step 4: Consistency Validation & Automatic Calibration (CR)
+    This is the step to validate the logical consistency of responses, which is critical in AHP academic studies.
+    
+    1. **Check Initial CR Value**: Check the **Consistency Ratio (CR)** displayed in the results panel.
+       * `CR < 0.1` (Green): Indicates highly consistent and logical responses (Passed).
+       * `CR > 0.1` (Red): Indicates logical contradictions exceed the standard limit (Needs Calibration).
+    2. **🔥 One-Click Auto Calibration**: If the initial CR value exceeds 0.1, do not worry. Simply click the **[CR Auto Calibration]** button. AHP Master's optimization algorithm will adjust the CR value to under 0.1 automatically, preserving the original response preferences as much as possible.
+    
+    ### 🏆 Step 5: Check Weights & Save Results
+    Once all validations and settings are complete, use the final results in your report or paper.
+    
+    1. **Check Weights & Rankings**:
+       * **Main/Sub-Criteria Weights**: View the weight percentages and decimals representing the importance of each item.
+       * **Global Rank**: View the overall 1st-to-last rankings of the items in an intuitive table and visual Plotly charts.
+    2. **Download Results (Excel/Image)**:
+       * Click the **[Download Results (Excel)]** button at the bottom of the screen to save the results in a clean table format ready to copy-paste.
+       * Click the camera icon in the top right of the Plotly charts to save the charts as high-resolution images (PNG).
+    
+    ---
+    
+    ### 💡 Frequently Asked Questions (FAQ)
+    
+    * **Q1. Can I change the template items to fit my specific paper?**
+      * **Yes, absolutely!** The default template is only an example. You can add or delete rows and columns, rename text, and modify items to build **your own custom hierarchical model (Custom Model)** to fit your evaluation criteria and alternative count.
+    * **Q2. Can I analyze data from multiple survey respondents (group analysis) at once?**
+      * Yes! If you have multiple respondents, you can calculate the geometric mean of individual pairwise comparisons in Excel, enter the aggregated figures into the template, and upload it to calculate the group weights at once.
+    * **Q3. I see an "Error" message during upload. Why?**
+      * In the customization process, the required sheets' layout may have been broken, or some number input cells might have empty (Null) values or text instead of numbers. Please review your Excel template to ensure all numeric inputs are complete.
+    
+    ---
+    
+    ### 💬 Contact & Support
+    If you have any questions during analysis, or need custom AHP consulting (expert survey execution, thesis statistical consulting, etc.), please contact us:
+    * **Email**: jeon080423@gmail.com
+    * **KakaoTalk ID**: AHPkr
+    * **Mobile**: 010-2142-2610
+    """)
+    
+    if st.button("← Back to AHP Analysis Tool", use_container_width=True, key="btn_back_to_main_bottom"):
+        st.session_state.page = "main"
+        st.rerun()
+    st.stop()
 
 # 메인 헤더 영역
 st.title(_("AHP 분석 자동화 시스템", "AHP Automated Decision System"))
