@@ -3317,7 +3317,7 @@ if uploaded_file:
                             fig_all = px.violin(cr_df, y="CR", x="Sheet", box=True, points="all",
                                                hover_data=cr_df.columns, title=_("[전체 표본] 일관성 비율(CR) 분포", "[Overall Samples] Consistency Ratio (CR) Distribution"),
                                                color_discrete_sequence=["#7f7f7f"]) # 전체는 회색 계열
-                            fig_all.update_traces(spanmode='soft')
+                            fig_all.update_traces(spanmode='soft', pointpos=0, jitter=0.5, marker=dict(opacity=0.6, size=5))
                             # Y축 범위를 자동(Auto)으로 맡겨 꼬리(하단/상단)가 잘리지 않고 뾰족하게 보이도록 수정
                             st.plotly_chart(fig_all, use_container_width=True)
                             st.markdown("---")
@@ -3328,7 +3328,7 @@ if uploaded_file:
                             fig_violin = px.violin(g_df, y="CR", x="Sheet", box=True, points="all",
                                                    hover_data=g_df.columns, title=_(f"[{g_type}] 일관성 비율(CR) 분포", f"[{g_type}] Consistency Ratio (CR) Distribution"),
                                                    color_discrete_sequence=[color_map.get(g_type, "#1f77b4")])
-                            fig_violin.update_traces(spanmode='soft')
+                            fig_violin.update_traces(spanmode='soft', pointpos=0, jitter=0.5, marker=dict(opacity=0.6, size=5))
                             # Y축 범위를 자동(Auto)으로 맡겨 꼬리가 잘리지 않도록 수정
                             st.plotly_chart(fig_violin, use_container_width=True)
 
