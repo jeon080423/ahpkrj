@@ -108,28 +108,28 @@ try:
         logo_img = "📊"
     
     st.set_page_config(
-        page_title=_("AHP 마스터", "AHP Master | Decision Analysis System"), 
+        page_title=_("AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템", "AHP Master | Traditional & Fuzzy AHP Decision Analysis System"), 
         layout="wide", 
         page_icon=logo_img,
         menu_items={
             'Get Help': None,
             'Report a bug': None,
-            'About': _("AHP 마스터 - 스마트 의사결정 분석 시스템", "AHP Master - Smart Decision Analysis System")
+            'About': _("AHP 마스터 - 스마트 일반 및 퍼지 AHP 의사결정 분석 시스템", "AHP Master - Smart Traditional & Fuzzy AHP Decision Analysis System")
         }
     )
 except Exception:
-    st.set_page_config(page_title=_("AHP 마스터", "AHP Master"), layout="wide", page_icon="📊")
+    st.set_page_config(page_title=_("AHP 마스터 | 퍼지 AHP 지원", "AHP Master | Fuzzy AHP Support"), layout="wide", page_icon="📊")
 
 # [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
 seo_tags = """
     <div style="display:none;">
         <head>
             <meta name="google-site-verification" content="KbMsp4y15le5XNyK05UEr6Nq6" />
-            <meta name="description" content="AHP Master (AHP 마스터) - Professional Analytic Hierarchy Process (AHP) automation tool for thesis, research papers, and policy studies. Supports automatic Consistency Ratio (CR) calibration, statistical group testing (ANOVA), and instant Excel reports. 학위 논문 및 정책 연구를 위한 최적의 AHP 분석 자동화 솔루션. 일관성 비율(CR) 자동 보정 및 통계 검정 제공." />
-            <meta name="keywords" content="AHP, AHP Master, AHP 마스터, AHP Calculator, AHP 계산기, analytic hierarchy process, consistency ratio, CR calibration, 일관성 보정, ANOVA, group analysis, thesis statistics, 학위논문통계, 무료 AHP 프로그램, AHP software" />
+            <meta name="description" content="AHP Master (AHP 마스터) - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP (퍼지 AHP) automation tool for thesis, research papers, and policy studies. Supports automatic Consistency Ratio (CR) calibration, statistical group testing (ANOVA), and instant Excel reports. 학위 논문 및 정책 연구를 위한 최적의 AHP 및 퍼지 AHP 분석 자동화 솔루션. 일관성 비율(CR) 자동 보정 및 통계 검정 제공." />
+            <meta name="keywords" content="AHP, Fuzzy AHP, 퍼지 AHP, Fuzzy AHP 계산기, Fuzzy AHP 프로그램, AHP Master, AHP 마스터, AHP Calculator, AHP 계산기, analytic hierarchy process, consistency ratio, CR calibration, 일관성 보정, ANOVA, group analysis, thesis statistics, 학위논문통계, 무료 AHP 프로그램, AHP software" />
             <meta name="author" content="AHP Master" />
-            <meta property="og:title" content="AHP Master (AHP 마스터) - Analytic Hierarchy Process Automation System" />
-            <meta property="og:description" content="Advanced AHP decision software with mathematical consistency calibration and statistical group comparison. 수학적 일관성 보정과 고도화된 통계 분석을 지원하는 최신 AHP 전문 도구" />
+            <meta property="og:title" content="AHP Master (AHP 마스터) - Traditional & Fuzzy AHP Automation System" />
+            <meta property="og:description" content="Advanced AHP & Fuzzy AHP decision software with mathematical consistency calibration and statistical group comparison. 수학적 일관성 보정과 고도화된 통계 및 퍼지 AHP 분석을 지원하는 전문 도구" />
             <meta property="og:type" content="website" />
             <meta name="robots" content="index, follow" />
         </head>
