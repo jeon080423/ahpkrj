@@ -1462,7 +1462,7 @@ with st.sidebar:
                 paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                 paypal_html = f"""
                 <div id="paypal-button-container-signup" style="text-align: center; max-width: 100%;"></div>
-                <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD"></script>
+                <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
                 <script>
                   paypal.Buttons({{
                     style: {{
@@ -1597,7 +1597,7 @@ with st.sidebar:
                     
                     paypal_html = f"""
                     <div id="paypal-button-container" style="text-align: center; max-width: 100%;"></div>
-                    <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD"></script>
+                    <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
                     <script>
                       paypal.Buttons({{
                         style: {{
@@ -2991,7 +2991,7 @@ if uploaded_file:
                         
                         paypal_html = f"""
                         <div id="paypal-button-container-main" style="text-align: center; max-width: 100%;"></div>
-                        <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD"></script>
+                        <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
                         <script>
                           paypal.Buttons({{
                             style: {{
