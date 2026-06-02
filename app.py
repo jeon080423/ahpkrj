@@ -1134,8 +1134,8 @@ def create_sample_excel():
     is_en = (st.session_state.get('lang', 'ko') == 'en')
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         if is_en:
-            main_cols = ["ID", "Type", "Governance_Planning", "Governance_Feasibility", "Governance_Effect", 
-                          "Planning_Feasibility", "Planning_Effect", "Feasibility_Effect"]
+            main_cols = ["ID", "Type", "Governance_Planning", "Governance_Feasibility", "Governance_Effectiveness", 
+                          "Planning_Feasibility", "Planning_Effectiveness", "Feasibility_Effectiveness"]
             main_data = [
                 [1, "Expert", -3, -3, 3, 1, 1, 1],                
                 [2, "Expert", -5, 3, 3, 3, 3, 3],        
