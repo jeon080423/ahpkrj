@@ -3232,6 +3232,7 @@ if uploaded_file:
                             fig_all = px.violin(cr_df, y="CR", x="Sheet", box=True, points="all",
                                                hover_data=cr_df.columns, title=_("[전체 표본] 일관성 비율(CR) 분포", "[Overall Samples] Consistency Ratio (CR) Distribution"),
                                                color_discrete_sequence=["#7f7f7f"]) # 전체는 회색 계열
+                            fig_all.update_traces(spanmode='hard')
                             st.plotly_chart(fig_all, use_container_width=True)
                             st.markdown("---")
  
@@ -3241,6 +3242,7 @@ if uploaded_file:
                             fig_violin = px.violin(g_df, y="CR", x="Sheet", box=True, points="all",
                                                    hover_data=g_df.columns, title=_(f"[{g_type}] 일관성 비율(CR) 분포", f"[{g_type}] Consistency Ratio (CR) Distribution"),
                                                    color_discrete_sequence=[color_map.get(g_type, "#1f77b4")])
+                            fig_violin.update_traces(spanmode='hard')
                             st.plotly_chart(fig_violin, use_container_width=True)
 
                         if ahp_method == 'fuzzy':
