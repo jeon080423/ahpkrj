@@ -1220,7 +1220,7 @@ def calculate_anova_and_posthoc(full_data):
                 sig_pairs = tukey_df[tukey_df['reject'] == True]
                 if not sig_pairs.empty:
                     pairs_str = []
-                    for _, r in sig_pairs.iterrows():
+                    for idx_row, r in sig_pairs.iterrows():
                         pairs_str.append(f"{r['group1']} vs {r['group2']}")
                     row["사후검정(Tukey HSD)"] = ", ".join(pairs_str) + " 차이 있음"
                 else:
@@ -3008,14 +3008,14 @@ if uploaded_file:
                     # CR 값 추출을 위한 데이터 정제
                     cr_dist_data = []
                     # 메인 시트 CR
-                    for _, r in main_results_df.iterrows():
+                    for idx_row, r in main_results_df.iterrows():
                         g_type_val = str(r['Type'])
                         if is_english:
                             g_type_val = g_type_val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
                         cr_dist_data.append({"Type": g_type_val, "Sheet": "Main_Criteria", "CR": r['Final_CR']})
                     # 하위 시트 CR
                     for mf, info in sub_results_storage.items():
-                        for _, r in info['df'].iterrows():
+                        for idx_row, r in info['df'].iterrows():
                             g_type_val = str(r['Type'])
                             if is_english:
                                 g_type_val = g_type_val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
