@@ -2995,6 +2995,10 @@ if uploaded_file:
                 if st.session_state.user_role == 'official':
                     save_analysis_to_db(st.session_state.user_id, f"{uploaded_file.name.split('.')[0]}_Result.xlsx", output_res.getvalue())
 
+                # 결과 휘발성 주의 안내
+                st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;">⚠️ 주의: 페이지를 새로고침하거나 브라우저를 닫으면 분석 결과가 저장되지 않고 리셋되므로, 결과물 엑셀 파일(📑 결과 다운로드 탭)을 반드시 다운로드하여 저장해 주세요.</p>',
+                              '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;">⚠️ Warning: Analysis results are not stored and will be reset if you refresh the page or close the browser. Please make sure to download and save the results Excel file (📑 Download Results tab).</p>'), unsafe_allow_html=True)
+
                 tab1, tab2, tab3, tab4, tab5 = st.tabs([
                     _("🌐 종합 분석 (Global)", "🌐 Global Comprehensive Analysis"),
                     _("👨‍👩‍👧‍👦 그룹별 분석", "👨‍👩‍👧‍👦 Group Analysis"),
@@ -3303,6 +3307,8 @@ if uploaded_file:
                             )
 
                 with tab5:
+                    st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
+                                  '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
                     st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx")
                     if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
                         disp_radar_df = radar_indiv_df.copy()
