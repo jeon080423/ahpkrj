@@ -1900,8 +1900,8 @@ if st.session_state.get('page', 'main') == 'guide':
 # 메인 헤더 영역
 st.title(_("AHP 분석 자동화 시스템", "AHP Automated Decision System"))
 
-st.markdown(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다. 엑셀 파일을 업로드하면 개인별 가중치 산출, 일관성 보정(CR), 그룹별 집계 결과를 제공합니다.",
-              "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool. Upload an Excel file to get individual weights, Consistency Ratio (CR) correction, and group aggregation results."))
+st.markdown(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다. 일반 AHP뿐만 아니라 삼각퍼지수(TFN)를 활용한 퍼지 AHP(Fuzzy AHP) 분석도 함께 지원하며, 엑셀 파일을 업로드하면 개인별 가중치 산출, 일관성 보정(CR), 그룹별 집계 결과를 제공합니다.",
+              "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool. It supports both traditional AHP and Fuzzy AHP analysis utilizing Triangular Fuzzy Numbers (TFN), and provides individual weights, Consistency Ratio (CR) correction, and group aggregation results upon uploading an Excel file."))
 
 with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
     st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
@@ -2061,8 +2061,8 @@ else:
             default_subs = saved_model.get('subs', default_subs)
 
     with st.expander(_("📌 나의 분석 모델 만들기", "📌 Create Custom AHP Model"), expanded=True):
-        st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 삭제하시고 이용자님의 AHP 모델을 입력하세요.",
-                  "Enter main criteria and sub-criteria to generate your custom Excel template.\n\nThe content below is a sample model. Feel free to clear it and enter your own AHP elements."))
+        st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 삭제하시고 이용자님의 AHP 모델을 입력하세요.",
+                  "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. Feel free to clear it and enter your own AHP elements."))
         main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
         main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
         
