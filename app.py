@@ -1786,7 +1786,7 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
 
-    with st.expander(_("⚙️ 분석 설정", "⚙️ Analysis Settings"), expanded=False):
+    with st.expander(_("⚙️ AHP 분석 설정", "⚙️ Analysis Settings"), expanded=False):
         st.markdown('<div class="analysis-settings-marker"></div>', unsafe_allow_html=True)
         ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
         ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
