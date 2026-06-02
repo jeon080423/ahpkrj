@@ -1458,7 +1458,6 @@ with st.sidebar:
         tab_login, tab_signup, tab_find_pw = st.tabs([_("로그인", "Login"), _("회원가입", "Sign Up"), _("비밀번호 찾기", "Find Password")])
         
         with tab_login:
-            st.header(_("🔐 로그인", "🔐 Login"))
             l_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="l_id")
             l_pw = st.text_input(_("비밀번호 (PW)", "Password (PW)"), type="password", key="l_pw")
             if st.button(_("로그인 실행", "Login")):
@@ -1495,7 +1494,6 @@ with st.sidebar:
                     st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
 
         with tab_signup:
-            st.header(_("📝 회원가입", "📝 Sign Up"))
             if st.session_state.get('signup_paypal_user'):
                 user_id = st.session_state.signup_paypal_user
                 st.markdown("### 💳 Upgrade to Official User via PayPal")
@@ -1582,7 +1580,6 @@ with st.sidebar:
                             st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
         with tab_find_pw:
-            st.header(_("🔑 비밀번호 찾기", "🔑 Find Password"))
             st.write(_("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.",
                        "Please enter the email address used at registration. A new temporary password will be sent to your email."))
             f_id = st.text_input(_("가입한 아이디 (이메일)", "Registered ID (Email)"), key="f_id")
@@ -1615,21 +1612,17 @@ with st.sidebar:
         # 만료일 정보 처리
         expiry_info = ""
         if st.session_state.expiry_date:
-            expiry_label = _("사용 만료일: ", "Expiry Date: ")
-            expiry_info = f'<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #fffde7; border: 1px solid #fff9c4; border-radius: 6px; color: #f57f17; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">📅 {expiry_label}{st.session_state.expiry_date}</div>'
+            expiry_label = _("만료일: ", "Expiry: ")
+            expiry_info = f' | {expiry_label}{st.session_state.expiry_date}'
             
         # 세련된 HTML 로그인 정보 카드 렌더링 (인덴트 제거로 마크다운 코드블록 변환 방지)
-        user_suffix = _(" 님", "")
-        role_label = _("권한: ", "Role: ")
-        info_html = f"""<div style="display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 10px;">
-<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">{st.session_state.user_id}{user_suffix}</div>
-<div style="display: flex; align-items: center; justify-content: center; height: 38px; background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; color: #1565c0; font-weight: bold; font-size: 0.9rem; padding: 0 10px;">{role_label}{role_disp}</div>
-{expiry_info}
+        info_html = f"""<div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.85rem; padding: 8px 10px; text-align: center; margin-bottom: 8px;">
+👤 {st.session_state.user_id} ({role_disp}{expiry_info})
 </div>"""
         st.markdown(info_html, unsafe_allow_html=True)
         
         if st.session_state.user_role == 'temp':
-            with st.container(border=True):
+            with st.expander(_("💳 정식 사용자 승격/결제", "💳 Upgrade to Official User"), expanded=False):
                 if st.session_state.lang == 'en':
                     st.markdown("##### 💳 PayPal Membership Upgrade")
                     st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$330.00 USD**.")
