@@ -928,6 +928,38 @@ def calculate_consistency(matrix, method='geometric'):
     cr = ci / ri if ri > 0 else 0.0
     return cr, ci, lambda_max
 
+FUZZY_SCALE = {
+    1: (1.0, 1.0, 1.0), 2: (1.0, 2.0, 3.0), 3: (2.0, 3.0, 4.0), 4: (3.0, 4.0, 5.0), 5: (4.0, 5.0, 6.0),
+    6: (5.0, 6.0, 7.0), 7: (6.0, 7.0, 8.0), 8: (7.0, 8.0, 9.0), 9: (9.0, 9.0, 9.0)
+}
+
+def saaty_to_fuzzy(v):
+    try:
+        val = max(1, min(9, int(round(v)))) if v >= 1 else max(1, min(9, int(round(1/v))))
+        tfn = FUZZY_SCALE[val]
+        if v < 1: return (1.0/tfn[2], 1.0/tfn[1], 1.0/tfn[0])
+        return tfn
+    except: return (1.0, 1.0, 1.0)
+
+def fuzzy_ahp_analysis(matrix):
+    n = matrix.shape[0]
+    fuzzy_mat = np.zeros((n, n, 3))
+    for i in range(n):
+        for j in range(n):
+            if i == j: fuzzy_mat[i,j] = (1.0, 1.0, 1.0)
+            else: fuzzy_mat[i,j] = saaty_to_fuzzy(matrix[i,j])
+    row_sums = []
+    for i in range(n): 
+        row_sums.append((sum(fuzzy_mat[i,:,0]), sum(fuzzy_mat[i,:,1]), sum(fuzzy_mat[i,:,2])))
+    t_l, t_m, t_u = sum(x[0] for x in row_sums), sum(x[1] for x in row_sums), sum(x[2] for x in row_sums)
+    if t_l == 0: return np.ones(n)/n, row_sums
+    Si = []
+    for (l, m, u) in row_sums: 
+        Si.append((l/t_u if t_u!=0 else 0.0, m/t_m if t_m!=0 else 0.0, u/t_l if t_l!=0 else 0.0))
+    crisp_w = np.array([(l*m*u)**(1/3) for (l,m,u) in Si])
+    norm_w = crisp_w / crisp_w.sum() if crisp_w.sum() != 0 else np.ones(n)/n
+    return norm_w, Si
+
 def improve_consistency(matrix, threshold, min_val, max_val, max_iter=500, learning_rate=0.6, method='geometric'):
     current_matrix = matrix.copy()
     n = current_matrix.shape[0]
@@ -1030,7 +1062,7 @@ def calculate_pairwise_ttest(df, factors):
                     p_values.iloc[i, j] = np.nan
     return p_values
 
-def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geometric'):
+def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geometric', ahp_method='traditional'):
     meta_cols = df.columns[:2]
     comp_cols = df.columns[2:]
     factors, n = infer_factors_from_columns(comp_cols)
@@ -1092,7 +1124,10 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
                 final_raw_values.append(final_raw_val)
 
         _unused_cr, final_ci, _unused_lambda = calculate_consistency(final_matrix, method)
-        final_weights = calculate_weights(final_matrix, method)
+        if ahp_method == 'fuzzy':
+            final_weights, final_Si = fuzzy_ahp_analysis(final_matrix)
+        else:
+            final_weights = calculate_weights(final_matrix, method)
         
         # 결과 딕셔너리 구성 (요청사항 5 재배치 반영)
         res = {
@@ -1122,6 +1157,12 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         
         for f_idx, f_name in enumerate(factors):
             res[f"Weight_{f_name}"] = final_weights[f_idx]
+            if ahp_method == 'fuzzy':
+                l, m, u = final_Si[f_idx]
+                res[f"L_{f_name}"] = l
+                res[f"M_{f_name}"] = m
+                res[f"U_{f_name}"] = u
+                res[f"Crisp_{f_name}"] = (l*m*u)**(1/3)
             
         results_list.append(res)
         
@@ -1773,6 +1814,8 @@ with st.sidebar:
    - **High (0.7~0.9)**: Quick mathematical consistency, but may alter original responses more.
 """
     st.header(_("분석 설정", "Analysis Settings"), help=_(analysis_settings_help, analysis_settings_help_en))
+    ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
+    ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
     mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
     mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
     cr_threshold = st.selectbox(_("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), [0.1, 0.2], index=0)
@@ -2302,7 +2345,7 @@ if uploaded_file:
                     # 1. 메인 시트 분석 시도
                     try:
                         main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(
-                            df_main, cr_threshold, max_iter_val, learning_rate, mean_method
+                            df_main, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
                         )
                     except Exception as e:
                         st.error(_("❌ [메인 시트] 분석 중 오류가 발생했습니다.", "❌ Error occurred during [Main Criteria] analysis."))
@@ -2412,7 +2455,7 @@ if uploaded_file:
                             try:
                                 df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
                                 sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
-                                    df_sub, cr_threshold, max_iter_val, learning_rate, mean_method
+                                    df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
                                 )
                                 
                                 if sub_res_df.empty:
@@ -2420,17 +2463,23 @@ if uploaded_file:
                                     
                                 # 통계 계산 로직
                                 sub_w_cols = [f"Weight_{f}" for f in sub_facts]
-                                group_sub_w = sub_res_df[sub_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(sub_res_df[sub_w_cols].values, axis=0)
-                                group_sub_w = group_sub_w / group_sub_w.sum()
                                 sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
                                 sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
                                 sub_grp_cr, sub_grp_ci, _not_used_lambda = calculate_consistency(sub_group_matrix, method=mean_method)
+                                
+                                if ahp_method == 'fuzzy':
+                                    sw_vals, sub_group_Si = fuzzy_ahp_analysis(sub_group_matrix)
+                                    group_sub_w = pd.Series(sw_vals, index=sub_w_cols)
+                                else:
+                                    sub_group_Si = None
+                                    group_sub_w = sub_res_df[sub_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(sub_res_df[sub_w_cols].values, axis=0)
+                                    group_sub_w = group_sub_w / group_sub_w.sum()
                                 
                                 sub_results_storage[parent_factor] = {
                                     'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
                                     'ci': sub_res_df['Final_CI'].mean(),
                                     'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr,
-                                    'group_ci': sub_grp_ci
+                                    'group_ci': sub_grp_ci, 'group_Si': sub_group_Si
                                 }
                                 if not sub_excl_df.empty:
                                     sub_excl_df['Sheet'] = parent_factor
@@ -2460,16 +2509,22 @@ if uploaded_file:
                     main_sig_df = calculate_pairwise_ttest(main_results_df, main_factors)
                     main_weight_cols = [f"Weight_{f}" for f in main_factors]
                     
-                    if mean_method == 'arithmetic':
-                        group_main_weights = main_results_df[main_weight_cols].mean(axis=0)
-                    else:
-                        group_main_weights = gmean(main_results_df[main_weight_cols].values, axis=0)
-                    group_main_weights = group_main_weights / group_main_weights.sum()
-                    main_cr_final_avg = main_results_df['Final_CR'].mean()
-                    
                     main_matrices = np.stack(main_results_df['Matrix_Object'].values)
                     main_group_matrix = np.mean(main_matrices, axis=0) if mean_method == 'arithmetic' else gmean(main_matrices, axis=0)
                     main_grp_cr, main_grp_ci, _not_used_lambda = calculate_consistency(main_group_matrix, mean_method)
+                    
+                    if ahp_method == 'fuzzy':
+                        mw_vals, main_group_Si = fuzzy_ahp_analysis(main_group_matrix)
+                        group_main_weights = pd.Series(mw_vals, index=main_weight_cols)
+                    else:
+                        main_group_Si = None
+                        if mean_method == 'arithmetic':
+                            group_main_weights = main_results_df[main_weight_cols].mean(axis=0)
+                        else:
+                            group_main_weights = gmean(main_results_df[main_weight_cols].values, axis=0)
+                        group_main_weights = group_main_weights / group_main_weights.sum()
+                    
+                    main_cr_final_avg = main_results_df['Final_CR'].mean()
                     
                     indiv_global_data = []
                     all_ids = main_results_df['ID'].unique()
@@ -2524,11 +2579,16 @@ if uploaded_file:
                     for grp in unique_groups:
                         grp_main_df = main_results_df[main_results_df['Type'].astype(str) == grp]
                         if grp_main_df.empty: continue
-                        g_main_w = grp_main_df[main_weight_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_main_df[main_weight_cols].values, axis=0)
-                        g_main_w = g_main_w / g_main_w.sum()
                         g_main_mats = np.stack(grp_main_df['Matrix_Object'].values)
                         g_main_mat_obj = np.mean(g_main_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_main_mats, axis=0)
                         g_main_cr, g_main_ci, _not_used_lambda = calculate_consistency(g_main_mat_obj, method=mean_method)
+                        
+                        if ahp_method == 'fuzzy':
+                            mw_vals_grp, _ = fuzzy_ahp_analysis(g_main_mat_obj)
+                            g_main_w = pd.Series(mw_vals_grp, index=main_weight_cols)
+                        else:
+                            g_main_w = grp_main_df[main_weight_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_main_df[main_weight_cols].values, axis=0)
+                            g_main_w = g_main_w / g_main_w.sum()
                         
                         grp_rows = []
                         for idx, main_f in enumerate(main_factors):
@@ -2538,11 +2598,17 @@ if uploaded_file:
                             sub_facts = sub_results_storage[main_f]['factors']
                             if grp_sub_df.empty: continue
                             s_w_cols = [f"Weight_{f}" for f in sub_facts]
-                            g_sub_w = grp_sub_df[s_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_sub_df[s_w_cols].values, axis=0)
-                            g_sub_w = g_sub_w / g_sub_w.sum()
                             g_sub_mats = np.stack(grp_sub_df['Matrix_Object'].values)
                             g_sub_mat_obj = np.mean(g_sub_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_sub_mats, axis=0)
                             g_sub_cr, g_sub_ci, _not_used_lambda = calculate_consistency(g_sub_mat_obj, method=mean_method)
+                            
+                            if ahp_method == 'fuzzy':
+                                sw_vals_grp, _ = fuzzy_ahp_analysis(g_sub_mat_obj)
+                                g_sub_w = pd.Series(sw_vals_grp, index=s_w_cols)
+                            else:
+                                g_sub_w = grp_sub_df[s_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_sub_df[s_w_cols].values, axis=0)
+                                g_sub_w = g_sub_w / g_sub_w.sum()
+                                
                             for s_idx, sf in enumerate(sub_facts):
                                 grp_rows.append({
                                     "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": g_sub_w[s_idx],
@@ -3053,6 +3119,40 @@ if uploaded_file:
                                                    hover_data=g_df.columns, title=_(f"[{g_type}] 일관성 비율(CR) 분포", f"[{g_type}] Consistency Ratio (CR) Distribution"),
                                                    color_discrete_sequence=[color_map.get(g_type, "#1f77b4")])
                             st.plotly_chart(fig_violin, use_container_width=True)
+
+                        if ahp_method == 'fuzzy':
+                            st.markdown("---")
+                            st.write(_("**퍼지 삼각가중치 분포 (TFN Graph)**", "**Triangular Fuzzy Numbers (TFN Graph)**"))
+                            tfn_options = ["Main_Criteria"] + list(sub_results_storage.keys())
+                            selected_tfn_sheet = st.selectbox(
+                                _("TFN 시각화 대상 시트 선택", "Select Sheet for TFN Visualization"), 
+                                tfn_options, 
+                                key="selectbox_tfn_sheet"
+                            )
+                            if selected_tfn_sheet == "Main_Criteria":
+                                tfn_Si = main_group_Si
+                                tfn_factors = main_factors
+                            else:
+                                tfn_Si = sub_results_storage[selected_tfn_sheet]['group_Si']
+                                tfn_factors = sub_results_storage[selected_tfn_sheet]['factors']
+                            
+                            fig_tfn = go.Figure()
+                            for i, (l, m, u) in enumerate(tfn_Si):
+                                fig_tfn.add_trace(go.Scatter(
+                                    x=[l, m, u], 
+                                    y=[0, 1, 0], 
+                                    mode='lines+markers', 
+                                    name=tfn_factors[i],
+                                    line=dict(width=2)
+                                ))
+                            fig_tfn.update_layout(
+                                xaxis_title=_("가중치 값 (Weight Value)", "Weight Value"),
+                                yaxis_title=_("소속도 (Membership Degree)", "Membership Degree"),
+                                height=350,
+                                margin=dict(l=20, r=20, t=30, b=20),
+                                hovermode="x unified"
+                            )
+                            st.plotly_chart(fig_tfn, use_container_width=True)
 
                 with tab5:
                     st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx")
