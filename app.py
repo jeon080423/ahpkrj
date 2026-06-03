@@ -2169,7 +2169,11 @@ with col_main:
                     sub_list = [x.strip() for x in sub_input.split(',') if x.strip()]
                     model_structure[mc] = sub_list
             
-            if st.button(_("설정한 모델로 입력 엑셀 템플릿 생성", "Generate Excel Template with this Model")):
+            col1, col2 = st.columns(2)
+            with col1:
+                generate_clicked = st.button(_("1️⃣ 설정한 모델로 입력 엑셀 템플릿 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
+            
+            if generate_clicked:
                 if not main_criteria_list:
                     st.error(_("대항목 입력 필요", "Main criteria input is required"))
                 else:
@@ -2196,12 +2200,18 @@ with col_main:
                             safe_sheet_name = mc[:31]
                             df_sub.to_excel(writer, sheet_name=safe_sheet_name, index=False)
                     output_template.seek(0)
-                    st.download_button(
-                        label=_("📥 엑셀 템플릿 다운로드", "📥 Download Excel Template"),
-                        data=output_template,
-                        file_name="AHP_Master_Template.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
+                    
+                    with col2:
+                        st.download_button(
+                            label=_("2️⃣ 📥 엑셀 템플릿 다운로드", "2️⃣ 📥 Download Excel Template"),
+                            data=output_template,
+                            file_name="AHP_Master_Template.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True
+                        )
+                    
+                    st.info(_("💡 **안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 엑셀 템플릿 파일을 저장하세요.", 
+                              "💡 **Info:** The model has been generated and saved. Click the 2nd button on the right to download the Excel template file to your computer."))
     
                     st.markdown(_("""
                     ---
