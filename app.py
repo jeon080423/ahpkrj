@@ -1831,33 +1831,8 @@ with st.sidebar:
             st.query_params.pop("login_token", None)
             st.rerun()
 
-    # 분석 설정에만 세련된 스타일 적용 (Expander 내부에 마커를 삽입하여 타겟팅)
-    st.markdown("""
-    <style>
-    div[data-testid="stExpander"]:has(.analysis-settings-marker) details summary {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        border-radius: 8px;
-        padding: 10px 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    div[data-testid="stExpander"]:has(.analysis-settings-marker) details summary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    div[data-testid="stExpander"]:has(.analysis-settings-marker) details summary p {
-        color: white !important;
-        font-weight: bold !important;
-        font-size: 1.05rem !important;
-    }
-    div[data-testid="stExpander"]:has(.analysis-settings-marker) details summary svg {
-        color: white !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    with st.expander(_("⚙️ AHP 분석 설정", "⚙️ Analysis Settings"), expanded=False):
-        st.markdown('<div class="analysis-settings-marker"></div>', unsafe_allow_html=True)
+        st.markdown("---")
+        st.markdown(f'<h3 style="color:#4f46e5; font-family:\'Arial\', sans-serif; font-weight:bold; margin-bottom:10px;">⚙️ {_("AHP 분석 설정", "Analysis Settings")}</h3>', unsafe_allow_html=True)
         ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
         ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
         mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
