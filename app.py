@@ -1986,7 +1986,7 @@ col_main, col_settings = st.columns([3.0, 1.1], gap="large")
 
 with col_settings:
     with st.container(border=True):
-        st.markdown(f'<h4 style="color:#4f46e5; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">⚙️ {_("AHP 분석 설정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
+        st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("AHP 분석 설정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
         ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
         ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
         mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
