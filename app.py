@@ -2271,14 +2271,17 @@ with col_main:
         
         def load_example_file(path):
             try:
-                with open(path, "rb") as f:
+                import os
+                base_dir = os.path.dirname(__file__)
+                full_path = os.path.join(base_dir, path)
+                with open(full_path, "rb") as f:
                     return f.read(), None
             except Exception as e:
                 return b"", str(e)
 
         is_en = st.session_state.get('lang', 'ko') == 'en'
-        tahp_path = "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/E_TAHP_Result.xlsx" if is_en else "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/K_TAHP_Result.xlsx"
-        fahp_path = "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/E_FAHP_Result.xlsx" if is_en else "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/K_FAHP_Result.xlsx"
+        tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
+        fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
         
         tahp_data, tahp_err = load_example_file(tahp_path)
         fahp_data, fahp_err = load_example_file(fahp_path)
