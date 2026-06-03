@@ -123,15 +123,15 @@ except Exception:
 # [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
 seo_tags = """
     <div style="display:none;">
-        <title>AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템</title>
-        <meta name="description" content="학위논문, 연구논문 및 학술 연구를 위한 최적의 AHP 및 퍼지 AHP 분석 자동화 솔루션. 일관성 비율(CR) 자동 보정, 복수 응답 기하평균 계산, 그룹 통계 검정(ANOVA) 및 즉시 활용 가능한 논문용 엑셀 보고서 생성을 지원합니다." />
-        <meta name="keywords" content="AHP, Fuzzy AHP, 퍼지 AHP, AHP 계산기, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, AHP 무료 프로그램, AHP 설문지 양식, 학위논문 AHP 통계, AHP 분석 방법, AHP 대안 우선순위, AHP 기하평균, AHP ANOVA, AHP Excel 템플릿, Fuzzy AHP 계산기, AHP Master, AHP 마스터" />
+        <title>AHP Master | Traditional & Fuzzy AHP Decision Analysis System (AHP 마스터)</title>
+        <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing, and instant Excel reports. 학위논문 및 연구용 AHP/퍼지 AHP 분석 자동화 솔루션." />
+        <meta name="keywords" content="AHP, Fuzzy AHP, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP weight calculation, AHP software for thesis, AHP excel template, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, AHP 무료 프로그램, 학위논문 AHP 통계, AHP 분석 방법, AHP 기하평균, AHP ANOVA, AHP Master, AHP 마스터" />
         <meta name="author" content="AHP Master" />
         <meta name="robots" content="index, follow" />
         <meta name="google-site-verification" content="KbMsp4y15le5XNyK05UEr6Nq6" />
         <meta name="naver-site-verification" content="f0561d996c39ca52dcc47cf2aad128c5e586a1d6" />
-        <meta property="og:title" content="AHP 마스터 | 논문 및 학술 연구용 AHP & 퍼지 AHP 분석 자동화 시스템" />
-        <meta property="og:description" content="수학적 일관성 비율(CR) 보정, 복수 응답 기하평균 계산 및 통계 검정을 지원하는 논문 맞춤형 AHP 분석 도구" />
+        <meta property="og:title" content="AHP Master - Traditional & Fuzzy AHP Automation System for Research & Thesis" />
+        <meta property="og:description" content="Advanced AHP & Fuzzy AHP decision software with mathematical consistency ratio (CR) calibration, group consensus, and statistical comparison." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://ahpkrj.streamlit.app/" />
     </div>
