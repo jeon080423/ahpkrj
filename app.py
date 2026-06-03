@@ -2008,8 +2008,6 @@ with col_settings:
         
         """))
 
-
-with col_main:
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
         st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
                   "When describing AHP analysis results in your thesis or research report, you can refer to and cite the example below."))
@@ -2023,6 +2021,8 @@ with col_main:
         > 
         > "The survey data collected in this study was analyzed using **'AHP Master'**, a web-based dedicated AHP analysis solution. Pairwise comparison matrices were constructed in accordance with Saaty's (1980) Analytic Hierarchy Process to calculate local and global weights, and the validity of the results was secured through the system's consistency ratio (CR) adjustment function to ensure CR was below 0.1."
         """))
+
+with col_main:
                 
     
     if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
@@ -2124,6 +2124,66 @@ with col_main:
                     st.success("삭제 완료")
                     st.rerun()
         st.divider()
+    
+    with st.container(border=True):
+        st.markdown(_("#### ⚡ 빠른 시작 (도시재생 사업 모델)", "#### ⚡ Quick Start (Urban Regeneration Project Model)"))
+        st.info(_("아래 버튼을 누르면 테스트용 샘플 엑셀 파일이 다운로드 됩니다.\n\n"
+                  "다운받은 테스트 샘플 엑셀 파일을 아래 '데이터 업로드 및 분석'에 업로드 하세요.",
+                  "Click the button below to download the test sample Excel file.\n\n"
+                  "Upload the downloaded sample file to '2. Data Upload & Analysis' below."))
+        
+        sample_excel = create_sample_excel()
+        
+        def load_example_file(path):
+            try:
+                import os
+                base_dir = os.path.dirname(__file__)
+                full_path = os.path.join(base_dir, path)
+                with open(full_path, "rb") as f:
+                    return f.read(), None
+            except Exception as e:
+                return b"", str(e)
+
+        is_en = st.session_state.get('lang', 'ko') == 'en'
+        tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
+        fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
+        
+        tahp_data, tahp_err = load_example_file(tahp_path)
+        fahp_data, fahp_err = load_example_file(fahp_path)
+        
+        if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
+        if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
+
+        col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
+        with col_btn1:
+            st.download_button(
+                label=_("📂 테스트용 샘플 데이터 다운로드", "📂 Download Test Sample Data"),
+                data=sample_excel,
+                file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                type="primary"
+            )
+        with col_btn2:
+            st.download_button(
+                label=_("📂 일반 AHP 분석 보고서(예시)", "📂 Traditional AHP Analysis Report (Example)"),
+                data=tahp_data if tahp_data else b"",
+                file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                disabled=(not tahp_data)
+            )
+        with col_btn3:
+            st.download_button(
+                label=_("📂 퍼지AHP 분석 보고서(예시)", "📂 Fuzzy AHP Analysis Report (Example)"),
+                data=fahp_data if fahp_data else b"",
+                file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                disabled=(not fahp_data)
+            )
+    
+    st.markdown("---")
     
     st.subheader(_("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "1. Setup AHP Decision Model & Download Template"))
     
@@ -2274,65 +2334,7 @@ with col_main:
                             delete_analysis(a_id)
                             st.rerun()
     
-    with st.container(border=True):
-        st.markdown(_("#### ⚡ 빠른 시작 (도시재생 사업 모델)", "#### ⚡ Quick Start (Urban Regeneration Project Model)"))
-        st.info(_("아래 버튼을 누르면 테스트용 샘플 엑셀 파일이 다운로드 됩니다.\n\n"
-                  "다운받은 테스트 샘플 엑셀 파일을 아래 '데이터 업로드 및 분석'에 업로드 하세요.",
-                  "Click the button below to download the test sample Excel file.\n\n"
-                  "Upload the downloaded sample file to '2. Data Upload & Analysis' below."))
-        
-        sample_excel = create_sample_excel()
-        
-        def load_example_file(path):
-            try:
-                import os
-                base_dir = os.path.dirname(__file__)
-                full_path = os.path.join(base_dir, path)
-                with open(full_path, "rb") as f:
-                    return f.read(), None
-            except Exception as e:
-                return b"", str(e)
 
-        is_en = st.session_state.get('lang', 'ko') == 'en'
-        tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
-        fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
-        
-        tahp_data, tahp_err = load_example_file(tahp_path)
-        fahp_data, fahp_err = load_example_file(fahp_path)
-        
-        if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
-        if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
-
-        col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
-        with col_btn1:
-            st.download_button(
-                label=_("📂 테스트용 샘플 데이터 다운로드", "📂 Download Test Sample Data"),
-                data=sample_excel,
-                file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-                type="primary"
-            )
-        with col_btn2:
-            st.download_button(
-                label=_("📂 일반 AHP 분석 보고서(예시)", "📂 Traditional AHP Analysis Report (Example)"),
-                data=tahp_data if tahp_data else b"",
-                file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-                disabled=(not tahp_data)
-            )
-        with col_btn3:
-            st.download_button(
-                label=_("📂 퍼지AHP 분석 보고서(예시)", "📂 Fuzzy AHP Analysis Report (Example)"),
-                data=fahp_data if fahp_data else b"",
-                file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-                disabled=(not fahp_data)
-            )
-    
-    st.markdown("---")
     
     def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, formats, excluded_df=None):
         workbook = writer.book
