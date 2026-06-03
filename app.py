@@ -3253,121 +3253,7 @@ with col_main:
                             disp_final_df = final_df
                         st.dataframe(disp_final_df.style.format(precision=3), use_container_width=True)
     
-                        # ── Fuzzy AHP TFN 삼각퍼지 그래프 (Tab1 결과 화면 직후) ──
-                        if ahp_method == 'fuzzy':
-                            st.markdown("---")
-                            st.subheader(_("📐 삼각퍼지수(TFN) 가중치 분포", "📐 Triangular Fuzzy Number (TFN) Weight Distribution"))
-                            st.caption(_("각 요인의 삼각퍼지수(L, M, U)와 비퍼지화된 Crisp 가중치를 시각화합니다.",
-                                         "Visualizes each factor's Triangular Fuzzy Numbers (L, M, U) and defuzzified Crisp weights."))
-    
-                            tfn_color_palette = [
-                                '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
-                                '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'
-                            ]
-    
-                            def render_tfn_chart(tfn_Si_data, tfn_factors_data, chart_title):
-                                fig = go.Figure()
-                                for i, (l, m, u) in enumerate(tfn_Si_data):
-                                    color = tfn_color_palette[i % len(tfn_color_palette)]
-                                    crisp = (l * m * u) ** (1/3)
-                                    # 삼각형 채우기 (반투명)
-                                    fig.add_trace(go.Scatter(
-                                        x=[l, m, u, l],
-                                        y=[0, 1, 0, 0],
-                                        fill='toself',
-                                        fillcolor=f"rgba({int(color[1:3],16)}, {int(color[3:5],16)}, {int(color[5:7],16)}, 0.15)" if color.startswith('#') and len(color) == 7 else (color.replace(')', ', 0.15)').replace('rgb', 'rgba') if 'rgb' in color else color),
-                                        line=dict(color=color, width=2.5),
-                                        mode='lines',
-                                        name=f"{tfn_factors_data[i]}",
-                                        hovertemplate=(
-                                            f"<b>{tfn_factors_data[i]}</b><br>"
-                                            f"L={l:.4f}, M={m:.4f}, U={u:.4f}<br>"
-                                            f"Crisp={crisp:.4f}<extra></extra>"
-                                        ),
-                                        showlegend=True
-                                    ))
-                                    # Crisp 가중치 수직 점선
-                                    fig.add_trace(go.Scatter(
-                                        x=[crisp, crisp],
-                                        y=[0, 0.85],
-                                        mode='lines',
-                                        line=dict(color=color, width=1.5, dash='dot'),
-                                        showlegend=False,
-                                        hoverinfo='skip'
-                                    ))
-                                    # Crisp 마커
-                                    fig.add_trace(go.Scatter(
-                                        x=[crisp],
-                                        y=[0.88],
-                                        mode='markers+text',
-                                        marker=dict(color=color, size=8, symbol='diamond'),
-                                        text=[f"{crisp:.3f}"],
-                                        textposition='top center',
-                                        textfont=dict(size=10, color=color),
-                                        showlegend=False,
-                                        hovertemplate=f"<b>{tfn_factors_data[i]}</b> Crisp={crisp:.4f}<extra></extra>"
-                                    ))
-                                fig.update_layout(
-                                    title=dict(text=chart_title, font=dict(size=14)),
-                                    xaxis_title=_("가중치 값 (Weight Value)", "Weight Value"),
-                                    yaxis_title=_("소속도 (Membership Degree)", "Membership Degree"),
-                                    yaxis=dict(range=[-0.05, 1.25]),
-                                    height=420,
-                                    margin=dict(l=30, r=30, t=50, b=40),
-                                    hovermode="closest",
-                                    legend=dict(
-                                        orientation="h",
-                                        yanchor="bottom",
-                                        y=-0.25,
-                                        xanchor="center",
-                                        x=0.5
-                                    ),
-                                    plot_bgcolor='rgba(248,249,250,1)',
-                                    paper_bgcolor='rgba(255,255,255,1)'
-                                )
-                                fig.update_xaxes(gridcolor='rgba(200,200,200,0.3)', zeroline=True, zerolinecolor='rgba(150,150,150,0.5)')
-                                fig.update_yaxes(gridcolor='rgba(200,200,200,0.3)')
-                                return fig
-    
-                            # 1) 메인 기준 TFN 그래프
-                            if main_group_Si:
-                                st.plotly_chart(
-                                    render_tfn_chart(main_group_Si, main_factors,
-                                        _("▶ 대분류 (Main Criteria) 삼각퍼지 분포", "▶ Main Criteria TFN Distribution")),
-                                    use_container_width=True
-                                )
-    
-                                # TFN 수치 테이블
-                                tfn_table_rows = []
-                                for i, (l, m, u) in enumerate(main_group_Si):
-                                    crisp = (l * m * u) ** (1/3)
-                                    tfn_table_rows.append({
-                                        _("요인", "Factor"): main_factors[i],
-                                        "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
-                                        "Crisp Weight": crisp,
-                                        _("정규화 가중치", "Normalized Weight"): group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
-                                    })
-                                st.dataframe(pd.DataFrame(tfn_table_rows).style.format(precision=4), use_container_width=True)
-    
-                            # 2) 세부 기준별 TFN 그래프
-                            for parent_f, sub_info in sub_results_storage.items():
-                                if sub_info.get('group_Si'):
-                                    st.markdown("---")
-                                    st.plotly_chart(
-                                        render_tfn_chart(sub_info['group_Si'], sub_info['factors'],
-                                            _(f"▶ [{parent_f}] 세부항목 삼각퍼지 분포", f"▶ [{parent_f}] Sub-Criteria TFN Distribution")),
-                                        use_container_width=True
-                                    )
-                                    sub_tfn_rows = []
-                                    for i, (l, m, u) in enumerate(sub_info['group_Si']):
-                                        crisp = (l * m * u) ** (1/3)
-                                        sub_tfn_rows.append({
-                                            _("요인", "Factor"): sub_info['factors'][i],
-                                            "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
-                                            "Crisp Weight": crisp,
-                                            _("정규화 가중치", "Normalized Weight"): sub_info['weights'].iloc[i] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][i]
-                                        })
-                                    st.dataframe(pd.DataFrame(sub_tfn_rows).style.format(precision=4), use_container_width=True)
+
     
                     with tab2:
                         st.markdown(_("#### 그룹별 가중치 상세 비교", "#### Detailed Comparison of Weights by Group"))
@@ -3530,27 +3416,121 @@ with col_main:
                                 # Y축 범위를 자동(Auto)으로 맡겨 꼬리가 잘리지 않도록 수정
                                 st.plotly_chart(fig_violin, use_container_width=True)
     
-                            if ahp_method == 'fuzzy':
-                                st.markdown("---")
-                                st.write(_("**퍼지 삼각가중치 분포 (TFN Graph)**", "**Triangular Fuzzy Numbers (TFN Graph)**"))
-                                tfn_options = ["Main_Criteria"] + list(sub_results_storage.keys())
-                                selected_tfn_sheet = st.selectbox(
-                                    _("TFN 시각화 대상 시트 선택", "Select Sheet for TFN Visualization"), 
-                                    tfn_options, 
-                                    key="selectbox_tfn_sheet"
+                        # ── Fuzzy AHP TFN 삼각퍼지 그래프 (Tab1 결과 화면 직후) ──
+                        if ahp_method == 'fuzzy':
+                            st.markdown("---")
+                            st.subheader(_("📐 삼각퍼지수(TFN) 가중치 분포", "📐 Triangular Fuzzy Number (TFN) Weight Distribution"))
+                            st.caption(_("각 요인의 삼각퍼지수(L, M, U)와 비퍼지화된 Crisp 가중치를 시각화합니다.",
+                                         "Visualizes each factor's Triangular Fuzzy Numbers (L, M, U) and defuzzified Crisp weights."))
+    
+                            tfn_color_palette = [
+                                '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
+                                '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'
+                            ]
+    
+                            def render_tfn_chart(tfn_Si_data, tfn_factors_data, chart_title):
+                                fig = go.Figure()
+                                for i, (l, m, u) in enumerate(tfn_Si_data):
+                                    color = tfn_color_palette[i % len(tfn_color_palette)]
+                                    crisp = (l * m * u) ** (1/3)
+                                    # 삼각형 채우기 (반투명)
+                                    fig.add_trace(go.Scatter(
+                                        x=[l, m, u, l],
+                                        y=[0, 1, 0, 0],
+                                        fill='toself',
+                                        fillcolor=f"rgba({int(color[1:3],16)}, {int(color[3:5],16)}, {int(color[5:7],16)}, 0.15)" if color.startswith('#') and len(color) == 7 else (color.replace(')', ', 0.15)').replace('rgb', 'rgba') if 'rgb' in color else color),
+                                        line=dict(color=color, width=2.5),
+                                        mode='lines',
+                                        name=f"{tfn_factors_data[i]}",
+                                        hovertemplate=(
+                                            f"<b>{tfn_factors_data[i]}</b><br>"
+                                            f"L={l:.4f}, M={m:.4f}, U={u:.4f}<br>"
+                                            f"Crisp={crisp:.4f}<extra></extra>"
+                                        ),
+                                        showlegend=True
+                                    ))
+                                    # Crisp 가중치 수직 점선
+                                    fig.add_trace(go.Scatter(
+                                        x=[crisp, crisp],
+                                        y=[0, 0.85],
+                                        mode='lines',
+                                        line=dict(color=color, width=1.5, dash='dot'),
+                                        showlegend=False,
+                                        hoverinfo='skip'
+                                    ))
+                                    # Crisp 마커
+                                    fig.add_trace(go.Scatter(
+                                        x=[crisp],
+                                        y=[0.88],
+                                        mode='markers+text',
+                                        marker=dict(color=color, size=8, symbol='diamond'),
+                                        text=[f"{crisp:.3f}"],
+                                        textposition='top center',
+                                        textfont=dict(size=10, color=color),
+                                        showlegend=False,
+                                        hovertemplate=f"<b>{tfn_factors_data[i]}</b> Crisp={crisp:.4f}<extra></extra>"
+                                    ))
+                                fig.update_layout(
+                                    title=dict(text=chart_title, font=dict(size=14)),
+                                    xaxis_title=_("가중치 값 (Weight Value)", "Weight Value"),
+                                    yaxis_title=_("소속도 (Membership Degree)", "Membership Degree"),
+                                    yaxis=dict(range=[-0.05, 1.25]),
+                                    height=420,
+                                    margin=dict(l=30, r=30, t=50, b=40),
+                                    hovermode="closest",
+                                    legend=dict(
+                                        orientation="h",
+                                        yanchor="bottom",
+                                        y=-0.25,
+                                        xanchor="center",
+                                        x=0.5
+                                    ),
+                                    plot_bgcolor='rgba(248,249,250,1)',
+                                    paper_bgcolor='rgba(255,255,255,1)'
                                 )
-                                if selected_tfn_sheet == "Main_Criteria":
-                                    tfn_Si = main_group_Si
-                                    tfn_factors = main_factors
-                                else:
-                                    tfn_Si = sub_results_storage[selected_tfn_sheet]['group_Si']
-                                    tfn_factors = sub_results_storage[selected_tfn_sheet]['factors']
-                                
+                                fig.update_xaxes(gridcolor='rgba(200,200,200,0.3)', zeroline=True, zerolinecolor='rgba(150,150,150,0.5)')
+                                fig.update_yaxes(gridcolor='rgba(200,200,200,0.3)')
+                                return fig
+    
+                            # 1) 메인 기준 TFN 그래프
+                            if main_group_Si:
                                 st.plotly_chart(
-                                    render_tfn_chart(tfn_Si, tfn_factors,
-                                        _(f"▶ [{selected_tfn_sheet}] 삼각퍼지 분포", f"▶ [{selected_tfn_sheet}] TFN Distribution")),
+                                    render_tfn_chart(main_group_Si, main_factors,
+                                        _("▶ 대분류 (Main Criteria) 삼각퍼지 분포", "▶ Main Criteria TFN Distribution")),
                                     use_container_width=True
                                 )
+    
+                                # TFN 수치 테이블
+                                tfn_table_rows = []
+                                for i, (l, m, u) in enumerate(main_group_Si):
+                                    crisp = (l * m * u) ** (1/3)
+                                    tfn_table_rows.append({
+                                        _("요인", "Factor"): main_factors[i],
+                                        "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
+                                        "Crisp Weight": crisp,
+                                        _("정규화 가중치", "Normalized Weight"): group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
+                                    })
+                                st.dataframe(pd.DataFrame(tfn_table_rows).style.format(precision=4), use_container_width=True)
+    
+                            # 2) 세부 기준별 TFN 그래프
+                            for parent_f, sub_info in sub_results_storage.items():
+                                if sub_info.get('group_Si'):
+                                    st.markdown("---")
+                                    st.plotly_chart(
+                                        render_tfn_chart(sub_info['group_Si'], sub_info['factors'],
+                                            _(f"▶ [{parent_f}] 세부항목 삼각퍼지 분포", f"▶ [{parent_f}] Sub-Criteria TFN Distribution")),
+                                        use_container_width=True
+                                    )
+                                    sub_tfn_rows = []
+                                    for i, (l, m, u) in enumerate(sub_info['group_Si']):
+                                        crisp = (l * m * u) ** (1/3)
+                                        sub_tfn_rows.append({
+                                            _("요인", "Factor"): sub_info['factors'][i],
+                                            "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
+                                            "Crisp Weight": crisp,
+                                            _("정규화 가중치", "Normalized Weight"): sub_info['weights'].iloc[i] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][i]
+                                        })
+                                    st.dataframe(pd.DataFrame(sub_tfn_rows).style.format(precision=4), use_container_width=True)
     
                     with tab5:
                         st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
