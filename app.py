@@ -1963,8 +1963,6 @@ if st.session_state.get('page', 'main') == 'guide':
 # 메인 헤더 영역
 st.title(_("AHP 의사결정 분석/컨설팅 솔루션", "AHP Decision Analysis & Consulting Solution"))
 
-st.markdown(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**](삼각퍼지수 활용) 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
-              "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis (using TFN), providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
 
 
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
@@ -2127,10 +2125,8 @@ with col_main:
     
     with st.container(border=True):
         st.markdown(_("#### ⚡ 빠른 시작 (도시재생 사업 모델)", "#### ⚡ Quick Start (Urban Regeneration Project Model)"))
-        st.info(_("아래 버튼을 누르면 테스트용 샘플 엑셀 파일이 다운로드 됩니다.\n\n"
-                  "다운받은 테스트 샘플 엑셀 파일을 아래 '데이터 업로드 및 분석'에 업로드 하세요.",
-                  "Click the button below to download the test sample Excel file.\n\n"
-                  "Upload the downloaded sample file to '2. Data Upload & Analysis' below."))
+        st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**](삼각퍼지수 활용) 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
+                  "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis (using TFN), providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
         
         sample_excel = create_sample_excel()
         
