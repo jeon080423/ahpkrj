@@ -1985,16 +1985,15 @@ st.markdown(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
 
 with col_settings:
-    st.markdown('<div style="border-left: 2px solid #e0e0e0; padding-left: 20px; min-height: 600px; height: 100%;">', unsafe_allow_html=True)
-    st.markdown(f'<h4 style="color:#4f46e5; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">⚙️ {_("AHP 분석 설정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
-    ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
-    ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
-    mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
-    mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
-    cr_threshold = st.selectbox(_("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), [0.1, 0.2], index=0)
-    max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
-    learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown(f'<h4 style="color:#4f46e5; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">⚙️ {_("AHP 분석 설정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
+        ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
+        ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
+        mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
+        mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
+        cr_threshold = st.selectbox(_("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), [0.1, 0.2], index=0)
+        max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
+        learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
 
 with col_main:
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
