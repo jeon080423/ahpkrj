@@ -2268,12 +2268,49 @@ with col_main:
                   "Upload the downloaded sample file to '2. Data Upload & Analysis' below."))
         
         sample_excel = create_sample_excel()
-        st.download_button(
-            label=_("📂 테스트용 샘플 데이터 다운로드", "📂 Download Test Sample Data"),
-            data=sample_excel,
-            file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        
+        @st.cache_data(show_spinner=False)
+        def load_example_file(path):
+            try:
+                with open(path, "rb") as f:
+                    return f.read()
+            except Exception:
+                return b""
+
+        is_en = st.session_state.get('lang', 'ko') == 'en'
+        tahp_path = "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/E_TAHP_Result.xlsx" if is_en else "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/K_TAHP_Result.xlsx"
+        fahp_path = "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/E_FAHP_Result.xlsx" if is_en else "F:/SD카드 백업/Ahp/19. AHP마스터 셈플데이터/K_FAHP_Result.xlsx"
+        
+        tahp_data = load_example_file(tahp_path)
+        fahp_data = load_example_file(fahp_path)
+        
+        col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
+        with col_btn1:
+            st.download_button(
+                label=_("📂 테스트용 샘플 데이터 다운로드", "📂 Download Test Sample Data"),
+                data=sample_excel,
+                file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+        with col_btn2:
+            st.download_button(
+                label=_("📂 일반 AHP 분석 보고서(예시)", "📂 Traditional AHP Analysis Report (Example)"),
+                data=tahp_data if tahp_data else b"",
+                file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                disabled=(not tahp_data)
+            )
+        with col_btn3:
+            st.download_button(
+                label=_("📂 퍼지AHP 분석 보고서(예시)", "📂 Fuzzy AHP Analysis Report (Example)"),
+                data=fahp_data if fahp_data else b"",
+                file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                disabled=(not fahp_data)
+            )
     
     st.markdown("---")
     
