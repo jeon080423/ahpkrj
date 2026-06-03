@@ -1329,7 +1329,7 @@ st.markdown("""
 <style>
     .stDataFrame {font-size: 0.9rem;} 
     div[data-testid="stMetricValue"] {font-size: 1.2rem;}
-    .stDownloadButton > button {
+    .stDownloadButton > button[kind="primary"] {
         background-color: #d32f2f;
         color: white;
         border-radius: 5px;
@@ -1338,8 +1338,21 @@ st.markdown("""
         font-weight: bold;
         transition: background-color 0.3s ease;
     }
-    .stDownloadButton > button:hover {
+    .stDownloadButton > button[kind="primary"]:hover {
         background-color: #b71c1c;
+    }
+    .stDownloadButton > button[kind="secondary"] {
+        background-color: #ffffff !important;
+        color: #1976D2 !important;
+        border: 1px solid #d9d9d9 !important;
+        border-radius: 5px !important;
+        padding: 0.6rem 1.2rem !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease !important;
+    }
+    .stDownloadButton > button[kind="secondary"]:hover {
+        background-color: #f0f8ff !important;
+        border-color: #1976D2 !important;
     }
     /* [수정] 좋아요 버튼 스타일 */
     div.stButton > button:first-child[kind="primary"] {
@@ -2207,7 +2220,8 @@ with col_main:
                             data=output_template,
                             file_name="AHP_Master_Template.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True
+                            use_container_width=True,
+                            type="primary"
                         )
                     
                     st.info(_("💡 **안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 엑셀 템플릿 파일을 저장하세요.", 
@@ -2254,7 +2268,7 @@ with col_main:
                         file_info = get_analysis_file(analysis_id=a_id)
                         if file_info:
                             fname, fdata = file_info
-                            st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}")
+                            st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
                     with col_List4:
                         if st.button("🗑️", key=f"del_{a_id}"):
                             delete_analysis(a_id)
@@ -2296,7 +2310,8 @@ with col_main:
                 data=sample_excel,
                 file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
+                use_container_width=True,
+                type="primary"
             )
         with col_btn2:
             st.download_button(
@@ -3577,7 +3592,7 @@ with col_main:
                     with tab5:
                         st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
                                       '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
-                        st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx")
+                        st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary")
                         if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
                             disp_radar_df = radar_indiv_df.copy()
                             if is_english:
