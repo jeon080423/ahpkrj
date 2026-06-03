@@ -1956,7 +1956,7 @@ if st.session_state.get('page', 'main') == 'guide':
     st.stop()
 
 # 메인 헤더 영역
-st.title(_("AHP 의사결정 분석/컨설팅 솔루션", "AHP Decision Analysis & Consulting Solution"))
+st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"))
 
 
 
