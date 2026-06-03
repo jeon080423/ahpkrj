@@ -2007,12 +2007,12 @@ with col_settings:
         st.markdown(_("""
         > **[논문 기재 예시문]**
         > 
-        > "본 연구에서 수집된 설문 데이터는 웹 기반 AHP 전용 분석 솔루션인 **'AHP 마스터'**를 활용하여 분석을 수행하였다. Saaty(1980)의 계층분석과정에 따라 쌍대비교 행렬을 구성하여 국지적 가중치와 종합 가중치(Global Weight)를 산출하였으며, 일관성 비율(CR)이 0.1 미만이 되도록 시스템의 보정 기능을 거쳐 결과의 타당성을 확보하였다."
+        > "본 연구에서 수집된 설문 데이터는 웹 기반 AHP 전용 분석 솔루션인 'AHP 마스터'를 활용하여 분석을 수행하였다. Saaty(1980)의 계층분석과정에 따라 쌍대비교 행렬을 구성하여 국지적 가중치와 종합 가중치(Global Weight)를 산출하였으며, 일관성 비율(CR)이 0.1 미만이 되도록 시스템의 보정 기능을 거쳐 결과의 타당성을 확보하였다."
         """,
         """
         > **[Example of Paper Citation]**
         > 
-        > "The survey data collected in this study was analyzed using **'AHP Master'**, a web-based dedicated AHP analysis solution. Pairwise comparison matrices were constructed in accordance with Saaty's (1980) Analytic Hierarchy Process to calculate local and global weights, and the validity of the results was secured through the system's consistency ratio (CR) adjustment function to ensure CR was below 0.1."
+        > "The survey data collected in this study was analyzed using 'AHP Master', a web-based dedicated AHP analysis solution. Pairwise comparison matrices were constructed in accordance with Saaty's (1980) Analytic Hierarchy Process to calculate local and global weights, and the validity of the results was secured through the system's consistency ratio (CR) adjustment function to ensure CR was below 0.1."
         """))
 
 with col_main:
