@@ -124,14 +124,14 @@ except Exception:
 seo_tags = """
     <div style="display:none;">
         <title>AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템</title>
-        <meta name="description" content="AHP Master (AHP 마스터) - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP (퍼지 AHP) automation tool for thesis, research papers, and policy studies. Supports automatic Consistency Ratio (CR) calibration, statistical group testing (ANOVA), and instant Excel reports. 학위 논문 및 정책 연구를 위한 최적의 AHP 및 퍼지 AHP 분석 자동화 솔루션. 일관성 비율(CR) 자동 보정 및 통계 검정 제공." />
-        <meta name="keywords" content="AHP, Fuzzy AHP, 퍼지 AHP, Fuzzy AHP 계산기, Fuzzy AHP 프로그램, AHP Master, AHP 마스터, AHP Calculator, AHP 계산기, analytic hierarchy process, consistency ratio, CR calibration, 일관성 보정, ANOVA, group analysis, thesis statistics, 학위논문통계, 무료 AHP 프로그램, AHP software" />
+        <meta name="description" content="학위논문, 연구논문 및 학술 연구를 위한 최적의 AHP 및 퍼지 AHP 분석 자동화 솔루션. 일관성 비율(CR) 자동 보정, 복수 응답 기하평균 계산, 그룹 통계 검정(ANOVA) 및 즉시 활용 가능한 논문용 엑셀 보고서 생성을 지원합니다." />
+        <meta name="keywords" content="AHP, Fuzzy AHP, 퍼지 AHP, AHP 계산기, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, AHP 무료 프로그램, AHP 설문지 양식, 학위논문 AHP 통계, AHP 분석 방법, AHP 대안 우선순위, AHP 기하평균, AHP ANOVA, AHP Excel 템플릿, Fuzzy AHP 계산기, AHP Master, AHP 마스터" />
         <meta name="author" content="AHP Master" />
         <meta name="robots" content="index, follow" />
         <meta name="google-site-verification" content="KbMsp4y15le5XNyK05UEr6Nq6" />
         <meta name="naver-site-verification" content="f0561d996c39ca52dcc47cf2aad128c5e586a1d6" />
-        <meta property="og:title" content="AHP Master (AHP 마스터) - Traditional & Fuzzy AHP Automation System" />
-        <meta property="og:description" content="Advanced AHP & Fuzzy AHP decision software with mathematical consistency calibration and statistical group comparison. 수학적 일관성 보정과 고도화된 통계 및 퍼지 AHP 분석을 지원하는 전문 도구" />
+        <meta property="og:title" content="AHP 마스터 | 논문 및 학술 연구용 AHP & 퍼지 AHP 분석 자동화 시스템" />
+        <meta property="og:description" content="수학적 일관성 비율(CR) 보정, 복수 응답 기하평균 계산 및 통계 검정을 지원하는 논문 맞춤형 AHP 분석 도구" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://ahpkrj.streamlit.app/" />
     </div>
