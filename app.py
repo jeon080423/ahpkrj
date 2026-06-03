@@ -2269,7 +2269,6 @@ with col_main:
         
         sample_excel = create_sample_excel()
         
-        @st.cache_data(show_spinner=False)
         def load_example_file(path):
             try:
                 with open(path, "rb") as f:
