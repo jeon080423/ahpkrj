@@ -1850,12 +1850,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    with st.expander(_("💡 사용자 권한 안내", "💡 User Roles & Permissions"), expanded=False):
-        st.info(_("**비로그인(Guest)**: 샘플 파일 분석만 가능", "**Guest**: Sample file analysis only"))
-        st.info(_("**무료사용자**: 나만의 모델 생성, 분석 가능 (무료 5표본 제한)", "**Free User**: Create custom models, analyze data (up to 5 samples)"))
-        st.info(_("**정식 사용자**: 모든 기능 무제한 (2개월/필요시 1개월 연장)", "**Official User**: All features unlimited (2 months, extensible by 1 month)"))
-    
-    st.markdown("---")
+
     
     if st.session_state.get('lang', 'ko') == 'en':
         st.markdown("""
