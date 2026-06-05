@@ -3170,7 +3170,7 @@ with col_main:
                                     mats = np.stack(g_df_m['Matrix_Object'].values)
                                     main_group_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
     
-                            out_main = main_results_df.drop(columns=['Matrix_Object'], errors='ignore')
+                            out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
                             write_detailed_sheet_ws('Result_Main', main_group_matrix, out_main, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
                             for mf, info in sub_results_storage.items():
                                 safe_name = f"Result_{mf}"[:31]
@@ -3180,7 +3180,7 @@ with col_main:
                                     if not g_sub_df.empty:
                                         mats = np.stack(g_sub_df['Matrix_Object'].values)
                                         sub_grp_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
-                                out_sub = info['df'].drop(columns=['Matrix_Object'], errors='ignore')
+                                out_sub = info['df'].drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
                                 
                                 sub_excl_val = 0
                                 for df_ex in total_excl_df_list:
