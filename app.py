@@ -1992,29 +1992,92 @@ def show_cr_distortion_dialog():
         option_name = option
 
     metrics = run_analysis(original_matrix, corrected_matrix, option_name)
-    report_html = generate_report([metrics], original_matrix, {option_name: corrected_matrix})
 
-    st.subheader(_("CR 검증 결과", "CR Verification Results"))
-    st.write(pd.DataFrame([metrics]))
+    # --- Two-column layout: left=explanation, right=results ---
+    left_col, right_col = st.columns([1.2, 1])
 
-    # Show heatmaps side by side
-    hm_col1, hm_col2 = st.columns(2)
-    orig_img = matrix_to_heatmap_img(original_matrix, _("원본 행렬", "Original Matrix"))
-    corr_img = matrix_to_heatmap_img(corrected_matrix, option_name)
-    with hm_col1:
-        st.image(f"data:image/png;base64,{orig_img}", caption=_("원본 행렬", "Original Matrix"), use_container_width=True)
-    with hm_col2:
-        st.image(f"data:image/png;base64,{corr_img}", caption=option_name, use_container_width=True)
+    with right_col:
+        st.subheader(_("📊 검증 결과", "📊 Verification Results"))
+        st.dataframe(pd.DataFrame([metrics]), use_container_width=True)
 
-    # Download report button
-    file_name = f"cr_report_{option_name.replace(' ', '_')}.html"
-    st.download_button(
-        label=_("HTML 보고서 다운로드", "Download HTML Report"),
-        data=report_html,
-        file_name=file_name,
-        mime="text/html"
-    )
+        # Heatmaps side by side
+        orig_img = matrix_to_heatmap_img(original_matrix, _("원본 행렬", "Original Matrix"))
+        corr_img = matrix_to_heatmap_img(corrected_matrix, option_name)
+        hm1, hm2 = st.columns(2)
+        with hm1:
+            st.image(f"data:image/png;base64,{orig_img}", caption=_("원본 행렬", "Original Matrix"), use_container_width=True)
+        with hm2:
+            st.image(f"data:image/png;base64,{corr_img}", caption=_("보정 행렬", "Corrected Matrix"), use_container_width=True)
 
+    with left_col:
+        st.subheader(_("📝 결과 해석", "📝 Interpretation"))
+
+        # Extract metric values
+        euc = metrics.get("Euclidean Distance", 0)
+        man = metrics.get("Manhattan Distance", 0)
+        cos = metrics.get("Cosine Similarity", 1)
+        dist = metrics.get("Distortion Score", 0)
+
+        st.markdown(_( 
+            f"""
+**1. 유클리드 거리 (Euclidean Distance): `{euc:.6f}`**  
+원본 행렬과 보정 행렬 사이의 직선 거리입니다.  
+값이 **0에 가까울수록** 보정이 원본을 거의 변형하지 않았음을 의미합니다.
+
+**2. 맨해튼 거리 (Manhattan Distance): `{man:.6f}`**  
+각 원소별 차이의 절대값 합입니다.  
+유클리드 거리와 함께 보정의 **전체적인 변동 크기**를 나타냅니다.
+
+**3. 코사인 유사도 (Cosine Similarity): `{cos:.6f}`**  
+두 행렬 벡터 간의 방향 유사도입니다.  
+**1.0에 가까울수록** 보정 전후 응답 패턴이 동일한 방향을 유지하고 있습니다.
+
+**4. 왜곡 점수 (Distortion Score): `{dist:.6f}`**  
+종합적인 왜곡 수준을 나타내는 지표입니다.
+
+---
+
+""",
+            f"""
+**1. Euclidean Distance: `{euc:.6f}`**  
+The straight-line distance between the original and corrected matrices.  
+A value **close to 0** means the correction barely altered the original.
+
+**2. Manhattan Distance: `{man:.6f}`**  
+The sum of absolute element-wise differences.  
+Together with Euclidean distance, it shows the **overall magnitude of change**.
+
+**3. Cosine Similarity: `{cos:.6f}`**  
+The directional similarity between the two matrix vectors.  
+A value **close to 1.0** means the response pattern is preserved after correction.
+
+**4. Distortion Score: `{dist:.6f}`**  
+A composite index representing the overall distortion level.
+
+---
+
+"""))
+
+        # Verdict
+        if dist < 0.01:
+            verdict_icon = "✅"
+            verdict = _("왜곡 수준: **매우 낮음** — 보정이 원본 응답을 거의 변형하지 않았습니다. 신뢰할 수 있는 결과입니다.",
+                        "Distortion Level: **Very Low** — The correction barely altered the original responses. The result is reliable.")
+        elif dist < 0.05:
+            verdict_icon = "🟡"
+            verdict = _("왜곡 수준: **낮음** — 경미한 조정이 있었으나 원본 경향성이 잘 보존되었습니다.",
+                        "Distortion Level: **Low** — Minor adjustments were made, but the original trends are well preserved.")
+        elif dist < 0.15:
+            verdict_icon = "🟠"
+            verdict = _("왜곡 수준: **보통** — 일부 변형이 발생했습니다. 결과 해석에 주의가 필요합니다.",
+                        "Distortion Level: **Moderate** — Some distortion occurred. Interpret results with caution.")
+        else:
+            verdict_icon = "🔴"
+            verdict = _("왜곡 수준: **높음** — 보정 과정에서 상당한 변형이 발생했습니다. CR 임계값을 조정하거나 원본 데이터를 재검토하세요.",
+                        "Distortion Level: **High** — Significant distortion occurred during correction. Consider adjusting the CR threshold or reviewing the original data.")
+
+        st.markdown(f"### {verdict_icon} {_('종합 판정', 'Overall Verdict')}")
+        st.info(verdict)
 
 
 with col_settings:
