@@ -123,17 +123,34 @@ except Exception:
 # [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
 seo_tags = """
     <div style="display:none;">
-        <title>AHP Master | Traditional & Fuzzy AHP Decision Analysis System (AHP 마스터)</title>
-        <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing, and instant Excel reports. 학위논문 및 연구용 AHP/퍼지 AHP 분석 자동화 솔루션." />
-        <meta name="keywords" content="AHP, Fuzzy AHP, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP weight calculation, AHP software for thesis, AHP excel template, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, AHP 무료 프로그램, 학위논문 AHP 통계, AHP 분석 방법, AHP 기하평균, AHP ANOVA, AHP Master, AHP 마스터" />
+        <title>AHP Master | Traditional & Fuzzy AHP Decision Analysis System (AHP 마스터, 层次分析法, 階層分析法, Proceso de Análisis Jerárquico)</title>
+        
+        <!-- Multilingual Description -->
+        <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. 학위논문 및 연구용 AHP/퍼지 AHP 분석 솔루션. 专业层次分析法(AHP)及模糊层次分析法在线软件与计算器。階層分析法(AHP)ツール。Software del Proceso de Análisis Jerárquico (AHP)." />
+        
+        <!-- Multilingual Keywords -->
+        <meta name="keywords" content="AHP, Fuzzy AHP, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스터, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, 학위논문 AHP 통계, 层次分析法, 模糊层次分析法, 层次分析法计算器, 层次分析法软件, 论文AHP分析, 一致性比例, 階層分析法, ファジィAHP, AHPソフトウェア, AHPツール, Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP" />
+        
         <meta name="author" content="AHP Master" />
         <meta name="robots" content="index, follow" />
         <meta name="google-site-verification" content="KbMsp4y15le5XNyK05UEr6Nq6" />
         <meta name="naver-site-verification" content="f0561d996c39ca52dcc47cf2aad128c5e586a1d6" />
-        <meta property="og:title" content="AHP Master - Traditional & Fuzzy AHP Automation System for Research & Thesis" />
-        <meta property="og:description" content="Advanced AHP & Fuzzy AHP decision software with mathematical consistency ratio (CR) calibration, group consensus, and statistical comparison." />
+        
+        <!-- Open Graph Tags -->
+        <meta property="og:title" content="AHP Master - Global AHP & Fuzzy AHP Analysis Software (层次分析法, 階層分析法)" />
+        <meta property="og:description" content="Advanced AHP & Fuzzy AHP decision software with mathematical consistency ratio (CR) calibration, group consensus, and statistical comparison for global researchers." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://ahpkrj.streamlit.app/" />
+        
+        <!-- Hidden content for deep indexing -->
+        <h1>AHP Master - Analytic Hierarchy Process & Fuzzy AHP Calculator</h1>
+        <p>AHP Master is a powerful online software for Traditional AHP and Fuzzy AHP analysis. Perfect for academic thesis, research papers, and corporate decision making. Features automatic consistency ratio (CR) improvement and Excel exports.</p>
+        <h2>层次分析法 (AHP) & 模糊层次分析法 在线计算器与软件</h2>
+        <p>专为学术论文和研究所设计的层次分析法(AHP)自动化分析工具。支持一致性比率(CR)自动校正、群体几何平均数计算、ANOVA方差分析以及导出Excel报告。</p>
+        <h2>階層分析法 (AHP) & ファジィAHP ソフトウェア</h2>
+        <p>論文や研究のための階層分析法(AHP)自動化ツール。一貫性比率(CR)の調整やExcelレポート出力に対応。</p>
+        <h2>Proceso de Análisis Jerárquico (AHP) y AHP Difuso</h2>
+        <p>Software y calculadora en línea para el Proceso de Análisis Jerárquico (AHP). Ideal para tesis y toma de decisiones, con calibración automática de la Relación de Consistencia (CR).</p>
     </div>
 """
 st.markdown(seo_tags, unsafe_allow_html=True)
