@@ -1970,7 +1970,15 @@ with col_settings:
         ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
         mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
         mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
-        cr_threshold = st.selectbox(_("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), [0.1, 0.2], index=0)
+        cr_threshold_label = st.selectbox(
+            _("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), 
+            [_("0.1", "0.1"), _("0.2", "0.2"), _("보정 하지 않음", "Do Not Correct")], 
+            index=0
+        )
+        if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
+            cr_threshold = 999.0
+        else:
+            cr_threshold = float(cr_threshold_label)
         max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
         learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
 
