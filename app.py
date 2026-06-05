@@ -632,7 +632,7 @@ def send_approval_email(user_email):
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
-    body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
+    body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 3개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender_email
@@ -1507,7 +1507,7 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월 기능 무제한)</li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월)</li>
   </ul>
 
 </div>""",
@@ -1640,7 +1640,7 @@ with st.sidebar:
                 agreements = show_agreement_ui()
                 s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="s_id")
                 s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="s_pw")
-                s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (2개월, 기능 무제한)", "Official User (2 Months, Unlimited)")), index=0)
+                s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (3개월, 기능 무제한)", "Official User (3 Months, Unlimited)")), index=0)
                 
                 if "정식" in s_role_selection or "Official" in s_role_selection:
                     if st.session_state.get('lang', 'ko') == 'en':
@@ -1672,7 +1672,7 @@ with st.sidebar:
                         </div>
                         """
                         st.markdown(acc_info_html, unsafe_allow_html=True)
-                        st.info("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 2개월 입니다)")
+                        st.info("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 3개월 입니다)")
                 
                 if st.button(_("가입신청", "Register")):
                     if not agreements.get("agree_personal_info"):
@@ -1788,7 +1788,7 @@ with st.sidebar:
                       <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
                         • <b>은행명</b>: 카카오뱅크<br>
                         • <b>예금주</b>: ㅈㅅㅎ<br>
-                        • <b>이용요금</b>: 50만원 (2개월 무제한)<br>
+                        • <b>이용요금</b>: 50만원 (3개월)<br>
                         <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
                           <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
                           <button onclick="(function(){
@@ -2266,8 +2266,8 @@ with col_main:
                                     index=['temp', 'official', 'admin'].index(selected_user['role']))
             
             if new_role_val == 'official' and selected_user['role'] != 'official':
-                suggested_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date() + relativedelta(months=2)
-                new_expiry_val = st.text_input("만료일 설정 (YYYY-MM-DD) - 2개월 기한 자동 제안됨", value=str(suggested_date))
+                suggested_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date() + relativedelta(months=3)
+                new_expiry_val = st.text_input("만료일 설정 (YYYY-MM-DD) - 3개월 기한 자동 제안됨", value=str(suggested_date))
             else:
                 new_expiry_val = st.text_input("만료일 변경 (YYYY-MM-DD)", value=selected_user['expiry_date'])
                 
