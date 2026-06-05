@@ -1962,19 +1962,21 @@ st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"
 
 
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
-# Routing for CR distortion verification page
-query_params = st.query_params
-if query_params.get("page") == "cr_distortion":
+# ---------- CR Distortion Verification Dialog ----------
+@st.dialog(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), width="large")
+def show_cr_distortion_dialog():
     import numpy as np
     from cr_analysis import run_analysis, generate_report, matrix_to_heatmap_img
+
     # Retrieve original matrix (uploaded or demo)
     if "uploaded_matrix" in st.session_state:
         original_matrix = st.session_state.uploaded_matrix
     else:
-        rng = np.random.default_rng()
+        rng = np.random.default_rng(42)
         original_matrix = rng.random((4, 4))
         original_matrix = (original_matrix + original_matrix.T) / 2
         np.fill_diagonal(original_matrix, 1.0)
+
     # Determine selected CR option
     option = st.session_state.get('cr_threshold_label', '0.1')
     if option in ["보정 하지 않음", "Do Not Correct"]:
@@ -1988,16 +1990,23 @@ if query_params.get("page") == "cr_distortion":
             max_val=9
         )
         option_name = option
+
     metrics = run_analysis(original_matrix, corrected_matrix, option_name)
     report_html = generate_report([metrics], original_matrix, {option_name: corrected_matrix})
+
     st.subheader(_("CR 검증 결과", "CR Verification Results"))
     st.write(pd.DataFrame([metrics]))
-    # Show heatmaps
-    orig_img = matrix_to_heatmap_img(original_matrix, _("Original Matrix", "Original Matrix"))
+
+    # Show heatmaps side by side
+    hm_col1, hm_col2 = st.columns(2)
+    orig_img = matrix_to_heatmap_img(original_matrix, _("원본 행렬", "Original Matrix"))
     corr_img = matrix_to_heatmap_img(corrected_matrix, option_name)
-    st.image(f"data:image/png;base64,{orig_img}", caption=_("Original Matrix", "Original Matrix"), use_column_width=True)
-    st.image(f"data:image/png;base64,{corr_img}", caption=option_name, use_column_width=True)
-    # Download report button (language-specific filename)
+    with hm_col1:
+        st.image(f"data:image/png;base64,{orig_img}", caption=_("원본 행렬", "Original Matrix"), use_container_width=True)
+    with hm_col2:
+        st.image(f"data:image/png;base64,{corr_img}", caption=option_name, use_container_width=True)
+
+    # Download report button
     file_name = f"cr_report_{option_name.replace(' ', '_')}.html"
     st.download_button(
         label=_("HTML 보고서 다운로드", "Download HTML Report"),
@@ -2005,9 +2014,8 @@ if query_params.get("page") == "cr_distortion":
         file_name=file_name,
         mime="text/html"
     )
-    if st.button(_("메인으로 돌아가기", "Back to Main")):
-        st.query_params.clear()
-    st.stop()
+
+
 
 with col_settings:
     with st.container(border=True):
@@ -2058,8 +2066,7 @@ with col_settings:
         """))
 
     if st.button(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), use_container_width=True):
-        st.query_params["page"] = "cr_distortion"
-        st.rerun()
+        show_cr_distortion_dialog()
 
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
         st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
