@@ -2128,7 +2128,18 @@ with col_settings:
         
         """))
 
-    if st.button(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), use_container_width=True):
+    # CSS to left-align the CR verification button and match expander icon alignment
+    st.markdown("""
+    <style>
+    /* Left-align CR verification button text to match expanders */
+    button[kind="secondary"][data-testid="stBaseButton-secondary"] {
+        text-align: left !important;
+        justify-content: flex-start !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    if st.button(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), use_container_width=True, key="btn_cr_verify"):
         show_cr_distortion_dialog()
 
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
