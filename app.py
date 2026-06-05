@@ -2165,13 +2165,17 @@ with col_settings:
         
         """))
 
-    # CSS to left-align the CR verification button and match expander icon alignment
+    # CSS to left-align the CR verification button and match expander spacing
     st.markdown("""
     <style>
     /* Left-align CR verification button text to match expanders */
-    button[kind="secondary"][data-testid="stBaseButton-secondary"] {
+    div[data-testid="stButton"] > button[data-testid="stBaseButton-secondary"] {
         text-align: left !important;
+        display: flex !important;
         justify-content: flex-start !important;
+        padding: 0.75rem 1.05rem !important;
+        margin-top: -0.5rem !important;
+        margin-bottom: -0.5rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
