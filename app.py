@@ -1963,8 +1963,8 @@ st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"
 
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
 # Routing for CR distortion verification page
-query_params = st.experimental_get_query_params()
-if query_params.get("page") == ["cr_distortion"]:
+query_params = st.query_params
+if query_params.get("page") == "cr_distortion":
     import numpy as np
     from cr_analysis import run_analysis, generate_report, matrix_to_heatmap_img
     # Retrieve original matrix (uploaded or demo)
@@ -2006,7 +2006,7 @@ if query_params.get("page") == ["cr_distortion"]:
         mime="text/html"
     )
     if st.button(_("메인으로 돌아가기", "Back to Main")):
-        st.experimental_set_query_params()
+        st.query_params.clear()
     st.stop()
 
 with col_settings:
@@ -2058,7 +2058,7 @@ with col_settings:
         """))
 
     if st.button(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), use_container_width=True):
-        st.experimental_set_query_params(page="cr_distortion")
+        st.query_params["page"] = "cr_distortion"
         st.rerun()
 
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
