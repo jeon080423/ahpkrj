@@ -1981,7 +1981,7 @@ if query_params.get("page") == "cr_distortion":
         corrected_matrix = original_matrix.copy()
         option_name = _("보정 안 함", "Do Not Correct")
     else:
-        corrected_matrix, cr_val, iters, _ = improve_consistency(
+        corrected_matrix, cr_val, iters, _unused = improve_consistency(
             original_matrix,
             threshold=float(option),
             min_val=1/9,
