@@ -1969,16 +1969,13 @@ def show_cr_distortion_dialog():
     import numpy as np
     from cr_analysis import run_analysis, generate_report, matrix_to_heatmap_img
 
-    # Retrieve original matrix (uploaded or demo)
-    if "uploaded_matrix" in st.session_state:
-        st.info(_("📊 업로드된 메인 기준 데이터(응답자 전체 기하평균 행렬)를 바탕으로 검증을 수행합니다.", "📊 Performing verification based on the uploaded Main Criteria data (geometric mean matrix of all respondents)."))
-        original_matrix = st.session_state.uploaded_matrix
-    else:
-        st.warning(_("⚠️ 업로드된 데이터가 없어 **임의로 생성된 샘플 행렬**을 기준으로 검증합니다. 데이터를 먼저 업로드하세요.", "⚠️ No uploaded data found. Verification is performed on a **randomly generated sample matrix**. Please upload data first."))
-        rng = np.random.default_rng(42)
-        original_matrix = rng.random((4, 4))
-        original_matrix = (original_matrix + original_matrix.T) / 2
-        np.fill_diagonal(original_matrix, 1.0)
+    # Check if data has been analyzed
+    if "uploaded_matrix" not in st.session_state:
+        st.warning(_("⚠️ 분석 후 확인 가능합니다. (데이터를 먼저 업로드하세요)", "⚠️ Available after analysis. (Please upload data first)"))
+        return
+        
+    st.info(_("📊 업로드된 메인 기준 데이터(응답자 전체 기하평균 행렬)를 바탕으로 검증을 수행합니다.", "📊 Performing verification based on the uploaded Main Criteria data (geometric mean matrix of all respondents)."))
+    original_matrix = st.session_state.uploaded_matrix
 
     # Determine selected CR option
     option = st.session_state.get('cr_threshold_label', '0.1')
@@ -2140,15 +2137,12 @@ with col_settings:
         learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
 
 
-    with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
-        st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
-        if st.session_state.get('lang', 'ko') == 'en':
-            if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
-                st.session_state.page = "guide"
-                st.rerun()
-        else:
-            st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
+    # 1. CR 보정 결과 왜곡 검증
+    with st.expander(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), expanded=False):
+        if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
+            show_cr_distortion_dialog()
 
+    # 2. 일관성 보정 기준
     with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
         st.markdown(_("""
         **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
@@ -2168,10 +2162,15 @@ with col_settings:
         
         """))
 
-    # Use a minimal expander as a clickable trigger to match style perfectly
-    with st.expander(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), expanded=False):
-        if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
-            show_cr_distortion_dialog()
+    # 3. 이용자 가이드
+    with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
+        st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
+        if st.session_state.get('lang', 'ko') == 'en':
+            if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
+                st.session_state.page = "guide"
+                st.rerun()
+        else:
+            st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
 
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
         st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
