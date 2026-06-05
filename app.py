@@ -114,7 +114,18 @@ try:
         menu_items={
             'Get Help': None,
             'Report a bug': None,
-            'About': _("AHP 마스터 - 스마트 일        <!-- Multilingual Description -->
+            'About': _("AHP 마스터 - 스마트 일반 및 퍼지 AHP 의사결정 분석 시스템", "AHP Master - Smart Traditional & Fuzzy AHP Decision Analysis System")
+        }
+    )
+except Exception:
+    st.set_page_config(page_title=_("AHP 마스터 | 퍼지 AHP 지원", "AHP Master | Fuzzy AHP Support"), layout="wide", page_icon="📊")
+
+# [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
+seo_tags = """
+    <div style="display:none;">
+        <title>AHP Master | Traditional & Fuzzy AHP Decision Analysis System (AHP 마스터, 层次分析法, 階層分析法, Proceso de Análisis Jerárquico)</title>
+        
+        <!-- Multilingual Description -->
         <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. 학위논문 및 연구용 AHP/퍼지 AHP 분석 솔루션. 专业层次分析法(AHP)及模糊层次分析法在线软件与计算器。階層分析法(AHP)ツール。Software del Proceso de Análisis Jerárquico (AHP). Processus d'Analyse Hiérarchique. Analytischer Hierarchieprozess. Quá trình Phân tích Phân cấp. विश्लेषणात्मक पदानुक्रम प्रक्रिया. Analitiese Hiërargieproses. Метод анализа иерархий." />
         
         <!-- Multilingual Keywords -->
