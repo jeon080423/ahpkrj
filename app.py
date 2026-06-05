@@ -1963,16 +1963,15 @@ st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"
 
 
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
+@st.dialog(_("알림", "Notice"))
+def show_warning_dialog():
+    st.warning(_("⚠️ 분석 후 확인 가능합니다. (데이터를 먼저 업로드하세요)", "⚠️ Available after analysis. (Please upload data first)"))
+
 # ---------- CR Distortion Verification Dialog ----------
 @st.dialog(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), width="large")
 def show_cr_distortion_dialog():
     import numpy as np
     from cr_analysis import run_analysis, generate_report, matrix_to_heatmap_img
-
-    # Check if data has been analyzed
-    if "uploaded_matrix" not in st.session_state:
-        st.warning(_("⚠️ 분석 후 확인 가능합니다. (데이터를 먼저 업로드하세요)", "⚠️ Available after analysis. (Please upload data first)"))
-        return
         
     st.info(_("📊 업로드된 메인 기준 데이터(응답자 전체 기하평균 행렬)를 바탕으로 검증을 수행합니다.", "📊 Performing verification based on the uploaded Main Criteria data (geometric mean matrix of all respondents)."))
     original_matrix = st.session_state.uploaded_matrix
@@ -2140,7 +2139,10 @@ with col_settings:
     # 1. CR 보정 결과 왜곡 검증
     with st.expander(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), expanded=False):
         if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
-            show_cr_distortion_dialog()
+            if "uploaded_matrix" not in st.session_state:
+                show_warning_dialog()
+            else:
+                show_cr_distortion_dialog()
 
     # 2. 일관성 보정 기준
     with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
