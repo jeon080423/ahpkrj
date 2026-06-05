@@ -1540,6 +1540,11 @@ with st.sidebar:
         st.image("ahp_master_logo.png", use_container_width=True)
     except:
         st.subheader(_("📊 AHP 마스터", "📊 AHP Master"))
+col1, col2 = st.columns([3, 1])
+with col2:
+    if st.button(_("CR 보정 결과 왜곡 검증", "CR Consistency Distortion Verification")):
+        st.experimental_set_query_params(page="cr_distortion")
+        st.rerun()
     
 
     if st.session_state.user_id is None:
