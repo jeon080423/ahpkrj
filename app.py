@@ -1506,7 +1506,7 @@ def get_fee_info_text():
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
-    <li style="margin-bottom: 2px;"><b>무료사용자</b>: 무료 (5표본 제한 외 기능제한 없음)</li>
+    <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
     <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월 기능 무제한)</li>
   </ul>
 
@@ -1567,8 +1567,8 @@ with st.sidebar:
                                 st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                                 st.query_params["last_activity"] = str(int(time.time()))
                                 st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Automatically downgraded to Free User."))
-                                st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 제한) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
-                                             f"Welcome, {l_id}! Your subscription expired and you were automatically downgraded to a Free User (5-sample limit). You can extend your subscription anytime in the sidebar!"))
+                                st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 분석 가능) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
+                                             f"Welcome, {l_id}! Your subscription expired and you were automatically downgraded to a Free User (5-sample analysis possible). You can extend your subscription anytime in the sidebar!"))
                                 st.rerun()
                             except Exception as e:
                                 st.error(_(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}", f"Error during automatic expiry downgrade: {e}"))
