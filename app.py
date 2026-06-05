@@ -1962,6 +1962,52 @@ st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"
 
 
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
+# Routing for CR distortion verification page
+query_params = st.experimental_get_query_params()
+if query_params.get("page") == ["cr_distortion"]:
+    import numpy as np
+    from cr_analysis import run_analysis, generate_report, matrix_to_heatmap_img
+    # Retrieve original matrix (uploaded or demo)
+    if "uploaded_matrix" in st.session_state:
+        original_matrix = st.session_state.uploaded_matrix
+    else:
+        rng = np.random.default_rng()
+        original_matrix = rng.random((4, 4))
+        original_matrix = (original_matrix + original_matrix.T) / 2
+        np.fill_diagonal(original_matrix, 1.0)
+    # Determine selected CR option
+    option = st.session_state.get('cr_threshold_label', '0.1')
+    if option in ["보정 하지 않음", "Do Not Correct"]:
+        corrected_matrix = original_matrix.copy()
+        option_name = _("보정 안 함", "Do Not Correct")
+    else:
+        corrected_matrix, cr_val, iters, _ = improve_consistency(
+            original_matrix,
+            threshold=float(option),
+            min_val=1/9,
+            max_val=9
+        )
+        option_name = option
+    metrics = run_analysis(original_matrix, corrected_matrix, option_name)
+    report_html = generate_report([metrics], original_matrix, {option_name: corrected_matrix})
+    st.subheader(_("CR 검증 결과", "CR Verification Results"))
+    st.write(pd.DataFrame([metrics]))
+    # Show heatmaps
+    orig_img = matrix_to_heatmap_img(original_matrix, _("Original Matrix", "Original Matrix"))
+    corr_img = matrix_to_heatmap_img(corrected_matrix, option_name)
+    st.image(f"data:image/png;base64,{orig_img}", caption=_("Original Matrix", "Original Matrix"), use_column_width=True)
+    st.image(f"data:image/png;base64,{corr_img}", caption=option_name, use_column_width=True)
+    # Download report button (language-specific filename)
+    file_name = f"cr_report_{option_name.replace(' ', '_')}.html"
+    st.download_button(
+        label=_("HTML 보고서 다운로드", "Download HTML Report"),
+        data=report_html,
+        file_name=file_name,
+        mime="text/html"
+    )
+    if st.button(_("메인으로 돌아가기", "Back to Main")):
+        st.experimental_set_query_params()
+    st.stop()
 
 with col_settings:
     with st.container(border=True):
@@ -1982,6 +2028,9 @@ with col_settings:
         max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
         learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
 
+    if st.button(_("CR 보정 결과 왜곡 검증", "CR Consistency Distortion Verification")):
+        st.experimental_set_query_params(page="cr_distortion")
+        st.rerun()
     with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
         st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
         if st.session_state.get('lang', 'ko') == 'en':
