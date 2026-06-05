@@ -1540,12 +1540,7 @@ with st.sidebar:
         st.image("ahp_master_logo.png", use_container_width=True)
     except:
         st.subheader(_("📊 AHP 마스터", "📊 AHP Master"))
-col1, col2 = st.columns([3, 1])
-with col2:
-    if st.button(_("CR 보정 결과 왜곡 검증", "CR Consistency Distortion Verification")):
-        st.experimental_set_query_params(page="cr_distortion")
-        st.rerun()
-    
+
 
     if st.session_state.user_id is None:
         tab_login, tab_signup, tab_find_pw = st.tabs([_("로그인", "Login"), _("회원가입", "Sign Up"), _("비밀번호 찾기", "Find Password")])
@@ -2033,9 +2028,7 @@ with col_settings:
         max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
         learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
 
-    if st.button(_("CR 보정 결과 왜곡 검증", "CR Consistency Distortion Verification")):
-        st.experimental_set_query_params(page="cr_distortion")
-        st.rerun()
+
     with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
         st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
         if st.session_state.get('lang', 'ko') == 'en':
@@ -2063,6 +2056,10 @@ with col_settings:
         2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = Old^{(1-\alpha)} \times Ideal^{\alpha}$)
         
         """))
+
+    if st.button(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), use_container_width=True):
+        st.experimental_set_query_params(page="cr_distortion")
+        st.rerun()
 
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
         st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
