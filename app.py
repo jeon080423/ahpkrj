@@ -587,6 +587,58 @@ def validate_password(password):
     has_special = re.search(r'[!@#$%^&*(),.?":{}|<>]', password)
     return has_char and has_special
 
+def send_foreign_access_email(ip, country, region, kst_time):
+    sender_email = "jeon080423@gmail.com"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    recipient_email = "jeon080423@gmail.com"
+    subject = f"[AHP 마스터] ⚠️ 해외 접속 감지: {country}"
+    
+    body = f"""AHP 마스터에 해외 접속이 감지되었습니다.
+
+접속 시간 (KST): {kst_time}
+접속 국가: {country}
+접속 지역: {region}
+접속 IP: {ip}
+"""
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+    except Exception as e:
+        print(f"Failed to send foreign access email: {e}")
+
+def check_foreign_access():
+    if "foreign_access_checked" not in st.session_state:
+        st.session_state.foreign_access_checked = True
+        try:
+            # st.context.headers is available in Streamlit 1.30+
+            if hasattr(st, 'context') and hasattr(st.context, 'headers'):
+                headers = st.context.headers
+                ip = headers.get("X-Forwarded-For", "").split(",")[0].strip()
+                if not ip:
+                    ip = headers.get("X-Real-IP", "").split(",")[0].strip()
+                    
+                if ip and ip not in ["127.0.0.1", "::1", "localhost"]:
+                    import requests
+                    res = requests.get(f"https://get.geojs.io/v1/ip/geo/{ip}.json", timeout=3)
+                    if res.status_code == 200:
+                        data = res.json()
+                        country_code = data.get("country_code", "")
+                        country = data.get("country", "Unknown Country")
+                        region = data.get("region", "Unknown Region")
+                        
+                        if country_code and country_code != "KR":
+                            kst_time = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+                            send_foreign_access_email(ip, country, region, kst_time)
+        except Exception as e:
+            print(f"Error checking foreign access: {e}")
+
+
 def send_application_email(user_email):
     sender_email = "jeon080423@gmail.com"
     # secrets.toml에서 이메일 비밀번호를 안전하게 로드합니다.
@@ -1386,6 +1438,9 @@ if 'admin_mode' not in st.session_state: st.session_state.admin_mode = False
 if 'model_structure' not in st.session_state: st.session_state.model_structure = {}
 if 'page' not in st.session_state: st.session_state.page = "main"
 if 'signup_paypal_user' not in st.session_state: st.session_state.signup_paypal_user = None
+
+# Check for foreign access once per session
+check_foreign_access()
 
 # -----------------------------------------------------------------------------
 # 쿼리 매개변수 확인 (다국어 선택 및 결제 완료 처리)
