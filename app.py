@@ -1196,6 +1196,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         res["Iterations"] = iterations
         res["Corrected"] = corrected_flag
         res["Matrix_Object"] = final_matrix 
+        res["Orig_Matrix_Object"] = matrix.copy()
         
         for f_idx, f_name in enumerate(factors):
             res[f"Weight_{f_name}"] = final_weights[f_idx]
@@ -1970,8 +1971,10 @@ def show_cr_distortion_dialog():
 
     # Retrieve original matrix (uploaded or demo)
     if "uploaded_matrix" in st.session_state:
+        st.info(_("📊 업로드된 메인 기준 데이터(응답자 전체 기하평균 행렬)를 바탕으로 검증을 수행합니다.", "📊 Performing verification based on the uploaded Main Criteria data (geometric mean matrix of all respondents)."))
         original_matrix = st.session_state.uploaded_matrix
     else:
+        st.warning(_("⚠️ 업로드된 데이터가 없어 **임의로 생성된 샘플 행렬**을 기준으로 검증합니다. 데이터를 먼저 업로드하세요.", "⚠️ No uploaded data found. Verification is performed on a **randomly generated sample matrix**. Please upload data first."))
         rng = np.random.default_rng(42)
         original_matrix = rng.random((4, 4))
         original_matrix = (original_matrix + original_matrix.T) / 2
@@ -1986,7 +1989,7 @@ def show_cr_distortion_dialog():
         corrected_matrix, cr_val, iters, _unused = improve_consistency(
             original_matrix,
             threshold=float(option),
-            min_val=1/9,
+            min_val=-9,
             max_val=9
         )
         option_name = option
@@ -2685,6 +2688,14 @@ with col_main:
                                 """))
                             st.stop()
     
+                        # --- Uploaded Data Matrix for CR Distortion Verification ---
+                        if 'Orig_Matrix_Object' in main_results_df.columns:
+                            orig_mats = np.stack(main_results_df['Orig_Matrix_Object'].values)
+                            # Use geometric mean to aggregate the raw matrices of all respondents
+                            agg_orig_matrix = np.exp(np.mean(np.log(orig_mats), axis=0))
+                            st.session_state.uploaded_matrix = agg_orig_matrix
+                        # -----------------------------------------------------------
+
                         # 2. 하위 시트 분석 및 저장
                         sub_results_storage = {}
                         total_excl_df_list = [main_excluded_df]
