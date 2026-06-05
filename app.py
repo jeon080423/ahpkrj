@@ -2010,6 +2010,43 @@ def show_cr_distortion_dialog():
             st.image(f"data:image/png;base64,{corr_img}", caption=_("보정 행렬", "Corrected Matrix"), use_container_width=True)
 
     with left_col:
+        st.subheader(_("🧪 검증 방법", "🧪 Verification Method"))
+        st.markdown(_(
+            f"""
+본 검증은 CR(일관성 비율) 보정 과정에서 **원본 응답 데이터가 얼마나 변형되었는지**를 정량적으로 측정합니다.
+
+**검증 절차:**
+1. **원본 행렬 확보** — 설문 응답자의 쌍대비교 판단 행렬을 그대로 사용합니다.
+2. **보정 행렬 생성** — 선택된 CR 임계값(`{option_name}`)에 따라 반복 수렴 조정법(Iterative Adjustment)으로 보정된 행렬을 생성합니다.
+3. **차이 분석** — 원본과 보정 행렬 간 4가지 수리적 지표를 계산합니다:
+   - **유클리드 거리**: 행렬 원소 간 직선 거리
+   - **맨해튼 거리**: 행렬 원소 간 절대 차이의 합
+   - **코사인 유사도**: 두 행렬 벡터의 방향 일치도
+   - **왜곡 점수**: 위 지표들을 종합한 왜곡 수준 지수
+4. **종합 판정** — 왜곡 점수를 기준으로 보정의 신뢰성을 평가합니다.
+
+> 💡 왜곡 점수가 낮을수록 보정이 원본 응답의 경향성을 잘 보존했음을 의미합니다.
+
+---
+""",
+            f"""
+This verification quantitatively measures **how much the original response data was altered** during the CR (Consistency Ratio) correction process.
+
+**Verification Procedure:**
+1. **Obtain Original Matrix** — Use the respondent's raw pairwise comparison judgment matrix as-is.
+2. **Generate Corrected Matrix** — Apply the Iterative Adjustment method based on the selected CR threshold (`{option_name}`) to produce a corrected matrix.
+3. **Difference Analysis** — Calculate 4 mathematical metrics between the original and corrected matrices:
+   - **Euclidean Distance**: Straight-line distance between matrix elements
+   - **Manhattan Distance**: Sum of absolute element-wise differences
+   - **Cosine Similarity**: Directional alignment of the two matrix vectors
+   - **Distortion Score**: Composite index summarizing overall distortion
+4. **Overall Verdict** — Evaluate the reliability of the correction based on the Distortion Score.
+
+> 💡 A lower Distortion Score means the correction better preserved the original response patterns.
+
+---
+"""))
+
         st.subheader(_("📝 결과 해석", "📝 Interpretation"))
 
         # Extract metric values
