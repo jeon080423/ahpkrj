@@ -126,10 +126,10 @@ seo_tags = """
         <title>AHP Master | Traditional & Fuzzy AHP Decision Analysis System (AHP 마스터, 层次分析法, 階層分析法, Proceso de Análisis Jerárquico)</title>
         
         <!-- Multilingual Description -->
-        <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. 학위논문 및 연구용 AHP/퍼지 AHP 분석 솔루션. 专业层次分析法(AHP)及模糊层次分析法在线软件与计算器。階層分析法(AHP)ツール。Software del Proceso de Análisis Jerárquico (AHP)." />
+        <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. 학위논문 및 연구용 AHP/퍼지 AHP 분석 솔루션. 专业层次分析法(AHP)及模糊层次分析法在线软件与计算器。階層分析法(AHP)ツール。Software del Proceso de Análisis Jerárquico (AHP). Processus d'Analyse Hiérarchique. Analytischer Hierarchieprozess. Quá trình Phân tích Phân cấp. विश्लेषणात्मक पदानुक्रम प्रक्रिया. Analitiese Hiërargieproses." />
         
         <!-- Multilingual Keywords -->
-        <meta name="keywords" content="AHP, Fuzzy AHP, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스터, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, 학위논문 AHP 통계, 层次分析法, 模糊层次分析法, 层次分析法计算器, 层次分析法软件, 论文AHP分析, 一致性比例, 階層分析法, ファジィAHP, AHPソフトウェア, AHPツール, Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP" />
+        <meta name="keywords" content="AHP, Fuzzy AHP, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스터, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, 학위논문 AHP 통계, 层次分析法, 模糊层次分析法, 层次分析法计算器, 层次分析法软件, 论文AHP分析, 一致性比例, 階層分析法, ファジィAHP, AHPソフトウェア, AHPツール, Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP, Processus d'Analyse Hiérarchique, AHP Flou, Logiciel AHP, Quá trình Phân tích Phân cấp, AHP mờ, Phần mềm AHP, Analytischer Hierarchieprozess, AHP-Software, AHP Rechner, विश्लेषणात्मक पदानुक्रम प्रक्रिया, फ़ज़ी AHP, AHP सॉफ्टवेयर, Analitiese Hiërargieproses, Vae AHP, AHP-sagteware" />
         
         <meta name="author" content="AHP Master" />
         <meta name="robots" content="index, follow" />
@@ -151,6 +151,16 @@ seo_tags = """
         <p>論文や研究のための階層分析法(AHP)自動化ツール。一貫性比率(CR)の調整やExcelレポート出力に対応。</p>
         <h2>Proceso de Análisis Jerárquico (AHP) y AHP Difuso</h2>
         <p>Software y calculadora en línea para el Proceso de Análisis Jerárquico (AHP). Ideal para tesis y toma de decisiones, con calibración automática de la Relación de Consistencia (CR).</p>
+        <h2>Processus d'Analyse Hiérarchique (AHP) et AHP Flou</h2>
+        <p>Logiciel et calculatrice en ligne pour le Processus d'Analyse Hiérarchique (AHP). Idéal pour les thèses académiques et la prise de décision, avec calibrage automatique du ratio de cohérence (CR).</p>
+        <h2>Analytischer Hierarchieprozess (AHP) und Fuzzy AHP</h2>
+        <p>AHP-Software und Rechner für akademische Arbeiten und Forschung. Unterstützt automatische Anpassung der Konsistenzrate (CR).</p>
+        <h2>Quá trình Phân tích Phân cấp (AHP) & AHP mờ</h2>
+        <p>Phần mềm tự động hóa phân tích AHP và AHP mờ (Fuzzy AHP) chuyên nghiệp dành cho luận văn và nghiên cứu.</p>
+        <h2>विश्लेषणात्मक पदानुक्रम प्रक्रिया (AHP) और फ़ज़ी AHP</h2>
+        <p>शोध प्रबंध, अकादमिक पत्रों और अनुसंधान के लिए पेशेवर AHP और फ़ज़ी AHP स्वचालित सॉफ्टवेयर टूल।</p>
+        <h2>Analitiese Hiërargieproses (AHP) en Vae AHP</h2>
+        <p>AHP-sagteware instrument vir proefskrifte en navorsing. Ondersteun outomatiese CR kalibrasie en groep geometriese gemiddelde berekening.</p>
     </div>
 """
 st.markdown(seo_tags, unsafe_allow_html=True)
