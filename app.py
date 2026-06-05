@@ -2165,23 +2165,10 @@ with col_settings:
         
         """))
 
-    # CSS to left-align the CR verification button and match expander spacing
-    st.markdown("""
-    <style>
-    /* Left-align CR verification button text to match expanders */
-    div[data-testid="stButton"] > button[data-testid="stBaseButton-secondary"] {
-        text-align: left !important;
-        display: flex !important;
-        justify-content: flex-start !important;
-        padding: 0.75rem 1.05rem !important;
-        margin-top: -0.5rem !important;
-        margin-bottom: -0.5rem !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    if st.button(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), use_container_width=True, key="btn_cr_verify"):
-        show_cr_distortion_dialog()
+    # Use a minimal expander as a clickable trigger to match style perfectly
+    with st.expander(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), expanded=False):
+        if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
+            show_cr_distortion_dialog()
 
     with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
         st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
