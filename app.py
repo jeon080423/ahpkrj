@@ -1643,16 +1643,39 @@ if "survey_id" in q_params:
             """
             st.markdown(header_html, unsafe_allow_html=True)
             
-            # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (2)] - [척도 라디오 버튼 영역 컬럼 (8)] - [오른쪽 요인명 컬럼 (2)]
+            # 대형 화면 및 폰 브라우저에서 st.radio의 가로 아이템들이 균등한 간격(flex-grow)으로 벌어지도록 CSS 주입
+            st.markdown(
+                """
+                <style>
+                /* streamlit radio horizontal flex layout override to distribute items evenly */
+                div[role="radiogroup"] {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                    gap: 0px !important;
+                }
+                div[role="radiogroup"] > label {
+                    flex: 1;
+                    text-align: center;
+                    display: flex;
+                    justify-content: center;
+                    margin-right: 0px !important;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (1.5 / 15%)] - [척도 라디오 버튼 영역 컬럼 (7.0 / 70%)] - [오른쪽 요인명 컬럼 (1.5 / 15%)]
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
                 
-                # streamlit columns 구성 ([2, 8, 2] 비율로 척도 가로 공간을 최대한 넓힘)
-                row_cols = st.columns([2, 8, 2])
+                # 상단 헤더 테이블의 width 비율인 15%, 70%, 15% 와 정확히 매핑되도록 streamlit columns 분할
+                row_cols = st.columns([1.5, 7.0, 1.5])
                 
                 # 왼쪽 요인명 출력
                 with row_cols[0]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{left_f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{left_f}</div>", unsafe_allow_html=True)
                 
                 # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
                 with row_cols[1]:
@@ -1668,7 +1691,7 @@ if "survey_id" in q_params:
                 
                 # 오른쪽 요인명 출력
                 with row_cols[2]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{right_f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{right_f}</div>", unsafe_allow_html=True)
                 
                 ahp_answers[pair_key] = ans_val
                 st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
@@ -4452,11 +4475,11 @@ with col_main:
                     
                     for left_f, right_f in comb["pairs"]:
                         pair_key = f"{left_f}_{right_f}"
-                        row_cols = st.columns([2, 8, 2])
+                        row_cols = st.columns([1.5, 7.0, 1.5])
                         
                         # 왼쪽 요인명
                         with row_cols[0]:
-                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{left_f}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{left_f}</div>", unsafe_allow_html=True)
                         
                         # 라디오 버튼만 출력
                         with row_cols[1]:
@@ -4472,7 +4495,7 @@ with col_main:
                             
                         # 오른쪽 요인명
                         with row_cols[2]:
-                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{right_f}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{right_f}</div>", unsafe_allow_html=True)
                         st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
                     st.write("")
                     
