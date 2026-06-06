@@ -1602,7 +1602,7 @@ if "survey_id" in q_params:
                 options = [-9, -7, -3, 1, 3, 7, 9]
                 format_func = lambda x: f"왼쪽 절대적 중요 (-9)" if x == -9 else (f"왼쪽 대단히 중요 (-7)" if x == -7 else (f"왼쪽 약간 중요 (-3)" if x == -3 else ("동등함 (1)" if x == 1 else (f"오른쪽 약간 중요 (3)" if x == 3 else (f"오른쪽 대단히 중요 (7)" if x == 9 else f"오른쪽 절대적 중요 (9)")))))
             else: # 1-9 Continuous (Default)
-                options = list(range(-9, 0)) + list(range(1, 10))
+                options = list(range(-9, -1)) + list(range(1, 10))
                 options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
                 format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
                 
@@ -1621,7 +1621,7 @@ if "survey_id" in q_params:
             else: # 1-9 Continuous (Default)
                 left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
                 right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
-                options = list(range(-9, 0)) + list(range(1, 10))
+                options = list(range(-9, -1)) + list(range(1, 10))
                 options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
                 col_headers = ["9", "8", "7", "6", "5", "4", "3", "2", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
             
@@ -1654,6 +1654,7 @@ if "survey_id" in q_params:
                     justify-content: space-between;
                     width: 100% !important;
                     gap: 0px !important;
+                    padding: 0 10px !important;
                 }
                 div[role="radiogroup"] > label {
                     flex: 1;
@@ -1684,14 +1685,16 @@ if "survey_id" in q_params:
                 
                 # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
                 with row_cols[1]:
+                    # 안전을 위해 options에서 중복 및 -1 값 명시적 제외
+                    clean_options = [x for x in options if x != -1]
                     ans_val = st.radio(
-                        label=f"select_{pair_key}",
-                        options=options,
-                        index=options.index(1),
-                        format_func=lambda x: f"{abs(x)}" if x != 1 else "1",
-                        key=f"pair_ans_{pair_key}",
-                        horizontal=True,
-                        label_visibility="collapsed"
+                         label=f"select_{pair_key}",
+                         options=clean_options,
+                         index=clean_options.index(1),
+                         format_func=lambda x: f"{abs(x)}" if x != 1 else "1",
+                         key=f"pair_ans_{pair_key}",
+                         horizontal=True,
+                         label_visibility="collapsed"
                     )
                 
                 # 오른쪽 요인명 출력
@@ -4453,7 +4456,7 @@ with col_main:
                 else: # 1-9 Continuous (Default)
                     left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
                     right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
-                    options = list(range(-9, 0)) + list(range(1, 10))
+                    options = list(range(-9, -1)) + list(range(1, 10))
                     options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
 
                 for comb in combinations:
@@ -4480,18 +4483,19 @@ with col_main:
                     
                     for left_f, right_f in comb["pairs"]:
                         pair_key = f"{left_f}_{right_f}"
-                        row_cols = st.columns([1.5, 7.0, 1.5])
+                        row_cols = st.columns([1.6, 6.8, 1.6])
                         
                         # 왼쪽 요인명
                         with row_cols[0]:
-                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{left_f}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{left_f}</div>", unsafe_allow_html=True)
                         
                         # 라디오 버튼만 출력
                         with row_cols[1]:
+                            clean_preview_options = [x for x in options if x != -1]
                             st.radio(
                                 label=f"preview_select_{pair_key}",
-                                options=options,
-                                index=options.index(1),
+                                options=clean_preview_options,
+                                index=clean_preview_options.index(1),
                                 format_func=lambda x: f"{abs(x)}" if x != 1 else "1",
                                 key=f"preview_pair_ans_{left_f}_{right_f}",
                                 horizontal=True,
@@ -4500,7 +4504,7 @@ with col_main:
                             
                         # 오른쪽 요인명
                         with row_cols[2]:
-                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{right_f}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{right_f}</div>", unsafe_allow_html=True)
                         st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
                     st.write("")
                     
