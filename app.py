@@ -1608,15 +1608,36 @@ if "survey_id" in q_params:
                 
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
-                st.markdown(f"**{left_f}** vs **{right_f}**")
-                ans_val = st.radio(
-                    f"상대적 중요도 선택 ({left_f} ◀ ▶ {right_f})",
-                    options=options,
-                    index=options.index(1),
-                    format_func=format_func,
-                    key=f"pair_ans_{pair_key}"
+                
+                # HTML / CSS를 통한 PDF 설문지 스타일의 헤더/비교 구조 생성
+                st.markdown(
+                    f"""
+                    <div style="background-color:#f8f9fa; padding:10px; border-radius:5px; margin-top:10px; font-weight:bold; border-left: 5px solid #007bff;">
+                        <span style="color:#007bff;">[비교]</span> {left_f} <span style="color:#6c757d;">VS</span> {right_f}
+                    </div>
+                    """, 
+                    unsafe_html=True
                 )
+                
+                # 가로 메트릭스 격자 형태 배치 (왼쪽 요인명 - 척도 영역 - 오른쪽 요인명)
+                col_left, col_matrix, col_right = st.columns([2, 8, 2])
+                with col_left:
+                    st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_html=True)
+                with col_matrix:
+                    ans_val = st.radio(
+                        label=f"hidden_label_{pair_key}", # 스크린리더/구조용 레이블
+                        options=options,
+                        index=options.index(1),
+                        format_func=format_func,
+                        key=f"pair_ans_{pair_key}",
+                        horizontal=True,
+                        label_visibility="collapsed" # 레이블 감추고 메트릭스 버튼 형태만 부각
+                    )
+                with col_right:
+                    st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_html=True)
+                
                 ahp_answers[pair_key] = ans_val
+                st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_html=True)
             st.divider()
             
         # 4. 답례품 및 개인정보 수집 동의
@@ -4375,15 +4396,34 @@ with col_main:
                     st.markdown(f"##### 🔍 {parent_lbl}")
                     
                     for left_f, right_f in comb["pairs"]:
-                        st.markdown(f"**{left_f}**  vs  **{right_f}**")
-                        st.radio(
-                            f"상대적 중요도 선택 ({left_f} ◀ ▶ {right_f})",
-                            options=options,
-                            index=options.index(1),
-                            format_func=format_func,
-                            key=f"preview_pair_ans_{left_f}_{right_f}",
-                            horizontal=True
+                        pair_key = f"{left_f}_{right_f}"
+                        # HTML / CSS를 통한 PDF 설문지 스타일의 헤더/비교 구조 생성 (미리보기)
+                        st.markdown(
+                            f"""
+                            <div style="background-color:#f8f9fa; padding:10px; border-radius:5px; margin-top:10px; font-weight:bold; border-left: 5px solid #28a745;">
+                                <span style="color:#28a745;">[비교]</span> {left_f} <span style="color:#6c757d;">VS</span> {right_f}
+                            </div>
+                            """, 
+                            unsafe_html=True
                         )
+                        
+                        # 가로 메트릭스 격자 형태 배치 (왼쪽 요인명 - 척도 영역 - 오른쪽 요인명)
+                        col_left, col_matrix, col_right = st.columns([2, 8, 2])
+                        with col_left:
+                            st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_html=True)
+                        with col_matrix:
+                            st.radio(
+                                label=f"hidden_preview_label_{pair_key}",
+                                options=options,
+                                index=options.index(1),
+                                format_func=format_func,
+                                key=f"preview_pair_ans_{left_f}_{right_f}",
+                                horizontal=True,
+                                label_visibility="collapsed"
+                            )
+                        with col_right:
+                            st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_html=True)
+                        st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_html=True)
                     st.write("")
                     
                 if reward_enabled:
