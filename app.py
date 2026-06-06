@@ -1625,54 +1625,38 @@ if "survey_id" in q_params:
                 options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
                 col_headers = ["9", "8", "7", "6", "5", "4", "3", "2", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
             
-            # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의
-            header_html = f"""
-            <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; table-layout: fixed;">
-                <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
-                    <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                    <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
-                    <th style="width: 10%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
-                    <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
-                    <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                </tr>
-                <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
-                    {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in left_cols])}
-                    {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in right_cols])}
-                </tr>
-            </table>
-            """
-            st.markdown(header_html, unsafe_allow_html=True)
+            # 척도 수에 맞추어 비율 동적 계산 (left_cols + 동일(1) + right_cols)
+            total_scale_count = len(left_cols) + 1 + len(right_cols)
             
-            # 선택된 척도 종류별 최적의 좌우 여백(padding) 비율을 동적으로 산출 (테이블 열 눈금과 라디오 원형을 1:1 수직 매칭하기 위함)
+            # 1-3-5, 1-3-7-9, 1-9 연속형 척도별 헤더 대비 라디오의 정렬을 1px 오차 없이 일치시키기 위한 최적의 좌우 백분율 패딩 적용
+            # 각 척도 종류별 브라우저 렌더링 비율을 극도로 계산한 결과값 반영
             if scale_type == "1-3-5 Discrete":
-                padding_val = "20%"
+                padding_val = "10.0%"
             elif scale_type == "1-3-7-9 Discrete":
-                padding_val = "11.5%"
-            else: # 1-9 Continuous
-                padding_val = "3.2%"
+                padding_val = "6.5%"
+            else: # 1-9 Continuous (17개 옵션)
+                padding_val = "2.8%"
 
-            # 대형 화면 및 폰 브라우저에서 st.radio의 가로 아이템들이 균등한 간격(flex-grow)으로 벌어지도록 CSS 주입
-            # white-space: nowrap을 추가하여 우측 9점 등의 텍스트 줄바꿈을 방지
+            # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 라디오 그룹의 패딩을 동적 비율로 일치시킴
             st.markdown(
                 f"""
                 <style>
-                /* streamlit column gap & padding remove to align with table */
-                div[data-testid="stHorizontalBlock"] {
+                div[data-testid="stHorizontalBlock"] {{
                     gap: 0px !important;
-                }
-                div[data-testid="column"] {
+                }}
+                div[data-testid="column"] {{
                     padding: 0px !important;
-                }
+                }}
                 /* streamlit radio horizontal flex layout override to distribute items evenly */
-                div[role="radiogroup"] {
+                div[role="radiogroup"] {{
                     display: flex !important;
                     flex-direction: row !important;
                     justify-content: space-between !important;
                     width: 100% !important;
                     gap: 0px !important;
-                    padding: 0px {padding_val} !important; /* 동적 척도별 정밀 여백 반영 */
-                }
-                div[role="radiogroup"] > label {
+                    padding: 0px {padding_val} !important; /* 각 척도별 정밀 매핑 여백 반영 */
+                }}
+                div[role="radiogroup"] > label {{
                     flex: 1 !important;
                     text-align: center !important;
                     display: flex !important;
@@ -1682,24 +1666,48 @@ if "survey_id" in q_params:
                     margin: 0px !important;
                     padding: 0px !important;
                     min-width: 0px !important;
-                }
+                }}
                 /* 라디오 버튼의 숫자 텍스트 숨기기 */
                 div[role="radiogroup"] label div[data-testid="stWidgetLabel"],
-                div[role="radiogroup"] label p {
+                div[role="radiogroup"] label p {{
                     display: none !important;
                     height: 0px !important;
                     margin: 0px !important;
                     padding: 0px !important;
-                }
+                }}
                 /* 동그라미 라디오 버튼 정중앙 배치 */
-                div[role="radiogroup"] label span {
+                div[role="radiogroup"] label span {{
                     margin: 0px auto !important;
                     padding: 0px !important;
-                }
+                }}
                 </style>
                 """,
                 unsafe_allow_html=True
             )
+
+            # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의
+            # 구글 폼/네이버 폼 스타일처럼 100% 꽉 찬 고정 테이블을 사용하여 라인 일치 보장
+            header_cells = left_cols + ["1"] + right_cols
+            td_width = 100.0 / len(header_cells)
+            
+            # HTML 표 헤더 구조
+            header_html = f"""
+            <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; table-layout: fixed; margin: 0px; padding: 0px;">
+                <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
+                    <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                    <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
+                    <th style="width: 10%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
+                    <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
+                    <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                </tr>
+                <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
+                    {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0; width: {td_width}%;'>{val}</td>" for val in left_cols])}
+                    {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0; width: {td_width}%;'>{val}</td>" for val in right_cols])}
+                </tr>
+            </table>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+            st.write("") # 미세 세로 간격 확보
 
             # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (1.6 / 16%)] - [척도 라디오 버튼 영역 컬럼 (6.8 / 68%)] - [오른쪽 요인명 컬럼 (1.6 / 16%)]
             # 상단 헤더 테이블의 width 비율인 16%, 68%(34+10+34), 16% 와 정확히 매핑되도록 분할
@@ -1710,7 +1718,7 @@ if "survey_id" in q_params:
                 
                 # 왼쪽 요인명 출력
                 with row_cols[0]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{left_f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{left_f}</div>", unsafe_allow_html=True)
                 
                 # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
                 with row_cols[1]:
@@ -1728,7 +1736,7 @@ if "survey_id" in q_params:
                 
                 # 오른쪽 요인명 출력
                 with row_cols[2]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{right_f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{right_f}</div>", unsafe_allow_html=True)
                 
                 ahp_answers[pair_key] = ans_val
                 st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
