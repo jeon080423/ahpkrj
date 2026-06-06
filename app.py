@@ -174,31 +174,38 @@ st.markdown(seo_tags, unsafe_allow_html=True)
 # =============================================================================
 global_ahp_css = """
 <style>
-/* 1. 수직 정렬 & 레이아웃 배분 */
-div[data-testid="stHorizontalBlock"] {
+/* 1. 수직 정렬 & 레이아웃 배분 (AHP 척도가 포함된 stHorizontalBlock 대상) */
+div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) {
     gap: 0px !important;
     align-items: center !important;
+    width: 100% !important;
 }
-div[data-testid="column"] {
+
+div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"] {
     padding: 0px !important;
 }
 
-/* 2. 라디오 그룹 전체 100% 분배 강제 */
-div[data-testid="stRadio"],
-.stRadio {
+/* 2. 라디오 그룹 전체 100% 분배 강제 (옵션이 5개 이상인 라디오 버튼만 타겟) */
+div[data-testid="stRadio"]:has(label:nth-child(5)),
+div[data-testid="stRadio"]:has(label:nth-child(5)) .stRadio {
     width: 100% !important;
 }
-div[role="radiogroup"] {
+
+div[data-testid="stRadio"]:has(label:nth-child(5)) > div,
+div[role="radiogroup"]:has(label:nth-child(5)) {
     display: flex !important;
     flex-direction: row !important;
     justify-content: space-between !important;
+    align-items: center !important;
     width: 100% !important;
     gap: 0px !important;
     padding: 0px !important; 
+    margin: 0px !important;
 }
 
 /* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
-div[role="radiogroup"] > label {
+div[data-testid="stRadio"]:has(label:nth-child(5)) label,
+div[role="radiogroup"]:has(label:nth-child(5)) label {
     flex: 1 1 0% !important;
     display: flex !important;
     flex-direction: column !important;
@@ -208,29 +215,40 @@ div[role="radiogroup"] > label {
     margin: 0px !important;
     padding: 0px !important;
     min-width: 0px !important;
-    border-radius: 4px;
-    transition: background-color 0.2s ease-in-out;
+    border-radius: 4px !important;
+    transition: background-color 0.2s ease-in-out !important;
+    background-color: transparent !important;
 }
 
-/* 4. 기존 텍스트 찌꺼기 제거 */
-div[role="radiogroup"] label div[data-testid="stWidgetLabel"],
-div[role="radiogroup"] label p {
+/* 4. 기존 텍스트 찌꺼기 완벽 제거 (AHP 척도의 경우 텍스트를 숨김) */
+div[data-testid="stRadio"]:has(label:nth-child(5)) label div[data-testid="stWidgetLabel"],
+div[data-testid="stRadio"]:has(label:nth-child(5)) label p,
+div[role="radiogroup"]:has(label:nth-child(5)) label p {
     display: none !important;
     height: 0px !important;
+    width: 0px !important;
     margin: 0px !important;
     padding: 0px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
 }
-div[role="radiogroup"] label span {
+
+/* 동그라미 컨테이너 중앙 정렬 */
+div[data-testid="stRadio"]:has(label:nth-child(5)) label span,
+div[role="radiogroup"]:has(label:nth-child(5)) label span {
     margin: 0px auto !important;
     padding: 0px !important;
 }
 
 /* 5. Hover 및 Zebra 효과 */
-div[role="radiogroup"] > label:hover {
+div[data-testid="stRadio"]:has(label:nth-child(5)) label:hover,
+div[role="radiogroup"]:has(label:nth-child(5)) label:hover {
     background-color: #e2e8f0 !important;
     cursor: pointer !important;
 }
-div[data-testid="stHorizontalBlock"]:hover {
+
+div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)):hover {
     background-color: #fafafa !important; 
 }
 
@@ -242,18 +260,18 @@ div[data-testid="stHorizontalBlock"]:hover {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
     }
-    div[data-testid="stHorizontalBlock"] {
+    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) {
         flex-wrap: nowrap !important;
         min-width: 750px !important;
     }
     div[data-testid="column"] {
         flex: 0 0 auto !important;
     }
-    div[data-testid="column"]:nth-child(1),
-    div[data-testid="column"]:nth-child(3) {
+    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"]:nth-child(1),
+    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"]:nth-child(3) {
         width: 15% !important; 
     }
-    div[data-testid="column"]:nth-child(2) {
+    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"]:nth-child(2) {
         width: 70% !important;
     }
 }
@@ -1505,57 +1523,7 @@ def calculate_anova_and_posthoc(full_data):
 init_db()
 
 # CSS 최적화
-st.markdown("""
-<style>
-    .stDataFrame {font-size: 0.9rem;} 
-    div[data-testid="stMetricValue"] {font-size: 1.2rem;}
-    .stDownloadButton > button[kind="primary"] {
-        background-color: #d32f2f;
-        color: white;
-        border-radius: 5px;
-        border: none;
-        padding: 0.6rem 1.2rem;
-        font-weight: bold;
-        transition: background-color 0.3s ease;
-    }
-    .stDownloadButton > button[kind="primary"]:hover {
-        background-color: #b71c1c;
-    }
-    .stDownloadButton > button[kind="secondary"] {
-        background-color: #ffffff !important;
-        color: #1976D2 !important;
-        border: 1px solid #d9d9d9 !important;
-        border-radius: 5px !important;
-        padding: 0.6rem 1.2rem !important;
-        font-weight: bold !important;
-        transition: all 0.3s ease !important;
-    }
-    .stDownloadButton > button[kind="secondary"]:hover {
-        background-color: #f0f8ff !important;
-        border-color: #1976D2 !important;
-    }
-    /* [수정] 좋아요 버튼 스타일 */
-    div.stButton > button:first-child[kind="primary"] {
-        background-color: #FFC0CB !important; /* 핑크색 */
-        color: black !important;
-        border: none !important;
-    }
-    /* 본문 상단 여백 축소로 좌측 로고와 수평 정렬 */
-    .block-container, div[data-testid="stAppViewBlockContainer"] {
-        padding-top: 2.0rem !important;
-    }
-    /* 사이드바 여백 극대 축소 */
-    section[data-testid="stSidebar"] .block-container {
-        padding-top: 1.0rem !important;
-    }
-    section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] {
-        gap: 0.4rem !important;
-    }
-    section[data-testid="stSidebar"] div.stElementContainer {
-        margin-bottom: 0.2rem !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+
 
 if 'user_id' not in st.session_state: st.session_state.user_id = None
 if 'user_role' not in st.session_state: st.session_state.user_role = None
@@ -1726,91 +1694,7 @@ if "survey_id" in q_params:
             right_width = scale_width * len(right_cols)
 
             # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 라디오 그룹을 100% 분배
-            st.markdown(
-                f"""
-                <style>
-                div[data-testid="stHorizontalBlock"] {{
-                    gap: 0px !important;
-                }}
-                div[data-testid="column"] {{
-                    padding: 0px !important;
-                }}
-                /* streamlit radio horizontal flex layout override to distribute items evenly */
-                div[data-testid="stRadio"] {{
-                    width: 100% !important;
-                }}
-                div[role="radiogroup"] {{
-                    display: flex !important;
-                    flex-direction: row !important;
-                    justify-content: space-between !important;
-                    width: 100% !important;
-                    gap: 0px !important;
-                    padding: 0px !important; 
-                }}
-                div[role="radiogroup"] > label {{
-                    flex: 1 1 0% !important;
-                    text-align: center !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    margin: 0px !important;
-                    padding: 0px !important;
-                    min-width: 0px !important;
-                }}
-                /* 라디오 버튼의 숫자 텍스트 숨기기 */
-                div[role="radiogroup"] label div[data-testid="stWidgetLabel"],
-                div[role="radiogroup"] label p {{
-                    display: none !important;
-                    height: 0px !important;
-                    margin: 0px !important;
-                    padding: 0px !important;
-                }}
-                /* 동그라미 라디오 버튼 정중앙 배치 */
-                div[role="radiogroup"] label span {{
-                    margin: 0px auto !important;
-                    padding: 0px !important;
-                }}
-
-                /* =========================================================
-                   2. 응답 편의성 및 가독성 강화 (Hover & Zebra Striping)
-                   ========================================================= */
-                div[role="radiogroup"] > label:hover {{
-                    background-color: #e2e8f0 !important;
-                    cursor: pointer !important;
-                }}
-                div[data-testid="stHorizontalBlock"]:hover {{
-                    background-color: #fafafa !important; 
-                }}
-
-                /* =========================================================
-                   3. 모바일 반응형 웹 대응 (세로 붕괴 방지 및 가로 스크롤)
-                   ========================================================= */
-                @media (max-width: 768px) {{
-                    .stApp > header + div, 
-                    .block-container {{
-                        overflow-x: auto !important;
-                        -webkit-overflow-scrolling: touch;
-                    }}
-                    div[data-testid="stHorizontalBlock"] {{
-                        flex-wrap: nowrap !important;
-                        min-width: 750px !important;
-                    }}
-                    div[data-testid="column"] {{
-                        flex: 0 0 auto !important;
-                    }}
-                    div[data-testid="column"]:nth-child(1),
-                    div[data-testid="column"]:nth-child(3) {{
-                        width: 15% !important; 
-                    }}
-                    div[data-testid="column"]:nth-child(2) {{
-                        width: 70% !important;
-                    }}
-                }}
-                </style>
-                """,
-                unsafe_allow_html=True
-            )
+            
 
             # HTML 표 헤더 구조
             header_html = f"""
@@ -1870,7 +1754,7 @@ if "survey_id" in q_params:
             reward_contact = st.text_input("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *")
             resp_data["reward_contact"] = reward_contact
             
-        agree_check = st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의함", "동의하지 않음"], index=1)
+        agree_check = st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의", "비동의"], index=1)
         
         # 제출 버튼
         submit_btn = st.form_submit_button("설문지 제출하기", type="primary")
@@ -4625,84 +4509,7 @@ with col_main:
                 right_width = scale_width * len(right_cols)
 
                 # 미리보기 화면에도 수직 정렬 CSS 주입
-                st.markdown(
-                    f"""
-                    <style>
-                    div[data-testid="stHorizontalBlock"] {{
-                        gap: 0px !important;
-                    }}
-                    div[data-testid="column"] {{
-                        padding: 0px !important;
-                    }}
-                    div[data-testid="stRadio"] {{
-                        width: 100% !important;
-                    }}
-                    div[role="radiogroup"] {{
-                        display: flex !important;
-                        flex-direction: row !important;
-                        justify-content: space-between !important;
-                        width: 100% !important;
-                        gap: 0px !important;
-                        padding: 0px !important;
-                    }}
-                    div[role="radiogroup"] > label {{
-                        flex: 1 1 0% !important;
-                        text-align: center !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                        margin: 0px !important;
-                        padding: 0px !important;
-                        min-width: 0px !important;
-                    }}
-                    div[role="radiogroup"] label div[data-testid="stWidgetLabel"],
-                    div[role="radiogroup"] label p {{
-                        display: none !important;
-                        height: 0px !important;
-                        margin: 0px !important;
-                        padding: 0px !important;
-                    }}
-                    div[role="radiogroup"] label span {{
-                        margin: 0px auto !important;
-                        padding: 0px !important;
-                    }}
-
-                    /* 응답 편의성 및 가독성 강화 (Hover & Zebra Striping) */
-                    div[role="radiogroup"] > label:hover {{
-                        background-color: #e2e8f0 !important;
-                        cursor: pointer !important;
-                    }}
-                    div[data-testid="stHorizontalBlock"]:hover {{
-                        background-color: #fafafa !important; 
-                    }}
-
-                    /* 모바일 반응형 웹 대응 (세로 붕괴 방지 및 가로 스크롤) */
-                    @media (max-width: 768px) {{
-                        .stApp > header + div, 
-                        .block-container {{
-                            overflow-x: auto !important;
-                            -webkit-overflow-scrolling: touch;
-                        }}
-                        div[data-testid="stHorizontalBlock"] {{
-                            flex-wrap: nowrap !important;
-                            min-width: 750px !important;
-                        }}
-                        div[data-testid="column"] {{
-                            flex: 0 0 auto !important;
-                        }}
-                        div[data-testid="column"]:nth-child(1),
-                        div[data-testid="column"]:nth-child(3) {{
-                            width: 15% !important; 
-                        }}
-                        div[data-testid="column"]:nth-child(2) {{
-                            width: 70% !important;
-                        }}
-                    }}
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
+                
 
                 for comb in combinations:
                     parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
@@ -4760,7 +4567,7 @@ with col_main:
                     st.info(f"🎁 **답례품 안내**: {reward_desc}")
                     st.text_input("답례품 수령 연락처 *", placeholder="010-0000-0000", key="preview_reward_contact")
                 
-                st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의함", "동의하지 않음"], index=1, key="preview_agree_check")
+                st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의", "비동의"], index=1, key="preview_agree_check")
                 
                 st.divider()
                 st.button("미리보기 닫기", key="close_preview_btn", type="primary", use_container_width=True)
