@@ -1627,13 +1627,13 @@ if "survey_id" in q_params:
             
             # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의
             header_html = f"""
-            <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444;">
+            <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; table-layout: fixed;">
                 <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
-                    <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                    <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
+                    <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                    <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
                     <th style="width: 10%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
-                    <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
-                    <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                    <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
+                    <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
                 </tr>
                 <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
                     {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in left_cols])}
@@ -1644,6 +1644,7 @@ if "survey_id" in q_params:
             st.markdown(header_html, unsafe_allow_html=True)
             
             # 대형 화면 및 폰 브라우저에서 st.radio의 가로 아이템들이 균등한 간격(flex-grow)으로 벌어지도록 CSS 주입
+            # white-space: nowrap을 추가하여 우측 9점 등의 텍스트 줄바꿈을 방지
             st.markdown(
                 """
                 <style>
@@ -1651,7 +1652,7 @@ if "survey_id" in q_params:
                 div[role="radiogroup"] {
                     display: flex;
                     justify-content: space-between;
-                    width: 100%;
+                    width: 100% !important;
                     gap: 0px !important;
                 }
                 div[role="radiogroup"] > label {
@@ -1660,22 +1661,26 @@ if "survey_id" in q_params:
                     display: flex;
                     justify-content: center;
                     margin-right: 0px !important;
+                    white-space: nowrap !important;
+                }
+                div[data-testid="column"] {
+                    padding: 0px !important;
                 }
                 </style>
                 """,
                 unsafe_allow_html=True
             )
 
-            # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (1.5 / 15%)] - [척도 라디오 버튼 영역 컬럼 (7.0 / 70%)] - [오른쪽 요인명 컬럼 (1.5 / 15%)]
+            # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (1.6 / 16%)] - [척도 라디오 버튼 영역 컬럼 (6.8 / 68%)] - [오른쪽 요인명 컬럼 (1.6 / 16%)]
+            # 상단 헤더 테이블의 width 비율인 16%, 68%(34+10+34), 16% 와 정확히 매핑되도록 분할
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
                 
-                # 상단 헤더 테이블의 width 비율인 15%, 70%, 15% 와 정확히 매핑되도록 streamlit columns 분할
-                row_cols = st.columns([1.5, 7.0, 1.5])
+                row_cols = st.columns([1.6, 6.8, 1.6])
                 
                 # 왼쪽 요인명 출력
                 with row_cols[0]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{left_f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{left_f}</div>", unsafe_allow_html=True)
                 
                 # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
                 with row_cols[1]:
@@ -1691,7 +1696,7 @@ if "survey_id" in q_params:
                 
                 # 오른쪽 요인명 출력
                 with row_cols[2]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px; height: 44px; display: flex; align-items: center; justify-content: center;'>{right_f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{right_f}</div>", unsafe_allow_html=True)
                 
                 ahp_answers[pair_key] = ans_val
                 st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
