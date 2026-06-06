@@ -1548,16 +1548,33 @@ if "survey_id" in q_params:
             
         # 2. 사전 중요도 순위 지정
         st.subheader("2. 요인별 전반적 중요도 순위 지정 (사전 순위)")
-        st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.")
+        st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
         main_criteria = ahp_model.get("main", [])
         
-        pre_rankings = []
-        for rank_idx in range(len(main_criteria)):
-            selected_f = st.selectbox(f"{rank_idx+1}순위 요인 선택 *", ["선택해 주세요"] + main_criteria, key=f"pre_rank_{rank_idx}")
-            if selected_f != "선택해 주세요":
-                pre_rankings.append(selected_f)
-                
-        resp_data["pre_ranking"] = "-".join(pre_rankings)
+        # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
+        if main_criteria:
+            cols = st.columns(len(main_criteria))
+            pre_rankings = []
+            
+            # 이전 단계의 선택 상태를 session_state에 저장하여 연쇄 필터링 구현
+            for rank_idx in range(len(main_criteria)):
+                with cols[rank_idx]:
+                    # 1단계: 전체 요인 중 현재 순위 이전에 선택한 요인들을 제외
+                    available_options = [opt for opt in main_criteria if opt not in pre_rankings]
+                    
+                    # 2단계: 이전 선택이 여전히 사용 가능한지 혹은 빈값인지에 따라 default 설정
+                    selected_f = st.selectbox(
+                        f"{rank_idx+1}순위 요인 선택 *",
+                        ["선택해 주세요"] + available_options,
+                        key=f"pre_rank_{rank_idx}"
+                    )
+                    
+                    if selected_f != "선택해 주세요":
+                        pre_rankings.append(selected_f)
+            
+            resp_data["pre_ranking"] = "-".join(pre_rankings)
+        else:
+            resp_data["pre_ranking"] = ""
         
         st.divider()
         
@@ -4313,9 +4330,20 @@ with col_main:
                 st.divider()
                 
                 st.markdown("### 2. 요인별 전반적 중요도 순위 지정 (사전 순위)")
-                st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.")
-                for rank_idx in range(len(main_list)):
-                    st.selectbox(f"{rank_idx+1}순위 요인 선택 *", ["선택해 주세요"] + main_list, key=f"preview_pre_rank_{rank_idx}")
+                st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
+                if main_list:
+                    preview_cols = st.columns(len(main_list))
+                    preview_rankings = []
+                    for rank_idx in range(len(main_list)):
+                        with preview_cols[rank_idx]:
+                            available_options = [opt for opt in main_list if opt not in preview_rankings]
+                            selected_f = st.selectbox(
+                                f"{rank_idx+1}순위 요인 선택 *",
+                                ["선택해 주세요"] + available_options,
+                                key=f"preview_pre_rank_{rank_idx}"
+                            )
+                            if selected_f != "선택해 주세요":
+                                preview_rankings.append(selected_f)
                     
                 st.divider()
                 
