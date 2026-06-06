@@ -1551,25 +1551,44 @@ except AttributeError:
 # -----------------------------------------------------------------------------
 # [신규] 동적 라우팅 - 응답자 설문 참여 SPA (Single Page Application)
 # -----------------------------------------------------------------------------
-if "survey_id" in q_params:
-    survey_id_param = q_params["survey_id"]
-    if isinstance(survey_id_param, list):
-        survey_id_param = survey_id_param[0]
-        
+if "preview_id" in q_params or "survey_id" in q_params:
+    is_preview_mode = "preview_id" in q_params
+    
     from survey_manager import load_survey_metadata, save_response_to_sheet, generate_pairwise_combinations, calculate_matrix_cr
     
-    st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
-    
-    survey_meta = load_survey_metadata(survey_id_param)
-    if not survey_meta:
-        st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
-        st.stop()
+    if is_preview_mode:
+        preview_id_param = q_params["preview_id"]
+        if isinstance(preview_id_param, list):
+            preview_id_param = preview_id_param[0]
+            
+        st.info("⚠️ [미리보기 모드] 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.")
         
-    # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
-    if f"visited_survey_{survey_id_param}" not in st.session_state:
-        from survey_manager import increment_survey_visit
-        increment_survey_visit(survey_id_param)
-        st.session_state[f"visited_survey_{survey_id_param}"] = True
+        preview_file_path = f"temp_previews/preview_{preview_id_param}.json"
+        if os.path.exists(preview_file_path):
+            with open(preview_file_path, "r", encoding="utf-8") as f:
+                survey_meta = json.load(f)
+        else:
+            st.error("미리보기 데이터를 불러올 수 없습니다. 다시 시도해 주세요.")
+            st.stop()
+            
+        survey_id_param = f"preview_{preview_id_param}"
+    else:
+        survey_id_param = q_params["survey_id"]
+        if isinstance(survey_id_param, list):
+            survey_id_param = survey_id_param[0]
+            
+        st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
+        
+        survey_meta = load_survey_metadata(survey_id_param)
+        if not survey_meta:
+            st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
+            st.stop()
+            
+        # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
+        if f"visited_survey_{survey_id_param}" not in st.session_state:
+            from survey_manager import increment_survey_visit
+            increment_survey_visit(survey_id_param)
+            st.session_state[f"visited_survey_{survey_id_param}"] = True
         
     st.title(f"📋 {survey_meta.get('Title', 'AHP 온라인 설문조사')}")
     
@@ -1774,7 +1793,7 @@ if "survey_id" in q_params:
                 st.error("🚨 사전 요인 중요도 순위 지정을 모두 완성해 주세요.")
                 st.stop()
                 
-            if agree_check != "동의함":
+            if agree_check != "동의":
                 st.error("🚨 설문제출을 위해 개인정보 수집 동의에 체크해 주세요.")
                 st.stop()
                 
@@ -1784,11 +1803,12 @@ if "survey_id" in q_params:
                 
             # 실시간 CR 계산 및 검증 피드백
             if cr_limit is not None:
-                from survey_manager import increment_abandoned_cr
                 # 대분류 CR 체크
                 main_cr = calculate_matrix_cr(main_criteria, ahp_answers)
                 if main_cr > cr_limit:
-                    increment_abandoned_cr(survey_id_param)
+                    if not is_preview_mode:
+                        from survey_manager import increment_abandoned_cr
+                        increment_abandoned_cr(survey_id_param)
                     st.error(f"🚨 입력하신 설문의 응답 일관성이 부족합니다. (대분류 일관성 비율: {main_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
                     st.stop()
                     
@@ -1797,21 +1817,30 @@ if "survey_id" in q_params:
                     if len(subs) >= 3:
                         sub_cr = calculate_matrix_cr(subs, ahp_answers)
                         if sub_cr > cr_limit:
-                            increment_abandoned_cr(survey_id_param)
+                            if not is_preview_mode:
+                                from survey_manager import increment_abandoned_cr
+                                increment_abandoned_cr(survey_id_param)
                             st.error(f"🚨 '{parent}' 하위 항목의 응답 일관성이 부족합니다. (일관성 비율: {sub_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
                             st.stop()
             
             # 저장 진행
             with st.spinner("응답을 안전하게 전송 중입니다..."):
-                success = save_response_to_sheet(
-                    survey_id_param, resp_data, ahp_answers, demographics, ahp_model, rewards_info
-                )
-                if success:
+                if is_preview_mode:
+                    import time
+                    time.sleep(1.0)
                     st.balloons()
-                    st.success("🎉 설문 응답이 성공적으로 제출되었습니다. 참여해 주셔서 감사합니다!")
+                    st.success("🎉 [미리보기 성공] 설문 응답이 성공적으로 제출되는 화면입니다. (실제 데이터는 구글 시트에 전송되지 않습니다.)")
                     st.stop()
                 else:
-                    st.error("🚨 데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.")
+                    success = save_response_to_sheet(
+                        survey_id_param, resp_data, ahp_answers, demographics, ahp_model, rewards_info
+                    )
+                    if success:
+                        st.balloons()
+                        st.success("🎉 설문 응답이 성공적으로 제출되었습니다. 참여해 주셔서 감사합니다!")
+                        st.stop()
+                    else:
+                        st.error("🚨 데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.")
                     
     st.stop()
 
@@ -4425,160 +4454,55 @@ with col_main:
             # 섹션 7: 최종 미리보기 및 배포
             st.subheader("섹션 7: 저장 전 최종 미리보기 및 배포")
             
-            # preview 모달 정의
-            # preview 모달 정의
-            @st.dialog("👀 응답자 화면 최종 미리보기", width="large")
-            def show_survey_preview():
-                st.markdown(f"## 📋 {survey_title}")
-                st.markdown(f"*{survey_desc}*")
-                
-                st.divider()
-                
-                # 요인 정의 설명문 노출
-                if definitions_map:
-                    st.markdown("### 💡 요인별 개념 설명 (조작적 정의)")
-                    for k_def, v_def in definitions_map.items():
-                        if v_def:
-                            st.markdown(f"**• {k_def}**: {v_def}")
-                    st.divider()
-                
-                st.markdown("### 1. 응답자 기초 정보 입력")
-                col_demo1, col_demo2 = st.columns(2)
-                with col_demo1:
-                    if demo_age:
-                        st.number_input("연령 (세) *", min_value=1, max_value=120, value=30, key="preview_demo_age")
-                    if demo_exp:
-                        st.number_input("경력년수 *", min_value=0, max_value=60, value=5, key="preview_demo_exp")
-                with col_demo2:
-                    if demo_gender:
-                        st.radio("성별 *", ["남자", "여자"], key="preview_demo_gender", horizontal=True)
-                    if demo_aff:
-                        st.text_input("소속 *", value="예시 기관", key="preview_demo_aff")
-                if demo_email:
-                    st.text_input("이메일 주소 *", value="respondent@example.com", key="preview_demo_email")
-                
-                st.divider()
-                
-                st.markdown("### 2. 요인별 전반적 중요도 순위 지정 (사전 순위)")
-                st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
-                if main_list:
-                    preview_cols = st.columns(len(main_list))
-                    preview_rankings = []
-                    for rank_idx in range(len(main_list)):
-                        with preview_cols[rank_idx]:
-                            available_options = [opt for opt in main_list if opt not in preview_rankings]
-                            selected_f = st.selectbox(
-                                f"{rank_idx+1}순위 요인 선택 *",
-                                ["선택해 주세요"] + available_options,
-                                key=f"preview_pre_rank_{rank_idx}"
-                            )
-                            if selected_f != "선택해 주세요":
-                                preview_rankings.append(selected_f)
-                    
-                st.divider()
-                
-                st.markdown("### 3. 요인 간 상대적 중요도 평가 (쌍대비교)")
-                st.markdown("""
-                **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 더 중요하다고 생각하는 요인 방향의 척도 점수를 클릭해 주세요.
-                - **동등(1)**: 양쪽 요인이 똑같이 중요함
-                - **좌측 요인 선택 시**: 음수 방향 선택 (예: -3, -5, -9 등)
-                - **우측 요인 선택 시**: 양수 방향 선택 (예: 3, 5, 9 등)
-                """)
-                
-                # 실시간 쌍대비교 렌더링
-                combinations = generate_pairwise_combinations(model_structure)
-                
-                # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
-                if scale_option == "1-3-5 Discrete":
-                    left_cols = ["5", "3"]
-                    right_cols = ["3", "5"]
-                    options = [-5, -3, 1, 3, 5]
-                elif scale_option == "1-3-7-9 Discrete":
-                    left_cols = ["9", "7", "3"]
-                    right_cols = ["3", "7", "9"]
-                    options = [-9, -7, -3, 1, 3, 7, 9]
-                else: # 1-9 Continuous (Default)
-                    left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
-                    right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
-                    options = list(range(-9, -1)) + list(range(1, 10))
-                    options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
-
-                # 헤더 및 척도 너비 동적 계산
-                header_cells = left_cols + ["1"] + right_cols
-                total_scale_count = len(header_cells)
-                scale_width = 70.0 / total_scale_count
-                left_width = scale_width * len(left_cols)
-                right_width = scale_width * len(right_cols)
-
-                # 미리보기 화면에도 수직 정렬 CSS 주입
-                
-
-                with st.container(key="ahp_survey_matrix"):
-                    for comb in combinations:
-                        parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
-                        st.markdown(f"##### 🔍 {parent_lbl}")
-                    
-                        # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의 (미리보기)
-                        header_html = f"""
-                        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; margin-bottom: 10px; table-layout: fixed;">
-                            <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
-                                <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                                <th style="width: {left_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
-                                <th style="width: {scale_width}%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
-                                <th style="width: {right_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
-                                <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                            </tr>
-                            <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
-                                {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in left_cols])}
-                                {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in right_cols])}
-                            </tr>
-                        </table>
-                        """
-                        st.markdown(header_html, unsafe_allow_html=True)
-                        st.write("")
-                    
-                        for left_f, right_f in comb["pairs"]:
-                            pair_key = f"{left_f}_{right_f}"
-                            row_cols = st.columns([15, 70, 15])
-                        
-                            # 왼쪽 요인명
-                            with row_cols[0]:
-                                st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{left_f}</div>", unsafe_allow_html=True)
-                        
-                            # 라디오 버튼만 출력
-                            with row_cols[1]:
-                                clean_preview_options = [x for x in options if x != -1]
-                                st.radio(
-                                    label=f"preview_select_{pair_key}",
-                                    options=clean_preview_options,
-                                    index=clean_preview_options.index(1),
-                                    format_func=lambda x: "",
-                                    key=f"preview_pair_ans_{left_f}_{right_f}",
-                                    horizontal=True,
-                                    label_visibility="collapsed"
-                                )
-                            
-                            # 오른쪽 요인명
-                            with row_cols[2]:
-                                st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{right_f}</div>", unsafe_allow_html=True)
-                            st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
-                        st.write("")
-                    
-                if reward_enabled:
-                    st.divider()
-                    st.markdown("### 4. 개인정보 수집 및 답례품")
-                    st.info(f"🎁 **답례품 안내**: {reward_desc}")
-                    st.text_input("답례품 수령 연락처 *", placeholder="010-0000-0000", key="preview_reward_contact")
-                
-                st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의", "비동의"], index=1, key="preview_agree_check")
-                
-                st.divider()
-                st.button("미리보기 닫기", key="close_preview_btn", type="primary", use_container_width=True)
+            # Save current state for preview tab
+            preview_id = f"preview_{st.session_state.user_id if st.session_state.user_id else 'guest'}"
+            preview_data = {
+                "Title": survey_title,
+                "AHP_Model_JSON": model_structure,
+                "Scale_Type": scale_option,
+                "Demographics": demographics_settings,
+                "Definitions": definitions_map,
+                "CR_Limit": cr_limit,
+                "Rewards_Info": rewards_info
+            }
+            
+            try:
+                os.makedirs("temp_previews", exist_ok=True)
+                with open(f"temp_previews/preview_{preview_id}.json", "w", encoding="utf-8") as f:
+                    json.dump(preview_data, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                pass
 
             col_p1, col_p2 = st.columns(2)
             with col_p1:
-                if st.button("👁️ 설문지 응답 화면 미리보기", use_container_width=True):
-                    show_survey_preview()
+                preview_link_html = f"""
+                <a href="/?preview_id={preview_id}" target="_blank" style="text-decoration: none;">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 100%;
+                        padding: 0.375rem 0.75rem;
+                        border: 1px solid rgba(49, 51, 63, 0.2);
+                        border-radius: 4px;
+                        background-color: #ffffff;
+                        color: #31333f;
+                        font-size: 14px;
+                        font-weight: 400;
+                        line-height: 1.6;
+                        cursor: pointer;
+                        text-align: center;
+                        box-sizing: border-box;
+                        transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+                    "
+                    onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
+                    onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
+                    >
+                        👁️ 설문지 응답 화면 미리보기
+                    </div>
+                </a>
+                """
+                st.markdown(preview_link_html, unsafe_allow_html=True)
             
             with col_p2:
                 if st.button("🚀 최종 배포 및 구글 시트 데이터베이스 연동", type="primary", use_container_width=True):
