@@ -2559,62 +2559,6 @@ with col_main:
                     st.rerun()
         st.divider()
     
-    with st.container(border=True):
-        st.markdown(_("#### ⚡ 빠른 시작 (도시재생 사업 모델)", "#### ⚡ Quick Start (Urban Regeneration Project Model)"))
-        st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
-                  "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
-        
-        sample_excel = create_sample_excel()
-        
-        def load_example_file(path):
-            try:
-                import os
-                base_dir = os.path.dirname(__file__)
-                full_path = os.path.join(base_dir, path)
-                with open(full_path, "rb") as f:
-                    return f.read(), None
-            except Exception as e:
-                return b"", str(e)
-
-        is_en = st.session_state.get('lang', 'ko') == 'en'
-        tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
-        fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
-        
-        tahp_data, tahp_err = load_example_file(tahp_path)
-        fahp_data, fahp_err = load_example_file(fahp_path)
-        
-        if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
-        if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
-
-        col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
-        with col_btn1:
-            st.download_button(
-                label=_("📂 테스트용 샘플 데이터 다운로드", "📂 Download Test Sample Data"),
-                data=sample_excel,
-                file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-                type="primary"
-            )
-        with col_btn2:
-            st.download_button(
-                label=_("📂 일반 AHP 분석 보고서(예시)", "📂 Traditional AHP Analysis Report (Example)"),
-                data=tahp_data if tahp_data else b"",
-                file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-                disabled=(not tahp_data)
-            )
-        with col_btn3:
-            st.download_button(
-                label=_("📂 퍼지AHP 분석 보고서(예시)", "📂 Fuzzy AHP Analysis Report (Example)"),
-                data=fahp_data if fahp_data else b"",
-                file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-                disabled=(not fahp_data)
-            )
-    
     # -------------------------------------------------------------------------
     # [수정] 관리자용 상단 탭 연동 (Tab 1: 분석, Tab 2: 설문지 제작)
     # 일반 사용자에게는 Tab 1 화면(분석)만 직접 단일 노출시킵니다.
@@ -2627,6 +2571,63 @@ with col_main:
         main_tab1 = st.container() # 일반 사용자는 컨테이너로 직접 단독 노출
         
     with main_tab1:
+        # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
+        with st.container(border=True):
+            st.markdown(_("#### ⚡ 빠른 시작 (도시재생 사업 모델)", "#### ⚡ Quick Start (Urban Regeneration Project Model)"))
+            st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
+                      "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
+            
+            sample_excel = create_sample_excel()
+            
+            def load_example_file(path):
+                try:
+                    import os
+                    base_dir = os.path.dirname(__file__)
+                    full_path = os.path.join(base_dir, path)
+                    with open(full_path, "rb") as f:
+                        return f.read(), None
+                except Exception as e:
+                    return b"", str(e)
+    
+            is_en = st.session_state.get('lang', 'ko') == 'en'
+            tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
+            fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
+            
+            tahp_data, tahp_err = load_example_file(tahp_path)
+            fahp_data, fahp_err = load_example_file(fahp_path)
+            
+            if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
+            if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
+    
+            col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
+            with col_btn1:
+                st.download_button(
+                    label=_("📂 테스트용 샘플 데이터 다운로드", "📂 Download Test Sample Data"),
+                    data=sample_excel,
+                    file_name=_("AHP_UrbanRegeneration_Sample.xlsx", "AHP_DecisionModel_Sample.xlsx"),
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    type="primary"
+                )
+            with col_btn2:
+                st.download_button(
+                    label=_("📂 일반 AHP 분석 보고서(예시)", "📂 Traditional AHP Analysis Report (Example)"),
+                    data=tahp_data if tahp_data else b"",
+                    file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    disabled=(not tahp_data)
+                )
+            with col_btn3:
+                st.download_button(
+                    label=_("📂 퍼지AHP 분석 보고서(예시)", "📂 Fuzzy AHP Analysis Report (Example)"),
+                    data=fahp_data if fahp_data else b"",
+                    file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    disabled=(not fahp_data)
+                )
+        
         st.subheader(_("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "1. Setup AHP Decision Model & Download Template"))
         
         saved_model = None
