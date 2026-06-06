@@ -1703,7 +1703,7 @@ if "survey_id" in q_params:
                          label=f"select_{pair_key}",
                          options=clean_options,
                          index=clean_options.index(1),
-                         format_func=lambda x: f"{abs(x)}" if x != 1 else "1",
+                         format_func=lambda x: "",
                          key=f"pair_ans_{pair_key}",
                          horizontal=True,
                          label_visibility="collapsed"
@@ -4508,7 +4508,7 @@ with col_main:
                                 label=f"preview_select_{pair_key}",
                                 options=clean_preview_options,
                                 index=clean_preview_options.index(1),
-                                format_func=lambda x: f"{abs(x)}" if x != 1 else "1",
+                                format_func=lambda x: "",
                                 key=f"preview_pair_ans_{left_f}_{right_f}",
                                 horizontal=True,
                                 label_visibility="collapsed"
