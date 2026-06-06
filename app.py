@@ -4279,30 +4279,95 @@ with col_main:
             st.subheader("섹션 7: 저장 전 최종 미리보기 및 배포")
             
             # preview 모달 정의
+            # preview 모달 정의
             @st.dialog("👀 응답자 화면 최종 미리보기", width="large")
             def show_survey_preview():
-                st.info("실제 응답자 스마트폰 또는 PC 브라우저에 표시될 화면의 전체 구조입니다. 아래 내용을 최종 확인해 주십시오.")
                 st.markdown(f"## 📋 {survey_title}")
                 st.markdown(f"*{survey_desc}*")
                 
-                st.markdown("### 1. 인구통계학적 정보 수집 문항")
-                if demo_age: st.number_input("[미리보기] 연령 *", min_value=20, max_value=80, value=35, disabled=True)
-                if demo_gender: st.radio("[미리보기] 성별 *", ["남자", "여자"], disabled=True)
+                st.divider()
                 
-                st.markdown("### 2. 사전 중요도 순위 지정")
-                st.selectbox("[미리보기] 1순위 요인 선택 *", ["선택해 주세요"] + main_list, disabled=True)
+                # 요인 정의 설명문 노출
+                if definitions_map:
+                    st.markdown("### 💡 요인별 개념 설명 (조작적 정의)")
+                    for k_def, v_def in definitions_map.items():
+                        if v_def:
+                            st.markdown(f"**• {k_def}**: {v_def}")
+                    st.divider()
                 
-                st.markdown("### 3. AHP 쌍대비교 평가 예시")
-                if len(main_list) >= 2:
-                    st.markdown(f"**{main_list[0]}** vs **{main_list[1]}**")
-                    st.radio("[미리보기] 상대적 중요도 척도 선택", ["왼쪽이 더 중요", "동등함(1)", "오른쪽이 더 중요"], disabled=True)
+                st.markdown("### 1. 응답자 기초 정보 입력")
+                col_demo1, col_demo2 = st.columns(2)
+                with col_demo1:
+                    if demo_age:
+                        st.number_input("[미리보기] 연령 (세) *", min_value=1, max_value=120, value=30, key="preview_demo_age")
+                    if demo_exp:
+                        st.number_input("[미리보기] 경력년수 *", min_value=0, max_value=60, value=5, key="preview_demo_exp")
+                with col_demo2:
+                    if demo_gender:
+                        st.radio("[미리보기] 성별 *", ["남자", "여자"], key="preview_demo_gender", horizontal=True)
+                    if demo_aff:
+                        st.text_input("[미리보기] 소속 *", value="예시 기관", key="preview_demo_aff")
+                if demo_email:
+                    st.text_input("[미리보기] 이메일 주소 *", value="respondent@example.com", key="preview_demo_email")
+                
+                st.divider()
+                
+                st.markdown("### 2. 요인별 전반적 중요도 순위 지정 (사전 순위)")
+                st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.")
+                for rank_idx in range(len(main_list)):
+                    st.selectbox(f"{rank_idx+1}순위 요인 선택 *", ["선택해 주세요"] + main_list, key=f"preview_pre_rank_{rank_idx}")
+                    
+                st.divider()
+                
+                st.markdown("### 3. 요인 간 상대적 중요도 평가 (쌍대비교)")
+                st.markdown("""
+                **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 더 중요하다고 생각하는 요인 방향의 척도 점수를 클릭해 주세요.
+                - **동등(1)**: 양쪽 요인이 똑같이 중요함
+                - **좌측 요인 선택 시**: 음수 방향 선택 (예: -3, -5, -9 등)
+                - **우측 요인 선택 시**: 양수 방향 선택 (예: 3, 5, 9 등)
+                """)
+                
+                # 실시간 쌍대비교 렌더링
+                combinations = generate_pairwise_combinations(model_structure)
+                
+                # 척도 옵션
+                if scale_option == "1-3-5 Discrete":
+                    options = [-5, -3, 1, 3, 5]
+                    format_func = lambda x: "왼쪽 훨씬 중요 (-5)" if x == -5 else ("왼쪽 약간 중요 (-3)" if x == -3 else ("동등함 (1)" if x == 1 else ("오른쪽 약간 중요 (3)" if x == 3 else "오른쪽 훨씬 중요 (5)")))
+                elif scale_option == "1-3-7-9 Discrete":
+                    options = [-9, -7, -3, 1, 3, 7, 9]
+                    format_func = lambda x: "왼쪽 절대 중요 (-9)" if x == -9 else ("왼쪽 대단히 중요 (-7)" if x == -7 else ("왼쪽 약간 중요 (-3)" if x == -3 else ("동등 (1)" if x == 1 else ("오른쪽 약간 중요 (3)" if x == 3 else ("오른쪽 대단히 중요 (7)" if x == 7 else "오른쪽 절대 중요 (9)")))))
+                else: # 1-9 Continuous
+                    options = list(range(-9, 0)) + list(range(1, 10))
+                    options = sorted(list(set(options)))
+                    format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
+                
+                for comb in combinations:
+                    parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
+                    st.markdown(f"##### 🔍 {parent_lbl}")
+                    
+                    for left_f, right_f in comb["pairs"]:
+                        st.markdown(f"**{left_f}**  vs  **{right_f}**")
+                        st.radio(
+                            f"상대적 중요도 선택 ({left_f} ◀ ▶ {right_f})",
+                            options=options,
+                            index=options.index(1),
+                            format_func=format_func,
+                            key=f"preview_pair_ans_{left_f}_{right_f}",
+                            horizontal=True
+                        )
+                    st.write("")
                     
                 if reward_enabled:
-                    st.markdown("### 4. 답례품 및 동의")
-                    st.text_input("[미리보기] 기프티콘 발송용 연락처 *", disabled=True)
-                    
-                if st.button("미리보기 닫기", key="close_preview_btn"):
-                    st.rerun()
+                    st.divider()
+                    st.markdown("### 4. 개인정보 수집 및 답례품")
+                    st.info(f"🎁 **답례품 안내**: {reward_desc}")
+                    st.text_input("[미리보기] 답례품 수령 연락처 *", placeholder="010-0000-0000", key="preview_reward_contact")
+                
+                st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의함", "동의하지 않음"], index=1, key="preview_agree_check")
+                
+                st.divider()
+                st.button("미리보기 닫기", key="close_preview_btn", type="primary", use_container_width=True)
 
             col_p1, col_p2 = st.columns(2)
             with col_p1:
