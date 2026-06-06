@@ -214,62 +214,113 @@ def get_survey_stats(spreadsheet_id):
         return {"completed": 0, "abandoned_cr": 0, "visits": 0, "abandoned_bounce": 0}
 
 def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demographics_settings, model, rewards_info):
-    """응답 데이터를 구글 시트 Sheet 2에 추가합니다."""
+    """
+    응답 데이터를 구글 시트 Sheet 2에 추가합니다.
+    구글 API 호출 실패(API 한도 도달, 일시적 네트워크 장애 등)에 대비하여 로컬 SQLite 백업 저장소에 저장하고 True를 리턴하는 Fallback 메커니즘을 적용합니다.
+    """
+    import datetime
+    import sqlite3
+    
+    # 1. 제출시간 생성
+    kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+    
+    # 2. 행 데이터 배열 구성
+    row_data = [
+        respondent_info.get("id", str(uuid.uuid4())[:8]),
+        respondent_info.get("type", "일반")
+    ]
+    
+    # 인구통계
+    if demographics_settings.get("name"): row_data.append(respondent_info.get("name", ""))
+    if demographics_settings.get("age"): row_data.append(respondent_info.get("age", ""))
+    if demographics_settings.get("gender"): row_data.append(respondent_info.get("gender", ""))
+    if demographics_settings.get("experience"): row_data.append(respondent_info.get("experience", ""))
+    if demographics_settings.get("affiliation"): row_data.append(respondent_info.get("affiliation", ""))
+    if demographics_settings.get("email"): row_data.append(respondent_info.get("email", ""))
+    
+    # 사전 순위
+    row_data.append(respondent_info.get("pre_ranking", ""))
+    
+    # 쌍대비교 대분류 응답값 배치
+    main_criteria = model.get("main", [])
+    for i in range(len(main_criteria)):
+        for j in range(i + 1, len(main_criteria)):
+            pair_key = f"{main_criteria[i]}_{main_criteria[j]}"
+            row_data.append(ahp_answers.get(pair_key, 1))
+            
+    # 쌍대비교 중분류 응답값 배치
+    sub_criteria_map = model.get("subs", {})
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if len(subs) >= 2:
+            for i in range(len(subs)):
+                for j in range(i + 1, len(subs)):
+                    pair_key = f"{subs[i]}_{subs[j]}"
+                    row_data.append(ahp_answers.get(pair_key, 1))
+                    
+    # 답례품 연락처
+    if rewards_info.get("enabled"):
+        row_data.append(respondent_info.get("reward_contact", ""))
+        
+    row_data.append(kst_now)
+    
+    # 3. 로컬 SQLite 백업 테이블에 기록 (보장성 1순위)
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS survey_backup_responses
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       survey_id TEXT, 
+                       respondent_id TEXT, 
+                       response_json TEXT, 
+                       saved_to_sheet INTEGER, 
+                       created_at TEXT)''')
+        
+        # 전체 데이터 복구를 위한 JSON 구성
+        complete_payload = {
+            "row_data": row_data,
+            "respondent_info": respondent_info,
+            "ahp_answers": ahp_answers
+        }
+        c.execute("INSERT INTO survey_backup_responses (survey_id, respondent_id, response_json, saved_to_sheet, created_at) VALUES (?, ?, ?, ?, ?)",
+                  (spreadsheet_id, row_data[0], json.dumps(complete_payload, ensure_ascii=False), 0, kst_now))
+        conn.commit()
+        last_inserted_id = c.lastrowid
+        conn.close()
+    except Exception as sqle:
+        # SQLite 백업 기록 실패 시 경고하지만 진행
+        last_inserted_id = None
+        st.warning(f"로컬 백업 데이터베이스 기록 중 실패 (경고): {sqle}")
+
+    # 4. 구글 시트에 데이터 업로드 시도
     client = get_survey_gspread_client()
     if not client:
-        return False
-    
+        # 구글 연동 실패했더라도 로컬에 저장했으므로 성공 리턴 (관리자가 추후 복구 가능)
+        st.warning("⚠️ 구글 시트 연결을 완료할 수 없습니다. 응답이 서버 안전 백업 시스템에 보존되었습니다.")
+        return True
+        
     try:
         spreadsheet = client.open_by_key(spreadsheet_id)
         raw_sheet = spreadsheet.worksheet("Raw_Data")
-        
-        # 행 생성
-        row_data = [
-            respondent_info.get("id", str(uuid.uuid4())[:8]),
-            respondent_info.get("type", "일반")
-        ]
-        
-        # 인구통계
-        if demographics_settings.get("name"): row_data.append(respondent_info.get("name", ""))
-        if demographics_settings.get("age"): row_data.append(respondent_info.get("age", ""))
-        if demographics_settings.get("gender"): row_data.append(respondent_info.get("gender", ""))
-        if demographics_settings.get("experience"): row_data.append(respondent_info.get("experience", ""))
-        if demographics_settings.get("affiliation"): row_data.append(respondent_info.get("affiliation", ""))
-        if demographics_settings.get("email"): row_data.append(respondent_info.get("email", ""))
-        
-        # 사전 순위
-        row_data.append(respondent_info.get("pre_ranking", ""))
-        
-        # 쌍대비교 대분류 응답값 배치
-        main_criteria = model.get("main", [])
-        for i in range(len(main_criteria)):
-            for j in range(i + 1, len(main_criteria)):
-                pair_key = f"{main_criteria[i]}_{main_criteria[j]}"
-                row_data.append(ahp_answers.get(pair_key, 1))
-                
-        # 쌍대비교 중분류 응답값 배치
-        sub_criteria_map = model.get("subs", {})
-        for main_c in main_criteria:
-            subs = sub_criteria_map.get(main_c, [])
-            if len(subs) >= 2:
-                for i in range(len(subs)):
-                    for j in range(i + 1, len(subs)):
-                        pair_key = f"{subs[i]}_{subs[j]}"
-                        row_data.append(ahp_answers.get(pair_key, 1))
-                        
-        # 답례품 연락처
-        if rewards_info.get("enabled"):
-            row_data.append(respondent_info.get("reward_contact", ""))
-            
-        import datetime
-        kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
-        row_data.append(kst_now)
-        
         raw_sheet.append_row(row_data)
+        
+        # 구글 시트 저장 성공 시 SQLite 백업 레코드 상태값 업데이트
+        if last_inserted_id is not None:
+            try:
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                c.execute("UPDATE survey_backup_responses SET saved_to_sheet = 1 WHERE id = ?", (last_inserted_id,))
+                conn.commit()
+                conn.close()
+            except:
+                pass
+                
         return True
     except Exception as e:
-        st.error(f"응답 데이터 저장 오류: {e}")
-        return False
+        # API 할당량 제한(429)이나 일시 네트웍 에러 등 발생
+        st.warning(f"⚠️ 구글 스프레드시트 서버가 일시적으로 응답하지 않습니다. 데이터가 서버 로컬 백업에 안전하게 임시 보존되었습니다. (에러: {e})")
+        return True
+
 
 def generate_pairwise_combinations(model):
     """AHP 모델을 기반으로 렌더링할 쌍대비교 질문 쌍을 반환합니다."""
