@@ -4486,15 +4486,67 @@ with col_main:
                     left_cols = ["5", "3"]
                     right_cols = ["3", "5"]
                     options = [-5, -3, 1, 3, 5]
+                    padding_val = "10.0%"
                 elif scale_option == "1-3-7-9 Discrete":
                     left_cols = ["9", "7", "3"]
                     right_cols = ["3", "7", "9"]
                     options = [-9, -7, -3, 1, 3, 7, 9]
+                    padding_val = "6.5%"
                 else: # 1-9 Continuous (Default)
                     left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
                     right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
                     options = list(range(-9, -1)) + list(range(1, 10))
                     options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
+                    padding_val = "2.8%"
+
+                # 미리보기 화면에도 수직 정렬 CSS 주입 (gap 0px 제거 및 척도별 동적 padding 적용)
+                st.markdown(
+                    f"""
+                    <style>
+                    div[data-testid="stHorizontalBlock"] {{
+                        gap: 0px !important;
+                    }}
+                    div[data-testid="column"] {{
+                        padding: 0px !important;
+                    }}
+                    div[role="radiogroup"] {{
+                        display: flex !important;
+                        flex-direction: row !important;
+                        justify-content: space-between !important;
+                        width: 100% !important;
+                        gap: 0px !important;
+                        padding: 0px {padding_val} !important; /* 각 척도별 정밀 매핑 여백 반영 */
+                    }}
+                    div[role="radiogroup"] > label {{
+                        flex: 1 !important;
+                        text-align: center !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        margin: 0px !important;
+                        padding: 0px !important;
+                        min-width: 0px !important;
+                    }}
+                    div[role="radiogroup"] label div[data-testid="stWidgetLabel"],
+                    div[role="radiogroup"] label p {{
+                        display: none !important;
+                        height: 0px !important;
+                        margin: 0px !important;
+                        padding: 0px !important;
+                    }}
+                    div[role="radiogroup"] label span {{
+                        margin: 0px auto !important;
+                        padding: 0px !important;
+                    }}
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                # 헤더 렌더링용 td 너비
+                header_cells = left_cols + ["1"] + right_cols
+                td_width = 100.0 / len(header_cells)
 
                 for comb in combinations:
                     parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
@@ -4511,12 +4563,13 @@ with col_main:
                             <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
                         </tr>
                         <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
-                            {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in left_cols])}
-                            {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in right_cols])}
+                            {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0; width: {td_width}%;'>{val}</td>" for val in left_cols])}
+                            {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0; width: {td_width}%;'>{val}</td>" for val in right_cols])}
                         </tr>
                     </table>
                     """
                     st.markdown(header_html, unsafe_allow_html=True)
+                    st.write("")
                     
                     for left_f, right_f in comb["pairs"]:
                         pair_key = f"{left_f}_{right_f}"
