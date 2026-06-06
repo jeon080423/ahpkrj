@@ -1484,6 +1484,188 @@ except AttributeError:
     except:
         q_params = {}
 
+# -----------------------------------------------------------------------------
+# [신규] 동적 라우팅 - 응답자 설문 참여 SPA (Single Page Application)
+# -----------------------------------------------------------------------------
+if "survey_id" in q_params:
+    survey_id_param = q_params["survey_id"]
+    if isinstance(survey_id_param, list):
+        survey_id_param = survey_id_param[0]
+        
+    from survey_manager import load_survey_metadata, save_response_to_sheet, generate_pairwise_combinations, calculate_matrix_cr
+    
+    st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
+    
+    survey_meta = load_survey_metadata(survey_id_param)
+    if not survey_meta:
+        st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
+        st.stop()
+        
+    # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
+    if f"visited_survey_{survey_id_param}" not in st.session_state:
+        from survey_manager import increment_survey_visit
+        increment_survey_visit(survey_id_param)
+        st.session_state[f"visited_survey_{survey_id_param}"] = True
+        
+    st.title(f"📋 {survey_meta.get('Title', 'AHP 온라인 설문조사')}")
+    
+    # 모델 정보와 인구통계 추출
+    ahp_model = survey_meta["AHP_Model_JSON"]
+    demographics = survey_meta["Demographics"]
+    definitions = survey_meta["Definitions"]
+    cr_limit = survey_meta["CR_Limit"]
+    rewards_info = survey_meta["Rewards_Info"]
+    scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
+    
+    # 단일 스크롤 폼 생성
+    with st.form("respondent_survey_form"):
+        # 1. 인구통계학적 정보 수집
+        st.subheader("1. 응답자 기본 정보")
+        resp_data = {}
+        
+        # 100% 매핑에 맞게 ID 및 Type 추가 지정
+        resp_data["id"] = st.text_input("ID (선택 사항)", placeholder="미입력 시 무작위 자동 부여됩니다.")
+        resp_data["type"] = st.selectbox("그룹 분류 (Type)", ["전문가", "일반", "공무원", "기타"], index=1)
+        
+        if demographics.get("name"): resp_data["name"] = st.text_input("성명 *")
+        if demographics.get("age"): resp_data["age"] = st.number_input("연령 (세) *", min_value=1, max_value=120, value=30)
+        if demographics.get("gender"): resp_data["gender"] = st.radio("성별 *", ["남자", "여자"])
+        if demographics.get("experience"): resp_data["experience"] = st.number_input("경력년수 *", min_value=0, max_value=60, value=5)
+        if demographics.get("affiliation"): resp_data["affiliation"] = st.text_input("소속 *")
+        if demographics.get("email"): resp_data["email"] = st.text_input("이메일 *")
+        
+        st.divider()
+        
+        # 1.5 요인 조작적 정의 설명란 표시
+        if definitions:
+            st.subheader("💡 평가 요인 설명 (조작적 정의)")
+            for factor_name, def_text in definitions.items():
+                if def_text:
+                    st.markdown(f"**• {factor_name}**: {def_text}")
+            st.divider()
+            
+        # 2. 사전 중요도 순위 지정
+        st.subheader("2. 요인별 전반적 중요도 순위 지정 (사전 순위)")
+        st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.")
+        main_criteria = ahp_model.get("main", [])
+        
+        pre_rankings = []
+        for rank_idx in range(len(main_criteria)):
+            selected_f = st.selectbox(f"{rank_idx+1}순위 요인 선택 *", ["선택해 주세요"] + main_criteria, key=f"pre_rank_{rank_idx}")
+            if selected_f != "선택해 주세요":
+                pre_rankings.append(selected_f)
+                
+        resp_data["pre_ranking"] = "-".join(pre_rankings)
+        
+        st.divider()
+        
+        # 3. AHP 쌍대비교 문항 생성
+        st.subheader("3. 요인 간 상대적 중요도 평가 (쌍대비교)")
+        st.markdown("""
+        **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 더 중요한 요인 방향으로 중요도 점수를 선택해 주세요.
+        - **동등(1)**: 양쪽 요인이 똑같이 중요함
+        - **좌측 요인 선택 시**: 음수 방향으로 체크 (예: -3, -5 등)
+        - **우측 요인 선택 시**: 양수 방향으로 체크 (예: 3, 5 등)
+        """)
+        
+        combinations = generate_pairwise_combinations(ahp_model)
+        ahp_answers = {}
+        
+        for comb in combinations:
+            parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
+            st.markdown(f"#### 🔍 {parent_lbl}")
+            
+            # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
+            if scale_type == "1-3-5 Discrete":
+                options = [-5, -3, 1, 3, 5]
+                format_func = lambda x: f"왼쪽 요인이 훨씬 중요 (-5)" if x == -5 else (f"왼쪽 요인이 약간 중요 (-3)" if x == -3 else ("양측이 동등함 (1)" if x == 1 else (f"오른쪽 요인이 약간 중요 (3)" if x == 3 else f"오른쪽 요인이 훨씬 중요 (5)")))
+            elif scale_type == "1-3-7-9 Discrete":
+                options = [-9, -7, -3, 1, 3, 7, 9]
+                format_func = lambda x: f"왼쪽 절대적 중요 (-9)" if x == -9 else (f"왼쪽 대단히 중요 (-7)" if x == -7 else (f"왼쪽 약간 중요 (-3)" if x == -3 else ("동등함 (1)" if x == 1 else (f"오른쪽 약간 중요 (3)" if x == 3 else (f"오른쪽 대단히 중요 (7)" if x == 9 else f"오른쪽 절대적 중요 (9)")))))
+            else: # 1-9 Continuous (Default)
+                options = list(range(-9, 0)) + list(range(1, 10))
+                options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
+                format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
+                
+            for left_f, right_f in comb["pairs"]:
+                pair_key = f"{left_f}_{right_f}"
+                st.markdown(f"**{left_f}** vs **{right_f}**")
+                ans_val = st.radio(
+                    f"상대적 중요도 선택 ({left_f} ◀ ▶ {right_f})",
+                    options=options,
+                    index=options.index(1),
+                    format_func=format_func,
+                    key=f"pair_ans_{pair_key}"
+                )
+                ahp_answers[pair_key] = ans_val
+            st.divider()
+            
+        # 4. 답례품 및 개인정보 수집 동의
+        st.subheader("4. 개인정보 수집 및 답례품")
+        if rewards_info.get("enabled"):
+            st.info(f"🎁 **답례품 안내**: {rewards_info.get('desc', '설문 완료 시 답례품을 제공합니다.')}")
+            reward_contact = st.text_input("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *")
+            resp_data["reward_contact"] = reward_contact
+            
+        agree_check = st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의함", "동의하지 않음"], index=1)
+        
+        # 제출 버튼
+        submit_btn = st.form_submit_button("설문지 제출하기", type="primary")
+        if submit_btn:
+            # 필수값 유효성 검증
+            missing = False
+            
+            # 인구통계 필수값
+            if demographics.get("name") and not resp_data.get("name"): missing = True
+            if demographics.get("affiliation") and not resp_data.get("affiliation"): missing = True
+            if demographics.get("email") and not resp_data.get("email"): missing = True
+            if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
+            
+            if len(pre_rankings) < len(main_criteria):
+                st.error("🚨 사전 요인 중요도 순위 지정을 모두 완성해 주세요.")
+                st.stop()
+                
+            if agree_check != "동의함":
+                st.error("🚨 설문제출을 위해 개인정보 수집 동의에 체크해 주세요.")
+                st.stop()
+                
+            if missing:
+                st.error("🚨 입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.")
+                st.stop()
+                
+            # 실시간 CR 계산 및 검증 피드백
+            if cr_limit is not None:
+                from survey_manager import increment_abandoned_cr
+                # 대분류 CR 체크
+                main_cr = calculate_matrix_cr(main_criteria, ahp_answers)
+                if main_cr > cr_limit:
+                    increment_abandoned_cr(survey_id_param)
+                    st.error(f"🚨 입력하신 설문의 응답 일관성이 부족합니다. (대분류 일관성 비율: {main_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
+                    st.stop()
+                    
+                # 하위분류 CR 체크
+                for parent, subs in ahp_model.get("subs", {}).items():
+                    if len(subs) >= 3:
+                        sub_cr = calculate_matrix_cr(subs, ahp_answers)
+                        if sub_cr > cr_limit:
+                            increment_abandoned_cr(survey_id_param)
+                            st.error(f"🚨 '{parent}' 하위 항목의 응답 일관성이 부족합니다. (일관성 비율: {sub_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
+                            st.stop()
+            
+            # 저장 진행
+            with st.spinner("응답을 안전하게 전송 중입니다..."):
+                success = save_response_to_sheet(
+                    survey_id_param, resp_data, ahp_answers, demographics, ahp_model, rewards_info
+                )
+                if success:
+                    st.balloons()
+                    st.success("🎉 설문 응답이 성공적으로 제출되었습니다. 참여해 주셔서 감사합니다!")
+                    st.stop()
+                else:
+                    st.error("🚨 데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.")
+                    
+    st.stop()
+
 # 자동 로그인 처리 (쿼리 파라미터 기반)
 if st.session_state.user_id is None and "login_user" in q_params and "login_token" in q_params:
     login_user_val = q_params["login_user"]
@@ -2433,16 +2615,26 @@ with col_main:
                 disabled=(not fahp_data)
             )
     
-    st.markdown("---")
+    # -------------------------------------------------------------------------
+    # [수정] 관리자용 상단 탭 연동 (Tab 1: 분석, Tab 2: 설문지 제작)
+    # 일반 사용자에게는 Tab 1 화면(분석)만 직접 단일 노출시킵니다.
+    # -------------------------------------------------------------------------
+    has_admin_tab = (st.session_state.user_role == 'admin')
     
-    st.subheader(_("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "1. Setup AHP Decision Model & Download Template"))
-    
-    if st.session_state.user_id is None:
-        st.info(_("🔒 **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
-                  "🔒 **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
+    if has_admin_tab:
+        main_tab1, main_tab2 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작 (Admin)"])
     else:
-        saved_model = load_user_model(st.session_state.user_id)
-        is_en = st.session_state.get('lang', 'ko') == 'en'
+        main_tab1 = st.container() # 일반 사용자는 컨테이너로 직접 단독 노출
+        
+    with main_tab1:
+        st.subheader(_("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "1. Setup AHP Decision Model & Download Template"))
+        
+        if st.session_state.user_id is None:
+            st.info(_("🔒 **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
+                      "🔒 **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
+        else:
+            saved_model = load_user_model(st.session_state.user_id)
+            is_en = st.session_state.get('lang', 'ko') == 'en'
         
         en_default_main = "Governance, Planning, Feasibility, Effectiveness"
         en_default_subs = {
@@ -3933,6 +4125,251 @@ with col_main:
                                     st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
         except Exception as e:
             st.error(f"파일 처리 오류 발생: {e}")
-    
+            
+    # -------------------------------------------------------------------------
+    # [신규] 관리자용 온라인 설문지 제작 탭 (Tab 2) 상세 구현
+    # -------------------------------------------------------------------------
+    if has_admin_tab:
+        with main_tab2:
+            st.header("📝 AHP 온라인 설문 자동 생성 및 배포기")
+            st.info("이 탭은 공인된 관리자(Admin) 전용 화면입니다. 여기서 만든 설문지의 모든 응답 데이터는 동적으로 자동 생성되는 구글 스프레드시트에 영구 저장됩니다.")
+            
+            # -------------------------------------------------------------------------
+            # [신규] AHP 온라인 설문 실시간 응답 현황 대시보드
+            # -------------------------------------------------------------------------
+            with st.expander("📊 배포 설문 실시간 응답 현황 대시보드", expanded=True):
+                st.markdown("배포하신 설문지의 **구글 스프레드시트 ID**를 입력하여 실시간 응답자 및 중단자 현황을 모니터링할 수 있습니다.")
+                dashboard_sheet_id = st.text_input("조회할 구글 스프레드시트 ID", key="dashboard_sheet_id_input", placeholder="스프레드시트 URL의 d/ 와 /edit 사이의 해시 문자열을 입력해 주세요.")
+                
+                if dashboard_sheet_id:
+                    from survey_manager import get_survey_stats
+                    with st.spinner("실시간 설문 현황 로딩 중..."):
+                        stats = get_survey_stats(dashboard_sheet_id.strip())
+                        
+                    col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+                    with col_stat1:
+                        st.metric("총 접속자 수 (Visits)", f"{stats['visits']}명")
+                    with col_stat2:
+                        st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}명")
+                    with col_stat3:
+                        st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
+                    with col_stat4:
+                        st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
+                        
+                    # 시각화 차트 추가
+                    import pandas as pd
+                    import plotly.express as px
+                    
+                    chart_data = pd.DataFrame({
+                        "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
+                        "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
+                    })
+                    
+                    fig_stats = px.bar(
+                        chart_data,
+                        x="구분",
+                        y="인원수",
+                        text="인원수",
+                        color="구분",
+                        color_discrete_map={
+                            "응답 완료": "#2E7D32",
+                            "일관성 초과 중단": "#C62828",
+                            "단순 페이지 이탈": "#EF6C00"
+                        },
+                        title="설문 참여 상태별 분포"
+                    )
+                    fig_stats.update_layout(showlegend=False)
+                    st.plotly_chart(fig_stats, use_container_width=True)
+                else:
+                    st.info("실시간 대시보드를 활성화하려면 조회할 구글 스프레드시트 ID를 기입해 주십시오.")
+                    
+            st.divider()
+            
+            from survey_manager import create_survey_sheet, generate_pairwise_combinations
+            
+            # 7개 섹션 설문지 생성 폼 구성
+            # 섹션 1: 기본 정보
+            st.subheader("섹션 1: 설문 기본 정보 설정")
+            survey_title = st.text_input("설문지 제목", value="제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문")
+            survey_desc = st.text_area("조사 목적 및 안내문", value="본 설문은 중소기업의 제조 환경변화에 따른 협동로봇 도입 요인들의 상대적 중요도를 결정하기 위한 조사입니다.")
+            survey_admin_email = st.text_input("관리자 구글 이메일 주소 (신규 구글 시트 공유용) *", placeholder="example@gmail.com")
+            
+            st.divider()
+            
+            # 섹션 1.5: 응답자 인구통계학적 정보 체크박스
+            st.subheader("섹션 1.5: 응답자 수집 정보 (인구통계학적 문항)")
+            demo_name = st.checkbox("성명 수집", value=True)
+            demo_age = st.checkbox("연령(숫자) 수집", value=True)
+            demo_gender = st.checkbox("성별 수집", value=True)
+            demo_exp = st.checkbox("경력년수(숫자) 수집", value=True)
+            demo_aff = st.checkbox("소속 수집", value=True)
+            demo_email = st.checkbox("이메일 수집", value=True)
+            
+            demographics_settings = {
+                "name": demo_name,
+                "age": demo_age,
+                "gender": demo_gender,
+                "experience": demo_exp,
+                "affiliation": demo_aff,
+                "email": demo_email
+            }
+            
+            st.divider()
+            
+            # 섹션 2: AHP 모델 계층구조 입력 폼
+            st.subheader("섹션 2: AHP 요인 계층구조 및 문항 설정")
+            st.info("Goal -> Criteria (대분류) -> Sub-criteria (중분류) 구조를 입력해 주세요. (콤마로 요인을 구분합니다)")
+            
+            main_input = st.text_input("대항목 (Main Criteria)", value="기술 요인, 조직 요인, 환경 요인, 혁신 요인")
+            main_list = [x.strip() for x in main_input.split(",") if x.strip()]
+            
+            model_structure = {"main": main_list, "subs": {}}
+            for mc in main_list:
+                # 기본값 제안 (기존 양승훈 협동로봇 설문지 구조 자동 매핑)
+                default_sub_val = ""
+                if mc == "기술 요인": default_sub_val = "상대적이점, 호환성, 안전성, 서비스지원"
+                elif mc == "조직 요인": default_sub_val = "경영진지원, 기술준비도, 금융자원, 교육훈련"
+                elif mc == "환경 요인": default_sub_val = "정부지원, 경쟁압력, 인력난, 외부지원"
+                elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
+                
+                sub_input = st.text_input(f"'{mc}'의 하위 요인 (Sub-criteria)", value=default_sub_val)
+                model_structure["subs"][mc] = [x.strip() for x in sub_input.split(",") if x.strip()]
+                
+            st.caption("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.")
+            
+            st.divider()
+            
+            # 섹션 3: 요인 조작적 정의 설정
+            st.subheader("섹션 3: 요인별 상세 설명 (조작적 정의)")
+            st.info("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.")
+            definitions_map = {}
+            for mc in main_list:
+                definitions_map[mc] = st.text_input(f"대분류 [{mc}] 설명", value=f"{mc}에 대한 전반적 요소를 설명합니다.")
+                for sc in model_structure["subs"].get(mc, []):
+                    # 기본 양승훈 설문 정의 적용
+                    default_def = ""
+                    if sc == "상대적이점": default_def = "도입대상 협동로봇간의 상대적 이점"
+                    elif sc == "호환성": default_def = "기존 설비나 타사 협동로봇과의 연결성"
+                    elif sc == "안전성": default_def = "작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준"
+                    elif sc == "서비스지원": default_def = "공급사의 기술 및 A/S 지원 정도"
+                    elif sc == "경영진지원": default_def = "경영진의 도입 의지 및 경영철학 반영도"
+                    elif sc == "기술준비도": default_def = "조직원의 로봇 활용 기술 준비 수준"
+                    elif sc == "금융자원": default_def = "로봇 구입을 위한 자본 여력 및 자금 조달 편의성"
+                    elif sc == "교육훈련": default_def = "기술 향상을 위한 위탁/사내 교육 프로그램 유무"
+                    
+                    definitions_map[sc] = st.text_input(f"ㄴ 중분류 [{sc}] 설명", value=default_def or f"{sc}에 대한 정의입니다.")
+                    
+            st.divider()
+            
+            # 섹션 4: 척도 인터페이스 설정
+            st.subheader("섹션 4: 쌍대비교 응답 척도 설정")
+            scale_option = st.radio("응답 척도 타입", [
+                "1-9 Continuous (1부터 9까지 연속형 스케일)",
+                "1-3-7-9 Discrete (이산형 척도)",
+                "1-3-5 Discrete (이산형 척도)"
+            ], index=0)
+            
+            st.divider()
+            
+            # 섹션 5: 답례품 및 개인정보 수집 동의 설정
+            st.subheader("섹션 5: 답례품 및 동의 양식 설정")
+            reward_enabled = st.toggle("답례품(기프티콘 등) 제공 활성화")
+            reward_desc = ""
+            if reward_enabled:
+                reward_desc = st.text_area("답례품 설명", value="모든 설문 응답을 마친 분들에게 스타벅스 아메리카노 기프티콘을 발송해 드립니다.")
+                
+            rewards_info = {
+                "enabled": reward_enabled,
+                "desc": reward_desc
+            }
+            
+            st.divider()
+            
+            # 섹션 6: 실시간 CR 검증 레벨 설정
+            st.subheader("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨")
+            cr_limit_opt = st.selectbox("일관성 비율(CR) 허용 기준치", [
+                "제한하지 않음 (이탈률 감소용)",
+                "0.1 이하 (매우 엄격함)",
+                "0.2 이하 (보통)",
+                "0.3 이하 (일부 허용)"
+            ], index=0)
+            
+            cr_limit = None
+            if "0.1" in cr_limit_opt: cr_limit = 0.1
+            elif "0.2" in cr_limit_opt: cr_limit = 0.2
+            elif "0.3" in cr_limit_opt: cr_limit = 0.3
+            
+            if cr_limit is not None:
+                st.warning("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 전부 튕겨나가 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다.")
+                
+            st.divider()
+            
+            # 섹션 7: 최종 미리보기 및 배포
+            st.subheader("섹션 7: 저장 전 최종 미리보기 및 배포")
+            
+            # preview 모달 정의
+            @st.dialog("👀 응답자 화면 최종 미리보기", width="large")
+            def show_survey_preview():
+                st.info("실제 응답자 스마트폰 또는 PC 브라우저에 표시될 화면의 전체 구조입니다. 아래 내용을 최종 확인해 주십시오.")
+                st.markdown(f"## 📋 {survey_title}")
+                st.markdown(f"*{survey_desc}*")
+                
+                st.markdown("### 1. 인구통계학적 정보 수집 문항")
+                if demo_name: st.text_input("[미리보기] 성명 *", disabled=True)
+                if demo_age: st.number_input("[미리보기] 연령 *", min_value=20, max_value=80, value=35, disabled=True)
+                if demo_gender: st.radio("[미리보기] 성별 *", ["남자", "여자"], disabled=True)
+                
+                st.markdown("### 2. 사전 중요도 순위 지정")
+                st.selectbox("[미리보기] 1순위 요인 선택 *", ["선택해 주세요"] + main_list, disabled=True)
+                
+                st.markdown("### 3. AHP 쌍대비교 평가 예시")
+                if len(main_list) >= 2:
+                    st.markdown(f"**{main_list[0]}** vs **{main_list[1]}**")
+                    st.radio("[미리보기] 상대적 중요도 척도 선택", ["왼쪽이 더 중요", "동등함(1)", "오른쪽이 더 중요"], disabled=True)
+                    
+                if reward_enabled:
+                    st.markdown("### 4. 답례품 및 동의")
+                    st.text_input("[미리보기] 기프티콘 발송용 연락처 *", disabled=True)
+                    
+                st.button("미리보기 닫기", key="close_preview_btn")
+
+            col_p1, col_p2 = st.columns(2)
+            with col_p1:
+                if st.button("👁️ 설문지 응답 화면 미리보기", use_container_width=True):
+                    show_survey_preview()
+            
+            with col_p2:
+                if st.button("🚀 최종 배포 및 구글 시트 데이터베이스 연동", type="primary", use_container_width=True):
+                    if not survey_admin_email or "@" not in survey_admin_email:
+                        st.error("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.")
+                    else:
+                        with st.spinner("구글 클라우드 드라이브에 신규 스프레드시트를 생성하고 보안 권한을 연동하는 중..."):
+                            try:
+                                sheet_id = create_survey_sheet(
+                                    title=survey_title,
+                                    admin_email=survey_admin_email,
+                                    ahp_model=model_structure,
+                                    scale_type=scale_option,
+                                    demographics=demographics_settings,
+                                    definition_map=definitions_map,
+                                    cr_limit=cr_limit,
+                                    rewards_info=rewards_info
+                                )
+                                # 단축 주소 생성
+                                base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
+                                if "localhost" in base_url or "127.0.0.1" in base_url:
+                                    short_url = f"{base_url}?survey_id={sheet_id}"
+                                else:
+                                    short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
+                                    
+                                st.balloons()
+                                st.success("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
+                                
+                                st.code(short_url, language="text")
+                                st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
+                            except Exception as ex:
+                                st.error(f"구글 시트 생성 실패: {ex}")
+            
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
+
