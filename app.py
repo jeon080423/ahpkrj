@@ -190,6 +190,7 @@ global_ahp_css = """
 }
 
 /* 2. 라디오 그룹 전체 100% 분배 강제 및 줄바꿈 원천 차단 */
+.st-key-ahp_survey_matrix div[data-testid="stElementContainer"],
 .st-key-ahp_survey_matrix div[data-testid="stRadio"],
 .st-key-ahp_survey_matrix .stRadio {
     width: 100% !important;
@@ -208,6 +209,11 @@ global_ahp_css = """
     margin: 0px !important;
 }
 
+/* 2.5. AHP 컨테이너 내부의 수직 요소 간격 초밀착 */
+.st-key-ahp_survey_matrix div[data-testid="stVerticalBlock"] {
+    gap: 4px !important;
+}
+
 /* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
 /* Streamlit 버전에 따라 option들을 div(stRadioHorizontalOption)로 감싸는 경우와 direct label인 경우가 있으므로 모두 stretch 적용 */
 .st-key-ahp_survey_matrix div[role="radiogroup"] > div,
@@ -219,7 +225,7 @@ global_ahp_css = """
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 44px !important;
+    height: 34px !important; /* 요인 박스와 동일하게 34px로 정렬 */
     margin: 0px !important;
     padding: 0px !important;
     min-width: 0px !important;
@@ -1607,7 +1613,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             increment_survey_visit(survey_id_param)
             st.session_state[f"visited_survey_{survey_id_param}"] = True
         
-    st.title(f"📋 {survey_meta.get('Title', 'AHP 온라인 설문조사')}")
+    st.title(survey_meta.get('Title', 'AHP 온라인 설문조사'))
     
     # 모델 정보와 인구통계 추출
     ahp_model = survey_meta["AHP_Model_JSON"]
@@ -1619,8 +1625,37 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     # 단일 스크롤 폼 생성
     with st.form("respondent_survey_form"):
-        # 1. 인구통계학적 정보 수집
-        st.subheader("1. 응답자 기본 정보")
+        # Define professional soft pastel colors for factor boxes
+        PASTEL_PALETTES = [
+            {"bg": "#eff6ff", "text": "#1e40af", "border": "#bfdbfe"}, # Soft Blue
+            {"bg": "#f0fdf4", "text": "#166534", "border": "#bbf7d0"}, # Soft Green
+            {"bg": "#fff7ed", "text": "#c2410c", "border": "#fed7aa"}, # Soft Orange
+            {"bg": "#faf5ff", "text": "#6b21a8", "border": "#e9d5ff"}, # Soft Purple
+            {"bg": "#fdf2f8", "text": "#be185d", "border": "#fbcfe8"}, # Soft Pink
+            {"bg": "#f0fdfa", "text": "#0f766e", "border": "#ccfbf1"}, # Soft Teal
+            {"bg": "#fffbeb", "text": "#b45309", "border": "#fef3c7"}, # Soft Amber
+            {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"}, # Soft Slate/Gray
+        ]
+        
+        # Extract all unique factors to ensure consistent coloring
+        all_factors = []
+        for main_f in ahp_model.get("main", []):
+            if main_f not in all_factors:
+                all_factors.append(main_f)
+        for sub_list in ahp_model.get("subs", {}).values():
+            for sub_f in sub_list:
+                if sub_f not in all_factors:
+                    all_factors.append(sub_f)
+                    
+        factor_colors = {}
+        for i, f_name in enumerate(all_factors):
+            factor_colors[f_name] = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
+
+        section_num = 1
+
+        # 1. 응답자 기본 정보
+        st.subheader(f"{section_num}. 응답자 기본 정보")
+        section_num += 1
         resp_data = {}
         
         # 100% 매핑에 맞게 ID 및 Type 추가 지정
@@ -1636,16 +1671,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
         
         st.divider()
         
-        # 1.5 요인 조작적 정의 설명란 표시
+        # 2. 요인 조작적 정의 설명란 표시
         if definitions:
-            st.subheader("💡 평가 요인 설명 (조작적 정의)")
+            st.subheader(f"{section_num}. 평가 요인 정의 및 설명")
+            section_num += 1
             for factor_name, def_text in definitions.items():
                 if def_text:
                     st.markdown(f"**• {factor_name}**: {def_text}")
             st.divider()
             
-        # 2. 사전 중요도 순위 지정
-        st.subheader("2. 요인별 전반적 중요도 순위 지정 (사전 순위)")
+        # 3. 사전 중요도 순위 지정
+        st.subheader(f"{section_num}. 요인별 전반적 중요도 순위 지정 (사전 순위)")
+        section_num += 1
         st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
         main_criteria = ahp_model.get("main", [])
         
@@ -1676,8 +1713,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
         
         st.divider()
         
-        # 3. AHP 쌍대비교 문항 생성
-        st.subheader("3. 요인 간 상대적 중요도 평가 (쌍대비교)")
+        # 4. AHP 쌍대비교 문항 생성
+        st.subheader(f"{section_num}. 요인 간 상대적 중요도 평가 (쌍대비교)")
+        ahp_section_prefix = f"{section_num}"
+        section_num += 1
+        
         st.markdown("""
         **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 더 중요한 요인 방향으로 중요도 점수를 선택해 주세요.
         - **동등(1)**: 양쪽 요인이 똑같이 중요함
@@ -1689,9 +1729,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
         ahp_answers = {}
         
         with st.container(key="ahp_survey_matrix"):
+            comp_idx = 1
             for comb in combinations:
-                parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
-                st.markdown(f"#### 🔍 {parent_lbl}")
+                parent_lbl = f"{ahp_section_prefix}.{comp_idx}. [{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else f"{ahp_section_prefix}.{comp_idx}. 대분류(핵심) 요인 비교"
+                st.markdown(f"#### {parent_lbl}")
+                comp_idx += 1
             
                 # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
                 if scale_type == "1-3-5 Discrete":
@@ -1736,17 +1778,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
 
                 # HTML 표 헤더 구조
                 header_html = f"""
-                <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; table-layout: fixed; margin: 0px; padding: 0px;">
-                    <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
-                        <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                        <th style="width: {left_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
-                        <th style="width: {scale_width}%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
-                        <th style="width: {right_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
-                        <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 11px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px;">
+                    <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                        <th style="width: 15%; border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
+                        <th style="width: {left_width}%; border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;">← 좌측 요인 중요도</th>
+                        <th style="width: {scale_width}%; border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 11px;" rowspan="2">동등<br>(1)</th>
+                        <th style="width: {right_width}%; border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;">우측 요인 중요도 →</th>
+                        <th style="width: 15%; border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
                     </tr>
-                    <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
-                        {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in left_cols])}
-                        {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in right_cols])}
+                    <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in left_cols])}
+                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in right_cols])}
                     </tr>
                 </table>
                 """
@@ -1761,7 +1803,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 
                     # 왼쪽 요인명 출력
                     with row_cols[0]:
-                        st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{left_f}</div>", unsafe_allow_html=True)
+                        left_style = factor_colors.get(left_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
+                        st.markdown(f"""
+                        <div style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
+                                    padding: 0px 8px; background-color: {left_style["bg"]}; color: {left_style["text"]}; 
+                                    border-radius: 4px; height: 34px; display: flex; align-items: center; 
+                                    justify-content: center; font-size: 11px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
+                            {left_f}
+                        </div>
+                        """, unsafe_allow_html=True)
                 
                     # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
                     with row_cols[1]:
@@ -1779,16 +1829,24 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
-                        st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{right_f}</div>", unsafe_allow_html=True)
+                        right_style = factor_colors.get(right_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
+                        st.markdown(f"""
+                        <div style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
+                                    padding: 0px 8px; background-color: {right_style["bg"]}; color: {right_style["text"]}; 
+                                    border-radius: 4px; height: 34px; display: flex; align-items: center; 
+                                    justify-content: center; font-size: 11px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
+                            {right_f}
+                        </div>
+                        """, unsafe_allow_html=True)
                 
                     ahp_answers[pair_key] = ans_val
-                    st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
+                    st.markdown("<hr style='margin: 3px 0; border: 0; border-top: 1px dashed #e2e8f0;'>", unsafe_allow_html=True)
             st.divider()
             
-        # 4. 답례품 및 개인정보 수집 동의
-        st.subheader("4. 개인정보 수집 및 답례품")
+        # 5. 개인정보 수집 및 답례품
+        st.subheader(f"{section_num}. 개인정보 수집 및 답례품")
         if rewards_info.get("enabled"):
-            st.info(f"🎁 **답례품 안내**: {rewards_info.get('desc', '설문 완료 시 답례품을 제공합니다.')}")
+            st.info(f"**답례품 안내**: {rewards_info.get('desc', '설문 완료 시 답례품을 제공합니다.')}")
             reward_contact = st.text_input("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *")
             resp_data["reward_contact"] = reward_contact
             
@@ -1807,15 +1865,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
             if len(pre_rankings) < len(main_criteria):
-                st.error("🚨 사전 요인 중요도 순위 지정을 모두 완성해 주세요.")
+                st.error("사전 요인 중요도 순위 지정을 모두 완성해 주세요.")
                 st.stop()
                 
             if agree_check != "동의":
-                st.error("🚨 설문제출을 위해 개인정보 수집 동의에 체크해 주세요.")
+                st.error("설문제출을 위해 개인정보 수집 동의에 체크해 주세요.")
                 st.stop()
                 
             if missing:
-                st.error("🚨 입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.")
+                st.error("입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.")
                 st.stop()
                 
             # 실시간 CR 계산 및 검증 피드백
@@ -1826,7 +1884,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     if not is_preview_mode:
                         from survey_manager import increment_abandoned_cr
                         increment_abandoned_cr(survey_id_param)
-                    st.error(f"🚨 입력하신 설문의 응답 일관성이 부족합니다. (대분류 일관성 비율: {main_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
+                    st.error(f"입력하신 설문의 응답 일관성이 부족합니다. (대분류 일관성 비율: {main_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
                     st.stop()
                     
                 # 하위분류 CR 체크
@@ -1837,7 +1895,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             if not is_preview_mode:
                                 from survey_manager import increment_abandoned_cr
                                 increment_abandoned_cr(survey_id_param)
-                            st.error(f"🚨 '{parent}' 하위 항목의 응답 일관성이 부족합니다. (일관성 비율: {sub_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
+                            st.error(f"'{parent}' 하위 항목의 응답 일관성이 부족합니다. (일관성 비율: {sub_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
                             st.stop()
             
             # 저장 진행
@@ -1857,7 +1915,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.success("🎉 설문 응답이 성공적으로 제출되었습니다. 참여해 주셔서 감사합니다!")
                         st.stop()
                     else:
-                        st.error("🚨 데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.")
+                        st.error("데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.")
                     
     st.stop()
 
