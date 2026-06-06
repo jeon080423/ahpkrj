@@ -8,36 +8,72 @@ from google.oauth2.service_account import Credentials
 def get_survey_gspread_client():
     """gspread 클라이언트를 반환합니다. st.secrets에 있는 credentials 사용."""
     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-    if "gcp_service_account" not in st.secrets:
-        return None
     
+    # st.secrets에서 값 가져오기 (없을 경우 에러 처리)
+    if "gcp_service_account" not in st.secrets:
+        st.error("Secrets에 'gcp_service_account' 설정이 없습니다.")
+        return None
+
     raw_auth = st.secrets["gcp_service_account"]
     auth_info = {}
-    if isinstance(raw_auth, dict) or hasattr(raw_auth, "keys"):
-        auth_info = dict(raw_auth)
+
+    # Case 1: 이미 딕셔너리 형태인 경우 (TOML 포맷) - 가장 일반적인 경우
+    if isinstance(raw_auth, dict) or hasattr(raw_auth, "keys"): 
+        auth_info = dict(raw_auth) # AttrDict 등을 dict로 변환
+    
+    # Case 2: 문자열 형태인 경우 (JSON 문자열 혹은 Base64 인코딩 문자열)
     elif isinstance(raw_auth, str):
-        import base64, json, re
+        import base64, re
+        # 앞뒤 공백 및 따옴표 제거
         auth_str = raw_auth.strip().strip('"').strip("'")
+        
         try:
+            # 2-1. 순수 JSON 문자열로 파싱 시도
             auth_info = json.loads(auth_str)
         except json.JSONDecodeError:
+            # 2-2. JSON 파싱 실패 -> Base64 인코딩된 값으로 가정하고 디코딩 시도
             try:
+                # 1단계: 문자열 정제 (모든 공백 제거)
                 clean_b64 = re.sub(r'\s+', '', auth_str)
+                
+                # 2단계: 패딩(=) 보정
                 missing_padding = len(clean_b64) % 4
                 if missing_padding:
                     clean_b64 += '=' * (4 - missing_padding)
-                decoded_bytes = base64.b64decode(clean_b64)
-                auth_info = json.loads(decoded_bytes.decode('utf-8'))
-            except Exception:
+                
+                # 3단계: Base64 디코딩 (Standard 및 URL-Safe 방식 모두 시도)
+                try:
+                    decoded_bytes = base64.b64decode(clean_b64)
+                except Exception:
+                    # Standard 실패 시 URL-Safe 방식 시도 (-와 _ 문자 처리)
+                    decoded_bytes = base64.urlsafe_b64decode(clean_b64)
+                    
+                decoded_info = decoded_bytes.decode('utf-8')
+                auth_info = json.loads(decoded_info)
+            except Exception as e:
+                st.error(f"서비스 계정 키 디코딩 실패 (Base64/JSON 오류): {e}")
                 return None
-    
+    else:
+        st.error("gcp_service_account 형식을 인식할 수 없습니다.")
+        return None
+
+    # [중요] Private Key 내의 줄바꿈 문자(\n) 처리
+    # TOML 등에서 문자열로 읽어올 때 \\n으로 이스케이프된 경우 실제 줄바꿈으로 변경 필요
     if auth_info and "private_key" in auth_info:
         auth_info["private_key"] = auth_info["private_key"].replace("\\n", "\n")
-        
+
+    # 필수 필드 확인 (Missing fields 에러 방지)
+    required_fields = ["private_key", "client_email", "token_uri"]
+    missing = [f for f in required_fields if f not in auth_info]
+    if missing:
+        st.error(f"서비스 계정 정보에 필수 필드가 누락되었습니다: {', '.join(missing)}")
+        return None
+
     try:
         creds = Credentials.from_service_account_info(auth_info, scopes=scope)
         return gspread.authorize(creds)
-    except Exception:
+    except Exception as e:
+        st.error(f"gspread 인증 에러: {e}")
         return None
 
 def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, rewards_info):
