@@ -4299,16 +4299,16 @@ with col_main:
                 col_demo1, col_demo2 = st.columns(2)
                 with col_demo1:
                     if demo_age:
-                        st.number_input("[미리보기] 연령 (세) *", min_value=1, max_value=120, value=30, key="preview_demo_age")
+                        st.number_input("연령 (세) *", min_value=1, max_value=120, value=30, key="preview_demo_age")
                     if demo_exp:
-                        st.number_input("[미리보기] 경력년수 *", min_value=0, max_value=60, value=5, key="preview_demo_exp")
+                        st.number_input("경력년수 *", min_value=0, max_value=60, value=5, key="preview_demo_exp")
                 with col_demo2:
                     if demo_gender:
-                        st.radio("[미리보기] 성별 *", ["남자", "여자"], key="preview_demo_gender", horizontal=True)
+                        st.radio("성별 *", ["남자", "여자"], key="preview_demo_gender", horizontal=True)
                     if demo_aff:
-                        st.text_input("[미리보기] 소속 *", value="예시 기관", key="preview_demo_aff")
+                        st.text_input("소속 *", value="예시 기관", key="preview_demo_aff")
                 if demo_email:
-                    st.text_input("[미리보기] 이메일 주소 *", value="respondent@example.com", key="preview_demo_email")
+                    st.text_input("이메일 주소 *", value="respondent@example.com", key="preview_demo_email")
                 
                 st.divider()
                 
@@ -4362,7 +4362,7 @@ with col_main:
                     st.divider()
                     st.markdown("### 4. 개인정보 수집 및 답례품")
                     st.info(f"🎁 **답례품 안내**: {reward_desc}")
-                    st.text_input("[미리보기] 답례품 수령 연락처 *", placeholder="010-0000-0000", key="preview_reward_contact")
+                    st.text_input("답례품 수령 연락처 *", placeholder="010-0000-0000", key="preview_reward_contact")
                 
                 st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의함", "동의하지 않음"], index=1, key="preview_agree_check")
                 
