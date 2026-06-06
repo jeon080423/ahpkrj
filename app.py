@@ -1635,7 +1635,7 @@ if "survey_id" in q_params:
             elif scale_type == "1-3-7-9 Discrete":
                 padding_val = "6.5%"
             else: # 1-9 Continuous (17개 옵션)
-                padding_val = "2.8%"
+                padding_val = "2.1%"
 
             # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 라디오 그룹의 패딩을 동적 비율로 일치시킴
             st.markdown(
@@ -4497,7 +4497,7 @@ with col_main:
                     right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
                     options = list(range(-9, -1)) + list(range(1, 10))
                     options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
-                    padding_val = "2.8%"
+                    padding_val = "2.1%"
 
                 # 미리보기 화면에도 수직 정렬 CSS 주입 (gap 0px 제거 및 척도별 동적 padding 적용)
                 st.markdown(
