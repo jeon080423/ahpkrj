@@ -1654,15 +1654,27 @@ if "survey_id" in q_params:
                     justify-content: space-between;
                     width: 100% !important;
                     gap: 0px !important;
-                    padding: 0 10px !important;
+                    padding: 0px 18px !important; /* 헤더 표 간격과 라디오 버튼의 물리적인 좌우 위치를 완벽히 정렬 */
                 }
                 div[role="radiogroup"] > label {
                     flex: 1;
                     text-align: center;
                     display: flex;
+                    flex-direction: column;
+                    align-items: center;
                     justify-content: center;
                     margin-right: 0px !important;
-                    white-space: nowrap !important;
+                }
+                /* 라디오 버튼의 숫자 텍스트(label 안의 p 태그 또는 div 안의 span 등)를 숨겨서 순수 동그라미 버튼만 렌더링 */
+                div[role="radiogroup"] label div[data-testid="stWidgetLabel"] {
+                    display: none !important;
+                }
+                div[role="radiogroup"] label p {
+                    display: none !important;
+                }
+                div[role="radiogroup"] label span {
+                    /* 숫자 라벨이 숨겨진 후 원형 버튼 자체의 정렬 흐름 유지 */
+                    margin: 0 auto !important;
                 }
                 div[data-testid="column"] {
                     padding: 0px !important;
@@ -4465,13 +4477,13 @@ with col_main:
                     
                     # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의 (미리보기)
                     header_html = f"""
-                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; margin-bottom: 10px;">
+                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; margin-bottom: 10px; table-layout: fixed;">
                         <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
-                            <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                            <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
+                            <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                            <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
                             <th style="width: 10%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
-                            <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
-                            <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                            <th style="width: 34%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
+                            <th style="width: 16%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
                         </tr>
                         <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
                             {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in left_cols])}
