@@ -4181,6 +4181,44 @@ with col_main:
                     )
                     fig_stats.update_layout(showlegend=False)
                     st.plotly_chart(fig_stats, use_container_width=True)
+                    
+                    # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
+                    import sqlite3
+                    try:
+                        conn = sqlite3.connect('users.db')
+                        backup_df = pd.read_sql_query(
+                            "SELECT id, respondent_id, response_json, created_at FROM survey_backup_responses WHERE survey_id = ?",
+                            conn, params=(dashboard_sheet_id.strip(),)
+                        )
+                        conn.close()
+                        
+                        if not backup_df.empty:
+                            with st.expander("🛡️ 서버 로컬 안전 백업 관리 센터"):
+                                st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
+                                st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
+                                
+                                # 전체 로 데이터 복구 엑셀 데이터 빌드
+                                recovered_rows = []
+                                for idx_b, r_b in backup_df.iterrows():
+                                    payload = json.loads(r_b["response_json"])
+                                    recovered_rows.append(payload["row_data"])
+                                    
+                                if recovered_rows:
+                                    # CSV 파일 형태로 복구 파일 내보내기 다운로드 버튼
+                                    import io
+                                    output_csv = io.StringIO()
+                                    pd.DataFrame(recovered_rows).to_csv(output_csv, index=False, header=False)
+                                    st.download_button(
+                                        "📥 로컬 백업 데이터 다운로드 (CSV)",
+                                        data=output_csv.getvalue().encode('utf-8-sig'),
+                                        file_name=f"Backup_Recovery_{dashboard_sheet_id.strip()[:6]}.csv",
+                                        mime="text/csv",
+                                        use_container_width=True
+                                    )
+                        else:
+                            st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
+                    except Exception as err:
+                        st.caption(f"로컬 백업 조회 불가: {err}")
                 else:
                     st.info("실시간 대시보드를 활성화하려면 조회할 구글 스프레드시트 ID를 기입해 주십시오.")
                     
