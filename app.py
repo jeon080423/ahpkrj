@@ -291,6 +291,8 @@ def init_db():
                   (user_id TEXT PRIMARY KEY, model_data TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS visit_logs
                   (ip_address TEXT, visit_date TEXT, PRIMARY KEY (ip_address, visit_date))''')
+    c.execute('''CREATE TABLE IF NOT EXISTS admin_surveys
+                  (survey_id TEXT PRIMARY KEY, title TEXT, admin_id TEXT, created_at TEXT)''')
     
     # 관리자 계정 생성
     try:
@@ -2566,7 +2568,7 @@ with col_main:
     has_admin_tab = (st.session_state.user_role == 'admin')
     
     if has_admin_tab:
-        main_tab1, main_tab2 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작 (Admin)"])
+        main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작 (Admin)", "📊 응답현황 대시보드"])
     else:
         main_tab1 = st.container() # 일반 사용자는 컨테이너로 직접 단독 노출
         
@@ -4136,92 +4138,8 @@ with col_main:
             st.header("📝 AHP 온라인 설문 자동 생성 및 배포기")
             st.info("이 탭은 공인된 관리자(Admin) 전용 화면입니다. 여기서 만든 설문지의 모든 응답 데이터는 동적으로 자동 생성되는 구글 스프레드시트에 영구 저장됩니다.")
             
-            # -------------------------------------------------------------------------
-            # [신규] AHP 온라인 설문 실시간 응답 현황 대시보드
-            # -------------------------------------------------------------------------
-            with st.expander("📊 배포 설문 실시간 응답 현황 대시보드", expanded=True):
-                st.markdown("배포하신 설문지의 **구글 스프레드시트 ID**를 입력하여 실시간 응답자 및 중단자 현황을 모니터링할 수 있습니다.")
-                dashboard_sheet_id = st.text_input("조회할 구글 스프레드시트 ID", key="dashboard_sheet_id_input", placeholder="스프레드시트 URL의 d/ 와 /edit 사이의 해시 문자열을 입력해 주세요.")
-                
-                if dashboard_sheet_id:
-                    from survey_manager import get_survey_stats
-                    with st.spinner("실시간 설문 현황 로딩 중..."):
-                        stats = get_survey_stats(dashboard_sheet_id.strip())
-                        
-                    col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
-                    with col_stat1:
-                        st.metric("총 접속자 수 (Visits)", f"{stats['visits']}명")
-                    with col_stat2:
-                        st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}명")
-                    with col_stat3:
-                        st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
-                    with col_stat4:
-                        st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
-                        
-                    # 시각화 차트 추가
-                    import pandas as pd
-                    import plotly.express as px
-                    
-                    chart_data = pd.DataFrame({
-                        "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
-                        "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
-                    })
-                    
-                    fig_stats = px.bar(
-                        chart_data,
-                        x="구분",
-                        y="인원수",
-                        text="인원수",
-                        color="구분",
-                        color_discrete_map={
-                            "응답 완료": "#2E7D32",
-                            "일관성 초과 중단": "#C62828",
-                            "단순 페이지 이탈": "#EF6C00"
-                        },
-                        title="설문 참여 상태별 분포"
-                    )
-                    fig_stats.update_layout(showlegend=False)
-                    st.plotly_chart(fig_stats, use_container_width=True)
-                    
-                    # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
-                    import sqlite3
-                    try:
-                        conn = sqlite3.connect('users.db')
-                        backup_df = pd.read_sql_query(
-                            "SELECT id, respondent_id, response_json, created_at FROM survey_backup_responses WHERE survey_id = ?",
-                            conn, params=(dashboard_sheet_id.strip(),)
-                        )
-                        conn.close()
-                        
-                        if not backup_df.empty:
-                            with st.expander("🛡️ 서버 로컬 안전 백업 관리 센터"):
-                                st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
-                                st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
-                                
-                                # 전체 로 데이터 복구 엑셀 데이터 빌드
-                                recovered_rows = []
-                                for idx_b, r_b in backup_df.iterrows():
-                                    payload = json.loads(r_b["response_json"])
-                                    recovered_rows.append(payload["row_data"])
-                                    
-                                if recovered_rows:
-                                    # CSV 파일 형태로 복구 파일 내보내기 다운로드 버튼
-                                    import io
-                                    output_csv = io.StringIO()
-                                    pd.DataFrame(recovered_rows).to_csv(output_csv, index=False, header=False)
-                                    st.download_button(
-                                        "📥 로컬 백업 데이터 다운로드 (CSV)",
-                                        data=output_csv.getvalue().encode('utf-8-sig'),
-                                        file_name=f"Backup_Recovery_{dashboard_sheet_id.strip()[:6]}.csv",
-                                        mime="text/csv",
-                                        use_container_width=True
-                                    )
-                        else:
-                            st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
-                    except Exception as err:
-                        st.caption(f"로컬 백업 조회 불가: {err}")
-                else:
-                    st.info("실시간 대시보드를 활성화하려면 조회할 구글 스프레드시트 ID를 기입해 주십시오.")
+            # (Dashboard moved to main_tab3 below)
+            pass
                     
             st.divider()
             
@@ -4395,6 +4313,18 @@ with col_main:
                                     cr_limit=cr_limit,
                                     rewards_info=rewards_info
                                 )
+                                
+                                # admin_surveys 테이블에 신규 설문 자동 등록
+                                try:
+                                    conn = sqlite3.connect('users.db')
+                                    cur = conn.cursor()
+                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
+                                                (sheet_id, survey_title, st.session_state.user_id))
+                                    conn.commit()
+                                    conn.close()
+                                except Exception as dbe:
+                                    pass
+
                                 # 단축 주소 생성
                                 base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                                 if "localhost" in base_url or "127.0.0.1" in base_url:
@@ -4409,6 +4339,114 @@ with col_main:
                                 st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
                             except Exception as ex:
                                 st.error(f"구글 시트 생성 실패: {ex}")
+            
+    # -------------------------------------------------------------------------
+    # [신규] 관리자용 응답현황 대시보드 탭 (Tab 3) 상세 구현
+    # -------------------------------------------------------------------------
+    if has_admin_tab:
+        with main_tab3:
+            st.header("📊 배포 설문 실시간 응답 현황 대시보드")
+            st.info("로그인한 관리자 계정으로 배포한 설문 목록을 자동으로 조회하여 실시간 응답 현황을 대시보드로 구성합니다. (별도의 구글 스프레드시트 ID 입력 불필요)")
+            
+            # DB에서 해당 관리자가 생성한 설문 목록 조회
+            import sqlite3
+            import pandas as pd
+            
+            admin_surveys = []
+            try:
+                conn = sqlite3.connect('users.db')
+                cur = conn.cursor()
+                cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
+                admin_surveys = cur.fetchall()
+                conn.close()
+            except Exception as e:
+                st.error(f"설문 목록 조회 실패: {e}")
+                
+            if not admin_surveys:
+                st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작' 탭에서 설문을 배포해 주세요.")
+            else:
+                # 선택 박스를 통해 현재 관리자가 배포한 설문들 중 하나 선택 (자동 선택 지원)
+                survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
+                selected_survey_label = st.selectbox("📊 조회할 배포 설문 선택", list(survey_options.keys()))
+                selected_sheet_id = survey_options[selected_survey_label]
+                
+                if selected_sheet_id:
+                    st.markdown(f"**선택된 설문 스프레드시트 ID**: `{selected_sheet_id}`")
+                    
+                    from survey_manager import get_survey_stats
+                    with st.spinner("실시간 설문 현황 로딩 중..."):
+                        stats = get_survey_stats(selected_sheet_id.strip())
+                        
+                    col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+                    with col_stat1:
+                        st.metric("총 접속자 수 (Visits)", f"{stats['visits']}명")
+                    with col_stat2:
+                        st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}명")
+                    with col_stat3:
+                        st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
+                    with col_stat4:
+                        st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
+                        
+                    # 시각화 차트 추가
+                    import plotly.express as px
+                    
+                    chart_data = pd.DataFrame({
+                        "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
+                        "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
+                    })
+                    
+                    fig_stats = px.bar(
+                        chart_data,
+                        x="구분",
+                        y="인원수",
+                        text="인원수",
+                        color="구분",
+                        color_discrete_map={
+                            "응답 완료": "#2E7D32",
+                            "일관성 초과 중단": "#C62828",
+                            "단순 페이지 이탈": "#EF6C00"
+                        },
+                        title="설문 참여 상태별 분포"
+                    )
+                    fig_stats.update_layout(showlegend=False)
+                    st.plotly_chart(fig_stats, use_container_width=True)
+                    
+                    # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
+                    try:
+                        conn = sqlite3.connect('users.db')
+                        backup_df = pd.read_sql_query(
+                            "SELECT id, respondent_id, response_json, created_at FROM survey_backup_responses WHERE survey_id = ?",
+                            conn, params=(selected_sheet_id.strip(),)
+                        )
+                        conn.close()
+                        
+                        if not backup_df.empty:
+                            with st.expander("🛡️ 서버 로컬 안전 백업 관리 센터"):
+                                st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
+                                st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
+                                
+                                # 전체 로 데이터 복구 엑셀 데이터 빌드
+                                recovered_rows = []
+                                for idx_b, r_b in backup_df.iterrows():
+                                    payload = json.loads(r_b["response_json"])
+                                    recovered_rows.append(payload["row_data"])
+                                    
+                                if recovered_rows:
+                                    # CSV 파일 형태로 복구 파일 내보내기 다운로드 버튼
+                                    import io
+                                    output_csv = io.StringIO()
+                                    pd.DataFrame(recovered_rows).to_csv(output_csv, index=False, header=False)
+                                    st.download_button(
+                                        "📥 로컬 백업 데이터 다운로드 (CSV)",
+                                        data=output_csv.getvalue().encode('utf-8-sig'),
+                                        file_name=f"Backup_Recovery_{selected_sheet_id.strip()[:6]}.csv",
+                                        mime="text/csv",
+                                        use_container_width=True
+                                    )
+                        else:
+                            st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
+                    except Exception as err:
+                        st.caption(f"로컬 백업 조회 불가: {err}")
             
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
