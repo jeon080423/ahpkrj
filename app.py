@@ -1616,13 +1616,13 @@ if "survey_id" in q_params:
                         <span style="color:#007bff;">[비교]</span> {left_f} <span style="color:#6c757d;">VS</span> {right_f}
                     </div>
                     """, 
-                    unsafe_html=True
+                    unsafe_allow_html=True
                 )
                 
                 # 가로 메트릭스 격자 형태 배치 (왼쪽 요인명 - 척도 영역 - 오른쪽 요인명)
                 col_left, col_matrix, col_right = st.columns([2, 8, 2])
                 with col_left:
-                    st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_html=True)
+                    st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_allow_html=True)
                 with col_matrix:
                     ans_val = st.radio(
                         label=f"hidden_label_{pair_key}", # 스크린리더/구조용 레이블
@@ -1634,10 +1634,10 @@ if "survey_id" in q_params:
                         label_visibility="collapsed" # 레이블 감추고 메트릭스 버튼 형태만 부각
                     )
                 with col_right:
-                    st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_html=True)
+                    st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_allow_html=True)
                 
                 ahp_answers[pair_key] = ans_val
-                st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_html=True)
+                st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_allow_html=True)
             st.divider()
             
         # 4. 답례품 및 개인정보 수집 동의
@@ -4404,13 +4404,13 @@ with col_main:
                                 <span style="color:#28a745;">[비교]</span> {left_f} <span style="color:#6c757d;">VS</span> {right_f}
                             </div>
                             """, 
-                            unsafe_html=True
+                            unsafe_allow_html=True
                         )
                         
                         # 가로 메트릭스 격자 형태 배치 (왼쪽 요인명 - 척도 영역 - 오른쪽 요인명)
                         col_left, col_matrix, col_right = st.columns([2, 8, 2])
                         with col_left:
-                            st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_html=True)
+                            st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_allow_html=True)
                         with col_matrix:
                             st.radio(
                                 label=f"hidden_preview_label_{pair_key}",
@@ -4422,8 +4422,8 @@ with col_main:
                                 label_visibility="collapsed"
                             )
                         with col_right:
-                            st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_html=True)
-                        st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_html=True)
+                            st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_allow_html=True)
+                        st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_allow_html=True)
                     st.write("")
                     
                 if reward_enabled:
