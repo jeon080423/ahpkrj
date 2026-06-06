@@ -209,6 +209,10 @@ global_ahp_css = """
 }
 
 /* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
+/* Streamlit 버전에 따라 option들을 div(stRadioHorizontalOption)로 감싸는 경우와 direct label인 경우가 있으므로 모두 stretch 적용 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] > div,
+.st-key-ahp_survey_matrix div[role="radiogroup"] > label,
+.st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"],
 .st-key-ahp_survey_matrix label {
     flex: 1 1 0% !important;
     display: flex !important;
@@ -219,9 +223,22 @@ global_ahp_css = """
     margin: 0px !important;
     padding: 0px !important;
     min-width: 0px !important;
+    width: 100% !important;
     border-radius: 4px !important;
     transition: background-color 0.2s ease-in-out !important;
     background-color: transparent !important;
+}
+
+/* 감싸는 div가 있을 경우 그 내부의 실제 label도 100% 채우도록 지시 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] > div label,
+.st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"] label {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0px !important;
+    padding: 0px !important;
 }
 
 /* 4. 기존 텍스트 찌꺼기 완벽 제거 */
