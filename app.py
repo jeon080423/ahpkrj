@@ -4202,20 +4202,34 @@ with col_main:
             st.info("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.")
             definitions_map = {}
             for mc in main_list:
-                definitions_map[mc] = st.text_input(f"대분류 [{mc}] 설명", value=f"{mc}에 대한 전반적 요소를 설명합니다.")
-                for sc in model_structure["subs"].get(mc, []):
-                    # 기본 양승훈 설문 정의 적용
-                    default_def = ""
-                    if sc == "상대적이점": default_def = "도입대상 협동로봇간의 상대적 이점"
-                    elif sc == "호환성": default_def = "기존 설비나 타사 협동로봇과의 연결성"
-                    elif sc == "안전성": default_def = "작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준"
-                    elif sc == "서비스지원": default_def = "공급사의 기술 및 A/S 지원 정도"
-                    elif sc == "경영진지원": default_def = "경영진의 도입 의지 및 경영철학 반영도"
-                    elif sc == "기술준비도": default_def = "조직원의 로봇 활용 기술 준비 수준"
-                    elif sc == "금융자원": default_def = "로봇 구입을 위한 자본 여력 및 자금 조달 편의성"
-                    elif sc == "교육훈련": default_def = "기술 향상을 위한 위탁/사내 교육 프로그램 유무"
-                    
-                    definitions_map[sc] = st.text_input(f"ㄴ 중분류 [{sc}] 설명", value=default_def or f"{sc}에 대한 정의입니다.")
+                # 대분류명 파란색 볼드 및 이모티콘을 이용해 대조 설정
+                st.markdown(f"#### 🟦 :blue[**대분류: {mc}**]")
+                definitions_map[mc] = st.text_input(
+                    f"👉 [{mc}] 요인의 전체적인 설명 입력",
+                    value=f"{mc}에 대한 전반적 요소를 설명합니다.",
+                    key=f"def_main_{mc}"
+                )
+                
+                # 중분류들은 연관 관계를 묶을 수 있도록 시각적으로 구분된 테두리 컨테이너 안에 배치
+                with st.container(border=True):
+                    for sc in model_structure["subs"].get(mc, []):
+                        # 기본 양승훈 설문 정의 적용
+                        default_def = ""
+                        if sc == "상대적이점": default_def = "도입대상 협동로봇간의 상대적 이점"
+                        elif sc == "호환성": default_def = "기존 설비나 타사 협동로봇과의 연결성"
+                        elif sc == "안전성": default_def = "작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준"
+                        elif sc == "서비스지원": default_def = "공급사의 기술 및 A/S 지원 정도"
+                        elif sc == "경영진지원": default_def = "경영진의 도입 의지 및 경영철학 반영도"
+                        elif sc == "기술준비도": default_def = "조직원의 로봇 활용 기술 준비 수준"
+                        elif sc == "금융자원": default_def = "로봇 구입을 위한 자본 여력 및 자금 조달 편의성"
+                        elif sc == "교육훈련": default_def = "기술 향상을 위한 위탁/사내 교육 프로그램 유무"
+                        
+                        definitions_map[sc] = st.text_input(
+                            f"ㄴ 중분류 [{sc}] 설명 입력",
+                            value=default_def or f"{sc}에 대한 정의입니다.",
+                            key=f"def_sub_{sc}"
+                        )
+                st.write("") # 섹션 간 시각적 여백 추가
                     
             st.divider()
             
