@@ -4303,7 +4303,8 @@ with col_main:
                     st.markdown("### 4. 답례품 및 동의")
                     st.text_input("[미리보기] 기프티콘 발송용 연락처 *", disabled=True)
                     
-                st.button("미리보기 닫기", key="close_preview_btn")
+                if st.button("미리보기 닫기", key="close_preview_btn"):
+                    st.rerun()
 
             col_p1, col_p2 = st.columns(2)
             with col_p1:
