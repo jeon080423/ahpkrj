@@ -1648,6 +1648,13 @@ if "survey_id" in q_params:
             st.markdown(
                 """
                 <style>
+                /* streamlit column gap & padding remove to align with table */
+                div[data-testid="stHorizontalBlock"] {
+                    gap: 0px !important;
+                }
+                div[data-testid="column"] {
+                    padding: 0px !important;
+                }
                 /* streamlit radio horizontal flex layout override to distribute items evenly */
                 div[role="radiogroup"] {
                     display: flex !important;
@@ -1655,7 +1662,7 @@ if "survey_id" in q_params:
                     justify-content: space-between !important;
                     width: 100% !important;
                     gap: 0px !important;
-                    padding: 0px 18px !important; /* 좌우 마진 공간 보정 */
+                    padding: 0px 3.2% !important; /* 좌우 16% 요인명 영역을 뺀 나머지 68% 공간에서 헤더 척도 눈금들과 라디오 버튼이 좌우로 완벽히 정렬되도록 안쪽 여백 설정 */
                 }
                 div[role="radiogroup"] > label {
                     flex: 1 !important;
@@ -1668,17 +1675,17 @@ if "survey_id" in q_params:
                     padding: 0px !important;
                     min-width: 0px !important;
                 }
-                /* 라디오 버튼의 글자 텍스트(숫자) 영역을 숨기면서 가로 간격 찌그러짐 차단 */
+                /* 라디오 버튼의 숫자 텍스트 숨기기 */
                 div[role="radiogroup"] label div[data-testid="stWidgetLabel"],
                 div[role="radiogroup"] label p {
                     display: none !important;
-                }
-                /* 원형 라디오 버튼 컴포넌트의 위치를 정중앙으로 일치 */
-                div[role="radiogroup"] label span {
-                    margin: 0 auto !important;
+                    height: 0px !important;
+                    margin: 0px !important;
                     padding: 0px !important;
                 }
-                div[data-testid="column"] {
+                /* 동그라미 라디오 버튼 정중앙 배치 */
+                div[role="radiogroup"] label span {
+                    margin: 0px auto !important;
                     padding: 0px !important;
                 }
                 </style>
