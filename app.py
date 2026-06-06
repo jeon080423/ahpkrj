@@ -174,27 +174,32 @@ st.markdown(seo_tags, unsafe_allow_html=True)
 # =============================================================================
 global_ahp_css = """
 <style>
-/* 1. 수직 정렬 & 레이아웃 배분 (AHP 척도가 포함된 stHorizontalBlock 대상) */
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) {
+/* =============================================================================
+   AHP 척도 전용 고유 클래스 타겟팅 (.st-key-ahp_survey_matrix)
+   ============================================================================= */
+
+/* 1. 수직 정렬 & 레이아웃 배분 */
+.st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
     gap: 0px !important;
     align-items: center !important;
     width: 100% !important;
 }
 
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"] {
+.st-key-ahp_survey_matrix div[data-testid="column"] {
     padding: 0px !important;
 }
 
-/* 2. 라디오 그룹 전체 100% 분배 강제 (옵션이 5개 이상인 라디오 버튼만 타겟) */
-div[data-testid="stRadio"]:has(label:nth-child(5)),
-div[data-testid="stRadio"]:has(label:nth-child(5)) .stRadio {
+/* 2. 라디오 그룹 전체 100% 분배 강제 및 줄바꿈 원천 차단 */
+.st-key-ahp_survey_matrix div[data-testid="stRadio"],
+.st-key-ahp_survey_matrix .stRadio {
     width: 100% !important;
 }
 
-div[data-testid="stRadio"]:has(label:nth-child(5)) > div,
-div[role="radiogroup"]:has(label:nth-child(5)) {
+.st-key-ahp_survey_matrix div[data-testid="stRadio"] > div,
+.st-key-ahp_survey_matrix div[role="radiogroup"] {
     display: flex !important;
     flex-direction: row !important;
+    flex-wrap: nowrap !important; /* 핵심: 모달에서도 절대 줄바꿈 되지 않음 */
     justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
@@ -204,8 +209,7 @@ div[role="radiogroup"]:has(label:nth-child(5)) {
 }
 
 /* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
-div[data-testid="stRadio"]:has(label:nth-child(5)) label,
-div[role="radiogroup"]:has(label:nth-child(5)) label {
+.st-key-ahp_survey_matrix label {
     flex: 1 1 0% !important;
     display: flex !important;
     flex-direction: column !important;
@@ -220,10 +224,9 @@ div[role="radiogroup"]:has(label:nth-child(5)) label {
     background-color: transparent !important;
 }
 
-/* 4. 기존 텍스트 찌꺼기 완벽 제거 (AHP 척도의 경우 텍스트를 숨김) */
-div[data-testid="stRadio"]:has(label:nth-child(5)) label div[data-testid="stWidgetLabel"],
-div[data-testid="stRadio"]:has(label:nth-child(5)) label p,
-div[role="radiogroup"]:has(label:nth-child(5)) label p {
+/* 4. 기존 텍스트 찌꺼기 완벽 제거 */
+.st-key-ahp_survey_matrix label div[data-testid="stWidgetLabel"],
+.st-key-ahp_survey_matrix label p {
     display: none !important;
     height: 0px !important;
     width: 0px !important;
@@ -235,20 +238,18 @@ div[role="radiogroup"]:has(label:nth-child(5)) label p {
 }
 
 /* 동그라미 컨테이너 중앙 정렬 */
-div[data-testid="stRadio"]:has(label:nth-child(5)) label span,
-div[role="radiogroup"]:has(label:nth-child(5)) label span {
+.st-key-ahp_survey_matrix label span {
     margin: 0px auto !important;
     padding: 0px !important;
 }
 
 /* 5. Hover 및 Zebra 효과 */
-div[data-testid="stRadio"]:has(label:nth-child(5)) label:hover,
-div[role="radiogroup"]:has(label:nth-child(5)) label:hover {
+.st-key-ahp_survey_matrix label:hover {
     background-color: #e2e8f0 !important;
     cursor: pointer !important;
 }
 
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)):hover {
+.st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"]:hover {
     background-color: #fafafa !important; 
 }
 
@@ -260,18 +261,18 @@ div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-ch
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
     }
-    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) {
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
         flex-wrap: nowrap !important;
         min-width: 750px !important;
     }
-    div[data-testid="column"] {
+    .st-key-ahp_survey_matrix div[data-testid="column"] {
         flex: 0 0 auto !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"]:nth-child(1),
-    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"]:nth-child(3) {
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
         width: 15% !important; 
     }
-    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stRadio"] label:nth-child(5)) > div[data-testid="column"]:nth-child(2) {
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
         width: 70% !important;
     }
 }
@@ -1651,100 +1652,101 @@ if "survey_id" in q_params:
         combinations = generate_pairwise_combinations(ahp_model)
         ahp_answers = {}
         
-        for comb in combinations:
-            parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
-            st.markdown(f"#### 🔍 {parent_lbl}")
+        with st.container(key="ahp_survey_matrix"):
+            for comb in combinations:
+                parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
+                st.markdown(f"#### 🔍 {parent_lbl}")
             
-            # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
-            if scale_type == "1-3-5 Discrete":
-                options = [-5, -3, 1, 3, 5]
-                format_func = lambda x: f"왼쪽 요인이 훨씬 중요 (-5)" if x == -5 else (f"왼쪽 요인이 약간 중요 (-3)" if x == -3 else ("양측이 동등함 (1)" if x == 1 else (f"오른쪽 요인이 약간 중요 (3)" if x == 3 else f"오른쪽 요인이 훨씬 중요 (5)")))
-            elif scale_type == "1-3-7-9 Discrete":
-                options = [-9, -7, -3, 1, 3, 7, 9]
-                format_func = lambda x: f"왼쪽 절대적 중요 (-9)" if x == -9 else (f"왼쪽 대단히 중요 (-7)" if x == -7 else (f"왼쪽 약간 중요 (-3)" if x == -3 else ("동등함 (1)" if x == 1 else (f"오른쪽 약간 중요 (3)" if x == 3 else (f"오른쪽 대단히 중요 (7)" if x == 9 else f"오른쪽 절대적 중요 (9)")))))
-            else: # 1-9 Continuous (Default)
-                options = list(range(-9, -1)) + list(range(1, 10))
-                options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
-                format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
+                # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
+                if scale_type == "1-3-5 Discrete":
+                    options = [-5, -3, 1, 3, 5]
+                    format_func = lambda x: f"왼쪽 요인이 훨씬 중요 (-5)" if x == -5 else (f"왼쪽 요인이 약간 중요 (-3)" if x == -3 else ("양측이 동등함 (1)" if x == 1 else (f"오른쪽 요인이 약간 중요 (3)" if x == 3 else f"오른쪽 요인이 훨씬 중요 (5)")))
+                elif scale_type == "1-3-7-9 Discrete":
+                    options = [-9, -7, -3, 1, 3, 7, 9]
+                    format_func = lambda x: f"왼쪽 절대적 중요 (-9)" if x == -9 else (f"왼쪽 대단히 중요 (-7)" if x == -7 else (f"왼쪽 약간 중요 (-3)" if x == -3 else ("동등함 (1)" if x == 1 else (f"오른쪽 약간 중요 (3)" if x == 3 else (f"오른쪽 대단히 중요 (7)" if x == 9 else f"오른쪽 절대적 중요 (9)")))))
+                else: # 1-9 Continuous (Default)
+                    options = list(range(-9, -1)) + list(range(1, 10))
+                    options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
+                    format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
                 
-            # PDF 설문지와 유사한 헤더 스타일 표 생성
-            # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
-            if scale_type == "1-3-5 Discrete":
-                left_cols = ["5", "3"]
-                right_cols = ["3", "5"]
-                options = [-5, -3, 1, 3, 5]
-                col_headers = ["5", "3", "1", "3", "5"]
-            elif scale_type == "1-3-7-9 Discrete":
-                left_cols = ["9", "7", "3"]
-                right_cols = ["3", "7", "9"]
-                options = [-9, -7, -3, 1, 3, 7, 9]
-                col_headers = ["9", "7", "3", "1", "3", "7", "9"]
-            else: # 1-9 Continuous (Default)
-                left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
-                right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
-                options = list(range(-9, -1)) + list(range(1, 10))
-                options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
-                col_headers = ["9", "8", "7", "6", "5", "4", "3", "2", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                # PDF 설문지와 유사한 헤더 스타일 표 생성
+                # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
+                if scale_type == "1-3-5 Discrete":
+                    left_cols = ["5", "3"]
+                    right_cols = ["3", "5"]
+                    options = [-5, -3, 1, 3, 5]
+                    col_headers = ["5", "3", "1", "3", "5"]
+                elif scale_type == "1-3-7-9 Discrete":
+                    left_cols = ["9", "7", "3"]
+                    right_cols = ["3", "7", "9"]
+                    options = [-9, -7, -3, 1, 3, 7, 9]
+                    col_headers = ["9", "7", "3", "1", "3", "7", "9"]
+                else: # 1-9 Continuous (Default)
+                    left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
+                    right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
+                    options = list(range(-9, -1)) + list(range(1, 10))
+                    options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
+                    col_headers = ["9", "8", "7", "6", "5", "4", "3", "2", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
             
-            # 척도 수에 맞추어 비율 동적 계산 (left_cols + 동일(1) + right_cols)
-            header_cells = left_cols + ["1"] + right_cols
-            total_scale_count = len(header_cells)
-            scale_width = 70.0 / total_scale_count
-            left_width = scale_width * len(left_cols)
-            right_width = scale_width * len(right_cols)
+                # 척도 수에 맞추어 비율 동적 계산 (left_cols + 동일(1) + right_cols)
+                header_cells = left_cols + ["1"] + right_cols
+                total_scale_count = len(header_cells)
+                scale_width = 70.0 / total_scale_count
+                left_width = scale_width * len(left_cols)
+                right_width = scale_width * len(right_cols)
 
-            # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 라디오 그룹을 100% 분배
+                # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 라디오 그룹을 100% 분배
             
 
-            # HTML 표 헤더 구조
-            header_html = f"""
-            <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; table-layout: fixed; margin: 0px; padding: 0px;">
-                <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
-                    <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                    <th style="width: {left_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
-                    <th style="width: {scale_width}%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
-                    <th style="width: {right_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
-                    <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                </tr>
-                <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
-                    {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in left_cols])}
-                    {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in right_cols])}
-                </tr>
-            </table>
-            """
-            st.markdown(header_html, unsafe_allow_html=True)
-            st.write("") # 미세 세로 간격 확보
+                # HTML 표 헤더 구조
+                header_html = f"""
+                <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; table-layout: fixed; margin: 0px; padding: 0px;">
+                    <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
+                        <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                        <th style="width: {left_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
+                        <th style="width: {scale_width}%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
+                        <th style="width: {right_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
+                        <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                    </tr>
+                    <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
+                        {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in left_cols])}
+                        {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in right_cols])}
+                    </tr>
+                </table>
+                """
+                st.markdown(header_html, unsafe_allow_html=True)
+                st.write("") # 미세 세로 간격 확보
 
-            # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
-            for left_f, right_f in comb["pairs"]:
-                pair_key = f"{left_f}_{right_f}"
+                # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
+                for left_f, right_f in comb["pairs"]:
+                    pair_key = f"{left_f}_{right_f}"
                 
-                row_cols = st.columns([15, 70, 15])
+                    row_cols = st.columns([15, 70, 15])
                 
-                # 왼쪽 요인명 출력
-                with row_cols[0]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{left_f}</div>", unsafe_allow_html=True)
+                    # 왼쪽 요인명 출력
+                    with row_cols[0]:
+                        st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{left_f}</div>", unsafe_allow_html=True)
                 
-                # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
-                with row_cols[1]:
-                    # 안전을 위해 options에서 중복 및 -1 값 명시적 제외
-                    clean_options = [x for x in options if x != -1]
-                    ans_val = st.radio(
-                         label=f"select_{pair_key}",
-                         options=clean_options,
-                         index=clean_options.index(1),
-                         format_func=lambda x: "",
-                         key=f"pair_ans_{pair_key}",
-                         horizontal=True,
-                         label_visibility="collapsed"
-                    )
+                    # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
+                    with row_cols[1]:
+                        # 안전을 위해 options에서 중복 및 -1 값 명시적 제외
+                        clean_options = [x for x in options if x != -1]
+                        ans_val = st.radio(
+                             label=f"select_{pair_key}",
+                             options=clean_options,
+                             index=clean_options.index(1),
+                             format_func=lambda x: "",
+                             key=f"pair_ans_{pair_key}",
+                             horizontal=True,
+                             label_visibility="collapsed"
+                        )
                 
-                # 오른쪽 요인명 출력
-                with row_cols[2]:
-                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{right_f}</div>", unsafe_allow_html=True)
+                    # 오른쪽 요인명 출력
+                    with row_cols[2]:
+                        st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; margin: 0px;'>{right_f}</div>", unsafe_allow_html=True)
                 
-                ahp_answers[pair_key] = ans_val
-                st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
+                    ahp_answers[pair_key] = ans_val
+                    st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
             st.divider()
             
         # 4. 답례품 및 개인정보 수집 동의
@@ -4511,57 +4513,58 @@ with col_main:
                 # 미리보기 화면에도 수직 정렬 CSS 주입
                 
 
-                for comb in combinations:
-                    parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
-                    st.markdown(f"##### 🔍 {parent_lbl}")
+                with st.container(key="ahp_survey_matrix"):
+                    for comb in combinations:
+                        parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
+                        st.markdown(f"##### 🔍 {parent_lbl}")
                     
-                    # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의 (미리보기)
-                    header_html = f"""
-                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; margin-bottom: 10px; table-layout: fixed;">
-                        <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
-                            <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                            <th style="width: {left_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
-                            <th style="width: {scale_width}%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
-                            <th style="width: {right_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
-                            <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
-                        </tr>
-                        <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
-                            {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in left_cols])}
-                            {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in right_cols])}
-                        </tr>
-                    </table>
-                    """
-                    st.markdown(header_html, unsafe_allow_html=True)
-                    st.write("")
+                        # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의 (미리보기)
+                        header_html = f"""
+                        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; margin-bottom: 10px; table-layout: fixed;">
+                            <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
+                                <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                                <th style="width: {left_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
+                                <th style="width: {scale_width}%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
+                                <th style="width: {right_width}%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
+                                <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                            </tr>
+                            <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
+                                {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in left_cols])}
+                                {"".join([f"<td style='border: 1px solid #444444; padding: 6px 0;'>{val}</td>" for val in right_cols])}
+                            </tr>
+                        </table>
+                        """
+                        st.markdown(header_html, unsafe_allow_html=True)
+                        st.write("")
                     
-                    for left_f, right_f in comb["pairs"]:
-                        pair_key = f"{left_f}_{right_f}"
-                        row_cols = st.columns([15, 70, 15])
+                        for left_f, right_f in comb["pairs"]:
+                            pair_key = f"{left_f}_{right_f}"
+                            row_cols = st.columns([15, 70, 15])
                         
-                        # 왼쪽 요인명
-                        with row_cols[0]:
-                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{left_f}</div>", unsafe_allow_html=True)
+                            # 왼쪽 요인명
+                            with row_cols[0]:
+                                st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{left_f}</div>", unsafe_allow_html=True)
                         
-                        # 라디오 버튼만 출력
-                        with row_cols[1]:
-                            clean_preview_options = [x for x in options if x != -1]
-                            st.radio(
-                                label=f"preview_select_{pair_key}",
-                                options=clean_preview_options,
-                                index=clean_preview_options.index(1),
-                                format_func=lambda x: "",
-                                key=f"preview_pair_ans_{left_f}_{right_f}",
-                                horizontal=True,
-                                label_visibility="collapsed"
-                            )
+                            # 라디오 버튼만 출력
+                            with row_cols[1]:
+                                clean_preview_options = [x for x in options if x != -1]
+                                st.radio(
+                                    label=f"preview_select_{pair_key}",
+                                    options=clean_preview_options,
+                                    index=clean_preview_options.index(1),
+                                    format_func=lambda x: "",
+                                    key=f"preview_pair_ans_{left_f}_{right_f}",
+                                    horizontal=True,
+                                    label_visibility="collapsed"
+                                )
                             
-                        # 오른쪽 요인명
-                        with row_cols[2]:
-                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{right_f}</div>", unsafe_allow_html=True)
-                        st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
-                    st.write("")
+                            # 오른쪽 요인명
+                            with row_cols[2]:
+                                st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #444444; padding: 10px; background-color: #f3f4f6; border-radius: 0px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px;'>{right_f}</div>", unsafe_allow_html=True)
+                            st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
+                        st.write("")
                     
-                if reward_enabled:
+                    if reward_enabled:
                     st.divider()
                     st.markdown("### 4. 개인정보 수집 및 답례품")
                     st.info(f"🎁 **답례품 안내**: {reward_desc}")
