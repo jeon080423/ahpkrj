@@ -1650,31 +1650,33 @@ if "survey_id" in q_params:
                 <style>
                 /* streamlit radio horizontal flex layout override to distribute items evenly */
                 div[role="radiogroup"] {
-                    display: flex;
-                    justify-content: space-between;
+                    display: flex !important;
+                    flex-direction: row !important;
+                    justify-content: space-between !important;
                     width: 100% !important;
                     gap: 0px !important;
-                    padding: 0px 18px !important; /* 헤더 표 간격과 라디오 버튼의 물리적인 좌우 위치를 완벽히 정렬 */
+                    padding: 0px 18px !important; /* 좌우 마진 공간 보정 */
                 }
                 div[role="radiogroup"] > label {
-                    flex: 1;
-                    text-align: center;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    margin-right: 0px !important;
+                    flex: 1 !important;
+                    text-align: center !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    margin: 0px !important;
+                    padding: 0px !important;
+                    min-width: 0px !important;
                 }
-                /* 라디오 버튼의 숫자 텍스트(label 안의 p 태그 또는 div 안의 span 등)를 숨겨서 순수 동그라미 버튼만 렌더링 */
-                div[role="radiogroup"] label div[data-testid="stWidgetLabel"] {
-                    display: none !important;
-                }
+                /* 라디오 버튼의 글자 텍스트(숫자) 영역을 숨기면서 가로 간격 찌그러짐 차단 */
+                div[role="radiogroup"] label div[data-testid="stWidgetLabel"],
                 div[role="radiogroup"] label p {
                     display: none !important;
                 }
+                /* 원형 라디오 버튼 컴포넌트의 위치를 정중앙으로 일치 */
                 div[role="radiogroup"] label span {
-                    /* 숫자 라벨이 숨겨진 후 원형 버튼 자체의 정렬 흐름 유지 */
                     margin: 0 auto !important;
+                    padding: 0px !important;
                 }
                 div[data-testid="column"] {
                     padding: 0px !important;
