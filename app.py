@@ -4150,7 +4150,7 @@ with col_main:
             st.subheader("섹션 1: 설문 기본 정보 설정")
             survey_title = st.text_input("설문지 제목", value="제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문")
             survey_desc = st.text_area("조사 목적 및 안내문", value="본 설문은 중소기업의 제조 환경변화에 따른 협동로봇 도입 요인들의 상대적 중요도를 결정하기 위한 조사입니다.")
-            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 (신규 구글 시트 공유용) *", placeholder="example@gmail.com")
+            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", placeholder="example@gmail.com")
             
             st.divider()
             
@@ -4386,6 +4386,61 @@ with col_main:
                         st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
                     with col_stat4:
                         st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
+                    
+                    # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
+                    with st.expander("📥 실시간 구글 시트 응답 데이터 다운로드 센터", expanded=True):
+                        from survey_manager import get_survey_gspread_client
+                        g_client = get_survey_gspread_client()
+                        if g_client:
+                            try:
+                                with st.spinner("구글 시트에서 실시간 설문 응답 로드를 가져오는 중..."):
+                                    spreadsheet = g_client.open_by_key(selected_sheet_id.strip())
+                                    raw_sheet = spreadsheet.worksheet("Raw_Data")
+                                    all_rows = raw_sheet.get_all_values()
+                                    
+                                if len(all_rows) > 0:
+                                    headers = all_rows[0]
+                                    rows = all_rows[1:]
+                                    live_df = pd.DataFrame(rows, columns=headers)
+                                    
+                                    st.success(f"구글 스프레드시트에서 실시간 응답 데이터 {len(live_df)}건을 성공적으로 불러왔습니다.")
+                                    st.dataframe(live_df, use_container_width=True)
+                                    
+                                    # Excel 및 CSV 내보내기 버튼 제공
+                                    import io
+                                    
+                                    # 1. Excel 내보내기
+                                    excel_buffer = io.BytesIO()
+                                    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                                        live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
+                                    
+                                    col_dl1, col_dl2 = st.columns(2)
+                                    with col_dl1:
+                                        st.download_button(
+                                            "📥 실시간 응답 Excel 다운로드 (.xlsx)",
+                                            data=excel_buffer.getvalue(),
+                                            file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.xlsx",
+                                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                            use_container_width=True,
+                                            type="primary"
+                                        )
+                                    # 2. CSV 내보내기
+                                    csv_buffer = io.StringIO()
+                                    live_df.to_csv(csv_buffer, index=False, header=True)
+                                    with col_dl2:
+                                        st.download_button(
+                                            "📥 실시간 응답 CSV 다운로드 (.csv)",
+                                            data=csv_buffer.getvalue().encode('utf-8-sig'),
+                                            file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.csv",
+                                            mime="text/csv",
+                                            use_container_width=True
+                                        )
+                                else:
+                                    st.info("구글 시트에 수집된 응답 로데이터가 아직 비어 있습니다.")
+                            except Exception as g_err:
+                                st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")
+                        else:
+                            st.warning("구글 Sheets API 클라이언트 연결 실패로 인해 구글 시트 내 데이터를 직접 다운로드할 수 없습니다. (아래 로컬 백업 센터 이용 권장)")
                         
                     # 시각화 차트 추가
                     import plotly.express as px
