@@ -1643,10 +1643,18 @@ if "survey_id" in q_params:
             """
             st.markdown(header_html, unsafe_allow_html=True)
             
+            # 선택된 척도 종류별 최적의 좌우 여백(padding) 비율을 동적으로 산출 (테이블 열 눈금과 라디오 원형을 1:1 수직 매칭하기 위함)
+            if scale_type == "1-3-5 Discrete":
+                padding_val = "20%"
+            elif scale_type == "1-3-7-9 Discrete":
+                padding_val = "11.5%"
+            else: # 1-9 Continuous
+                padding_val = "3.2%"
+
             # 대형 화면 및 폰 브라우저에서 st.radio의 가로 아이템들이 균등한 간격(flex-grow)으로 벌어지도록 CSS 주입
             # white-space: nowrap을 추가하여 우측 9점 등의 텍스트 줄바꿈을 방지
             st.markdown(
-                """
+                f"""
                 <style>
                 /* streamlit column gap & padding remove to align with table */
                 div[data-testid="stHorizontalBlock"] {
@@ -1662,7 +1670,7 @@ if "survey_id" in q_params:
                     justify-content: space-between !important;
                     width: 100% !important;
                     gap: 0px !important;
-                    padding: 0px 3.2% !important; /* 좌우 16% 요인명 영역을 뺀 나머지 68% 공간에서 헤더 척도 눈금들과 라디오 버튼이 좌우로 완벽히 정렬되도록 안쪽 여백 설정 */
+                    padding: 0px {padding_val} !important; /* 동적 척도별 정밀 여백 반영 */
                 }
                 div[role="radiogroup"] > label {
                     flex: 1 !important;
