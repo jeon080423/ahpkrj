@@ -4156,7 +4156,6 @@ with col_main:
             
             # 섹션 1.5: 응답자 인구통계학적 정보 체크박스
             st.subheader("섹션 1.5: 응답자 수집 정보 (인구통계학적 문항)")
-            demo_name = st.checkbox("성명 수집", value=True)
             demo_age = st.checkbox("연령(숫자) 수집", value=True)
             demo_gender = st.checkbox("성별 수집", value=True)
             demo_exp = st.checkbox("경력년수(숫자) 수집", value=True)
@@ -4164,7 +4163,7 @@ with col_main:
             demo_email = st.checkbox("이메일 수집", value=True)
             
             demographics_settings = {
-                "name": demo_name,
+                "name": False,  # 성명 수집 삭제
                 "age": demo_age,
                 "gender": demo_gender,
                 "experience": demo_exp,
@@ -4287,7 +4286,6 @@ with col_main:
                 st.markdown(f"*{survey_desc}*")
                 
                 st.markdown("### 1. 인구통계학적 정보 수집 문항")
-                if demo_name: st.text_input("[미리보기] 성명 *", disabled=True)
                 if demo_age: st.number_input("[미리보기] 연령 *", min_value=20, max_value=80, value=35, disabled=True)
                 if demo_gender: st.radio("[미리보기] 성별 *", ["남자", "여자"], disabled=True)
                 
