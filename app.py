@@ -4150,7 +4150,7 @@ with col_main:
             st.subheader("섹션 1: 설문 기본 정보 설정")
             survey_title = st.text_input("설문지 제목", value="제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문")
             survey_desc = st.text_area("조사 목적 및 안내문", value="본 설문은 중소기업의 제조 환경변화에 따른 협동로봇 도입 요인들의 상대적 중요도를 결정하기 위한 조사입니다.")
-            survey_admin_email = st.text_input("관리자 구글 이메일 주소 (신규 구글 시트 공유용) *", placeholder="example@gmail.com")
+            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 (신규 구글 시트 공유용) *", placeholder="example@gmail.com")
             
             st.divider()
             
