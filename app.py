@@ -4564,7 +4564,7 @@ with col_main:
                             st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
                         st.write("")
                     
-                    if reward_enabled:
+                if reward_enabled:
                     st.divider()
                     st.markdown("### 4. 개인정보 수집 및 답례품")
                     st.info(f"🎁 **답례품 안내**: {reward_desc}")
