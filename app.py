@@ -2629,6 +2629,7 @@ with col_main:
     with main_tab1:
         st.subheader(_("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "1. Setup AHP Decision Model & Download Template"))
         
+        saved_model = None
         if st.session_state.user_id is None:
             st.info(_("🔒 **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
                       "🔒 **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
