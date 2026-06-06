@@ -1606,38 +1606,81 @@ if "survey_id" in q_params:
                 options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
                 format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
                 
+            # PDF 설문지와 유사한 헤더 스타일 표 생성
+            # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
+            if scale_type == "1-3-5 Discrete":
+                left_cols = ["5", "3"]
+                right_cols = ["3", "5"]
+                options = [-5, -3, 1, 3, 5]
+                col_headers = ["5", "3", "1", "3", "5"]
+            elif scale_type == "1-3-7-9 Discrete":
+                left_cols = ["9", "7", "3"]
+                right_cols = ["3", "7", "9"]
+                options = [-9, -7, -3, 1, 3, 7, 9]
+                col_headers = ["9", "7", "3", "1", "3", "7", "9"]
+            else: # 1-9 Continuous (Default)
+                left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
+                right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
+                options = list(range(-9, 0)) + list(range(1, 10))
+                options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
+                col_headers = ["9", "8", "7", "6", "5", "4", "3", "2", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+            
+            # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의
+            header_html = f"""
+            <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444;">
+                <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
+                    <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                    <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
+                    <th style="width: 10%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
+                    <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
+                    <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                </tr>
+                <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
+                    {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in left_cols])}
+                    {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in right_cols])}
+                </tr>
+            </table>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+            
+            # 각 비교 요인들을 Streamlit Columns를 사용하여 표 행처럼 배치 (숫자 라벨 제외하고 라디오 버튼들만 나열)
+            # 총 1+len(options)+1 개의 컬럼을 생성하여 메트릭스 형태로 병렬 배치
+            num_cols = len(options)
+            col_ratios = [2] + [1] * num_cols + [2]
+            
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
                 
-                # HTML / CSS를 통한 PDF 설문지 스타일의 헤더/비교 구조 생성
-                st.markdown(
-                    f"""
-                    <div style="background-color:#f8f9fa; padding:10px; border-radius:5px; margin-top:10px; font-weight:bold; border-left: 5px solid #007bff;">
-                        <span style="color:#007bff;">[비교]</span> {left_f} <span style="color:#6c757d;">VS</span> {right_f}
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
+                # streamlit columns 구성
+                row_cols = st.columns(col_ratios)
                 
-                # 가로 메트릭스 격자 형태 배치 (왼쪽 요인명 - 척도 영역 - 오른쪽 요인명)
-                col_left, col_matrix, col_right = st.columns([2, 8, 2])
-                with col_left:
-                    st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_allow_html=True)
-                with col_matrix:
+                # 왼쪽 요인명 출력
+                with row_cols[0]:
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{left_f}</div>", unsafe_allow_html=True)
+                
+                # 라디오 대용으로 가변 라디오 또는 셀렉트 적용
+                # PDF처럼 한 행에 각각의 라디오 버튼이 딱 맞게 위치하기 위해 각 옵션을 columns[1~1+len(options)] 에 단독 라디오 버튼 형태로 구현 (단일 선택이 되도록 st.radio를 가로로 배치하거나, value 선택 연동)
+                # st.radio를 st.columns 중앙의 큰 하나의 column으로 삽입하되 포맷 레이블을 숫자값으로만 매핑
+                # 각 라디오 버튼을 독립 배치하면 동기화에 복잡하므로 st.radio를 st.columns[1]에서 st.columns[-2]까지 병합된 공간(st.columns[1]에서 시작)에 띄우는 것이 안전함
+                with row_cols[1]:
+                    # st.columns 중간 영역을 활용하기 위해 단일 st.radio를 렌더링하고 label을 감춤
+                    # col_headers 형태와 정확히 일치하도록 척도 숫자만 출력
                     ans_val = st.radio(
-                        label=f"hidden_label_{pair_key}", # 스크린리더/구조용 레이블
+                        label=f"select_{pair_key}",
                         options=options,
                         index=options.index(1),
-                        format_func=format_func,
+                        format_func=lambda x: f"{abs(x)}" if x != 1 else "1",
                         key=f"pair_ans_{pair_key}",
                         horizontal=True,
-                        label_visibility="collapsed" # 레이블 감추고 메트릭스 버튼 형태만 부각
+                        label_visibility="collapsed"
                     )
-                with col_right:
-                    st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_allow_html=True)
+                
+                # 오른쪽 요인명 출력
+                with row_cols[-1]:
+                    st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{right_f}</div>", unsafe_allow_html=True)
                 
                 ahp_answers[pair_key] = ans_val
-                st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_allow_html=True)
+                st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
             st.divider()
             
         # 4. 답례품 및 개인정보 수집 동의
@@ -4379,51 +4422,71 @@ with col_main:
                 # 실시간 쌍대비교 렌더링
                 combinations = generate_pairwise_combinations(model_structure)
                 
-                # 척도 옵션
+                # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
                 if scale_option == "1-3-5 Discrete":
+                    left_cols = ["5", "3"]
+                    right_cols = ["3", "5"]
                     options = [-5, -3, 1, 3, 5]
-                    format_func = lambda x: "왼쪽 훨씬 중요 (-5)" if x == -5 else ("왼쪽 약간 중요 (-3)" if x == -3 else ("동등함 (1)" if x == 1 else ("오른쪽 약간 중요 (3)" if x == 3 else "오른쪽 훨씬 중요 (5)")))
                 elif scale_option == "1-3-7-9 Discrete":
+                    left_cols = ["9", "7", "3"]
+                    right_cols = ["3", "7", "9"]
                     options = [-9, -7, -3, 1, 3, 7, 9]
-                    format_func = lambda x: "왼쪽 절대 중요 (-9)" if x == -9 else ("왼쪽 대단히 중요 (-7)" if x == -7 else ("왼쪽 약간 중요 (-3)" if x == -3 else ("동등 (1)" if x == 1 else ("오른쪽 약간 중요 (3)" if x == 3 else ("오른쪽 대단히 중요 (7)" if x == 7 else "오른쪽 절대 중요 (9)")))))
-                else: # 1-9 Continuous
+                else: # 1-9 Continuous (Default)
+                    left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
+                    right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
                     options = list(range(-9, 0)) + list(range(1, 10))
-                    options = sorted(list(set(options)))
-                    format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
-                
+                    options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
+
                 for comb in combinations:
                     parent_lbl = f"[{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else "대분류(핵심) 요인 비교"
                     st.markdown(f"##### 🔍 {parent_lbl}")
                     
+                    # HTML 구조를 사용해 깔끔한 메트릭스 표 상단부(헤더) 정의 (미리보기)
+                    header_html = f"""
+                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 13px; font-family: sans-serif; border: 1px solid #444444; margin-bottom: 10px;">
+                        <tr style="background-color: #d1d5db; font-weight: bold; border-bottom: 1px solid #444444;">
+                            <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                            <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(left_cols)}">◀ 좌측 항목이 더 중요</th>
+                            <th style="width: 10%; border: 1px solid #444444; padding: 4px; background-color: #cbd5e1;" rowspan="2">동일<br>(1)</th>
+                            <th style="width: 35%; border: 1px solid #444444; padding: 4px;" colspan="{len(right_cols)}">우측 항목이 더 중요 ▶</th>
+                            <th style="width: 15%; border: 1px solid #444444; padding: 8px;" rowspan="2">항목</th>
+                        </tr>
+                        <tr style="background-color: #e5e7eb; font-weight: bold; border-bottom: 2px solid #444444;">
+                            {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in left_cols])}
+                            {"".join([f"<td style='border: 1px solid #444444; padding: 4px;'>{val}</td>" for val in right_cols])}
+                        </tr>
+                    </table>
+                    """
+                    st.markdown(header_html, unsafe_allow_html=True)
+                    
+                    # 총 1+len(options)+1 개의 컬럼 구성
+                    num_cols = len(options)
+                    col_ratios = [2] + [1] * num_cols + [2]
+                    
                     for left_f, right_f in comb["pairs"]:
                         pair_key = f"{left_f}_{right_f}"
-                        # HTML / CSS를 통한 PDF 설문지 스타일의 헤더/비교 구조 생성 (미리보기)
-                        st.markdown(
-                            f"""
-                            <div style="background-color:#f8f9fa; padding:10px; border-radius:5px; margin-top:10px; font-weight:bold; border-left: 5px solid #28a745;">
-                                <span style="color:#28a745;">[비교]</span> {left_f} <span style="color:#6c757d;">VS</span> {right_f}
-                            </div>
-                            """, 
-                            unsafe_allow_html=True
-                        )
+                        row_cols = st.columns(col_ratios)
                         
-                        # 가로 메트릭스 격자 형태 배치 (왼쪽 요인명 - 척도 영역 - 오른쪽 요인명)
-                        col_left, col_matrix, col_right = st.columns([2, 8, 2])
-                        with col_left:
-                            st.markdown(f"<div style='text-align:right; font-weight:bold; padding-top:10px;'>{left_f}</div>", unsafe_allow_html=True)
-                        with col_matrix:
+                        # 왼쪽 요인명
+                        with row_cols[0]:
+                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{left_f}</div>", unsafe_allow_html=True)
+                        
+                        # 라디오 버튼만 출력
+                        with row_cols[1]:
                             st.radio(
-                                label=f"hidden_preview_label_{pair_key}",
+                                label=f"preview_select_{pair_key}",
                                 options=options,
                                 index=options.index(1),
-                                format_func=format_func,
+                                format_func=lambda x: f"{abs(x)}" if x != 1 else "1",
                                 key=f"preview_pair_ans_{left_f}_{right_f}",
                                 horizontal=True,
                                 label_visibility="collapsed"
                             )
-                        with col_right:
-                            st.markdown(f"<div style='text-align:left; font-weight:bold; padding-top:10px;'>{right_f}</div>", unsafe_allow_html=True)
-                        st.markdown("<hr style='margin: 10px 0; border: 0; border-top: 1px dashed #cccccc;'>", unsafe_allow_html=True)
+                            
+                        # 오른쪽 요인명
+                        with row_cols[-1]:
+                            st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{right_f}</div>", unsafe_allow_html=True)
+                        st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
                     st.write("")
                     
                 if reward_enabled:
