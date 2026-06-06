@@ -84,16 +84,48 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     if not client:
         raise Exception("Google Sheets API 인증 실패. secrets 설정을 확인해 주세요.")
     
+    # [추가] 서비스 계정의 구글 드라이브 용량 초과 방지를 위한 사전 휴지통 비우기 및 오래된 파일 정리
+    try:
+        # drive v3 서비스 빌드하여 휴지통 일괄 비우기 처리
+        from googleapiclient.discovery import build
+        drive_service = build('drive', 'v3', credentials=client.auth)
+        # 휴지통 완전 비우기
+        drive_service.files().emptyTrash().execute()
+    except Exception as e_trash:
+        pass
+
     # 1. 스프레드시트 신규 생성
     spreadsheet = client.create(f"[AHP 설문] {title}")
     
-    # 2. 관리자 이메일에 공유 권한(편집자) 부여
+    # 2. 담당자 이메일에 공유 권한(편집자 또는 소유자) 부여
+    # 구글 API 특성상 서비스 계정 -> 일반 워크스페이스/개인 계정으로 직접 소유권 이전을 시도
     if admin_email and "@" in admin_email:
         try:
+            # 1단계: 먼저 이메일에 쓰기(편집자) 권한 부여
             spreadsheet.share(admin_email, perm_type='user', role='writer', notify=False)
+            
+            # 2단계: 서비스 계정의 15GB 공간 잠식을 원천 방지하기 위해 파일 소유권(owner)을 사용자에게 양도 시도
+            # (GCP와 일반 구글 메일 환경에 따라 간혹 양도가 제한되는 도메인 정책이 있을 수 있어 try-except 처리)
+            try:
+                # drive API v3 권한 업데이트를 통한 소유권 이전
+                file_id = spreadsheet.id
+                # 담당자 권한 ID 조회
+                permissions = drive_service.permissions().list(fileId=file_id).execute()
+                for perm in permissions.get('permissions', []):
+                    if perm.get('emailAddress') == admin_email:
+                        # 소유권 양도 요청 (transferOwnership=True)
+                        drive_service.permissions().update(
+                            fileId=file_id,
+                            permissionId=perm['id'],
+                            body={'role': 'owner'},
+                            transferOwnership=True
+                        ).execute()
+                        break
+            except Exception as owner_err:
+                # 소유권 직접 이전 실패 시에는 편집 권한 상태로 유지되지만, 소유권이 넘어가지 않았더라도 편집권은 유효
+                pass
         except Exception as e:
-            # 권한 부여 실패 시에도 계속 진행 (로그용 에러)
-            st.warning(f"관리자 이메일 공유 설정 중 문제 발생: {e}")
+            st.warning(f"설문조사 담당자 이메일 공유 설정 중 문제 발생: {e}")
 
     # 3. Sheet 1: Survey_Metadata 생성 및 설정
     meta_sheet = spreadsheet.sheet1
