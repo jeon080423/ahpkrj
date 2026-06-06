@@ -1643,28 +1643,19 @@ if "survey_id" in q_params:
             """
             st.markdown(header_html, unsafe_allow_html=True)
             
-            # 각 비교 요인들을 Streamlit Columns를 사용하여 표 행처럼 배치 (숫자 라벨 제외하고 라디오 버튼들만 나열)
-            # 총 1+len(options)+1 개의 컬럼을 생성하여 메트릭스 형태로 병렬 배치
-            num_cols = len(options)
-            col_ratios = [2] + [1] * num_cols + [2]
-            
+            # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (2)] - [척도 라디오 버튼 영역 컬럼 (8)] - [오른쪽 요인명 컬럼 (2)]
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
                 
-                # streamlit columns 구성
-                row_cols = st.columns(col_ratios)
+                # streamlit columns 구성 ([2, 8, 2] 비율로 척도 가로 공간을 최대한 넓힘)
+                row_cols = st.columns([2, 8, 2])
                 
                 # 왼쪽 요인명 출력
                 with row_cols[0]:
                     st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{left_f}</div>", unsafe_allow_html=True)
                 
-                # 라디오 대용으로 가변 라디오 또는 셀렉트 적용
-                # PDF처럼 한 행에 각각의 라디오 버튼이 딱 맞게 위치하기 위해 각 옵션을 columns[1~1+len(options)] 에 단독 라디오 버튼 형태로 구현 (단일 선택이 되도록 st.radio를 가로로 배치하거나, value 선택 연동)
-                # st.radio를 st.columns 중앙의 큰 하나의 column으로 삽입하되 포맷 레이블을 숫자값으로만 매핑
-                # 각 라디오 버튼을 독립 배치하면 동기화에 복잡하므로 st.radio를 st.columns[1]에서 st.columns[-2]까지 병합된 공간(st.columns[1]에서 시작)에 띄우는 것이 안전함
+                # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
                 with row_cols[1]:
-                    # st.columns 중간 영역을 활용하기 위해 단일 st.radio를 렌더링하고 label을 감춤
-                    # col_headers 형태와 정확히 일치하도록 척도 숫자만 출력
                     ans_val = st.radio(
                         label=f"select_{pair_key}",
                         options=options,
@@ -1676,7 +1667,7 @@ if "survey_id" in q_params:
                     )
                 
                 # 오른쪽 요인명 출력
-                with row_cols[-1]:
+                with row_cols[2]:
                     st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{right_f}</div>", unsafe_allow_html=True)
                 
                 ahp_answers[pair_key] = ans_val
@@ -4459,13 +4450,9 @@ with col_main:
                     """
                     st.markdown(header_html, unsafe_allow_html=True)
                     
-                    # 총 1+len(options)+1 개의 컬럼 구성
-                    num_cols = len(options)
-                    col_ratios = [2] + [1] * num_cols + [2]
-                    
                     for left_f, right_f in comb["pairs"]:
                         pair_key = f"{left_f}_{right_f}"
-                        row_cols = st.columns(col_ratios)
+                        row_cols = st.columns([2, 8, 2])
                         
                         # 왼쪽 요인명
                         with row_cols[0]:
@@ -4484,7 +4471,7 @@ with col_main:
                             )
                             
                         # 오른쪽 요인명
-                        with row_cols[-1]:
+                        with row_cols[2]:
                             st.markdown(f"<div style='text-align:center; font-weight:bold; border: 1px solid #cccccc; padding: 10px; background-color: #f3f4f6; border-radius: 4px;'>{right_f}</div>", unsafe_allow_html=True)
                         st.markdown("<hr style='margin: 5px 0; border: 0; border-top: 1px dashed #dddddd;'>", unsafe_allow_html=True)
                     st.write("")
