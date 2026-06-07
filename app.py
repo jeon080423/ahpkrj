@@ -2647,7 +2647,11 @@ with col_settings:
         cr_threshold_label = st.selectbox(
             _("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), 
             [_("0.1", "0.1"), _("0.2", "0.2"), _("보정 하지 않음", "Do Not Correct")], 
-            index=0
+            index=0,
+            help=_(
+                "임계값 설정(0.1 또는 0.2)은 일관성 비율(CR)을 해당 수치로 정확하게 일치시키는 것이 아니라, 해당 임계값 이하로 만드는 것을 의미합니다. 이미 임계값 이하인 데이터는 보정하지 않으며, 이를 통해 원본 응답이 과도하게 왜곡되는 것을 방지합니다.",
+                "The threshold setting (0.1 or 0.2) does not force the consistency ratio (CR) to equal that value. Instead, it adjusts the CR to be less than or equal to the threshold. If a matrix is already within the threshold, no correction is applied, preventing excessive distortion of the original responses."
+            )
         )
         if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
             cr_threshold = 999.0
@@ -2674,6 +2678,7 @@ with col_settings:
         **현재 방법의 특징:**
         1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
         2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\alpha)} \times Ideal^{\alpha}$)
+        3. **과도한 보정 방지**: 임계값 설정(0.1 또는 0.2)은 CR 값을 정확히 맞추는 것이 아니라 임계값 '이하'로 만드는 것을 목표로 합니다. 이미 임계값 이하인 응답은 보정을 수행하지 않아 원본 판단을 최대한 보존합니다.
         
         """, """
         **Correction Method: Iterative Adjustment**
@@ -2682,6 +2687,7 @@ with col_settings:
         **Key Features:**
         1. **Minimal Distortion of Judgments**: Preserves the trends of the original survey responses while securing mathematical consistency.
         2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = Old^{(1-\alpha)} \times Ideal^{\alpha}$)
+        3. **Prevention of Excessive Correction**: The threshold setting (0.1 or 0.2) targets bringing the CR 'below or equal to' the threshold, rather than matching it exactly. Responses already below the threshold are left uncorrected to preserve the original judgments as much as possible.
         
         """))
 
