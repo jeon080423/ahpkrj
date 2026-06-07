@@ -2570,10 +2570,10 @@ This verification quantitatively measures **how much the original response data 
         st.subheader(_("📝 결과 해석", "📝 Interpretation"))
 
         # Extract metric values
-        euc = metrics.get("Euclidean Distance", 0)
-        man = metrics.get("Manhattan Distance", 0)
-        cos = metrics.get("Cosine Similarity", 1)
-        dist = metrics.get("Distortion Score", 0)
+        euc = metrics.get("euclidean", 0)
+        man = metrics.get("manhattan", 0)
+        cos = metrics.get("cosine_similarity", 1)
+        dist = metrics.get("distortion_score", 0)
 
         st.markdown(_( 
             f"""
