@@ -183,6 +183,10 @@ global_ahp_css = """
     gap: 0px !important;
     align-items: center !important;
     width: 100% !important;
+    margin-top: 1px !important;
+    margin-bottom: 1px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
 }
 
 .st-key-ahp_survey_matrix div[data-testid="column"] {
@@ -194,6 +198,8 @@ global_ahp_css = """
 .st-key-ahp_survey_matrix div[data-testid="stRadio"],
 .st-key-ahp_survey_matrix .stRadio {
     width: 100% !important;
+    margin: 0px !important;
+    padding: 0px !important;
 }
 
 .st-key-ahp_survey_matrix div[data-testid="stRadio"] > div,
@@ -1777,14 +1783,26 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
 
                 # HTML 표 헤더 구조
+                # fixed table layout에서 colspan 사용 시 각 컬럼 너비를 동일 배분하도록 colgroup 정의
+                colgroup_html = "".join([
+                    f'<col style="width: 15%;" />',
+                    "".join([f'<col style="width: {scale_width}%;" />' for _ in left_cols]),
+                    f'<col style="width: {scale_width}%;" />',
+                    "".join([f'<col style="width: {scale_width}%;" />' for _ in right_cols]),
+                    f'<col style="width: 15%;" />'
+                ])
+                
                 header_html = f"""
                 <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 11px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px;">
+                    <colgroup>
+                        {colgroup_html}
+                    </colgroup>
                     <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                        <th style="width: 15%; border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
-                        <th style="width: {left_width}%; border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;">← 좌측 요인 중요도</th>
-                        <th style="width: {scale_width}%; border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 11px;" rowspan="2">동등<br>(1)</th>
-                        <th style="width: {right_width}%; border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;">우측 요인 중요도 →</th>
-                        <th style="width: 15%; border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;" colspan="{len(left_cols)}">← 좌측 요인 중요도</th>
+                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 11px;" rowspan="2">동등<br>(1)</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;" colspan="{len(right_cols)}">우측 요인 중요도 →</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
                     </tr>
                     <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
                         {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in left_cols])}
@@ -1793,7 +1811,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 </table>
                 """
                 st.markdown(header_html, unsafe_allow_html=True)
-                st.write("") # 미세 세로 간격 확보
 
                 # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
                 for left_f, right_f in comb["pairs"]:
@@ -1840,7 +1857,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         """, unsafe_allow_html=True)
                 
                     ahp_answers[pair_key] = ans_val
-                    st.markdown("<hr style='margin: 3px 0; border: 0; border-top: 1px dashed #e2e8f0;'>", unsafe_allow_html=True)
+                    st.markdown("<hr style='margin: 1px 0; border: 0; border-top: 1px dashed #e2e8f0;'>", unsafe_allow_html=True)
             st.divider()
             
         # 5. 개인정보 수집 및 답례품
