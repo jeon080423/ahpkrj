@@ -4626,6 +4626,85 @@ with col_main:
                                 
                                 st.code(short_url, language="text")
                                 st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
+                                
+                                # 카카오톡 공유 키 로드 및 버튼 생성
+                                kakao_js_key = "0a88a1ac194bfc83e73070fe09e1e336"
+                                try:
+                                    if os.path.exists("temp_previews/kakao_config.json"):
+                                        with open("temp_previews/kakao_config.json", "r", encoding="utf-8") as kf:
+                                            k_cfg = json.load(kf)
+                                            if "all_keys" in k_cfg and len(k_cfg["all_keys"]) > 0:
+                                                kakao_js_key = k_cfg["all_keys"][0]
+                                except Exception:
+                                    pass
+                                
+                                btn_text = _("카카오톡으로 설문 링크 공유하기", "Share Survey Link on KakaoTalk")
+                                msg_desc = _("AHP 온라인 설문조사에 참여해 주십시오.", "Please participate in the AHP online survey.")
+                                msg_btn = _("설문 참여하기", "Participate in Survey")
+                                safe_survey_title = survey_title.replace("'", "\\'").replace('"', '\\"')
+                                
+                                kakao_share_html = f"""
+                                <div style="display: flex; justify-content: flex-start; margin-top: 10px; margin-bottom: 10px;">
+                                  <div id="kakao-share-btn" style="
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    padding: 0px 16px;
+                                    height: 38px;
+                                    background-color: #FEE500;
+                                    color: #191919;
+                                    font-family: sans-serif;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                                    transition: background-color 0.2s;
+                                    user-select: none;
+                                  "
+                                  onmouseover="this.style.backgroundColor='#Fada00';"
+                                  onmouseout="this.style.backgroundColor='#FEE500';"
+                                  >
+                                    <img src="https://developers.kakao.com/assets/img/about/logos/kakaotalksharing/kakaotalk_sharing_btn_medium.png" alt="Kakao" style="width: 18px; height: 18px; margin-right: 8px;">
+                                    {btn_text}
+                                  </div>
+                                </div>
+                                
+                                <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" integrity="sha384-ih7gWZI1hEME99sM27t60B083Gfy1198jwz1fgycW+Uu706l99g8B4FCS92yE0Hl" crossorigin="anonymous"></script>
+                                <script>
+                                  try {{
+                                    if (!Kakao.isInitialized()) {{
+                                      Kakao.init('{kakao_js_key}');
+                                    }}
+                                    document.getElementById('kakao-share-btn').addEventListener('click', function() {{
+                                      Kakao.Share.sendDefault({{
+                                        objectType: 'feed',
+                                        content: {{
+                                          title: '{safe_survey_title}',
+                                          description: '{msg_desc}',
+                                          imageUrl: 'https://raw.githubusercontent.com/jeon080423/ahpkrj/main/ahp_master_logo.png',
+                                          link: {{
+                                            mobileWebUrl: '{short_url}',
+                                            webUrl: '{short_url}',
+                                          }},
+                                        }},
+                                        buttons: [
+                                          {{
+                                            title: '{msg_btn}',
+                                            link: {{
+                                              mobileWebUrl: '{short_url}',
+                                              webUrl: '{short_url}',
+                                            }},
+                                          }},
+                                        ],
+                                      }});
+                                    }});
+                                  }} catch (e) {{
+                                    console.error(e);
+                                  }}
+                                </script>
+                                """
+                                st.components.v1.html(kakao_share_html, height=58)
                             except Exception as ex:
                                 st.error(f"구글 시트 생성 실패: {ex}")
             
