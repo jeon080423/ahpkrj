@@ -1990,7 +1990,7 @@ if "paypal_order_id" in q_params:
         target_user = current_user or user_id_param
         if target_user:
             kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-            new_expiry_date = (kst_now + relativedelta(months=2)).strftime("%Y-%m-%d")
+            new_expiry_date = (kst_now + relativedelta(months=3)).strftime("%Y-%m-%d")
             update_user_full_info(target_user, None, "official", new_expiry_date)
             
             if st.session_state.get("user_id") == target_user:
@@ -2037,7 +2037,7 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
-    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months unlimited)</li>
+    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (3 months unlimited)</li>
   </ul>
 
 </div>"""
@@ -2167,7 +2167,7 @@ with st.sidebar:
                     if st.session_state.get('lang', 'ko') == 'en':
                         st.warning("⚠️ Official User Signup Guide")
                         st.info("Official users are registered as a **Free User** first.")
-                        st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 2 months)")
+                        st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 3 months)")
                     else:
                         st.warning("⚠️ 정식 사용자 가입 안내")
                         acc_info_html = """
@@ -2259,7 +2259,7 @@ with st.sidebar:
             with st.expander(_("💳 정식 사용자 승격/결제", "💳 Upgrade to Official User"), expanded=False):
                 if st.session_state.lang == 'en':
                     st.markdown("##### 💳 PayPal Membership Upgrade")
-                    st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$350.00 USD**.")
+                    st.info("Upgrade to **Official User** to get unlimited access (3 months) for **$350.00 USD**.")
                     
                     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                     user_id = st.session_state.user_id
@@ -4333,7 +4333,7 @@ with col_main:
                         if is_english:
                             st.markdown("### 💳 Official User Upgrade & Unlimited Analysis")
                             st.markdown("Upgrading to an Official User **instantly removes the 5-sample limit** and allows unlimited access to all features.")
-                            st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$350.00 USD** via PayPal.")
+                            st.info("Upgrade to **Official User** to get unlimited access (3 months) for **$350.00 USD** via PayPal.")
                             
                             paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                             user_id = st.session_state.user_id
