@@ -1665,22 +1665,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
         survey_email = "temp@ahpmaster.com"
     
     if survey_desc or survey_email:
-        email_html = f"""
-        <div style="margin-top: 10px; font-size: 0.88rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 8px; display: flex; align-items: center; gap: 6px;">
-            <span style="font-weight: 600;">📧 설문 담당자 문의:</span>
-            <a href="mailto:{survey_email}" style="color: #2563eb; text-decoration: none; font-weight: 500;">{survey_email}</a>
-        </div>
-        """ if survey_email else ""
+        email_html = (
+            f'<div style="margin-top: 10px; font-size: 0.88rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 8px; display: flex; align-items: center; gap: 6px;">'
+            f'<span style="font-weight: 600;">📧 설문 담당자 문의:</span>'
+            f'<a href="mailto:{survey_email}" style="color: #2563eb; text-decoration: none; font-weight: 500;">{survey_email}</a>'
+            f'</div>'
+        ) if survey_email else ""
         
-        desc_box_html = f"""
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 20px; line-height: 1.6; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-            <div style="font-size: 0.95rem; color: #334155; font-weight: 400; white-space: pre-wrap;">
-                {survey_desc}
-            </div>
-            {email_html}
-        </div>
-        """
+        desc_box_html = (
+            f'<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 20px; line-height: 1.6; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">'
+            f'<div style="font-size: 0.95rem; color: #334155; font-weight: 400; white-space: pre-wrap;">{survey_desc}</div>'
+            f'{email_html}'
+            f'</div>'
+        )
         st.markdown(desc_box_html, unsafe_allow_html=True)
+
     
     # 모델 정보와 인구통계 추출
     ahp_model = survey_meta["AHP_Model_JSON"]
