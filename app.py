@@ -1748,36 +1748,43 @@ if "preview_id" in q_params or "survey_id" in q_params:
         section_num += 1
         st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
         main_criteria = ahp_model.get("main", [])
-        
-        # 중복 선택 방지를 위한 세션 상태 동적 검증 및 초기화
+        # 중복 선택 방지를 위해 각 순위별 상태를 담을 세션 리스트 초기화 및 동적 보정
         if main_criteria:
-            selected_so_far = set()
-            for rank_idx in range(len(main_criteria)):
-                key = f"pre_rank_{rank_idx}"
-                if key in st.session_state:
-                    val = st.session_state[key]
-                    if val != "선택해 주세요" and val in selected_so_far:
-                        st.session_state[key] = "선택해 주세요"
-                    elif val != "선택해 주세요":
-                        selected_so_far.add(val)
+            if "pre_rank_selections" not in st.session_state:
+                st.session_state.pre_rank_selections = ["선택해 주세요"] * len(main_criteria)
+            # 대분류 개수가 변한 경우 리스트 리셋
+            if len(st.session_state.pre_rank_selections) != len(main_criteria):
+                st.session_state.pre_rank_selections = ["선택해 주세요"] * len(main_criteria)
         
         # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
         if main_criteria:
             cols = st.columns(len(main_criteria))
             pre_rankings = []
             
-            # 이전 단계의 선택 상태를 session_state에 저장하여 연쇄 필터링 구현
+            # 이전 단계의 선택 상태를 활용하여 연쇄 필터링 및 selectbox 렌더링
             for rank_idx in range(len(main_criteria)):
                 with cols[rank_idx]:
                     # 1단계: 전체 요인 중 현재 순위 이전에 선택한 요인들을 제외
                     available_options = [opt for opt in main_criteria if opt not in pre_rankings]
+                    options = ["선택해 주세요"] + available_options
                     
-                    # 2단계: 이전 선택이 여전히 사용 가능한지 혹은 빈값인지에 따라 default 설정
+                    # 2단계: 기존 선택값이 현재 선택 가능 옵션 목록에 존재하면 그 위치를 기본값으로, 없으면 "선택해 주세요"로 초기화
+                    current_val = st.session_state.pre_rank_selections[rank_idx]
+                    if current_val in options:
+                        default_index = options.index(current_val)
+                    else:
+                        default_index = 0
+                        st.session_state.pre_rank_selections[rank_idx] = "선택해 주세요"
+                    
                     selected_f = st.selectbox(
                         f"{rank_idx+1}순위 요인 선택 *",
-                        ["선택해 주세요"] + available_options,
-                        key=f"pre_rank_{rank_idx}"
+                        options,
+                        index=default_index,
+                        key=f"pre_rank_widget_{rank_idx}"
                     )
+                    
+                    # 선택값 업데이트
+                    st.session_state.pre_rank_selections[rank_idx] = selected_f
                     
                     if selected_f != "선택해 주세요":
                         pre_rankings.append(selected_f)
