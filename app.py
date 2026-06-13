@@ -3754,9 +3754,22 @@ with col_main:
                         permission_granted = False
                         message = _("⛔ 이용 기간이 만료되었습니다.", "⛔ Your subscription period has expired.")
             else: 
-                permission_granted = False
-                message = _("⛔ **AHP 분석 기능은 유료(정식) 회원 전용 서비스입니다.** 좌측 로그인 패널을 통해 정식 라이선스 계정으로 로그인해 주십시오.",
-                            "⛔ **AHP Analysis is a premium feature.** Please log in with a paid license account.")
+                rows_ok = True
+                if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
+                    for sn in sheet_names:
+                        if len(pd.read_excel(uploaded_file, sheet_name=sn)) > 5:
+                            rows_ok = False
+                            break
+                else:
+                    if len(df_main) > 5:
+                        rows_ok = False
+                    for sn, sdf in sub_dfs.items():
+                        if len(sdf) > 5:
+                            rows_ok = False
+                            break
+                if rows_ok: permission_granted = True
+                else: message = _(f"⛔ **무료사용자**는 시트당 최대 5개 표본까지만 분석 가능합니다. (현재: {len(df_main)}개 표본)",
+                                 f"⛔ **Free Users** can only analyze up to 5 samples per sheet. (Current: {len(df_main)} samples)")
             
             if permission_granted:
                 try:
