@@ -1749,6 +1749,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
         st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
         main_criteria = ahp_model.get("main", [])
         
+        # 중복 선택 방지를 위한 세션 상태 동적 검증 및 초기화
+        if main_criteria:
+            selected_so_far = set()
+            for rank_idx in range(len(main_criteria)):
+                key = f"pre_rank_{rank_idx}"
+                if key in st.session_state:
+                    val = st.session_state[key]
+                    if val != "선택해 주세요" and val in selected_so_far:
+                        st.session_state[key] = "선택해 주세요"
+                    elif val != "선택해 주세요":
+                        selected_so_far.add(val)
+        
         # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
         if main_criteria:
             cols = st.columns(len(main_criteria))
