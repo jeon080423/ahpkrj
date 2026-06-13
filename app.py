@@ -3623,21 +3623,128 @@ with col_main:
                                       {'type': 'formula', 'criteria': '=TRUE', 'format': border_fmt})
     
     st.subheader(_("2. 데이터 업로드 및 분석", "2. Data Upload & Analysis"))
-    uploaded_file = st.file_uploader(_("작성된 엑셀 파일 업로드 (.xlsx)", "Upload completed Excel file (.xlsx)"), type=['xlsx', 'xls'])
     
-    if uploaded_file:
+    # 데이터 소스 선택 추가
+    data_source = st.radio(
+        _("분석 데이터 소스 선택", "Select Analysis Data Source"),
+        [_("📂 엑셀 파일 직접 업로드", "Upload Excel File"), _("🌐 배포된 온라인 설문 데이터 연동", "Link Online Survey Data")],
+        horizontal=True
+    )
+    
+    df_main = None
+    sub_dfs = {}
+    sheet_names = []
+    filename_base = "AHP_Analysis"
+    
+    if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
+        uploaded_file = st.file_uploader(_("작성된 엑셀 파일 업로드 (.xlsx)", "Upload completed Excel file (.xlsx)"), type=['xlsx', 'xls'])
+        if uploaded_file:
+            try:
+                excel_obj = pd.ExcelFile(uploaded_file)
+                sheet_names = excel_obj.sheet_names
+                df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
+                for sn in sheet_names[1:]:
+                    sub_dfs[sn] = pd.read_excel(uploaded_file, sheet_name=sn)
+                filename_base = uploaded_file.name.split('.')[0]
+            except Exception as e:
+                st.error(f"엑셀 파일 로드 실패: {e}")
+    else:
+        # 배포된 온라인 설문 데이터 연동
+        if st.session_state.user_id is None:
+            st.warning(_("🔒 온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", "🔒 Online survey integration is available for members. Please log in."))
+        else:
+            import sqlite3
+            conn = sqlite3.connect('users.db')
+            cur = conn.cursor()
+            cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
+            admin_surveys = cur.fetchall()
+            conn.close()
+            
+            if not admin_surveys:
+                st.warning(_("배포된 온라인 설문이 없습니다.", "No deployed online surveys found."))
+            else:
+                survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
+                
+                default_idx = 0
+                if st.session_state.get("selected_survey_for_analysis") in survey_options.values():
+                    default_idx = list(survey_options.values()).index(st.session_state.get("selected_survey_for_analysis"))
+                
+                selected_survey_label = st.selectbox(
+                    _("분석할 온라인 설문 선택", "Select Online Survey for Analysis"),
+                    list(survey_options.keys()),
+                    index=default_idx
+                )
+                selected_sheet_id = survey_options[selected_survey_label]
+                filename_base = f"Survey_{selected_sheet_id[:6]}"
+                
+                if st.button(_("🔄 구글 시트에서 실시간 응답 가져오기", "🔄 Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
+                    from survey_manager import load_survey_metadata, get_survey_gspread_client
+                    with st.spinner(_("구글 시트에서 설문 데이터 및 구조를 가져오는 중...", "Fetching survey structure and responses...")):
+                        survey_meta = load_survey_metadata(selected_sheet_id)
+                        g_client = get_survey_gspread_client()
+                        if survey_meta and g_client:
+                            try:
+                                spreadsheet = g_client.open_by_key(selected_sheet_id)
+                                raw_sheet = spreadsheet.worksheet("Raw_Data")
+                                all_rows = raw_sheet.get_all_values()
+                                
+                                if len(all_rows) > 1:
+                                    headers = all_rows[0]
+                                    rows = all_rows[1:]
+                                    raw_df = pd.DataFrame(rows, columns=headers)
+                                    
+                                    for col in raw_df.columns:
+                                        if col not in ["ID", "Type", "제출시간", "답례품_연락처"]:
+                                            raw_df[col] = pd.to_numeric(raw_df[col], errors='coerce').fillna(1.0)
+                                            
+                                    ahp_model = survey_meta["AHP_Model_JSON"]
+                                    
+                                    base_cols = ["ID", "Type"]
+                                    main_criteria = ahp_model.get("main", [])
+                                    main_pairs = []
+                                    for i in range(len(main_criteria)):
+                                        for j in range(i + 1, len(main_criteria)):
+                                            main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
+                                    main_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in main_pairs if p in raw_df.columns]
+                                    
+                                    st.session_state["ahp_df_main"] = raw_df[main_cols].copy()
+                                    
+                                    st.session_state["ahp_sub_dfs"] = {}
+                                    sub_criteria_map = ahp_model.get("subs", {})
+                                    for main_c, subs in sub_criteria_map.items():
+                                        if len(subs) >= 2:
+                                            sub_pairs = []
+                                            for i in range(len(subs)):
+                                                for j in range(i + 1, len(subs)):
+                                                    sub_pairs.append(f"{subs[i]}_{subs[j]}")
+                                            sub_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_pairs if p in raw_df.columns]
+                                            st.session_state["ahp_sub_dfs"][main_c] = raw_df[sub_cols].copy()
+                                            
+                                    st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
+                                    st.success(_(f"✅ 구글 시트에서 총 {len(raw_df)}건의 응답 데이터를 성공적으로 가져왔습니다!", f"✅ Successfully fetched {len(raw_df)} responses!"))
+                                else:
+                                    st.warning(_("가져올 설문 응답 데이터가 시트에 존재하지 않습니다 (헤더만 존재).", "No survey responses found in the sheet."))
+                            except Exception as g_err:
+                                st.error(f"구글 시트 로드 실패: {g_err}")
+                        else:
+                            st.error(_("설문 메타데이터 또는 구글 API 클라이언트를 로드할 수 없습니다.", "Failed to load survey metadata or Google client."))
+                
+                if "ahp_df_main" in st.session_state:
+                    df_main = st.session_state["ahp_df_main"]
+                    sub_dfs = st.session_state["ahp_sub_dfs"]
+                    sheet_names = st.session_state["ahp_sheet_names"]
+                    st.info(_("💡 구글 시트에서 로드된 실시간 데이터 분석 모드입니다. (새 데이터를 가져오려면 위 버튼을 클릭해 주세요)", "💡 Live data analysis mode. Click the button above to refresh data."))
+
+    if df_main is not None:
         try:
-            excel_obj = pd.ExcelFile(uploaded_file)
-            sheet_names = excel_obj.sheet_names
-            df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
             main_cols_up = df_main.columns[2:]
             main_factors_up, n_main_up = infer_factors_from_columns(main_cols_up)
-    
+            
             permission_granted = False
             message = ""
             role_chk = st.session_state.user_role
             user_id_chk = st.session_state.user_id
-    
+            
             if role_chk == 'admin' or role_chk == 'official':
                 permission_granted = True
                 if role_chk == 'official':
@@ -3647,14 +3754,10 @@ with col_main:
                         permission_granted = False
                         message = _("⛔ 이용 기간이 만료되었습니다.", "⛔ Your subscription period has expired.")
             else: 
-                rows_ok = True
-                for sn in sheet_names:
-                    if len(pd.read_excel(uploaded_file, sheet_name=sn)) > 5:
-                        rows_ok = False
-                        break
-                if rows_ok: permission_granted = True
-                else: message = _(f"⛔ **무료사용자**는 시트당 최대 5개 표본까지만 분석 가능합니다.", f"⛔ **Free Users** can only analyze up to 5 samples per sheet.")
-    
+                permission_granted = False
+                message = _("⛔ **AHP 분석 기능은 유료(정식) 회원 전용 서비스입니다.** 좌측 로그인 패널을 통해 정식 라이선스 계정으로 로그인해 주십시오.",
+                            "⛔ **AHP Analysis is a premium feature.** Please log in with a paid license account.")
+            
             if permission_granted:
                 try:
                     with st.spinner(_("계층 분석 수행 중...", "Performing Analytic Hierarchy Process (AHP)...")):
