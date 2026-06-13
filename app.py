@@ -121,6 +121,7 @@ except Exception:
     st.set_page_config(page_title=_("AHP 마스터 | 퍼지 AHP 지원", "AHP Master | Fuzzy AHP Support"), layout="wide", page_icon="📊")
 
 # [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
+# [추가] 네이버 서치어드바이저 및 검색 엔진 크롤러 수집을 위해 메타 태그, canonical, JSON-LD 구조화 데이터를 실제 헤드(Parent Head)에 동적으로 삽입하는 1x1 이미지 로더 스크립트 탑재
 seo_tags = """
     <div style="display:none;">
         <title>AHP Master | Traditional & Fuzzy AHP Decision Analysis System (AHP 마스터, 层次分析法, 階層分析法, Proceso de Análisis Jerárquico)</title>
@@ -148,7 +149,7 @@ seo_tags = """
         <h2>层次分析法 (AHP) & 模糊层次分析法 在线计算器与软件</h2>
         <p>专为学术论文和研究所设计的层次分析法(AHP)自动化分析工具。支持一致性比率(CR)自动校正、群体几何平均数计算、ANOVA方差分析以及导出Excel报告。</p>
         <h2>階層分析法 (AHP) & ファジィAHP ソフトウェア</h2>
-        <p>論文や研究のための階層分析法(AHP)自動化ツール。一貫性比率(CR)の調整やExcelレポート出力に対応。</p>
+        <p>論文や研究のための階層分析법(AHP)自動化ツール。一貫性比率(CR)의 조정이나 Excelレポート出力に対応。</p>
         <h2>Proceso de Análisis Jerárquico (AHP) y AHP Difuso</h2>
         <p>Software y calculadora en línea para el Proceso de Análisis Jerárquico (AHP). Ideal para tesis y toma de decisiones, con calibración automática de la Relación de Consistencia (CR).</p>
         <h2>Processus d'Analyse Hiérarchique (AHP) et AHP Flou</h2>
@@ -156,7 +157,7 @@ seo_tags = """
         <h2>Analytischer Hierarchieprozess (AHP) und Fuzzy AHP</h2>
         <p>AHP-Software und Rechner für akademische Arbeiten und Forschung. Unterstützt automatische Anpassung der Konsistenzrate (CR).</p>
         <h2>Quá trình Phân tích Phân cấp (AHP) & AHP mờ</h2>
-        <p>Phần mềm tự động hóa phân tích AHP và AHP mờ (Fuzzy AHP) chuyên nghiệp dành cho luận văn và nghiên cứu.</p>
+        <p>Phần mềm tự động hóa phân tích AHP và AHP mờ (Fuzzy AHP) chuyên nghiệp dành for luận văn và nghiên cứu.</p>
         <h2>विश्लेषणात्मक पदानुक्रम प्रक्रिया (AHP) और फ़ज़ी AHP</h2>
         <p>शोध प्रबंध, अकादमिक पत्रों और अनुसंधान के लिए पेशेवर AHP और फ़ज़ी AHP स्वचालित सॉफ्टवेयर टूल。</p>
         <h2>Analitiese Hiërargieproses (AHP) en Vae AHP</h2>
@@ -166,6 +167,98 @@ seo_tags = """
         <h2>عملية التحليل الهرمي (AHP) و عملية التحليل الهرمي الضبابي</h2>
         <p>برنامج آلي لعملية التحليل الهرمي (AHP) للرسائل الأكاديمية والبحوث.</p>
     </div>
+
+    <!-- 1x1 투명 GIF 로드를 통해 온로드 시점 브라우저/크롤러에서 실제 parent head에 메타 태그, canonical, 구조화데이터 동적 주입 -->
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="
+        (function() {
+            const metaTags = [
+                { name: 'naver-site-verification', content: 'f0561d996c39ca52dcc47cf2aad128c5e586a1d6' },
+                { name: 'google-site-verification', content: 'KbMsp4y15le5XNyK05UEr6Nq6' },
+                { name: 'description', content: 'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.' },
+                { name: 'keywords', content: 'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP' },
+                { property: 'og:title', content: 'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템' },
+                { property: 'og:description', content: '학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션' },
+                { property: 'og:type', content: 'website' },
+                { property: 'og:url', content: 'https://ahpkrj.streamlit.app/' }
+            ];
+            
+            const jsonLd = {
+                '@context': 'https://schema.org',
+                '@type': 'WebApplication',
+                'name': 'AHP Master',
+                'alternateName': 'AHP 마스터',
+                'url': 'https://ahpkrj.streamlit.app/',
+                'applicationCategory': 'BusinessApplication',
+                'operatingSystem': 'All',
+                'description': '학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.',
+                'offers': {
+                    '@type': 'Offer',
+                    'price': '0',
+                    'priceCurrency': 'KRW'
+                }
+            };
+            
+            function injectToDoc(doc) {
+                if (!doc || !doc.head) return;
+                
+                // 1. 메타 태그 동적 삽입
+                metaTags.forEach(tag => {
+                    const key = tag.name ? 'name' : 'property';
+                    const val = tag[key];
+                    let existing = false;
+                    const metas = doc.head.getElementsByTagName('meta');
+                    for (let i = 0; i < metas.length; i++) {
+                        if (metas[i].getAttribute(key) === val) {
+                            existing = true;
+                            break;
+                        }
+                    }
+                    if (!existing) {
+                        const newMeta = doc.createElement('meta');
+                        newMeta.setAttribute(key, val);
+                        newMeta.setAttribute('content', tag.content);
+                        doc.head.appendChild(newMeta);
+                    }
+                });
+                
+                // 2. Canonical URL 동적 삽입
+                let existingCanonical = false;
+                const links = doc.head.getElementsByTagName('link');
+                for (let i = 0; i < links.length; i++) {
+                    if (links[i].getAttribute('rel') === 'canonical') {
+                        existingCanonical = true;
+                        break;
+                    }
+                }
+                if (!existingCanonical) {
+                    const canonicalLink = doc.createElement('link');
+                    canonicalLink.setAttribute('rel', 'canonical');
+                    canonicalLink.setAttribute('href', 'https://ahpkrj.streamlit.app/');
+                    doc.head.appendChild(canonicalLink);
+                }
+                
+                // 3. JSON-LD 구조화 데이터 동적 삽입
+                let existingJsonLd = false;
+                const scripts = doc.head.getElementsByTagName('script');
+                for (let i = 0; i < scripts.length; i++) {
+                    if (scripts[i].getAttribute('type') === 'application/ld+json') {
+                        existingJsonLd = true;
+                        break;
+                    }
+                }
+                if (!existingJsonLd) {
+                    const script = doc.createElement('script');
+                    script.type = 'application/ld+json';
+                    script.text = JSON.stringify(jsonLd);
+                    doc.head.appendChild(script);
+                }
+            }
+            
+            // 현 Iframe 및 상위 Window(Parent) 문서에 모두 메타 및 구조화 태그 동적 주입 시도
+            try { injectToDoc(document); } catch(e) {}
+            try { if (window.parent && window.parent.document) { injectToDoc(window.parent.document); } } catch(e) {}
+        })();
+    " style="display:none;"/>
 """
 st.markdown(seo_tags, unsafe_allow_html=True)
 
