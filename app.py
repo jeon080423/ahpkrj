@@ -2496,9 +2496,44 @@ if st.session_state.get('page', 'main') == 'guide':
     st.stop()
 
 # 메인 헤더 영역
-st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"))
+try:
+    visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
+    total_visits = len(visit_data_gs) if visit_data_gs else 0
+except Exception:
+    total_visits = 0
 
-
+col_main_title, col_settings_title = st.columns([3.0, 1.1], gap="large")
+with col_main_title:
+    col_title_text, col_title_counter = st.columns([2.0, 1.0])
+    with col_title_text:
+        st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"))
+    with col_title_counter:
+        visitor_label = _("총 누적 방문자 수", "Total Visitors")
+        visitor_unit = _("명", " visitors")
+        counter_html = f"""
+        <div style="
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 8px 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-top: 15px;
+            transition: transform 0.2s ease-in-out;
+        ">
+            <div style="font-size: 1.5rem; margin-right: 8px;">👥</div>
+            <div>
+                <div style="font-size: 0.7rem; color: #0369a1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1;">
+                    {visitor_label}
+                </div>
+                <div style="font-size: 1.15rem; color: #0f172a; font-weight: 800; line-height: 1.2; margin-top: 2px;">
+                    {total_visits:,}{visitor_unit}
+                </div>
+            </div>
+        </div>
+        """
+        st.markdown(counter_html, unsafe_allow_html=True)
 
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
 @st.dialog(_("알림", "Notice"))
