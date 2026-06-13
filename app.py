@@ -5300,54 +5300,35 @@ with col_main:
     # -------------------------------------------------------------------------
     with main_tab3:
         st.header("📊 배포 설문 실시간 응답 현황 대시보드")
-        # 조회 방식 선택
-        query_mode = st.radio(
-            "조회 방식 선택",
-            ["내 계정의 배포 설문 목록에서 선택", "구글 스프레드시트 URL/ID 직접 입력"],
-            horizontal=True
-        )
-        
         selected_sheet_id = None
         
-        if query_mode == "내 계정의 배포 설문 목록에서 선택":
-            if st.session_state.user_id is None:
-                st.warning("🔒 **이 방식은 회원 전용 기능입니다.** 로그인하시거나 '구글 스프레드시트 URL/ID 직접 입력' 방식을 사용해 주세요.")
-            else:
-                st.info("본인이 배포한 설문 목록을 자동으로 조회하여 실시간 응답 현황을 대시보드로 구성합니다.")
-
-                # DB에서 해당 관리자가 생성한 설문 목록 조회
-                import sqlite3
-                import pandas as pd
-
-                admin_surveys = []
-                try:
-                    conn = sqlite3.connect('users.db')
-                    cur = conn.cursor()
-                    cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
-                    admin_surveys = cur.fetchall()
-                    conn.close()
-                except Exception as e:
-                    st.error(f"설문 목록 조회 실패: {e}")
-
-                if not admin_surveys:
-                    st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작' 탭에서 설문을 배포해 주세요.")
-                else:
-                    # 선택 박스를 통해 현재 관리자가 배포한 설문들 중 하나 선택 (자동 선택 지원)
-                    survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
-                    selected_survey_label = st.selectbox("📊 조회할 배포 설문 선택", list(survey_options.keys()))
-                    selected_sheet_id = survey_options[selected_survey_label]
+        if st.session_state.user_id is None:
+            st.warning("🔒 **응답현황 대시보드 기능은 회원 전용 서비스입니다.**")
+            st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
         else:
-            # 직접 입력 방식
-            url_input = st.text_input("조회할 구글 스프레드시트 URL 또는 ID 입력", placeholder="https://docs.google.com/spreadsheets/d/...")
-            if url_input.strip():
-                target_id = url_input.strip()
-                if "docs.google.com/spreadsheets" in target_id:
-                    parts = target_id.split("/d/")
-                    if len(parts) > 1:
-                        target_id = parts[1].split("/")[0]
-                selected_sheet_id = target_id
+            st.info("본인이 배포한 설문 목록을 자동으로 조회하여 실시간 응답 현황을 대시보드로 구성합니다.")
+
+            # DB에서 해당 관리자가 생성한 설문 목록 조회
+            import sqlite3
+            import pandas as pd
+
+            admin_surveys = []
+            try:
+                conn = sqlite3.connect('users.db')
+                cur = conn.cursor()
+                cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
+                admin_surveys = cur.fetchall()
+                conn.close()
+            except Exception as e:
+                st.error(f"설문 목록 조회 실패: {e}")
+
+            if not admin_surveys:
+                st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작' 탭에서 설문을 배포해 주세요.")
             else:
-                st.info("조회하고자 하는 설문 스프레드시트의 URL 또는 ID를 입력하시면 실시간 진행 현황을 조회할 수 있습니다.")
+                # 선택 박스를 통해 현재 관리자가 배포한 설문들 중 하나 선택 (자동 선택 지원)
+                survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
+                selected_survey_label = st.selectbox("📊 조회할 배포 설문 선택", list(survey_options.keys()))
+                selected_sheet_id = survey_options[selected_survey_label]
 
         # 대시보드 렌더링
         if selected_sheet_id:
