@@ -1682,32 +1682,48 @@ if "preview_id" in q_params or "survey_id" in q_params:
     type_opts = demographics.get("type_options", ["전문가", "일반", "공무원", "기타"])
     if not isinstance(type_opts, list) or not type_opts:
         type_opts = ["전문가", "일반", "공무원", "기타"]
-    resp_data["type"] = st.radio(type_q, type_opts, index=0, key="survey_resp_type", horizontal=True)
+        
+    sq_idx = 1
+    resp_data["type"] = st.radio(f"SQ{sq_idx}. {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
+    sq_idx += 1
     
-    if demographics.get("name"): resp_data["name"] = st.text_input("성명 *", key="survey_resp_name")
+    if demographics.get("name"):
+        resp_data["name"] = st.text_input(f"SQ{sq_idx}. 성명 *", key="survey_resp_name")
+        sq_idx += 1
     
     # 연령: 개방형 vs 10세 단위 선택형
     if demographics.get("age"):
+        age_label = f"SQ{sq_idx}. 연령 *"
+        sq_idx += 1
         age_type = demographics.get("age_type", "개방형 (숫자 직접 입력)")
         if age_type == "10세 단위 선택형":
             age_options = ["20대 미만", "20대 (20~29세)", "30대 (30~39세)", "40대 (40~49세)", "50대 (50~59세)", "60대 이상"]
-            resp_data["age"] = st.radio("연령 *", age_options, index=0, key="survey_resp_age", horizontal=True)
+            resp_data["age"] = st.radio(age_label, age_options, index=0, key="survey_resp_age", horizontal=True)
         else:
-            resp_data["age"] = st.number_input("연령 (세) *", min_value=1, max_value=120, value=30, key="survey_resp_age")
+            resp_data["age"] = st.number_input(f"{age_label} (세)", min_value=1, max_value=120, value=30, key="survey_resp_age")
             
-    if demographics.get("gender"): resp_data["gender"] = st.radio("성별 *", ["남자", "여자"], key="survey_resp_gender", horizontal=True)
+    if demographics.get("gender"):
+        resp_data["gender"] = st.radio(f"SQ{sq_idx}. 성별 *", ["남자", "여자"], key="survey_resp_gender", horizontal=True)
+        sq_idx += 1
     
     # 경력년수: 개방형 vs 5년 단위 선택형
     if demographics.get("experience"):
+        exp_label = f"SQ{sq_idx}. 경력년수 *"
+        sq_idx += 1
         exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
         if exp_type == "5년 단위 선택형":
             exp_options = ["5년 미만", "5년 이상 ~ 10년 미만", "10년 이상 ~ 15년 미만", "15년 이상 ~ 20년 미만", "20년 이상"]
-            resp_data["experience"] = st.radio("경력년수 *", exp_options, index=0, key="survey_resp_experience", horizontal=True)
+            resp_data["experience"] = st.radio(exp_label, exp_options, index=0, key="survey_resp_experience", horizontal=True)
         else:
-            resp_data["experience"] = st.number_input("경력년수 *", min_value=0, max_value=60, value=5, key="survey_resp_experience")
+            resp_data["experience"] = st.number_input(f"{exp_label} (년)", min_value=0, max_value=60, value=5, key="survey_resp_experience")
             
-    if demographics.get("affiliation"): resp_data["affiliation"] = st.text_input("소속 *", key="survey_resp_affiliation")
-    if demographics.get("email"): resp_data["email"] = st.text_input("이메일 *", key="survey_resp_email")
+    if demographics.get("affiliation"):
+        resp_data["affiliation"] = st.text_input(f"SQ{sq_idx}. 소속 *", key="survey_resp_affiliation")
+        sq_idx += 1
+        
+    if demographics.get("email"):
+        resp_data["email"] = st.text_input(f"SQ{sq_idx}. 이메일 *", key="survey_resp_email")
+        sq_idx += 1
     
     st.divider()
     
