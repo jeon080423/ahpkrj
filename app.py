@@ -173,6 +173,12 @@ global_ahp_css = """
    AHP 척도 전용 고유 클래스 타겟팅 (.st-key-ahp_survey_matrix)
    ============================================================================= */
 
+/* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
+div.st-key-ahp_survey_matrix {
+    gap: 4px !important;
+    row-gap: 4px !important;
+}
+
 /* 1. 수직 정렬 & 레이아웃 배분 */
 .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
     gap: 0px !important;
@@ -221,7 +227,7 @@ global_ahp_css = """
 .st-key-ahp_survey_matrix div[role="radiogroup"] > div,
 .st-key-ahp_survey_matrix div[role="radiogroup"] > label,
 .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"],
-.st-key-ahp_survey_matrix label {
+.st-key-ahp_survey_matrix div[role="radiogroup"] label {
     flex: 1 1 0% !important;
     display: flex !important;
     flex-direction: column !important;
@@ -237,6 +243,11 @@ global_ahp_css = """
     background-color: transparent !important;
 }
 
+/* 3.5. 라디오 그룹 최소 높이 해제 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] {
+    min-height: 28px !important;
+}
+
 /* 감싸는 div가 있을 경우 그 내부의 실제 label도 100% 채우도록 지시 */
 .st-key-ahp_survey_matrix div[role="radiogroup"] > div label,
 .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"] label {
@@ -250,7 +261,7 @@ global_ahp_css = """
 }
 
 /* 4. 기존 텍스트 찌꺼기 완벽 제거 */
-.st-key-ahp_survey_matrix label div[data-testid="stWidgetLabel"],
+.st-key-ahp_survey_matrix label[data-testid="stWidgetLabel"],
 .st-key-ahp_survey_matrix label p {
     display: none !important;
     height: 0px !important;
