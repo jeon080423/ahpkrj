@@ -5138,21 +5138,43 @@ with col_main:
                                     raw_sheet = spreadsheet.worksheet("Raw_Data")
                                     all_rows = raw_sheet.get_all_values()
                                     
+                                    try:
+                                        demo_sheet = spreadsheet.worksheet("Demographic_Data")
+                                        demo_rows = demo_sheet.get_all_values()
+                                    except Exception:
+                                        demo_rows = []
+                                    
                                 if len(all_rows) > 0:
                                     headers = all_rows[0]
                                     rows = all_rows[1:]
                                     live_df = pd.DataFrame(rows, columns=headers)
                                     
-                                    st.success(f"구글 스프레드시트에서 실시간 응답 데이터 {len(live_df)}건을 성공적으로 불러왔습니다.")
-                                    st.dataframe(live_df, use_container_width=True)
+                                    demo_df = None
+                                    if len(demo_rows) > 0:
+                                        demo_headers = demo_rows[0]
+                                        demo_vals = demo_rows[1:]
+                                        demo_df = pd.DataFrame(demo_vals, columns=demo_headers)
+                                        
+                                    st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
+                                    
+                                    tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
+                                    with tab_raw:
+                                        st.dataframe(live_df, use_container_width=True)
+                                    with tab_demo:
+                                        if demo_df is not None:
+                                            st.dataframe(demo_df, use_container_width=True)
+                                        else:
+                                            st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
                                     
                                     # Excel 및 CSV 내보내기 버튼 제공
                                     import io
                                     
-                                    # 1. Excel 내보내기
+                                    # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
                                     excel_buffer = io.BytesIO()
                                     with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
                                         live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
+                                        if demo_df is not None:
+                                            demo_df.to_excel(writer, index=False, sheet_name='Demographic_Data')
                                     
                                     col_dl1, col_dl2 = st.columns(2)
                                     with col_dl1:
@@ -5164,7 +5186,7 @@ with col_main:
                                             use_container_width=True,
                                             type="primary"
                                         )
-                                    # 2. CSV 내보내기
+                                    # 2. CSV 내보내기 (Raw_Data 우선 내보내기)
                                     csv_buffer = io.StringIO()
                                     live_df.to_csv(csv_buffer, index=False, header=True)
                                     with col_dl2:
@@ -5220,24 +5242,52 @@ with col_main:
                                 st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
                                 st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
                                 
-                                # 전체 로 데이터 복구 엑셀 데이터 빌드
-                                recovered_rows = []
+                                # 전체 로 데이터 복구 엑셀/CSV 데이터 빌드
+                                recovered_raw_rows = []
+                                recovered_demo_rows = []
                                 for idx_b, r_b in backup_df.iterrows():
                                     payload = json.loads(r_b["response_json"])
-                                    recovered_rows.append(payload["row_data"])
+                                    if "raw_row_data" in payload:
+                                        recovered_raw_rows.append(payload["raw_row_data"])
+                                    elif "row_data" in payload:
+                                        # 하위 호환성
+                                        recovered_raw_rows.append(payload["row_data"])
+                                        
+                                    if "demo_row_data" in payload:
+                                        recovered_demo_rows.append(payload["demo_row_data"])
                                     
-                                if recovered_rows:
-                                    # CSV 파일 형태로 복구 파일 내보내기 다운로드 버튼
+                                if recovered_raw_rows:
                                     import io
-                                    output_csv = io.StringIO()
-                                    pd.DataFrame(recovered_rows).to_csv(output_csv, index=False, header=False)
-                                    st.download_button(
-                                        "📥 로컬 백업 데이터 다운로드 (CSV)",
-                                        data=output_csv.getvalue().encode('utf-8-sig'),
-                                        file_name=f"Backup_Recovery_{selected_sheet_id.strip()[:6]}.csv",
-                                        mime="text/csv",
-                                        use_container_width=True
-                                    )
+                                    
+                                    # Excel로 두 개의 백업 데이터를 시트별로 다운로드할 수 있도록 패키징
+                                    excel_backup_buffer = io.BytesIO()
+                                    with pd.ExcelWriter(excel_backup_buffer, engine='openpyxl') as writer:
+                                        pd.DataFrame(recovered_raw_rows).to_excel(writer, index=False, header=False, sheet_name='Raw_Data')
+                                        if recovered_demo_rows:
+                                            pd.DataFrame(recovered_demo_rows).to_excel(writer, index=False, header=False, sheet_name='Demographic_Data')
+                                            
+                                    col_b_dl1, col_b_dl2 = st.columns(2)
+                                    with col_b_dl1:
+                                        st.download_button(
+                                            "📥 로컬 백업 Excel 다운로드 (.xlsx)",
+                                            data=excel_backup_buffer.getvalue(),
+                                            file_name=f"Backup_Recovery_{selected_sheet_id.strip()[:6]}.xlsx",
+                                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                            use_container_width=True,
+                                            type="primary"
+                                        )
+                                    
+                                    with col_b_dl2:
+                                        # CSV 파일 형태로 복구 파일 내보내기 (Raw_Data 우선)
+                                        output_csv = io.StringIO()
+                                        pd.DataFrame(recovered_raw_rows).to_csv(output_csv, index=False, header=False)
+                                        st.download_button(
+                                            "📥 로컬 백업 Raw_Data CSV 다운로드 (.csv)",
+                                            data=output_csv.getvalue().encode('utf-8-sig'),
+                                            file_name=f"Backup_Recovery_Raw_{selected_sheet_id.strip()[:6]}.csv",
+                                            mime="text/csv",
+                                            use_container_width=True
+                                        )
                         else:
                             st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
                     except Exception as err:
