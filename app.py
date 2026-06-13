@@ -1688,9 +1688,59 @@ if "preview_id" in q_params or "survey_id" in q_params:
         if definitions:
             st.subheader(f"{section_num}. 평가 요인 정의 및 설명")
             section_num += 1
+            
+            main_criteria = ahp_model.get("main", [])
+            subs_map = ahp_model.get("subs", {})
+            rendered_factors = set()
+            
+            for i, main_factor in enumerate(main_criteria):
+                palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
+                bg = palette["bg"]
+                text_color = palette["text"]
+                border = palette["border"]
+                
+                main_desc = definitions.get(main_factor, "")
+                rendered_factors.add(main_factor)
+                
+                # 하위 요인 목록 추출 및 HTML 조립
+                subs = subs_map.get(main_factor, [])
+                sub_rows_html = ""
+                for sub_factor in subs:
+                    sub_desc = definitions.get(sub_factor, "")
+                    rendered_factors.add(sub_factor)
+                    if sub_desc:
+                        sub_rows_html += f"""
+                        <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
+                            <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{sub_factor}</span>
+                            <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{sub_desc}</span>
+                        </div>
+                        """
+                
+                if main_desc or sub_rows_html:
+                    main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
+                    sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
+                    
+                    card_html = f"""
+                    <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                            <span style="background-color: {text_color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">대분류</span>
+                            {main_factor}
+                        </h4>
+                        {main_desc_html}
+                        {sub_container_html}
+                    </div>
+                    """
+                    st.markdown(card_html, unsafe_allow_html=True)
+            
+            # 대분류/하위분류 어디에도 속하지 않는 정의 요인이 있다면 예외 처리로 출력
+            other_html = ""
             for factor_name, def_text in definitions.items():
-                if def_text:
-                    st.markdown(f"**• {factor_name}**: {def_text}")
+                if factor_name not in rendered_factors and def_text:
+                    other_html += f"<div style='margin-bottom: 6px; padding: 4px 0;'><strong>• {factor_name}</strong>: {def_text}</div>"
+            
+            if other_html:
+                st.markdown(f"<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-top: 10px;'>{other_html}</div>", unsafe_allow_html=True)
+                
             st.divider()
             
         # 3. 사전 중요도 순위 지정
