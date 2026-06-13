@@ -246,33 +246,100 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     demo_headers.append("제출시간")
     demo_sheet.append_row(demo_headers)
     
+    # 로컬 SQLite 캐시에 백업 저장 및 Streamlit 캐시 비우기
+    try:
+        import sqlite3
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS survey_metadata_cache
+                      (survey_id TEXT PRIMARY KEY, metadata_json TEXT, updated_at TEXT)''')
+        meta_dict = {
+            "Title": title,
+            "Description": description,
+            "Admin_Email": admin_email,
+            "AHP_Model_JSON": ahp_model,
+            "Scale_Type": scale_type,
+            "Demographics": demographics,
+            "Definitions": definition_map,
+            "CR_Limit": float(cr_limit) if cr_limit is not None and str(cr_limit) != "None" else None,
+            "Rewards_Info": rewards_info
+        }
+        c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
+                  (spreadsheet.id, json.dumps(meta_dict, ensure_ascii=False)))
+        conn.commit()
+        conn.close()
+    except Exception as db_err:
+        pass
+
+    try:
+        st.cache_data.clear()
+    except:
+        pass
+    
     # 스프레드시트 ID 반환
     return spreadsheet.id
 
-def load_survey_metadata(spreadsheet_id):
-    """지정한 스프레드시트에서 설문지 구조 및 메타데이터를 로드합니다."""
+@st.cache_data(ttl=300, show_spinner=False)
+def _fetch_survey_metadata_from_sheets(spreadsheet_id):
+    """구글 시트에서 실시간으로 설문 데이터를 가져와서 데코딩하고 로컬 DB 캐시를 갱신합니다."""
     client = get_survey_gspread_client()
     if not client:
-        return None
+        raise Exception("구글 시트 API 클라이언트를 초기화할 수 없습니다.")
+        
+    spreadsheet = client.open_by_key(spreadsheet_id)
+    meta_sheet = spreadsheet.worksheet("Survey_Metadata")
+    records = meta_sheet.get_all_records()
     
+    meta_dict = {}
+    for row in records:
+        meta_dict[row["Field"]] = row["Value"]
+        
+    # 디코딩
+    meta_dict["AHP_Model_JSON"] = json.loads(meta_dict["AHP_Model_JSON"])
+    meta_dict["Demographics"] = json.loads(meta_dict["Demographics"])
+    meta_dict["Definitions"] = json.loads(meta_dict["Definitions"])
+    meta_dict["Rewards_Info"] = json.loads(meta_dict["Rewards_Info"])
+    meta_dict["CR_Limit"] = float(meta_dict["CR_Limit"]) if meta_dict["CR_Limit"] != "None" else None
+    
+    # 로컬 SQLite 캐시에 백업/동기화 저장
     try:
-        spreadsheet = client.open_by_key(spreadsheet_id)
-        meta_sheet = spreadsheet.worksheet("Survey_Metadata")
-        records = meta_sheet.get_all_records()
+        import sqlite3
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS survey_metadata_cache
+                      (survey_id TEXT PRIMARY KEY, metadata_json TEXT, updated_at TEXT)''')
+        c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
+                  (spreadsheet_id, json.dumps(meta_dict, ensure_ascii=False)))
+        conn.commit()
+        conn.close()
+    except:
+        pass
         
-        meta_dict = {}
-        for row in records:
-            meta_dict[row["Field"]] = row["Value"]
-            
-        # 디코딩
-        meta_dict["AHP_Model_JSON"] = json.loads(meta_dict["AHP_Model_JSON"])
-        meta_dict["Demographics"] = json.loads(meta_dict["Demographics"])
-        meta_dict["Definitions"] = json.loads(meta_dict["Definitions"])
-        meta_dict["Rewards_Info"] = json.loads(meta_dict["Rewards_Info"])
-        meta_dict["CR_Limit"] = float(meta_dict["CR_Limit"]) if meta_dict["CR_Limit"] != "None" else None
-        
-        return meta_dict
+    return meta_dict
+
+def load_survey_metadata(spreadsheet_id):
+    """지정한 스프레드시트에서 설문지 구조 및 메타데이터를 로드합니다. 캐시 및 로컬 DB 백업 우선 적용."""
+    try:
+        # 1단계: Streamlit 캐시(Google Sheets API 실시간 호출) 시도
+        return _fetch_survey_metadata_from_sheets(spreadsheet_id)
     except Exception as e:
+        # 2단계: 실패 시 (429 Quota Exceeded 등) 로컬 SQLite 캐시 데이터 복구 시도
+        import sqlite3
+        try:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('''CREATE TABLE IF NOT EXISTS survey_metadata_cache
+                          (survey_id TEXT PRIMARY KEY, metadata_json TEXT, updated_at TEXT)''')
+            c.execute("SELECT metadata_json FROM survey_metadata_cache WHERE survey_id = ?", (spreadsheet_id,))
+            row = c.fetchone()
+            conn.close()
+            if row:
+                st.warning("⚠️ 구글 API 호출 제한(Quota Limit)으로 인해 서버에 보관되어 있던 로컬 백업 설문지 스키마 정보를 로드했습니다. 설문 제출 및 답변은 안전하게 동작합니다.")
+                return json.loads(row[0])
+        except Exception as db_e:
+            pass
+            
+        # 3단계: 둘 다 실패 시 에러 표시
         st.error(f"설문 메타데이터 로드 실패: {e}")
         return None
 
