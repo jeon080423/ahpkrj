@@ -305,6 +305,18 @@ global_ahp_css = """
         width: 70% !important;
     }
 }
+/* 전역 상단 여백 최소화 */
+.block-container {
+    padding-top: 1rem !important;
+}
+.stApp > header {
+    height: 0px !important;
+    min-height: 0px !important;
+}
+header[data-testid="stHeader"] {
+    height: 0px !important;
+    min-height: 0px !important;
+}
 </style>
 """
 st.markdown(global_ahp_css, unsafe_allow_html=True)
