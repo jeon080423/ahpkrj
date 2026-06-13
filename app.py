@@ -2774,8 +2774,13 @@ with col_settings:
         """))
 
     if st.session_state.get('lang', 'ko') == 'ko':
-        st.markdown("<br/>", unsafe_allow_html=True)
-        st.markdown("<a href='https://raw.githubusercontent.com/jeon080423/ahpkrj/main/AHP_Master_Accuracy_Paper.pdf' target='_blank' style='text-decoration: underline; font-weight: bold; font-size: 14px;'>📄 AHP 정확성 검증 논문 (PDF)</a>", unsafe_allow_html=True)
+        pdf_path = "AHP_Master_Accuracy_Paper.pdf"
+        if os.path.exists(pdf_path):
+            with open(pdf_path, "rb") as f:
+                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+            pdf_html = f'<a href="data:application/pdf;base64,{base64_pdf}" download="AHP_Master_Accuracy_Paper.pdf" style="text-decoration: underline; font-weight: bold; font-size: 14px; color: #1B2A4A;">📄 AHP 정확성 검증 논문 (PDF) 다운로드</a>'
+            st.markdown("<br/>", unsafe_allow_html=True)
+            st.markdown(pdf_html, unsafe_allow_html=True)
 
 with col_main:
                 
