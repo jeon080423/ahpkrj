@@ -76,7 +76,7 @@ def get_survey_gspread_client():
         st.error(f"gspread 인증 에러: {e}")
         return None
 
-def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, rewards_info):
+def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, rewards_info, description=""):
     """
     고유한 Google Sheet를 동적으로 신규 생성하고 관리자 계정에 쓰기 권한을 부여합니다.
     """
@@ -93,7 +93,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         drive_service.files().emptyTrash().execute()
     except Exception as e_trash:
         pass
-
+ 
     # 1. 스프레드시트 신규 생성
     spreadsheet = client.create(f"[AHP 설문] {title}")
     
@@ -126,7 +126,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                 pass
         except Exception as e:
             st.warning(f"설문조사 담당자 이메일 공유 설정 중 문제 발생: {e}")
-
+ 
     # 3. Sheet 1: Survey_Metadata 생성 및 설정
     meta_sheet = spreadsheet.sheet1
     meta_sheet.update_title("Survey_Metadata")
@@ -134,6 +134,8 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     metadata = [
         ["Field", "Value"],
         ["Title", title],
+        ["Description", description],
+        ["Admin_Email", admin_email],
         ["AHP_Model_JSON", json.dumps(ahp_model, ensure_ascii=False)],
         ["Scale_Type", scale_type],
         ["Demographics", json.dumps(demographics, ensure_ascii=False)],
@@ -143,7 +145,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["Visit_Count", "0"],
         ["Abandoned_CR_Count", "0"]
     ]
-    meta_sheet.update(range_name="A1:B11", values=metadata)
+    meta_sheet.update(range_name="A1:B13", values=metadata)
     
     # 4. Sheet 2: Raw_Data 생성
     raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")

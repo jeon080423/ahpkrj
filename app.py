@@ -160,7 +160,7 @@ seo_tags = """<div style="display:none;">
 <p>Программное обеспечение и калькулятор для метода анализа иерархий (AHP). Идеально подходит для академических диссертаций.</p>
 <h2>عملية التحليل الهرمي (AHP) و عملية التحليل الهرمي الضبابي</h2>
 <p>برنامج آلي لعملية التحليل الهرمي (AHP) للرسائل الأكاديمية والبحوث.</p>
-<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'KbMsp4y15le5XNyK05UEr6Nq6'},{name:'description',content:'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.'},{name:'keywords',content:'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP'},{property:'og:title',content:'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템'},{property:'og:description',content:'학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'KbMsp4y15le5XNyK05UEr6Nq6'},{name:'description',content:'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.'},{name:'keywords',content:'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP'},{property:'og:title',content:'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템'},{property:'og:description',content:'학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
 </div>"""
 st.markdown(seo_tags, unsafe_allow_html=True)
 
@@ -273,9 +273,27 @@ div.st-key-ahp_survey_matrix {
     position: absolute !important;
 }
 
-/* 동그라미 컨테이너 중앙 정렬 */
+/* stMarkdownContainer의 negative margin 제거하여 컬럼간 수직 평행 맞춤 */
+.st-key-ahp_survey_matrix div[data-testid="stMarkdownContainer"] {
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+/* 라디오 항목 내부의 markdown 컨테이너(텍스트용) 완전히 감추기 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+    display: none !important;
+    height: 0px !important;
+    width: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+}
+
+/* 동그라미 컨테이너 중앙 정렬 및 여백 마진 제거 */
 .st-key-ahp_survey_matrix label span {
-    margin: 0px auto !important;
+    margin: 0px !important;
     padding: 0px !important;
 }
 
@@ -1640,6 +1658,30 @@ if "preview_id" in q_params or "survey_id" in q_params:
         
     st.title(survey_meta.get('Title', 'AHP 온라인 설문조사'))
     
+    # 조사 목적 및 안내문, 설문 담당자 이메일 표시 (깔끔한 디자인 적용)
+    survey_desc = survey_meta.get("Description", "")
+    survey_email = survey_meta.get("Admin_Email", "temp@ahpmaster.com")
+    if not survey_email or str(survey_email).strip() == "":
+        survey_email = "temp@ahpmaster.com"
+    
+    if survey_desc or survey_email:
+        email_html = f"""
+        <div style="margin-top: 10px; font-size: 0.88rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 8px; display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600;">📧 설문 담당자 문의:</span>
+            <a href="mailto:{survey_email}" style="color: #2563eb; text-decoration: none; font-weight: 500;">{survey_email}</a>
+        </div>
+        """ if survey_email else ""
+        
+        desc_box_html = f"""
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 20px; line-height: 1.6; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <div style="font-size: 0.95rem; color: #334155; font-weight: 400; white-space: pre-wrap;">
+                {survey_desc}
+            </div>
+            {email_html}
+        </div>
+        """
+        st.markdown(desc_box_html, unsafe_allow_html=True)
+    
     # 모델 정보와 인구통계 추출
     ahp_model = survey_meta["AHP_Model_JSON"]
     demographics = survey_meta["Demographics"]
@@ -1647,6 +1689,16 @@ if "preview_id" in q_params or "survey_id" in q_params:
     cr_limit = survey_meta["CR_Limit"]
     rewards_info = survey_meta["Rewards_Info"]
     scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
+    
+    # AHP 쌍대비교 기본 선택값을 1(동등)로 설정하기 위해 session_state 사전 초기화 (버전 v3 적용으로 세션 캐시 갱신)
+    init_key = f"init_survey_{survey_id_param}_v3"
+    if init_key not in st.session_state:
+        st.session_state[init_key] = True
+        combinations = generate_pairwise_combinations(ahp_model)
+        for comb in combinations:
+            for left_f, right_f in comb["pairs"]:
+                pair_key = f"{left_f}_{right_f}"
+                st.session_state[f"pair_ans_{pair_key}"] = 1
     
     # 단일 스크롤 폼 생성
     # respondent_survey_form context split - sections 1,2,3 are now outside the form
@@ -1739,69 +1791,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     st.divider()
     
-    # 2. 요인 조작적 정의 설명란 표시
-    if definitions:
-        st.subheader(f"{section_num}. 평가 요인 정의 및 설명")
-        section_num += 1
-        
-        main_criteria = ahp_model.get("main", [])
-        subs_map = ahp_model.get("subs", {})
-        rendered_factors = set()
-        
-        for i, main_factor in enumerate(main_criteria):
-            palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
-            bg = palette["bg"]
-            text_color = palette["text"]
-            border = palette["border"]
-            
-            main_desc = definitions.get(main_factor, "")
-            rendered_factors.add(main_factor)
-            
-            # 하위 요인 목록 추출 및 HTML 조립
-            subs = subs_map.get(main_factor, [])
-            sub_rows_html = ""
-            for sub_factor in subs:
-                sub_desc = definitions.get(sub_factor, "")
-                rendered_factors.add(sub_factor)
-                if sub_desc:
-                    sub_rows_html += f"""
-                    <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
-                        <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{sub_factor}</span>
-                        <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{sub_desc}</span>
-                    </div>
-                    """
-            
-            if main_desc or sub_rows_html:
-                main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
-                sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
-                
-                card_html = f"""
-                <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                        <span style="background-color: {text_color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">대분류</span>
-                        {main_factor}
-                    </h4>
-                    {main_desc_html}
-                    {sub_container_html}
-                </div>
-                """
-                st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
-        
-        # 대분류/하위분류 어디에도 속하지 않는 정의 요인이 있다면 예외 처리로 출력
-        other_html = ""
-        for factor_name, def_text in definitions.items():
-            if factor_name not in rendered_factors and def_text:
-                other_html += f"<div style='margin-bottom: 6px; padding: 4px 0;'><strong>• {factor_name}</strong>: {def_text}</div>"
-        
-        if other_html:
-            st.markdown(f"<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-top: 10px;'>{other_html}</div>".replace("\n", " "), unsafe_allow_html=True)
-            
-        st.divider()
-        
     # 3. 사전 중요도 순위 지정
     st.subheader(f"{section_num}. 요인별 전반적 중요도 순위 지정 (사전 순위)")
     section_num += 1
-    st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
+    st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.")
     main_criteria = ahp_model.get("main", [])
     # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
     if main_criteria:
@@ -1848,10 +1841,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
         section_num += 1
         
         st.markdown("""
-        **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 더 중요한 요인 방향으로 중요도 점수를 선택해 주세요.
-        - **동등(1)**: 양쪽 요인이 똑같이 중요함
-        - **좌측 요인 선택 시**: 음수 방향으로 체크 (예: -3, -5 등)
-        - **우측 요인 선택 시**: 양수 방향으로 체크 (예: 3, 5 등)
+        **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 **더 중요하다고 생각하는 방향**으로 숫자를 선택해 주세요. 숫자가 클수록 해당 요인이 더 중요함을 의미합니다.
+        - **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
+        - **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
+        - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
         """)
         
         combinations = generate_pairwise_combinations(ahp_model)
@@ -1862,6 +1855,76 @@ if "preview_id" in q_params or "survey_id" in q_params:
             for comb in combinations:
                 parent_lbl = f"{ahp_section_prefix}.{comp_idx}. [{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else f"{ahp_section_prefix}.{comp_idx}. 대분류(핵심) 요인 비교"
                 st.markdown(f"#### {parent_lbl}")
+                
+                # [수정] 평가 요인 정의 및 설명을 각 척도 평가 바로 위쪽으로 이동
+                if comb['type'] == 'sub':
+                    # 해당 대분류(parent) 카드 출력
+                    main_factor = comb['parent']
+                    main_criteria = ahp_model.get("main", [])
+                    try:
+                        i = main_criteria.index(main_factor)
+                    except ValueError:
+                        i = 0
+                    palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
+                    bg = palette["bg"]
+                    text_color = palette["text"]
+                    border = palette["border"]
+                    
+                    main_desc = definitions.get(main_factor, "") if definitions else ""
+                    subs = ahp_model.get("subs", {}).get(main_factor, [])
+                    sub_rows_html = ""
+                    if definitions:
+                        for sub_factor in subs:
+                            sub_desc = definitions.get(sub_factor, "")
+                            if sub_desc:
+                                sub_rows_html += f"""
+                                <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
+                                    <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{sub_factor}</span>
+                                    <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{sub_desc}</span>
+                                </div>
+                                """
+                    
+                    if main_desc or sub_rows_html:
+                        main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
+                        sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
+                        
+                        card_html = f"""
+                        <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                                {main_factor}
+                            </h4>
+                            {main_desc_html}
+                            {sub_container_html}
+                        </div>
+                        """
+                        st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
+                else:
+                    # 대분류 핵심 요인 비교일 때, 비교 대상 대분류들의 전체 설명 노출 (테이블 형태 카드로 일치화)
+                    main_rows_html = ""
+                    if definitions:
+                        for i, mc in enumerate(ahp_model.get("main", [])):
+                            palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
+                            text_color = palette["text"]
+                            border = palette["border"]
+                            mc_desc = definitions.get(mc, "")
+                            if mc_desc:
+                                main_rows_html += f"""
+                                <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px dashed #f1f5f9;">
+                                    <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{mc}</span>
+                                    <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{mc_desc}</span>
+                                </div>
+                                """
+                    if main_rows_html:
+                        card_html = f"""
+                        <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #1e40af; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #1e40af; font-size: 1.0rem; font-weight: bold;">대분류 요인 정의</h5>
+                            <div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                {main_rows_html}
+                            </div>
+                        </div>
+                        """
+                        st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
+                
                 comp_idx += 1
             
                 # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
@@ -1944,11 +2007,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     # 왼쪽 요인명 출력
                     with row_cols[0]:
                         left_style = factor_colors.get(left_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
+                        left_desc = definitions.get(left_f, "") if definitions else ""
+                        left_desc_esc = left_desc.replace('"', '&quot;')
                         st.markdown(f"""
-                        <div style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
+                        <div title="{left_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
                                     padding: 0px 8px; background-color: {left_style["bg"]}; color: {left_style["text"]}; 
                                     border-radius: 4px; height: 28px; display: flex; align-items: center; 
-                                    justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
+                                    justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
                                 {left_f}
                         </div>
                         """, unsafe_allow_html=True)
@@ -1961,7 +2026,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                              label=f"select_{pair_key}",
                              options=clean_options,
                              index=clean_options.index(1),
-                             format_func=lambda x: "",
+                             format_func=str,
                              key=f"pair_ans_{pair_key}",
                              horizontal=True,
                              label_visibility="collapsed"
@@ -1970,11 +2035,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
                         right_style = factor_colors.get(right_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
+                        right_desc = definitions.get(right_f, "") if definitions else ""
+                        right_desc_esc = right_desc.replace('"', '&quot;')
                         st.markdown(f"""
-                        <div style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
+                        <div title="{right_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
                                     padding: 0px 8px; background-color: {right_style["bg"]}; color: {right_style["text"]}; 
                                     border-radius: 4px; height: 28px; display: flex; align-items: center; 
-                                    justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
+                                    justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
                                 {right_f}
                         </div>
                         """, unsafe_allow_html=True)
@@ -4598,7 +4665,8 @@ with col_main:
             st.subheader("섹션 1: 설문 기본 정보 설정")
             survey_title = st.text_input("설문지 제목", value="제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문")
             survey_desc = st.text_area("조사 목적 및 안내문", value="본 설문은 중소기업의 제조 환경변화에 따른 협동로봇 도입 요인들의 상대적 중요도를 결정하기 위한 조사입니다.")
-            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", placeholder="example@gmail.com")
+            default_admin_email = st.session_state.user_id if (st.session_state.user_id and "@" in st.session_state.user_id) else "temp@ahpmaster.com"
+            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", value=default_admin_email, placeholder="example@gmail.com")
             
             st.divider()
             
@@ -4679,9 +4747,15 @@ with col_main:
             for mc in main_list:
                 # 대분류명 파란색 볼드 및 이모티콘을 이용해 대조 설정
                 st.markdown(f"#### 🟦 :blue[**대분류: {mc}**]")
+                default_main_def = ""
+                if mc == "기술 요인": default_main_def = "협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인"
+                elif mc == "조직 요인": default_main_def = "협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인"
+                elif mc == "환경 요인": default_main_def = "정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인"
+                elif mc == "혁신 요인": default_main_def = "경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인"
+                
                 definitions_map[mc] = st.text_input(
                     f"👉 [{mc}] 요인의 전체적인 설명 입력",
-                    value=f"{mc}에 대한 전반적 요소를 설명합니다.",
+                    value=default_main_def or f"{mc}에 대한 전반적 요소를 설명합니다.",
                     key=f"def_main_{mc}"
                 )
                 
@@ -4698,6 +4772,14 @@ with col_main:
                         elif sc == "기술준비도": default_def = "조직원의 로봇 활용 기술 준비 수준"
                         elif sc == "금융자원": default_def = "로봇 구입을 위한 자본 여력 및 자금 조달 편의성"
                         elif sc == "교육훈련": default_def = "기술 향상을 위한 위탁/사내 교육 프로그램 유무"
+                        elif sc == "정부지원": default_def = "협동로봇 도입을 활성화하기 위한 정부의 재정 지원 및 보조금 혜택 정도"
+                        elif sc == "경쟁압력": default_def = "동종 업계 또는 경쟁사의 협동로봇 도입에 따른 경쟁적 압박 정도"
+                        elif sc == "인력난": default_def = "제조 현장의 구인난 및 생산 인력 수급의 어려움 수준"
+                        elif sc == "외부지원": default_def = "로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적/교육적 지원"
+                        elif sc == "경영진의 혁신성": default_def = "새로운 제조 기술 및 로봇 도입에 대한 최고경영자의 적극적인 의지"
+                        elif sc == "변화수용태도": default_def = "신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도"
+                        elif sc == "스마트팩토리수준": default_def = "공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준"
+                        elif sc == "지식정도": default_def = "협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준"
                         
                         definitions_map[sc] = st.text_input(
                             f"ㄴ 중분류 [{sc}] 설명 입력",
@@ -4758,6 +4840,8 @@ with col_main:
             preview_id = f"preview_{st.session_state.user_id if st.session_state.user_id else 'guest'}"
             preview_data = {
                 "Title": survey_title,
+                "Description": survey_desc,
+                "Admin_Email": survey_admin_email,
                 "AHP_Model_JSON": model_structure,
                 "Scale_Type": scale_option,
                 "Demographics": demographics_settings,
@@ -4819,7 +4903,8 @@ with col_main:
                                     demographics=demographics_settings,
                                     definition_map=definitions_map,
                                     cr_limit=cr_limit,
-                                    rewards_info=rewards_info
+                                    rewards_info=rewards_info,
+                                    description=survey_desc
                                 )
                                 
                                 # admin_surveys 테이블에 신규 설문 자동 등록
