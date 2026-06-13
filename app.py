@@ -4966,9 +4966,11 @@ with col_main:
                 1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되어 오류가 발생하지 않습니다.)
                 2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자(Editor)**로 추가합니다.
                    * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-                3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
+                3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
                 """)
+                st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
                 existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID", placeholder="https://docs.google.com/spreadsheets/d/...")
+
 
             
             # Save current state for preview tab
