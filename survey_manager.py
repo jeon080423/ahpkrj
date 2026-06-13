@@ -120,6 +120,13 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
             raw_sheet.clear()
         except gspread.WorksheetNotFound:
             raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")
+
+        # Demographic_Data 워크시트 설정
+        try:
+            demo_sheet = spreadsheet.worksheet("Demographic_Data")
+            demo_sheet.clear()
+        except gspread.WorksheetNotFound:
+            demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
             
     else:
         # [추가] 서비스 계정의 구글 드라이브 용량 초과 방지를 위한 사전 휴지통 비우기 및 오래된 파일 정리
@@ -171,6 +178,9 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         
         # 4. Sheet 2: Raw_Data 생성
         raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")
+
+        # 5. Sheet 3: Demographic_Data 생성
+        demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
         
     metadata = [
         ["Field", "Value"],
@@ -188,30 +198,16 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     ]
     meta_sheet.update(range_name="A1:B13", values=metadata)
     
-    # 헤더 구성: ID, Type, (Demographic Fields...), (Pairwise Combination Fields...)
-    headers = ["ID", "Type"]
+    # 1. Raw_Data 헤더 구성: ID, Type, (Pairwise Combination Fields...), 제출시간
+    raw_headers = ["ID", "Type"]
     
-    # 활성화된 인구통계 항목 추가
-    demo_cols = []
-    if demographics.get("name"): demo_cols.append("성명")
-    if demographics.get("age"): demo_cols.append("연령")
-    if demographics.get("gender"): demo_cols.append("성별")
-    if demographics.get("experience"): demo_cols.append("경력년수")
-    if demographics.get("affiliation"): demo_cols.append("소속")
-    if demographics.get("email"): demo_cols.append("이메일")
-    headers.extend(demo_cols)
-    
-    # 사전 순위 매기기 문항 정보 컬럼
-    headers.append("사전순위지정")
-    
-    # AHP 쌍대비교 필드명 목록 구성 (엑셀 구조와 100% 매핑되도록 생성)
-    # 대분류 조합
+    # AHP 쌍대비교 필드명 목록 구성 (대분류 조합)
     main_criteria = ahp_model.get("main", [])
     main_pairs = []
     for i in range(len(main_criteria)):
         for j in range(i + 1, len(main_criteria)):
             main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
-    headers.extend(main_pairs)
+    raw_headers.extend(main_pairs)
     
     # 중분류 조합
     sub_criteria_map = ahp_model.get("subs", {})
@@ -222,14 +218,33 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
             for i in range(len(subs)):
                 for j in range(i + 1, len(subs)):
                     sub_pairs.append(f"{subs[i]}_{subs[j]}")
-            headers.extend(sub_pairs)
+            raw_headers.extend(sub_pairs)
             
+    raw_headers.append("제출시간")
+    raw_sheet.append_row(raw_headers)
+
+    # 2. Demographic_Data 헤더 구성: ID, Type, (Demographic Fields...), 사전순위지정, (답례품_연락처...), 제출시간
+    demo_headers = ["ID", "Type"]
+    
+    # 활성화된 인구통계 항목 추가
+    demo_cols = []
+    if demographics.get("name"): demo_cols.append("성명")
+    if demographics.get("age"): demo_cols.append("연령")
+    if demographics.get("gender"): demo_cols.append("성별")
+    if demographics.get("experience"): demo_cols.append("경력년수")
+    if demographics.get("affiliation"): demo_cols.append("소속")
+    if demographics.get("email"): demo_cols.append("이메일")
+    demo_headers.extend(demo_cols)
+    
+    # 사전 순위 매기기 문항 정보 컬럼
+    demo_headers.append("사전순위지정")
+    
     # 답례품 수집용 번호/연락처
     if rewards_info.get("enabled"):
-        headers.append("답례품_연락처")
+        demo_headers.append("답례품_연락처")
         
-    headers.append("제출시간")
-    raw_sheet.append_row(headers)
+    demo_headers.append("제출시간")
+    demo_sheet.append_row(demo_headers)
     
     # 스프레드시트 ID 반환
     return spreadsheet.id
@@ -323,7 +338,7 @@ def get_survey_stats(spreadsheet_id):
 
 def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demographics_settings, model, rewards_info):
     """
-    응답 데이터를 구글 시트 Sheet 2에 추가합니다.
+    응답 데이터를 구글 시트의 Raw_Data 시트(AHP 응답)와 Demographic_Data 시트(인구통계 및 사전순위)에 각각 분할하여 저장합니다.
     구글 API 호출 실패(API 한도 도달, 일시적 네트워크 장애 등)에 대비하여 로컬 SQLite 백업 저장소에 저장하고 True를 리턴하는 Fallback 메커니즘을 적용합니다.
     """
     import datetime
@@ -332,29 +347,18 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
     # 1. 제출시간 생성
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
     
-    # 2. 행 데이터 배열 구성
-    row_data = [
-        respondent_info.get("id", str(uuid.uuid4())[:8]),
-        respondent_info.get("type", "일반")
-    ]
+    resp_id = respondent_info.get("id", str(uuid.uuid4())[:8])
+    resp_type = respondent_info.get("type", "일반")
     
-    # 인구통계
-    if demographics_settings.get("name"): row_data.append(respondent_info.get("name", ""))
-    if demographics_settings.get("age"): row_data.append(respondent_info.get("age", ""))
-    if demographics_settings.get("gender"): row_data.append(respondent_info.get("gender", ""))
-    if demographics_settings.get("experience"): row_data.append(respondent_info.get("experience", ""))
-    if demographics_settings.get("affiliation"): row_data.append(respondent_info.get("affiliation", ""))
-    if demographics_settings.get("email"): row_data.append(respondent_info.get("email", ""))
-    
-    # 사전 순위
-    row_data.append(respondent_info.get("pre_ranking", ""))
+    # 2. Raw_Data 행 데이터 구성 (ID, Type, AHP 쌍대비교 데이터, 제출시간)
+    raw_row_data = [resp_id, resp_type]
     
     # 쌍대비교 대분류 응답값 배치
     main_criteria = model.get("main", [])
     for i in range(len(main_criteria)):
         for j in range(i + 1, len(main_criteria)):
             pair_key = f"{main_criteria[i]}_{main_criteria[j]}"
-            row_data.append(ahp_answers.get(pair_key, 1))
+            raw_row_data.append(ahp_answers.get(pair_key, 1))
             
     # 쌍대비교 중분류 응답값 배치
     sub_criteria_map = model.get("subs", {})
@@ -364,15 +368,31 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
             for i in range(len(subs)):
                 for j in range(i + 1, len(subs)):
                     pair_key = f"{subs[i]}_{subs[j]}"
-                    row_data.append(ahp_answers.get(pair_key, 1))
+                    raw_row_data.append(ahp_answers.get(pair_key, 1))
                     
+    raw_row_data.append(kst_now)
+    
+    # 3. Demographic_Data 행 데이터 구성 (ID, Type, 인구통계 필드, 사전순위, 답례품 연락처, 제출시간)
+    demo_row_data = [resp_id, resp_type]
+    
+    # 인구통계
+    if demographics_settings.get("name"): demo_row_data.append(respondent_info.get("name", ""))
+    if demographics_settings.get("age"): demo_row_data.append(respondent_info.get("age", ""))
+    if demographics_settings.get("gender"): demo_row_data.append(respondent_info.get("gender", ""))
+    if demographics_settings.get("experience"): demo_row_data.append(respondent_info.get("experience", ""))
+    if demographics_settings.get("affiliation"): demo_row_data.append(respondent_info.get("affiliation", ""))
+    if demographics_settings.get("email"): demo_row_data.append(respondent_info.get("email", ""))
+    
+    # 사전 순위
+    demo_row_data.append(respondent_info.get("pre_ranking", ""))
+    
     # 답례품 연락처
     if rewards_info.get("enabled"):
-        row_data.append(respondent_info.get("reward_contact", ""))
+        demo_row_data.append(respondent_info.get("reward_contact", ""))
         
-    row_data.append(kst_now)
+    demo_row_data.append(kst_now)
     
-    # 3. 로컬 SQLite 백업 테이블에 기록 (보장성 1순위)
+    # 4. 로컬 SQLite 백업 테이블에 기록 (보장성 1순위)
     try:
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
@@ -386,12 +406,13 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
         
         # 전체 데이터 복구를 위한 JSON 구성
         complete_payload = {
-            "row_data": row_data,
+            "raw_row_data": raw_row_data,
+            "demo_row_data": demo_row_data,
             "respondent_info": respondent_info,
             "ahp_answers": ahp_answers
         }
         c.execute("INSERT INTO survey_backup_responses (survey_id, respondent_id, response_json, saved_to_sheet, created_at) VALUES (?, ?, ?, ?, ?)",
-                  (spreadsheet_id, row_data[0], json.dumps(complete_payload, ensure_ascii=False), 0, kst_now))
+                  (spreadsheet_id, resp_id, json.dumps(complete_payload, ensure_ascii=False), 0, kst_now))
         conn.commit()
         last_inserted_id = c.lastrowid
         conn.close()
@@ -400,7 +421,7 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
         last_inserted_id = None
         st.warning(f"로컬 백업 데이터베이스 기록 중 실패 (경고): {sqle}")
 
-    # 4. 구글 시트에 데이터 업로드 시도
+    # 5. 구글 시트에 데이터 업로드 시도
     admin_id = None
     try:
         conn = sqlite3.connect('users.db')
@@ -421,8 +442,37 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
         
     try:
         spreadsheet = client.open_by_key(spreadsheet_id)
+        
+        # 1) Raw_Data에 추가
         raw_sheet = spreadsheet.worksheet("Raw_Data")
-        raw_sheet.append_row(row_data)
+        raw_sheet.append_row(raw_row_data)
+        
+        # 2) Demographic_Data에 추가
+        try:
+            demo_sheet = spreadsheet.worksheet("Demographic_Data")
+            demo_sheet.append_row(demo_row_data)
+        except Exception:
+            # 혹시 모를 오류 방지 (Demographic_Data 시트가 없으면 재생성)
+            try:
+                demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
+                # 헤더 추가
+                demo_headers = ["ID", "Type"]
+                demo_cols = []
+                if demographics_settings.get("name"): demo_cols.append("성명")
+                if demographics_settings.get("age"): demo_cols.append("연령")
+                if demographics_settings.get("gender"): demo_cols.append("성별")
+                if demographics_settings.get("experience"): demo_cols.append("경력년수")
+                if demographics_settings.get("affiliation"): demo_cols.append("소속")
+                if demographics_settings.get("email"): demo_cols.append("이메일")
+                demo_headers.extend(demo_cols)
+                demo_headers.append("사전순위지정")
+                if rewards_info.get("enabled"):
+                    demo_headers.append("답례품_연락처")
+                demo_headers.append("제출시간")
+                demo_sheet.append_row(demo_headers)
+                demo_sheet.append_row(demo_row_data)
+            except:
+                pass
         
         # 구글 시트 저장 성공 시 SQLite 백업 레코드 상태값 업데이트
         if last_inserted_id is not None:
