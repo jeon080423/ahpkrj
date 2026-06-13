@@ -3234,7 +3234,7 @@ with col_main:
     has_admin_tab = (st.session_state.user_role == 'admin')
     
     if has_admin_tab:
-        main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작 (Admin)", "📊 응답현황 대시보드"])
+        main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작", "📊 응답현황 대시보드"])
     else:
         main_tab1 = st.container() # 일반 사용자는 컨테이너로 직접 단독 노출
         
