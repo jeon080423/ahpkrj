@@ -1730,7 +1730,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         {sub_container_html}
                     </div>
                     """
-                    st.markdown(card_html, unsafe_allow_html=True)
+                    st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
             
             # 대분류/하위분류 어디에도 속하지 않는 정의 요인이 있다면 예외 처리로 출력
             other_html = ""
@@ -1739,7 +1739,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     other_html += f"<div style='margin-bottom: 6px; padding: 4px 0;'><strong>• {factor_name}</strong>: {def_text}</div>"
             
             if other_html:
-                st.markdown(f"<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-top: 10px;'>{other_html}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-top: 10px;'>{other_html}</div>".replace("\n", " "), unsafe_allow_html=True)
                 
             st.divider()
             
