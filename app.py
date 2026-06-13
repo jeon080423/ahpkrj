@@ -1637,164 +1637,156 @@ if "preview_id" in q_params or "survey_id" in q_params:
     scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
     
     # 단일 스크롤 폼 생성
-    with st.form("respondent_survey_form"):
-        # Define professional soft pastel colors for factor boxes
-        PASTEL_PALETTES = [
-            {"bg": "#eff6ff", "text": "#1e40af", "border": "#bfdbfe"}, # Soft Blue
-            {"bg": "#f0fdf4", "text": "#166534", "border": "#bbf7d0"}, # Soft Green
-            {"bg": "#fff7ed", "text": "#c2410c", "border": "#fed7aa"}, # Soft Orange
-            {"bg": "#faf5ff", "text": "#6b21a8", "border": "#e9d5ff"}, # Soft Purple
-            {"bg": "#fdf2f8", "text": "#be185d", "border": "#fbcfe8"}, # Soft Pink
-            {"bg": "#f0fdfa", "text": "#0f766e", "border": "#ccfbf1"}, # Soft Teal
-            {"bg": "#fffbeb", "text": "#b45309", "border": "#fef3c7"}, # Soft Amber
-            {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"}, # Soft Slate/Gray
-        ]
-        
-        # Extract all unique factors to ensure consistent coloring
-        all_factors = []
-        for main_f in ahp_model.get("main", []):
-            if main_f not in all_factors:
-                all_factors.append(main_f)
-        for sub_list in ahp_model.get("subs", {}).values():
-            for sub_f in sub_list:
-                if sub_f not in all_factors:
-                    all_factors.append(sub_f)
-                    
-        factor_colors = {}
-        for i, f_name in enumerate(all_factors):
-            factor_colors[f_name] = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
+    # respondent_survey_form context split - sections 1,2,3 are now outside the form
+    # Define professional soft pastel colors for factor boxes
+    PASTEL_PALETTES = [
+        {"bg": "#eff6ff", "text": "#1e40af", "border": "#bfdbfe"}, # Soft Blue
+        {"bg": "#f0fdf4", "text": "#166534", "border": "#bbf7d0"}, # Soft Green
+        {"bg": "#fff7ed", "text": "#c2410c", "border": "#fed7aa"}, # Soft Orange
+        {"bg": "#faf5ff", "text": "#6b21a8", "border": "#e9d5ff"}, # Soft Purple
+        {"bg": "#fdf2f8", "text": "#be185d", "border": "#fbcfe8"}, # Soft Pink
+        {"bg": "#f0fdfa", "text": "#0f766e", "border": "#ccfbf1"}, # Soft Teal
+        {"bg": "#fffbeb", "text": "#b45309", "border": "#fef3c7"}, # Soft Amber
+        {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"}, # Soft Slate/Gray
+    ]
+    
+    # Extract all unique factors to ensure consistent coloring
+    all_factors = []
+    for main_f in ahp_model.get("main", []):
+        if main_f not in all_factors:
+            all_factors.append(main_f)
+    for sub_list in ahp_model.get("subs", {}).values():
+        for sub_f in sub_list:
+            if sub_f not in all_factors:
+                all_factors.append(sub_f)
+                
+    factor_colors = {}
+    for i, f_name in enumerate(all_factors):
+        factor_colors[f_name] = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
 
-        section_num = 1
+    section_num = 1
 
-        # 1. 응답자 기본 정보
-        st.subheader(f"{section_num}. 응답자 기본 정보")
+    # 1. 응답자 기본 정보
+    st.subheader(f"{section_num}. 응답자 기본 정보")
+    section_num += 1
+    resp_data = {}
+    
+    # 100% 매핑에 맞게 ID 및 Type 추가 지정
+    resp_data["id"] = st.text_input("ID (선택 사항)", placeholder="미입력 시 무작위 자동 부여됩니다.", key="survey_resp_id")
+    resp_data["type"] = st.selectbox("그룹 분류 (Type)", ["전문가", "일반", "공무원", "기타"], index=1, key="survey_resp_type")
+    
+    if demographics.get("name"): resp_data["name"] = st.text_input("성명 *", key="survey_resp_name")
+    if demographics.get("age"): resp_data["age"] = st.number_input("연령 (세) *", min_value=1, max_value=120, value=30, key="survey_resp_age")
+    if demographics.get("gender"): resp_data["gender"] = st.radio("성별 *", ["남자", "여자"], key="survey_resp_gender")
+    if demographics.get("experience"): resp_data["experience"] = st.number_input("경력년수 *", min_value=0, max_value=60, value=5, key="survey_resp_experience")
+    if demographics.get("affiliation"): resp_data["affiliation"] = st.text_input("소속 *", key="survey_resp_affiliation")
+    if demographics.get("email"): resp_data["email"] = st.text_input("이메일 *", key="survey_resp_email")
+    
+    st.divider()
+    
+    # 2. 요인 조작적 정의 설명란 표시
+    if definitions:
+        st.subheader(f"{section_num}. 평가 요인 정의 및 설명")
         section_num += 1
-        resp_data = {}
         
-        # 100% 매핑에 맞게 ID 및 Type 추가 지정
-        resp_data["id"] = st.text_input("ID (선택 사항)", placeholder="미입력 시 무작위 자동 부여됩니다.")
-        resp_data["type"] = st.selectbox("그룹 분류 (Type)", ["전문가", "일반", "공무원", "기타"], index=1)
+        main_criteria = ahp_model.get("main", [])
+        subs_map = ahp_model.get("subs", {})
+        rendered_factors = set()
         
-        if demographics.get("name"): resp_data["name"] = st.text_input("성명 *")
-        if demographics.get("age"): resp_data["age"] = st.number_input("연령 (세) *", min_value=1, max_value=120, value=30)
-        if demographics.get("gender"): resp_data["gender"] = st.radio("성별 *", ["남자", "여자"])
-        if demographics.get("experience"): resp_data["experience"] = st.number_input("경력년수 *", min_value=0, max_value=60, value=5)
-        if demographics.get("affiliation"): resp_data["affiliation"] = st.text_input("소속 *")
-        if demographics.get("email"): resp_data["email"] = st.text_input("이메일 *")
-        
-        st.divider()
-        
-        # 2. 요인 조작적 정의 설명란 표시
-        if definitions:
-            st.subheader(f"{section_num}. 평가 요인 정의 및 설명")
-            section_num += 1
+        for i, main_factor in enumerate(main_criteria):
+            palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
+            bg = palette["bg"]
+            text_color = palette["text"]
+            border = palette["border"]
             
-            main_criteria = ahp_model.get("main", [])
-            subs_map = ahp_model.get("subs", {})
-            rendered_factors = set()
+            main_desc = definitions.get(main_factor, "")
+            rendered_factors.add(main_factor)
             
-            for i, main_factor in enumerate(main_criteria):
-                palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
-                bg = palette["bg"]
-                text_color = palette["text"]
-                border = palette["border"]
-                
-                main_desc = definitions.get(main_factor, "")
-                rendered_factors.add(main_factor)
-                
-                # 하위 요인 목록 추출 및 HTML 조립
-                subs = subs_map.get(main_factor, [])
-                sub_rows_html = ""
-                for sub_factor in subs:
-                    sub_desc = definitions.get(sub_factor, "")
-                    rendered_factors.add(sub_factor)
-                    if sub_desc:
-                        sub_rows_html += f"""
-                        <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
-                            <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{sub_factor}</span>
-                            <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{sub_desc}</span>
-                        </div>
-                        """
-                
-                if main_desc or sub_rows_html:
-                    main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
-                    sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
-                    
-                    card_html = f"""
-                    <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                            <span style="background-color: {text_color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">대분류</span>
-                            {main_factor}
-                        </h4>
-                        {main_desc_html}
-                        {sub_container_html}
+            # 하위 요인 목록 추출 및 HTML 조립
+            subs = subs_map.get(main_factor, [])
+            sub_rows_html = ""
+            for sub_factor in subs:
+                sub_desc = definitions.get(sub_factor, "")
+                rendered_factors.add(sub_factor)
+                if sub_desc:
+                    sub_rows_html += f"""
+                    <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
+                        <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{sub_factor}</span>
+                        <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{sub_desc}</span>
                     </div>
                     """
-                    st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
             
-            # 대분류/하위분류 어디에도 속하지 않는 정의 요인이 있다면 예외 처리로 출력
-            other_html = ""
-            for factor_name, def_text in definitions.items():
-                if factor_name not in rendered_factors and def_text:
-                    other_html += f"<div style='margin-bottom: 6px; padding: 4px 0;'><strong>• {factor_name}</strong>: {def_text}</div>"
-            
-            if other_html:
-                st.markdown(f"<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-top: 10px;'>{other_html}</div>".replace("\n", " "), unsafe_allow_html=True)
+            if main_desc or sub_rows_html:
+                main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
+                sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
                 
-            st.divider()
-            
-        # 3. 사전 중요도 순위 지정
-        st.subheader(f"{section_num}. 요인별 전반적 중요도 순위 지정 (사전 순위)")
-        section_num += 1
-        st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
-        main_criteria = ahp_model.get("main", [])
-        # 중복 선택 방지를 위해 각 순위별 상태를 담을 세션 리스트 초기화 및 동적 보정
-        if main_criteria:
-            if "pre_rank_selections" not in st.session_state:
-                st.session_state.pre_rank_selections = ["선택해 주세요"] * len(main_criteria)
-            # 대분류 개수가 변한 경우 리스트 리셋
-            if len(st.session_state.pre_rank_selections) != len(main_criteria):
-                st.session_state.pre_rank_selections = ["선택해 주세요"] * len(main_criteria)
+                card_html = f"""
+                <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                        <span style="background-color: {text_color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">대분류</span>
+                        {main_factor}
+                    </h4>
+                    {main_desc_html}
+                    {sub_container_html}
+                </div>
+                """
+                st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
         
-        # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
-        if main_criteria:
-            cols = st.columns(len(main_criteria))
-            pre_rankings = []
-            
-            # 이전 단계의 선택 상태를 활용하여 연쇄 필터링 및 selectbox 렌더링
-            for rank_idx in range(len(main_criteria)):
-                with cols[rank_idx]:
-                    # 1단계: 전체 요인 중 현재 순위 이전에 선택한 요인들을 제외
-                    available_options = [opt for opt in main_criteria if opt not in pre_rankings]
-                    options = ["선택해 주세요"] + available_options
-                    
-                    # 2단계: 기존 선택값이 현재 선택 가능 옵션 목록에 존재하면 그 위치를 기본값으로, 없으면 "선택해 주세요"로 초기화
-                    current_val = st.session_state.pre_rank_selections[rank_idx]
-                    if current_val in options:
-                        default_index = options.index(current_val)
-                    else:
-                        default_index = 0
-                        st.session_state.pre_rank_selections[rank_idx] = "선택해 주세요"
-                    
-                    selected_f = st.selectbox(
-                        f"{rank_idx+1}순위 요인 선택 *",
-                        options,
-                        index=default_index,
-                        key=f"pre_rank_widget_{rank_idx}"
-                    )
-                    
-                    # 선택값 업데이트
-                    st.session_state.pre_rank_selections[rank_idx] = selected_f
-                    
-                    if selected_f != "선택해 주세요":
-                        pre_rankings.append(selected_f)
-            
-            resp_data["pre_ranking"] = "-".join(pre_rankings)
-        else:
-            resp_data["pre_ranking"] = ""
+        # 대분류/하위분류 어디에도 속하지 않는 정의 요인이 있다면 예외 처리로 출력
+        other_html = ""
+        for factor_name, def_text in definitions.items():
+            if factor_name not in rendered_factors and def_text:
+                other_html += f"<div style='margin-bottom: 6px; padding: 4px 0;'><strong>• {factor_name}</strong>: {def_text}</div>"
         
+        if other_html:
+            st.markdown(f"<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-top: 10px;'>{other_html}</div>".replace("\n", " "), unsafe_allow_html=True)
+            
         st.divider()
         
+    # 3. 사전 중요도 순위 지정
+    st.subheader(f"{section_num}. 요인별 전반적 중요도 순위 지정 (사전 순위)")
+    section_num += 1
+    st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오. (앞 순위에서 이미 선택한 요인은 다음 순위에서 자동으로 제외됩니다)")
+    main_criteria = ahp_model.get("main", [])
+    # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
+    if main_criteria:
+        cols = st.columns(len(main_criteria))
+        pre_rankings = []
+        
+        # 이전 단계의 선택 상태를 활용하여 연쇄 필터링 및 selectbox 렌더링
+        for rank_idx in range(len(main_criteria)):
+            with cols[rank_idx]:
+                # 1단계: 전체 요인 중 현재 순위 이전에 선택한 요인들을 제외
+                available_options = [opt for opt in main_criteria if opt not in pre_rankings]
+                options = ["선택해 주세요"] + available_options
+                
+                # 2단계: 기존 선택값이 현재 선택 가능 옵션 목록에 존재하면 사용하고, 없으면 widget의 session state를 직접 초기화
+                widget_key = f"pre_rank_widget_{rank_idx}"
+                current_val = st.session_state.get(widget_key, "선택해 주세요")
+                
+                if current_val not in options:
+                    st.session_state[widget_key] = "선택해 주세요"
+                    current_val = "선택해 주세요"
+                
+                default_index = options.index(current_val)
+                
+                selected_f = st.selectbox(
+                    f"{rank_idx+1}순위 요인 선택 *",
+                    options,
+                    index=default_index,
+                    key=widget_key
+                )
+                
+                if selected_f != "선택해 주세요":
+                    pre_rankings.append(selected_f)
+        
+        resp_data["pre_ranking"] = "-".join(pre_rankings)
+    else:
+        resp_data["pre_ranking"] = ""
+    
+    st.divider()
+    
+    with st.form("respondent_survey_form"):
         # 4. AHP 쌍대비교 문항 생성
         st.subheader(f"{section_num}. 요인 간 상대적 중요도 평가 (쌍대비교)")
         ahp_section_prefix = f"{section_num}"
