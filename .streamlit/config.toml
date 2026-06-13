@@ -1,2 +1,6 @@
 [client]
 toolbarMode = "viewer"
+
+[server]
+enableStaticServing = true
+
