@@ -1671,14 +1671,41 @@ if "preview_id" in q_params or "survey_id" in q_params:
     section_num += 1
     resp_data = {}
     
-    # 100% 매핑에 맞게 ID 및 Type 추가 지정
-    resp_data["id"] = st.text_input("ID (선택 사항)", placeholder="미입력 시 무작위 자동 부여됩니다.", key="survey_resp_id")
-    resp_data["type"] = st.selectbox("그룹 분류 (Type)", ["전문가", "일반", "공무원", "기타"], index=1, key="survey_resp_type")
+    # 아이디는 응답자에게 제시하지 말고 임의로 무작위 자동 부여
+    if "survey_resp_uuid" not in st.session_state:
+        import uuid
+        st.session_state.survey_resp_uuid = str(uuid.uuid4())[:8]
+    resp_data["id"] = st.session_state.survey_resp_uuid
+    
+    # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
+    type_q = demographics.get("type_question", "그룹 분류 (Type)")
+    type_opts = demographics.get("type_options", ["전문가", "일반", "공무원", "기타"])
+    if not isinstance(type_opts, list) or not type_opts:
+        type_opts = ["전문가", "일반", "공무원", "기타"]
+    resp_data["type"] = st.selectbox(type_q, type_opts, index=0, key="survey_resp_type")
     
     if demographics.get("name"): resp_data["name"] = st.text_input("성명 *", key="survey_resp_name")
-    if demographics.get("age"): resp_data["age"] = st.number_input("연령 (세) *", min_value=1, max_value=120, value=30, key="survey_resp_age")
+    
+    # 연령: 개방형 vs 10세 단위 선택형
+    if demographics.get("age"):
+        age_type = demographics.get("age_type", "개방형 (숫자 직접 입력)")
+        if age_type == "10세 단위 선택형":
+            age_options = ["20대 미만", "20대 (20~29세)", "30대 (30~39세)", "40대 (40~49세)", "50대 (50~59세)", "60대 이상"]
+            resp_data["age"] = st.selectbox("연령 *", age_options, key="survey_resp_age")
+        else:
+            resp_data["age"] = st.number_input("연령 (세) *", min_value=1, max_value=120, value=30, key="survey_resp_age")
+            
     if demographics.get("gender"): resp_data["gender"] = st.radio("성별 *", ["남자", "여자"], key="survey_resp_gender")
-    if demographics.get("experience"): resp_data["experience"] = st.number_input("경력년수 *", min_value=0, max_value=60, value=5, key="survey_resp_experience")
+    
+    # 경력년수: 개방형 vs 5년 단위 선택형
+    if demographics.get("experience"):
+        exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
+        if exp_type == "5년 단위 선택형":
+            exp_options = ["5년 미만", "5년 이상 ~ 10년 미만", "10년 이상 ~ 15년 미만", "15년 이상 ~ 20년 미만", "20년 이상"]
+            resp_data["experience"] = st.selectbox("경력년수 *", exp_options, key="survey_resp_experience")
+        else:
+            resp_data["experience"] = st.number_input("경력년수 *", min_value=0, max_value=60, value=5, key="survey_resp_experience")
+            
     if demographics.get("affiliation"): resp_data["affiliation"] = st.text_input("소속 *", key="survey_resp_affiliation")
     if demographics.get("email"): resp_data["email"] = st.text_input("이메일 *", key="survey_resp_email")
     
@@ -4548,21 +4575,49 @@ with col_main:
             
             st.divider()
             
-            # 섹션 1.5: 응답자 인구통계학적 정보 체크박스
-            st.subheader("섹션 1.5: 응답자 수집 정보 (인구통계학적 문항)")
-            demo_age = st.checkbox("연령(숫자) 수집", value=True)
-            demo_gender = st.checkbox("성별 수집", value=True)
-            demo_exp = st.checkbox("경력년수(숫자) 수집", value=True)
-            demo_aff = st.checkbox("소속 수집", value=True)
-            demo_email = st.checkbox("이메일 수집", value=True)
+            # 섹션 1.5: 응답자 수집 정보 및 그룹 분류 설정
+            st.subheader("섹션 1.5: 응답자 수집 정보 및 그룹 분류")
+            
+            # 그룹 분류 설정
+            with st.container(border=True):
+                st.markdown("**👥 그룹 분류 문항 설정**")
+                type_question = st.text_input("그룹 분류 질문 제목", value="그룹 분류 (Type)")
+                type_options = st.text_input("그룹 분류 보기 옵션 (콤마로 구분)", value="전문가, 일반, 공무원, 기타")
+            
+            st.write("")
+            
+            # 인구통계학 정보 설정
+            with st.container(border=True):
+                st.markdown("**📊 인구통계학적 문항 수집 설정**")
+                demo_gender = st.checkbox("성별 수집", value=True)
+                demo_aff = st.checkbox("소속 수집", value=True)
+                demo_email = st.checkbox("이메일 수집", value=True)
+                
+                st.divider()
+                
+                demo_age = st.checkbox("연령 수집", value=True)
+                age_type = "개방형 (숫자 직접 입력)"
+                if demo_age:
+                    age_type = st.radio("연령 수집 방식", ["개방형 (숫자 직접 입력)", "10세 단위 선택형"], index=0, horizontal=True, key="survey_age_type_setup")
+                    
+                st.divider()
+                
+                demo_exp = st.checkbox("경력년수 수집", value=True)
+                exp_type = "개방형 (숫자 직접 입력)"
+                if demo_exp:
+                    exp_type = st.radio("경력년수 수집 방식", ["개방형 (숫자 직접 입력)", "5년 단위 선택형"], index=0, horizontal=True, key="survey_exp_type_setup")
             
             demographics_settings = {
                 "name": False,  # 성명 수집 삭제
                 "age": demo_age,
+                "age_type": age_type,
                 "gender": demo_gender,
                 "experience": demo_exp,
+                "experience_type": exp_type,
                 "affiliation": demo_aff,
-                "email": demo_email
+                "email": demo_email,
+                "type_question": type_question,
+                "type_options": [x.strip() for x in type_options.split(",") if x.strip()]
             }
             
             st.divider()
