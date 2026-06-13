@@ -2773,6 +2773,9 @@ with col_settings:
         > "The survey data collected in this study was analyzed using 'AHP Master', a web-based dedicated AHP analysis solution. Pairwise comparison matrices were constructed in accordance with Saaty's (1980) Analytic Hierarchy Process to calculate local and global weights, and the validity of the results was secured through the system's consistency ratio (CR) adjustment function to ensure CR was below 0.1."
         """))
 
+    st.markdown("<br/>", unsafe_allow_html=True)
+    st.link_button("📄 AHP 정확성 검증 논문 (PDF)", "https://github.com/jeon080423/ahpkrj/raw/main/AHP_Master_Accuracy_Paper.pdf", use_container_width=True)
+
 with col_main:
                 
     
