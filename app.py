@@ -471,6 +471,8 @@ def init_db():
                   (ip_address TEXT, visit_date TEXT, PRIMARY KEY (ip_address, visit_date))''')
     c.execute('''CREATE TABLE IF NOT EXISTS admin_surveys
                   (survey_id TEXT PRIMARY KEY, title TEXT, admin_id TEXT, created_at TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS user_google_credentials
+                  (user_id TEXT PRIMARY KEY, token TEXT, refresh_token TEXT, token_uri TEXT, client_id TEXT, client_secret TEXT, scopes TEXT, expiry TEXT)''')
     
     # 관리자 계정 생성
     try:
@@ -1615,6 +1617,56 @@ except AttributeError:
         q_params = {}
 
 # -----------------------------------------------------------------------------
+# 구글 OAuth 2.0 콜백 처리
+# -----------------------------------------------------------------------------
+if "code" in q_params and st.session_state.user_id:
+    import os
+    if os.name == 'nt':
+        redirect_uri = "http://localhost:8501/"
+    else:
+        redirect_uri = "https://ahpkrj.streamlit.app/"
+        
+    code_val = q_params["code"]
+    if isinstance(code_val, list):
+        code_val = code_val[0]
+        
+    from survey_manager import get_google_oauth_flow
+    flow = get_google_oauth_flow(redirect_uri)
+    if flow:
+        try:
+            flow.fetch_token(code=code_val)
+            creds = flow.credentials
+            
+            import sqlite3
+            import json
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("""
+                INSERT OR REPLACE INTO user_google_credentials 
+                (user_id, token, refresh_token, token_uri, client_id, client_secret, scopes, expiry)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                st.session_state.user_id,
+                creds.token,
+                creds.refresh_token,
+                creds.token_uri,
+                creds.client_id,
+                creds.client_secret,
+                json.dumps(creds.scopes),
+                creds.expiry.isoformat() if hasattr(creds.expiry, 'isoformat') else str(creds.expiry)
+            ))
+            conn.commit()
+            conn.close()
+            
+            st.success("🎉 구글 계정 연동이 완료되었습니다!")
+            st.query_params.clear()
+            st.rerun()
+        except Exception as oauth_err:
+            st.error(f"구글 계정 연동 실패: {oauth_err}")
+            st.query_params.clear()
+
+
+# -----------------------------------------------------------------------------
 # [신규] 동적 라우팅 - 응답자 설문 참여 SPA (Single Page Application)
 # -----------------------------------------------------------------------------
 if "preview_id" in q_params or "survey_id" in q_params:
@@ -2576,6 +2628,67 @@ with st.sidebar:
                         st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
                     else:
                         st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
+
+        # [추가] 구글 계정 연동 설정 UI (구글 드라이브/스프레드시트 개별 연동)
+        with st.expander(_("📊 구글 스프레드시트 계정 연동 설정", "📊 Google Sheets Account Integration")):
+            import sqlite3
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("SELECT user_id FROM user_google_credentials WHERE user_id = ?", (st.session_state.user_id,))
+            has_linked = c.fetchone() is not None
+            conn.close()
+            
+            if has_linked:
+                st.success(_("✅ 구글 계정이 연동되어 있습니다. (이 사용자가 생성하는 설문지는 본인 드라이브에 직접 생성됩니다.)", "✅ Google account is connected. (Surveys you create will be stored directly in your own Drive.)"))
+                if st.button(_("연동 해제하기", "Disconnect Account"), key="btn_unlink_google"):
+                    conn = sqlite3.connect('users.db')
+                    c = conn.cursor()
+                    c.execute("DELETE FROM user_google_credentials WHERE user_id = ?", (st.session_state.user_id,))
+                    conn.commit()
+                    conn.close()
+                    st.success(_("구글 계정 연동이 해제되었습니다.", "Google account has been disconnected."))
+                    st.rerun()
+            else:
+                st.warning(_("현재 공용 서비스 계정을 사용 중입니다. 개인 구글 계정을 연동하면 본인 드라이브에 직접 시트를 생성할 수 있습니다.", "Currently using shared service account. Connect your personal Google account to create sheets in your own Drive."))
+                
+                # OAuth Flow 링크 생성
+                import os
+                if os.name == 'nt':
+                    redirect_uri = "http://localhost:8501/"
+                else:
+                    redirect_uri = "https://ahpkrj.streamlit.app/"
+                
+                from survey_manager import get_google_oauth_flow
+                flow = get_google_oauth_flow(redirect_uri)
+                if flow:
+                    auth_url, _state = flow.authorization_url(prompt='consent', access_type='offline')
+                    st.markdown(f"""
+                        <a href="{auth_url}" target="_self" style="text-decoration: none;">
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                width: 100%;
+                                padding: 0.5rem;
+                                border: 1px solid #4f46e5;
+                                border-radius: 6px;
+                                background-color: #4f46e5;
+                                color: white;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                text-align: center;
+                                transition: background-color 0.2s;
+                            "
+                            onmouseover="this.style.backgroundColor='#4338ca';"
+                            onmouseout="this.style.backgroundColor='#4f46e5';"
+                            >
+                                🔗 구글 계정 로그인 및 연동하기
+                            </div>
+                        </a>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.error(_("구글 API 설정(client_id, client_secret)이 누락되어 연동을 시작할 수 없습니다. 관리자에게 문의하세요.", "Google API settings missing. Please contact the administrator."))
 
         if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
             st.session_state.user_id = None
@@ -4928,7 +5041,8 @@ with col_main:
                                     cr_limit=cr_limit,
                                     rewards_info=rewards_info,
                                     description=survey_desc,
-                                    existing_sheet_id=target_sheet_id if use_existing_sheet else None
+                                    existing_sheet_id=target_sheet_id if use_existing_sheet else None,
+                                    user_id=st.session_state.user_id
                                 )
 
                                 
