@@ -3231,12 +3231,7 @@ with col_main:
     # [수정] 관리자용 상단 탭 연동 (Tab 1: 분석, Tab 2: 설문지 제작)
     # 일반 사용자에게는 Tab 1 화면(분석)만 직접 단일 노출시킵니다.
     # -------------------------------------------------------------------------
-    has_admin_tab = (st.session_state.user_role == 'admin')
-    
-    if has_admin_tab:
-        main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작", "📊 응답현황 대시보드"])
-    else:
-        main_tab1 = st.container() # 일반 사용자는 컨테이너로 직접 단독 노출
+    main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작", "📊 응답현황 대시보드"])
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
@@ -4797,21 +4792,25 @@ with col_main:
             st.error(f"파일 처리 오류 발생: {e}")
             
     # -------------------------------------------------------------------------
-    # [신규] 관리자용 온라인 설문지 제작 탭 (Tab 2) 상세 구현
+    # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
     # -------------------------------------------------------------------------
-    if has_admin_tab:
-        with main_tab2:
-            st.header("📝 AHP 온라인 설문 자동 생성 및 배포기")
+    with main_tab2:
+        st.header("📝 AHP 온라인 설문 자동 생성 및 배포기")
+        if st.session_state.user_id is None:
+            st.warning("🔒 **온라인 설문지 제작 기능은 회원 전용 서비스입니다.**")
+            st.info("회원가입 및 로그인을 완료하시면 제한 없이 AHP 온라인 설문지를 자동 생성하고 본인의 구글 스프레드시트와 연동할 수 있습니다.  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
+        else:
+
             st.info("모든 응답 데이터는 이용자 본인의 구글 계정(연동한 구글 스프레드시트)을 통해 저장되므로, 설문 배포 전에 테스트 응답을 제출하여 실제 시트에 정상적으로 데이터가 기록되는지 반드시 직접 미리 확인해야 합니다.")
             st.warning("⚠️ **주의 및 경고:** 본 플랫폼은 데이터 저장 오류, 구글 API 연동 해제, 네트워크 장애 또는 관리 미흡 등으로 인한 데이터의 유실이나 소실에 대해 어떠한 법적/기술적 책임도 지지 않습니다. 중요 데이터는 실시간 구글 시트 확인 및 서버 로컬 안전 백업을 통해 주기적으로 다운로드하여 보관해 주시기 바랍니다.")
-            
+
             # (Dashboard moved to main_tab3 below)
             pass
-                    
+
             st.divider()
-            
+
             from survey_manager import create_survey_sheet, generate_pairwise_combinations
-            
+
             # 7개 섹션 설문지 생성 폼 구성
             # 섹션 1: 기본 정보
             st.subheader("섹션 1: 설문 기본 정보 설정")
@@ -4827,41 +4826,41 @@ with col_main:
             else:
                 default_admin_email = "temp@ahpmaster.com"
             survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", value=default_admin_email, placeholder="example@gmail.com")
-            
+
             st.divider()
-            
+
             # 섹션 1.5: 응답자 수집 정보 및 그룹 분류 설정
             st.subheader("섹션 1.5: 응답자 수집 정보 및 그룹 분류")
-            
+
             # 그룹 분류 설정
             with st.container(border=True):
                 st.markdown("**👥 그룹 분류 문항 설정**")
                 type_question = st.text_input("그룹 분류 질문 제목", value="그룹 분류 (Type)")
                 type_options = st.text_input("그룹 분류 보기 옵션 (콤마로 구분)", value="전문가, 일반, 공무원, 기타")
-            
+
             st.write("")
-            
+
             # 인구통계학 정보 설정
             with st.container(border=True):
                 st.markdown("**📊 인구통계학적 문항 수집 설정**")
                 demo_gender = st.checkbox("성별 수집", value=True)
                 demo_aff = st.checkbox("소속 수집", value=True)
                 demo_email = st.checkbox("이메일 수집", value=True)
-                
+
                 st.divider()
-                
+
                 demo_age = st.checkbox("연령 수집", value=True)
                 age_type = "개방형 (숫자 직접 입력)"
                 if demo_age:
                     age_type = st.radio("연령 수집 방식", ["개방형 (숫자 직접 입력)", "10세 단위 선택형"], index=0, horizontal=True, key="survey_age_type_setup")
-                    
+
                 st.divider()
-                
+
                 demo_exp = st.checkbox("경력년수 수집", value=True)
                 exp_type = "개방형 (숫자 직접 입력)"
                 if demo_exp:
                     exp_type = st.radio("경력년수 수집 방식", ["개방형 (숫자 직접 입력)", "5년 단위 선택형"], index=0, horizontal=True, key="survey_exp_type_setup")
-            
+
             demographics_settings = {
                 "name": False,  # 성명 수집 삭제
                 "age": demo_age,
@@ -4874,16 +4873,16 @@ with col_main:
                 "type_question": type_question,
                 "type_options": [x.strip() for x in type_options.split(",") if x.strip()]
             }
-            
+
             st.divider()
-            
+
             # 섹션 2: AHP 모델 계층구조 입력 폼
             st.subheader("섹션 2: AHP 요인 계층구조 및 문항 설정")
             st.info("Goal -> Criteria (대분류) -> Sub-criteria (중분류) 구조를 입력해 주세요. (콤마로 요인을 구분합니다)")
-            
+
             main_input = st.text_input("대항목 (Main Criteria)", value="기술 요인, 조직 요인, 환경 요인, 혁신 요인")
             main_list = [x.strip() for x in main_input.split(",") if x.strip()]
-            
+
             model_structure = {"main": main_list, "subs": {}}
             for mc in main_list:
                 # 기본값 제안 (기존 양승훈 협동로봇 설문지 구조 자동 매핑)
@@ -4892,14 +4891,14 @@ with col_main:
                 elif mc == "조직 요인": default_sub_val = "경영진지원, 기술준비도, 금융자원, 교육훈련"
                 elif mc == "환경 요인": default_sub_val = "정부지원, 경쟁압력, 인력난, 외부지원"
                 elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
-                
+
                 sub_input = st.text_input(f"'{mc}'의 하위 요인 (Sub-criteria)", value=default_sub_val)
                 model_structure["subs"][mc] = [x.strip() for x in sub_input.split(",") if x.strip()]
-                
+
             st.caption("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.")
-            
+
             st.divider()
-            
+
             # 섹션 3: 요인 조작적 정의 설정
             st.subheader("섹션 3: 요인별 상세 설명 (조작적 정의)")
             st.info("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.")
@@ -4912,13 +4911,13 @@ with col_main:
                 elif mc == "조직 요인": default_main_def = "협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인"
                 elif mc == "환경 요인": default_main_def = "정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인"
                 elif mc == "혁신 요인": default_main_def = "경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인"
-                
+
                 definitions_map[mc] = st.text_input(
                     f"👉 [{mc}] 요인의 전체적인 설명 입력",
                     value=default_main_def or f"{mc}에 대한 전반적 요소를 설명합니다.",
                     key=f"def_main_{mc}"
                 )
-                
+
                 # 중분류들은 연관 관계를 묶을 수 있도록 시각적으로 구분된 테두리 컨테이너 안에 배치
                 with st.container(border=True):
                     for sc in model_structure["subs"].get(mc, []):
@@ -4940,16 +4939,16 @@ with col_main:
                         elif sc == "변화수용태도": default_def = "신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도"
                         elif sc == "스마트팩토리수준": default_def = "공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준"
                         elif sc == "지식정도": default_def = "협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준"
-                        
+
                         definitions_map[sc] = st.text_input(
                             f"ㄴ 중분류 [{sc}] 설명 입력",
                             value=default_def or f"{sc}에 대한 정의입니다.",
                             key=f"def_sub_{sc}"
                         )
                 st.write("") # 섹션 간 시각적 여백 추가
-                    
+
             st.divider()
-            
+
             # 섹션 4: 척도 인터페이스 설정
             st.subheader("섹션 4: 쌍대비교 응답 척도 설정")
             scale_option = st.radio("응답 척도 타입", [
@@ -4957,23 +4956,23 @@ with col_main:
                 "1-3-7-9 Discrete (이산형 척도)",
                 "1-3-5 Discrete (이산형 척도)"
             ], index=0)
-            
+
             st.divider()
-            
+
             # 섹션 5: 답례품 및 개인정보 수집 동의 설정
             st.subheader("섹션 5: 답례품 및 동의 양식 설정")
             reward_enabled = st.toggle("답례품(기프티콘 등) 제공 활성화")
             reward_desc = ""
             if reward_enabled:
                 reward_desc = st.text_area("답례품 설명", value="모든 설문 응답을 마친 분들에게 스타벅스 아메리카노 기프티콘을 발송해 드립니다.")
-                
+
             rewards_info = {
                 "enabled": reward_enabled,
                 "desc": reward_desc
             }
-            
+
             st.divider()
-            
+
             # 섹션 6: 실시간 CR 검증 레벨 설정
             st.subheader("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨")
             cr_limit_opt = st.selectbox("일관성 비율(CR) 허용 기준치", [
@@ -4982,20 +4981,20 @@ with col_main:
                 "0.2 이하 (보통)",
                 "0.3 이하 (일부 허용)"
             ], index=0)
-            
+
             cr_limit = None
             if "0.1" in cr_limit_opt: cr_limit = 0.1
             elif "0.2" in cr_limit_opt: cr_limit = 0.2
             elif "0.3" in cr_limit_opt: cr_limit = 0.3
-            
+
             if cr_limit is not None:
                 st.warning("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 전부 튕겨나가 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다.")
-                
+
             st.divider()
-            
+
             # 섹션 7: 최종 미리보기 및 배포
             st.subheader("섹션 7: 저장 전 최종 미리보기 및 배포")
-            
+
             # [추가] 구글 스프레드시트 연동 설정
             st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
             st.info("""
@@ -5010,7 +5009,7 @@ with col_main:
 
 
 
-            
+
             # Save current state for preview tab
             preview_id = f"preview_{st.session_state.user_id if st.session_state.user_id else 'guest'}"
             preview_data = {
@@ -5024,7 +5023,7 @@ with col_main:
                 "CR_Limit": cr_limit,
                 "Rewards_Info": rewards_info
             }
-            
+
             try:
                 os.makedirs("temp_previews", exist_ok=True)
                 with open(f"temp_previews/preview_{preview_id}.json", "w", encoding="utf-8") as f:
@@ -5062,7 +5061,7 @@ with col_main:
                 </a>
                 """
                 st.markdown(preview_link_html, unsafe_allow_html=True)
-            
+
             with col_p2:
                 if st.button("🚀 최종 배포 및 구글 시트 데이터베이스 연동", type="primary", use_container_width=True):
                     if not existing_sheet_id_input.strip():
@@ -5077,7 +5076,7 @@ with col_main:
                                     parts = target_sheet_id.split("/d/")
                                     if len(parts) > 1:
                                         target_sheet_id = parts[1].split("/")[0]
-                                
+
                                 sheet_id = create_survey_sheet(
                                     title=survey_title,
                                     admin_email=survey_admin_email,
@@ -5093,7 +5092,7 @@ with col_main:
                                 )
 
 
-                                
+
                                 # 단축 코드 생성
                                 import random
                                 import string
@@ -5109,34 +5108,40 @@ with col_main:
                                     conn.close()
                                 except Exception as dbe:
                                     pass
- 
+
                                 # 단축 주소 생성
                                 base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                                 if "localhost" in base_url or "127.0.0.1" in base_url:
                                     short_url = f"{base_url}?s={short_code}"
                                 else:
                                     short_url = f"https://ahpkrj.streamlit.app/?s={short_code}"
-                                    
+
                                 st.balloons()
                                 st.success("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
-                                
+
                                 st.code(short_url, language="text")
                                 st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
                             except Exception as ex:
                                 st.error(f"구글 시트 생성 실패: {ex}")
-            
+
+
+
     # -------------------------------------------------------------------------
-    # [신규] 관리자용 응답현황 대시보드 탭 (Tab 3) 상세 구현
+    # [신규] 응답현황 대시보드 탭 (Tab 3) 상세 구현
     # -------------------------------------------------------------------------
-    if has_admin_tab:
-        with main_tab3:
-            st.header("📊 배포 설문 실시간 응답 현황 대시보드")
-            st.info("로그인한 관리자 계정으로 배포한 설문 목록을 자동으로 조회하여 실시간 응답 현황을 대시보드로 구성합니다. (별도의 구글 스프레드시트 ID 입력 불필요)")
-            
+    with main_tab3:
+        st.header("📊 배포 설문 실시간 응답 현황 대시보드")
+        if st.session_state.user_id is None:
+            st.warning("🔒 **응답현황 대시보드 기능은 회원 전용 서비스입니다.**")
+            st.info("회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다.  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
+        else:
+
+            st.info("본인이 배포한 설문 목록을 자동으로 조회하여 실시간 응답 현황을 대시보드로 구성합니다. (별도의 구글 스프레드시트 ID 입력 불필요)")
+
             # DB에서 해당 관리자가 생성한 설문 목록 조회
             import sqlite3
             import pandas as pd
-            
+
             admin_surveys = []
             try:
                 conn = sqlite3.connect('users.db')
@@ -5146,7 +5151,7 @@ with col_main:
                 conn.close()
             except Exception as e:
                 st.error(f"설문 목록 조회 실패: {e}")
-                
+
             if not admin_surveys:
                 st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작' 탭에서 설문을 배포해 주세요.")
             else:
@@ -5154,14 +5159,14 @@ with col_main:
                 survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
                 selected_survey_label = st.selectbox("📊 조회할 배포 설문 선택", list(survey_options.keys()))
                 selected_sheet_id = survey_options[selected_survey_label]
-                
+
                 if selected_sheet_id:
                     st.markdown(f"**선택된 설문 스프레드시트 ID**: `{selected_sheet_id}`")
-                    
+
                     from survey_manager import get_survey_stats
                     with st.spinner("실시간 설문 현황 로딩 중..."):
                         stats = get_survey_stats(selected_sheet_id.strip())
-                        
+
                     col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                     with col_stat1:
                         st.metric("총 접속자 수 (Visits)", f"{stats['visits']}명")
@@ -5171,7 +5176,7 @@ with col_main:
                         st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
                     with col_stat4:
                         st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
-                    
+
                     # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
                     with st.expander("📥 실시간 구글 시트 응답 데이터 다운로드 센터", expanded=True):
                         from survey_manager import get_survey_gspread_client
@@ -5182,26 +5187,26 @@ with col_main:
                                     spreadsheet = g_client.open_by_key(selected_sheet_id.strip())
                                     raw_sheet = spreadsheet.worksheet("Raw_Data")
                                     all_rows = raw_sheet.get_all_values()
-                                    
+
                                     try:
                                         demo_sheet = spreadsheet.worksheet("Demographic_Data")
                                         demo_rows = demo_sheet.get_all_values()
                                     except Exception:
                                         demo_rows = []
-                                    
+
                                 if len(all_rows) > 0:
                                     headers = all_rows[0]
                                     rows = all_rows[1:]
                                     live_df = pd.DataFrame(rows, columns=headers)
-                                    
+
                                     demo_df = None
                                     if len(demo_rows) > 0:
                                         demo_headers = demo_rows[0]
                                         demo_vals = demo_rows[1:]
                                         demo_df = pd.DataFrame(demo_vals, columns=demo_headers)
-                                        
+
                                     st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
-                                    
+
                                     tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
                                     with tab_raw:
                                         st.dataframe(live_df, use_container_width=True)
@@ -5210,17 +5215,17 @@ with col_main:
                                             st.dataframe(demo_df, use_container_width=True)
                                         else:
                                             st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
-                                    
+
                                     # Excel 및 CSV 내보내기 버튼 제공
                                     import io
-                                    
+
                                     # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
                                     excel_buffer = io.BytesIO()
                                     with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
                                         live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
                                         if demo_df is not None:
                                             demo_df.to_excel(writer, index=False, sheet_name='Demographic_Data')
-                                    
+
                                     col_dl1, col_dl2 = st.columns(2)
                                     with col_dl1:
                                         st.download_button(
@@ -5248,15 +5253,15 @@ with col_main:
                                 st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")
                         else:
                             st.warning("구글 Sheets API 클라이언트 연결 실패로 인해 구글 시트 내 데이터를 직접 다운로드할 수 없습니다. (아래 로컬 백업 센터 이용 권장)")
-                        
+
                     # 시각화 차트 추가
                     import plotly.express as px
-                    
+
                     chart_data = pd.DataFrame({
                         "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
                         "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
                     })
-                    
+
                     fig_stats = px.bar(
                         chart_data,
                         x="구분",
@@ -5272,7 +5277,7 @@ with col_main:
                     )
                     fig_stats.update_layout(showlegend=False)
                     st.plotly_chart(fig_stats, use_container_width=True)
-                    
+
                     # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
                     try:
                         conn = sqlite3.connect('users.db')
@@ -5281,12 +5286,12 @@ with col_main:
                             conn, params=(selected_sheet_id.strip(),)
                         )
                         conn.close()
-                        
+
                         if not backup_df.empty:
                             with st.expander("🛡️ 서버 로컬 안전 백업 관리 센터"):
                                 st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
                                 st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
-                                
+
                                 # 전체 로 데이터 복구 엑셀/CSV 데이터 빌드
                                 recovered_raw_rows = []
                                 recovered_demo_rows = []
@@ -5297,20 +5302,20 @@ with col_main:
                                     elif "row_data" in payload:
                                         # 하위 호환성
                                         recovered_raw_rows.append(payload["row_data"])
-                                        
+
                                     if "demo_row_data" in payload:
                                         recovered_demo_rows.append(payload["demo_row_data"])
-                                    
+
                                 if recovered_raw_rows:
                                     import io
-                                    
+
                                     # Excel로 두 개의 백업 데이터를 시트별로 다운로드할 수 있도록 패키징
                                     excel_backup_buffer = io.BytesIO()
                                     with pd.ExcelWriter(excel_backup_buffer, engine='openpyxl') as writer:
                                         pd.DataFrame(recovered_raw_rows).to_excel(writer, index=False, header=False, sheet_name='Raw_Data')
                                         if recovered_demo_rows:
                                             pd.DataFrame(recovered_demo_rows).to_excel(writer, index=False, header=False, sheet_name='Demographic_Data')
-                                            
+
                                     col_b_dl1, col_b_dl2 = st.columns(2)
                                     with col_b_dl1:
                                         st.download_button(
@@ -5321,7 +5326,7 @@ with col_main:
                                             use_container_width=True,
                                             type="primary"
                                         )
-                                    
+
                                     with col_b_dl2:
                                         # CSV 파일 형태로 복구 파일 내보내기 (Raw_Data 우선)
                                         output_csv = io.StringIO()
@@ -5337,7 +5342,8 @@ with col_main:
                             st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
                     except Exception as err:
                         st.caption(f"로컬 백업 조회 불가: {err}")
-            
+
+
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
 
