@@ -2665,6 +2665,7 @@ with col_settings:
             _("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), 
             [_("0.1", "0.1"), _("0.2", "0.2"), _("보정 하지 않음", "Do Not Correct")], 
             index=0,
+            key="cr_threshold_label",
             help=_(
                 "임계값 설정(0.1 또는 0.2)은 일관성 비율(CR)을 해당 수치로 정확하게 일치시키는 것이 아니라, 해당 임계값 이하로 만드는 것을 의미합니다. 이미 임계값 이하인 데이터는 보정하지 않으며, 이를 통해 원본 응답이 과도하게 왜곡되는 것을 방지합니다.",
                 "The threshold setting (0.1 or 0.2) does not force the consistency ratio (CR) to equal that value. Instead, it adjusts the CR to be less than or equal to the threshold. If a matrix is already within the threshold, no correction is applied, preventing excessive distortion of the original responses."
@@ -2672,10 +2673,15 @@ with col_settings:
         )
         if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
             cr_threshold = 999.0
+            learning_rate = 0.0
         else:
             cr_threshold = float(cr_threshold_label)
         max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
-        learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1)
+        
+        if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
+            st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.0, max_value=0.9, value=0.0, step=0.1, disabled=True, key="learning_rate_disabled")
+        else:
+            learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1, key="learning_rate_enabled")
 
 
     # 1. CR 보정 결과 왜곡 검증
