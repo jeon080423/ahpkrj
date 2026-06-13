@@ -1928,14 +1928,28 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     st.markdown("<hr style='margin: 1px 0; border: 0; border-top: 1px dashed #e2e8f0;'>", unsafe_allow_html=True)
             st.divider()
             
-        # 5. 개인정보 수집 및 답례품
-        st.subheader(f"{section_num}. 개인정보 수집 및 답례품")
-        if rewards_info.get("enabled"):
-            st.info(f"**답례품 안내**: {rewards_info.get('desc', '설문 완료 시 답례품을 제공합니다.')}")
-            reward_contact = st.text_input("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *")
-            resp_data["reward_contact"] = reward_contact
+        # 5. 개인정보 수집 및 답례품 동적 노출 및 문구 설정
+        has_demographics = any(demographics.values()) if demographics else False
+        has_rewards = rewards_info.get("enabled", False) if rewards_info else False
+        
+        agree_check = "동의"
+        if has_demographics or has_rewards:
+            if has_rewards:
+                subheader_text = f"{section_num}. 개인정보 수집 및 답례품"
+                radio_label = "개인정보 수집 및 답례품 지급을 위한 이용 동의에 동의하십니까? *"
+            else:
+                subheader_text = f"{section_num}. 개인정보 수집 동의"
+                radio_label = "개인정보 수집 및 이용에 동의하십니까? *"
+                
+            st.subheader(subheader_text)
+            section_num += 1
             
-        agree_check = st.radio("개인정보 수집 및 동의에 동의하십니까? *", ["동의", "비동의"], index=1)
+            if has_rewards:
+                st.info(f"**답례품 안내**: {rewards_info.get('desc', '설문 완료 시 답례품을 제공합니다.')}")
+                reward_contact = st.text_input("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *", key="survey_reward_contact")
+                resp_data["reward_contact"] = reward_contact
+                
+            agree_check = st.radio(radio_label, ["동의", "비동의"], index=1, key="survey_agree_check")
         
         # 제출 버튼
         submit_btn = st.form_submit_button("설문지 제출하기", type="primary")
