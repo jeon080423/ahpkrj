@@ -2512,7 +2512,7 @@ with col_main_title:
         visitor_unit = _("명", " visitors")
         counter_html = f"""
         <div style="text-align: right; margin-top: 32px;">
-            <span style="font-size: 0.85rem; color: #0369a1; font-weight: 700;">
+            <span style="font-size: 0.85rem; color: #0369a1;">
                 {visitor_label} : {total_visits:,}{visitor_unit}
             </span>
         </div>
