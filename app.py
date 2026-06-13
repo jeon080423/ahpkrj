@@ -1764,6 +1764,48 @@ if "preview_id" in q_params or "survey_id" in q_params:
         survey_id_param = q_params["survey_id"]
         if isinstance(survey_id_param, list):
             survey_id_param = survey_id_param[0]
+
+    submitted_key = f"survey_submitted_{survey_id_param}"
+    if st.session_state.get(submitted_key):
+        # 1. HTML/CSS를 이용한 모던하고 수려한 감사 카드 UI 렌더링
+        st.markdown("""
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; font-family: 'Inter', sans-serif; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-top: 40px; border: 1px solid #e2e8f0;">
+            <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 50%; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);">
+                <span style="font-size: 45px; color: #10b981;">🎉</span>
+            </div>
+            <h1 style="font-size: 2.2rem; color: #1f2937; font-weight: 800; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">설문 제출이 성공적으로 완료되었습니다!</h1>
+            <p style="font-size: 1.1rem; color: #4b5563; max-width: 550px; line-height: 1.6; margin-bottom: 30px; word-break: keep-all;">
+                의사결정 우선순위 분석을 위해 소중한 시간 내어 응답해 주셔서 대단히 감사합니다. <br>
+                보내주신 답변은 안전하게 기록되었으며 연구 분석에 귀중한 자료로 활용됩니다.
+            </p>
+            <div style="font-size: 0.85rem; color: #9ca3af; margin-top: 5px; margin-bottom: 15px; line-height: 1.5; word-break: keep-all;">
+                ※ 브라우저 보안 규정에 따라 '창 닫기' 버튼이 동작하지 않을 수 있습니다. <br>
+                동작하지 않을 경우 현재 열려있는 <strong>브라우저 탭의 X 버튼</strong>을 직접 눌러 종료해 주세요.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # 2. 창 닫기 버튼 렌더링 및 자바스크립트 실행 트리거
+        import streamlit.components.v1 as components
+        close_clicked = st.button("🚪 창 닫기", use_container_width=True)
+        if close_clicked:
+            components.html("""
+            <script>
+                // Close current window
+                window.close();
+                // Try parent window close
+                try {
+                    window.parent.close();
+                } catch(e) {}
+                // Workaround for some browsers
+                try {
+                    open(window.location, '_self').close();
+                } catch(e) {}
+                alert("창 닫기 동작이 브라우저 보안에 의해 차단되었습니다. 현재 브라우저 탭(X)을 직접 닫아주세요.");
+            </script>
+            """, height=0, width=0)
+            
+        st.stop()
             
         st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
         
@@ -2244,17 +2286,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 if is_preview_mode:
                     import time
                     time.sleep(1.0)
-                    st.balloons()
-                    st.success("🎉 [미리보기 성공] 설문 응답이 성공적으로 제출되는 화면입니다. (실제 데이터는 구글 시트에 전송되지 않습니다.)")
-                    st.stop()
+                    st.session_state[f"survey_submitted_{survey_id_param}"] = True
+                    st.rerun()
                 else:
                     success = save_response_to_sheet(
                         survey_id_param, resp_data, ahp_answers, demographics, ahp_model, rewards_info
                     )
                     if success:
-                        st.balloons()
-                        st.success("🎉 설문 응답이 성공적으로 제출되었습니다. 참여해 주셔서 감사합니다!")
-                        st.stop()
+                        st.session_state[f"survey_submitted_{survey_id_param}"] = True
+                        st.rerun()
                     else:
                         st.error("데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.")
                     
