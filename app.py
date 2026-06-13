@@ -2707,7 +2707,11 @@ with col_settings:
             learning_rate = 0.0
         else:
             cr_threshold = float(cr_threshold_label)
-        max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50)
+        if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
+            max_iter_val = 0
+            st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=0, max_value=500, value=0, step=50, disabled=True, key="max_iter_disabled")
+        else:
+            max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50, key="max_iter_enabled")
         
         if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
             st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.0, max_value=0.9, value=0.0, step=0.1, disabled=True, key="learning_rate_disabled")
