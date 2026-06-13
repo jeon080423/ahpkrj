@@ -4956,20 +4956,18 @@ with col_main:
             # 섹션 7: 최종 미리보기 및 배포
             st.subheader("섹션 7: 저장 전 최종 미리보기 및 배포")
             
-            # [추가] 구글 클라우드 드라이브 용량 초과 우회용 수동 연동 옵션
-            st.markdown("##### ⚙️ 구글 스프레드시트 수동 연동 (용량 초과 오류 발생 시 우회 방법)")
-            use_existing_sheet = st.checkbox("구글 서비스 계정 용량 제한 오류(403) 발생 시, 기존 시트에 연동하여 우회하기", value=False)
-            existing_sheet_id_input = ""
-            if use_existing_sheet:
-                st.info("""
-                **💡 수동 연동 방법:**
-                1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되어 오류가 발생하지 않습니다.)
-                2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자(Editor)**로 추가합니다.
-                   * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-                3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
-                """)
-                st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
-                existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID", placeholder="https://docs.google.com/spreadsheets/d/...")
+            # [추가] 구글 스프레드시트 연동 설정
+            st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
+            st.info("""
+            **💡 연동 방법:**
+            1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
+            2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자(Editor)**로 추가합니다.
+               * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+            3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
+            """)
+            st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
+            existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...")
+
 
 
             
@@ -5027,16 +5025,15 @@ with col_main:
             
             with col_p2:
                 if st.button("🚀 최종 배포 및 구글 시트 데이터베이스 연동", type="primary", use_container_width=True):
-                    if use_existing_sheet and not existing_sheet_id_input.strip():
-                        st.error("수동 연동하기가 체크된 경우, 연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.")
+                    if not existing_sheet_id_input.strip():
+                        st.error("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.")
                     elif not survey_admin_email or "@" not in survey_admin_email:
                         st.error("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.")
                     else:
-                        spinner_text = "기존 구글 스프레드시트와 설문 구조를 연동하는 중..." if use_existing_sheet else "구글 클라우드 드라이브에 신규 스프레드시트를 생성하고 보안 권한을 연동하는 중..."
-                        with st.spinner(spinner_text):
+                        with st.spinner("구글 스프레드시트와 설문 구조를 연동하는 중..."):
                             try:
                                 target_sheet_id = existing_sheet_id_input.strip()
-                                if use_existing_sheet and "docs.google.com/spreadsheets" in target_sheet_id:
+                                if "docs.google.com/spreadsheets" in target_sheet_id:
                                     parts = target_sheet_id.split("/d/")
                                     if len(parts) > 1:
                                         target_sheet_id = parts[1].split("/")[0]
@@ -5051,9 +5048,10 @@ with col_main:
                                     cr_limit=cr_limit,
                                     rewards_info=rewards_info,
                                     description=survey_desc,
-                                    existing_sheet_id=target_sheet_id if use_existing_sheet else None,
+                                    existing_sheet_id=target_sheet_id,
                                     user_id=st.session_state.user_id
                                 )
+
 
                                 
                                 # admin_surveys 테이블에 신규 설문 자동 등록
