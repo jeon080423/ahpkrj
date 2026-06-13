@@ -3302,7 +3302,7 @@ with col_main:
     # [수정] 관리자용 상단 탭 연동 (Tab 1: 분석, Tab 2: 설문지 제작)
     # 일반 사용자에게는 Tab 1 화면(분석)만 직접 단일 노출시킵니다.
     # -------------------------------------------------------------------------
-    main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작", "📊 응답현황 대시보드"])
+    main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작(베타버전)", "📊 응답현황 대시보드"])
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
@@ -3654,6 +3654,10 @@ with col_main:
             st.warning(_("🔒 온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", "🔒 Online survey integration is available for members. Please log in."))
         else:
             import sqlite3
+            try:
+                sync_short_codes_from_gs()
+            except Exception:
+                pass
             conn = sqlite3.connect('users.db')
             cur = conn.cursor()
             cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
@@ -4984,12 +4988,12 @@ with col_main:
     with main_tab2:
         st.header("📝 AHP 온라인 설문 자동 생성 및 배포기")
         if st.session_state.user_id is None:
-            st.warning("🔒 **온라인 설문지 제작 기능은 회원 전용 서비스입니다.**")
+            st.warning("🔒 **온라인 설문지 제작(베타버전) 기능은 회원 전용 서비스입니다.**")
             st.info("무료 회원가입 및 로그인을 완료하시면 제한 없이 AHP 온라인 설문지를 자동 생성하고 본인의 구글 스프레드시트와 연동할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
         else:
 
             st.info("모든 응답 데이터는 이용자 본인의 구글 계정(연동한 구글 스프레드시트)을 통해 저장되므로, 설문 배포 전에 테스트 응답을 제출하여 실제 시트에 정상적으로 데이터가 기록되는지 반드시 직접 미리 확인해야 합니다.")
-            st.warning("⚠️ **주의 및 경고:** 본 플랫폼은 데이터 저장 오류, 구글 API 연동 해제, 네트워크 장애 또는 관리 미흡 등으로 인한 데이터의 유실이나 소실에 대해 어떠한 법적/기술적 책임도 지지 않습니다. 중요 데이터는 실시간 구글 시트 확인 및 서버 로컬 안전 백업을 통해 주기적으로 다운로드하여 보관해 주시기 바랍니다.")
+            st.warning("⚠️ **주의 및 경고:** 본 플랫폼은 데이터 저장 오류, 구글 API 연동 해제, 네트워크 장애 또는 관리 미흡 등으로 인한 데이터의 유실이나 소실은 이용자가 확인해야 합니다. 중요 데이터는 실시간 구글 시트 확인 및 서버 로컬 안전 백업을 통해 주기적으로 다운로드하여 보관해 주시기 바랍니다.")
 
             # (Dashboard moved to main_tab3 below)
             pass
@@ -5325,6 +5329,11 @@ with col_main:
             import sqlite3
             import pandas as pd
 
+            try:
+                sync_short_codes_from_gs()
+            except Exception:
+                pass
+
             admin_surveys = []
             try:
                 conn = sqlite3.connect('users.db')
@@ -5336,7 +5345,7 @@ with col_main:
                 st.error(f"설문 목록 조회 실패: {e}")
 
             if not admin_surveys:
-                st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작' 탭에서 설문을 배포해 주세요.")
+                st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작(베타버전)' 탭에서 설문을 배포해 주세요.")
             else:
                 # 선택 박스를 통해 현재 관리자가 배포한 설문들 중 하나 선택 (자동 선택 지원)
                 survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
