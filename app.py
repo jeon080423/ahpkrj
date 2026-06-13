@@ -178,10 +178,11 @@ global_ahp_css = """
     gap: 0px !important;
     align-items: center !important;
     width: 100% !important;
-    margin-top: 1px !important;
-    margin-bottom: 1px !important;
-    padding-top: 0px !important;
-    padding-bottom: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    border-bottom: 1px dashed #e2e8f0 !important;
 }
 
 .st-key-ahp_survey_matrix div[data-testid="column"] {
@@ -212,7 +213,7 @@ global_ahp_css = """
 
 /* 2.5. AHP 컨테이너 내부의 수직 요소 간격 초밀착 */
 .st-key-ahp_survey_matrix div[data-testid="stVerticalBlock"] {
-    gap: 4px !important;
+    gap: 0px !important;
 }
 
 /* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
@@ -226,7 +227,7 @@ global_ahp_css = """
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 34px !important; /* 요인 박스와 동일하게 34px로 정렬 */
+    height: 28px !important; /* 요인 박스와 동일하게 28px로 정렬 */
     margin: 0px !important;
     padding: 0px !important;
     min-width: 0px !important;
@@ -1904,20 +1905,20 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 ])
                 
                 header_html = f"""
-                <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 11px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px;">
+                <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px;">
                     <colgroup>
                         {colgroup_html}
                     </colgroup>
                     <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                        <th style="border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
-                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;" colspan="{len(left_cols)}">← 좌측 요인 중요도</th>
-                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 11px;" rowspan="2">동등<br>(1)</th>
-                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 11px;" colspan="{len(right_cols)}">우측 요인 중요도 →</th>
-                        <th style="border: 1px solid #334155; padding: 6px; font-size: 11px;" rowspan="2">비교 요인</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(left_cols)}">← 좌측 요인 중요도</th>
+                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">동등<br>(1)</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(right_cols)}">우측 요인 중요도 →</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
                     </tr>
                     <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in left_cols])}
-                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in right_cols])}
+                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in left_cols])}
+                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in right_cols])}
                     </tr>
                 </table>
                 """
@@ -1935,9 +1936,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.markdown(f"""
                         <div style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
                                     padding: 0px 8px; background-color: {left_style["bg"]}; color: {left_style["text"]}; 
-                                    border-radius: 4px; height: 34px; display: flex; align-items: center; 
-                                    justify-content: center; font-size: 11px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
-                            {left_f}
+                                    border-radius: 4px; height: 28px; display: flex; align-items: center; 
+                                    justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
+                                {left_f}
                         </div>
                         """, unsafe_allow_html=True)
                 
@@ -1953,7 +1954,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                              key=f"pair_ans_{pair_key}",
                              horizontal=True,
                              label_visibility="collapsed"
-                        )
+                         )
                 
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
@@ -1961,14 +1962,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.markdown(f"""
                         <div style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
                                     padding: 0px 8px; background-color: {right_style["bg"]}; color: {right_style["text"]}; 
-                                    border-radius: 4px; height: 34px; display: flex; align-items: center; 
-                                    justify-content: center; font-size: 11px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
-                            {right_f}
+                                    border-radius: 4px; height: 28px; display: flex; align-items: center; 
+                                    justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);'>
+                                {right_f}
                         </div>
                         """, unsafe_allow_html=True)
                 
                     ahp_answers[pair_key] = ans_val
-                    st.markdown("<hr style='margin: 1px 0; border: 0; border-top: 1px dashed #e2e8f0;'>", unsafe_allow_html=True)
             st.divider()
             
         # 5. 개인정보 수집 및 답례품 동적 노출 및 문구 설정
