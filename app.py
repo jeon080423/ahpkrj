@@ -456,6 +456,51 @@ def get_cached_visit_logs(spreadsheet_id):
         st.error(f"구글 시트 방문 로그 캐싱 조회 오류: {e}")
     return []
 
+def save_short_code_to_gs(short_code, survey_id, title, admin_id):
+    try:
+        client = get_gspread_client()
+        if client and "SPREADSHEET_ID" in st.secrets:
+            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+            try:
+                sheet = spreadsheet.worksheet("Short_Urls")
+            except gspread.exceptions.WorksheetNotFound:
+                sheet = spreadsheet.add_worksheet(title="Short_Urls", rows="1000", cols="5")
+                sheet.append_row(["short_code", "survey_id", "title", "admin_id", "created_at"])
+            
+            import datetime
+            kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+            sheet.append_row([short_code, survey_id, title, admin_id, kst_now])
+    except Exception as e:
+        pass
+
+def sync_short_codes_from_gs():
+    try:
+        client = get_gspread_client()
+        if client and "SPREADSHEET_ID" in st.secrets:
+            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+            try:
+                sheet = spreadsheet.worksheet("Short_Urls")
+                records = sheet.get_all_records()
+                if records:
+                    conn = sqlite3.connect('users.db')
+                    cur = conn.cursor()
+                    for r in records:
+                        short_code = str(r.get("short_code", "")).strip()
+                        survey_id = str(r.get("survey_id", "")).strip()
+                        title = str(r.get("title", "")).strip()
+                        admin_id = str(r.get("admin_id", "")).strip()
+                        created_at = str(r.get("created_at", "")).strip()
+                        if short_code and survey_id:
+                            cur.execute("INSERT OR IGNORE INTO admin_surveys (survey_id, title, admin_id, created_at, short_code) VALUES (?, ?, ?, ?, ?)",
+                                        (survey_id, title, admin_id, created_at, short_code))
+                            cur.execute("UPDATE admin_surveys SET short_code = ? WHERE survey_id = ? AND (short_code IS NULL OR short_code = '')", (short_code, survey_id))
+                    conn.commit()
+                    conn.close()
+            except gspread.exceptions.WorksheetNotFound:
+                pass
+    except Exception as e:
+        pass
+
 # DB 초기화 및 구글 시트로부터 데이터(회원+방문로그) 복구 로직
 def init_db():
     conn = sqlite3.connect('users.db')
@@ -599,6 +644,10 @@ def init_db():
         except Exception:
             pass
 
+    try:
+        sync_short_codes_from_gs()
+    except Exception:
+        pass
     conn.close()
 
 # [신규 기능 1] 구글 시트의 내용을 강제로 DB에 동기화하는 함수
@@ -1693,6 +1742,9 @@ if "s" in q_params and "survey_id" not in q_params:
     short_code_param = q_params["s"]
     if isinstance(short_code_param, list):
         short_code_param = short_code_param[0]
+    
+    survey_id_found = None
+    # 1) 로컬 DB 먼저 조회
     try:
         conn = sqlite3.connect('users.db')
         cur = conn.cursor()
@@ -1700,12 +1752,28 @@ if "s" in q_params and "survey_id" not in q_params:
         db_row = cur.fetchone()
         conn.close()
         if db_row:
-            q_params["survey_id"] = db_row[0]
-        else:
-            st.error("유효하지 않거나 만료된 단축 링크입니다.")
-            st.stop()
-    except Exception as err:
-        st.error(f"단축 링크 처리 중 오류가 발생했습니다: {err}")
+            survey_id_found = db_row[0]
+    except Exception:
+        pass
+
+    # 2) 로컬 DB에 없을 경우 Google Sheets 백업에서 복구/동기화 후 재조회
+    if not survey_id_found:
+        sync_short_codes_from_gs()
+        try:
+            conn = sqlite3.connect('users.db')
+            cur = conn.cursor()
+            cur.execute("SELECT survey_id FROM admin_surveys WHERE short_code = ?", (short_code_param,))
+            db_row = cur.fetchone()
+            conn.close()
+            if db_row:
+                survey_id_found = db_row[0]
+        except Exception:
+            pass
+
+    if survey_id_found:
+        q_params["survey_id"] = survey_id_found
+    else:
+        st.error("유효하지 않거나 만료된 단축 링크입니다.")
         st.stop()
 
 if "preview_id" in q_params or "survey_id" in q_params:
@@ -5108,6 +5176,9 @@ with col_main:
                                     conn.close()
                                 except Exception as dbe:
                                     pass
+
+                                # 구글 시트에 단축 URL 매핑 저장 (백업/동기화용)
+                                save_short_code_to_gs(short_code, sheet_id, survey_title, st.session_state.user_id)
 
                                 # 단축 주소 생성
                                 base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
