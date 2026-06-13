@@ -1737,44 +1737,7 @@ if "code" in q_params and st.session_state.user_id:
 # -----------------------------------------------------------------------------
 # [신규] 동적 라우팅 - 응답자 설문 참여 SPA (Single Page Application)
 # -----------------------------------------------------------------------------
-# [신규] 단축 URL 해석 처리 (s 파라미터가 들어온 경우)
-if "s" in q_params and "survey_id" not in q_params:
-    short_code_param = q_params["s"]
-    if isinstance(short_code_param, list):
-        short_code_param = short_code_param[0]
-    
-    survey_id_found = None
-    # 1) 로컬 DB 먼저 조회
-    try:
-        conn = sqlite3.connect('users.db')
-        cur = conn.cursor()
-        cur.execute("SELECT survey_id FROM admin_surveys WHERE short_code = ?", (short_code_param,))
-        db_row = cur.fetchone()
-        conn.close()
-        if db_row:
-            survey_id_found = db_row[0]
-    except Exception:
-        pass
 
-    # 2) 로컬 DB에 없을 경우 Google Sheets 백업에서 복구/동기화 후 재조회
-    if not survey_id_found:
-        sync_short_codes_from_gs()
-        try:
-            conn = sqlite3.connect('users.db')
-            cur = conn.cursor()
-            cur.execute("SELECT survey_id FROM admin_surveys WHERE short_code = ?", (short_code_param,))
-            db_row = cur.fetchone()
-            conn.close()
-            if db_row:
-                survey_id_found = db_row[0]
-        except Exception:
-            pass
-
-    if survey_id_found:
-        q_params["survey_id"] = survey_id_found
-    else:
-        st.error("유효하지 않거나 만료된 단축 링크입니다.")
-        st.stop()
 
 if "preview_id" in q_params or "survey_id" in q_params:
     is_preview_mode = "preview_id" in q_params
@@ -5161,31 +5124,23 @@ with col_main:
 
 
 
-                                # 단축 코드 생성
-                                import random
-                                import string
-                                short_code = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-
                                 # admin_surveys 테이블에 신규 설문 자동 등록
                                 try:
                                     conn = sqlite3.connect('users.db')
                                     cur = conn.cursor()
-                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at, short_code) VALUES (?, ?, ?, datetime('now'), ?)",
-                                                (sheet_id, survey_title, st.session_state.user_id, short_code))
+                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
+                                                (sheet_id, survey_title, st.session_state.user_id))
                                     conn.commit()
                                     conn.close()
                                 except Exception as dbe:
                                     pass
 
-                                # 구글 시트에 단축 URL 매핑 저장 (백업/동기화용)
-                                save_short_code_to_gs(short_code, sheet_id, survey_title, st.session_state.user_id)
-
-                                # 단축 주소 생성
+                                # 배포 주소 생성
                                 base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                                 if "localhost" in base_url or "127.0.0.1" in base_url:
-                                    short_url = f"{base_url}?s={short_code}"
+                                    short_url = f"{base_url}?survey_id={sheet_id}"
                                 else:
-                                    short_url = f"https://ahpkrj.streamlit.app/?s={short_code}"
+                                    short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
 
                                 st.balloons()
                                 st.success("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
