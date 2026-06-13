@@ -470,7 +470,26 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS visit_logs
                   (ip_address TEXT, visit_date TEXT, PRIMARY KEY (ip_address, visit_date))''')
     c.execute('''CREATE TABLE IF NOT EXISTS admin_surveys
-                  (survey_id TEXT PRIMARY KEY, title TEXT, admin_id TEXT, created_at TEXT)''')
+                  (survey_id TEXT PRIMARY KEY, title TEXT, admin_id TEXT, created_at TEXT, short_code TEXT)''')
+    try:
+        c.execute("ALTER TABLE admin_surveys ADD COLUMN short_code TEXT")
+        conn.commit()
+    except Exception:
+        pass
+
+    # 기존 데이터에 short_code 가 없는 경우 채워넣기
+    try:
+        c.execute("SELECT survey_id FROM admin_surveys WHERE short_code IS NULL OR short_code = ''")
+        rows = c.fetchall()
+        if rows:
+            for row in rows:
+                sid = row[0]
+                scode = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+                c.execute("UPDATE admin_surveys SET short_code = ? WHERE survey_id = ?", (scode, sid))
+            conn.commit()
+    except Exception:
+        pass
+        
     c.execute('''CREATE TABLE IF NOT EXISTS user_google_credentials
                   (user_id TEXT PRIMARY KEY, token TEXT, refresh_token TEXT, token_uri TEXT, client_id TEXT, client_secret TEXT, scopes TEXT, expiry TEXT)''')
     
@@ -1669,6 +1688,26 @@ if "code" in q_params and st.session_state.user_id:
 # -----------------------------------------------------------------------------
 # [신규] 동적 라우팅 - 응답자 설문 참여 SPA (Single Page Application)
 # -----------------------------------------------------------------------------
+# [신규] 단축 URL 해석 처리 (s 파라미터가 들어온 경우)
+if "s" in q_params and "survey_id" not in q_params:
+    short_code_param = q_params["s"]
+    if isinstance(short_code_param, list):
+        short_code_param = short_code_param[0]
+    try:
+        conn = sqlite3.connect('users.db')
+        cur = conn.cursor()
+        cur.execute("SELECT survey_id FROM admin_surveys WHERE short_code = ?", (short_code_param,))
+        db_row = cur.fetchone()
+        conn.close()
+        if db_row:
+            q_params["survey_id"] = db_row[0]
+        else:
+            st.error("유효하지 않거나 만료된 단축 링크입니다.")
+            st.stop()
+    except Exception as err:
+        st.error(f"단축 링크 처리 중 오류가 발생했습니다: {err}")
+        st.stop()
+
 if "preview_id" in q_params or "survey_id" in q_params:
     is_preview_mode = "preview_id" in q_params
     
@@ -5054,29 +5093,34 @@ with col_main:
 
 
                                 
+                                # 단축 코드 생성
+                                import random
+                                import string
+                                short_code = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+
                                 # admin_surveys 테이블에 신규 설문 자동 등록
                                 try:
                                     conn = sqlite3.connect('users.db')
                                     cur = conn.cursor()
-                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
-                                                (sheet_id, survey_title, st.session_state.user_id))
+                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at, short_code) VALUES (?, ?, ?, datetime('now'), ?)",
+                                                (sheet_id, survey_title, st.session_state.user_id, short_code))
                                     conn.commit()
                                     conn.close()
                                 except Exception as dbe:
                                     pass
-
+ 
                                 # 단축 주소 생성
                                 base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                                 if "localhost" in base_url or "127.0.0.1" in base_url:
-                                    short_url = f"{base_url}?survey_id={sheet_id}"
+                                    short_url = f"{base_url}?s={short_code}"
                                 else:
-                                    short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
+                                    short_url = f"https://ahpkrj.streamlit.app/?s={short_code}"
                                     
                                 st.balloons()
                                 st.success("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
                                 
                                 st.code(short_url, language="text")
-                                st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
+                                st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
                             except Exception as ex:
                                 st.error(f"구글 시트 생성 실패: {ex}")
             
