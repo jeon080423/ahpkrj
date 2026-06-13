@@ -4777,7 +4777,15 @@ with col_main:
             st.subheader("섹션 1: 설문 기본 정보 설정")
             survey_title = st.text_input("설문지 제목", value="제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문")
             survey_desc = st.text_area("조사 목적 및 안내문", value="본 설문은 중소기업의 제조 환경변화에 따른 협동로봇 도입 요인들의 상대적 중요도를 결정하기 위한 조사입니다.")
-            default_admin_email = st.session_state.user_id if (st.session_state.user_id and "@" in st.session_state.user_id) else "temp@ahpmaster.com"
+            if st.session_state.user_id:
+                if "@" in st.session_state.user_id:
+                    default_admin_email = st.session_state.user_id
+                elif st.session_state.user_id == "shjeon":
+                    default_admin_email = "jeon080423@gmail.com"
+                else:
+                    default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
+            else:
+                default_admin_email = "temp@ahpmaster.com"
             survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", value=default_admin_email, placeholder="example@gmail.com")
             
             st.divider()
