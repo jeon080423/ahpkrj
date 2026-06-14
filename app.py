@@ -5277,12 +5277,22 @@ with col_main:
 
             # 섹션 6: 실시간 CR 검증 레벨 설정
             st.subheader("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨")
+            # Get default index from edit state if editing, otherwise default to index 3 (0.3 이하)
+            default_cr_idx = 3
+            if st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is not None:
+                cr_val = float(st.session_state.get("edit_cr_limit"))
+                if cr_val <= 0.1: default_cr_idx = 1
+                elif cr_val <= 0.2: default_cr_idx = 2
+                elif cr_val <= 0.3: default_cr_idx = 3
+            elif st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is None:
+                default_cr_idx = 0
+                
             cr_limit_opt = st.selectbox("일관성 비율(CR) 허용 기준치", [
                 "제한하지 않음 (이탈률 감소용)",
                 "0.1 이하 (매우 엄격함)",
                 "0.2 이하 (보통)",
                 "0.3 이하 (일부 허용)"
-            ], index=0)
+            ], index=default_cr_idx)
 
             cr_limit = None
             if "0.1" in cr_limit_opt: cr_limit = 0.1
