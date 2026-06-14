@@ -5373,7 +5373,7 @@ with col_main:
                 st.error(f"설문 목록 조회 실패: {e}")
 
             if not admin_surveys:
-                st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작(베타버전)' 탭에서 설문을 배포해 주세요.")
+                st.warning("자동으로 조회된 배포 설문 목록이 없습니다. 먼저 '온라인 설문지 제작' 탭에서 설문을 배포하시거나, 아래에 구글 스프레드시트 URL을 직접 입력해 주세요.")
             else:
                 st.subheader("📋 전체 배포 설문 응답 요약 현황")
                 summary_data = []
@@ -5396,15 +5396,23 @@ with col_main:
                 
                 if summary_data:
                     summary_df = pd.DataFrame(summary_data)
-                    # Convert to string and set format if needed, but Streamlit dataframe handles it
                     st.dataframe(summary_df, use_container_width=True, hide_index=True)
                 
                 st.divider()
                 st.subheader("🔍 개별 설문 상세 데이터 다운로드 및 시각화")
-                # 선택 박스를 통해 현재 관리자가 배포한 설문들 중 하나 선택 (자동 선택 지원)
                 survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
                 selected_survey_label = st.selectbox("📊 상세 조회 및 데이터 다운로드할 설문 선택", list(survey_options.keys()))
                 selected_sheet_id = survey_options[selected_survey_label]
+                
+            st.markdown("---")
+            st.markdown("##### 🔗 구글 시트 직접 연동 (조회 목록에 없는 설문)")
+            manual_input = st.text_input("과거 배포했거나 수동으로 생성한 설문의 경우, 구글 스프레드시트 URL 또는 ID를 직접 입력하세요.", placeholder="https://docs.google.com/spreadsheets/d/...")
+            if manual_input.strip():
+                selected_sheet_id = manual_input.strip()
+                if "docs.google.com/spreadsheets" in selected_sheet_id:
+                    parts = selected_sheet_id.split("/d/")
+                    if len(parts) > 1:
+                        selected_sheet_id = parts[1].split("/")[0]
 
         # 대시보드 렌더링
         if selected_sheet_id:
