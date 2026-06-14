@@ -5375,9 +5375,35 @@ with col_main:
             if not admin_surveys:
                 st.warning("배포된 설문이 존재하지 않습니다. 먼저 '온라인 설문지 제작(베타버전)' 탭에서 설문을 배포해 주세요.")
             else:
+                st.subheader("📋 전체 배포 설문 응답 요약 현황")
+                summary_data = []
+                from survey_manager import get_survey_stats
+                with st.spinner("모든 설문의 구글 시트에서 최신 응답 현황을 집계 중입니다..."):
+                    for row in admin_surveys:
+                        sheet_id = row[0]
+                        title = row[1]
+                        created_at = row[2]
+                        stats = get_survey_stats(sheet_id.strip())
+                        summary_data.append({
+                            "설문 제목": title,
+                            "접속자 수 (명)": stats.get('visits', 0),
+                            "완료 응답 (명)": stats.get('completed', 0),
+                            "단순 이탈 (명)": stats.get('abandoned_bounce', 0),
+                            "일관성 초과 (회)": stats.get('abandoned_cr', 0),
+                            "생성 일시": created_at,
+                            "스프레드시트 ID": sheet_id
+                        })
+                
+                if summary_data:
+                    summary_df = pd.DataFrame(summary_data)
+                    # Convert to string and set format if needed, but Streamlit dataframe handles it
+                    st.dataframe(summary_df, use_container_width=True, hide_index=True)
+                
+                st.divider()
+                st.subheader("🔍 개별 설문 상세 데이터 다운로드 및 시각화")
                 # 선택 박스를 통해 현재 관리자가 배포한 설문들 중 하나 선택 (자동 선택 지원)
                 survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
-                selected_survey_label = st.selectbox("📊 조회할 배포 설문 선택", list(survey_options.keys()))
+                selected_survey_label = st.selectbox("📊 상세 조회 및 데이터 다운로드할 설문 선택", list(survey_options.keys()))
                 selected_sheet_id = survey_options[selected_survey_label]
 
         # 대시보드 렌더링
