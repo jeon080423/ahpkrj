@@ -3655,6 +3655,11 @@ with col_main:
                                         headers = all_rows[0]
                                         rows = all_rows[1:]
                                         raw_df = pd.DataFrame(rows, columns=headers)
+                                        
+                                        # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 5표본)
+                                        if st.session_state.get('user_role') == 'free' and len(raw_df) > 5:
+                                            raw_df = raw_df.head(5)
+                                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 5표본까지만 분석할 수 있습니다. 처음 접수된 5명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 5 samples. Only the first 5 responses will be analyzed."))
                                     
                                         for col in raw_df.columns:
                                             if col not in ["ID", "Type", "제출시간", "답례품_연락처"]:
