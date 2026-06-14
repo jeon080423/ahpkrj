@@ -5072,8 +5072,8 @@ with col_main:
 
             # 7개 섹션 설문지 생성 폼 구성
             # 섹션 1: 기본 정보
-            st.subheader("섹션 1: 설문 기본 정보 설정")
-            survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_title", "제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문"))
+            st.subheader(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
+            survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", "제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문"))
             default_survey_desc = """[조사 목적 및 안내문]
 
 안녕하십니까?
@@ -5090,7 +5090,7 @@ with col_main:
 
 - 연구 책임자 : [이름 기재]
 - 문의처 : [연락처 또는 이메일 기재]"""
-            survey_desc = st.text_area("조사 목적 및 안내문", value=st.session_state.get("edit_desc", default_survey_desc), height=350)
+            survey_desc = st.text_area(_("조사 목적 및 안내문", "Survey Purpose & Instructions"), value=st.session_state.get("edit_desc", default_survey_desc), height=350)
             if st.session_state.user_id:
                 if "@" in st.session_state.user_id:
                     default_admin_email = st.session_state.user_id
@@ -5100,41 +5100,43 @@ with col_main:
                     default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
             else:
                 default_admin_email = "temp@ahpmaster.com"
-            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", value=st.session_state.get("edit_admin_email", default_admin_email), placeholder="example@gmail.com")
+            survey_admin_email = st.text_input(_("설문조사 담당자 이메일 주소 *", "Survey Admin Email *"), value=st.session_state.get("edit_admin_email", default_admin_email), placeholder="example@gmail.com")
 
             st.divider()
 
             # 섹션 1.5: 응답자 수집 정보 및 그룹 분류 설정
-            st.subheader("섹션 1.5: 응답자 수집 정보 및 그룹 분류")
+            st.subheader(_("섹션 1.5: 응답자 수집 정보 및 그룹 분류", "Section 1.5: Respondent Info & Grouping"))
 
             # 그룹 분류 설정
             with st.container(border=True):
-                st.markdown("**👥 그룹 분류 문항 설정**")
-                type_question = st.text_input("그룹 분류 질문 제목", value=st.session_state.get("edit_type_question", "그룹 분류 (Type)"))
-                type_options = st.text_input("그룹 분류 보기 옵션 (콤마로 구분)", value=st.session_state.get("edit_type_options", "전문가, 일반, 공무원, 기타"))
+                st.markdown(_("**👥 그룹 분류 문항 설정**", "**👥 Group Classification Setup**"))
+                type_question = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title"), value=st.session_state.get("edit_type_question", "그룹 분류 (Type)"))
+                type_options = st.text_input(_("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)"), value=st.session_state.get("edit_type_options", "전문가, 일반, 공무원, 기타"))
 
             st.write("")
 
             # 인구통계학 정보 설정
             with st.container(border=True):
-                st.markdown("**📊 인구통계학적 문항 수집 설정**")
-                demo_gender = st.checkbox("성별 수집", value=st.session_state.get("edit_demo_gender", True))
-                demo_aff = st.checkbox("소속 수집", value=st.session_state.get("edit_demo_aff", True))
-                demo_email = st.checkbox("이메일 수집", value=st.session_state.get("edit_demo_email", True))
+                st.markdown(_("**📊 인구통계학적 문항 수집 설정**", "**📊 Demographic Questions Setup**"))
+                demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
+                demo_aff = st.checkbox(_("소속 수집", "Collect Affiliation"), value=st.session_state.get("edit_demo_aff", True))
+                demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
                 st.divider()
 
-                demo_age = st.checkbox("연령 수집", value=st.session_state.get("edit_demo_age", True))
+                demo_age = st.checkbox(_("연령 수집", "Collect Age"), value=st.session_state.get("edit_demo_age", True))
                 age_type = "개방형 (숫자 직접 입력)"
                 if demo_age:
-                    age_type = st.radio("연령 수집 방식", ["개방형 (숫자 직접 입력)", "10세 단위 선택형"], index=0 if st.session_state.get("edit_age_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_age_type_setup")
+                    age_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("10세 단위 선택형", "Multiple Choice (10-year intervals)")]
+                    age_type = st.radio(_("연령 수집 방식", "Age Collection Method"), age_type_options, index=0 if st.session_state.get("edit_age_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_age_type_setup")
 
                 st.divider()
 
-                demo_exp = st.checkbox("경력년수 수집", value=st.session_state.get("edit_demo_exp", True))
+                demo_exp = st.checkbox(_("경력년수 수집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", True))
                 exp_type = "개방형 (숫자 직접 입력)"
                 if demo_exp:
-                    exp_type = st.radio("경력년수 수집 방식", ["개방형 (숫자 직접 입력)", "5년 단위 선택형"], index=0 if st.session_state.get("edit_exp_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_exp_type_setup")
+                    exp_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("5년 단위 선택형", "Multiple Choice (5-year intervals)")]
+                    exp_type = st.radio(_("경력년수 수집 방식", "Experience Collection Method"), exp_type_options, index=0 if st.session_state.get("edit_exp_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_exp_type_setup")
 
             demographics_settings = {
                 "name": False,  # 성명 수집 삭제
@@ -5152,10 +5154,10 @@ with col_main:
             st.divider()
 
             # 섹션 2: AHP 모델 계층구조 입력 폼
-            st.subheader("섹션 2: AHP 요인 계층구조 및 문항 설정")
-            st.info("Goal -> Criteria (대분류) -> Sub-criteria (중분류) 구조를 입력해 주세요. (콤마로 요인을 구분합니다)")
+            st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
+            st.info(_("Goal -> Criteria (대분류) -> Sub-criteria (중분류) 구조를 입력해 주세요. (콤마로 요인을 구분합니다)", "Please enter the Goal -> Main Criteria -> Sub-criteria structure. (Use commas to separate criteria)"))
 
-            main_input = st.text_input("대항목 (Main Criteria)", value=st.session_state.get("edit_main_input", "기술 요인, 조직 요인, 환경 요인, 혁신 요인"))
+            main_input = st.text_input(_("대항목 (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", "기술 요인, 조직 요인, 환경 요인, 혁신 요인"))
             main_list = [x.strip() for x in main_input.split(",") if x.strip()]
 
             model_structure = {"main": main_list, "subs": {}}
@@ -5167,16 +5169,16 @@ with col_main:
                 elif mc == "환경 요인": default_sub_val = "정부지원, 경쟁압력, 인력난, 외부지원"
                 elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
 
-                sub_input = st.text_input(f"\'{mc}\'의 하위 요인 (Sub-criteria)", value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
+                sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
                 model_structure["subs"][mc] = [x.strip() for x in sub_input.split(",") if x.strip()]
 
-            st.caption("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.")
+            st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
             st.divider()
 
             # 섹션 3: 요인 조작적 정의 설정
-            st.subheader("섹션 3: 요인별 상세 설명 (조작적 정의)")
-            st.info("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.")
+            st.subheader(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
+            st.info(_("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.", "Please provide detailed descriptions so respondents can intuitively understand each criteria concept."))
             definitions_map = {}
             for mc in main_list:
                 # 대분류명 파란색 볼드 및 이모티콘을 이용해 대조 설정
@@ -5188,7 +5190,7 @@ with col_main:
                 elif mc == "혁신 요인": default_main_def = "경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인"
 
                 definitions_map[mc] = st.text_input(
-                    f"👉 [{mc}] 요인의 전체적인 설명 입력",
+                    _(f"👉 [{mc}] 요인의 전체적인 설명 입력", f"👉 Enter overall description for [{mc}]"),
                     value=default_main_def or f"{mc}에 대한 전반적 요소를 설명합니다.",
                     key=f"def_main_{mc}"
                 )
@@ -5216,7 +5218,7 @@ with col_main:
                         elif sc == "지식정도": default_def = "협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준"
 
                         definitions_map[sc] = st.text_input(
-                            f"ㄴ 중분류 [{sc}] 설명 입력",
+                            _(f"ㄴ 중분류 [{sc}] 설명 입력", f"👉 Enter description for sub-criteria [{sc}]"),
                             value=default_def or f"{sc}에 대한 정의입니다.",
                             key=f"def_sub_{sc}"
                         )
@@ -5225,21 +5227,22 @@ with col_main:
             st.divider()
 
             # 섹션 4: 척도 인터페이스 설정
-            st.subheader("섹션 4: 쌍대비교 응답 척도 설정")
-            scale_option = st.radio("응답 척도 타입", [
-                "1-9 Continuous (1부터 9까지 연속형 스케일)",
-                "1-3-7-9 Discrete (이산형 척도)",
-                "1-3-5 Discrete (이산형 척도)"
-            ], index=0)
+            st.subheader(_("섹션 4: 쌍대비교 응답 척도 설정", "Section 4: Pairwise Comparison Scale Setup"))
+            scale_options = [
+                _("1-9 Continuous (1부터 9까지 연속형 스케일)", "1-9 Continuous Scale"),
+                _("1-3-7-9 Discrete (이산형 척도)", "1-3-7-9 Discrete Scale"),
+                _("1-3-5 Discrete (이산형 척도)", "1-3-5 Discrete Scale")
+            ]
+            scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=0)
 
             st.divider()
 
             # 섹션 5: 답례품 및 개인정보 수집 동의 설정
-            st.subheader("섹션 5: 답례품 및 동의 양식 설정")
-            reward_enabled = st.toggle("답례품(기프티콘 등) 제공 활성화")
+            st.subheader(_("섹션 5: 답례품 및 동의 양식 설정", "Section 5: Reward & Consent Form Setup"))
+            reward_enabled = st.toggle(_("답례품(기프티콘 등) 제공 활성화", "Enable Rewards (e.g., Gifticons)"))
             reward_desc = ""
             if reward_enabled:
-                reward_desc = st.text_area("답례품 설명", value="모든 설문 응답을 마친 분들에게 스타벅스 아메리카노 기프티콘을 발송해 드립니다.")
+                reward_desc = st.text_area(_("답례품 설명", "Reward Description"), value=st.session_state.get("edit_reward_desc", "모든 설문 응답을 마친 분들에게 스타벅스 아메리카노 기프티콘을 발송해 드립니다."))
 
             rewards_info = {
                 "enabled": reward_enabled,
@@ -5249,7 +5252,7 @@ with col_main:
             st.divider()
 
             # 섹션 6: 실시간 CR 검증 레벨 설정
-            st.subheader("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨")
+            st.subheader(_("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨", "Section 6: Pre-submission Consistency Ratio (CR) Validation Level"))
             # Get default index from edit state if editing, otherwise default to index 3 (0.3 이하)
             default_cr_idx = 3
             if st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is not None:
@@ -5260,11 +5263,11 @@ with col_main:
             elif st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is None:
                 default_cr_idx = 0
                 
-            cr_limit_opt = st.selectbox("일관성 비율(CR) 허용 기준치", [
-                "제한하지 않음 (이탈률 감소용)",
-                "0.1 이하 (매우 엄격함)",
-                "0.2 이하 (보통)",
-                "0.3 이하 (일부 허용)"
+            cr_limit_opt = st.selectbox(_("일관성 비율(CR) 허용 기준치", "Consistency Ratio (CR) Tolerance Limit"), [
+                _("제한하지 않음 (이탈률 감소용)", "No Limit (To reduce drop-out rate)"),
+                _("0.1 이하 (매우 엄격함)", "0.1 or below (Very Strict)"),
+                _("0.2 이하 (보통)", "0.2 or below (Normal)"),
+                _("0.3 이하 (일부 허용)", "0.3 or below (Somewhat Lenient)")
             ], index=default_cr_idx)
 
             cr_limit = None
@@ -5273,29 +5276,35 @@ with col_main:
             elif "0.3" in cr_limit_opt: cr_limit = 0.3
 
             if cr_limit is not None:
-                st.warning("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 전부 튕겨나가 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다.")
+                st.warning(_("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 전부 튕겨나가 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다.", "⚠️ Warning: If the CR limit is set too strict (low), all logically inconsistent surveys will be rejected. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. Please proceed with caution."))
 
             st.divider()
 
             # 섹션 7: 최종 미리보기 및 배포
-            st.subheader("섹션 7: 저장 전 최종 미리보기 및 배포")
+            st.subheader(_("섹션 7: 저장 전 최종 미리보기 및 배포", "Section 7: Final Preview & Deployment Before Saving"))
 
             # [추가] 구글 스프레드시트 연동 설정
             if st.session_state.get('editing_survey_id'):
-                st.markdown("##### ⚙️ 기존 구글 스프레드시트 연동 (수정 모드)")
-                st.info("현재 **기존 설문 수정 모드**로 진입했습니다. 수정한 설정 내용은 기존 연동된 구글 스프레드시트에 안전하게 덮어씌워집니다.\n\n**연동된 시트 ID:** " + st.session_state.editing_survey_id)
+                st.markdown(_("##### ⚙️ 기존 구글 스프레드시트 연동 (수정 모드)", "##### ⚙️ Existing Google Spreadsheet Integration (Edit Mode)"))
+                st.info(_("현재 **기존 설문 수정 모드**로 진입했습니다. 수정한 설정 내용은 기존 연동된 구글 스프레드시트에 안전하게 덮어씌워집니다.\n\n**연동된 시트 ID:** ", "You have entered **Existing Survey Edit Mode**. The modified settings will be safely overwritten to the existing linked Google Spreadsheet.\n\n**Linked Sheet ID:** ") + st.session_state.editing_survey_id)
                 existing_sheet_id_input = st.session_state.editing_survey_id
             else:
-                st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
-                st.info("""
+                st.markdown(_("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *", "##### ⚙️ Setup Your Google Spreadsheet to Link *"))
+                st.info(_("""
                 **💡 연동 방법:**
                 1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
                 2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
                    * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
                 3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
-                """)
-                st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
-                existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...")
+                """, """
+                **💡 How to link:**
+                1. Create a **New Google Spreadsheet** in your Google Drive. (This uses your account storage, so there will be no quota errors on our side.)
+                2. Click the 'Share' button on the top right and add the following service account email as an **Editor**.
+                   * Service Account Email: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                3. Copy the **URL** or **Sheet ID** of the created spreadsheet and paste it below. (See the example image below)
+                """))
+                st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Example of copying Google Spreadsheet URL"), width=650)
+                existing_sheet_id_input = st.text_input(_("연동할 구글 스프레드시트 URL 또는 ID *", "Google Spreadsheet URL or ID to link *"), placeholder="https://docs.google.com/spreadsheets/d/...")
 
 
 
@@ -5346,24 +5355,27 @@ with col_main:
                     onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
                     onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
                     >
-                        👁️ 설문지 응답 화면 미리보기
+                        {_("👁️ 설문지 응답 화면 미리보기", "👁️ Preview Survey Form")}
                     </div>
                 </a>
                 """
                 st.markdown(preview_link_html, unsafe_allow_html=True)
 
             with col_p2:
-                if st.button("🚀 배포 및 DB 연동 (수정 내용 적용)" if st.session_state.get("editing_survey_id") else "🚀 배포 및 DB 연동", type="primary", use_container_width=True):
+                btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
+                if st.button(btn_label, type="primary", use_container_width=True):
                     if not existing_sheet_id_input.strip():
-                        st.error("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.")
+                        st.error(_("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.", "You must enter the Google Spreadsheet URL or ID to link."))
                         import streamlit.components.v1 as components
-                        components.html("<script>alert('연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.');</script>", height=0, width=0)
+                        alert_msg = _("연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.", "Deployment and linking will fail without a Google Spreadsheet URL.\\nPlease make sure to enter your Google Spreadsheet URL or ID.")
+                        components.html(f"<script>alert('{alert_msg}');</script>", height=0, width=0)
                     elif not survey_admin_email or "@" not in survey_admin_email:
-                        st.error("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.")
+                        st.error(_("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership."))
                         import streamlit.components.v1 as components
-                        components.html("<script>alert('구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.');</script>", height=0, width=0)
+                        alert_msg2 = _("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership.")
+                        components.html(f"<script>alert('{alert_msg2}');</script>", height=0, width=0)
                     else:
-                        with st.spinner("구글 스프레드시트와 설문 구조를 연동하는 중..."):
+                        with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
                             try:
                                 target_sheet_id = existing_sheet_id_input.strip()
                                 if "docs.google.com/spreadsheets" in target_sheet_id:
