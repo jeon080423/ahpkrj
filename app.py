@@ -2536,7 +2536,7 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월)</li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월) <span style="font-size: 0.85rem; color: #555;">(AHP 설문지 셋팅 대행 5만원 추가)</span></li>
   </ul>
   <div style="margin-top: 10px; color: #e65100; font-size: 0.85rem; font-weight: 600;">
     💡 가입 후 3일 내 불만족 시 100% 환불
@@ -2547,7 +2547,7 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
-    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (3 months unlimited)</li>
+    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (3 months unlimited) <span style="font-size: 0.85rem; color: #555;">(+$50 USD for AHP survey setup service)</span></li>
   </ul>
 
 </div>"""
