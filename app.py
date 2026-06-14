@@ -324,10 +324,12 @@ div.st-key-ahp_survey_matrix {
     }
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
-        width: 15% !important; 
+        width: 25% !important; 
+        white-space: normal !important;
+        word-break: keep-all !important;
     }
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
-        width: 70% !important;
+        width: 50% !important;
     }
 }
 /* 전역 상단 여백 최소화 */

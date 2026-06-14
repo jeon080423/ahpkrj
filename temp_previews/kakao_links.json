@@ -1,0 +1,178 @@
+[
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/console/app/320791#mainContent"
+  },
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/console/app/320791#gnbContent"
+  },
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/console/app/320791#sideContent"
+  },
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/"
+  },
+  {
+    "text": "앱",
+    "href": "https://developers.kakao.com/console/app"
+  },
+  {
+    "text": "문서",
+    "href": "https://developers.kakao.com/docs"
+  },
+  {
+    "text": "도구",
+    "href": "https://developers.kakao.com/tool"
+  },
+  {
+    "text": "데브톡",
+    "href": "https://devtalk.kakao.com/"
+  },
+  {
+    "text": "앱",
+    "href": "https://developers.kakao.com/console/app"
+  },
+  {
+    "text": "대시보드",
+    "href": "https://developers.kakao.com/console/app/320791"
+  },
+  {
+    "text": "비즈니스 인증",
+    "href": "https://developers.kakao.com/console/app/320791/product/business-auth"
+  },
+  {
+    "text": "카카오톡 메시지",
+    "href": "https://developers.kakao.com/console/app/320791/product/message"
+  },
+  {
+    "text": "카카오맵",
+    "href": "https://developers.kakao.com/console/app/320791/product/kakao-map"
+  },
+  {
+    "text": "푸시 알림",
+    "href": "https://developers.kakao.com/console/app/320791/product/push"
+  },
+  {
+    "text": "기간별 사용량",
+    "href": "https://developers.kakao.com/console/app/320791/stat/api"
+  },
+  {
+    "text": "실시간 사용량",
+    "href": "https://developers.kakao.com/console/app/320791/stat/realtime"
+  },
+  {
+    "text": "쿼터",
+    "href": "https://developers.kakao.com/console/app/320791/stat/quota"
+  },
+  {
+    "text": "유료 사용량",
+    "href": "https://developers.kakao.com/console/app/320791/stat/billing"
+  },
+  {
+    "text": "비즈 앱 등록",
+    "href": "https://developers.kakao.com/console/app/320791/config#business-info"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/app-setting/app#app-permission"
+  },
+  {
+    "text": "비즈 앱 등록",
+    "href": "https://developers.kakao.com/console/app/320791/config#business-info"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/kakaologin/common"
+  },
+  {
+    "text": "통계 확인",
+    "href": "https://developers.kakao.com/console/app/320791/stat/user"
+  },
+  {
+    "text": "설정",
+    "href": "https://developers.kakao.com/console/app/320791/product/login"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/ko/kakaologin/prerequisite#kakao-login-activate"
+  },
+  {
+    "text": "설정",
+    "href": "https://developers.kakao.com/console/app/320791/product/login/scope"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/ko/kakaologin/prerequisite#scope"
+  },
+  {
+    "text": "설정",
+    "href": "https://developers.kakao.com/console/app/320791/product/login/easySignUp"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/ko/kakaologin/prerequisite#simple-signup-enable"
+  },
+  {
+    "text": "설정",
+    "href": "https://developers.kakao.com/console/app/320791/config/webhook#unlink"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/ko/app-setting/app#unlink-webhook"
+  },
+  {
+    "text": "설정",
+    "href": "https://developers.kakao.com/console/app/320791/config/webhook#ssf"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/ko/app-setting/app#account-change-webhook"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/kakaotalk-share/common#kakaotalk-share"
+  },
+  {
+    "text": "통계 확인",
+    "href": "https://developers.kakao.com/console/app/320791/stat/kakaotalk-sharing"
+  },
+  {
+    "text": "설정",
+    "href": "https://developers.kakao.com/console/app/320791/config/webhook#share"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/ko/app-setting/app#share-webhook"
+  },
+  {
+    "text": "© Kakao Corp.",
+    "href": "https://www.kakaocorp.com/"
+  },
+  {
+    "text": "카카오비즈니스 이용약관",
+    "href": "https://kakaobusiness-policy.kakao.com/SERVICE/"
+  },
+  {
+    "text": "서비스 약관",
+    "href": "https://developers.kakao.com/terms/latest/ko/site-terms"
+  },
+  {
+    "text": "운영 정책",
+    "href": "https://developers.kakao.com/terms/latest/ko/site-policies"
+  },
+  {
+    "text": "쿼터",
+    "href": "https://developers.kakao.com/docs/latest/ko/getting-started/quota"
+  },
+  {
+    "text": "개인정보 처리방침",
+    "href": "https://business.kakao.com/policy/privacy/"
+  },
+  {
+    "text": "",
+    "href": "https://www.kakaocorp.com/"
+  }
+]
