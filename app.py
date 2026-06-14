@@ -3247,7 +3247,7 @@ with col_main:
     # [수정] 관리자용 상단 탭 연동 (Tab 1: 분석, Tab 2: 설문지 제작)
     # 일반 사용자에게는 Tab 1 화면(분석)만 직접 단일 노출시킵니다.
     # -------------------------------------------------------------------------
-    main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 설문지 제작 (무료)", "실시간 응답 현황"])
+    main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 AHP 설문지 작성 및 배포(무료)", "실시간 응답 현황"])
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
@@ -3435,27 +3435,27 @@ with col_main:
                     if os.path.exists(img_file):
                         st.image(img_file, caption=caption_text)
     
-    st.markdown("---")
+        st.markdown("---")
     
-    if st.session_state.user_role == 'official':
-        with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
-            my_analyses = get_user_analyses(st.session_state.user_id)
-            if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
-            else:
-                for item in my_analyses:
-                    a_id, filename, save_date = item
-                    col_List1, col_List2, col_List3, col_List4 = st.columns([3, 2, 1, 1])
-                    with col_List1: st.text(f"{filename}")
-                    with col_List2: st.caption(f"{save_date}")
-                    with col_List3:
-                        file_info = get_analysis_file(analysis_id=a_id)
-                        if file_info:
-                            fname, fdata = file_info
-                            st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
-                    with col_List4:
-                        if st.button("🗑️", key=f"del_{a_id}"):
-                            delete_analysis(a_id)
-                            st.rerun()
+        if st.session_state.user_role == 'official':
+            with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
+                my_analyses = get_user_analyses(st.session_state.user_id)
+                if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
+                else:
+                    for item in my_analyses:
+                        a_id, filename, save_date = item
+                        col_List1, col_List2, col_List3, col_List4 = st.columns([3, 2, 1, 1])
+                        with col_List1: st.text(f"{filename}")
+                        with col_List2: st.caption(f"{save_date}")
+                        with col_List3:
+                            file_info = get_analysis_file(analysis_id=a_id)
+                            if file_info:
+                                fname, fdata = file_info
+                                st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
+                        with col_List4:
+                            if st.button("🗑️", key=f"del_{a_id}"):
+                                delete_analysis(a_id)
+                                st.rerun()
     
 
     
@@ -4947,7 +4947,7 @@ with col_main:
     with main_tab2:
         st.header("📝 AHP 온라인 설문 자동 생성 및 배포기")
         if st.session_state.user_id is None:
-            st.warning("🔒 **온라인 설문지 제작 (무료) 기능은 회원 전용 서비스입니다.**")
+            st.warning("🔒 **온라인 AHP 설문지 작성 및 배포(무료) 기능은 회원 전용 서비스입니다.**")
             st.info("무료 회원가입 및 로그인을 완료하시면 제한 없이 AHP 온라인 설문지를 자동 생성하고 본인의 구글 스프레드시트와 연동할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
         else:
 
