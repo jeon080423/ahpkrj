@@ -3666,8 +3666,22 @@ with col_main:
                 conn = sqlite3.connect('users.db')
                 cur = conn.cursor()
                 cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
-                admin_surveys = cur.fetchall()
+                sqlite_surveys = cur.fetchall()
                 conn.close()
+                
+                gs_surveys = []
+                try:
+                    from survey_manager import get_admin_surveys_from_gsheet
+                    gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
+                except Exception:
+                    pass
+                
+                merged_surveys = {}
+                for s in gs_surveys + sqlite_surveys:
+                    if s[0] not in merged_surveys:
+                        merged_surveys[s[0]] = s
+                admin_surveys = list(merged_surveys.values())
+                admin_surveys.sort(key=lambda x: x[2], reverse=True)
             
                 if not admin_surveys:
                     st.warning(_("배포된 온라인 설문이 없습니다.", "No deployed online surveys found."))
@@ -5309,8 +5323,11 @@ with col_main:
 
 
 
-                                # admin_surveys 테이블에 신규 설문 자동 등록
+                                # admin_surveys 테이블에 신규 설문 자동 등록 및 마스터 구글 시트 백업
                                 try:
+                                    from survey_manager import save_admin_survey_to_gsheet
+                                    save_admin_survey_to_gsheet(sheet_id, survey_title, st.session_state.user_id)
+                                    
                                     conn = sqlite3.connect('users.db')
                                     cur = conn.cursor()
                                     cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
@@ -5367,8 +5384,22 @@ with col_main:
                 conn = sqlite3.connect('users.db')
                 cur = conn.cursor()
                 cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
-                admin_surveys = cur.fetchall()
+                sqlite_surveys = cur.fetchall()
                 conn.close()
+                
+                gs_surveys = []
+                try:
+                    from survey_manager import get_admin_surveys_from_gsheet
+                    gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
+                except Exception:
+                    pass
+                
+                merged_surveys = {}
+                for s in gs_surveys + sqlite_surveys:
+                    if s[0] not in merged_surveys:
+                        merged_surveys[s[0]] = s
+                admin_surveys = list(merged_surveys.values())
+                admin_surveys.sort(key=lambda x: x[2], reverse=True)
             except Exception as e:
                 st.error(f"설문 목록 조회 실패: {e}")
 
