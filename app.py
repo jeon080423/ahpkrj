@@ -5018,13 +5018,89 @@ with col_main:
             pass
 
             st.divider()
+            
+            # ------------------------------------------------------------
+            # 0. 설문 관리 (새로 작성 / 기존 수정 모드)
+            # ------------------------------------------------------------
+            st.subheader("섹션 0: 설문 작성 방식 선택")
+            
+            if 'editing_survey_id' not in st.session_state:
+                st.session_state.editing_survey_id = None
+                
+            col_mode1, col_mode2 = st.columns(2)
+            with col_mode1:
+                if st.button("✨ 새 설문 작성하기 (초기화)", use_container_width=True, type="primary" if st.session_state.editing_survey_id is None else "secondary"):
+                    st.session_state.editing_survey_id = None
+                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
+                    for k in keys_to_clear:
+                        del st.session_state[k]
+                    st.rerun()
+                    
+            with col_mode2:
+                st.markdown("**기존 설문 불러와서 수정하기:**")
+                gs_surveys = []
+                try:
+                    from survey_manager import get_admin_surveys_from_gsheet
+                    gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
+                except Exception:
+                    pass
+                
+                if gs_surveys:
+                    survey_options = {f"{s[1]} ({s[2]})": s[0] for s in gs_surveys}
+                    selected_edit_sheet = st.selectbox("수정할 설문을 선택하세요", options=list(survey_options.keys()), key="edit_survey_selectbox")
+                    if st.button("📂 선택한 설문 불러오기", use_container_width=True):
+                        sel_id = survey_options[selected_edit_sheet]
+                        with st.spinner("설문 데이터를 불러오는 중입니다..."):
+                            from survey_manager import load_survey_metadata
+                            meta = load_survey_metadata(sel_id)
+                            if meta:
+                                st.session_state.editing_survey_id = sel_id
+                                st.session_state.edit_title = meta.get("Title", "")
+                                st.session_state.edit_desc = meta.get("Description", "")
+                                st.session_state.edit_admin_email = meta.get("Admin_Email", "")
+                                
+                                demo = meta.get("Demographics", {})
+                                st.session_state.edit_type_question = demo.get("type_question", "")
+                                st.session_state.edit_type_options = ", ".join(demo.get("type_options", []))
+                                st.session_state.edit_demo_gender = demo.get("gender", False)
+                                st.session_state.edit_demo_aff = demo.get("affiliation", False)
+                                st.session_state.edit_demo_email = demo.get("email", False)
+                                st.session_state.edit_demo_name = demo.get("name", False)
+                                st.session_state.edit_demo_age = demo.get("age", False)
+                                st.session_state.edit_demo_exp = demo.get("experience", False)
+                                st.session_state.edit_age_type = demo.get("age_type", "개방형 (숫자 직접 입력)")
+                                st.session_state.edit_exp_type = demo.get("experience_type", "개방형 (숫자 직접 입력)")
+                                
+                                st.session_state.edit_scale_type = meta.get("Scale_Type", "1-9 Continuous")
+                                st.session_state.edit_cr_limit = float(meta.get("CR_Limit", 0.1))
+                                
+                                ahp_model = meta.get("AHP_Model_JSON", {})
+                                st.session_state.edit_main_input = ", ".join(ahp_model.get("main", []))
+                                st.session_state.edit_sub_inputs = {}
+                                for mc, subs in ahp_model.get("subs", {}).items():
+                                    st.session_state.edit_sub_inputs[mc] = ", ".join(subs)
+                                    
+                                definitions = meta.get("Definitions", {})
+                                st.session_state.edit_definitions = definitions
+                                
+                                st.success("성공적으로 불러왔습니다!")
+                                st.rerun()
+                            else:
+                                st.error("설문 데이터를 불러오지 못했습니다.")
+                else:
+                    st.info("수정할 수 있는 배포된 설문이 없습니다.")
+                    
+            if st.session_state.editing_survey_id:
+                st.warning("⚠️ **주의:** 대항목/소항목 등 AHP 모델 구조를 수정하고 업데이트하면 기존에 수집된 응답 데이터와 열(Column) 불일치로 인한 오류가 발생할 수 있습니다. 모델 구조를 변경하실 경우 가급적 '새 설문 작성'을 권장합니다.")
+            
+            st.divider()
 
             from survey_manager import create_survey_sheet, generate_pairwise_combinations
 
             # 7개 섹션 설문지 생성 폼 구성
             # 섹션 1: 기본 정보
             st.subheader("섹션 1: 설문 기본 정보 설정")
-            survey_title = st.text_input("설문지 제목", value="제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문")
+            survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_title", "제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문"))
             default_survey_desc = """[조사 목적 및 안내문]
 
 안녕하십니까?
@@ -5041,7 +5117,7 @@ with col_main:
 
 - 연구 책임자 : [이름 기재]
 - 문의처 : [연락처 또는 이메일 기재]"""
-            survey_desc = st.text_area("조사 목적 및 안내문", value=default_survey_desc, height=350)
+            survey_desc = st.text_area("조사 목적 및 안내문", value=st.session_state.get("edit_desc", default_survey_desc), height=350)
             if st.session_state.user_id:
                 if "@" in st.session_state.user_id:
                     default_admin_email = st.session_state.user_id
@@ -5051,7 +5127,7 @@ with col_main:
                     default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
             else:
                 default_admin_email = "temp@ahpmaster.com"
-            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", value=default_admin_email, placeholder="example@gmail.com")
+            survey_admin_email = st.text_input("설문조사 담당자 이메일 주소 *", value=st.session_state.get("edit_admin_email", default_admin_email), placeholder="example@gmail.com")
 
             st.divider()
 
@@ -5061,31 +5137,31 @@ with col_main:
             # 그룹 분류 설정
             with st.container(border=True):
                 st.markdown("**👥 그룹 분류 문항 설정**")
-                type_question = st.text_input("그룹 분류 질문 제목", value="그룹 분류 (Type)")
-                type_options = st.text_input("그룹 분류 보기 옵션 (콤마로 구분)", value="전문가, 일반, 공무원, 기타")
+                type_question = st.text_input("그룹 분류 질문 제목", value=st.session_state.get("edit_type_question", "그룹 분류 (Type)"))
+                type_options = st.text_input("그룹 분류 보기 옵션 (콤마로 구분)", value=st.session_state.get("edit_type_options", "전문가, 일반, 공무원, 기타"))
 
             st.write("")
 
             # 인구통계학 정보 설정
             with st.container(border=True):
                 st.markdown("**📊 인구통계학적 문항 수집 설정**")
-                demo_gender = st.checkbox("성별 수집", value=True)
-                demo_aff = st.checkbox("소속 수집", value=True)
-                demo_email = st.checkbox("이메일 수집", value=True)
+                demo_gender = st.checkbox("성별 수집", value=st.session_state.get("edit_demo_gender", True))
+                demo_aff = st.checkbox("소속 수집", value=st.session_state.get("edit_demo_aff", True))
+                demo_email = st.checkbox("이메일 수집", value=st.session_state.get("edit_demo_email", True))
 
                 st.divider()
 
-                demo_age = st.checkbox("연령 수집", value=True)
+                demo_age = st.checkbox("연령 수집", value=st.session_state.get("edit_demo_age", True))
                 age_type = "개방형 (숫자 직접 입력)"
                 if demo_age:
-                    age_type = st.radio("연령 수집 방식", ["개방형 (숫자 직접 입력)", "10세 단위 선택형"], index=0, horizontal=True, key="survey_age_type_setup")
+                    age_type = st.radio("연령 수집 방식", ["개방형 (숫자 직접 입력)", "10세 단위 선택형"], index=0 if st.session_state.get("edit_age_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_age_type_setup")
 
                 st.divider()
 
-                demo_exp = st.checkbox("경력년수 수집", value=True)
+                demo_exp = st.checkbox("경력년수 수집", value=st.session_state.get("edit_demo_exp", True))
                 exp_type = "개방형 (숫자 직접 입력)"
                 if demo_exp:
-                    exp_type = st.radio("경력년수 수집 방식", ["개방형 (숫자 직접 입력)", "5년 단위 선택형"], index=0, horizontal=True, key="survey_exp_type_setup")
+                    exp_type = st.radio("경력년수 수집 방식", ["개방형 (숫자 직접 입력)", "5년 단위 선택형"], index=0 if st.session_state.get("edit_exp_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_exp_type_setup")
 
             demographics_settings = {
                 "name": False,  # 성명 수집 삭제
@@ -5106,7 +5182,7 @@ with col_main:
             st.subheader("섹션 2: AHP 요인 계층구조 및 문항 설정")
             st.info("Goal -> Criteria (대분류) -> Sub-criteria (중분류) 구조를 입력해 주세요. (콤마로 요인을 구분합니다)")
 
-            main_input = st.text_input("대항목 (Main Criteria)", value="기술 요인, 조직 요인, 환경 요인, 혁신 요인")
+            main_input = st.text_input("대항목 (Main Criteria)", value=st.session_state.get("edit_main_input", "기술 요인, 조직 요인, 환경 요인, 혁신 요인"))
             main_list = [x.strip() for x in main_input.split(",") if x.strip()]
 
             model_structure = {"main": main_list, "subs": {}}
@@ -5118,7 +5194,7 @@ with col_main:
                 elif mc == "환경 요인": default_sub_val = "정부지원, 경쟁압력, 인력난, 외부지원"
                 elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
 
-                sub_input = st.text_input(f"'{mc}'의 하위 요인 (Sub-criteria)", value=default_sub_val)
+                sub_input = st.text_input(f"\'{mc}\'의 하위 요인 (Sub-criteria)", value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
                 model_structure["subs"][mc] = [x.strip() for x in sub_input.split(",") if x.strip()]
 
             st.caption("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.")
@@ -5222,16 +5298,21 @@ with col_main:
             st.subheader("섹션 7: 저장 전 최종 미리보기 및 배포")
 
             # [추가] 구글 스프레드시트 연동 설정
-            st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
-            st.info("""
-            **💡 연동 방법:**
-            1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
-            2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
-               * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-            3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
-            """)
-            st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
-            existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...")
+            if st.session_state.get('editing_survey_id'):
+                st.markdown("##### ⚙️ 기존 구글 스프레드시트 연동 (수정 모드)")
+                st.info("현재 **기존 설문 수정 모드**로 진입했습니다. 수정한 설정 내용은 기존 연동된 구글 스프레드시트에 안전하게 덮어씌워집니다.\n\n**연동된 시트 ID:** " + st.session_state.editing_survey_id)
+                existing_sheet_id_input = st.session_state.editing_survey_id
+            else:
+                st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
+                st.info("""
+                **💡 연동 방법:**
+                1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
+                2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
+                   * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
+                """)
+                st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
+                existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...")
 
 
 
@@ -5289,7 +5370,7 @@ with col_main:
                 st.markdown(preview_link_html, unsafe_allow_html=True)
 
             with col_p2:
-                if st.button("🚀 배포 및 DB 연동", type="primary", use_container_width=True):
+                if st.button("🚀 배포 및 DB 연동 (수정 내용 적용)" if st.session_state.get("editing_survey_id") else "🚀 배포 및 DB 연동", type="primary", use_container_width=True):
                     if not existing_sheet_id_input.strip():
                         st.error("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.")
                         import streamlit.components.v1 as components
@@ -5345,7 +5426,7 @@ with col_main:
                                     short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
 
                                 st.balloons()
-                                st.success("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
+                                st.success("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!" if st.session_state.get("editing_survey_id") else "🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
 
                                 st.code(short_url, language="text")
                                 st.info(f"**위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.**  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
