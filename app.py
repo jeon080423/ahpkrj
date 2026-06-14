@@ -1793,7 +1793,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         if close_clicked:
             components.html("""
             <script>
-                // Close current window
+                // Try standard close
                 window.close();
                 // Try parent window close
                 try {
@@ -1801,9 +1801,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 } catch(e) {}
                 // Workaround for some browsers
                 try {
-                    open(window.location, '_self').close();
+                    window.open('', '_self', '').close();
                 } catch(e) {}
-                alert("창 닫기 동작이 브라우저 보안에 의해 차단되었습니다. 현재 브라우저 탭(X)을 직접 닫아주세요.");
+                // Fallback: redirect to a blank page if closing fails (which is highly likely)
+                setTimeout(function() {
+                    window.location.href = "about:blank";
+                }, 300);
             </script>
             """, height=0, width=0)
             
