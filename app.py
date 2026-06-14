@@ -5333,7 +5333,10 @@ with col_main:
                                 st.code(short_url, language="text")
                                 st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
                             except Exception as ex:
-                                st.error(f"구글 시트 생성 실패: {ex}")
+                                st.error(f"구글 시트 연동 실패: {ex}")
+                                import streamlit.components.v1 as components
+                                error_msg = str(ex).replace("'", "\\'").replace("\\n", " ")
+                                components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp2-75@ahp2-486703.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
 
 
 
