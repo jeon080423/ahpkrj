@@ -2547,7 +2547,7 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
-    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (3 months unlimited) <span style="font-size: 0.85rem; color: #555;">(+$50 USD for AHP survey setup service)</span></li>
+    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (3 months unlimited)</li>
   </ul>
 
 </div>"""
