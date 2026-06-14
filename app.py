@@ -474,7 +474,23 @@ def get_cached_visit_logs(spreadsheet_id):
             spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
             try:
                 visit_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Visit_Logs")
-                return run_gspread_with_retry(visit_sheet.get_all_records)
+                records = run_gspread_with_retry(visit_sheet.get_all_records)
+                # 구글 시트에서 가져온 전체 로그를 로컬 DB에 자동으로 싱크해 채워넣습니다.
+                if records:
+                    try:
+                        conn = sqlite3.connect('users.db')
+                        c = conn.cursor()
+                        for row in records:
+                            ip_val = row.get('IP')
+                            date_val = row.get('Date')
+                            if ip_val and date_val:
+                                c.execute("INSERT OR IGNORE INTO visit_logs (ip_address, visit_date) VALUES (?, ?)", 
+                                          (str(ip_val), str(date_val)))
+                        conn.commit()
+                        conn.close()
+                    except Exception:
+                        pass
+                return records
             except gspread.exceptions.WorksheetNotFound:
                 return []
     except Exception as e:
@@ -2897,17 +2913,17 @@ if st.session_state.get('page', 'main') == 'guide':
 
 # 메인 헤더 영역
 try:
-    # Google Sheets API 429 오류를 완벽히 차단하기 위해, 로컬 DB의 방문 로그 행 수를 먼저 조회하여 total_visits를 계산합니다.
-    # 만약 로컬 DB가 비어 있다면, Google Sheets에서 데이터를 캐시로 조회해 복구합니다.
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM visit_logs")
-    total_visits = c.fetchone()[0]
-    conn.close()
-    
-    if total_visits == 0:
-        visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
-        total_visits = len(visit_data_gs) if visit_data_gs else 0
+    # 5분 캐싱된 구글 시트 데이터를 먼저 조회합니다.
+    visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
+    if visit_data_gs:
+        total_visits = len(visit_data_gs)
+    else:
+        # 구글 시트 API 제한(429) 시 로컬 DB에 저장된 방문 로그 수를 표시합니다.
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM visit_logs")
+        total_visits = c.fetchone()[0]
+        conn.close()
 except Exception:
     total_visits = 0
 
