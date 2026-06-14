@@ -5,6 +5,29 @@ import uuid
 import streamlit as st
 from google.oauth2.service_account import Credentials
 
+def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwargs):
+    """
+    구글 시트 API 호출 시 429(RESOURCE_EXHAUSTED) 등 일시적 오류 발생 시
+    지수 백오프(Exponential Backoff) 및 지터(Jitter)를 적용하여 재시도하는 헬퍼 함수.
+    """
+    import time
+    import random
+    backoff = initial_backoff
+    for attempt in range(max_retries):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            err_msg = str(e)
+            is_rate_limit = "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg or "RATE_LIMIT_EXCEEDED" in err_msg
+            
+            if is_rate_limit and attempt < max_retries - 1:
+                sleep_time = backoff + random.uniform(0, 1)
+                time.sleep(sleep_time)
+                backoff *= 2
+                continue
+            else:
+                raise e
+
 def get_survey_gspread_client(user_id=None):
     """gspread 클라이언트를 반환합니다. 사용자 OAuth 우선, 없을 시 서비스 계정 사용."""
     if user_id:
@@ -378,14 +401,14 @@ def get_survey_stats(spreadsheet_id):
         return {"completed": 0, "abandoned_cr": 0, "visits": 0, "abandoned_bounce": 0}
         
     try:
-        spreadsheet = client.open_by_key(spreadsheet_id)
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
         # 1. 완료자 수 (Raw_Data 행 개수 - 헤더행 1)
-        raw_sheet = spreadsheet.worksheet("Raw_Data")
-        completed_count = max(0, len(raw_sheet.get_all_values()) - 1)
+        raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+        completed_count = max(0, len(run_gspread_with_retry(raw_sheet.get_all_values)) - 1)
         
         # 2. 메타데이터 조회 (방문 및 CR 실패 횟수)
-        meta_sheet = spreadsheet.worksheet("Survey_Metadata")
-        records = meta_sheet.get_all_records()
+        meta_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Survey_Metadata")
+        records = run_gspread_with_retry(meta_sheet.get_all_records)
         meta_dict = {row["Field"]: row["Value"] for row in records}
         
         visits = int(meta_dict.get("Visit_Count", 0))
@@ -739,33 +762,46 @@ def delete_admin_survey(survey_id, admin_id):
     
     # 1. Clear data in the user's survey sheet
     try:
-        spreadsheet = client.open_by_key(survey_id)
+        spreadsheet = run_gspread_with_retry(client.open_by_key, survey_id)
         for sheet_name in ["Raw_Data", "Demographic_Data", "Survey_Metadata", "AHP_Model", "Pairwise_Data"]:
             try:
-                ws = spreadsheet.worksheet(sheet_name)
-                ws.clear()
+                ws = run_gspread_with_retry(spreadsheet.worksheet, sheet_name)
+                run_gspread_with_retry(ws.clear)
             except gspread.exceptions.WorksheetNotFound:
                 pass
     except Exception as e:
         print(f"Failed to clear survey sheet {survey_id}:", e)
         
-    # 2. Remove from Admin_Surveys Master Sheet
+    # 2. Remove from Admin_Surveys and Short_Urls Master Sheets
     try:
-        master_sheet = client.open_by_key('1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA')
-        ws = master_sheet.worksheet('Admin_Surveys')
-        # Find all rows for this admin and delete them from bottom to top to avoid index shifting
-        try:
-            all_records = ws.get_all_records()
-        except Exception:
-            all_records = []
-            
-        rows_to_delete = []
-        for i, r in enumerate(all_records):
-            if str(r.get('admin_id')) == str(admin_id):
-                rows_to_delete.append(i + 2)
+        master_sheet = run_gspread_with_retry(client.open_by_key, '1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA')
         
-        for r_idx in sorted(rows_to_delete, reverse=True):
-            ws.delete_rows(r_idx)
+        # 2-1. Admin_Surveys 시트에서 삭제
+        try:
+            ws = run_gspread_with_retry(master_sheet.worksheet, 'Admin_Surveys')
+            all_records = run_gspread_with_retry(ws.get_all_records)
+            rows_to_delete = []
+            for i, r in enumerate(all_records):
+                if str(r.get('survey_id')) == str(survey_id) or str(r.get('admin_id')) == str(admin_id):
+                    rows_to_delete.append(i + 2)
+            for r_idx in sorted(rows_to_delete, reverse=True):
+                run_gspread_with_retry(ws.delete_rows, r_idx)
+        except Exception:
+            pass
+            
+        # 2-2. Short_Urls 시트에서 삭제 (이전 누락 부분 수정: 로컬 DB에 자동 복구 방지)
+        try:
+            ws_short = run_gspread_with_retry(master_sheet.worksheet, 'Short_Urls')
+            all_short_records = run_gspread_with_retry(ws_short.get_all_records)
+            rows_to_delete_short = []
+            for i, r in enumerate(all_short_records):
+                if str(r.get('survey_id')) == str(survey_id) or str(r.get('admin_id')) == str(admin_id):
+                    rows_to_delete_short.append(i + 2)
+            for r_idx in sorted(rows_to_delete_short, reverse=True):
+                run_gspread_with_retry(ws_short.delete_rows, r_idx)
+        except Exception:
+            pass
+            
     except Exception as e:
         print("Failed to remove from Master GSheet:", e)
 
@@ -786,14 +822,14 @@ def get_admin_surveys_from_gsheet(admin_id):
     client = get_survey_gspread_client()
     if not client: return []
     try:
-        master_sheet = client.open_by_key('1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA')
+        master_sheet = run_gspread_with_retry(client.open_by_key, '1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA')
         try:
-            ws = master_sheet.worksheet('Admin_Surveys')
+            ws = run_gspread_with_retry(master_sheet.worksheet, 'Admin_Surveys')
         except gspread.exceptions.WorksheetNotFound:
             return []
             
         try:
-            all_records = ws.get_all_records()
+            all_records = run_gspread_with_retry(ws.get_all_records)
         except Exception:
             all_records = []
         surveys = []
