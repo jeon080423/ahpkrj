@@ -3398,13 +3398,14 @@ with col_main:
         st.write("### 👥 가입자 현황 및 최종 배포 링크")
         
         # 컬럼 순서 및 구성 재조정하여 데이터프레임으로 출력
-        display_df = users_df[['id', 'role', 'signup_date', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info']].copy()
+        display_df = users_df[['id', 'role', 'signup_date', 'pw', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info']].copy()
         st.dataframe(
             display_df,
             column_config={
                 "id": "회원 ID",
                 "role": "권한",
                 "signup_date": "가입일",
+                "pw": "비밀번호",
                 "survey_count": "배포 횟수",
                 "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
                 "expiry_date": "만료일",
