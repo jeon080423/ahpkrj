@@ -551,9 +551,21 @@ def sync_short_codes_from_gs():
 def init_db():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    # [수정] 구글 시트 구조에 맞춰 agree_info 컬럼 추가
+    # [수정] 구글 시트 구조에 맞춰 agree_info 및 배포통계 컬럼 추가
     c.execute('''CREATE TABLE IF NOT EXISTS users
-                  (id TEXT PRIMARY KEY, role TEXT, signup_date TEXT, pw TEXT, expiry_date TEXT, agree_info TEXT)''')
+                  (id TEXT PRIMARY KEY, role TEXT, signup_date TEXT, pw TEXT, expiry_date TEXT, agree_info TEXT, 
+                   survey_count INTEGER DEFAULT 0, last_survey_link TEXT)''')
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN survey_count INTEGER DEFAULT 0")
+        conn.commit()
+    except Exception:
+        pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN last_survey_link TEXT")
+        conn.commit()
+    except Exception:
+        pass
+
     c.execute('''CREATE TABLE IF NOT EXISTS saved_analyses
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, filename TEXT, save_date TEXT, file_data BLOB)''')
     c.execute('''CREATE TABLE IF NOT EXISTS user_models
@@ -589,9 +601,9 @@ def init_db():
         # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         signup_date_str = kst_now.strftime("%Y-%m-%d")
-        # 컬럼 순서: id, role, signup_date, pw, expiry_date, agree_info
-        c.execute("INSERT OR IGNORE INTO users VALUES (?, ?, ?, ?, ?, ?)", 
-                  ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y'))
+        # 컬럼 순서: id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link
+        c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                  ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
         conn.commit()
 
         # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가
@@ -602,12 +614,12 @@ def init_db():
                 sheet = spreadsheet.sheet1
                 # 헤더 보정
                 all_values = sheet.get_all_values()
-                if all_values and len(all_values[0]) == 5:
-                    sheet.update(range_name='A1:F1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info']])
+                if all_values and len(all_values[0]) < 8:
+                    sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
                 
                 cell = sheet.find('shjeon')
                 if not cell:
-                    sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y'])
+                    sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''])
         except Exception:
             pass
     except sqlite3.IntegrityError:
@@ -622,17 +634,17 @@ def init_db():
                 spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
                 sheet = spreadsheet.sheet1
 
-                # [헤더 보정] 구글 시트의 헤더가 5개인 경우 6개 컬럼으로 보정
+                # [헤더 보정] 구글 시트의 헤더 컬럼 보정
                 all_values = sheet.get_all_values()
-                if all_values and len(all_values[0]) == 5:
-                    sheet.update(range_name='A1:F1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info']])
+                if all_values and len(all_values[0]) < 8:
+                    sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
 
                 records = sheet.get_all_records()  # 1행 header 사용
                 if records:
                     def pick(row, *keys, default=""):
                         for k in keys:
                             if k in row and row[k] is not None and str(row[k]).strip() != "":
-                                return str(row[k]).strip()
+                                    return str(row[k]).strip()
                         return default
 
                     kst_today = datetime.datetime.now(
@@ -649,8 +661,10 @@ def init_db():
                         signupdate = pick(r, "signup_date", "signup_tate", "signupdate", "SignupDate", default=kst_today)
                         expirydate = pick(r, "expiry_date", "expirydate", "ExpiryDate", default="9999-12-31")
                         agreeinfo = pick(r, "agree_info", "agreeinfo", "Agree", default="")
+                        survey_count = int(pick(r, "survey_count", "surveycount", default="0"))
+                        last_survey_link = pick(r, "last_survey_link", "lastsurveylink", default="")
 
-                        # [자가 치유] 구글 시트 컬럼 쉬프트 오류 복구 (expiry_date에 동의 여부가 잘못 적힌 경우)
+                        # [자가 치유] 구글 시트 컬럼 쉬프트 오류 복구
                         if expirydate in ["Y", "N", "예", "아니오", "yes", "no"]:
                             if not agreeinfo:
                                 agreeinfo = expirydate
@@ -663,8 +677,8 @@ def init_db():
                             role = "temp"
 
                         c.execute(
-                            "INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)",
-                            (userid, role, signupdate, pw, expirydate, agreeinfo),
+                            "INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            (userid, role, signupdate, pw, expirydate, agreeinfo, survey_count, last_survey_link),
                         )
 
                     conn.commit()
@@ -735,7 +749,7 @@ def sync_db_from_sheets():
             cnt = 0
             processed_ids = set()
             for row in all_values[1:]:
-                # row 구조: [ID, Role, SignupDate, PW, expiry_date, agree_info]
+                # row 구조: [ID, Role, SignupDate, PW, expiry_date, agree_info, survey_count, last_survey_link]
                 if len(row) >= 4:
                     user_id = str(row[0]).strip()
                     if not user_id or user_id in processed_ids:
@@ -746,8 +760,18 @@ def sync_db_from_sheets():
                     signup_date = str(row[2]).strip()
                     pw = str(row[3]).strip()
                     
-                    # 6개 컬럼 대응 및 자가 치유
-                    if len(row) >= 6:
+                    # 8개 컬럼 대응 및 자가 치유
+                    survey_count = 0
+                    last_survey_link = ""
+                    if len(row) >= 8:
+                        expiry_date = str(row[4]).strip()
+                        agree_info = str(row[5]).strip()
+                        try:
+                            survey_count = int(row[6])
+                        except:
+                            survey_count = 0
+                        last_survey_link = str(row[7]).strip()
+                    elif len(row) >= 6:
                         expiry_date = str(row[4]).strip()
                         agree_info = str(row[5]).strip()
                     elif len(row) == 5:
@@ -764,22 +788,23 @@ def sync_db_from_sheets():
                         expiry_date = "9999-12-31"
 
                     # 이미 존재하는지 확인 후 없으면 INSERT, 있으면 정보 보정 업데이트
-                    c.execute("SELECT id, role, signup_date, pw, expiry_date, agree_info FROM users WHERE id=?", (user_id,))
+                    c.execute("SELECT id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link FROM users WHERE id=?", (user_id,))
                     db_user = c.fetchone()
                     if not db_user:
-                        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)", 
-                                  (user_id, role, signup_date, pw, expiry_date, agree_info))
+                        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                                  (user_id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link))
                         cnt += 1
                     else:
-                        db_role, db_signup_date, db_pw, db_expiry_date, db_agree_info = db_user[1], db_user[2], db_user[3], db_user[4], db_user[5]
+                        db_role, db_signup_date, db_pw, db_expiry_date, db_agree_info, db_survey_count, db_last_link = db_user[1], db_user[2], db_user[3], db_user[4], db_user[5], db_user[6], db_user[7]
                         # 변경 사항이 하나라도 있으면 구글 시트 기준으로 강제 업데이트 보정
                         if (db_role != role or db_signup_date != signup_date or 
-                            db_pw != pw or db_expiry_date != expiry_date or db_agree_info != agree_info):
+                            db_pw != pw or db_expiry_date != expiry_date or db_agree_info != agree_info or
+                            db_survey_count != survey_count or db_last_link != last_survey_link):
                             c.execute("""
                                 UPDATE users 
-                                SET role=?, signup_date=?, pw=?, expiry_date=?, agree_info=? 
+                                SET role=?, signup_date=?, pw=?, expiry_date=?, agree_info=?, survey_count=?, last_survey_link=? 
                                 WHERE id=?
-                            """, (role, signup_date, pw, expiry_date, agree_info, user_id))
+                            """, (role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, user_id))
                             cnt += 1
             
             conn.commit()
@@ -1053,14 +1078,14 @@ ID: {user_email}
 
 # --- DB CRUD ---
 
-def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31"):
+def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31", survey_count=0, last_survey_link=""):
     try:
         client = get_gspread_client()
         if client:
             spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
             sheet = spreadsheet.sheet1
-            # [수정] 구글 시트 6개 컬럼 순서(id, role, signup_date, pw, expiry_date, agree_info) 보장
-            sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info])
+            # [수정] 구글 시트 8개 컬럼 순서(id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) 보장
+            sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info, survey_count, last_survey_link])
     except Exception as e:
         st.error(f"Google Sheets 로깅 오류: {e}")
 
@@ -1072,17 +1097,70 @@ def add_user(user_id, pw, role, agree_info="Y"):
     expiry_date = "9999-12-31"
     hashed_pw = hash_password(pw)
     try:
-        # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info)
-        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info) VALUES (?, ?, ?, ?, ?, ?)", 
-                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info))
+        # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link)
+        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, ""))
         conn.commit()
-        log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date)
+        log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "")
         success = True
     except sqlite3.IntegrityError:
         success = False
     finally:
         conn.close()
     return success
+
+def update_user_survey_distribution(user_id, survey_link):
+    """
+    사용자가 설문을 배포할 때 호출하여
+    SQLite DB 및 관리자 구글 시트의 배포 횟수와 최종 배포 설문지 링크를 업데이트합니다.
+    """
+    if not user_id:
+        return
+    try:
+        # 1. SQLite DB 업데이트
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        c.execute("SELECT survey_count FROM users WHERE id = ?", (user_id,))
+        row = c.fetchone()
+        current_count = 0
+        if row and row[0] is not None:
+            current_count = int(row[0])
+            
+        new_count = current_count + 1
+        c.execute("UPDATE users SET survey_count = ?, last_survey_link = ? WHERE id = ?", (new_count, survey_link, user_id))
+        conn.commit()
+        conn.close()
+        
+        # 2. 관리자 구글 시트 업데이트
+        client = get_gspread_client()
+        if client:
+            spreadsheet = run_gspread_with_retry(client.open_by_key, st.secrets["SPREADSHEET_ID"])
+            sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
+            
+            # 헤더 확인 및 컬럼 추가 보정
+            headers = run_gspread_with_retry(sheet.row_values, 1)
+            headers_updated = False
+            if 'survey_count' not in headers:
+                headers.append('survey_count')
+                headers_updated = True
+            if 'last_survey_link' not in headers:
+                headers.append('last_survey_link')
+                headers_updated = True
+                
+            if headers_updated:
+                run_gspread_with_retry(sheet.update, range_name='A1:H1', values=[headers[:8]])
+                
+            try:
+                cell = run_gspread_with_retry(sheet.find, user_id)
+                if cell:
+                    run_gspread_with_retry(sheet.update_cell, cell.row, 7, new_count)
+                    run_gspread_with_retry(sheet.update_cell, cell.row, 8, survey_link)
+            except Exception:
+                pass
+    except Exception as e:
+        import logging
+        logging.error(f"update_user_survey_distribution Error: {e}")
 
 def upgrade_user_password_to_hash(user_id, pw):
     """기존 사용자의 평문 비밀번호를 암호화(해시) 버전으로 자동 승급합니다."""
@@ -3277,8 +3355,64 @@ with col_main:
             st.error(f"통계 오류: {e}")
         st.divider()
         
+        # 배포 통계 집계 및 시각화
+        st.write("---")
+        st.write("### 📊 설문지 배포 통계")
         users_df = get_all_users()
-        st.dataframe(users_df)
+        
+        # 컬럼 존재 확인 및 결측치 보정
+        if 'survey_count' not in users_df.columns:
+            users_df['survey_count'] = 0
+        if 'last_survey_link' not in users_df.columns:
+            users_df['last_survey_link'] = ""
+            
+        users_df['survey_count'] = pd.to_numeric(users_df['survey_count'].fillna(0)).astype(int)
+        
+        # 1. 요약 통계
+        total_dist_surveys = users_df['survey_count'].sum()
+        active_users_count = (users_df['survey_count'] > 0).sum()
+        total_registered_users = len(users_df)
+        
+        col_stat1, col_stat2, col_stat3 = st.columns(3)
+        with col_stat1:
+            st.metric("총 설문 배포 건수", f"{total_dist_surveys}건")
+        with col_stat2:
+            st.metric("설문 배포 경험 회원 수", f"{active_users_count}명")
+        with col_stat3:
+            st.metric("총 가입 회원 수", f"{total_registered_users}명")
+            
+        # 2. 사용자별 배포 횟수 차트
+        active_users_df = users_df[users_df['survey_count'] > 0].copy()
+        if not active_users_df.empty:
+            active_users_df = active_users_df.sort_values(by='survey_count', ascending=False)
+            fig_dist = px.bar(active_users_df, x='id', y='survey_count', text='survey_count',
+                              labels={'id': '회원 ID', 'survey_count': '배포 건수'},
+                              title="회원별 설문지 배포 현황 (1건 이상 배포 회원)")
+            fig_dist.update_traces(textposition='outside')
+            fig_dist.update_layout(xaxis_title="회원 ID", yaxis_title="배포 건수")
+            st.plotly_chart(fig_dist, use_container_width=True)
+        else:
+            st.info("아직 설문을 배포한 사용자가 없습니다.")
+            
+        st.write("---")
+        st.write("### 👥 가입자 현황 및 최종 배포 링크")
+        
+        # 컬럼 순서 및 구성 재조정하여 데이터프레임으로 출력
+        display_df = users_df[['id', 'role', 'signup_date', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info']].copy()
+        st.dataframe(
+            display_df,
+            column_config={
+                "id": "회원 ID",
+                "role": "권한",
+                "signup_date": "가입일",
+                "survey_count": "배포 횟수",
+                "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
+                "expiry_date": "만료일",
+                "agree_info": "동의여부"
+            },
+            hide_index=True,
+            use_container_width=True
+        )
     
         with st.expander("회원 정보 수정 (비밀번호 초기화 포함)"):
             edit_id = st.selectbox("수정할 회원 ID", users_df['id'].unique())
@@ -5023,7 +5157,7 @@ with col_main:
         # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
         # -------------------------------------------------------------------------
     with main_tab2:
-        st.header(_("📝 AHP 온라인 설문 자동 생성 및 배포기", "📝 AHP Online Survey Auto-Generator & Deployer"))
+        st.header(_("📝 AHP 온라인 설문 자동 생성 및 배포", "📝 AHP Online Survey Auto-Generator & Deployer"))
         if st.session_state.user_id is None:
             st.warning(_("🔒 **온라인 AHP 설문지 작성 및 배포(무료) 기능은 회원 전용 서비스입니다.**", "🔒 **Create & Deploy Online AHP Survey (Free) is a member-only feature.**"))
             st.info(_("무료 회원가입 및 로그인을 완료하시면 제한 없이 AHP 온라인 설문지를 자동 생성하고 본인의 구글 스프레드시트와 연동할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.", "Once you sign up and log in for free, you can automatically generate AHP online surveys without limits and link them to your Google Spreadsheet. (Free members can also use all features without restriction)  \n**Please use the Login/Sign Up panel on the left sidebar.**"))
@@ -5506,6 +5640,9 @@ with col_main:
                                     short_url = f"{base_url}?survey_id={sheet_id}"
                                 else:
                                     short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
+
+                                # 사용자 배포 통계 및 설문 링크 기록
+                                update_user_survey_distribution(st.session_state.user_id, short_url)
 
                                 st.balloons()
                                 st.success("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!" if st.session_state.get("editing_survey_id") else "🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
