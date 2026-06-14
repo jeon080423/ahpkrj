@@ -1,0 +1,207 @@
+[
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/console/app/320791/config#mainContent",
+    "outer": "<a class=\"absolute top-[-999px] bg-[#333] px-2.5 py-[5px] font-[bold] whitespace-nowrap text-white no-underline\" href=\"#mainContent\">본문 바로가기</a>"
+  },
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/console/app/320791/config#gnbContent",
+    "outer": "<a class=\"absolute top-[-999px] bg-[#333] px-2.5 py-[5px] font-[bold] whitespace-nowrap text-white no-underline\" href=\"#gnbContent\">메인 메뉴 바로가기</a>"
+  },
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/console/app/320791/config#sideContent",
+    "outer": "<a class=\"absolute top-[-999px] bg-[#333] px-2.5 py-[5px] font-[bold] whitespace-nowrap text-white no-underline\" href=\"#sideContent\">사이드 메뉴 바로가기</a>"
+  },
+  {
+    "text": "",
+    "href": "https://developers.kakao.com/",
+    "outer": "<a id=\"link_title\" href=\"/\" class=\"\n          block h-[23px] w-40\n          md:h-[26px] md:w-[178px]\n        \"><img src=\"data:image/svg+xml,%3csvg%20width='178'%20height='26'%20viewBox='0%200%20178%20"
+  },
+  {
+    "text": "앱",
+    "href": "https://developers.kakao.com/console/app",
+    "outer": "<a data-class=\"link_gnb\" class=\"text-body1-t16-b block px-0 py-4 text-[#f2f2f2] hover:opacity-80 md:px-4.5 md:py-0 md:font-normal! md:text-white\" href=\"/console/app\">앱</a>"
+  },
+  {
+    "text": "문서",
+    "href": "https://developers.kakao.com/docs",
+    "outer": "<a data-class=\"link_gnb\" class=\"text-body1-t16-b block px-0 py-4 text-[#f2f2f2] hover:opacity-80 md:px-4.5 md:py-0 md:font-normal! md:text-white\" href=\"/docs\">문서</a>"
+  },
+  {
+    "text": "도구",
+    "href": "https://developers.kakao.com/tool",
+    "outer": "<a data-class=\"link_gnb\" class=\"text-body1-t16-b block px-0 py-4 text-[#f2f2f2] hover:opacity-80 md:px-4.5 md:py-0 md:font-normal! md:text-white\" href=\"/tool\">도구</a>"
+  },
+  {
+    "text": "데브톡",
+    "href": "https://devtalk.kakao.com/",
+    "outer": "<a data-class=\"link_gnb\" class=\"text-body1-t16-b block px-0 py-4 text-[#f2f2f2] hover:opacity-80 md:px-4.5 md:py-0 md:font-normal! md:text-white\" href=\"https://devtalk.kakao.com\" target=\"_blank\">데브톡</"
+  },
+  {
+    "text": "앱",
+    "href": "https://developers.kakao.com/console/app",
+    "outer": "<a href=\"/console/app\" class=\"text-body3-t14 block px-1.5 py-0.5 text-gray-600 md:p-1.5 hover:text-gray-900\">앱</a>"
+  },
+  {
+    "text": "대시보드",
+    "href": "https://developers.kakao.com/console/app/320791",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791\">대"
+  },
+  {
+    "text": "일반",
+    "href": "https://developers.kakao.com/console/app/320791/config",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-brand-500 bg-brand-100 hover:text-brand-500\" href=\"/console/app/320791/config\">일반</a>"
+  },
+  {
+    "text": "플랫폼 키",
+    "href": "https://developers.kakao.com/console/app/320791/config/platform-key",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/platform-key\">플랫폼 키</a>"
+  },
+  {
+    "text": "어드민 키",
+    "href": "https://developers.kakao.com/console/app/320791/config/admin-key",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/admin-key\">어드민 키</a>"
+  },
+  {
+    "text": "제품 링크 관리",
+    "href": "https://developers.kakao.com/console/app/320791/config/product-link",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/product-link\">제품 링크 관리</a>"
+  },
+  {
+    "text": "추가 기능 신청",
+    "href": "https://developers.kakao.com/console/app/320791/config/review",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/review\">추가 기능 신청</a>"
+  },
+  {
+    "text": "카카오톡 채널",
+    "href": "https://developers.kakao.com/console/app/320791/config/channel",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/channel\">카카오톡 채널</a>"
+  },
+  {
+    "text": "웹훅",
+    "href": "https://developers.kakao.com/console/app/320791/config/webhook",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/webhook\">웹훅</a>"
+  },
+  {
+    "text": "멤버",
+    "href": "https://developers.kakao.com/console/app/320791/config/member",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/member\">멤버</a>"
+  },
+  {
+    "text": "고급",
+    "href": "https://developers.kakao.com/console/app/320791/config/advanced",
+    "outer": "<a data-class=\"link_sub\" class=\"text-body2-t15 flex min-h-[37px] w-full items-center px-10 py-2 text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/config/advanced\">고급</a>"
+  },
+  {
+    "text": "비즈니스 인증",
+    "href": "https://developers.kakao.com/console/app/320791/product/business-auth",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/pr"
+  },
+  {
+    "text": "카카오톡 메시지",
+    "href": "https://developers.kakao.com/console/app/320791/product/message",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/pr"
+  },
+  {
+    "text": "카카오맵",
+    "href": "https://developers.kakao.com/console/app/320791/product/kakao-map",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/pr"
+  },
+  {
+    "text": "푸시 알림",
+    "href": "https://developers.kakao.com/console/app/320791/product/push",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/pr"
+  },
+  {
+    "text": "기간별 사용량",
+    "href": "https://developers.kakao.com/console/app/320791/stat/api",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/st"
+  },
+  {
+    "text": "실시간 사용량",
+    "href": "https://developers.kakao.com/console/app/320791/stat/realtime",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/st"
+  },
+  {
+    "text": "쿼터",
+    "href": "https://developers.kakao.com/console/app/320791/stat/quota",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/st"
+  },
+  {
+    "text": "유료 사용량",
+    "href": "https://developers.kakao.com/console/app/320791/stat/billing",
+    "outer": "<a data-class=\"link_side_txt\" class=\"text-body1-t16-b flex min-h-10.5 w-full items-center justify-between py-[9.8px] pr-5 pl-8 text-left text-gray-600 hover:text-gray-900\" href=\"/console/app/320791/st"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/app-setting/app",
+    "outer": "<a data-class=\"link_g\" class=\"text-brand-500 text-body3-t14 md:text-body2-t15\" target=\"_blank\" href=\"/docs/latest/app-setting/app\"><button type=\"button\" class=\"flex cursor-pointer items-center justify"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/app-setting/app#app-info",
+    "outer": "<a data-class=\"link_g\" class=\"text-brand-500 text-body3-t14 md:text-body2-t15\" target=\"_blank\" href=\"/docs/latest/app-setting/app#app-info\"><button type=\"button\" class=\"flex cursor-pointer items-cente"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/app-setting/app#biz-app",
+    "outer": "<a data-class=\"link_g\" class=\"text-brand-500 text-body3-t14 md:text-body2-t15\" target=\"_blank\" href=\"/docs/latest/app-setting/app#biz-app\"><button type=\"button\" class=\"flex cursor-pointer items-center"
+  },
+  {
+    "text": "앱 아이콘 등록",
+    "href": "https://developers.kakao.com/console/app/320791/config#app-info",
+    "outer": "<a href=\"/console/app/320791/config#app-info\"><button type=\"button\" class=\"flex cursor-pointer items-center justify-center disabled:cursor-not-allowed bg-brand-200 text-navy-500 hover:bg-brand-300 act"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/app-setting/app#test-app",
+    "outer": "<a data-class=\"link_g\" class=\"text-brand-500 text-body3-t14 md:text-body2-t15\" target=\"_blank\" href=\"/docs/latest/app-setting/app#test-app\"><button type=\"button\" class=\"flex cursor-pointer items-cente"
+  },
+  {
+    "text": "사업자 정보 등록",
+    "href": "https://developers.kakao.com/console/app/320791/config#business-info",
+    "outer": "<a href=\"/console/app/320791/config#business-info\"><button type=\"button\" class=\"flex cursor-pointer items-center justify-center disabled:cursor-not-allowed bg-brand-200 text-navy-500 hover:bg-brand-30"
+  },
+  {
+    "text": "문서 확인",
+    "href": "https://developers.kakao.com/docs/latest/app-setting/app#app-deletion",
+    "outer": "<a data-class=\"link_g\" class=\"text-brand-500 text-body3-t14 md:text-body2-t15\" target=\"_blank\" href=\"/docs/latest/app-setting/app#app-deletion\"><button type=\"button\" class=\"flex cursor-pointer items-c"
+  },
+  {
+    "text": "© Kakao Corp.",
+    "href": "https://www.kakaocorp.com/",
+    "outer": "<a href=\"https://www.kakaocorp.com\" target=\"_blank\">© Kakao Corp.</a>"
+  },
+  {
+    "text": "카카오비즈니스 이용약관",
+    "href": "https://kakaobusiness-policy.kakao.com/SERVICE/",
+    "outer": "<a href=\"https://kakaobusiness-policy.kakao.com/SERVICE/\" target=\"_blank\" class=\"block px-3\">카카오비즈니스 이용약관</a>"
+  },
+  {
+    "text": "서비스 약관",
+    "href": "https://developers.kakao.com/terms/latest/ko/site-terms",
+    "outer": "<a href=\"/terms/latest/ko/site-terms\" class=\"block px-3\">서비스 약관</a>"
+  },
+  {
+    "text": "운영 정책",
+    "href": "https://developers.kakao.com/terms/latest/ko/site-policies",
+    "outer": "<a href=\"/terms/latest/ko/site-policies\" class=\"block px-3\">운영 정책</a>"
+  },
+  {
+    "text": "쿼터",
+    "href": "https://developers.kakao.com/docs/latest/ko/getting-started/quota",
+    "outer": "<a href=\"/docs/latest/ko/getting-started/quota\" class=\"block px-3\">쿼터</a>"
+  },
+  {
+    "text": "개인정보 처리방침",
+    "href": "https://business.kakao.com/policy/privacy/",
+    "outer": "<a href=\"https://business.kakao.com/policy/privacy/\" target=\"_blank\" class=\"block px-3\">개인정보 처리방침</a>"
+  },
+  {
+    "text": "",
+    "href": "https://www.kakaocorp.com/",
+    "outer": "<a href=\"https://www.kakaocorp.com\" target=\"_blank\">© Kakao Corp.</a>"
+  }
+]
