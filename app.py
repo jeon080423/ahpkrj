@@ -2876,20 +2876,19 @@ except Exception:
 
 col_main_title, col_settings_title = st.columns([3.0, 1.1], gap="large")
 with col_main_title:
-    col_title_text, col_title_counter = st.columns([2.2, 0.8])
-    with col_title_text:
-        st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"))
-    with col_title_counter:
-        visitor_label = _("총 누적 방문자 수", "Total Visitors")
-        visitor_unit = _("명", " visitors")
-        counter_html = f"""
-        <div style="text-align: right; margin-top: 32px;">
-            <span style="font-size: 0.85rem; color: #0369a1;">
-                {visitor_label} : {total_visits:,}{visitor_unit}
-            </span>
-        </div>
-        """
-        st.markdown(counter_html, unsafe_allow_html=True)
+    st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"))
+
+with col_settings_title:
+    visitor_label = _("총 누적 방문자 수", "Total Visitors")
+    visitor_unit = _("명", " visitors")
+    counter_html = f"""
+    <div style="text-align: right; margin-top: 32px;">
+        <span style="font-size: 0.85rem; color: #0369a1; font-weight: bold;">
+            {visitor_label} : {total_visits:,}{visitor_unit}
+        </span>
+    </div>
+    """
+    st.markdown(counter_html, unsafe_allow_html=True)
 
 col_main, col_settings = st.columns([3.0, 1.1], gap="large")
 @st.dialog(_("알림", "Notice"))
