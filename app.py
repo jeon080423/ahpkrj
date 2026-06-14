@@ -442,16 +442,39 @@ def get_gspread_client():
     creds = Credentials.from_service_account_info(auth_info, scopes=scope)
     return gspread.authorize(creds)
 
+def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwargs):
+    """
+    구글 시트 API 호출 시 429(RESOURCE_EXHAUSTED) 등 일시적 오류 발생 시
+    지수 백오프(Exponential Backoff) 및 지터(Jitter)를 적용하여 재시도하는 헬퍼 함수.
+    """
+    import time
+    import random
+    backoff = initial_backoff
+    for attempt in range(max_retries):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            err_msg = str(e)
+            is_rate_limit = "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg or "RATE_LIMIT_EXCEEDED" in err_msg
+            
+            if is_rate_limit and attempt < max_retries - 1:
+                sleep_time = backoff + random.uniform(0, 1)
+                time.sleep(sleep_time)
+                backoff *= 2
+                continue
+            else:
+                raise e
+
 # [신규] 관리자 페이지 방문 로그 조회를 위한 캐싱 함수 (읽기 요청 최적화 - 5분 TTL)
 @st.cache_data(ttl=300)
 def get_cached_visit_logs(spreadsheet_id):
     try:
         client = get_gspread_client()
         if client:
-            spreadsheet = client.open_by_key(spreadsheet_id)
+            spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
             try:
-                visit_sheet = spreadsheet.worksheet("Visit_Logs")
-                return visit_sheet.get_all_records()
+                visit_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Visit_Logs")
+                return run_gspread_with_retry(visit_sheet.get_all_records)
             except gspread.exceptions.WorksheetNotFound:
                 return []
     except Exception as e:
@@ -683,9 +706,9 @@ def sync_db_from_sheets():
             st.error("❌ 구글 시트 인증(gspread client)에 실패했습니다.")
             return -1
         
-        spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-        sheet = spreadsheet.sheet1
-        all_values = sheet.get_all_values()
+        spreadsheet = run_gspread_with_retry(client.open_by_key, st.secrets["SPREADSHEET_ID"])
+        sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
+        all_values = run_gspread_with_retry(sheet.get_all_values)
         
         # 데이터가 헤더 포함 2줄 이상일 때만 진행
         if len(all_values) > 1:
