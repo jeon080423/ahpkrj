@@ -1281,12 +1281,17 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry):
                 final_signup_date = db_signup_date or sheet_signup_date or kst_today
                 
                 final_pw = new_pw if (new_pw and new_pw != "") else (current_row_data[3] if len(current_row_data) >= 4 else "")
-                # 시트 순서: ID, Role, SignupDate, PW, expiry_date, agree_info (A:F)
-                sheet.update(range_name=f'A{row_num}:F{row_num}', values=[[user_id, new_role, final_signup_date, final_pw, new_expiry, agree_info]])
+                
+                # 배포 통계 및 설문 링크 보존 (G:H 컬럼 대응)
+                survey_count_val = current_row_data[6] if len(current_row_data) >= 7 else 0
+                last_survey_link_val = current_row_data[7] if len(current_row_data) >= 8 else ""
+                
+                # 시트 순서: ID, Role, SignupDate, PW, expiry_date, agree_info, survey_count, last_survey_link (A:H)
+                sheet.update(range_name=f'A{row_num}:H{row_num}', values=[[user_id, new_role, final_signup_date, final_pw, new_expiry, agree_info, survey_count_val, last_survey_link_val]])
             else:
                 final_pw = new_pw if (new_pw and new_pw != "") else ""
                 final_signup_date = db_signup_date or kst_today
-                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y"])
+                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, ""])
     except Exception as e:
         st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}") 
 
