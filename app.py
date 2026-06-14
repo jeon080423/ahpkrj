@@ -3230,7 +3230,7 @@ with col_settings:
         
         **현재 방법의 특징:**
         1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
-        2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\alpha)} \times Ideal^{\alpha}$)
+        2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
         3. **과도한 보정 방지**: 임계값 설정(0.1 또는 0.2)은 CR 값을 정확히 맞추는 것이 아니라 임계값 '이하'로 만드는 것을 목표로 합니다. 이미 임계값 이하인 응답은 보정을 수행하지 않아 원본 판단을 최대한 보존합니다.
         
         """, r"""
@@ -3239,7 +3239,7 @@ with col_settings:
         
         **Key Features:**
         1. **Minimal Distortion of Judgments**: Preserves the trends of the original survey responses while securing mathematical consistency.
-        2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = Old^{(1-\alpha)} \times Ideal^{\alpha}$)
+        2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
         3. **Prevention of Excessive Correction**: The threshold setting (0.1 or 0.2) targets bringing the CR 'below or equal to' the threshold, rather than matching it exactly. Responses already below the threshold are left uncorrected to preserve the original judgments as much as possible.
         
         """))
