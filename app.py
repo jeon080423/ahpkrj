@@ -3428,12 +3428,22 @@ with col_main:
                 
             new_pw_edit = st.text_input("새 비밀번호 (입력 시 변경됨)", type="password", placeholder="변경하지 않으려면 비워두세요")
             
-            if st.button("정보 수정 적용"):
-                update_user_full_info(edit_id, new_pw_edit, new_role_val, new_expiry_val)
-                if new_role_val == 'official' and selected_user['role'] != 'official':
-                    send_approval_email(edit_id)
-                st.success(f"{edit_id} 회원의 정보가 수정되었습니다.")
-                st.rerun()
+            col_admin_act1, col_admin_act2 = st.columns(2)
+            with col_admin_act1:
+                if st.button("정보 수정 적용", use_container_width=True):
+                    update_user_full_info(edit_id, new_pw_edit, new_role_val, new_expiry_val)
+                    if new_role_val == 'official' and selected_user['role'] != 'official':
+                        send_approval_email(edit_id)
+                    st.success(f"{edit_id} 회원의 정보가 수정되었습니다.")
+                    st.rerun()
+            with col_admin_act2:
+                if st.button("🔑 이 계정으로 로그인", use_container_width=True, type="secondary", help="비밀번호 없이 이 사용자의 계정으로 세션을 즉시 전환합니다."):
+                    st.session_state.user_id = edit_id
+                    st.session_state.user_role = selected_user['role']
+                    st.session_state.expiry_date = selected_user['expiry_date']
+                    st.session_state.admin_mode = False  # 일반 사용자 시점으로 전환
+                    st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
+                    st.rerun()
         
         with st.expander("회원 삭제"):
             del_id = st.selectbox("삭제할 회원 ID 선택", users_df['id'].unique(), key='del_user_select')
