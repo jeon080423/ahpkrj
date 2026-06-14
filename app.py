@@ -5549,13 +5549,22 @@ with col_main:
                 st.error(f"설문 목록 조회 실패: {e}")
 
             if not admin_surveys:
-                st.warning("아직 배포된 설문이 없습니다. '온라인 설문지 제작' 탭에서 먼저 설문을 완성하고 배포해 주세요.")
+                st.warning("배포된 설문지가 존재하지 않습니다. '온라인 설문지 제작' 탭에서 설문을 먼저 배포해 주세요.")
             else:
-                selected_sheet_id = admin_surveys[0][0]
-                survey_title = admin_surveys[0][1]
-                created_at = admin_surveys[0][2]
+                # 로그인한 아이디에 맞춰 본인의 설문들만 드롭다운에 노출시킵니다.
+                survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
+                selected_label = st.selectbox(
+                    "실시간 현황을 확인할 설문 선택",
+                    list(survey_options.keys()),
+                    key="tab3_survey_select"
+                )
+                selected_sheet_id = survey_options[selected_label]
                 
-                st.success(f"📌 현재 배포 중인 설문: **{survey_title}** (배포일시: {created_at})")
+                selected_survey_info = next(s for s in admin_surveys if s[0] == selected_sheet_id)
+                survey_title = selected_survey_info[1]
+                created_at = selected_survey_info[2]
+                
+                st.success(f"📌 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
                 st.divider()
 
         # 대시보드 렌더링
