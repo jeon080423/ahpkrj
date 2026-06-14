@@ -5073,7 +5073,7 @@ with col_main:
                                 
                                 st.session_state.edit_scale_type = meta.get("Scale_Type", "1-9 Continuous")
                                 cr_limit_raw = meta.get("CR_Limit", 0.1)
-                            st.session_state.edit_cr_limit = float(cr_limit_raw) if cr_limit_raw is not None and str(cr_limit_raw).lower() != "none" else None
+                                st.session_state.edit_cr_limit = float(cr_limit_raw) if cr_limit_raw is not None and str(cr_limit_raw).lower() != "none" else None
                                 
                                 ahp_model = meta.get("AHP_Model_JSON", {})
                                 st.session_state.edit_main_input = ", ".join(ahp_model.get("main", []))
