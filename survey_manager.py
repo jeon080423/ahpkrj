@@ -753,15 +753,19 @@ def delete_admin_survey(survey_id, admin_id):
     try:
         master_sheet = client.open_by_key('1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA')
         ws = master_sheet.worksheet('Admin_Surveys')
-        all_records = ws.get_all_records()
-        
-        # Find the row to delete. Note: get_all_records() returns a list of dicts.
-        # Gspread row index for deletion is 1-based, and row 1 is header. So data starts at row 2.
+        # Find all rows for this admin and delete them from bottom to top to avoid index shifting
+        try:
+            all_records = ws.get_all_records()
+        except Exception:
+            all_records = []
+            
+        rows_to_delete = []
         for i, r in enumerate(all_records):
-            if str(r.get('survey_id')) == str(survey_id) and str(r.get('admin_id')) == str(admin_id):
-                row_index_to_delete = i + 2  # +2 because header is row 1, and enumerate is 0-based
-                ws.delete_rows(row_index_to_delete)
-                break
+            if str(r.get('admin_id')) == str(admin_id):
+                rows_to_delete.append(i + 2)
+        
+        for r_idx in sorted(rows_to_delete, reverse=True):
+            ws.delete_rows(r_idx)
     except Exception as e:
         print("Failed to remove from Master GSheet:", e)
 
@@ -769,7 +773,7 @@ def delete_admin_survey(survey_id, admin_id):
     try:
         conn = sqlite3.connect('users.db')
         cur = conn.cursor()
-        cur.execute("DELETE FROM admin_surveys WHERE survey_id = ? AND admin_id = ?", (survey_id, admin_id))
+        cur.execute("DELETE FROM admin_surveys WHERE admin_id = ?", (admin_id,))
         conn.commit()
         conn.close()
     except Exception as e:
@@ -788,7 +792,10 @@ def get_admin_surveys_from_gsheet(admin_id):
         except gspread.exceptions.WorksheetNotFound:
             return []
             
-        all_records = ws.get_all_records()
+        try:
+            all_records = ws.get_all_records()
+        except Exception:
+            all_records = []
         surveys = []
         for r in all_records:
             if str(r.get('admin_id')) == str(admin_id):
