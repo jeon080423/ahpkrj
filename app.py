@@ -2417,7 +2417,7 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월)</li>
   </ul>
   <div style="margin-top: 10px; color: #e65100; font-size: 0.85rem; font-weight: 600;">
-    💡 서비스 불만족시 가입일 기준 3일 이내 전액 환불해 드립니다.
+    💡 가입 후 3일 내 불만족 시 100% 환불
   </div>
 </div>""",
         """<div style="line-height: 1.4; font-size: 0.95rem;">
