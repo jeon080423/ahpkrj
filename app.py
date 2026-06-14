@@ -3088,7 +3088,7 @@ with col_settings:
 
     # 2. 일관성 보정 기준
     with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
-        st.markdown(_("""
+        st.markdown(_(r"""
         **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
         가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
         
@@ -3097,7 +3097,7 @@ with col_settings:
         2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = Old^{(1-\alpha)} \times Ideal^{\alpha}$)
         3. **과도한 보정 방지**: 임계값 설정(0.1 또는 0.2)은 CR 값을 정확히 맞추는 것이 아니라 임계값 '이하'로 만드는 것을 목표로 합니다. 이미 임계값 이하인 응답은 보정을 수행하지 않아 원본 판단을 최대한 보존합니다.
         
-        """, """
+        """, r"""
         **Correction Method: Iterative Adjustment**
         If the judgment matrix is inconsistent (CR > threshold) based on Saaty's weight algorithm, it repeatedly adjusts the weights by mixing the original matrix with a mathematically consistent matrix.
         
