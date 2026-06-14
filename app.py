@@ -3247,7 +3247,11 @@ with col_main:
     # [수정] 관리자용 상단 탭 연동 (Tab 1: 분석, Tab 2: 설문지 제작)
     # 일반 사용자에게는 Tab 1 화면(분석)만 직접 단일 노출시킵니다.
     # -------------------------------------------------------------------------
-    main_tab1, main_tab2, main_tab3 = st.tabs(["📊 AHP 분석 도구", "📝 온라인 AHP 설문지 작성 및 배포(무료)", "실시간 응답 현황"])
+    main_tab1, main_tab2, main_tab3 = st.tabs([
+        _("📊 AHP 분석 도구", "📊 AHP Analysis Tool"), 
+        _("📝 온라인 AHP 설문지 작성 및 배포(무료)", "📝 Create & Deploy Online AHP Survey (Free)"), 
+        _("실시간 응답 현황", "Live Response Status")
+    ])
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
@@ -4950,14 +4954,14 @@ with col_main:
         # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
         # -------------------------------------------------------------------------
     with main_tab2:
-        st.header("📝 AHP 온라인 설문 자동 생성 및 배포기")
+        st.header(_("📝 AHP 온라인 설문 자동 생성 및 배포기", "📝 AHP Online Survey Auto-Generator & Deployer"))
         if st.session_state.user_id is None:
-            st.warning("🔒 **온라인 AHP 설문지 작성 및 배포(무료) 기능은 회원 전용 서비스입니다.**")
-            st.info("무료 회원가입 및 로그인을 완료하시면 제한 없이 AHP 온라인 설문지를 자동 생성하고 본인의 구글 스프레드시트와 연동할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
+            st.warning(_("🔒 **온라인 AHP 설문지 작성 및 배포(무료) 기능은 회원 전용 서비스입니다.**", "🔒 **Create & Deploy Online AHP Survey (Free) is a member-only feature.**"))
+            st.info(_("무료 회원가입 및 로그인을 완료하시면 제한 없이 AHP 온라인 설문지를 자동 생성하고 본인의 구글 스프레드시트와 연동할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.", "Once you sign up and log in for free, you can automatically generate AHP online surveys without limits and link them to your Google Spreadsheet. (Free members can also use all features without restriction)  \n**Please use the Login/Sign Up panel on the left sidebar.**"))
         else:
 
-            st.info("모든 응답 데이터는 이용자 본인의 구글 계정(연동한 구글 스프레드시트)을 통해 저장되므로, 설문 배포 전에 테스트 응답을 제출하여 실제 시트에 정상적으로 데이터가 기록되는지 반드시 직접 미리 확인해야 합니다.")
-            st.warning("⚠️ **주의 및 경고:** 본 플랫폼은 데이터 저장 오류, 구글 API 연동 해제, 네트워크 장애 또는 관리 미흡 등으로 인한 데이터의 유실이나 소실은 이용자가 확인해야 합니다. 중요 데이터는 실시간 구글 시트 확인 및 서버 로컬 안전 백업을 통해 주기적으로 다운로드하여 보관해 주시기 바랍니다.")
+            st.info(_("모든 응답 데이터는 이용자 본인의 구글 계정(연동한 구글 스프레드시트)을 통해 저장되므로, 설문 배포 전에 테스트 응답을 제출하여 실제 시트에 정상적으로 데이터가 기록되는지 반드시 직접 미리 확인해야 합니다.", "All response data is stored through your own Google account (linked Google Spreadsheet), so you must submit a test response before deploying the survey to ensure data is recorded correctly on the actual sheet."))
+            st.warning(_("⚠️ **주의 및 경고:** 본 플랫폼은 데이터 저장 오류, 구글 API 연동 해제, 네트워크 장애 또는 관리 미흡 등으로 인한 데이터의 유실이나 소실은 이용자가 확인해야 합니다. 중요 데이터는 실시간 구글 시트 확인 및 서버 로컬 안전 백업을 통해 주기적으로 다운로드하여 보관해 주시기 바랍니다.", "⚠️ **Caution & Warning:** Users must verify data loss due to data storage errors, Google API unlinking, network failures, or poor management on this platform. Please download and keep important data periodically through real-time Google Sheet checks and server local safe backups."))
 
             # (Dashboard moved to main_tab3 below)
             pass
