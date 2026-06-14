@@ -1812,18 +1812,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
         st.stop()
             
-        st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
+    st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
+    
+    survey_meta = load_survey_metadata(survey_id_param)
+    if not survey_meta:
+        st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
+        st.stop()
         
-        survey_meta = load_survey_metadata(survey_id_param)
-        if not survey_meta:
-            st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
-            st.stop()
-            
-        # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
-        if f"visited_survey_{survey_id_param}" not in st.session_state:
-            from survey_manager import increment_survey_visit
-            increment_survey_visit(survey_id_param)
-            st.session_state[f"visited_survey_{survey_id_param}"] = True
+    # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
+    if f"visited_survey_{survey_id_param}" not in st.session_state:
+        from survey_manager import increment_survey_visit
+        increment_survey_visit(survey_id_param)
+        st.session_state[f"visited_survey_{survey_id_param}"] = True
         
     st.title(survey_meta.get('Title', 'AHP 온라인 설문조사'))
     
@@ -5331,7 +5331,7 @@ with col_main:
                                 st.success("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
 
                                 st.code(short_url, language="text")
-                                st.info(f"위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
+                                st.info(f"**위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.**  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
                             except Exception as ex:
                                 st.error(f"구글 시트 연동 실패: {ex}")
                                 import streamlit.components.v1 as components
