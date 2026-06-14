@@ -117,14 +117,14 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         # Raw_Data 워크시트 설정
         try:
             raw_sheet = spreadsheet.worksheet("Raw_Data")
-            raw_sheet.clear()
+            # 수정 시 기존 데이터 보존
         except gspread.WorksheetNotFound:
             raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")
 
         # Demographic_Data 워크시트 설정
         try:
             demo_sheet = spreadsheet.worksheet("Demographic_Data")
-            demo_sheet.clear()
+            # 수정 시 기존 데이터 보존
         except gspread.WorksheetNotFound:
             demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
             
