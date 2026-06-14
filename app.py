@@ -5048,7 +5048,18 @@ with col_main:
             if 'survey_auto_loaded' not in st.session_state:
                 st.session_state.survey_auto_loaded = False
 
-            # Check existing surveys
+            # Check existing surveys (SQLite와 구글 시트 모두 조회하여 병합)
+            sqlite_surveys = []
+            try:
+                import sqlite3
+                conn = sqlite3.connect('users.db')
+                cur = conn.cursor()
+                cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
+                sqlite_surveys = cur.fetchall()
+                conn.close()
+            except Exception:
+                pass
+
             gs_surveys = []
             try:
                 from survey_manager import get_admin_surveys_from_gsheet
@@ -5056,11 +5067,18 @@ with col_main:
             except Exception:
                 pass
                 
-            has_survey = len(gs_surveys) > 0
+            merged_surveys = {}
+            for s in gs_surveys + sqlite_surveys:
+                if s[0] not in merged_surveys:
+                    merged_surveys[s[0]] = s
+            user_surveys = list(merged_surveys.values())
+            user_surveys.sort(key=lambda x: x[2], reverse=True)
+                
+            has_survey = len(user_surveys) > 0
 
             # Auto-load logic
             if has_survey and not st.session_state.survey_auto_loaded:
-                sel_id = gs_surveys[0][0] # Load the most recent one
+                sel_id = user_surveys[0][0] # Load the most recent one
                 from survey_manager import load_survey_metadata
                 meta = load_survey_metadata(sel_id)
                 if meta:
@@ -5109,8 +5127,8 @@ with col_main:
                     if st.button("✅ 동의 및 초기화", type="primary", use_container_width=True, disabled=not agree):
                         with st.spinner("기존 데이터를 삭제하는 중입니다..."):
                             from survey_manager import delete_admin_survey
-                            if gs_surveys:
-                                delete_admin_survey(gs_surveys[0][0], st.session_state.user_id)
+                            if user_surveys:
+                                delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
                             st.session_state.editing_survey_id = None
                             keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
                             for k in keys_to_clear:
@@ -5122,10 +5140,10 @@ with col_main:
                         st.rerun()
 
             if has_survey:
-                st.success(f"📌 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{gs_surveys[0][1]}**")
+                st.success(f"📌 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**")
                 st.info("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.")
                 if st.button("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", type="secondary"):
-                    confirm_new_survey()
+                     confirm_new_survey()
             else:
                 st.info("📌 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.")
                 if st.button("✨ 폼 내용 모두 지우기 (초기화)", type="secondary"):
