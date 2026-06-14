@@ -455,7 +455,12 @@ def get_cached_visit_logs(spreadsheet_id):
             except gspread.exceptions.WorksheetNotFound:
                 return []
     except Exception as e:
-        st.error(f"구글 시트 방문 로그 캐싱 조회 오류: {e}")
+        # 일반 사용자 화면에 429/500 에러 박스가 무분별하게 노출되는 것을 방지합니다.
+        # 관리자 로그인 상태이거나 관리자 모드인 경우에만 st.warning으로 경고하고, 평소에는 콘솔에 기록합니다.
+        import logging
+        logging.error(f"구글 시트 방문 로그 캐싱 조회 오류: {e}")
+        if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
+            st.warning(f"⚠️ 구글 시트 방문 로그 캐싱 조회 오류 (관리자 모드): {e}")
     return []
 
 def save_short_code_to_gs(short_code, survey_id, title, admin_id):
@@ -2869,8 +2874,17 @@ if st.session_state.get('page', 'main') == 'guide':
 
 # 메인 헤더 영역
 try:
-    visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
-    total_visits = len(visit_data_gs) if visit_data_gs else 0
+    # Google Sheets API 429 오류를 완벽히 차단하기 위해, 로컬 DB의 방문 로그 행 수를 먼저 조회하여 total_visits를 계산합니다.
+    # 만약 로컬 DB가 비어 있다면, Google Sheets에서 데이터를 캐시로 조회해 복구합니다.
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM visit_logs")
+    total_visits = c.fetchone()[0]
+    conn.close()
+    
+    if total_visits == 0:
+        visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
+        total_visits = len(visit_data_gs) if visit_data_gs else 0
 except Exception:
     total_visits = 0
 
@@ -3168,6 +3182,21 @@ with col_main:
         try:
             # [최적화] 구글 시트 API 분당 호출 제한(429)을 피하기 위해 5분 캐시 처리된 함수를 사용합니다.
             visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
+            if not visit_data_gs:
+                try:
+                    conn = sqlite3.connect('users.db')
+                    df_local = pd.read_sql_query("SELECT ip_address as IP, visit_date as Date FROM visit_logs", conn)
+                    conn.close()
+                    if not df_local.empty:
+                        # 지도 시각화 등에 필요한 컬럼 빈값 보정
+                        df_local['Country'] = ""
+                        df_local['Region'] = ""
+                        df_local['City'] = ""
+                        df_local['Latitude'] = ""
+                        df_local['Longitude'] = ""
+                        visit_data_gs = df_local.to_dict(orient='records')
+                except Exception:
+                    pass
             daily_df_logs = pd.DataFrame(visit_data_gs)
             if not daily_df_logs.empty:
                 daily_df_logs['Date_Only'] = daily_df_logs['Date'].astype(str).str[:10]
