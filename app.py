@@ -5278,8 +5278,12 @@ with col_main:
                 if st.button("🚀 최종 배포 및 구글 시트 데이터베이스 연동", type="primary", use_container_width=True):
                     if not existing_sheet_id_input.strip():
                         st.error("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.")
+                        import streamlit.components.v1 as components
+                        components.html("<script>alert('연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.');</script>", height=0, width=0)
                     elif not survey_admin_email or "@" not in survey_admin_email:
                         st.error("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.")
+                        import streamlit.components.v1 as components
+                        components.html("<script>alert('구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.');</script>", height=0, width=0)
                     else:
                         with st.spinner("구글 스프레드시트와 설문 구조를 연동하는 중..."):
                             try:
