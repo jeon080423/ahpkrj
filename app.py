@@ -5493,28 +5493,17 @@ with col_main:
         # 대시보드 렌더링
         if selected_sheet_id:
 
-
-            from survey_manager import get_survey_stats
-            with st.spinner("실시간 설문 현황 로딩 중..."):
-                stats = get_survey_stats(selected_sheet_id.strip())
-
-            col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
-            with col_stat1:
-                st.metric("총 접속자 수 (Visits)", f"{stats['visits']}명")
-            with col_stat2:
-                st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}명")
-            with col_stat3:
-                st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
-            with col_stat4:
-                st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
-
-            # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
-            with st.expander("📥 실시간 구글 시트 응답 데이터 다운로드 센터", expanded=True):
-                from survey_manager import get_survey_gspread_client
-                g_client = get_survey_gspread_client()
-                if g_client:
-                    try:
-                        with st.spinner("구글 시트에서 실시간 설문 응답 로드를 가져오는 중..."):
+            st.info("💡 구글 API 일일 호출 할당량 초과(Quota Exceeded 429 에러)를 방지하기 위해, 데이터는 자동으로 불러오지 않습니다. 아래 버튼을 눌러 최신 데이터를 갱신하세요.")
+            if st.button("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", type="primary"):
+                from survey_manager import get_survey_stats, get_survey_gspread_client
+                with st.spinner("실시간 설문 현황 로딩 중..."):
+                    # 1. Stats Loading
+                    st.session_state["survey_stats"] = get_survey_stats(selected_sheet_id.strip())
+                    
+                    # 2. Raw Data Loading
+                    g_client = get_survey_gspread_client()
+                    if g_client:
+                        try:
                             spreadsheet = g_client.open_by_key(selected_sheet_id.strip())
                             raw_sheet = spreadsheet.worksheet("Raw_Data")
                             all_rows = raw_sheet.get_all_values()
@@ -5525,127 +5514,153 @@ with col_main:
                             except Exception:
                                 demo_rows = []
 
-                        if len(all_rows) > 0:
-                            headers = all_rows[0]
-                            rows = all_rows[1:]
-                            live_df = pd.DataFrame(rows, columns=headers)
+                            if len(all_rows) > 0:
+                                headers = all_rows[0]
+                                rows = all_rows[1:]
+                                st.session_state["live_df"] = pd.DataFrame(rows, columns=headers)
 
-                            demo_df = None
-                            if len(demo_rows) > 0:
-                                demo_headers = demo_rows[0]
-                                demo_vals = demo_rows[1:]
-                                demo_df = pd.DataFrame(demo_vals, columns=demo_headers)
-
-                            st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
-                            
-                            # 📊 AHP 분석 연동 단축 버튼 추가
-                            if st.button("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", type="primary", use_container_width=True):
-                                st.session_state["selected_survey_for_analysis"] = selected_sheet_id
-                                from survey_manager import load_survey_metadata
-                                survey_meta = load_survey_metadata(selected_sheet_id)
-                                if survey_meta:
-                                    ahp_model = survey_meta["AHP_Model_JSON"]
-                                    base_cols = ["ID", "Type"]
-                                    main_criteria = ahp_model.get("main", [])
-                                    main_pairs = []
-                                    for i in range(len(main_criteria)):
-                                        for j in range(i + 1, len(main_criteria)):
-                                            main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
-                                    main_cols = [c for c in base_cols if c in live_df.columns] + [p for p in main_pairs if p in live_df.columns]
-                                    
-                                    st.session_state["ahp_df_main"] = live_df[main_cols].copy()
-                                    for col in st.session_state["ahp_df_main"].columns:
-                                        if col not in ["ID", "Type"]:
-                                            st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce').fillna(1.0)
-                                    
-                                     # 중분류 복사
-                                    st.session_state["ahp_sub_dfs"] = {}
-                                    sub_criteria_map = ahp_model.get("subs", {})
-                                    for main_c, subs in sub_criteria_map.items():
-                                        if len(subs) >= 2:
-                                            sub_pairs = []
-                                            for i in range(len(subs)):
-                                                for j in range(i + 1, len(subs)):
-                                                    sub_pairs.append(f"{subs[i]}_{subs[j]}")
-                                            sub_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_pairs if p in live_df.columns]
-                                            st.session_state["ahp_sub_dfs"][main_c] = live_df[sub_cols].copy()
-                                            for col in st.session_state["ahp_sub_dfs"][main_c].columns:
-                                                if col not in ["ID", "Type"]:
-                                                    st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce').fillna(1.0)
-                                                    
-                                    st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                    st.info("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.")
-
-                            tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
-                            with tab_raw:
-                                st.dataframe(live_df, use_container_width=True)
-                            with tab_demo:
-                                if demo_df is not None:
-                                    st.dataframe(demo_df, use_container_width=True)
+                                if len(demo_rows) > 0:
+                                    demo_headers = demo_rows[0]
+                                    demo_vals = demo_rows[1:]
+                                    st.session_state["demo_df"] = pd.DataFrame(demo_vals, columns=demo_headers)
                                 else:
-                                    st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
+                                    st.session_state["demo_df"] = None
+                            else:
+                                st.session_state["live_df"] = pd.DataFrame()
+                                st.session_state["demo_df"] = None
 
-                            # Excel 및 CSV 내보내기 버튼 제공
-                            import io
+                        except Exception as g_err:
+                            st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")
+                            st.session_state["live_df"] = None
+                    else:
+                        st.warning("구글 Sheets API 클라이언트 연결 실패로 인해 구글 시트 내 데이터를 직접 다운로드할 수 없습니다.")
+                        st.session_state["live_df"] = None
 
-                            # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
-                            excel_buffer = io.BytesIO()
-                            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-                                live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
-                                if demo_df is not None:
-                                    demo_df.to_excel(writer, index=False, sheet_name='Demographic_Data')
+            if "survey_stats" in st.session_state:
+                stats = st.session_state["survey_stats"]
+                col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+                with col_stat1:
+                    st.metric("총 접속자 수 (Visits)", f"{stats['visits']}명")
+                with col_stat2:
+                    st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}명")
+                with col_stat3:
+                    st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
+                with col_stat4:
+                    st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
 
-                            col_dl1, col_dl2 = st.columns(2)
-                            with col_dl1:
-                                st.download_button(
-                                    "📥 실시간 응답 Excel 다운로드 (.xlsx)",
-                                    data=excel_buffer.getvalue(),
-                                    file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.xlsx",
-                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                    use_container_width=True,
-                                    type="primary"
-                                )
-                            # 2. CSV 내보내기 (Raw_Data 우선 내보내기)
-                            csv_buffer = io.StringIO()
-                            live_df.to_csv(csv_buffer, index=False, header=True)
-                            with col_dl2:
-                                st.download_button(
-                                    "📥 실시간 응답 CSV 다운로드 (.csv)",
-                                    data=csv_buffer.getvalue().encode('utf-8-sig'),
-                                    file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.csv",
-                                    mime="text/csv",
-                                    use_container_width=True
-                                )
-                        else:
-                            st.info("구글 시트에 수집된 응답 로데이터가 아직 비어 있습니다.")
-                    except Exception as g_err:
-                        st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")
-                else:
-                    st.warning("구글 Sheets API 클라이언트 연결 실패로 인해 구글 시트 내 데이터를 직접 다운로드할 수 없습니다. (아래 로컬 백업 센터 이용 권장)")
+                # 시각화 차트 추가
+                import plotly.express as px
 
-            # 시각화 차트 추가
-            import plotly.express as px
+                chart_data = pd.DataFrame({
+                    "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
+                    "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
+                })
 
-            chart_data = pd.DataFrame({
-                "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
-                "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
-            })
+                fig_stats = px.bar(
+                    chart_data,
+                    x="구분",
+                    y="인원수",
+                    text="인원수",
+                    color="구분",
+                    color_discrete_map={
+                        "응답 완료": "#2E7D32",
+                        "일관성 초과 중단": "#C62828",
+                        "단순 페이지 이탈": "#EF6C00"
+                    },
+                    title="설문 참여 상태별 분포"
+                )
+                fig_stats.update_layout(showlegend=False)
+                st.plotly_chart(fig_stats, use_container_width=True)
 
-            fig_stats = px.bar(
-                chart_data,
-                x="구분",
-                y="인원수",
-                text="인원수",
-                color="구분",
-                color_discrete_map={
-                    "응답 완료": "#2E7D32",
-                    "일관성 초과 중단": "#C62828",
-                    "단순 페이지 이탈": "#EF6C00"
-                },
-                title="설문 참여 상태별 분포"
-            )
-            fig_stats.update_layout(showlegend=False)
-            st.plotly_chart(fig_stats, use_container_width=True)
+            if "live_df" in st.session_state and st.session_state["live_df"] is not None:
+                live_df = st.session_state["live_df"]
+                demo_df = st.session_state.get("demo_df", None)
+
+                # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
+                with st.expander("📥 실시간 구글 시트 응답 데이터 다운로드 센터", expanded=True):
+                    if not live_df.empty:
+                        st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
+                        
+                        # 📊 AHP 분석 연동 단축 버튼 추가
+                        if st.button("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", type="primary", use_container_width=True):
+                            st.session_state["selected_survey_for_analysis"] = selected_sheet_id
+                            from survey_manager import load_survey_metadata
+                            survey_meta = load_survey_metadata(selected_sheet_id)
+                            if survey_meta:
+                                ahp_model = survey_meta["AHP_Model_JSON"]
+                                base_cols = ["ID", "Type"]
+                                main_criteria = ahp_model.get("main", [])
+                                main_pairs = []
+                                for i in range(len(main_criteria)):
+                                    for j in range(i + 1, len(main_criteria)):
+                                        main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
+                                main_cols = [c for c in base_cols if c in live_df.columns] + [p for p in main_pairs if p in live_df.columns]
+                                
+                                st.session_state["ahp_df_main"] = live_df[main_cols].copy()
+                                for col in st.session_state["ahp_df_main"].columns:
+                                    if col not in ["ID", "Type"]:
+                                        st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce').fillna(1.0)
+                                
+                                 # 중분류 복사
+                                st.session_state["ahp_sub_dfs"] = {}
+                                sub_criteria_map = ahp_model.get("subs", {})
+                                for main_c, subs in sub_criteria_map.items():
+                                    if len(subs) >= 2:
+                                        sub_pairs = []
+                                        for i in range(len(subs)):
+                                            for j in range(i + 1, len(subs)):
+                                                sub_pairs.append(f"{subs[i]}_{subs[j]}")
+                                        sub_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_pairs if p in live_df.columns]
+                                        st.session_state["ahp_sub_dfs"][main_c] = live_df[sub_cols].copy()
+                                        for col in st.session_state["ahp_sub_dfs"][main_c].columns:
+                                            if col not in ["ID", "Type"]:
+                                                st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce').fillna(1.0)
+                                                
+                                st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
+                                st.info("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.")
+
+                        tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
+                        with tab_raw:
+                            st.dataframe(live_df, use_container_width=True)
+                        with tab_demo:
+                            if demo_df is not None:
+                                st.dataframe(demo_df, use_container_width=True)
+                            else:
+                                st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
+
+                        # Excel 및 CSV 내보내기 버튼 제공
+                        import io
+
+                        # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
+                        excel_buffer = io.BytesIO()
+                        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                            live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
+                            if demo_df is not None:
+                                demo_df.to_excel(writer, index=False, sheet_name='Demographic_Data')
+
+                        col_dl1, col_dl2 = st.columns(2)
+                        with col_dl1:
+                            st.download_button(
+                                "📥 실시간 응답 Excel 다운로드 (.xlsx)",
+                                data=excel_buffer.getvalue(),
+                                file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.xlsx",
+                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                use_container_width=True,
+                                type="primary"
+                            )
+                        # 2. CSV 내보내기 (Raw_Data 우선 내보내기)
+                        csv_buffer = io.StringIO()
+                        live_df.to_csv(csv_buffer, index=False, header=True)
+                        with col_dl2:
+                            st.download_button(
+                                "📥 실시간 응답 CSV 다운로드 (.csv)",
+                                data=csv_buffer.getvalue().encode('utf-8-sig'),
+                                file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.csv",
+                                mime="text/csv",
+                                use_container_width=True
+                            )
+                    else:
+                        st.info("구글 시트에 수집된 응답 로데이터가 아직 비어 있습니다.")
 
             # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
             try:
