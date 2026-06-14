@@ -2744,66 +2744,6 @@ with st.sidebar:
                     else:
                         st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
 
-        # [추가] 구글 계정 연동 설정 UI (구글 드라이브/스프레드시트 개별 연동)
-        with st.expander(_("📊 구글 스프레드시트 계정 연동 설정", "📊 Google Sheets Account Integration")):
-            import sqlite3
-            conn = sqlite3.connect('users.db')
-            c = conn.cursor()
-            c.execute("SELECT user_id FROM user_google_credentials WHERE user_id = ?", (st.session_state.user_id,))
-            has_linked = c.fetchone() is not None
-            conn.close()
-            
-            if has_linked:
-                st.success(_("✅ 구글 계정이 연동되어 있습니다. (이 사용자가 생성하는 설문지는 본인 드라이브에 직접 생성됩니다.)", "✅ Google account is connected. (Surveys you create will be stored directly in your own Drive.)"))
-                if st.button(_("연동 해제하기", "Disconnect Account"), key="btn_unlink_google"):
-                    conn = sqlite3.connect('users.db')
-                    c = conn.cursor()
-                    c.execute("DELETE FROM user_google_credentials WHERE user_id = ?", (st.session_state.user_id,))
-                    conn.commit()
-                    conn.close()
-                    st.success(_("구글 계정 연동이 해제되었습니다.", "Google account has been disconnected."))
-                    st.rerun()
-            else:
-                st.warning(_("현재 공용 서비스 계정을 사용 중입니다. 개인 구글 계정을 연동하면 본인 드라이브에 직접 시트를 생성할 수 있습니다.", "Currently using shared service account. Connect your personal Google account to create sheets in your own Drive."))
-                
-                # OAuth Flow 링크 생성
-                import os
-                if os.name == 'nt':
-                    redirect_uri = "http://localhost:8501/"
-                else:
-                    redirect_uri = "https://ahpkrj.streamlit.app/"
-                
-                from survey_manager import get_google_oauth_flow
-                flow = get_google_oauth_flow(redirect_uri)
-                if flow:
-                    auth_url, _state = flow.authorization_url(prompt='consent', access_type='offline')
-                    st.markdown(f"""
-                        <a href="{auth_url}" target="_self" style="text-decoration: none;">
-                            <div style="
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                width: 100%;
-                                padding: 0.5rem;
-                                border: 1px solid #4f46e5;
-                                border-radius: 6px;
-                                background-color: #4f46e5;
-                                color: white;
-                                font-size: 14px;
-                                font-weight: 600;
-                                cursor: pointer;
-                                text-align: center;
-                                transition: background-color 0.2s;
-                            "
-                            onmouseover="this.style.backgroundColor='#4338ca';"
-                            onmouseout="this.style.backgroundColor='#4f46e5';"
-                            >
-                                🔗 구글 계정 로그인 및 연동하기
-                            </div>
-                        </a>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.error(_("구글 API 설정(client_id, client_secret)이 누락되어 연동을 시작할 수 없습니다. 관리자에게 문의하세요.", "Google API settings missing. Please contact the administrator."))
 
         if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
             st.session_state.user_id = None
