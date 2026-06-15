@@ -3616,17 +3616,20 @@ with col_main:
             st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
                       "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
             
-            # [신규] 3계층 오프라인 지원
-            st.markdown("##### ▶ [신규] 계층 구조 설정")
-            tier_choice = st.radio(
-                "계층 레벨을 선택하세요.", 
-                ["2계층 (대분류 - 중분류)", "3계층 (대분류 - 중분류 - 소분류)"], 
-                index=0,
-                horizontal=True,
-                key="tab1_tier_choice"
-            )
-            tier_level = 3 if "3계층" in tier_choice else 2
-            st.markdown("---")
+            # [신규] 3계층 오프라인 지원 (관리자 전용)
+            tier_level = 2
+            if st.session_state.get('user_role') == 'admin':
+                st.markdown("##### ⚙️ [관리자 전용] 계층 구조 설정")
+                tier_choice = st.radio(
+                    "계층 레벨을 선택하세요.", 
+                    ["2계층 (대분류 - 중분류)", "3계층 (대분류 - 중분류 - 소분류)"], 
+                    index=0,
+                    horizontal=True,
+                    key="tab1_tier_choice"
+                )
+                if "3계층" in tier_choice:
+                    tier_level = 3
+                st.markdown("---")
             main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
             main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
             
@@ -3911,10 +3914,12 @@ with col_main:
                         else:
                             inferred_sub_sub_dfs[sn] = df_sheet
                     
-                    if len(inferred_sub_sub_dfs) > 0:
+                    if len(inferred_sub_sub_dfs) > 0 and st.session_state.get('user_role') == 'admin':
                         st.session_state["ahp_sub_sub_dfs"] = inferred_sub_sub_dfs
                         st.session_state["inferred_tier_level"] = 3
                     else:
+                        if len(inferred_sub_sub_dfs) > 0:
+                            st.warning("🔒 3계층 오프라인 분석은 관리자 모드에서만 지원됩니다. 소분류 데이터는 무시되고 2계층으로 분석됩니다.")
                         st.session_state["inferred_tier_level"] = 2
                         
                     filename_base = uploaded_file.name.split('.')[0]
