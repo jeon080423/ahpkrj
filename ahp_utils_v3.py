@@ -23,9 +23,23 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
     if main_results_df.empty:
         return False, "대분류 유효 응답이 부족하여 분석을 진행할 수 없습니다.", None, None
 
+    # --- Excel Export Data Storage ---
+    export_data = {
+        "Main": {
+            "res_df": main_results_df,
+            "excl_df": main_excluded_df,
+            "factors": main_factors,
+            "group_matrix": None # We will set it below
+        },
+        "Sub": {},
+        "Sub_Sub": {}
+    }
+    # ---------------------------------
+    
     main_weight_cols = [f"Weight_{f}" for f in main_factors]
     main_matrices = np.stack(main_results_df['Matrix_Object'].values)
     main_group_matrix = np.mean(main_matrices, axis=0) if mean_method == 'arithmetic' else gmean(main_matrices, axis=0)
+    export_data['Main']['group_matrix'] = main_group_matrix
 
     if ahp_method == 'fuzzy':
         mw_vals, _ = fn_fuzzy_ahp(main_group_matrix)
@@ -51,6 +65,12 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         s_weight_cols = [f"Weight_{f}" for f in s_factors]
         s_matrices = np.stack(s_res_df['Matrix_Object'].values)
         s_group_matrix = np.mean(s_matrices, axis=0) if mean_method == 'arithmetic' else gmean(s_matrices, axis=0)
+        export_data['Sub'][parent_factor] = {
+            "res_df": s_res_df,
+            "excl_df": s_excl_df,
+            "factors": s_factors,
+            "group_matrix": s_group_matrix
+        }
         
         if ahp_method == 'fuzzy':
             sw_vals, _ = fn_fuzzy_ahp(s_group_matrix)
@@ -94,6 +114,12 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             ss_weight_cols = [f"Weight_{f}" for f in ss_factors]
             ss_matrices = np.stack(ss_res_df['Matrix_Object'].values)
             ss_group_matrix = np.mean(ss_matrices, axis=0) if mean_method == 'arithmetic' else gmean(ss_matrices, axis=0)
+            export_data['Sub_Sub'][sub_f] = {
+                "res_df": ss_res_df,
+                "excl_df": ss_excl_df,
+                "factors": ss_factors,
+                "group_matrix": ss_group_matrix
+            }
             
             if ahp_method == 'fuzzy':
                 ssw_vals, _ = fn_fuzzy_ahp(ss_group_matrix)
@@ -147,23 +173,125 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
 
     # 5. 엑셀 파일 생성 (아주 깔끔하고 직관적인 템플릿 사용)
     output_res = io.BytesIO()
+    is_en = st.session_state.get('lang', 'ko') == 'en'
+    
+    def add_borders_to_data(worksheet, start_row, start_col, df, border_fmt, has_header=True, has_index=False):
+        rows = len(df) + (1 if has_header else 0)
+        cols = len(df.columns) + (1 if has_index else 0)
+        worksheet.conditional_format(start_row, start_col, start_row+rows-1, start_col+cols-1,
+                                      {'type': 'formula', 'criteria': '=TRUE', 'format': border_fmt})
+
+    def write_detailed_sheet_v3(writer, sheet_name, data_dict, is_en=False):
+        workbook = writer.book
+        res_df = data_dict['res_df']
+        excl_df = data_dict['excl_df']
+        factors = data_dict['factors']
+        g_mat = data_dict['group_matrix']
+        
+        # Ensure safe sheet name (max 31 chars)
+        sheet_name = sheet_name[:31]
+        
+        # We need an empty dataframe just to create the sheet or write directly
+        res_df_no_matrix = res_df.drop(columns=['Matrix_Object']) if 'Matrix_Object' in res_df.columns else res_df
+        
+        # Just use to_excel with an empty df to initialize the sheet
+        pd.DataFrame().to_excel(writer, sheet_name=sheet_name)
+        ws = writer.sheets[sheet_name]
+        
+        formats = {
+            'header': workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#D3D3D3', 'border': 1}),
+            'title': workbook.add_format({'bold': True, 'font_size': 12}),
+            'border': workbook.add_format({'border': 1}),
+            'num': workbook.add_format({'num_format': '0.000', 'border': 1, 'align': 'center'}),
+            'center': workbook.add_format({'align': 'center', 'border': 1})
+        }
+        
+        s_row = 1
+        # 1. Individual Matrices
+        title_text = "📌 Individual Respondent Data & Corrected Matrices" if is_en else "📌 개별 응답자 데이터 및 보정 매트릭스"
+        ws.write_string(s_row, 0, title_text, formats['title'])
+        s_row += 2
+        
+        for idx_row, row in res_df.iterrows():
+            r_id = row['ID']
+            r_type = row['Type']
+            r_cr = row.get('CR', row.get('CR(대분류)', row.get('CR(중분류)', row.get('CR(소분류)', 0))))
+            matrix = row['Matrix_Object']
+            
+            label_text = f"🔸 [ID: {r_id}] Type: {r_type} - CR: {r_cr:.4f}"
+            ws.write_string(s_row, 0, label_text)
+            s_row += 1
+            
+            m_df = pd.DataFrame(matrix, index=factors, columns=factors)
+            m_df.to_excel(writer, sheet_name=sheet_name, startrow=s_row)
+            add_borders_to_data(ws, s_row, 0, m_df, formats['border'], has_header=True, has_index=True)
+            
+            for r in range(len(matrix)):
+                for c in range(len(matrix)):
+                    ws.write_number(s_row + 1 + r, c + 1, matrix[r][c], formats['num'])
+            
+            s_row += len(matrix) + 2
+            
+        # 2. Group Matrix
+        title_text = "📌 Group Combined Matrix" if is_en else "📌 그룹 종합 분석 매트릭스"
+        ws.write_string(s_row, 0, title_text, formats['title'])
+        s_row += 2
+        
+        gm_df = pd.DataFrame(g_mat, index=factors, columns=factors)
+        gm_df.to_excel(writer, sheet_name=sheet_name, startrow=s_row)
+        add_borders_to_data(ws, s_row, 0, gm_df, formats['border'], has_header=True, has_index=True)
+        
+        for r in range(len(g_mat)):
+            for c in range(len(g_mat)):
+                ws.write_number(s_row + 1 + r, c + 1, g_mat[r][c], formats['num'])
+                
+        s_row += len(g_mat) + 3
+        
+        # 3. Detail DataFrame
+        title_text = "📌 Individual Response Details" if is_en else "📌 개별 응답 상세 데이터"
+        ws.write_string(s_row, 0, title_text, formats['title'])
+        s_row += 2
+        
+        res_df_no_matrix.to_excel(writer, sheet_name=sheet_name, startrow=s_row, index=False)
+        for c_idx, col_val in enumerate(res_df_no_matrix.columns):
+            ws.write(s_row, c_idx, col_val, formats['header'])
+        add_borders_to_data(ws, s_row, 0, res_df_no_matrix, formats['border'], has_header=True, has_index=False)
+        s_row += len(res_df_no_matrix) + 3
+        
+        # 4. Excluded DataFrame
+        title_text = "📌 Excluded Data (CR Threshold Exceeded)" if is_en else "📌 일관성 미달 제외 데이터"
+        ws.write_string(s_row, 0, title_text, formats['title'])
+        s_row += 1
+        
+        count_text = f"Excluded cases: {len(excl_df)}" if is_en else f"제외된 응답 수: {len(excl_df)}건"
+        ws.write_string(s_row, 0, count_text)
+        s_row += 1
+        
+        if len(excl_df) > 0:
+            excl_df.to_excel(writer, sheet_name=sheet_name, startrow=s_row, index=False)
+            for c_idx, col_val in enumerate(excl_df.columns):
+                ws.write(s_row, c_idx, col_val, formats['header'])
+            add_borders_to_data(ws, s_row, 0, excl_df, formats['border'], has_header=True, has_index=False)
+            
+        ws.set_column('A:A', 25)
+        ws.set_column('B:Z', 15)
+
     with pd.ExcelWriter(output_res, engine='xlsxwriter') as writer:
         workbook = writer.book
         
-        # Format definitions
+        # Format definitions for summary
         header_fmt = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1})
         num_fmt = workbook.add_format({'num_format': '0.000', 'align': 'center', 'border': 1})
         center_fmt = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1})
 
-        # 3-Tier Results Sheet
-        sheet_name = '3-Tier AHP 종합결과'
+        # --- 1. 3-Tier Results Sheet (Summary) ---
+        sheet_name = '3-Tier 종합결과' if not is_en else '3-Tier Summary'
         final_df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=1)
         ws = writer.sheets[sheet_name]
         
-        # Title
-        ws.write_string(0, 0, "[V3 엔진] 3계층 AHP 종합 가중치 분석 결과", workbook.add_format({'bold': True, 'font_size': 14}))
+        title_text = "[V3 엔진] 3계층 AHP 종합 가중치 분석 결과" if not is_en else "[V3 Engine] 3-Tier AHP Global Weights Result"
+        ws.write_string(0, 0, title_text, workbook.add_format({'bold': True, 'font_size': 14}))
         
-        # Apply formatting
         for col_num, value in enumerate(final_df.columns.values):
             ws.write(1, col_num, value, header_fmt)
             
@@ -186,6 +314,21 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         ws.set_column('G:G', 15)
         ws.set_column('H:H', 15)
 
+        # --- 2. Detailed Sheets ---
+        # Main
+        if export_data['Main']['res_df'] is not None and not export_data['Main']['res_df'].empty:
+            write_detailed_sheet_v3(writer, 'Main_Criteria', export_data['Main'], is_en)
+            
+        # Sub
+        for k, v in export_data['Sub'].items():
+            if v['res_df'] is not None and not v['res_df'].empty:
+                write_detailed_sheet_v3(writer, str(k), v, is_en)
+                
+        # Sub_Sub
+        for k, v in export_data['Sub_Sub'].items():
+            if v['res_df'] is not None and not v['res_df'].empty:
+                write_detailed_sheet_v3(writer, str(k), v, is_en)
+
     output_res.seek(0)
     
-    return True, "분석 성공", final_df, output_res
+    return True, "Analysis Successful" if is_en else "분석 성공", final_df, output_res
