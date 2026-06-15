@@ -5427,6 +5427,23 @@ with col_main:
 
             # 섹션 2: AHP 모델 계층구조 입력 폼
             st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
+
+            # --- [신규] 관리자 전용 계층 구조 선택 ---
+            tier_level = 2
+            if st.session_state.get('user_role') == 'admin':
+                st.markdown("---")
+                st.markdown("##### ⚙️ [관리자 전용] 계층 구조 레벨 선택")
+                tier_choice = st.radio(
+                    "설문 모델의 계층 깊이를 선택하세요.", 
+                    ["2계층 (대분류 ➔ 중분류)", "3계층 (대분류 ➔ 중분류 ➔ 소분류)"], 
+                    index=0,
+                    horizontal=True
+                )
+                if "3계층" in tier_choice:
+                    tier_level = 3
+                st.markdown("---")
+            # ------------------------------------
+
             st.info(_(
                 "💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n\n"
                 "- 대분류 및 하위 요인은 반드시 **쉼표(,)** 로 구분하여 입력해 주세요.\n"
@@ -5440,6 +5457,9 @@ with col_main:
             main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
 
             model_structure = {"main": main_list, "subs": {}}
+            if tier_level == 3:
+                model_structure["sub_subs"] = {}
+
             for mc in main_list:
                 # 기본값 제안 (기존 양승훈 협동로봇 설문지 구조 자동 매핑)
                 default_sub_val = ""
@@ -5449,7 +5469,23 @@ with col_main:
                 elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
 
                 sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
-                model_structure["subs"][mc] = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
+                subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
+                model_structure["subs"][mc] = subs_list
+
+                # [신규] 3계층 선택 시 소분류 입력 필드 동적 생성
+                if tier_level == 3 and subs_list:
+                    with st.expander(f"↳ '{mc}' 하위의 소분류 (Sub-sub-criteria) 입력", expanded=True):
+                        for sub_c in subs_list:
+                            sub_sub_val = "" # 3계층 기본값은 빈칸
+                            sub_sub_input = st.text_input(
+                                f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
+                                value=st.session_state.get("edit_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
+                                key=f"sub_sub_{sub_c}"
+                            )
+                            # 소분류가 입력된 경우에만 저장, 없으면 무시
+                            parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
+                            if parsed_sub_subs:
+                                model_structure["sub_subs"][sub_c] = parsed_sub_subs
 
             st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
@@ -5595,6 +5631,7 @@ with col_main:
                 "Description": survey_desc,
                 "Admin_Email": survey_admin_email,
                 "AHP_Model_JSON": model_structure,
+                "Tier_Level": tier_level, # [신규] 3계층 구분용
                 "Scale_Type": scale_option,
                 "Demographics": demographics_settings,
                 "Definitions": definitions_map,
@@ -5662,19 +5699,35 @@ with col_main:
                                     if len(parts) > 1:
                                         target_sheet_id = parts[1].split("/")[0]
 
-                                sheet_id = create_survey_sheet(
-                                    title=survey_title,
-                                    admin_email=survey_admin_email,
-                                    ahp_model=model_structure,
-                                    scale_type=scale_option,
-                                    demographics=demographics_settings,
-                                    definition_map=definitions_map,
-                                    cr_limit=cr_limit,
-                                    rewards_info=rewards_info,
-                                    description=survey_desc,
-                                    existing_sheet_id=target_sheet_id,
-                                    user_id=st.session_state.user_id
-                                )
+                                if tier_level == 3:
+                                    from survey_manager_v3 import create_survey_sheet_v3
+                                    sheet_id = create_survey_sheet_v3(
+                                        title=survey_title,
+                                        admin_email=survey_admin_email,
+                                        ahp_model=model_structure,
+                                        scale_type=scale_option,
+                                        demographics=demographics_settings,
+                                        definition_map=definitions_map,
+                                        cr_limit=cr_limit,
+                                        rewards_info=rewards_info,
+                                        description=survey_desc,
+                                        existing_sheet_id=target_sheet_id,
+                                        user_id=st.session_state.user_id
+                                    )
+                                else:
+                                    sheet_id = create_survey_sheet(
+                                        title=survey_title,
+                                        admin_email=survey_admin_email,
+                                        ahp_model=model_structure,
+                                        scale_type=scale_option,
+                                        demographics=demographics_settings,
+                                        definition_map=definitions_map,
+                                        cr_limit=cr_limit,
+                                        rewards_info=rewards_info,
+                                        description=survey_desc,
+                                        existing_sheet_id=target_sheet_id,
+                                        user_id=st.session_state.user_id
+                                    )
 
 
 
