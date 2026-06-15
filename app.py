@@ -466,7 +466,7 @@ def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwar
                 raise e
 
 # [신규] 관리자 페이지 방문 로그 조회를 위한 캐싱 함수 (읽기 요청 최적화 - 5분 TTL)
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=300, show_spinner=False)
 def get_cached_visit_logs(spreadsheet_id):
     try:
         client = get_gspread_client()
@@ -3040,17 +3040,12 @@ if st.session_state.get('page', 'main') == 'guide':
 
 # 메인 헤더 영역
 try:
-    # 5분 캐싱된 구글 시트 데이터를 먼저 조회합니다.
-    visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
-    if visit_data_gs:
-        total_visits = len(visit_data_gs)
-    else:
-        # 구글 시트 API 제한(429) 시 로컬 DB에 저장된 방문 로그 수를 표시합니다.
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        c.execute("SELECT COUNT(*) FROM visit_logs")
-        total_visits = c.fetchone()[0]
-        conn.close()
+    # 성능 최적화를 위해 메인 화면에서는 구글 시트 대신 로컬 DB의 방문 로그 수만 즉시 집계합니다.
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM visit_logs")
+    total_visits = c.fetchone()[0]
+    conn.close()
 except Exception:
     total_visits = 0
 
