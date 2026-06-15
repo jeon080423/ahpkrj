@@ -5604,11 +5604,14 @@ with col_main:
                 # [신규] 3계층 선택 시 소분류 입력 필드 동적 생성
                 if tier_level == 3 and subs_list:
                     with st.expander(f"↳ '{mc}' 하위의 소분류 (Sub-sub-criteria) 입력", expanded=True):
+                        st.info("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.")
                         for sub_c in subs_list:
                             sub_sub_val = "" # 3계층 기본값은 빈칸
                             sub_sub_input = st.text_input(
                                 f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
                                 value=st.session_state.get("edit_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
+                                placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
+                                help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
                                 key=f"sub_sub_{sub_c}"
                             )
                             # 소분류가 입력된 경우에만 저장, 없으면 무시
