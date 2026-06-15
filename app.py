@@ -5427,7 +5427,14 @@ with col_main:
 
             # 섹션 2: AHP 모델 계층구조 입력 폼
             st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
-            st.info(_("💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n* 대분류 및 하위 요인은 반드시 **쉼표(,)**로 구분하여 입력해 주세요.\n* 요인명에 언더바(`_`) 기호는 시스템 내부 처리와 충돌하므로 사용할 수 없습니다. (입력 시 자동으로 공백으로 변환됩니다.)", "💡 The current criteria are just examples. You can freely modify them to fit your research model.\n* Separate Main and Sub criteria using **commas(,)**.\n* Do not use underscores (`_`) in criteria names. (They will be automatically converted to spaces.)"))
+            st.info(_(
+                "💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n\n"
+                "- 대분류 및 하위 요인은 반드시 **쉼표(,)**로 구분하여 입력해 주세요.\n"
+                "- 요인명에 언더바(`_`) 기호는 시스템 내부 처리와 충돌하므로 사용할 수 없습니다. (입력 시 자동으로 공백으로 변환됩니다.)",
+                "💡 The current criteria are just **examples**. You can freely modify them to fit your research model.\n\n"
+                "- Separate Main and Sub criteria using **commas(,)**.\n"
+                "- Do not use underscores (`_`) in criteria names. (They will be automatically converted to spaces.)"
+            ))
 
             main_input = st.text_input(_("대항목 (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", "기술 요인, 조직 요인, 환경 요인, 혁신 요인"))
             main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
