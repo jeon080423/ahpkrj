@@ -3874,7 +3874,10 @@ with col_main:
                                           {'type': 'formula', 'criteria': '=TRUE', 'format': border_fmt})
     
         st.subheader(_("2. 데이터 업로드 및 분석", "2. Data Upload & Analysis"))
-    
+        
+        if st.session_state.get('user_role') == 'admin':
+            st.info("💡 **혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 엑셀 템플릿을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.")
+
         # 데이터 소스 선택 추가
         data_source = st.radio(
             _("분석 데이터 소스 선택", "Select Analysis Data Source"),
