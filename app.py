@@ -5175,7 +5175,7 @@ with col_main:
     with main_tab2:
         st.header(_("📝 AHP 온라인 설문 자동 생성 및 배포", "📝 AHP Online Survey Auto-Generator & Deployer"))
         if st.session_state.user_id is None:
-            st.warning(_("🔒 **온라인 AHP 설문지 작성 및 배포(무료) 기능은 회원 전용 서비스입니다.**", "🔒 **Create & Deploy Online AHP Survey (Free) is a member-only feature.**"))
+            st.warning(_("🔒 **회원가입하시면 온라인 설문 작성 및 배포를 기능제한 없이 사용할 수 있습니다.**", "🔒 **Sign up to use the online survey creation and deployment features without limitations.**"))
             st.info(_("무료 회원가입 및 로그인을 완료하시면 제한 없이 AHP 온라인 설문지를 자동 생성하고 본인의 구글 스프레드시트와 연동할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.", "Once you sign up and log in for free, you can automatically generate AHP online surveys without limits and link them to your Google Spreadsheet. (Free members can also use all features without restriction)  \n**Please use the Login/Sign Up panel on the left sidebar.**"))
         else:
 
