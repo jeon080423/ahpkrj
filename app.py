@@ -5429,7 +5429,7 @@ with col_main:
             st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
             st.info(_(
                 "💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n\n"
-                "- 대분류 및 하위 요인은 반드시 **쉼표(,)**로 구분하여 입력해 주세요.\n"
+                "- 대분류 및 하위 요인은 반드시 **쉼표(,)** 로 구분하여 입력해 주세요.\n"
                 "- 요인명에 언더바(`_`) 기호는 시스템 내부 처리와 충돌하므로 사용할 수 없습니다. (입력 시 자동으로 공백으로 변환됩니다.)",
                 "💡 The current criteria are just **examples**. You can freely modify them to fit your research model.\n\n"
                 "- Separate Main and Sub criteria using **commas(,)**.\n"
