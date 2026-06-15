@@ -1885,7 +1885,16 @@ if "preview_id" in q_params or "survey_id" in q_params:
             with open(preview_file_path, "r", encoding="utf-8") as f:
                 survey_meta = json.load(f)
         else:
-            st.error("미리보기 데이터를 불러올 수 없습니다. 다시 시도해 주세요.")
+            st.warning("⚠️ 미리보기 데이터를 불러올 수 없습니다.")
+            st.markdown("""
+#### 📋 미리보기 전에 아래 사항을 먼저 완료해 주세요.
+
+1. **설문지 설정 완료** — 메인 페이지에서 AHP 모델 구조, 요인, 척도 등 설문 설정을 모두 입력합니다.
+2. **구글 스프레드시트 연동** — 섹션 7에서 본인의 구글 스프레드시트 URL 또는 ID를 입력하고, 서비스 계정 이메일(`ahp2-75@ahp2-486703.iam.gserviceaccount.com`)을 편집자로 공유합니다.
+3. **미리보기 버튼 클릭** — 설정이 완료된 후 "👁️ 설문지 응답 화면 미리보기" 버튼을 다시 눌러 주세요.
+
+> 💡 설문 설정 페이지에서 내용을 입력한 뒤 미리보기를 눌러야 정상적으로 표시됩니다.
+            """)
             st.stop()
             
         survey_id_param = f"preview_{preview_id_param}"
