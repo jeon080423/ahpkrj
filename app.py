@@ -5206,6 +5206,17 @@ with col_main:
 
             st.info(_("응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.\n\n⚠️ **주의:** 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.", "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.\n\n⚠️ **Caution:** We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."))
 
+            # [가이드 삽입]
+            with st.expander("📖 온라인 설문 자동 생성 및 배포 이용 가이드 (클릭하여 펼치기)", expanded=False):
+                try:
+                    import os
+                    with open(os.path.join("static", "guide.html"), "r", encoding="utf-8") as f:
+                        guide_html = f.read()
+                    import streamlit.components.v1 as components
+                    components.html(guide_html, height=720, scrolling=True)
+                except Exception as e:
+                    st.error("가이드 파일을 불러올 수 없습니다.")
+
             # (Dashboard moved to main_tab3 below)
             pass
 
