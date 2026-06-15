@@ -3645,10 +3645,13 @@ with col_main:
                     
                     if tier_level == 3 and sub_list:
                         with st.expander(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", expanded=True):
+                            st.info("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.")
                             for sub_c in sub_list:
                                 sub_sub_input = st.text_input(
                                     f"▶ '{sub_c}'의 소분류 (콤마 구분)", 
                                     value="",
+                                    placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
+                                    help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
                                     key=f"tab1_sub_sub_{sub_c}"
                                 )
                                 parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
