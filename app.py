@@ -5427,10 +5427,10 @@ with col_main:
 
             # 섹션 2: AHP 모델 계층구조 입력 폼
             st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
-            st.info(_("Goal -> Criteria (대분류) -> Sub-criteria (중분류) 구조를 입력해 주세요. (콤마로 요인을 구분합니다)", "Please enter the Goal -> Main Criteria -> Sub-criteria structure. (Use commas to separate criteria)"))
+            st.info(_("💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n* 대분류 및 하위 요인은 반드시 **쉼표(,)**로 구분하여 입력해 주세요.\n* 요인명에 언더바(`_`) 기호는 시스템 내부 처리와 충돌하므로 사용할 수 없습니다. (입력 시 자동으로 공백으로 변환됩니다.)", "💡 The current criteria are just examples. You can freely modify them to fit your research model.\n* Separate Main and Sub criteria using **commas(,)**.\n* Do not use underscores (`_`) in criteria names. (They will be automatically converted to spaces.)"))
 
             main_input = st.text_input(_("대항목 (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", "기술 요인, 조직 요인, 환경 요인, 혁신 요인"))
-            main_list = [x.strip() for x in main_input.split(",") if x.strip()]
+            main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
 
             model_structure = {"main": main_list, "subs": {}}
             for mc in main_list:
@@ -5442,7 +5442,7 @@ with col_main:
                 elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
 
                 sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
-                model_structure["subs"][mc] = [x.strip() for x in sub_input.split(",") if x.strip()]
+                model_structure["subs"][mc] = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
 
             st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
