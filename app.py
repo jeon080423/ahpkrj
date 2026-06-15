@@ -3955,7 +3955,27 @@ with col_main:
                                                 sub_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_pairs if p in raw_df.columns]
                                                 st.session_state["ahp_sub_dfs"][main_c] = raw_df[sub_cols].copy()
                                             
-                                        st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
+                                        # [신규] 3계층 모델인 경우 소분류(sub_subs) 데이터프레임 파싱
+                                        tier_level = int(survey_meta.get("Tier_Level", 2))
+                                        st.session_state["ahp_sub_sub_dfs"] = {}
+                                        if tier_level == 3:
+                                            sub_sub_map = ahp_model.get("sub_subs", {})
+                                            for main_c, subs in sub_criteria_map.items():
+                                                for sub_c in subs:
+                                                    sub_subs = sub_sub_map.get(sub_c, [])
+                                                    if len(sub_subs) >= 2:
+                                                        sub_sub_pairs = []
+                                                        for i in range(len(sub_subs)):
+                                                            for j in range(i + 1, len(sub_subs)):
+                                                                sub_sub_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                                                        ss_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_sub_pairs if p in raw_df.columns]
+                                                        st.session_state["ahp_sub_sub_dfs"][sub_c] = raw_df[ss_cols].copy()
+
+                                        sheet_names_list = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
+                                        if tier_level == 3:
+                                            sheet_names_list += list(st.session_state["ahp_sub_sub_dfs"].keys())
+                                            
+                                        st.session_state["ahp_sheet_names"] = sheet_names_list
                                         st.success(_(f"✅ 구글 시트에서 총 {len(raw_df)}건의 응답 데이터를 성공적으로 가져왔습니다!", f"✅ Successfully fetched {len(raw_df)} responses!"))
                                     else:
                                         st.warning(_("가져올 설문 응답 데이터가 시트에 존재하지 않습니다 (헤더만 존재).", "No survey responses found in the sheet."))
@@ -4008,6 +4028,33 @@ with col_main:
             
                 if permission_granted:
                     try:
+                        tier_level = int(survey_meta.get("Tier_Level", 2)) if 'survey_meta' in locals() else 2
+                        
+                        if tier_level == 3:
+                            with st.spinner(_("V3 엔진: 3계층(소분류 포함) AHP 종합 분석 수행 중...", "V3 Engine: Performing 3-Tier AHP...")):
+                                from ahp_utils_v3 import run_ahp_analysis_v3
+                                sub_sub_dfs = st.session_state.get("ahp_sub_sub_dfs", {})
+                                success_v3, msg_v3, final_df_v3, output_res_v3 = run_ahp_analysis_v3(
+                                    df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
+                                )
+                                if not success_v3:
+                                    st.error(msg_v3)
+                                    st.stop()
+                                
+                                st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
+                                st.dataframe(final_df_v3, use_container_width=True)
+                                
+                                st.download_button(
+                                    label=_("📥 3계층 AHP 종합분석 결과 다운로드 (.xlsx)", "📥 Download 3-Tier AHP Results (.xlsx)"),
+                                    data=output_res_v3,
+                                    file_name="3Tier_AHP_Result.xlsx",
+                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                    type="primary",
+                                    use_container_width=True
+                                )
+                                # 3계층은 V3 엔진 전용 결과만 출력하고, 기존 2계층 차트 UI는 스킵
+                                st.stop()
+                        
                         with st.spinner(_("계층 분석 수행 중...", "Performing Analytic Hierarchy Process (AHP)...")):
                             # 1. 메인 시트 분석 시도
                             try:
