@@ -2037,7 +2037,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     resp_data["id"] = st.session_state.survey_resp_uuid
     
     # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
-    type_q = demographics.get("type_question", "그룹 분류 (Type)")
+    type_q = demographics.get("type_question", "귀하의 소속은 어떻게 되십니까?")
     type_opts = demographics.get("type_options", ["전문가", "일반", "공무원", "기타"])
     if not isinstance(type_opts, list) or not type_opts:
         type_opts = ["전문가", "일반", "공무원", "기타"]
@@ -5346,7 +5346,7 @@ with col_main:
             # 그룹 분류 설정
             with st.container(border=True):
                 st.markdown(_("**👥 그룹 분류 문항 설정**", "**👥 Group Classification Setup**"))
-                type_question = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title"), value=st.session_state.get("edit_type_question", "그룹 분류 (Type)"))
+                type_question = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title"), value=st.session_state.get("edit_type_question", "귀하의 소속은 어떻게 되십니까?"))
                 type_options = st.text_input(_("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)"), value=st.session_state.get("edit_type_options", "전문가, 일반, 공무원, 기타"))
 
             st.write("")
