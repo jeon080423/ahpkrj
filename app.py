@@ -4242,7 +4242,8 @@ with col_main:
                                 from ahp_utils_v3 import run_ahp_analysis_v3
                                 sub_sub_dfs = st.session_state.get("ahp_sub_sub_dfs", {})
                                 success_v3, msg_v3, final_df_v3, output_res_v3 = run_ahp_analysis_v3(
-                                    df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
+                                    df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method,
+                                    process_single_sheet, fuzzy_ahp_analysis
                                 )
                                 if not success_v3:
                                     st.error(msg_v3)

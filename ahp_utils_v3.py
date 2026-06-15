@@ -3,9 +3,9 @@ import numpy as np
 from scipy.stats import gmean
 import io
 import streamlit as st
-from cr_analysis import process_single_sheet, fuzzy_ahp_analysis, calculate_consistency
+# Dependency injected functions are used instead to avoid circular import
 
-def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method):
+def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method, fn_process_single_sheet, fn_fuzzy_ahp):
     """
     [3계층 전용] AHP 분석 및 엑셀 다운로드 생성 로직.
     기존 2계층의 모노리틱 분석 엔진과 분리하여, 완전히 새로운 V3 엔진으로 동작합니다.
@@ -14,7 +14,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
 
     # 1. 메인 기준(대분류) 분석
     try:
-        main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(
+        main_results_df, main_factors, main_excluded, main_excluded_df = fn_process_single_sheet(
             df_main, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
         )
     except Exception as e:
@@ -28,7 +28,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
     main_group_matrix = np.mean(main_matrices, axis=0) if mean_method == 'arithmetic' else gmean(main_matrices, axis=0)
 
     if ahp_method == 'fuzzy':
-        mw_vals, _ = fuzzy_ahp_analysis(main_group_matrix)
+        mw_vals, _ = fn_fuzzy_ahp(main_group_matrix)
         group_main_weights = pd.Series(mw_vals, index=main_weight_cols)
     else:
         if mean_method == 'arithmetic':
@@ -44,7 +44,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         if sdf is None or len(sdf) == 0:
             continue
         
-        s_res_df, s_factors, s_excl, s_excl_df = process_single_sheet(sdf, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method)
+        s_res_df, s_factors, s_excl, s_excl_df = fn_process_single_sheet(sdf, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method)
         if s_res_df.empty:
             continue
             
@@ -53,7 +53,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         s_group_matrix = np.mean(s_matrices, axis=0) if mean_method == 'arithmetic' else gmean(s_matrices, axis=0)
         
         if ahp_method == 'fuzzy':
-            sw_vals, _ = fuzzy_ahp_analysis(s_group_matrix)
+            sw_vals, _ = fn_fuzzy_ahp(s_group_matrix)
             group_sub_weights = pd.Series(sw_vals, index=s_weight_cols)
         else:
             if mean_method == 'arithmetic':
@@ -81,7 +81,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                 }
                 continue
                 
-            ss_res_df, ss_factors, ss_excl, ss_excl_df = process_single_sheet(ss_df, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method)
+            ss_res_df, ss_factors, ss_excl, ss_excl_df = fn_process_single_sheet(ss_df, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method)
             
             if ss_res_df.empty:
                 # 유효 응답이 없으면 1.0 부여
@@ -96,7 +96,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             ss_group_matrix = np.mean(ss_matrices, axis=0) if mean_method == 'arithmetic' else gmean(ss_matrices, axis=0)
             
             if ahp_method == 'fuzzy':
-                ssw_vals, _ = fuzzy_ahp_analysis(ss_group_matrix)
+                ssw_vals, _ = fn_fuzzy_ahp(ss_group_matrix)
                 group_sub_sub_weights = pd.Series(ssw_vals, index=ss_weight_cols)
             else:
                 if mean_method == 'arithmetic':
