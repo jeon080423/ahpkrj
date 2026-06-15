@@ -547,6 +547,16 @@ def sync_short_codes_from_gs():
     except Exception as e:
         pass
 
+# 설문/미리보기 페이지 여부 조기 감지 (Google Sheets API 절약용)
+try:
+    _q = st.query_params
+except AttributeError:
+    try:
+        _q = st.experimental_get_query_params()
+    except:
+        _q = {}
+_is_survey_or_preview = "preview_id" in _q or "survey_id" in _q
+
 # DB 초기화 및 구글 시트로부터 데이터(회원+방문로그) 복구 로직
 def init_db():
     conn = sqlite3.connect('users.db')
@@ -606,108 +616,110 @@ def init_db():
                   ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
         conn.commit()
 
-        # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가
-        try:
-            client = get_gspread_client()
-            if client:
-                spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-                sheet = spreadsheet.sheet1
-                # 헤더 보정
-                all_values = sheet.get_all_values()
-                if all_values and len(all_values[0]) < 8:
-                    sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
-                
-                cell = sheet.find('shjeon')
-                if not cell:
-                    sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''])
-        except Exception:
-            pass
+        # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (설문/미리보기 페이지에서는 건너뜀)
+        if not _is_survey_or_preview:
+            try:
+                client = get_gspread_client()
+                if client:
+                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+                    sheet = spreadsheet.sheet1
+                    # 헤더 보정
+                    all_values = sheet.get_all_values()
+                    if all_values and len(all_values[0]) < 8:
+                        sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
+                    
+                    cell = sheet.find('shjeon')
+                    if not cell:
+                        sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''])
+            except Exception:
+                pass
     except sqlite3.IntegrityError:
         pass 
 
-    # [복구 로직 1] 회원 정보 복구 (Cloud 초기화 대비) - header 기반 (컬럼 순서 무관)
-    c.execute("SELECT COUNT(*) FROM users")
-    if c.fetchone()[0] <= 1:
-        try:
-            client = get_gspread_client()  
-            if client:
-                spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-                sheet = spreadsheet.sheet1
+    # [복구 로직 1] 회원 정보 복구 (Cloud 초기화 대비) - 설문/미리보기 페이지에서는 건너뜀
+    if not _is_survey_or_preview:
+        c.execute("SELECT COUNT(*) FROM users")
+        if c.fetchone()[0] <= 1:
+            try:
+                client = get_gspread_client()  
+                if client:
+                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+                    sheet = spreadsheet.sheet1
 
-                # [헤더 보정] 구글 시트의 헤더 컬럼 보정
-                all_values = sheet.get_all_values()
-                if all_values and len(all_values[0]) < 8:
-                    sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
+                    # [헤더 보정] 구글 시트의 헤더 컬럼 보정
+                    all_values = sheet.get_all_values()
+                    if all_values and len(all_values[0]) < 8:
+                        sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
 
-                records = sheet.get_all_records()  # 1행 header 사용
-                if records:
-                    def pick(row, *keys, default=""):
-                        for k in keys:
-                            if k in row and row[k] is not None and str(row[k]).strip() != "":
-                                    return str(row[k]).strip()
-                        return default
+                    records = sheet.get_all_records()  # 1행 header 사용
+                    if records:
+                        def pick(row, *keys, default=""):
+                            for k in keys:
+                                if k in row and row[k] is not None and str(row[k]).strip() != "":
+                                        return str(row[k]).strip()
+                            return default
 
-                    kst_today = datetime.datetime.now(
-                        datetime.timezone(datetime.timedelta(hours=9))
-                    ).strftime("%Y-%m-%d")
+                        kst_today = datetime.datetime.now(
+                            datetime.timezone(datetime.timedelta(hours=9))
+                        ).strftime("%Y-%m-%d")
 
-                    for r in records:
-                        userid = pick(r, "id", "ID", "user_id", "userid", "email")
-                        if not userid or userid == "shjeon":
-                            continue
+                        for r in records:
+                            userid = pick(r, "id", "ID", "user_id", "userid", "email")
+                            if not userid or userid == "shjeon":
+                                continue
 
-                        pw = pick(r, "pw", "PW", "password")
-                        role = pick(r, "role", "Role", default="temp")
-                        signupdate = pick(r, "signup_date", "signup_tate", "signupdate", "SignupDate", default=kst_today)
-                        expirydate = pick(r, "expiry_date", "expirydate", "ExpiryDate", default="9999-12-31")
-                        agreeinfo = pick(r, "agree_info", "agreeinfo", "Agree", default="")
-                        survey_count = int(pick(r, "survey_count", "surveycount", default="0"))
-                        last_survey_link = pick(r, "last_survey_link", "lastsurveylink", default="")
+                            pw = pick(r, "pw", "PW", "password")
+                            role = pick(r, "role", "Role", default="temp")
+                            signupdate = pick(r, "signup_date", "signup_tate", "signupdate", "SignupDate", default=kst_today)
+                            expirydate = pick(r, "expiry_date", "expirydate", "ExpiryDate", default="9999-12-31")
+                            agreeinfo = pick(r, "agree_info", "agreeinfo", "Agree", default="")
+                            survey_count = int(pick(r, "survey_count", "surveycount", default="0"))
+                            last_survey_link = pick(r, "last_survey_link", "lastsurveylink", default="")
 
-                        # [자가 치유] 구글 시트 컬럼 쉬프트 오류 복구
-                        if expirydate in ["Y", "N", "예", "아니오", "yes", "no"]:
+                            # [자가 치유] 구글 시트 컬럼 쉬프트 오류 복구
+                            if expirydate in ["Y", "N", "예", "아니오", "yes", "no"]:
+                                if not agreeinfo:
+                                    agreeinfo = expirydate
+                                expirydate = "9999-12-31"
+
                             if not agreeinfo:
-                                agreeinfo = expirydate
-                            expirydate = "9999-12-31"
+                                agreeinfo = "Y"
 
-                        if not agreeinfo:
-                            agreeinfo = "Y"
+                            if role not in ("temp", "official", "admin"):
+                                role = "temp"
 
-                        if role not in ("temp", "official", "admin"):
-                            role = "temp"
+                            c.execute(
+                                "INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                (userid, role, signupdate, pw, expirydate, agreeinfo, survey_count, last_survey_link),
+                            )
 
-                        c.execute(
-                            "INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            (userid, role, signupdate, pw, expirydate, agreeinfo, survey_count, last_survey_link),
-                        )
+                        conn.commit()
+            except Exception:
+                pass
 
-                    conn.commit()
-        except Exception:
-            pass
+        # [복구 로직 2] 방문 로그 복구
+        c.execute("SELECT COUNT(*) FROM visit_logs")
+        if c.fetchone()[0] == 0:
+            try:
+                client = get_gspread_client()
+                if client:
+                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+                    try:
+                        visit_sheet = spreadsheet.worksheet("Visit_Logs")
+                        records = visit_sheet.get_all_records()
+                        for row in records:
+                            c.execute("INSERT OR IGNORE INTO visit_logs (ip_address, visit_date) VALUES (?, ?)", 
+                                      (row['IP'], row['Date']))
+                        conn.commit()
+                    except gspread.exceptions.WorksheetNotFound:
+                        pass
+            except Exception:
+                pass
 
-    # [복구 로직 2] 방문 로그 복구
-    c.execute("SELECT COUNT(*) FROM visit_logs")
-    if c.fetchone()[0] == 0:
         try:
-            client = get_gspread_client()
-            if client:
-                spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-                try:
-                    visit_sheet = spreadsheet.worksheet("Visit_Logs")
-                    records = visit_sheet.get_all_records()
-                    for row in records:
-                        c.execute("INSERT OR IGNORE INTO visit_logs (ip_address, visit_date) VALUES (?, ?)", 
-                                  (row['IP'], row['Date']))
-                    conn.commit()
-                except gspread.exceptions.WorksheetNotFound:
-                    pass
+            sync_short_codes_from_gs()
         except Exception:
             pass
-
-    try:
-        sync_short_codes_from_gs()
-    except Exception:
-        pass
     conn.close()
 
 # [신규 기능 1] 구글 시트의 내용을 강제로 DB에 동기화하는 함수
@@ -863,24 +875,23 @@ def track_visitor():
         conn.commit()
         conn.close()
 
-        try:
-            client = get_gspread_client()
-            if client:
-                spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-                try:
-                    visit_sheet = spreadsheet.worksheet("Visit_Logs")
-                except gspread.exceptions.WorksheetNotFound:
-                    visit_sheet = spreadsheet.add_worksheet(title="Visit_Logs", rows="1000", cols="10")
-                    visit_sheet.append_row(["IP", "Date", "Country", "Region", "City", "Latitude", "Longitude"])
-                
-                # [최적화] API 읽기 제한(429)을 피하기 위해 전체 로그를 매번 가져와 중복을 대조하던 읽기 요청(get_all_values)을 제거합니다.
-                # 세션 상태(st.session_state.visited)가 작동 중이고 초 단위의 고유 타임스탬프를 쓰므로 바로 추가합니다.
-                visit_sheet.append_row([ip, now_ts, country, region, city, lat, lon])
-                
-                st.session_state.visited = True
-            
-        except Exception:
-            pass
+        # 설문/미리보기 페이지에서는 구글 시트에 방문 로그를 기록하지 않음 (API 절약)
+        if not _is_survey_or_preview:
+            try:
+                client = get_gspread_client()
+                if client:
+                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+                    try:
+                        visit_sheet = spreadsheet.worksheet("Visit_Logs")
+                    except gspread.exceptions.WorksheetNotFound:
+                        visit_sheet = spreadsheet.add_worksheet(title="Visit_Logs", rows="1000", cols="10")
+                        visit_sheet.append_row(["IP", "Date", "Country", "Region", "City", "Latitude", "Longitude"])
+                    
+                    visit_sheet.append_row([ip, now_ts, country, region, city, lat, lon])
+                    
+            except Exception:
+                pass
+        st.session_state.visited = True
     except Exception:
         pass
 
