@@ -1950,16 +1950,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
     st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
     
-    survey_meta = load_survey_metadata(survey_id_param)
-    if not survey_meta:
-        st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
-        st.stop()
+    # 미리보기 모드가 아닌 경우에만 구글 시트에서 메타데이터를 로드
+    if not is_preview_mode:
+        survey_meta = load_survey_metadata(survey_id_param)
+        if not survey_meta:
+            st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
+            st.stop()
         
-    # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
-    if f"visited_survey_{survey_id_param}" not in st.session_state:
-        from survey_manager import increment_survey_visit
-        increment_survey_visit(survey_id_param)
-        st.session_state[f"visited_survey_{survey_id_param}"] = True
+        # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
+        if f"visited_survey_{survey_id_param}" not in st.session_state:
+            from survey_manager import increment_survey_visit
+            increment_survey_visit(survey_id_param)
+            st.session_state[f"visited_survey_{survey_id_param}"] = True
         
     st.title(survey_meta.get('Title', 'AHP 온라인 설문조사'))
     
