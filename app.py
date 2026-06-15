@@ -2011,10 +2011,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
     scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
     
     # AHP 쌍대비교 기본 선택값을 1(동등)로 설정하기 위해 session_state 사전 초기화 (버전 v3 적용으로 세션 캐시 갱신)
+    tier_level = int(survey_meta.get("Tier_Level", 2))
+    
     init_key = f"init_survey_{survey_id_param}_v3"
     if init_key not in st.session_state:
         st.session_state[init_key] = True
-        combinations = generate_pairwise_combinations(ahp_model)
+        
+        if tier_level == 3:
+            from survey_manager_v3 import generate_pairwise_combinations_v3
+            combinations = generate_pairwise_combinations_v3(ahp_model)
+        else:
+            combinations = generate_pairwise_combinations(ahp_model)
+            
         for comb in combinations:
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
@@ -2167,7 +2175,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
         - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
         """)
         
-        combinations = generate_pairwise_combinations(ahp_model)
+        if tier_level == 3:
+            from survey_manager_v3 import generate_pairwise_combinations_v3
+            combinations = generate_pairwise_combinations_v3(ahp_model)
+        else:
+            combinations = generate_pairwise_combinations(ahp_model)
+            
         ahp_answers = {}
         
         with st.container(key="ahp_survey_matrix"):
@@ -2446,9 +2459,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     st.session_state[f"survey_submitted_{survey_id_param}"] = True
                     st.rerun()
                 else:
-                    success = save_response_to_sheet(
-                        survey_id_param, resp_data, ahp_answers, demographics, ahp_model, rewards_info
-                    )
+                    if tier_level == 3:
+                        from survey_manager_v3 import save_response_to_sheet_v3
+                        success = save_response_to_sheet_v3(
+                            survey_id_param, resp_data, ahp_answers, demographics, ahp_model, rewards_info
+                        )
+                    else:
+                        success = save_response_to_sheet(
+                            survey_id_param, resp_data, ahp_answers, demographics, ahp_model, rewards_info
+                        )
                     if success:
                         st.session_state[f"survey_submitted_{survey_id_param}"] = True
                         st.rerun()
