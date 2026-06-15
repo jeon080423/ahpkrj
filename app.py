@@ -2541,7 +2541,7 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; padding-left: 20px; text-indent: -20px; margin-top: 2px;">(AHP 온라인 설문 셋팅 대행 추가 5만원)</span></li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; padding-left: 20px; text-indent: -20px; margin-top: 2px;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
   </ul>
   <div style="margin-top: 10px; color: #e65100; font-size: 0.85rem; font-weight: 600;">
     💡 가입 후 3일 내 불만족 시 100% 환불
