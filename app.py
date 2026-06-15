@@ -3615,17 +3615,42 @@ with col_main:
         with st.expander(_("📌 나의 분석 모델 만들기", "📌 Create Custom AHP Model"), expanded=True):
             st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
                       "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
+            
+            # [신규] 3계층 오프라인 지원
+            st.markdown("##### ▶ [신규] 계층 구조 설정")
+            tier_choice = st.radio(
+                "계층 레벨을 선택하세요.", 
+                ["2계층 (대분류 - 중분류)", "3계층 (대분류 - 중분류 - 소분류)"], 
+                index=0,
+                horizontal=True,
+                key="tab1_tier_choice"
+            )
+            tier_level = 3 if "3계층" in tier_choice else 2
+            st.markdown("---")
             main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
             main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
             
             model_structure = {}
+            sub_sub_structure = {}
             if main_criteria_list:
                 for mc in main_criteria_list:
                     d_val = default_subs.get(mc, "")
                     if isinstance(d_val, list): d_val = ", ".join(d_val)
-                    sub_input = st.text_input(_(f"'{mc}'의 세부항목", f"Sub-criteria for '{mc}'"), value=d_val, key=f"sub_{mc}")
+                    sub_input = st.text_input(_(f"'{mc}'의 세부항목", f"Sub-criteria for '{mc}'"), value=d_val, key=f"tab1_sub_{mc}")
                     sub_list = [x.strip() for x in sub_input.split(',') if x.strip()]
                     model_structure[mc] = sub_list
+                    
+                    if tier_level == 3 and sub_list:
+                        with st.expander(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", expanded=True):
+                            for sub_c in sub_list:
+                                sub_sub_input = st.text_input(
+                                    f"▶ '{sub_c}'의 소분류 (콤마 구분)", 
+                                    value="",
+                                    key=f"tab1_sub_sub_{sub_c}"
+                                )
+                                parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
+                                if parsed_sub_subs:
+                                    sub_sub_structure[sub_c] = parsed_sub_subs
             
             col1, col2 = st.columns(2)
             with col1:
@@ -3635,7 +3660,7 @@ with col_main:
                 if not main_criteria_list:
                     st.error(_("대항목 입력 필요", "Main criteria input is required"))
                 else:
-                    current_model = {'main': main_criteria_input, 'subs': model_structure}
+                    current_model = {'main': main_criteria_input, 'subs': model_structure, 'sub_subs': sub_sub_structure, 'Tier_Level': tier_level}
                     save_user_model(st.session_state.user_id, current_model)
                     st.toast(_("모델 저장 완료", "Model successfully saved"))
                     
@@ -3657,6 +3682,22 @@ with col_main:
                                 df_sub.loc[0] = [1, ""] + [0]*len(sub_pairs)
                             safe_sheet_name = mc[:31]
                             df_sub.to_excel(writer, sheet_name=safe_sheet_name, index=False)
+                            
+                        # 3계층 시트 생성
+                        if tier_level == 3:
+                            for mc, subs in model_structure.items():
+                                for sub_c in subs:
+                                    ss_list = sub_sub_structure.get(sub_c, [])
+                                    if len(ss_list) < 2:
+                                        df_ss = pd.DataFrame(columns=["ID", "Type"])
+                                    else:
+                                        ss_pairs = list(itertools.combinations(ss_list, 2))
+                                        ss_cols = ["ID", "Type"] + [f"{a}_{b}" for a, b in ss_pairs]
+                                        df_ss = pd.DataFrame(columns=ss_cols)
+                                        df_ss.loc[0] = [1, ""] + [0]*len(ss_pairs)
+                                    safe_ss_name = sub_c[:31]
+                                    df_ss.to_excel(writer, sheet_name=safe_ss_name, index=False)
+                                    
                     output_template.seek(0)
                     
                     with col2:
@@ -3850,8 +3891,32 @@ with col_main:
                     excel_obj = pd.ExcelFile(uploaded_file)
                     sheet_names = excel_obj.sheet_names
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
+                    
+                    # 3계층 식별 로직 (df_main 컬럼에서 _ 포함된 것으로 대분류 요인 도출)
+                    main_criteria_infer = set()
+                    for col in df_main.columns:
+                        if '_' in col:
+                            parts = col.split('_')
+                            if len(parts) == 2:
+                                main_criteria_infer.add(parts[0])
+                                main_criteria_infer.add(parts[1])
+                    
+                    inferred_sub_sub_dfs = {}
                     for sn in sheet_names[1:]:
-                        sub_dfs[sn] = pd.read_excel(uploaded_file, sheet_name=sn)
+                        df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
+                        # 안전한 시트명(safe_sheet_name)을 위해 앞부분이 일치하는지 확인
+                        is_sub = any(sn == mc[:31] for mc in main_criteria_infer)
+                        if is_sub:
+                            sub_dfs[sn] = df_sheet
+                        else:
+                            inferred_sub_sub_dfs[sn] = df_sheet
+                    
+                    if len(inferred_sub_sub_dfs) > 0:
+                        st.session_state["ahp_sub_sub_dfs"] = inferred_sub_sub_dfs
+                        st.session_state["inferred_tier_level"] = 3
+                    else:
+                        st.session_state["inferred_tier_level"] = 2
+                        
                     filename_base = uploaded_file.name.split('.')[0]
                 except Exception as e:
                     st.error(f"엑셀 파일 로드 실패: {e}")
@@ -4023,7 +4088,10 @@ with col_main:
             
                 if permission_granted:
                     try:
-                        tier_level = int(survey_meta.get("Tier_Level", 2)) if 'survey_meta' in locals() else 2
+                        if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
+                            tier_level = st.session_state.get("inferred_tier_level", 2)
+                        else:
+                            tier_level = int(survey_meta.get("Tier_Level", 2)) if 'survey_meta' in locals() else 2
                         
                         if tier_level == 3:
                             with st.spinner(_("V3 엔진: 3계층(소분류 포함) AHP 종합 분석 수행 중...", "V3 Engine: Performing 3-Tier AHP...")):
