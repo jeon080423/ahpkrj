@@ -175,3 +175,145 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         pass
 
     return spreadsheet.id
+
+def generate_pairwise_combinations_v3(model):
+    combinations = []
+    
+    # 1. 대분류
+    main_c = model.get("main", [])
+    if len(main_c) >= 2:
+        combinations.append({
+            "type": "main",
+            "parent": "Main",
+            "factors": main_c,
+            "pairs": [(main_c[i], main_c[j]) for i in range(len(main_c)) for j in range(i + 1, len(main_c))]
+        })
+        
+    # 2. 중분류
+    sub_map = model.get("subs", {})
+    for parent, subs in sub_map.items():
+        if len(subs) >= 2:
+            combinations.append({
+                "type": "sub",
+                "parent": parent,
+                "factors": subs,
+                "pairs": [(subs[i], subs[j]) for i in range(len(subs)) for j in range(i + 1, len(subs))]
+            })
+
+    # 3. 소분류 (V3 전용)
+    sub_sub_map = model.get("sub_subs", {})
+    for parent, subs in sub_map.items():
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) >= 2:
+                combinations.append({
+                    "type": "sub_sub",
+                    "parent": sub_c,
+                    "factors": sub_subs,
+                    "pairs": [(sub_subs[i], sub_subs[j]) for i in range(len(sub_subs)) for j in range(i + 1, len(sub_subs))]
+                })
+            
+    return combinations
+
+def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demographics_settings, model, rewards_info):
+    import datetime
+    import sqlite3
+    
+    kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+    resp_id = respondent_info.get("id", str(uuid.uuid4())[:8])
+    resp_type = respondent_info.get("type", "일반")
+    
+    raw_row_data = [resp_id, resp_type]
+    
+    # 1. 대분류 답변
+    main_criteria = model.get("main", [])
+    for i in range(len(main_criteria)):
+        for j in range(i + 1, len(main_criteria)):
+            pair_key = f"{main_criteria[i]}_{main_criteria[j]}"
+            raw_row_data.append(ahp_answers.get(pair_key, 1))
+            
+    # 2. 중분류 답변
+    sub_criteria_map = model.get("subs", {})
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if len(subs) >= 2:
+            for i in range(len(subs)):
+                for j in range(i + 1, len(subs)):
+                    pair_key = f"{subs[i]}_{subs[j]}"
+                    raw_row_data.append(ahp_answers.get(pair_key, 1))
+
+    # 3. 소분류 답변
+    sub_sub_map = model.get("sub_subs", {})
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) >= 2:
+                for i in range(len(sub_subs)):
+                    for j in range(i + 1, len(sub_subs)):
+                        pair_key = f"{sub_subs[i]}_{sub_subs[j]}"
+                        raw_row_data.append(ahp_answers.get(pair_key, 1))
+                        
+    raw_row_data.append(kst_now)
+    
+    demo_row_data = [resp_id, resp_type]
+    if demographics_settings.get("name"): demo_row_data.append(respondent_info.get("name", ""))
+    if demographics_settings.get("age"): demo_row_data.append(respondent_info.get("age", ""))
+    if demographics_settings.get("gender"): demo_row_data.append(respondent_info.get("gender", ""))
+    if demographics_settings.get("experience"): demo_row_data.append(respondent_info.get("experience", ""))
+    if demographics_settings.get("affiliation"): demo_row_data.append(respondent_info.get("affiliation", ""))
+    if demographics_settings.get("email"): demo_row_data.append(respondent_info.get("email", ""))
+    demo_row_data.append(respondent_info.get("pre_ranking", ""))
+    if rewards_info.get("enabled"):
+        demo_row_data.append(respondent_info.get("reward_contact", ""))
+    demo_row_data.append(kst_now)
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS survey_backup_responses
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       survey_id TEXT, 
+                       respondent_id TEXT, 
+                       response_json TEXT, 
+                       saved_to_sheet INTEGER, 
+                       created_at TEXT)''')
+        
+        complete_payload = {
+            "raw_row_data": raw_row_data,
+            "demo_row_data": demo_row_data,
+            "ahp_answers": ahp_answers,
+            "respondent_info": respondent_info
+        }
+        
+        c.execute("INSERT INTO survey_backup_responses (survey_id, respondent_id, response_json, saved_to_sheet, created_at) VALUES (?, ?, ?, 0, datetime('now'))",
+                  (spreadsheet_id, resp_id, json.dumps(complete_payload, ensure_ascii=False)))
+        conn.commit()
+        db_id = c.lastrowid
+        conn.close()
+    except Exception as db_err:
+        pass
+
+    try:
+        client = get_survey_gspread_client()
+        if not client: return False
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
+        
+        raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+        run_gspread_with_retry(raw_sheet.append_row, raw_row_data)
+        
+        demo_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Demographic_Data")
+        run_gspread_with_retry(demo_sheet.append_row, demo_row_data)
+        
+        try:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("UPDATE survey_backup_responses SET saved_to_sheet = 1 WHERE id = ?", (db_id,))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+            
+        return True
+    except Exception as e:
+        return False
