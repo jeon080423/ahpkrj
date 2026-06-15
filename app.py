@@ -616,8 +616,8 @@ def init_db():
                   ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
         conn.commit()
 
-        # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (설문/미리보기 페이지에서는 건너뜀)
-        if not _is_survey_or_preview:
+        # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (세션당 1회, 설문/미리보기 페이지 제외)
+        if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
             try:
                 client = get_gspread_client()
                 if client:
@@ -636,8 +636,8 @@ def init_db():
     except sqlite3.IntegrityError:
         pass 
 
-    # [복구 로직 1] 회원 정보 복구 (Cloud 초기화 대비) - 설문/미리보기 페이지에서는 건너뜀
-    if not _is_survey_or_preview:
+    # [복구 로직 1~2 및 short_code 동기화] 세션당 1회만 실행 (설문/미리보기 페이지 제외)
+    if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
         c.execute("SELECT COUNT(*) FROM users")
         if c.fetchone()[0] <= 1:
             try:
@@ -720,6 +720,9 @@ def init_db():
             sync_short_codes_from_gs()
         except Exception:
             pass
+        
+        # 세션당 1회 실행 완료 표시
+        st.session_state._init_gs_done = True
     conn.close()
 
 # [신규 기능 1] 구글 시트의 내용을 강제로 DB에 동기화하는 함수
