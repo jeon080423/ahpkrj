@@ -3593,24 +3593,39 @@ with col_main:
             "실현가능성": "부지확보, 사업구체화, 사업비적정성",
             "사업효과": "경제적효과, 사회적효과, 성과관리"
         }
+
+        # [신규] 3계층(V3) 샘플 데이터 (스마트폰 구매 결정)
+        en_default_main_v3 = "Functionality, Design, Economy"
+        en_default_subs_v3 = {
+            "Functionality": "Hardware, Software",
+            "Design": "Appearance, Usability",
+            "Economy": "Device Price, Maintenance"
+        }
+        en_default_sub_subs_v3 = {
+            "Hardware": "Camera, Battery, Processor",
+            "Software": "OS, Default Apps",
+            "Appearance": "Color, Material",
+            "Usability": "", 
+            "Device Price": "Lump Sum, Installment",
+            "Maintenance": "Plan, Repair"
+        }
+
+        ko_default_main_v3 = "기능성, 디자인, 경제성"
+        ko_default_subs_v3 = {
+            "기능성": "하드웨어, 소프트웨어",
+            "디자인": "외관, 편의성",
+            "경제성": "단말기가격, 유지비용"
+        }
+        ko_default_sub_subs_v3 = {
+            "하드웨어": "카메라, 배터리, 프로세서",
+            "소프트웨어": "운영체제, 기본앱",
+            "외관": "색상, 재질",
+            "편의성": "", 
+            "단말기가격": "일시불, 할부",
+            "유지비용": "통신요금, AS비용"
+        }
     
-        if is_en:
-            default_main = en_default_main
-            default_subs = en_default_subs
-        else:
-            default_main = ko_default_main
-            default_subs = ko_default_subs
-    
-        if saved_model:
-            saved_main = saved_model.get('main', '')
-            # 만약 저장된 모델이 반대 언어의 기본 예시와 동일하거나 비어 있다면, 현재 언어의 기본 예시를 표시
-            if is_en and (saved_main == ko_default_main or not saved_main):
-                pass
-            elif not is_en and (saved_main == en_default_main or not saved_main):
-                pass
-            else:
-                default_main = saved_main
-                default_subs = saved_model.get('subs', default_subs)
+        # default assignments are moved inside expander to react to tier_level
     
         with st.expander(_("📌 나의 분석 모델 만들기", "📌 Create Custom AHP Model"), expanded=True):
             st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
@@ -3630,6 +3645,27 @@ with col_main:
                 if "3계층" in tier_choice:
                     tier_level = 3
                 st.markdown("---")
+                
+            # [신규] tier_level에 따라 샘플 데이터 스위칭
+            if is_en:
+                default_main = en_default_main_v3 if tier_level == 3 else en_default_main
+                default_subs = en_default_subs_v3 if tier_level == 3 else en_default_subs
+                default_sub_subs = en_default_sub_subs_v3 if tier_level == 3 else {}
+            else:
+                default_main = ko_default_main_v3 if tier_level == 3 else ko_default_main
+                default_subs = ko_default_subs_v3 if tier_level == 3 else ko_default_subs
+                default_sub_subs = ko_default_sub_subs_v3 if tier_level == 3 else {}
+                
+            if saved_model:
+                saved_main = saved_model.get('main', '')
+                if is_en and (saved_main == ko_default_main or saved_main == ko_default_main_v3 or not saved_main):
+                    pass
+                elif not is_en and (saved_main == en_default_main or saved_main == en_default_main_v3 or not saved_main):
+                    pass
+                else:
+                    default_main = saved_main
+                    default_subs = saved_model.get('subs', default_subs)
+                    
             main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
             main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
             
@@ -3649,7 +3685,7 @@ with col_main:
                             for sub_c in sub_list:
                                 sub_sub_input = st.text_input(
                                     f"▶ '{sub_c}'의 소분류 (콤마 구분)", 
-                                    value="",
+                                    value=default_sub_subs.get(sub_c, ""),
                                     placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
                                     help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
                                     key=f"tab1_sub_sub_{sub_c}"
@@ -5593,7 +5629,8 @@ with col_main:
                 "- Do not use underscores (`_`) in criteria names. (They will be automatically converted to spaces.)"
             ))
 
-            main_input = st.text_input(_("대항목 (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", "기술 요인, 조직 요인, 환경 요인, 혁신 요인"))
+            default_tab2_main = "기능성, 디자인, 경제성" if tier_level == 3 else "기술 요인, 조직 요인, 환경 요인, 혁신 요인"
+            main_input = st.text_input(_("대항목 (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", default_tab2_main))
             main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
 
             model_structure = {"main": main_list, "subs": {}}
@@ -5601,12 +5638,15 @@ with col_main:
                 model_structure["sub_subs"] = {}
 
             for mc in main_list:
-                # 기본값 제안 (기존 양승훈 협동로봇 설문지 구조 자동 매핑)
+                # 기본값 제안 (기존 양승훈 협동로봇 및 3계층 스마트폰 구매 결정)
                 default_sub_val = ""
                 if mc == "기술 요인": default_sub_val = "상대적이점, 호환성, 안전성, 서비스지원"
                 elif mc == "조직 요인": default_sub_val = "경영진지원, 기술준비도, 금융자원, 교육훈련"
                 elif mc == "환경 요인": default_sub_val = "정부지원, 경쟁압력, 인력난, 외부지원"
                 elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
+                elif mc == "기능성": default_sub_val = "하드웨어, 소프트웨어"
+                elif mc == "디자인": default_sub_val = "외관, 편의성"
+                elif mc == "경제성": default_sub_val = "단말기가격, 유지비용"
 
                 sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
                 subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
@@ -5618,6 +5658,12 @@ with col_main:
                         st.info("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.")
                         for sub_c in subs_list:
                             sub_sub_val = "" # 3계층 기본값은 빈칸
+                            if sub_c == "하드웨어": sub_sub_val = "카메라, 배터리, 프로세서"
+                            elif sub_c == "소프트웨어": sub_sub_val = "운영체제, 기본앱"
+                            elif sub_c == "외관": sub_sub_val = "색상, 재질"
+                            elif sub_c == "단말기가격": sub_sub_val = "일시불, 할부"
+                            elif sub_c == "유지비용": sub_sub_val = "통신요금, AS비용"
+                            
                             sub_sub_input = st.text_input(
                                 f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
                                 value=st.session_state.get("edit_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
