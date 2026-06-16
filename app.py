@@ -5994,10 +5994,11 @@ with col_main:
             st.info(_("응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.\n\n⚠️ **주의:** 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.", "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.\n\n⚠️ **Caution:** We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."))
 
             # [가이드 삽입]
-            with st.expander("📖 온라인 설문 자동 생성 및 배포 이용 가이드 (클릭하여 펼치기)", expanded=False):
+            with st.expander(_("📖 온라인 설문 자동 생성 및 배포 이용 가이드 (클릭하여 펼치기)", "📖 Online Survey Auto-Generation & Deployment Guide (Click to expand)"), expanded=False):
                 try:
                     import os
-                    with open(os.path.join("static", "guide.html"), "r", encoding="utf-8") as f:
+                    guide_file = "guide_en.html" if st.session_state.lang == "en" else "guide.html"
+                    with open(os.path.join("static", guide_file), "r", encoding="utf-8") as f:
                         guide_html = f.read()
                     import streamlit.components.v1 as components
                     components.html(guide_html, height=720, scrolling=True)
@@ -6012,7 +6013,7 @@ with col_main:
             # ------------------------------------------------------------
             # 0. 설문 관리 (1인 1설문 모드)
             # ------------------------------------------------------------
-            st.subheader("섹션 0: 내 설문 관리")
+            st.subheader(_("섹션 0: 내 설문 관리", "Section 0: My Survey Management"))
 
             # Initialize states
             if 'editing_survey_id' not in st.session_state:
@@ -6086,18 +6087,18 @@ with col_main:
                 st.session_state.survey_auto_loaded = True
                 st.rerun()
 
-            @st.dialog("🚨 [경고] 기존 설문 영구 삭제 안내")
+            @st.dialog(_("🚨 [경고] 기존 설문 영구 삭제 안내", "🚨 [Warning] Permanent Deletion of Existing Survey"))
             def confirm_new_survey():
-                st.error("새로운 설문을 작성하시면 기존 연동된 구글 시트에 저장된 **모든 데이터(설문 구조, 문항, 수집된 전체 응답 결과)가 즉시 삭제되며 절대 복구할 수 없습니다.**")
-                st.info("💡 **데이터 보존 안내:** 기존 설문의 응답 결과 보존을 원하신다면, 삭제에 동의하시기 전에 구글 스프레드시트에 접속하여 **[파일] -> [다운로드]** 메뉴를 통해 엑셀(.xlsx) 파일 등으로 백업본을 사용자 컴퓨터에 미리 다운로드해 두시기 바랍니다.")
-                agree = st.checkbox("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.")
+                st.error(_("새로운 설문을 작성하시면 기존 연동된 구글 시트에 저장된 **모든 데이터(설문 구조, 문항, 수집된 전체 응답 결과)가 즉시 삭제되며 절대 복구할 수 없습니다.**", "If you create a new survey, **ALL data saved in the linked Google Sheet (survey structure, questions, collected responses) will be immediately deleted and CANNOT be recovered.**"))
+                st.info(_("💡 **데이터 보존 안내:** 기존 설문의 응답 결과 보존을 원하신다면, 삭제에 동의하시기 전에 구글 스프레드시트에 접속하여 **[파일] -> [다운로드]** 메뉴를 통해 엑셀(.xlsx) 파일 등으로 백업본을 사용자 컴퓨터에 미리 다운로드해 두시기 바랍니다.", "💡 **Data Preservation Guide:** If you wish to keep the existing responses, please go to the Google Spreadsheet and use the **[File] -> [Download]** menu to download a backup copy (e.g., .xlsx) to your computer before agreeing to delete."))
+                agree = st.checkbox(_("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.", "Yes, I have backed up or do not need the existing data, and I agree to delete all data."))
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button("❌ 취소", use_container_width=True):
+                    if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True):
                         st.rerun()
                 with col2:
-                    if st.button("✅ 동의 및 초기화", type="primary", use_container_width=True, disabled=not agree):
-                        with st.spinner("기존 데이터를 삭제하는 중입니다..."):
+                    if st.button(_("✅ 동의 및 초기화", "✅ Agree & Initialize"), type="primary", use_container_width=True, disabled=not agree):
+                        with st.spinner(_("기존 데이터를 삭제하는 중입니다...", "Deleting existing data...")):
                             from survey_manager import delete_admin_survey
                             if user_surveys:
                                 delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
@@ -6106,19 +6107,19 @@ with col_main:
                             for k in keys_to_clear:
                                 del st.session_state[k]
                             st.session_state.survey_auto_loaded = False
-                        st.success("완료되었습니다. 화면이 새로고침됩니다.")
+                        st.success(_("완료되었습니다. 화면이 새로고침됩니다.", "Completed. The screen will be refreshed."))
                         import time
                         time.sleep(1.5)
                         st.rerun()
 
             if has_survey:
-                st.success(f"📌 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**")
-                st.info("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.")
-                if st.button("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", type="secondary"):
+                st.success(_(f"📌 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f"📌 A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
+                st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
+                if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary"):
                      confirm_new_survey()
             else:
-                st.info("📌 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.")
-                if st.button("✨ 폼 내용 모두 지우기 (초기화)", type="secondary"):
+                st.info(_("📌 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", "📌 This is a new survey in progress. Please fill out the contents and deploy."))
+                if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
                     st.session_state.editing_survey_id = None
                     keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
                     for k in keys_to_clear:
