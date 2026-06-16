@@ -1,0 +1,52 @@
+<div style="font-family: 'Pretendard', 'Inter', sans-serif; line-height: 1.6; color: #333; background: #fdfdfd; padding: 20px; border-radius: 12px; border: 1px solid #eaeaea; margin-bottom: 25px;">
+    <h3 style="color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0;">📖 Online AHP Survey Auto-Generation & Deployment Guide</h3>
+    <p style="font-size: 0.95em; color: #555;">This service connects to your Google Spreadsheet in real-time to securely collect response data. Follow the guide below to complete your survey!</p>
+
+    <div style="background: #FFFBEB; border-left: 5px solid #F59E0B; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <h4 style="margin-top: 0; color: #B45309;">⚠️ [Core] Create Google Spreadsheet & Set Permissions (Required)</h4>
+        <p style="margin-bottom: 10px;">First, you need a <b>new Google Spreadsheet</b> to save the responses.</p>
+        <ol style="margin-bottom: 0;">
+            <li>Go to Google Drive (PC environment recommended) and create a <b>new spreadsheet</b>.</li>
+            <li>Click the <b>[Share]</b> button on the top right.</li>
+            <li>Paste the <b>service account email</b> below into the "Add people and groups" field:
+                <div style="background: #fff; padding: 8px; border: 1px dashed #F59E0B; border-radius: 4px; font-family: monospace; font-size: 14px; margin: 8px 0; color: #D97706; display: inline-block;">ahp2-75@ahp2-486703.iam.gserviceaccount.com</div>
+            </li>
+            <li>Set the permission to <b>[Editor]</b> and click [Send].</li>
+            <li>Copy the <b>entire URL</b> of the spreadsheet. (You must paste this URL in <b>Section 7</b>.)</li>
+        </ol>
+    </div>
+
+    <h4 style="color: #2563EB;">1️⃣ Section 1 ~ 2: Survey Basic Info & Period</h4>
+    <ul style="margin-bottom: 15px;">
+        <li>Write the survey title and purpose instructions. (This is the first screen respondents will see.)</li>
+        <li>Set the start and end dates. (Responses outside this period will be blocked.)</li>
+    </ul>
+
+    <h4 style="color: #2563EB;">2️⃣ Section 3: Respondent Demographics (Groups)</h4>
+    <ul style="margin-bottom: 15px;">
+        <li>Configure questions for statistical analysis, such as affiliation, age group, etc.</li>
+        <li>Enter options separated by commas (,). (e.g., 20s, 30s, 40s)</li>
+    </ul>
+
+    <h4 style="color: #2563EB;">3️⃣ Section 4 ~ 5: AHP Model (Evaluation Criteria)</h4>
+    <ul style="margin-bottom: 15px;">
+        <li>Enter the <b>Main Criteria</b>. (At least 2 required)</li>
+        <li>Enter the <b>Sub Criteria</b> belonging to each main category.</li>
+        <li>It is recommended to keep criteria names intuitive and concise.</li>
+    </ul>
+
+    <h4 style="color: #2563EB;">4️⃣ Section 7: [Important] Spreadsheet Link & Save</h4>
+    <div style="background: #EFF6FF; border-left: 5px solid #3B82F6; padding: 15px; margin-bottom: 15px; border-radius: 4px;">
+        <ul style="margin-bottom: 0;">
+            <li>Paste the <b>Google Spreadsheet URL</b> you copied earlier into the input field.</li>
+            <li>Click <b>[Preview & Data Verification]</b> to ensure there are no errors.</li>
+            <li>If verified, click <b>[Link Google Sheet & Deploy Survey]</b> to finalize.</li>
+        </ul>
+    </div>
+
+    <h4 style="color: #2563EB;">5️⃣ Monitor Real-time Responses</h4>
+    <ul style="margin-bottom: 0;">
+        <li>Upon successful deployment, a <b>shortened link</b> will be generated. Share this link with respondents.</li>
+        <li>Go to the <b>[Real-time Responses]</b> tab at the top to monitor collected data and download analysis files.</li>
+    </ul>
+</div>
