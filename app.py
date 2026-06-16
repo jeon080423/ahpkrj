@@ -465,17 +465,12 @@ div.st-key-ahp_survey_matrix {
         width: 50% !important;
     }
 }
-/* 전역 상단 여백 최소화 */
+/* 전역 상단 여백 설정 (상단 아이콘 겹침 방지) */
 .block-container {
-    padding-top: 1rem !important;
-}
-.stApp > header {
-    height: 0px !important;
-    min-height: 0px !important;
+    padding-top: 3.5rem !important;
 }
 header[data-testid="stHeader"] {
-    height: 0px !important;
-    min-height: 0px !important;
+    background-color: transparent !important;
 }
 </style>
 """
