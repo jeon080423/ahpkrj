@@ -1705,7 +1705,7 @@ def create_sample_excel_v3():
             subs = {"기능성": ["하드웨어", "소프트웨어"], "디자인": ["외관", "편의성"], "경제성": ["단말기가격", "유지비용"]}
             sub_subs = {"하드웨어": ["카메라", "배터리", "프로세서"], "소프트웨어": ["운영체제", "기본앱"], "외관": ["색상", "재질"], "편의성": [], "단말기가격": ["일시불", "할부"], "유지비용": ["통신요금", "AS비용"]}
             
-        def _get_dummy_data(cols, num_respondents=3):
+        def _get_dummy_data(cols, num_respondents=5):
             # cols contains ["ID", "Type", pair1, pair2...]
             data = []
             for i in range(num_respondents):
@@ -3603,23 +3603,23 @@ with col_main:
     
             # 3계층 샘플 데이터: 권한에 따라 분기
             # - 정식/관리자: Mock_3Tier_Full.xlsx (100행, 실제 분석 가능)
-            # - 무료/비로그인: create_sample_excel_v3() (3행, 5행 제한 통과)
+            # - 무료/비로그인: create_sample_excel_v3() (5행, 5행 제한 통과)
             _role_now = st.session_state.get('user_role', None)
             _is_full_user = (_role_now in ('admin', 'official'))
             if _is_full_user:
                 try:
                     with open("Mock_3Tier_Full.xlsx", "rb") as f:
                         sample_excel_v3 = f.read()
-                    _v3_label = _("📂 3계층 샘플 데이터 (100표본)", "📂 3-Tier Sample Data (100 Samples)")
+                    _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
                     _v3_filename = "Mock_3Tier_Full.xlsx"
                 except Exception:
                     sample_excel_v3 = create_sample_excel_v3()
                     _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
                     _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
             else:
-                sample_excel_v3 = create_sample_excel_v3()   # 3행 — 무료 5행 제한 통과
-                _v3_label = _("📂 3계층 샘플 데이터 (3표본)", "📂 3-Tier Sample Data (3 Samples)")
-                _v3_filename = _("AHP_3Tier_Sample_Free.xlsx", "AHP_3Tier_Sample_Free.xlsx")
+                sample_excel_v3 = create_sample_excel_v3()   # 5행 — 무료 5행 제한 통과
+                _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+                _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
             
             # 모든 사용자에게 2계층·3계층 샘플 데이터 + 결과 예시 버튼 4개 표시
             col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
