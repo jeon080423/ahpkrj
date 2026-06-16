@@ -3601,11 +3601,25 @@ with col_main:
             if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
             if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
     
-            try:
-                with open("Mock_3Tier_Full.xlsx", "rb") as f:
-                    sample_excel_v3 = f.read()
-            except Exception:
-                sample_excel_v3 = create_sample_excel_v3()
+            # 3계층 샘플 데이터: 권한에 따라 분기
+            # - 정식/관리자: Mock_3Tier_Full.xlsx (100행, 실제 분석 가능)
+            # - 무료/비로그인: create_sample_excel_v3() (3행, 5행 제한 통과)
+            _role_now = st.session_state.get('user_role', None)
+            _is_full_user = (_role_now in ('admin', 'official'))
+            if _is_full_user:
+                try:
+                    with open("Mock_3Tier_Full.xlsx", "rb") as f:
+                        sample_excel_v3 = f.read()
+                    _v3_label = _("📂 3계층 샘플 데이터 (100표본)", "📂 3-Tier Sample Data (100 Samples)")
+                    _v3_filename = "Mock_3Tier_Full.xlsx"
+                except Exception:
+                    sample_excel_v3 = create_sample_excel_v3()
+                    _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+                    _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
+            else:
+                sample_excel_v3 = create_sample_excel_v3()   # 3행 — 무료 5행 제한 통과
+                _v3_label = _("📂 3계층 샘플 데이터 (3표본)", "📂 3-Tier Sample Data (3 Samples)")
+                _v3_filename = _("AHP_3Tier_Sample_Free.xlsx", "AHP_3Tier_Sample_Free.xlsx")
             
             # 모든 사용자에게 2계층·3계층 샘플 데이터 + 결과 예시 버튼 4개 표시
             col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
@@ -3620,9 +3634,9 @@ with col_main:
                 )
             with col_btn2:
                 st.download_button(
-                    label=_("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data"),
+                    label=_v3_label,
                     data=sample_excel_v3,
-                    file_name=_("Mock_3Tier_Full.xlsx", "Mock_3Tier_Full.xlsx"),
+                    file_name=_v3_filename,
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     use_container_width=True,
                     type="primary"
