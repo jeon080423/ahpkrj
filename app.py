@@ -4249,6 +4249,7 @@ with col_main:
                             tier_level = int(survey_meta.get("Tier_Level", 2)) if 'survey_meta' in locals() else 2
                         
                         if tier_level == 3:
+                            is_english = (st.session_state.get('lang', 'ko') == 'en')
                             success_v3 = False
                             msg_v3 = ""
                             final_df_v3 = None
