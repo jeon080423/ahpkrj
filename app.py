@@ -88,6 +88,127 @@ def _(ko_text, en_text):
         return en_text
     return ko_text
 
+DEFAULT_SURVEY_DESC_KO = """[조사 목적 및 안내문]
+
+안녕하십니까?
+본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다. 
+바쁘시더라도 잠시 시간을 내어 귀하의 귀중한 의견을 응답해 주시면 연구에 큰 도움이 될 것입니다.
+
+■ 조사 목적 : [연구/프로젝트 목적 기재]
+■ 조사 내용 : [조사 대상 요인] 간의 AHP(쌍대비교) 평가
+■ 조사 기간 : 202X년 X월 X일 ~ 202X년 X월 X일
+■ 개인정보 보호 : 
+본 조사를 통해 수집된 모든 자료는 통계법 제33조(비밀의 보호)에 의거하여 철저히 보호되며, 오직 연구 및 통계 분석 목적으로만 활용됩니다. 응답해주신 개인 정보 및 개별 응답 결과는 절대 외부로 유출되지 않음을 약속드립니다.
+
+귀하의 소중한 참여에 깊은 감사를 드립니다.
+
+- 연구 책임자 : [이름 기재]
+- 문의처 : [연락처 또는 이메일 기재]"""
+
+DEFAULT_SURVEY_DESC_EN = """[Survey Purpose & Instructions]
+
+Greetings,
+This survey is designed to collect the valuable opinions of experts (or practitioners) to derive the relative importance of key factors regarding [Research/Project Topic].
+Your participation will be of great help to our research, and we would deeply appreciate it if you could take a moment out of your busy schedule to respond.
+
+■ Purpose : [Enter Research/Project Purpose]
+■ Content : AHP (Pairwise Comparison) evaluation among [Target Factors]
+■ Period : 202X-XX-XX ~ 202X-XX-XX
+■ Privacy Policy : 
+All data collected through this survey will be strictly protected in accordance with privacy laws and used solely for research and statistical analysis purposes. We promise that your personal information and individual responses will never be leaked externally.
+
+Thank you very much for your valuable participation.
+
+- Lead Researcher : [Enter Name]
+- Contact : [Enter Phone or Email]"""
+
+# Default definition mappings for auto-translation to English when survey is loaded in English mode
+DEFAULT_TRANSLATED_DEFS = {
+    DEFAULT_SURVEY_DESC_KO: DEFAULT_SURVEY_DESC_EN,
+    "제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문": "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots",
+    "협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인": "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.",
+    "협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인": "Factors related to the internal capabilities of the organization, top management support, financial and training status.",
+    "정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인": "External environmental factors such as government support, competitive pressure within the industry, labor shortage, and external cooperation.",
+    "경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인": "Factors such as the management's innovation orientation, members' acceptance of change, and smart factory knowledge/skill levels.",
+    "도입대상 협동로봇간의 상대적 이점": "Relative advantage among the collaborative robots targeted for adoption.",
+    "기존 설비나 타사 협동로봇과의 연결성": "Connectivity with existing equipment or third-party collaborative robots.",
+    "작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준": "Level of human accident prevention when working in the same space as operators without safety fences.",
+    "공급사의 기술 및 A/S 지원 정도": "Degree of technical and A/S support from the supplier.",
+    "경영진의 도입 의지 및 경영철학 반영도": "The management's willingness to adopt and the degree to which management philosophy is reflected.",
+    "조직원의 로봇 활용 기술 준비 수준": "The level of technical readiness of organizational members to utilize robots.",
+    "로봇 구입을 위한 자본 여력 및 자금 조달 편의성": "Capital capacity and financing convenience for purchasing robots.",
+    "기술 향상을 위한 위탁/사내 교육 프로그램 유무": "Availability of external/internal training programs for skill improvement.",
+    "협동로봇 도입을 활성화하기 위한 정부의 재정 지원 및 보조금 혜택 정도": "Degree of government financial support and subsidy benefits to promote the adoption of collaborative robots.",
+    "동종 업계 또는 경쟁사의 협동로봇 도입에 따른 경쟁적 압박 정도": "Degree of competitive pressure due to the adoption of collaborative robots by peers or competitors.",
+    "제조 현장의 구인난 및 생산 인력 수급의 어려움 수준": "Level of difficulty in finding labor and supplying production personnel at the manufacturing site.",
+    "로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적/교육적 지원": "Technical/educational support from external consulting, research institutes, etc., other than the robot supplier.",
+    "최고경영자의 적극적인 의지": "The top management's active willingness to adopt new manufacturing technologies and robots.",
+    "새로운 제조 기술 및 로봇 도입에 대한 최고경영자의 적극적인 의지": "The top management's active willingness to adopt new manufacturing technologies and robots.",
+    "신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도": "Members' acceptance and cooperative attitude towards changes in new equipment and work processes.",
+    "공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준": "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.",
+    "협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준": "Level of internal expertise required for the utilization and maintenance of collaborative robots.",
+    "기능성": "Functionality",
+    "디자인": "Design",
+    "경제성": "Economy",
+    "하드웨어": "Hardware",
+    "소프트웨어": "Software",
+    "외관": "Appearance",
+    "편의성": "Usability",
+    "단말기가격": "Device Price",
+    "유지비용": "Maintenance Cost",
+    "기술 요인": "Technological",
+    "조직 요인": "Organizational",
+    "환경 요인": "Environmental",
+    "혁신 요인": "Innovational",
+    "상대적이점": "Relative Advantage",
+    "호환성": "Compatibility",
+    "안전성": "Security",
+    "서비스지원": "Service Support",
+    "경영진지원": "Top Management Support",
+    "기술준비도": "Tech Readiness",
+    "금융자원": "Financial Resources",
+    "교육훈련": "Training",
+    "정부지원": "Gov Support",
+    "경쟁압력": "Competitive Pressure",
+    "인력난": "Labor Shortage",
+    "외부지원": "External Support",
+    "경영진의 혁신성": "Management Innovativeness",
+    "변화수용태도": "Change Acceptance",
+    "스마트팩토리수준": "Smart Factory Level",
+    "지식정도": "Knowledge Level"
+}
+
+def translate_definition_if_default(factor_name, def_text):
+    if st.session_state.get('lang', 'ko') != 'en' or not def_text:
+        return def_text
+    
+    import re
+    # Clean up whitespace
+    clean_def = re.sub(r'\s+', ' ', def_text).strip()
+    
+    # 1. Direct match in dictionary
+    if clean_def in DEFAULT_TRANSLATED_DEFS:
+        return DEFAULT_TRANSLATED_DEFS[clean_def]
+        
+    # Translate the factor_name in pattern matching to match Korean if it's saved in Korean
+    trans_factor = DEFAULT_TRANSLATED_DEFS.get(factor_name, factor_name)
+    
+    # 2. Pattern matches for "{factor}에 대한 정의입니다." or "{factor}에 대한 정의 입니다."
+    pattern1 = rf"^(?:{re.escape(factor_name)}|{re.escape(trans_factor)})\s*에\s*대한\s*정의\s*입니다\.?$"
+    if re.match(pattern1, clean_def):
+        return f"Definition for {trans_factor}."
+        
+    pattern2 = rf"^(?:{re.escape(factor_name)}|{re.escape(trans_factor)})\s*에\s*대한\s*전반적\s*요소를\s*설명합니다\.?$"
+    if re.match(pattern2, clean_def):
+        return f"Overall description for {trans_factor}."
+        
+    return def_text
+
+def translate_factor_if_default(factor_name):
+    if st.session_state.get('lang', 'ko') != 'en' or not factor_name:
+        return factor_name
+    return DEFAULT_TRANSLATED_DEFS.get(factor_name, factor_name)
+
 # =============================================================================
 # 0. 시스템 설정 및 유틸리티
 # =============================================================================
@@ -2038,26 +2159,33 @@ if "preview_id" in q_params or "survey_id" in q_params:
     submitted_key = f"survey_submitted_{survey_id_param}"
     if st.session_state.get(submitted_key):
         # 1. HTML/CSS를 이용한 모던하고 수려한 감사 카드 UI 렌더링
-        st.markdown("""
+        thank_you_title = _("설문 제출이 성공적으로 완료되었습니다!", "Survey Submitted Successfully!")
+        thank_you_body = _(
+            "의사결정 우선순위 분석을 위해 소중한 시간 내어 응답해 주셔서 대단히 감사합니다. <br>보내주신 답변은 안전하게 기록되었으며 연구 분석에 귀중한 자료로 활용됩니다.",
+            "Thank you very much for taking your valuable time to respond for decision-making priority analysis. <br>Your responses have been safely recorded and will be used as valuable data for research analysis."
+        )
+        thank_you_note = _(
+            "※ 브라우저 보안 규정에 따라 '창 닫기' 버튼이 동작하지 않을 수 있습니다. <br>동작하지 않을 경우 현재 열려있는 <strong>브라우저 탭의 X 버튼</strong>을 직접 눌러 종료해 주세요.",
+            "※ Depending on browser security policies, the 'Close Window' button may not work. <br>If it does not work, please close the current <strong>browser tab</strong> manually."
+        )
+        st.markdown(f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; font-family: 'Inter', sans-serif; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-top: 40px; border: 1px solid #e2e8f0;">
             <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 50%; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);">
                 <span style="font-size: 45px; color: #10b981;">🎉</span>
             </div>
-            <h1 style="font-size: 2.2rem; color: #1f2937; font-weight: 800; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">설문 제출이 성공적으로 완료되었습니다!</h1>
+            <h1 style="font-size: 2.2rem; color: #1f2937; font-weight: 800; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">{thank_you_title}</h1>
             <p style="font-size: 1.1rem; color: #4b5563; max-width: 550px; line-height: 1.6; margin-bottom: 30px; word-break: keep-all;">
-                의사결정 우선순위 분석을 위해 소중한 시간 내어 응답해 주셔서 대단히 감사합니다. <br>
-                보내주신 답변은 안전하게 기록되었으며 연구 분석에 귀중한 자료로 활용됩니다.
+                {thank_you_body}
             </p>
             <div style="font-size: 0.85rem; color: #9ca3af; margin-top: 5px; margin-bottom: 15px; line-height: 1.5; word-break: keep-all;">
-                ※ 브라우저 보안 규정에 따라 '창 닫기' 버튼이 동작하지 않을 수 있습니다. <br>
-                동작하지 않을 경우 현재 열려있는 <strong>브라우저 탭의 X 버튼</strong>을 직접 눌러 종료해 주세요.
+                {thank_you_note}
             </div>
         </div>
         """, unsafe_allow_html=True)
         
         # 2. 창 닫기 버튼 렌더링 및 자바스크립트 실행 트리거
         import streamlit.components.v1 as components
-        close_clicked = st.button("🚪 창 닫기", use_container_width=True)
+        close_clicked = st.button(_("🚪 창 닫기", "🚪 Close Window"), use_container_width=True)
         if close_clicked:
             components.html("""
             <script>
@@ -2080,13 +2208,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
         st.stop()
             
-    st.info("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.")
+    st.info(_("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.", "⚠️ Please note that all entered information will be initialized if you refresh or leave the page."))
     
     # 미리보기 모드가 아닌 경우에만 구글 시트에서 메타데이터를 로드
     if not is_preview_mode:
         survey_meta = load_survey_metadata(survey_id_param)
         if not survey_meta:
-            st.error("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.")
+            st.error(_("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.", "Failed to load the survey. Please check if the link is correct."))
             st.stop()
         
         # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
@@ -2095,10 +2223,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
             increment_survey_visit(survey_id_param)
             st.session_state[f"visited_survey_{survey_id_param}"] = True
         
-    st.title(survey_meta.get('Title', 'AHP 온라인 설문조사'))
+    survey_title = survey_meta.get('Title', 'AHP 온라인 설문조사')
+    if survey_title in ['AHP 온라인 설문조사', '제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문']:
+        survey_title = _(survey_title, 'Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots')
+    st.title(survey_title)
     
     # 조사 목적 및 안내문, 설문 담당자 이메일 표시 (깔끔한 디자인 적용)
     survey_desc = survey_meta.get("Description", "")
+    survey_desc = translate_definition_if_default("Description", survey_desc)
+    
     survey_email = survey_meta.get("Admin_Email", "temp@ahpmaster.com")
     if not survey_email or str(survey_email).strip() == "":
         survey_email = "temp@ahpmaster.com"
@@ -2106,7 +2239,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     if survey_desc or survey_email:
         email_html = (
             f'<div style="margin-top: 10px; font-size: 0.88rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 8px; display: flex; align-items: center; gap: 6px;">'
-            f'<span style="font-weight: 600;">📧 설문 담당자 문의:</span>'
+            f'<span style="font-weight: 600;">📧 ' + _("설문 담당자 문의:", "Contact Survey Administrator:") + '</span>'
             f'<a href="mailto:{survey_email}" style="color: #2563eb; text-decoration: none; font-weight: 500;">{survey_email}</a>'
             f'</div>'
         ) if survey_email else ""
@@ -2177,7 +2310,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     section_num = 1
 
     # 1. 응답자 기본 정보
-    st.subheader(f"{section_num}. 응답자 기본 정보")
+    st.subheader(f"{section_num}. " + _("응답자 기본 정보", "Respondent Demographic Information"))
     section_num += 1
     resp_data = {}
     
@@ -2188,91 +2321,104 @@ if "preview_id" in q_params or "survey_id" in q_params:
     resp_data["id"] = st.session_state.survey_resp_uuid
     
     # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
-    type_q = demographics.get("type_question", "귀하의 소속은 어떻게 되십니까?")
-    type_opts = demographics.get("type_options", ["전문가", "일반", "공무원", "기타"])
-    if not isinstance(type_opts, list) or not type_opts:
-        type_opts = ["전문가", "일반", "공무원", "기타"]
+    type_q = demographics.get("type_question", "")
+    if not type_q or type_q == "귀하의 소속은 어떻게 되십니까?":
+        type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+    
+    type_opts = demographics.get("type_options", [])
+    if not isinstance(type_opts, list) or not type_opts or type_opts == ["전문가", "일반", "공무원", "기타"]:
+        type_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
+    else:
+        type_opts = [translate_factor_if_default(opt) for opt in type_opts]
         
     sq_idx = 1
     resp_data["type"] = st.radio(f"SQ{sq_idx}. {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
     sq_idx += 1
     
     if demographics.get("name"):
-        resp_data["name"] = st.text_input(f"SQ{sq_idx}. 성명 *", key="survey_resp_name")
+        resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name")
         sq_idx += 1
     
     # 연령: 개방형 vs 10세 단위 선택형
     if demographics.get("age"):
-        age_label = f"SQ{sq_idx}. 연령 *"
+        age_label = f"SQ{sq_idx}. " + _("연령 *", "Age *")
         sq_idx += 1
         age_type = demographics.get("age_type", "개방형 (숫자 직접 입력)")
         if age_type == "10세 단위 선택형":
-            age_options = ["20대 미만", "20대 (20~29세)", "30대 (30~39세)", "40대 (40~49세)", "50대 (50~59세)", "60대 이상"]
+            age_options = [_("20대 미만", "Under 20s"), _("20대 (20~29세)", "20s (20-29)"), _("30대 (30~39세)", "30s (30-39)"), _("40대 (40~49세)", "40s (40-49)"), _("50대 (50~59세)", "50s (50-59)"), _("60대 이상", "60s or older")]
             resp_data["age"] = st.radio(age_label, age_options, index=0, key="survey_resp_age", horizontal=True)
         else:
-            resp_data["age"] = st.number_input(f"{age_label} (세)", min_value=1, max_value=120, value=30, key="survey_resp_age")
+            resp_data["age"] = st.number_input(f"{age_label} " + _("(세)", "(Years)"), min_value=1, max_value=120, value=30, key="survey_resp_age")
             
     if demographics.get("gender"):
-        resp_data["gender"] = st.radio(f"SQ{sq_idx}. 성별 *", ["남자", "여자"], key="survey_resp_gender", horizontal=True)
+        resp_data["gender"] = st.radio(f"SQ{sq_idx}. " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
         sq_idx += 1
     
     # 경력년수: 개방형 vs 5년 단위 선택형
     if demographics.get("experience"):
-        exp_label = f"SQ{sq_idx}. 경력년수 *"
+        exp_label = f"SQ{sq_idx}. " + _("경력년수 *", "Years of Experience *")
         sq_idx += 1
         exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
         if exp_type == "5년 단위 선택형":
-            exp_options = ["5년 미만", "5년 이상 ~ 10년 미만", "10년 이상 ~ 15년 미만", "15년 이상 ~ 20년 미만", "20년 이상"]
+            exp_options = [_("5년 미만", "Less than 5 years"), _("5년 이상 ~ 10년 미만", "5 to 10 years"), _("10년 이상 ~ 15년 미만", "10 to 15 years"), _("15년 이상 ~ 20년 미만", "15 to 20 years"), _("20년 이상", "20 years or more")]
             resp_data["experience"] = st.radio(exp_label, exp_options, index=0, key="survey_resp_experience", horizontal=True)
         else:
-            resp_data["experience"] = st.number_input(f"{exp_label} (년)", min_value=0, max_value=60, value=5, key="survey_resp_experience")
+            resp_data["experience"] = st.number_input(f"{exp_label} " + _("(년)", "(Years)"), min_value=0, max_value=60, value=5, key="survey_resp_experience")
             
     if demographics.get("affiliation"):
-        resp_data["affiliation"] = st.text_input(f"SQ{sq_idx}. 소속 *", key="survey_resp_affiliation")
+        resp_data["affiliation"] = st.text_input(f"SQ{sq_idx}. " + _("소속 *", "Affiliation *"), key="survey_resp_affiliation")
         sq_idx += 1
         
     if demographics.get("email"):
-        resp_data["email"] = st.text_input(f"SQ{sq_idx}. 이메일 *", key="survey_resp_email")
+        resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email")
         sq_idx += 1
     
     st.divider()
     
     # 3. 사전 중요도 순위 지정
-    st.subheader(f"{section_num}. 요인별 전반적 중요도 순위 지정 (사전 순위)")
+    st.subheader(f"{section_num}. " + _("요인별 전반적 중요도 순위 지정 (사전 순위)", "Prior Overall Factor Importance Ranking"))
     section_num += 1
-    st.info("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.")
+    st.info(_("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.", "Please rank the factors intuitively before starting pairwise comparisons."))
     main_criteria = ahp_model.get("main", [])
     # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
     if main_criteria:
         cols = st.columns(len(main_criteria))
         pre_rankings = []
         
+        please_select = _("선택해 주세요", "Please select")
+        
         # 이전 단계의 선택 상태를 활용하여 연쇄 필터링 및 selectbox 렌더링
         for rank_idx in range(len(main_criteria)):
             with cols[rank_idx]:
                 # 1단계: 전체 요인 중 현재 순위 이전에 선택한 요인들을 제외
-                available_options = [opt for opt in main_criteria if opt not in pre_rankings]
-                options = ["선택해 주세요"] + available_options
+                available_options = [opt for opt in main_criteria if translate_factor_if_default(opt) not in [translate_factor_if_default(pr) for pr in pre_rankings]]
+                available_options_trans = [translate_factor_if_default(opt) for opt in available_options]
+                options = [please_select] + available_options_trans
                 
                 # 2단계: 기존 선택값이 현재 선택 가능 옵션 목록에 존재하면 사용하고, 없으면 widget의 session state를 직접 초기화
                 widget_key = f"pre_rank_widget_{rank_idx}"
-                current_val = st.session_state.get(widget_key, "선택해 주세요")
+                current_val = st.session_state.get(widget_key, please_select)
                 
                 if current_val not in options:
-                    st.session_state[widget_key] = "선택해 주세요"
-                    current_val = "선택해 주세요"
+                    st.session_state[widget_key] = please_select
+                    current_val = please_select
                 
                 default_index = options.index(current_val)
                 
                 selected_f = st.selectbox(
-                    f"{rank_idx+1}순위 요인 선택 *",
+                    f"{rank_idx+1}" + _("순위 요인 선택 *", " Rank Factor Selection *"),
                     options,
                     index=default_index,
                     key=widget_key
                 )
                 
-                if selected_f != "선택해 주세요":
-                    pre_rankings.append(selected_f)
+                if selected_f != please_select:
+                    orig_f = selected_f
+                    for opt in main_criteria:
+                        if translate_factor_if_default(opt) == selected_f:
+                            orig_f = opt
+                            break
+                    pre_rankings.append(orig_f)
         
         resp_data["pre_ranking"] = "-".join(pre_rankings)
     else:
@@ -2282,16 +2428,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     with st.form("respondent_survey_form"):
         # 4. AHP 쌍대비교 문항 생성
-        st.subheader(f"{section_num}. 요인 간 상대적 중요도 평가 (쌍대비교)")
+        st.subheader(f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)"))
         ahp_section_prefix = f"{section_num}"
         section_num += 1
         
-        st.markdown("""
+        st.markdown(_("""
         **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 **더 중요하다고 생각하는 방향**으로 숫자를 선택해 주세요. 숫자가 클수록 해당 요인이 더 중요함을 의미합니다.
         - **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
         - **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
         - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
-        """)
+        """, """
+        **Response Method**: Please select the number in the direction of **the factor you think is more important** between the left factor and the right factor. A larger number means that factor is more important.
+        - **Equal (1)**: Choose the middle **1** when both factors are equally important.
+        - **When the left factor is more important**: Choose a number on the left side (←). A larger number indicates the left factor is much more important.
+        - **When the right factor is more important**: Choose a number on the right side (→). A larger number indicates the right factor is much more important.
+        """))
         
         if tier_level == 3:
             from survey_manager_v3 import generate_pairwise_combinations_v3
@@ -2304,7 +2455,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
         with st.container(key="ahp_survey_matrix"):
             comp_idx = 1
             for comb in combinations:
-                parent_lbl = f"{ahp_section_prefix}.{comp_idx}. [{comb['parent']}] 하위 요인 비교" if comb['type'] == 'sub' else f"{ahp_section_prefix}.{comp_idx}. 대분류(핵심) 요인 비교"
+                parent_trans = translate_factor_if_default(comb['parent'])
+                parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + (
+                    _((f"[{parent_trans}] 하위 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
+                    if comb['type'] == 'sub'
+                    else _("대분류(핵심) 요인 비교", "Main Criteria (Core) Comparison")
+                )
                 st.markdown(f"#### {parent_lbl}")
                 
                 # [수정] 평가 요인 정의 및 설명을 각 척도 평가 바로 위쪽으로 이동
@@ -2321,20 +2477,22 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     text_color = palette["text"]
                     border = palette["border"]
                     
-                    main_desc = definitions.get(main_factor, "") if definitions else ""
+                    main_desc = translate_definition_if_default(main_factor, definitions.get(main_factor, "")) if definitions else ""
                     subs = ahp_model.get("subs", {}).get(main_factor, [])
                     sub_rows_html = ""
                     if definitions:
                         for sub_factor in subs:
-                            sub_desc = definitions.get(sub_factor, "")
+                            sub_desc = translate_definition_if_default(sub_factor, definitions.get(sub_factor, ""))
+                            sub_factor_trans = translate_factor_if_default(sub_factor)
                             if sub_desc:
                                 sub_rows_html += f"""
                                 <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
-                                    <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{sub_factor}</span>
+                                    <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{sub_factor_trans}</span>
                                     <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{sub_desc}</span>
                                 </div>
                                 """
                     
+                    main_factor_trans = translate_factor_if_default(main_factor)
                     if main_desc or sub_rows_html:
                         main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
                         sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
@@ -2342,7 +2500,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         card_html = f"""
                         <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
                             <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                                {main_factor}
+                                {main_factor_trans}
                             </h4>
                             {main_desc_html}
                             {sub_container_html}
@@ -2357,18 +2515,19 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
                             text_color = palette["text"]
                             border = palette["border"]
-                            mc_desc = definitions.get(mc, "")
+                            mc_desc = translate_definition_if_default(mc, definitions.get(mc, ""))
+                            mc_trans = translate_factor_if_default(mc)
                             if mc_desc:
                                 main_rows_html += f"""
                                 <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px dashed #f1f5f9;">
-                                    <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{mc}</span>
+                                    <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{mc_trans}</span>
                                     <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{mc_desc}</span>
                                 </div>
                                 """
                     if main_rows_html:
                         card_html = f"""
                         <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #1e40af; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #1e40af; font-size: 1.0rem; font-weight: bold;">대분류 요인 정의</h5>
+                            <h5 style="margin: 0 0 12px 0; color: #1e40af; font-size: 1.0rem; font-weight: bold;">{_("대분류 요인 정의", "Main Criteria Definitions")}</h5>
                             <div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                                 {main_rows_html}
                             </div>
@@ -2381,14 +2540,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
                 if scale_type == "1-3-5 Discrete":
                     options = [-5, -3, 1, 3, 5]
-                    format_func = lambda x: f"왼쪽 요인이 훨씬 중요 (-5)" if x == -5 else (f"왼쪽 요인이 약간 중요 (-3)" if x == -3 else ("양측이 동등함 (1)" if x == 1 else (f"오른쪽 요인이 약간 중요 (3)" if x == 3 else f"오른쪽 요인이 훨씬 중요 (5)")))
+                    format_func = lambda x: _("왼쪽 요인이 훨씬 중요 (-5)", "Left factor is much more important (-5)") if x == -5 else (_("왼쪽 요인이 약간 중요 (-3)", "Left factor is slightly more important (-3)") if x == -3 else (_("양측이 동등함 (1)", "Equal importance (1)") if x == 1 else (_("오른쪽 요인이 약간 중요 (3)", "Right factor is slightly more important (3)") if x == 3 else _("오른쪽 요인이 훨씬 중요 (5)", "Right factor is much more important (5)"))))
                 elif scale_type == "1-3-7-9 Discrete":
                     options = [-9, -7, -3, 1, 3, 7, 9]
-                    format_func = lambda x: f"왼쪽 절대적 중요 (-9)" if x == -9 else (f"왼쪽 대단히 중요 (-7)" if x == -7 else (f"왼쪽 약간 중요 (-3)" if x == -3 else ("동등함 (1)" if x == 1 else (f"오른쪽 약간 중요 (3)" if x == 3 else (f"오른쪽 대단히 중요 (7)" if x == 9 else f"오른쪽 절대적 중요 (9)")))))
+                    format_func = lambda x: _("왼쪽 절대적 중요 (-9)", "Left is absolutely more important (-9)") if x == -9 else (_("왼쪽 대단히 중요 (-7)", "Left is strongly more important (-7)") if x == -7 else (_("왼쪽 약간 중요 (-3)", "Left is slightly more important (-3)") if x == -3 else (_("동등함 (1)", "Equal (1)") if x == 1 else (_("오른쪽 약간 중요 (3)", "Right is slightly more important (3)") if x == 3 else (_("오른쪽 대단히 중요 (7)", "Right is strongly more important (7)") if x == 7 else _("오른쪽 절대적 중요 (9)", "Right is absolutely more important (9)"))))))
                 else: # 1-9 Continuous (Default)
                     options = list(range(-9, -1)) + list(range(1, 10))
                     options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
-                    format_func = lambda x: f"왼쪽 중요도 {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"오른쪽 중요도 {x}")
+                    format_func = lambda x: _(f"왼쪽 중요도 {abs(x)}", f"Left importance {abs(x)}") if x < 0 else (_("동등 (1)", "Equal (1)") if x == 1 else _(f"오른쪽 중요도 {x}", f"Right importance {x}"))
                 
                 # PDF 설문지와 유사한 헤더 스타일 표 생성
                 # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
@@ -2435,11 +2594,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         {colgroup_html}
                     </colgroup>
                     <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
-                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(left_cols)}">← 좌측 요인 중요도</th>
-                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">동등<br>(1)</th>
-                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(right_cols)}">우측 요인 중요도 →</th>
-                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">{_("비교 요인", "Comparison Criteria")}</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(left_cols)}">{_("← 좌측 요인 중요도", "← Left Criteria Importance")}</th>
+                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">{_("동등<br>(1)", "Equal<br>(1)")}</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(right_cols)}">{_("우측 요인 중요도 →", "Right Criteria Importance →")}</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">{_("비교 요인", "Comparison Criteria")}</th>
                     </tr>
                     <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
                         {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in left_cols])}
@@ -2458,14 +2617,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     # 왼쪽 요인명 출력
                     with row_cols[0]:
                         left_style = factor_colors.get(left_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
-                        left_desc = definitions.get(left_f, "") if definitions else ""
+                        left_desc = translate_definition_if_default(left_f, definitions.get(left_f, "")) if definitions else ""
                         left_desc_esc = left_desc.replace('"', '&quot;')
+                        left_trans = translate_factor_if_default(left_f)
                         st.markdown(f"""
                         <div title="{left_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
                                     padding: 0px 8px; background-color: {left_style["bg"]}; color: {left_style["text"]}; 
                                     border-radius: 4px; height: 28px; display: flex; align-items: center; 
                                     justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
-                                {left_f}
+                                {left_trans}
                         </div>
                         """, unsafe_allow_html=True)
                 
@@ -2486,14 +2646,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
                         right_style = factor_colors.get(right_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
-                        right_desc = definitions.get(right_f, "") if definitions else ""
+                        right_desc = translate_definition_if_default(right_f, definitions.get(right_f, "")) if definitions else ""
                         right_desc_esc = right_desc.replace('"', '&quot;')
+                        right_trans = translate_factor_if_default(right_f)
                         st.markdown(f"""
                         <div title="{right_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
                                     padding: 0px 8px; background-color: {right_style["bg"]}; color: {right_style["text"]}; 
                                     border-radius: 4px; height: 28px; display: flex; align-items: center; 
                                     justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
-                                {right_f}
+                                {right_trans}
                         </div>
                         """, unsafe_allow_html=True)
                 
@@ -2504,27 +2665,27 @@ if "preview_id" in q_params or "survey_id" in q_params:
         has_demographics = any(demographics.values()) if demographics else False
         has_rewards = rewards_info.get("enabled", False) if rewards_info else False
         
-        agree_check = "동의"
+        agree_check = _("동의", "Agree")
         if has_demographics or has_rewards:
             if has_rewards:
-                subheader_text = f"{section_num}. 개인정보 수집 및 답례품"
-                radio_label = "개인정보 수집 및 답례품 지급을 위한 이용 동의에 동의하십니까? *"
+                subheader_text = f"{section_num}. " + _("개인정보 수집 및 답례품", "Personal Information Collection & Reward")
+                radio_label = _("개인정보 수집 및 답례품 지급을 위한 이용 동의에 동의하십니까? *", "Do you agree to the collection of personal information and use for reward distribution? *")
             else:
-                subheader_text = f"{section_num}. 개인정보 수집 동의"
-                radio_label = "개인정보 수집 및 이용에 동의하십니까? *"
+                subheader_text = f"{section_num}. " + _("개인정보 수집 동의", "Consent to Personal Information Collection")
+                radio_label = _("개인정보 수집 및 이용에 동의하십니까? *", "Do you agree to the collection and use of personal information? *")
                 
             st.subheader(subheader_text)
             section_num += 1
             
             if has_rewards:
-                st.info(f"**답례품 안내**: {rewards_info.get('desc', '설문 완료 시 답례품을 제공합니다.')}")
-                reward_contact = st.text_input("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *", key="survey_reward_contact")
+                st.info(f"**" + _("답례품 안내", "Reward Info") + f"**: {rewards_info.get('desc', _('설문 완료 시 답례품을 제공합니다.', 'A reward will be provided upon survey completion.'))}")
+                reward_contact = st.text_input(_("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *", "Contact for Reward (Mobile number or Email) *"), key="survey_reward_contact")
                 resp_data["reward_contact"] = reward_contact
                 
-            agree_check = st.radio(radio_label, ["동의", "비동의"], index=1, key="survey_agree_check")
+            agree_check = st.radio(radio_label, [_("동의", "Agree"), _("비동의", "Disagree")], index=1, key="survey_agree_check")
         
         # 제출 버튼
-        submit_btn = st.form_submit_button("설문지 제출하기", type="primary")
+        submit_btn = st.form_submit_button(_("설문지 제출하기", "Submit Survey"), type="primary")
         if submit_btn:
             # 필수값 유효성 검증
             missing = False
@@ -2536,15 +2697,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
             if len(pre_rankings) < len(main_criteria):
-                st.error("사전 요인 중요도 순위 지정을 모두 완성해 주세요.")
+                st.error(_("사전 요인 중요도 순위 지정을 모두 완성해 주세요.", "Please complete all prior factor importance rankings."))
                 st.stop()
                 
-            if agree_check != "동의":
-                st.error("설문제출을 위해 개인정보 수집 동의에 체크해 주세요.")
+            if agree_check not in ["동의", "Agree"]:
+                st.error(_("설문제출을 위해 개인정보 수집 동의에 체크해 주세요.", "Please agree to the personal information collection to submit the survey."))
                 st.stop()
                 
             if missing:
-                st.error("입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.")
+                st.error(_("입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.", "There are missing required fields (*). Please check the form again."))
                 st.stop()
                 
             # 실시간 CR 계산 및 검증 피드백
@@ -2555,7 +2716,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     if not is_preview_mode:
                         from survey_manager import increment_abandoned_cr
                         increment_abandoned_cr(survey_id_param)
-                    st.error(f"입력하신 설문의 응답 일관성이 부족합니다. (대분류 일관성 비율: {main_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
+                    st.error(_(f"입력하신 설문의 응답 일관성이 부족합니다. (대분류 일관성 비율: {main_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.", f"The consistency of your responses is insufficient. (Main criteria CR: {main_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
                     st.stop()
                     
                 # 하위분류 CR 체크
@@ -2566,11 +2727,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             if not is_preview_mode:
                                 from survey_manager import increment_abandoned_cr
                                 increment_abandoned_cr(survey_id_param)
-                            st.error(f"'{parent}' 하위 항목의 응답 일관성이 부족합니다. (일관성 비율: {sub_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.")
+                            st.error(_(f"'{parent}' 하위 항목의 응답 일관성이 부족합니다. (일관성 비율: {sub_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.", f"The consistency of responses for sub-criteria under '{parent}' is insufficient. (CR: {sub_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
                             st.stop()
             
             # 저장 진행
-            with st.spinner("응답을 안전하게 전송 중입니다..."):
+            with st.spinner(_("응답을 안전하게 전송 중입니다...", "Submitting your response safely...")):
                 if is_preview_mode:
                     import time
                     time.sleep(1.0)
@@ -2590,7 +2751,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.session_state[f"survey_submitted_{survey_id_param}"] = True
                         st.rerun()
                     else:
-                        st.error("데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.")
+                        st.error(_("데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.", "A server error occurred while saving data. Please try again later."))
                     
     st.stop()
 
@@ -6190,8 +6351,19 @@ Thank you very much for your valuable participation.
             # 그룹 분류 설정
             with st.container(border=True):
                 st.markdown(_("**👥 그룹 분류 문항 설정**", "**👥 Group Classification Setup**"))
-                type_question = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title"), value=st.session_state.get("edit_type_question", _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")))
-                type_options = st.text_input(_("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)"), value=st.session_state.get("edit_type_options", _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")))
+                type_q_val = st.session_state.get("edit_type_question")
+                if type_q_val == "귀하의 소속은 어떻게 되십니까?":
+                    type_q_val = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+                elif not type_q_val:
+                    type_q_val = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+                type_question = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title"), value=type_q_val)
+                
+                type_opts_val = st.session_state.get("edit_type_options")
+                if type_opts_val == "전문가, 일반, 공무원, 기타":
+                    type_opts_val = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
+                elif not type_opts_val:
+                    type_opts_val = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
+                type_options = st.text_input(_("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)"), value=type_opts_val)
 
             st.write("")
 
@@ -6325,9 +6497,13 @@ Thank you very much for your valuable participation.
                 elif mc in ["환경 요인", "Environmental"]: default_main_def = _("정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인", "External environmental factors such as government support, competitive pressure within the industry, labor shortage, and external cooperation.")
                 elif mc in ["혁신 요인", "Innovational"]: default_main_def = _("경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인", "Factors such as the management's innovation orientation, members' acceptance of change, and smart factory knowledge/skill levels.")
 
+                edit_def_val = st.session_state.get("edit_definitions", {}).get(mc)
+                val_to_use = edit_def_val if edit_def_val is not None else (default_main_def or _(f"{mc}에 대한 전반적 요소를 설명합니다.", f"Overall description for {mc}."))
+                val_to_use = translate_definition_if_default(mc, val_to_use)
+
                 definitions_map[mc] = st.text_input(
                     _(f"👉 [{mc}] 요인의 전체적인 설명 입력", f"👉 Enter overall description for [{mc}]"),
-                    value=default_main_def or _(f"{mc}에 대한 전반적 요소를 설명합니다.", f"Overall description for {mc}."),
+                    value=val_to_use,
                     key=f"def_main_{mc}"
                 )
 
@@ -6353,9 +6529,13 @@ Thank you very much for your valuable participation.
                         elif sc in ["스마트팩토리수준", "Smart Factory Level"]: default_def = _("공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준", "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.")
                         elif sc in ["지식정도", "Knowledge Level"]: default_def = _("협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준", "Level of internal expertise required for the utilization and maintenance of collaborative robots.")
 
+                        edit_sub_def_val = st.session_state.get("edit_definitions", {}).get(sc)
+                        sub_val_to_use = edit_sub_def_val if edit_sub_def_val is not None else (default_def or _(f"{sc}에 대한 정의입니다.", f"Definition for {sc}."))
+                        sub_val_to_use = translate_definition_if_default(sc, sub_val_to_use)
+
                         definitions_map[sc] = st.text_input(
                             _(f"ㄴ 중분류 [{sc}] 설명 입력", f"👉 Enter description for sub-criteria [{sc}]"),
-                            value=default_def or _(f"{sc}에 대한 정의입니다.", f"Definition for {sc}."),
+                            value=sub_val_to_use,
                             key=f"def_sub_{sc}"
                         )
                 st.write("") # 섹션 간 시각적 여백 추가
