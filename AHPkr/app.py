@@ -1,4 +1,12 @@
 import streamlit as st
+import importlib
+import survey_manager
+importlib.reload(survey_manager)
+try:
+    import survey_manager_v3
+    importlib.reload(survey_manager_v3)
+except:
+    pass
 # Force rebuild 2026-01-24 v3 (Merged Sync & Restore)
 # Force deploy 2026-02-07
 import pandas as pd
@@ -6124,8 +6132,10 @@ with col_main:
             # 7개 섹션 설문지 생성 폼 구성
             # 섹션 1: 기본 정보
             st.subheader(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
-            survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", "제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문"))
-            default_survey_desc = """[조사 목적 및 안내문]
+            default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
+            survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", default_survey_title))
+            
+            default_survey_desc_ko = """[조사 목적 및 안내문]
 
 안녕하십니까?
 본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다. 
@@ -6141,7 +6151,25 @@ with col_main:
 
 - 연구 책임자 : [이름 기재]
 - 문의처 : [연락처 또는 이메일 기재]"""
-            survey_desc = st.text_area(_("조사 목적 및 안내문", "Survey Purpose & Instructions"), value=st.session_state.get("edit_desc", default_survey_desc), height=350)
+
+            default_survey_desc_en = """[Survey Purpose & Instructions]
+
+Greetings,
+This survey is designed to collect the valuable opinions of experts (or practitioners) to derive the relative importance of key factors regarding [Research/Project Topic].
+Your participation will be of great help to our research, and we would deeply appreciate it if you could take a moment out of your busy schedule to respond.
+
+■ Purpose : [Enter Research/Project Purpose]
+■ Content : AHP (Pairwise Comparison) evaluation among [Target Factors]
+■ Period : 202X-XX-XX ~ 202X-XX-XX
+■ Privacy Policy : 
+All data collected through this survey will be strictly protected in accordance with privacy laws and used solely for research and statistical analysis purposes. We promise that your personal information and individual responses will never be leaked externally.
+
+Thank you very much for your valuable participation.
+
+- Lead Researcher : [Enter Name]
+- Contact : [Enter Phone or Email]"""
+
+            survey_desc = st.text_area(_("조사 목적 및 안내문", "Survey Purpose & Instructions"), value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), height=350)
             if st.session_state.user_id:
                 if "@" in st.session_state.user_id:
                     default_admin_email = st.session_state.user_id
@@ -6161,8 +6189,8 @@ with col_main:
             # 그룹 분류 설정
             with st.container(border=True):
                 st.markdown(_("**👥 그룹 분류 문항 설정**", "**👥 Group Classification Setup**"))
-                type_question = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title"), value=st.session_state.get("edit_type_question", "귀하의 소속은 어떻게 되십니까?"))
-                type_options = st.text_input(_("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)"), value=st.session_state.get("edit_type_options", "전문가, 일반, 공무원, 기타"))
+                type_question = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title"), value=st.session_state.get("edit_type_question", _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")))
+                type_options = st.text_input(_("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)"), value=st.session_state.get("edit_type_options", _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")))
 
             st.write("")
 
@@ -6232,7 +6260,7 @@ with col_main:
                 "- Do not use underscores (`_`) in criteria names. (They will be automatically converted to spaces.)"
             ))
 
-            default_tab2_main = "기능성, 디자인, 경제성" if tier_level == 3 else "기술 요인, 조직 요인, 환경 요인, 혁신 요인"
+            default_tab2_main = _("기능성, 디자인, 경제성", "Functionality, Design, Economy") if tier_level == 3 else _("기술 요인, 조직 요인, 환경 요인, 혁신 요인", "Technological, Organizational, Environmental, Innovational")
             main_input = st.text_input(_("대항목 (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", default_tab2_main))
             main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
 
@@ -6243,13 +6271,13 @@ with col_main:
             for mc in main_list:
                 # 기본값 제안 (기존 양승훈 협동로봇 및 3계층 스마트폰 구매 결정)
                 default_sub_val = ""
-                if mc == "기술 요인": default_sub_val = "상대적이점, 호환성, 안전성, 서비스지원"
-                elif mc == "조직 요인": default_sub_val = "경영진지원, 기술준비도, 금융자원, 교육훈련"
-                elif mc == "환경 요인": default_sub_val = "정부지원, 경쟁압력, 인력난, 외부지원"
-                elif mc == "혁신 요인": default_sub_val = "경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도"
-                elif mc == "기능성": default_sub_val = "하드웨어, 소프트웨어"
-                elif mc == "디자인": default_sub_val = "외관, 편의성"
-                elif mc == "경제성": default_sub_val = "단말기가격, 유지비용"
+                if mc in ["기술 요인", "Technological"]: default_sub_val = _("상대적이점, 호환성, 안전성, 서비스지원", "Relative Advantage, Compatibility, Security, Service Support")
+                elif mc in ["조직 요인", "Organizational"]: default_sub_val = _("경영진지원, 기술준비도, 금융자원, 교육훈련", "Top Management Support, Tech Readiness, Financial Resources, Training")
+                elif mc in ["환경 요인", "Environmental"]: default_sub_val = _("정부지원, 경쟁압력, 인력난, 외부지원", "Gov Support, Competitive Pressure, Labor Shortage, External Support")
+                elif mc in ["혁신 요인", "Innovational"]: default_sub_val = _("경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도", "Management Innovativeness, Change Acceptance, Smart Factory Level, Knowledge Level")
+                elif mc in ["기능성", "Functionality"]: default_sub_val = _("하드웨어, 소프트웨어", "Hardware, Software")
+                elif mc in ["디자인", "Design"]: default_sub_val = _("외관, 편의성", "Appearance, Usability")
+                elif mc in ["경제성", "Economy"]: default_sub_val = _("단말기가격, 유지비용", "Device Price, Maintenance Cost")
 
                 sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
                 subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
@@ -6261,11 +6289,11 @@ with col_main:
                         st.info("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.")
                         for sub_c in subs_list:
                             sub_sub_val = "" # 3계층 기본값은 빈칸
-                            if sub_c == "하드웨어": sub_sub_val = "카메라, 배터리, 프로세서"
-                            elif sub_c == "소프트웨어": sub_sub_val = "운영체제, 기본앱"
-                            elif sub_c == "외관": sub_sub_val = "색상, 재질"
-                            elif sub_c == "단말기가격": sub_sub_val = "일시불, 할부"
-                            elif sub_c == "유지비용": sub_sub_val = "통신요금, AS비용"
+                            if sub_c in ["하드웨어", "Hardware"]: sub_sub_val = _("카메라, 배터리, 프로세서", "Camera, Battery, Processor")
+                            elif sub_c in ["소프트웨어", "Software"]: sub_sub_val = _("운영체제, 기본앱", "OS, Default Apps")
+                            elif sub_c in ["외관", "Appearance"]: sub_sub_val = _("색상, 재질", "Color, Material")
+                            elif sub_c in ["단말기가격", "Device Price"]: sub_sub_val = _("일시불, 할부", "Lump Sum, Installment")
+                            elif sub_c in ["유지비용", "Maintenance Cost"]: sub_sub_val = _("통신요금, AS비용", "Telecom Fee, A/S Cost")
                             
                             sub_sub_input = st.text_input(
                                 f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
