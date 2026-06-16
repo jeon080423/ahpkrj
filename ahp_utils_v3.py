@@ -538,6 +538,11 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
     for main_f, s_info in sub_results_storage.items():
         for sub_f in s_info['factors']:
             ss_df = sub_sub_dfs.get(sub_f)
+            if ss_df is None:
+                for k, v in sub_sub_dfs.items():
+                    if str(k).endswith(sub_f) or k == f"{main_f}_{sub_f}" or k == f"{main_f[:15]}_{sub_f[:15]}":
+                        ss_df = v
+                        break
             
             # Virtual leaf node (dummy sub-sub-criteria)
             if ss_df is None or len(ss_df) == 0:
@@ -988,13 +993,13 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         # Main
         out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
         write_detailed_sheet_ws(
-            writer, '[대분류] Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors,
+            writer, '(대분류) Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors,
             group_matrices=group_matrices_by_sheet.get('Main_Criteria'), sheet_excl_count=main_excluded, mean_method=mean_method
         )
         
         # Sub
         for mf, info in sub_results_storage.items():
-            safe_name = f"[중분류] {mf}"[:31]
+            safe_name = f"(중분류) {mf}"[:31]
             out_sub = info['df'].drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
             
             sub_excl_val = 0
@@ -1011,7 +1016,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         # Sub_Sub
         for ssf, info in sub_sub_results_storage.items():
             if 'df' not in info or info['df'] is None or info['df'].empty: continue
-            safe_name = f"[소분류] {ssf}"[:31]
+            safe_name = f"(소분류) {ssf}"[:31]
             out_ss = info['df'].drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
             
             ss_excl_val = 0

@@ -4806,9 +4806,9 @@ with col_main:
                                         main_group_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
     
                                 out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
-                                write_detailed_sheet_ws('[대분류] Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
+                                write_detailed_sheet_ws('(대분류) Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
                                 for mf, info in sub_results_storage.items():
-                                    safe_name = f"[중분류] {mf}"[:31]
+                                    safe_name = f"(중분류) {mf}"[:31]
                                     sub_grp_mats = {}
                                     for grp in unique_groups:
                                         g_sub_df = info['df'][info['df']['Type'].astype(str) == grp]
