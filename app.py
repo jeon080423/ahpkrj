@@ -3601,7 +3601,11 @@ with col_main:
             if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
             if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
     
-            sample_excel_v3 = create_sample_excel_v3()
+            try:
+                with open("Mock_3Tier_Full.xlsx", "rb") as f:
+                    sample_excel_v3 = f.read()
+            except Exception:
+                sample_excel_v3 = create_sample_excel_v3()
             
             is_admin = st.session_state.get('user_role') == 'admin'
             
@@ -3620,7 +3624,7 @@ with col_main:
                     st.download_button(
                         label=_("📂 3계층 샘플 데이터", "📂 Download 3-Tier Sample Data"),
                         data=sample_excel_v3,
-                        file_name=_("AHP_Smartphone_3Tier_Sample.xlsx", "AHP_Smartphone_3Tier_Sample.xlsx"),
+                        file_name=_("Mock_3Tier_Full.xlsx", "Mock_3Tier_Full.xlsx"),
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         use_container_width=True,
                         type="primary"
