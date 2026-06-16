@@ -1,11 +1,15 @@
 import streamlit as st
 import importlib
 import survey_manager
-importlib.reload(survey_manager)
+try:
+    importlib.reload(survey_manager)
+except Exception:
+    pass
+
 try:
     import survey_manager_v3
     importlib.reload(survey_manager_v3)
-except:
+except Exception:
     pass
 # Force rebuild 2026-01-24 v3 (Merged Sync & Restore)
 # Force deploy 2026-02-07
