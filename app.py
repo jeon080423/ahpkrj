@@ -3739,20 +3739,20 @@ with col_main:
             st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
                       "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
             
-            # [신규] 3계층 오프라인 지원 (관리자 전용)
+            # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
             tier_level = 2
-            if st.session_state.get('user_role') == 'admin':
-                st.markdown("##### ⚙️ [관리자 전용] 계층 구조 설정")
-                tier_choice = st.radio(
-                    "계층 레벨을 선택하세요.", 
-                    ["2계층 (대분류 - 중분류)", "3계층 (대분류 - 중분류 - 소분류)"], 
-                    index=0,
-                    horizontal=True,
-                    key="tab1_tier_choice"
-                )
-                if "3계층" in tier_choice:
-                    tier_level = 3
-                st.markdown("---")
+            st.markdown("##### ⚙️ 계층 구조 설정")
+            tier_choice = st.radio(
+                _("계층 레벨을 선택하세요.", "Select Hierarchy Level."),
+                [_("2계층 (대분류 - 중분류)", "2-Tier (Main - Sub)"),
+                 _("3계층 (대분류 - 중분류 - 소분류)", "3-Tier (Main - Sub - Sub-sub)")],
+                index=0,
+                horizontal=True,
+                key="tab1_tier_choice"
+            )
+            if _("3계층", "3-Tier") in tier_choice:
+                tier_level = 3
+            st.markdown("---")
                 
             # [신규] tier_level에 따라 샘플 데이터 스위칭
             if is_en:
@@ -6135,21 +6135,21 @@ with col_main:
             # 섹션 2: AHP 모델 계층구조 입력 폼
             st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
 
-            # --- [신규] 관리자 전용 계층 구조 선택 ---
+            # 계층 구조 선택 (2계층 기준과 동일하게 전체 공개)
             tier_level = 2
-            if st.session_state.get('user_role') == 'admin':
-                st.markdown("---")
-                st.markdown("##### ⚙️ [관리자 전용] 계층 구조 레벨 선택")
-                tier_choice = st.radio(
-                    "설문 모델의 계층 깊이를 선택하세요.", 
-                    ["2계층 (대분류 ➔ 중분류)", "3계층 (대분류 ➔ 중분류 ➔ 소분류)"], 
-                    index=0,
-                    horizontal=True
-                )
-                if "3계층" in tier_choice:
-                    tier_level = 3
-                st.markdown("---")
-            # ------------------------------------
+            st.markdown("---")
+            st.markdown(_("##### ⚙️ 계층 구조 레벨 선택", "##### ⚙️ Select Hierarchy Level"))
+            tier_choice_tab2 = st.radio(
+                _("설문 모델의 계층 깊이를 선택하세요.", "Select the hierarchy depth for your survey model."),
+                [_("2계층 (대분류 ➔ 중분류)", "2-Tier (Main ➔ Sub)"),
+                 _("3계층 (대분류 ➔ 중분류 ➔ 소분류)", "3-Tier (Main ➔ Sub ➔ Sub-sub)")],
+                index=0,
+                horizontal=True,
+                key="tab2_tier_choice"
+            )
+            if _("3계층", "3-Tier") in tier_choice_tab2:
+                tier_level = 3
+            st.markdown("---")
 
             st.info(_(
                 "💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n\n"
