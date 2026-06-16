@@ -2995,16 +2995,14 @@ with st.sidebar:
         ### Contact
         - **Email**: jeon080423@gmail.com
         - **KakaoTalk ID**: AHPkr
-        - **Phone**: +82-10-2142-2610  
-          <span style="color: gray; font-size: 0.85em;">(Please text us first, and we will call you back)</span>
+        - **Homepage**: [morison.tistory.com](https://morison.tistory.com/)
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
         ### 문의처
         - **이메일**: jeon080423@gmail.com
         - **카톡ID**: AHPkr
-        - **전화**: 010-2142-2610  
-          <span style="color: gray; font-size: 0.85em;">(문자로 문의 하시면 전화 드립니다)</span>
+        - **홈페이지**: [morison.tistory.com](https://morison.tistory.com/)
 
         """, unsafe_allow_html=True)
 
