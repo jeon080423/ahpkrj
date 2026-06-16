@@ -1296,6 +1296,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         "main_factors": main_factors,
         "sub_results_storage": sub_results_storage,
         "sub_sub_results_storage": sub_sub_results_storage,
+        "main_results_df": main_results_df,   # 바이올린 플롯(CR 분포)용
     }
     
     return True, "Analysis Successful" if is_en else "분석 성공", final_df, output_res, ui_data
