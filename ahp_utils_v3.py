@@ -632,7 +632,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                 })
 
     final_df = pd.DataFrame(summary_rows)
-    final_df['Global Rank'] = final_df['Global Weight'].rank(ascending=False, method='min').astype(int)
+    final_df['Global Rank'] = final_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
     cols_order = ["대분류", "대분류 가중치", "중분류", "중분류 가중치", "소분류", "소분류 가중치", "Global Weight", "Global Rank",
                   "CR(대분류)", "CI(대분류)", "CR(중분류)", "CI(중분류)", "CR(소분류)", "CI(소분류)"]
     final_df = final_df[cols_order]
@@ -776,9 +776,9 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                     
         g_df = pd.DataFrame(grp_summary_rows)
         if not g_df.empty:
-            g_df['Global Rank'] = g_df['Global Weight'].rank(ascending=False, method='min').astype(int)
+            g_df['Global Rank'] = g_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
             group_full_dfs[grp] = g_df[cols_order]
-            group_analysis_results[grp] = group_full_dfs[grp][['소분류', 'Global Weight']]
+            group_analysis_results[grp] = group_full_dfs[grp][['대분류', '중분류', '소분류', 'Global Weight']]
 
     # 5. ANOVA & post-hoc calculations
     anova_df = pd.DataFrame()
@@ -876,11 +876,11 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             ws_comp.write_string(s_row_cp, 0, _("그룹 간 비교(일원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
             s_row_cp += 1
             
-            comparison_df = final_df[['소분류', 'Global Weight']].copy()
+            comparison_df = final_df[['대분류', '중분류', '소분류', 'Global Weight']].copy()
             comparison_df.rename(columns={'Global Weight': 'Overall'}, inplace=True)
             for grp, df_res in group_analysis_results.items():
                 temp_df = df_res.rename(columns={'Global Weight': grp})
-                comparison_df = comparison_df.merge(temp_df, on='소분류', how='left')
+                comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류', '소분류'], how='left')
                 
             if not anova_df.empty:
                 anova_for_merge = anova_df.rename(columns={'요인': '소분류'})
@@ -890,6 +890,8 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                 
             if is_en:
                 rename_dict = {
+                    '대분류': 'Main Criteria',
+                    '중분류': 'Sub-Criteria',
                     '소분류': 'Sub-sub-Criteria',
                     'Overall': 'Overall',
                     'F-값': 'F-Value',

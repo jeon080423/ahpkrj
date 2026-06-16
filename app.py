@@ -4511,7 +4511,7 @@ with col_main:
                                     })
                         
                             final_df = pd.DataFrame(summary_rows)
-                            final_df['Global Rank'] = final_df['Global Weight'].rank(ascending=False, method='min').astype(int)
+                            final_df['Global Rank'] = final_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
                             cols_order = ["대분류", "대분류 가중치", "중분류", "중분류 가중치", "Global Weight", "Global Rank", "CR(대분류)", "CI(대분류)", "CR(중분류)", "CI(중분류)"]
                             final_df = final_df[cols_order]
     
@@ -4564,15 +4564,15 @@ with col_main:
                                         })
                                 g_df = pd.DataFrame(grp_rows)
                                 if not g_df.empty:
-                                    g_df['Global Rank'] = g_df['Global Weight'].rank(ascending=False, method='min').astype(int)
+                                    g_df['Global Rank'] = g_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
                                     group_full_dfs[grp] = g_df[cols_order]
-                                    group_analysis_results[grp] = group_full_dfs[grp][['중분류', 'Global Weight']]
+                                    group_analysis_results[grp] = group_full_dfs[grp][['대분류', '중분류', 'Global Weight']]
     
-                            comparison_df = final_df[['중분류', 'Global Weight']].copy()
+                            comparison_df = final_df[['대분류', '중분류', 'Global Weight']].copy()
                             comparison_df.rename(columns={'Global Weight': 'Overall'}, inplace=True)
                             for grp, df_res in group_analysis_results.items():
                                 temp_df = df_res.rename(columns={'Global Weight': grp})
-                                comparison_df = comparison_df.merge(temp_df, on='중분류', how='left')
+                                comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류'], how='left')
     
                             output_res = io.BytesIO()
                             with pd.ExcelWriter(output_res, engine='xlsxwriter') as writer:
@@ -4614,6 +4614,7 @@ with col_main:
                                     # English renaming logic for columns & significance
                                     if st.session_state.get('lang', 'ko') == 'en':
                                         rename_dict = {
+                                            '대분류': 'Main Criteria',
                                             '중분류': 'Sub-Criteria',
                                             'Overall': 'Overall',
                                             'F-값': 'F-Value',
