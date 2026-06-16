@@ -126,8 +126,54 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
                         raw_headers.append(f"{sub_subs[i]}_{sub_subs[j]}")
             
     raw_headers.append("제출시간")
-    raw_sheet.append_row(raw_headers)
-
+    
+    if len(raw_sheet.get_all_values()) == 0:
+        raw_sheet.append_row(raw_headers)
+        
+    # Main_Criteria 시트 생성
+    main_pairs = []
+    for i in range(len(main_criteria)):
+        for j in range(i + 1, len(main_criteria)):
+            main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
+    try:
+        main_sheet = spreadsheet.worksheet("Main_Criteria")
+    except gspread.WorksheetNotFound:
+        main_sheet = spreadsheet.add_worksheet(title="Main_Criteria", rows="1000", cols="20")
+    if len(main_sheet.get_all_values()) == 0:
+        main_sheet.append_row(["ID", "Type"] + main_pairs + ["제출시간"])
+        
+    # 중분류 시트 생성
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if len(subs) >= 2:
+            sub_pairs = []
+            for i in range(len(subs)):
+                for j in range(i + 1, len(subs)):
+                    sub_pairs.append(f"{subs[i]}_{subs[j]}")
+            safe_sheet_name = str(main_c)[:31]
+            try:
+                s_sheet = spreadsheet.worksheet(safe_sheet_name)
+            except gspread.WorksheetNotFound:
+                s_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
+            if len(s_sheet.get_all_values()) == 0:
+                s_sheet.append_row(["ID", "Type"] + sub_pairs + ["제출시간"])
+                
+    # 소분류 시트 생성
+    for main_c, subs in sub_criteria_map.items():
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) >= 2:
+                ss_pairs = []
+                for i in range(len(sub_subs)):
+                    for j in range(i + 1, len(sub_subs)):
+                        ss_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                safe_sheet_name = str(sub_c)[:31]
+                try:
+                    ss_sheet = spreadsheet.worksheet(safe_sheet_name)
+                except gspread.WorksheetNotFound:
+                    ss_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
+                if len(ss_sheet.get_all_values()) == 0:
+                    ss_sheet.append_row(["ID", "Type"] + ss_pairs + ["제출시간"])
     # Demographic Data 헤더 생성
     demo_headers = ["ID", "Type"]
     demo_cols = []
@@ -227,32 +273,44 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
     
     # 1. 대분류 답변
     main_criteria = model.get("main", [])
+    main_row_data = [resp_id, resp_type]
     for i in range(len(main_criteria)):
         for j in range(i + 1, len(main_criteria)):
             pair_key = f"{main_criteria[i]}_{main_criteria[j]}"
             raw_row_data.append(ahp_answers.get(pair_key, 1))
+            main_row_data.append(ahp_answers.get(pair_key, 1))
+    main_row_data.append(kst_now)
             
     # 2. 중분류 답변
     sub_criteria_map = model.get("subs", {})
+    sub_sub_map = model.get("sub_subs", {})
+    sub_row_data_map = {}
+    
     for main_c in main_criteria:
         subs = sub_criteria_map.get(main_c, [])
         if len(subs) >= 2:
+            s_row = [resp_id, resp_type]
             for i in range(len(subs)):
                 for j in range(i + 1, len(subs)):
                     pair_key = f"{subs[i]}_{subs[j]}"
                     raw_row_data.append(ahp_answers.get(pair_key, 1))
+                    s_row.append(ahp_answers.get(pair_key, 1))
+            s_row.append(kst_now)
+            sub_row_data_map[str(main_c)[:31]] = s_row
 
     # 3. 소분류 답변
-    sub_sub_map = model.get("sub_subs", {})
-    for main_c in main_criteria:
-        subs = sub_criteria_map.get(main_c, [])
+    for main_c, subs in sub_criteria_map.items():
         for sub_c in subs:
             sub_subs = sub_sub_map.get(sub_c, [])
             if len(sub_subs) >= 2:
+                ss_row = [resp_id, resp_type]
                 for i in range(len(sub_subs)):
                     for j in range(i + 1, len(sub_subs)):
                         pair_key = f"{sub_subs[i]}_{sub_subs[j]}"
                         raw_row_data.append(ahp_answers.get(pair_key, 1))
+                        ss_row.append(ahp_answers.get(pair_key, 1))
+                ss_row.append(kst_now)
+                sub_row_data_map[str(sub_c)[:31]] = ss_row
                         
     raw_row_data.append(kst_now)
     
@@ -299,8 +357,24 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
         if not client: return False
         spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
         
-        raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
-        run_gspread_with_retry(raw_sheet.append_row, raw_row_data)
+        try:
+            raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+            run_gspread_with_retry(raw_sheet.append_row, raw_row_data)
+        except Exception:
+            pass
+
+        try:
+            main_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Main_Criteria")
+            run_gspread_with_retry(main_sheet.append_row, main_row_data)
+        except Exception:
+            pass
+            
+        for s_name, s_row in sub_row_data_map.items():
+            try:
+                s_sheet = run_gspread_with_retry(spreadsheet.worksheet, s_name)
+                run_gspread_with_retry(s_sheet.append_row, s_row)
+            except Exception:
+                pass
         
         demo_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Demographic_Data")
         run_gspread_with_retry(demo_sheet.append_row, demo_row_data)

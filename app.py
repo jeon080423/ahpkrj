@@ -1,4 +1,12 @@
 import streamlit as st
+import importlib
+import survey_manager
+importlib.reload(survey_manager)
+try:
+    import survey_manager_v3
+    importlib.reload(survey_manager_v3)
+except:
+    pass
 # Force rebuild 2026-01-24 v3 (Merged Sync & Restore)
 # Force deploy 2026-02-07
 import pandas as pd
@@ -1691,6 +1699,62 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
 
 import itertools
 import numpy as np
+
+def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2):
+    import io
+    import pandas as pd
+    
+    excel_buffer = io.BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+        base_cols = ["ID", "Type"]
+        
+        # 1. Main Criteria
+        main_criteria = ahp_model.get("main", [])
+        main_pairs = []
+        for i in range(len(main_criteria)):
+            for j in range(i + 1, len(main_criteria)):
+                main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
+        main_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in main_pairs if p in raw_df.columns]
+        
+        df_main = raw_df[main_cols].copy()
+        df_main.to_excel(writer, index=False, sheet_name="Main_Criteria")
+        
+        # 2. Sub Criteria
+        sub_criteria_map = ahp_model.get("subs", {})
+        for main_c, subs in sub_criteria_map.items():
+            if len(subs) >= 2:
+                sub_pairs = []
+                for i in range(len(subs)):
+                    for j in range(i + 1, len(subs)):
+                        sub_pairs.append(f"{subs[i]}_{subs[j]}")
+                sub_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_pairs if p in raw_df.columns]
+                
+                df_sub = raw_df[sub_cols].copy()
+                safe_sheet_name = str(main_c)[:31]
+                df_sub.to_excel(writer, index=False, sheet_name=safe_sheet_name)
+                
+        # 3. Sub-sub Criteria (Tier 3)
+        if int(tier_level) == 3:
+            sub_sub_map = ahp_model.get("sub_subs", {})
+            for main_c, subs in sub_criteria_map.items():
+                for sub_c in subs:
+                    sub_subs = sub_sub_map.get(sub_c, [])
+                    if len(sub_subs) >= 2:
+                        sub_sub_pairs = []
+                        for i in range(len(sub_subs)):
+                            for j in range(i + 1, len(sub_subs)):
+                                sub_sub_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                        ss_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_sub_pairs if p in raw_df.columns]
+                        
+                        df_sub_sub = raw_df[ss_cols].copy()
+                        safe_sheet_name = str(sub_c)[:31]
+                        df_sub_sub.to_excel(writer, index=False, sheet_name=safe_sheet_name)
+                        
+        # 4. Demographic Data
+        if demo_df is not None and not demo_df.empty:
+            demo_df.to_excel(writer, index=False, sheet_name="Demographic_Data")
+            
+    return excel_buffer
 
 def create_sample_excel_v3():
     output = io.BytesIO()
@@ -3565,8 +3629,8 @@ with col_main:
         st.stop()
         
     main_tab1, main_tab2, main_tab3 = st.tabs([
-        _("📊 AHP 분석 도구", "📊 AHP Analysis Tool"), 
-        _("📝 온라인 AHP 설문지 작성 및 배포(무료)", "📝 Create & Deploy Online AHP Survey (Free)"), 
+        _("AHP 분석 도구", "AHP Analysis Tool"), 
+        _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
         _("실시간 응답 현황", "Live Response Status")
     ])
         
@@ -4245,6 +4309,24 @@ with col_main:
                             if not success_v3:
                                 st.error(msg_v3)
                                 st.stop()
+                            
+                            if st.session_state.user_role == 'official':
+                                if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
+                                    save_data = uploaded_file.getvalue()
+                                    save_filename = f"{filename_base}_Raw.xlsx"
+                                else:
+                                    uploadable_io = io.BytesIO()
+                                    with pd.ExcelWriter(uploadable_io, engine='openpyxl') as writer:
+                                        if df_main is not None and not df_main.empty:
+                                            df_main.to_excel(writer, index=False, sheet_name="Main_Criteria")
+                                        for s_name, s_df in sub_dfs.items():
+                                            s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
+                                        sub_sub_dfs_to_save = st.session_state.get("ahp_sub_sub_dfs", {})
+                                        for s_name, s_df in sub_sub_dfs_to_save.items():
+                                            s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
+                                    save_data = uploadable_io.getvalue()
+                                    save_filename = f"{filename_base}_Raw.xlsx"
+                                save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
 
                             st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
                             st.markdown(_('<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;">⚠️ 주의: 새로고침하거나 브라우저를 닫으면 결과가 리셋됩니다. 📑 결과 다운로드 탭에서 반드시 저장하세요.</p>',
@@ -4760,7 +4842,11 @@ with col_main:
                                         st.stop()
                                 
                                     try:
-                                        df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
+                                        if data_source == _("🌐 배포된 온라인 설문 데이터 연동", "🌐 Connect Online Survey Data"):
+                                            df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
+                                        else:
+                                            df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
+                                            
                                         sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
                                             df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
                                         )
@@ -5452,7 +5538,22 @@ with col_main:
     
                         st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
                         if st.session_state.user_role == 'official':
-                            save_analysis_to_db(st.session_state.user_id, f"{uploaded_file.name.split('.')[0]}_Result.xlsx", output_res.getvalue())
+                            if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
+                                save_data = uploaded_file.getvalue()
+                                save_filename = f"{filename_base}_Raw.xlsx"
+                            else:
+                                uploadable_io = io.BytesIO()
+                                with pd.ExcelWriter(uploadable_io, engine='openpyxl') as writer:
+                                    if df_main is not None and not df_main.empty:
+                                        df_main.to_excel(writer, index=False, sheet_name="Main_Criteria")
+                                    for s_name, s_df in sub_dfs.items():
+                                        s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
+                                    sub_sub_dfs_to_save = st.session_state.get("ahp_sub_sub_dfs", {})
+                                    for s_name, s_df in sub_sub_dfs_to_save.items():
+                                        s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
+                                save_data = uploadable_io.getvalue()
+                                save_filename = f"{filename_base}_Raw.xlsx"
+                            save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
     
                         # 결과 휘발성 주의 안내
                         st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;">⚠️ 주의: 페이지를 새로고침하거나 브라우저를 닫으면 분석 결과가 저장되지 않고 리셋되므로, 결과물 엑셀 파일(📑 결과 다운로드 탭)을 반드시 다운로드하여 저장해 주세요.</p>',
@@ -6674,7 +6775,56 @@ with col_main:
                         # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
                         excel_buffer = io.BytesIO()
                         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-                            live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
+                            from survey_manager import load_survey_metadata
+                            survey_meta = load_survey_metadata(selected_sheet_id)
+                            parsed_ok = False
+                            
+                            if survey_meta:
+                                ahp_model = survey_meta.get("AHP_Model_JSON", {})
+                                tier_level = int(survey_meta.get("Tier_Level", 2))
+                                base_cols = ["ID", "Type"]
+                                main_criteria = ahp_model.get("main", [])
+                                main_pairs = []
+                                for i in range(len(main_criteria)):
+                                    for j in range(i + 1, len(main_criteria)):
+                                        main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
+                                main_cols = [c for c in base_cols if c in live_df.columns] + [p for p in main_pairs if p in live_df.columns]
+                                
+                                if len(main_cols) > 2:
+                                    df_main_dl = live_df[main_cols].copy()
+                                    df_main_dl.to_excel(writer, index=False, sheet_name="Main_Criteria")
+                                    
+                                    sub_criteria_map = ahp_model.get("subs", {})
+                                    for main_c, subs in sub_criteria_map.items():
+                                        if len(subs) >= 2:
+                                            sub_pairs = []
+                                            for i in range(len(subs)):
+                                                for j in range(i + 1, len(subs)):
+                                                    sub_pairs.append(f"{subs[i]}_{subs[j]}")
+                                            sub_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_pairs if p in live_df.columns]
+                                            df_sub_dl = live_df[sub_cols].copy()
+                                            df_sub_dl.to_excel(writer, index=False, sheet_name=main_c[:31])
+                                            
+                                    if tier_level == 3:
+                                        sub_sub_map = ahp_model.get("sub_subs", {})
+                                        for main_c, subs in sub_criteria_map.items():
+                                            for sub_c in subs:
+                                                sub_subs = sub_sub_map.get(sub_c, [])
+                                                if len(sub_subs) >= 2:
+                                                    sub_sub_pairs = []
+                                                    for i in range(len(sub_subs)):
+                                                        for j in range(i + 1, len(sub_subs)):
+                                                            sub_sub_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                                                    ss_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_sub_pairs if p in live_df.columns]
+                                                    df_ss_dl = live_df[ss_cols].copy()
+                                                    df_ss_dl.to_excel(writer, index=False, sheet_name=sub_c[:31])
+                                    parsed_ok = True
+                            
+                            if not parsed_ok:
+                                live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
+                            else:
+                                live_df.to_excel(writer, index=False, sheet_name='Raw_Data_Dump')
+                                
                             if demo_df is not None:
                                 demo_df.to_excel(writer, index=False, sheet_name='Demographic_Data')
 
@@ -6733,12 +6883,76 @@ with col_main:
                         if recovered_raw_rows:
                             import io
 
-                            # Excel로 두 개의 백업 데이터를 시트별로 다운로드할 수 있도록 패키징
-                            excel_backup_buffer = io.BytesIO()
-                            with pd.ExcelWriter(excel_backup_buffer, engine='openpyxl') as writer:
-                                pd.DataFrame(recovered_raw_rows).to_excel(writer, index=False, header=False, sheet_name='Raw_Data')
-                                if recovered_demo_rows:
-                                    pd.DataFrame(recovered_demo_rows).to_excel(writer, index=False, header=False, sheet_name='Demographic_Data')
+                            # 헤더 복구 로직 추가
+                            raw_headers = None
+                            demo_headers = None
+                            from survey_manager import load_survey_metadata
+                            survey_meta = load_survey_metadata(selected_sheet_id.strip())
+                            if survey_meta:
+                                ahp_model = survey_meta.get("AHP_Model_JSON", {})
+                                demographics = survey_meta.get("Demographics", {})
+                                rewards_info = survey_meta.get("Rewards_Info", {})
+                                tier_level = str(survey_meta.get("Tier_Level", "2"))
+                                
+                                raw_headers = ["ID", "Type"]
+                                main_criteria = ahp_model.get("main", [])
+                                for i in range(len(main_criteria)):
+                                    for j in range(i + 1, len(main_criteria)):
+                                        raw_headers.append(f"{main_criteria[i]}_{main_criteria[j]}")
+                                sub_criteria_map = ahp_model.get("subs", {})
+                                for main_c in main_criteria:
+                                    subs = sub_criteria_map.get(main_c, [])
+                                    if len(subs) >= 2:
+                                        for i in range(len(subs)):
+                                            for j in range(i + 1, len(subs)):
+                                                raw_headers.append(f"{subs[i]}_{subs[j]}")
+                                if tier_level == "3":
+                                    sub_sub_map = ahp_model.get("sub_subs", {})
+                                    for main_c in main_criteria:
+                                        subs = sub_criteria_map.get(main_c, [])
+                                        for sub_c in subs:
+                                            sub_subs = sub_sub_map.get(sub_c, [])
+                                            if len(sub_subs) >= 2:
+                                                for i in range(len(sub_subs)):
+                                                    for j in range(i + 1, len(sub_subs)):
+                                                        raw_headers.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                                raw_headers.append("제출시간")
+                                
+                                demo_headers = ["ID", "Type"]
+                                if demographics.get("name"): demo_headers.append("성명")
+                                if demographics.get("age"): demo_headers.append("연령")
+                                if demographics.get("gender"): demo_headers.append("성별")
+                                if demographics.get("experience"): demo_headers.append("경력년수")
+                                if demographics.get("affiliation"): demo_headers.append("소속")
+                                if demographics.get("email"): demo_headers.append("이메일")
+                                demo_headers.append("사전순위지정")
+                                if rewards_info.get("enabled"):
+                                    demo_headers.append("경품연락처" if tier_level == "3" else "답례품_연락처")
+                                demo_headers.append("제출시간")
+
+                            df_raw_backup = pd.DataFrame(recovered_raw_rows)
+                            if raw_headers and len(raw_headers) == len(df_raw_backup.columns):
+                                df_raw_backup.columns = raw_headers
+                            elif raw_headers and len(raw_headers) > len(df_raw_backup.columns):
+                                df_raw_backup.columns = raw_headers[:len(df_raw_backup.columns)]
+                                
+                            df_demo_backup = None
+                            if recovered_demo_rows:
+                                df_demo_backup = pd.DataFrame(recovered_demo_rows)
+                                if demo_headers and len(demo_headers) == len(df_demo_backup.columns):
+                                    df_demo_backup.columns = demo_headers
+                                elif demo_headers and len(demo_headers) > len(df_demo_backup.columns):
+                                    df_demo_backup.columns = demo_headers[:len(df_demo_backup.columns)]
+
+                            # Excel로 백업 데이터를 템플릿 구조에 맞춰 분할하여 다운로드
+                            if survey_meta and "AHP_Model_JSON" in survey_meta:
+                                excel_backup_buffer = export_to_template_excel(df_raw_backup, df_demo_backup, survey_meta["AHP_Model_JSON"], survey_meta.get("Tier_Level", 2))
+                            else:
+                                excel_backup_buffer = io.BytesIO()
+                                with pd.ExcelWriter(excel_backup_buffer, engine='openpyxl') as writer:
+                                    df_raw_backup.to_excel(writer, index=False, header=bool(raw_headers), sheet_name='Raw_Data')
+                                    if df_demo_backup is not None:
+                                        df_demo_backup.to_excel(writer, index=False, header=bool(demo_headers), sheet_name='Demographic_Data')
 
                             col_b_dl1, col_b_dl2 = st.columns(2)
                             with col_b_dl1:
@@ -6754,7 +6968,7 @@ with col_main:
                             with col_b_dl2:
                                 # CSV 파일 형태로 복구 파일 내보내기 (Raw_Data 우선)
                                 output_csv = io.StringIO()
-                                pd.DataFrame(recovered_raw_rows).to_csv(output_csv, index=False, header=False)
+                                df_raw_backup.to_csv(output_csv, index=False, header=bool(raw_headers))
                                 st.download_button(
                                     "📥 로컬 백업 Raw_Data CSV 다운로드 (.csv)",
                                     data=output_csv.getvalue().encode('utf-8-sig'),

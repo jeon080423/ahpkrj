@@ -234,6 +234,8 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     
     # 중분류 조합
     sub_criteria_map = ahp_model.get("subs", {})
+    sub_sub_map = ahp_model.get("sub_subs", {})
+    
     for main_c in main_criteria:
         subs = sub_criteria_map.get(main_c, [])
         if len(subs) >= 2:
@@ -243,8 +245,64 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                     sub_pairs.append(f"{subs[i]}_{subs[j]}")
             raw_headers.extend(sub_pairs)
             
+    # 소분류 조합 (3계층)
+    for main_c, subs in sub_criteria_map.items():
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) >= 2:
+                ss_pairs = []
+                for i in range(len(sub_subs)):
+                    for j in range(i + 1, len(sub_subs)):
+                        ss_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                raw_headers.extend(ss_pairs)
+
     raw_headers.append("제출시간")
-    raw_sheet.append_row(raw_headers)
+    
+    # Raw_Data가 이미 존재하는지 (기존 연결 시) 확인 후 헤더 업데이트
+    if len(raw_sheet.get_all_values()) == 0:
+        raw_sheet.append_row(raw_headers)
+        
+    # [신규] Main_Criteria 및 하위 시트들 동적 생성 및 헤더 구성
+    try:
+        main_sheet = spreadsheet.worksheet("Main_Criteria")
+    except gspread.WorksheetNotFound:
+        main_sheet = spreadsheet.add_worksheet(title="Main_Criteria", rows="1000", cols="20")
+    if len(main_sheet.get_all_values()) == 0:
+        main_sheet.append_row(["ID", "Type"] + main_pairs + ["제출시간"])
+        
+    # 중분류 시트 생성
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if len(subs) >= 2:
+            sub_pairs = []
+            for i in range(len(subs)):
+                for j in range(i + 1, len(subs)):
+                    sub_pairs.append(f"{subs[i]}_{subs[j]}")
+            safe_sheet_name = str(main_c)[:31]
+            try:
+                s_sheet = spreadsheet.worksheet(safe_sheet_name)
+            except gspread.WorksheetNotFound:
+                s_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
+            if len(s_sheet.get_all_values()) == 0:
+                s_sheet.append_row(["ID", "Type"] + sub_pairs + ["제출시간"])
+                
+    # 소분류 시트 생성
+    for main_c, subs in sub_criteria_map.items():
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) >= 2:
+                ss_pairs = []
+                for i in range(len(sub_subs)):
+                    for j in range(i + 1, len(sub_subs)):
+                        ss_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                safe_sheet_name = str(sub_c)[:31]
+                try:
+                    ss_sheet = spreadsheet.worksheet(safe_sheet_name)
+                except gspread.WorksheetNotFound:
+                    ss_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
+                if len(ss_sheet.get_all_values()) == 0:
+                    ss_sheet.append_row(["ID", "Type"] + ss_pairs + ["제출시간"])
+
 
     # 2. Demographic_Data 헤더 구성: ID, Type, (Demographic Fields...), 사전순위지정, (답례품_연락처...), 제출시간
     demo_headers = ["ID", "Type"]
@@ -445,21 +503,44 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
     
     # 쌍대비교 대분류 응답값 배치
     main_criteria = model.get("main", [])
+    main_row_data = [resp_id, resp_type]
     for i in range(len(main_criteria)):
         for j in range(i + 1, len(main_criteria)):
             pair_key = f"{main_criteria[i]}_{main_criteria[j]}"
             raw_row_data.append(ahp_answers.get(pair_key, 1))
+            main_row_data.append(ahp_answers.get(pair_key, 1))
+    main_row_data.append(kst_now)
             
-    # 쌍대비교 중분류 응답값 배치
+    # 쌍대비교 중분류/소분류 응답값 배치 및 분할 데이터 구성
     sub_criteria_map = model.get("subs", {})
+    sub_sub_map = model.get("sub_subs", {})
+    sub_row_data_map = {}
+    
     for main_c in main_criteria:
         subs = sub_criteria_map.get(main_c, [])
         if len(subs) >= 2:
+            s_row = [resp_id, resp_type]
             for i in range(len(subs)):
                 for j in range(i + 1, len(subs)):
                     pair_key = f"{subs[i]}_{subs[j]}"
                     raw_row_data.append(ahp_answers.get(pair_key, 1))
-                    
+                    s_row.append(ahp_answers.get(pair_key, 1))
+            s_row.append(kst_now)
+            sub_row_data_map[str(main_c)[:31]] = s_row
+            
+    for main_c, subs in sub_criteria_map.items():
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) >= 2:
+                ss_row = [resp_id, resp_type]
+                for i in range(len(sub_subs)):
+                    for j in range(i + 1, len(sub_subs)):
+                        pair_key = f"{sub_subs[i]}_{sub_subs[j]}"
+                        raw_row_data.append(ahp_answers.get(pair_key, 1))
+                        ss_row.append(ahp_answers.get(pair_key, 1))
+                ss_row.append(kst_now)
+                sub_row_data_map[str(sub_c)[:31]] = ss_row
+                
     raw_row_data.append(kst_now)
     
     # 3. Demographic_Data 행 데이터 구성 (ID, Type, 인구통계 필드, 사전순위, 답례품 연락처, 제출시간)
@@ -534,8 +615,25 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
         spreadsheet = client.open_by_key(spreadsheet_id)
         
         # 1) Raw_Data에 추가
-        raw_sheet = spreadsheet.worksheet("Raw_Data")
-        raw_sheet.append_row(raw_row_data)
+        try:
+            raw_sheet = spreadsheet.worksheet("Raw_Data")
+            raw_sheet.append_row(raw_row_data)
+        except Exception as e:
+            st.warning(f"Raw_Data 시트 기록 실패: {e}")
+            
+        # [신규] Main_Criteria 및 하위 시트에 분할 추가
+        try:
+            main_sheet = spreadsheet.worksheet("Main_Criteria")
+            main_sheet.append_row(main_row_data)
+        except gspread.WorksheetNotFound:
+            pass # 이전 설문지는 시트가 없을 수 있음
+            
+        for s_name, s_row in sub_row_data_map.items():
+            try:
+                s_sheet = spreadsheet.worksheet(s_name)
+                s_sheet.append_row(s_row)
+            except gspread.WorksheetNotFound:
+                pass
         
         # 2) Demographic_Data에 추가
         try:
