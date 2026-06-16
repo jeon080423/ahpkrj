@@ -1280,4 +1280,22 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
 
     output_res.seek(0)
     
-    return True, "Analysis Successful" if is_en else "분석 성공", final_df, output_res
+    # integrated_df 방어: 그룹이 2개 미만이면 정의되지 않음
+    if 'integrated_df' not in dir():
+        integrated_df = final_df[['대분류','중분류','소분류','Global Weight']].rename(columns={'Global Weight':'종합평균(Overall)'})
+
+    # UI 탭 렌더링용 데이터 묶음
+    ui_data = {
+        "final_df": final_df,
+        "comparison_df": integrated_df if len(unique_groups) >= 2 else final_df[['대분류','중분류','소분류','Global Weight']].rename(columns={'Global Weight':'종합평균(Overall)'}),
+        "anova_df": anova_df,
+        "group_full_dfs": group_full_dfs,
+        "group_analysis_results": group_analysis_results,
+        "unique_groups": unique_groups,
+        "indiv_df": indiv_df,
+        "main_factors": main_factors,
+        "sub_results_storage": sub_results_storage,
+        "sub_sub_results_storage": sub_sub_results_storage,
+    }
+    
+    return True, "Analysis Successful" if is_en else "분석 성공", final_df, output_res, ui_data
