@@ -4806,9 +4806,9 @@ with col_main:
                                         main_group_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
     
                                 out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
-                                write_detailed_sheet_ws('Result_Main', main_group_matrix, out_main, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
+                                write_detailed_sheet_ws('[대분류] Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
                                 for mf, info in sub_results_storage.items():
-                                    safe_name = f"Result_{mf}"[:31]
+                                    safe_name = f"[중분류] {mf}"[:31]
                                     sub_grp_mats = {}
                                     for grp in unique_groups:
                                         g_sub_df = info['df'][info['df']['Type'].astype(str) == grp]
@@ -4823,7 +4823,9 @@ with col_main:
                                              if mf in df_ex['Sheet'].unique():
                                                  sub_excl_val = len(df_ex[df_ex['Sheet'] == mf])
                                              
-                                    write_detailed_sheet_ws(safe_name, info['group_matrix'], out_sub, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), info['factors'], group_matrices=sub_grp_mats, sheet_excl_count=sub_excl_val)
+                                    title_ko = f"[중분류 평가 종합 행렬]  ▶ 상위 계층: 대분류 [{mf}]"
+                                    title_en = f"[Sub-Criteria Combined Matrix]  ▶ Parent: Main [{mf}]"
+                                    write_detailed_sheet_ws(safe_name, info['group_matrix'], out_sub, _(title_ko, title_en), info['factors'], group_matrices=sub_grp_mats, sheet_excl_count=sub_excl_val)
     
                                 is_english = (st.session_state.get('lang', 'ko') == 'en')
                                 theory_ws = workbook.add_worksheet("Consistency_Theory")

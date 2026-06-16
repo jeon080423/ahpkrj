@@ -988,36 +988,46 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         # Main
         out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
         write_detailed_sheet_ws(
-            writer, 'Result_Main', main_group_matrix, out_main, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), main_factors,
+            writer, '[대분류] Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors,
             group_matrices=group_matrices_by_sheet.get('Main_Criteria'), sheet_excl_count=main_excluded, mean_method=mean_method
         )
         
         # Sub
         for mf, info in sub_results_storage.items():
-            safe_name = f"Result_{mf}"[:31]
+            safe_name = f"[중분류] {mf}"[:31]
             out_sub = info['df'].drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
             
             sub_excl_val = 0
             if 'Sheet' in total_excluded_df.columns:
                 sub_excl_val = len(total_excluded_df[total_excluded_df['Sheet'] == mf])
                 
+            title_ko = f"[중분류 평가 종합 행렬]  ▶ 상위 계층: 대분류 [{mf}]"
+            title_en = f"[Sub-Criteria Combined Matrix]  ▶ Parent: Main [{mf}]"
             write_detailed_sheet_ws(
-                writer, safe_name, info['group_matrix'], out_sub, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), info['factors'],
+                writer, safe_name, info['group_matrix'], out_sub, _(title_ko, title_en), info['factors'],
                 group_matrices=group_matrices_by_sheet.get(mf), sheet_excl_count=sub_excl_val, mean_method=mean_method
             )
 
         # Sub_Sub
         for ssf, info in sub_sub_results_storage.items():
             if 'df' not in info or info['df'] is None or info['df'].empty: continue
-            safe_name = f"Result_{ssf}"[:31]
+            safe_name = f"[소분류] {ssf}"[:31]
             out_ss = info['df'].drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
             
             ss_excl_val = 0
             if 'Sheet' in total_excluded_df.columns:
                 ss_excl_val = len(total_excluded_df[total_excluded_df['Sheet'] == ssf])
                 
+            parent_mf = ""
+            for m, s_info in sub_results_storage.items():
+                if ssf in s_info['factors']:
+                    parent_mf = m
+                    break
+                    
+            title_ko = f"[소분류 평가 종합 행렬]  ▶ 상위 계층: 대분류 [{parent_mf}] ➔ 중분류 [{ssf}]"
+            title_en = f"[Sub-sub-Criteria Combined Matrix]  ▶ Parent: Main [{parent_mf}] ➔ Sub [{ssf}]"
             write_detailed_sheet_ws(
-                writer, safe_name, info['group_matrix'], out_ss, _("[1] 전체 종합 행렬", "[1] Overall Combined Matrix"), info['factors'],
+                writer, safe_name, info['group_matrix'], out_ss, _(title_ko, title_en), info['factors'],
                 group_matrices=group_matrices_by_sheet.get(ssf), sheet_excl_count=ss_excl_val, mean_method=mean_method
             )
 
