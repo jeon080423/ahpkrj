@@ -3620,7 +3620,7 @@ with col_main:
                     )
                 with col_btn3:
                     st.download_button(
-                        label=_("📄 일반 AHP 보고서", "📄 Traditional AHP Report (Example)"),
+                        label=_("📄 일반 AHP 분석 결과(예시)", "📄 Traditional AHP Report (Example)"),
                         data=tahp_data if tahp_data else b"",
                         file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -3629,7 +3629,7 @@ with col_main:
                     )
                 with col_btn4:
                     st.download_button(
-                        label=_("📄 퍼지 AHP 보고서", "📄 Fuzzy AHP Report (Example)"),
+                        label=_("📄 퍼지 AHP 분석 결과(예시)", "📄 Fuzzy AHP Report (Example)"),
                         data=fahp_data if fahp_data else b"",
                         file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -3649,7 +3649,7 @@ with col_main:
                     )
                 with col_btn2:
                     st.download_button(
-                        label=_("📄 일반 AHP 보고서", "📄 Traditional AHP Report (Example)"),
+                        label=_("📄 일반 AHP 분석 결과(예시)", "📄 Traditional AHP Report (Example)"),
                         data=tahp_data if tahp_data else b"",
                         file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -3658,7 +3658,7 @@ with col_main:
                     )
                 with col_btn3:
                     st.download_button(
-                        label=_("📄 퍼지 AHP 보고서", "📄 Fuzzy AHP Report (Example)"),
+                        label=_("📄 퍼지 AHP 분석 결과(예시)", "📄 Fuzzy AHP Report (Example)"),
                         data=fahp_data if fahp_data else b"",
                         file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
