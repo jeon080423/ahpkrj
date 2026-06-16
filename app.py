@@ -6318,16 +6318,16 @@ Thank you very much for your valuable participation.
             definitions_map = {}
             for mc in main_list:
                 # 대분류명 파란색 볼드 및 이모티콘을 이용해 대조 설정
-                st.markdown(f"#### 🟦 :blue[**대분류: {mc}**]")
+                st.markdown(_(f"#### 🟦 :blue[**대분류: {mc}**]", f"#### 🟦 :blue[**Main Criteria: {mc}**]"))
                 default_main_def = ""
-                if mc == "기술 요인": default_main_def = "협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인"
-                elif mc == "조직 요인": default_main_def = "협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인"
-                elif mc == "환경 요인": default_main_def = "정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인"
-                elif mc == "혁신 요인": default_main_def = "경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인"
+                if mc in ["기술 요인", "Technological"]: default_main_def = _("협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인", "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.")
+                elif mc in ["조직 요인", "Organizational"]: default_main_def = _("협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인", "Factors related to the internal capabilities of the organization, top management support, financial and training status.")
+                elif mc in ["환경 요인", "Environmental"]: default_main_def = _("정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인", "External environmental factors such as government support, competitive pressure within the industry, labor shortage, and external cooperation.")
+                elif mc in ["혁신 요인", "Innovational"]: default_main_def = _("경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인", "Factors such as the management's innovation orientation, members' acceptance of change, and smart factory knowledge/skill levels.")
 
                 definitions_map[mc] = st.text_input(
                     _(f"👉 [{mc}] 요인의 전체적인 설명 입력", f"👉 Enter overall description for [{mc}]"),
-                    value=default_main_def or f"{mc}에 대한 전반적 요소를 설명합니다.",
+                    value=default_main_def or _(f"{mc}에 대한 전반적 요소를 설명합니다.", f"Overall description for {mc}."),
                     key=f"def_main_{mc}"
                 )
 
@@ -6336,26 +6336,26 @@ Thank you very much for your valuable participation.
                     for sc in model_structure["subs"].get(mc, []):
                         # 기본 양승훈 설문 정의 적용
                         default_def = ""
-                        if sc == "상대적이점": default_def = "도입대상 협동로봇간의 상대적 이점"
-                        elif sc == "호환성": default_def = "기존 설비나 타사 협동로봇과의 연결성"
-                        elif sc == "안전성": default_def = "작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준"
-                        elif sc == "서비스지원": default_def = "공급사의 기술 및 A/S 지원 정도"
-                        elif sc == "경영진지원": default_def = "경영진의 도입 의지 및 경영철학 반영도"
-                        elif sc == "기술준비도": default_def = "조직원의 로봇 활용 기술 준비 수준"
-                        elif sc == "금융자원": default_def = "로봇 구입을 위한 자본 여력 및 자금 조달 편의성"
-                        elif sc == "교육훈련": default_def = "기술 향상을 위한 위탁/사내 교육 프로그램 유무"
-                        elif sc == "정부지원": default_def = "협동로봇 도입을 활성화하기 위한 정부의 재정 지원 및 보조금 혜택 정도"
-                        elif sc == "경쟁압력": default_def = "동종 업계 또는 경쟁사의 협동로봇 도입에 따른 경쟁적 압박 정도"
-                        elif sc == "인력난": default_def = "제조 현장의 구인난 및 생산 인력 수급의 어려움 수준"
-                        elif sc == "외부지원": default_def = "로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적/교육적 지원"
-                        elif sc == "경영진의 혁신성": default_def = "새로운 제조 기술 및 로봇 도입에 대한 최고경영자의 적극적인 의지"
-                        elif sc == "변화수용태도": default_def = "신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도"
-                        elif sc == "스마트팩토리수준": default_def = "공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준"
-                        elif sc == "지식정도": default_def = "협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준"
+                        if sc in ["상대적이점", "Relative Advantage"]: default_def = _("도입대상 협동로봇간의 상대적 이점", "Relative advantage among the collaborative robots targeted for adoption.")
+                        elif sc in ["호환성", "Compatibility"]: default_def = _("기존 설비나 타사 협동로봇과의 연결성", "Connectivity with existing equipment or third-party collaborative robots.")
+                        elif sc in ["안전성", "Security"]: default_def = _("작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준", "Level of human accident prevention when working in the same space as operators without safety fences.")
+                        elif sc in ["서비스지원", "Service Support"]: default_def = _("공급사의 기술 및 A/S 지원 정도", "Degree of technical and A/S support from the supplier.")
+                        elif sc in ["경영진지원", "Top Management Support"]: default_def = _("경영진의 도입 의지 및 경영철학 반영도", "The management's willingness to adopt and the degree to which management philosophy is reflected.")
+                        elif sc in ["기술준비도", "Tech Readiness"]: default_def = _("조직원의 로봇 활용 기술 준비 수준", "The level of technical readiness of organizational members to utilize robots.")
+                        elif sc in ["금융자원", "Financial Resources"]: default_def = _("로봇 구입을 위한 자본 여력 및 자금 조달 편의성", "Capital capacity and financing convenience for purchasing robots.")
+                        elif sc in ["교육훈련", "Training"]: default_def = _("기술 향상을 위한 위탁/사내 교육 프로그램 유무", "Availability of external/internal training programs for skill improvement.")
+                        elif sc in ["정부지원", "Gov Support"]: default_def = _("협동로봇 도입을 활성화하기 위한 정부의 재정 지원 및 보조금 혜택 정도", "Degree of government financial support and subsidy benefits to promote the adoption of collaborative robots.")
+                        elif sc in ["경쟁압력", "Competitive Pressure"]: default_def = _("동종 업계 또는 경쟁사의 협동로봇 도입에 따른 경쟁적 압박 정도", "Degree of competitive pressure due to the adoption of collaborative robots by peers or competitors.")
+                        elif sc in ["인력난", "Labor Shortage"]: default_def = _("제조 현장의 구인난 및 생산 인력 수급의 어려움 수준", "Level of difficulty in finding labor and supplying production personnel at the manufacturing site.")
+                        elif sc in ["외부지원", "External Support"]: default_def = _("로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적/교육적 지원", "Technical/educational support from external consulting, research institutes, etc., other than the robot supplier.")
+                        elif sc in ["경영진의 혁신성", "Management Innovativeness"]: default_def = _("새로운 제조 기술 및 로봇 도입에 대한 최고경영자의 적극적인 의지", "The top management's active willingness to adopt new manufacturing technologies and robots.")
+                        elif sc in ["변화수용태도", "Change Acceptance"]: default_def = _("신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도", "Members' acceptance and cooperative attitude towards changes in new equipment and work processes.")
+                        elif sc in ["스마트팩토리수준", "Smart Factory Level"]: default_def = _("공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준", "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.")
+                        elif sc in ["지식정도", "Knowledge Level"]: default_def = _("협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준", "Level of internal expertise required for the utilization and maintenance of collaborative robots.")
 
                         definitions_map[sc] = st.text_input(
                             _(f"ㄴ 중분류 [{sc}] 설명 입력", f"👉 Enter description for sub-criteria [{sc}]"),
-                            value=default_def or f"{sc}에 대한 정의입니다.",
+                            value=default_def or _(f"{sc}에 대한 정의입니다.", f"Definition for {sc}."),
                             key=f"def_sub_{sc}"
                         )
                 st.write("") # 섹션 간 시각적 여백 추가
