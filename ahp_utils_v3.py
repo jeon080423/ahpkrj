@@ -877,7 +877,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             s_row_cp += 1
             
             comparison_df = final_df[['대분류', '중분류', '소분류', 'Global Weight']].copy()
-            comparison_df.rename(columns={'Global Weight': 'Overall'}, inplace=True)
+            comparison_df.rename(columns={'Global Weight': '종합합계(Overall)'}, inplace=True)
             for grp, df_res in group_analysis_results.items():
                 temp_df = df_res.rename(columns={'Global Weight': grp})
                 comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류', '소분류'], how='left')
@@ -893,7 +893,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                     '대분류': 'Main Criteria',
                     '중분류': 'Sub-Criteria',
                     '소분류': 'Sub-sub-Criteria',
-                    'Overall': 'Overall',
+                    '종합합계(Overall)': 'Overall',
                     'F-값': 'F-Value',
                     'P-Value': 'P-Value',
                     '유의성': 'Significance',
