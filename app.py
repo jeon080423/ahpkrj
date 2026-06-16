@@ -4569,7 +4569,7 @@ with col_main:
                                     group_analysis_results[grp] = group_full_dfs[grp][['대분류', '중분류', 'Global Weight']]
     
                             comparison_df = final_df[['대분류', '중분류', 'Global Weight']].copy()
-                            comparison_df.rename(columns={'Global Weight': '종합합계(Overall)'}, inplace=True)
+                            comparison_df.rename(columns={'Global Weight': '종합평균(Overall)'}, inplace=True)
                             for grp, df_res in group_analysis_results.items():
                                 temp_df = df_res.rename(columns={'Global Weight': grp})
                                 comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류'], how='left')
@@ -4616,7 +4616,7 @@ with col_main:
                                         rename_dict = {
                                             '대분류': 'Main Criteria',
                                             '중분류': 'Sub-Criteria',
-                                            '종합합계(Overall)': 'Overall',
+                                            '종합평균(Overall)': 'Overall',
                                             'F-값': 'F-Value',
                                             'P-Value': 'P-Value',
                                             '유의성': 'Significance',

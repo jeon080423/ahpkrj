@@ -809,16 +809,19 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                         # Fallback dummy for missing respondent row
                         ss_factors = sub_sub_results_storage[sf]['factors']
                         for ssf in ss_factors:
+                            # If the factor is a dummy leaf node, perform ANOVA on the parent sub-criteria (sf)
+                            anova_factor = sf if ssf.endswith("_단일항목") else ssf
                             indiv_global_data.append({
-                                "ID": uid, "Type": str(u_type), "Factor": ssf, "Global_Weight": m_w * s_w * (1.0 / len(ss_factors)),
+                                "ID": uid, "Type": str(u_type), "Factor": anova_factor, "Global_Weight": m_w * s_w * (1.0 / len(ss_factors)),
                                 "Original_CR": u_main['Original_CR'].values[0],
                                 "Final_CR": u_main['Final_CR'].values[0]
                             })
                     else:
                         for ssf in sub_sub_results_storage[sf]['factors']:
                             ss_w = u_ss[f"Weight_{ssf}"].values[0]
+                            anova_factor = sf if ssf.endswith("_단일항목") else ssf
                             indiv_global_data.append({
-                                "ID": uid, "Type": str(u_type), "Factor": ssf, "Global_Weight": m_w * s_w * ss_w,
+                                "ID": uid, "Type": str(u_type), "Factor": anova_factor, "Global_Weight": m_w * s_w * ss_w,
                                 "Original_CR": u_main['Original_CR'].values[0],
                                 "Final_CR": u_main['Final_CR'].values[0]
                             })
@@ -877,14 +880,36 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             s_row_cp += 1
             
             comparison_df = final_df[['대분류', '중분류', '소분류', 'Global Weight']].copy()
-            comparison_df.rename(columns={'Global Weight': '종합합계(Overall)'}, inplace=True)
+            comparison_df.rename(columns={'Global Weight': '종합평균(Overall)'}, inplace=True)
             for grp, df_res in group_analysis_results.items():
                 temp_df = df_res.rename(columns={'Global Weight': grp})
                 comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류', '소분류'], how='left')
                 
             if not anova_df.empty:
-                anova_for_merge = anova_df.rename(columns={'요인': '소분류'})
-                integrated_df = comparison_df.merge(anova_for_merge, on='소분류', how='left')
+                # Merge ANOVA results:
+                # 1. For rows that are dummy/virtual leaf nodes (i.e. '소분류' ends with '_단일항목'), we want to match ANOVA result where '요인' == '중분류'
+                # 2. For standard rows, we match ANOVA result where '요인' == '소분류'
+                
+                # Split comparison_df into dummy and standard
+                dummy_mask = comparison_df['소분류'].str.endswith('_단일항목')
+                comp_dummy = comparison_df[dummy_mask].copy()
+                comp_std = comparison_df[~dummy_mask].copy()
+                
+                anova_sub = anova_df.rename(columns={'요인': '중분류'})
+                anova_sub_sub = anova_df.rename(columns={'요인': '소분류'})
+                
+                integrated_dummy = comp_dummy.merge(anova_sub, on='중분류', how='left')
+                integrated_std = comp_std.merge(anova_sub_sub, on='소분류', how='left')
+                
+                integrated_df = pd.concat([integrated_std, integrated_dummy], ignore_index=True)
+                
+                # Restore original row order from comparison_df
+                # We can do this by setting index or using a merge back
+                integrated_df = comparison_df.merge(
+                    integrated_df,
+                    on=['대분류', '중분류', '소분류', '종합평균(Overall)'] + [grp for grp in group_analysis_results.keys() if grp in comparison_df.columns],
+                    how='left'
+                )
             else:
                 integrated_df = comparison_df
                 
@@ -893,7 +918,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                     '대분류': 'Main Criteria',
                     '중분류': 'Sub-Criteria',
                     '소분류': 'Sub-sub-Criteria',
-                    '종합합계(Overall)': 'Overall',
+                    '종합평균(Overall)': 'Overall',
                     'F-값': 'F-Value',
                     'P-Value': 'P-Value',
                     '유의성': 'Significance',
