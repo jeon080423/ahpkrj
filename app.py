@@ -4047,12 +4047,10 @@ with col_main:
                         else:
                             inferred_sub_sub_dfs[sn] = df_sheet
                     
-                    if len(inferred_sub_sub_dfs) > 0 and st.session_state.get('user_role') == 'admin':
+                    if len(inferred_sub_sub_dfs) > 0:
                         st.session_state["ahp_sub_sub_dfs"] = inferred_sub_sub_dfs
                         st.session_state["inferred_tier_level"] = 3
                     else:
-                        if len(inferred_sub_sub_dfs) > 0:
-                            st.warning("🔒 3계층 오프라인 분석은 관리자 모드에서만 지원됩니다. 소분류 데이터는 무시되고 2계층으로 분석됩니다.")
                         st.session_state["inferred_tier_level"] = 2
                         
                     filename_base = uploaded_file.name.split('.')[0]
