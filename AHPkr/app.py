@@ -4834,7 +4834,11 @@ with col_main:
                                         st.stop()
                                 
                                     try:
-                                        df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
+                                        if data_source == _("🌐 배포된 온라인 설문 데이터 연동", "🌐 Connect Online Survey Data"):
+                                            df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
+                                        else:
+                                            df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
+                                            
                                         sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
                                             df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
                                         )
