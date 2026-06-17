@@ -3508,12 +3508,12 @@ with col_settings:
             mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
             cr_threshold_label = st.selectbox(
                 _("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), 
-                [_("0.1", "0.1"), _("0.2", "0.2"), _("보정 하지 않음", "Do Not Correct")], 
+                [_("0.1", "0.1"), _("0.15", "0.15"), _("0.2", "0.2"), _("보정 하지 않음", "Do Not Correct")], 
                 index=0,
                 key="cr_threshold_label",
                 help=_(
-                    "임계값 설정(0.1 또는 0.2)은 일관성 비율(CR)을 해당 수치로 정확하게 일치시키는 것이 아니라, 해당 임계값 이하로 만드는 것을 의미합니다. 이미 임계값 이하인 데이터는 보정하지 않으며, 이를 통해 원본 응답이 과도하게 왜곡되는 것을 방지합니다.",
-                    "The threshold setting (0.1 or 0.2) does not force the consistency ratio (CR) to equal that value. Instead, it adjusts the CR to be less than or equal to the threshold. If a matrix is already within the threshold, no correction is applied, preventing excessive distortion of the original responses."
+                    "임계값 설정(0.1, 0.15 또는 0.2)은 일관성 비율(CR)을 해당 수치로 정확하게 일치시키는 것이 아니라, 해당 임계값 이하로 만드는 것을 의미합니다. 이미 임계값 이하인 데이터는 보정하지 않으며, 이를 통해 원본 응답이 과도하게 왜곡되는 것을 방지합니다.",
+                    "The threshold setting (0.1, 0.15 or 0.2) does not force the consistency ratio (CR) to equal that value. Instead, it adjusts the CR to be less than or equal to the threshold. If a matrix is already within the threshold, no correction is applied, preventing excessive distortion of the original responses."
                 )
             )
             if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
@@ -3550,7 +3550,7 @@ with col_settings:
             **현재 방법의 특징:**
             1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
             2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
-            3. **과도한 보정 방지**: 임계값 설정(0.1 또는 0.2)은 CR 값을 정확히 맞추는 것이 아니라 임계값 '이하'로 만드는 것을 목표로 합니다. 이미 임계값 이하인 응답은 보정을 수행하지 않아 원본 판단을 최대한 보존합니다.
+            3. **과도한 보정 방지**: 임계값 설정(0.1, 0.15 또는 0.2)은 CR 값을 정확히 맞추는 것이 아니라 임계값 '이하'로 만드는 것을 목표로 합니다. 이미 임계값 이하인 응답은 보정을 수행하지 않아 원본 판단을 최대한 보존합니다.
         
             """, r"""
             **Correction Method: Iterative Adjustment**
@@ -3559,7 +3559,7 @@ with col_settings:
             **Key Features:**
             1. **Minimal Distortion of Judgments**: Preserves the trends of the original survey responses while securing mathematical consistency.
             2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
-            3. **Prevention of Excessive Correction**: The threshold setting (0.1 or 0.2) targets bringing the CR 'below or equal to' the threshold, rather than matching it exactly. Responses already below the threshold are left uncorrected to preserve the original judgments as much as possible.
+            3. **Prevention of Excessive Correction**: The threshold setting (0.1, 0.15 or 0.2) targets bringing the CR 'below or equal to' the threshold, rather than matching it exactly. Responses already below the threshold are left uncorrected to preserve the original judgments as much as possible.
         
             """))
 
@@ -4915,14 +4915,14 @@ with col_main:
                                     st.markdown(_(f"""
                                     **원인:** 모든 응답자의 일관성 비율(CR)이 임계치({cr_threshold})를 초과하여 보정 후에도 수렴하지 못했습니다.
                                     **해결 방법:**
-                                    1. 왼쪽 사이드바에서 **'일관성 비율(CR) 임계값'**을 0.2로 완화해 보세요.
+                                    1. 왼쪽 사이드바에서 **'일관성 비율(CR) 임계값'**을 0.15 또는 0.2로 완화해 보세요.
                                     2. **'보정 강도(Learning Rate)'**를 0.7 이상으로 높여보세요.
                                     3. **'최대 보정 반복 횟수'**를 500회로 설정했는지 확인하세요.
                                     """,
                                     f"""
                                     **Cause:** The Consistency Ratio (CR) of all respondents exceeded the threshold ({cr_threshold}) and could not converge even after correction.
                                     **Solution:**
-                                    1. Loosen the **'Consistency Ratio (CR) Threshold'** to 0.2 in the left sidebar.
+                                    1. Loosen the **'Consistency Ratio (CR) Threshold'** to 0.15 or 0.2 in the left sidebar.
                                     2. Increase the **'Correction Intensity (Learning Rate)'** to 0.7 or higher.
                                     3. Ensure **'Max Correction Iterations'** is set to 500.
                                     """))
@@ -6568,25 +6568,28 @@ Thank you very much for your valuable participation.
 
             # 섹션 6: 실시간 CR 검증 레벨 설정
             st.subheader(_("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨", "Section 6: Pre-submission Consistency Ratio (CR) Validation Level"))
-            # Get default index from edit state if editing, otherwise default to index 3 (0.3 이하)
-            default_cr_idx = 3
+            # Get default index from edit state if editing, otherwise default to index 4 (0.3 이하)
+            default_cr_idx = 4
             if st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is not None:
                 cr_val = float(st.session_state.get("edit_cr_limit"))
                 if cr_val <= 0.1: default_cr_idx = 1
-                elif cr_val <= 0.2: default_cr_idx = 2
-                elif cr_val <= 0.3: default_cr_idx = 3
+                elif cr_val <= 0.15: default_cr_idx = 2
+                elif cr_val <= 0.2: default_cr_idx = 3
+                elif cr_val <= 0.3: default_cr_idx = 4
             elif st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is None:
                 default_cr_idx = 0
                 
             cr_limit_opt = st.selectbox(_("일관성 비율(CR) 허용 기준치", "Consistency Ratio (CR) Tolerance Limit"), [
                 _("제한하지 않음 (이탈률 감소용)", "No Limit (To reduce drop-out rate)"),
                 _("0.1 이하 (매우 엄격함)", "0.1 or below (Very Strict)"),
+                _("0.15 이하 (엄격함)", "0.15 or below (Strict)"),
                 _("0.2 이하 (보통)", "0.2 or below (Normal)"),
                 _("0.3 이하 (일부 허용)", "0.3 or below (Somewhat Lenient)")
             ], index=default_cr_idx)
 
             cr_limit = None
-            if "0.1" in cr_limit_opt: cr_limit = 0.1
+            if "0.15" in cr_limit_opt: cr_limit = 0.15
+            elif "0.1" in cr_limit_opt: cr_limit = 0.1
             elif "0.2" in cr_limit_opt: cr_limit = 0.2
             elif "0.3" in cr_limit_opt: cr_limit = 0.3
 
