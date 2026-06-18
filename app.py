@@ -2432,18 +2432,20 @@ if "preview_id" in q_params or "survey_id" in q_params:
         
         st.info(_("""
         **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 **더 중요하다고 생각하는 방향**으로 숫자를 선택해 주세요. 숫자가 클수록 해당 요인이 더 중요함을 의미합니다.
+
         - **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
         - **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
         - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
         
-💡 :blue[**파란색 배경 가이드: 앞선 응답들과의 논리적 일관성(CR)을 최적으로 유지할 수 있는**] :red[**권장 선택 구간**]:blue[**입니다.**]
+        💡 :blue[**파란색 배경 가이드: 앞선 응답들과의 논리적 일관성(CR)을 최적으로 유지할 수 있는**] :red[**권장 선택 구간**]:blue[**입니다.**]
         """, """
         **Response Method**: Please select the number in the direction of **the factor you think is more important** between the left factor and the right factor. A larger number means that factor is more important.
+
         - **Equal (1)**: Choose the middle **1** when both factors are equally important.
         - **When the left factor is more important**: Choose a number on the left side (←). A larger number indicates the left factor is much more important.
         - **When the right factor is more important**: Choose a number on the right side (→). A larger number indicates the right factor is much more important.
         
-💡 :blue[**Blue Background Guide: Indicates the**] :red[**recommended selection range**] :blue[**to optimally maintain logical consistency (CR) with your previous answers.**]
+        💡 :blue[**Blue Background Guide: Indicates the**] :red[**recommended selection range**] :blue[**to optimally maintain logical consistency (CR) with your previous answers.**]
         """))
         
         if tier_level == 3:
