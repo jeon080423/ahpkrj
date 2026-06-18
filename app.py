@@ -2646,6 +2646,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                     group_answers[k] = val
                                     if k != pair_key and val is None:
                                         other_missing = True
+                                        
+                                # === DEBUG INFO ===
+                                # To diagnose the 'None' issue:
+                                debug_text = f"DEBUG {pair_key} - other_missing: {other_missing} | vals: " + ", ".join([f"{k}:{v}" for k,v in group_answers.items()])
+                                st.caption(f"<div style='color: red; font-size: 10px;'>{debug_text}</div>", unsafe_allow_html=True)
+                                # ==================
                                 
                                 # 비교 요인이 2개 초과이고, 그룹 내의 다른 문항들이 모두 응답된 경우에만 권장 범위를 산출합니다.
                                 if len(group_factors) > 2 and not other_missing:
