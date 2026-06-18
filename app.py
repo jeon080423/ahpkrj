@@ -2653,13 +2653,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 pass
                                 
                         def format_option(opt):
-                            return str(abs(opt)) if opt < 0 else str(opt) # 가시성을 위해 절대값으로 표시
+                            # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
+                            return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        display_options = clean_options
                         if cr_guide_enabled and cr_limit is not None:
                             valid_sorted = [x for x in clean_options if x in valid_options]
                             if valid_sorted:
-                                display_options = valid_sorted
                                 min_val = valid_sorted[0]
                                 max_val = valid_sorted[-1]
                                 
@@ -2672,17 +2671,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                         return _(f"[오른쪽] {v}", f"[Right] {v}")
                                         
                                 if min_val == max_val:
-                                    range_str = _(f"💡 CR 허용 구간: {format_range_val(min_val)}만 선택 가능", f"💡 CR Allowed Range: Only {format_range_val(min_val)} is selectable")
+                                    range_str = _(f"💡 CR 권장 응답: {format_range_val(min_val)}", f"💡 Recommended Response: {format_range_val(min_val)}")
                                 else:
-                                    range_str = _(f"💡 CR 허용 구간: {format_range_val(min_val)} ~ {format_range_val(max_val)} 사이만 선택 가능", f"💡 CR Allowed Range: Only between {format_range_val(min_val)} ~ {format_range_val(max_val)} is selectable")
+                                    range_str = _(f"💡 CR 권장 범위: {format_range_val(min_val)} ~ {format_range_val(max_val)}", f"💡 Recommended Range: {format_range_val(min_val)} ~ {format_range_val(max_val)}")
                                 
                                 st.caption(f"<div style='color: #059669; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{range_str}</div>", unsafe_allow_html=True)
                             else:
-                                st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 논리적 모순이 발생했습니다. 아무것도 선택할 수 없다면 위에서 응답하신 내용을 조금씩 수정해 주세요.', '⚠️ A logical contradiction has occurred. If you cannot select anything, please slightly adjust your previous answers above.')}</div>", unsafe_allow_html=True)
+                                st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 논리적 모순이 발생했습니다. 권장 범위를 산출할 수 없으니 위에서 응답하신 내용을 조금씩 수정해 주세요.', '⚠️ A logical contradiction has occurred. Cannot calculate recommended range. Please slightly adjust your previous answers above.')}</div>", unsafe_allow_html=True)
 
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
-                             options=display_options,
+                             options=clean_options,
                              index=None,
                              format_func=format_option,
                              key=f"pair_ans_{pair_key}",
@@ -6654,7 +6653,7 @@ Thank you very much for your valuable participation.
                 st.warning(_("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 대거 무효 처리되어 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다. 응답자 이탈을 낮추기 위해 일관성 비율 허용 기준치를 0.3 이하로 여유롭게 설정하고, 데이터 수집 후 AHP마스터의 일관성 보정 기능을 통해 사후 보정하여 분석하시기를 적극 추천드립니다.", "⚠️ Warning: If the CR limit is set too strict (low), many logically inconsistent surveys will be invalidated. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. To reduce respondent dropout, we strongly recommend setting the consistency ratio tolerance to 0.3 or less and post-calibrating the collected data using the AHP Master consistency calibration feature."))
                 cr_guide_enabled = st.toggle(_("✅ 실시간 CR 가이드라인 기능 켜기 (응답자에게 제한 CR을 맞출 수 있는 척도를 시각적으로 안내합니다)", "✅ Enable Real-time CR Guideline (Visually guides respondents to choose scales that satisfy the CR limit)"), value=st.session_state.get("edit_cr_guide_enabled", False))
                 if cr_guide_enabled:
-                    st.info(_("💡 안내: 이 기능을 켜면 응답자가 설문 중 허용되는 권장 범위 내에서만 선택할 수 있도록 라디오 버튼 선택지가 제한됩니다. 이전 답변으로 인해 논리적 모순이 발생하면 아무것도 선택할 수 없는 상태(데드락)가 되며, 이때는 위쪽의 응답을 수정하도록 유도합니다.", "💡 Note: When enabled, radio button options will be restricted so respondents can only select within the recommended range. If a logical contradiction occurs due to previous answers, no options will be selectable (deadlock), and respondents will be prompted to adjust their previous answers."))
+                    st.info(_("💡 안내: 이 기능을 켜면 응답자가 설문 중 일관성을 유지할 수 있도록 권장되는 허용 범위(예: 왼쪽 5 ~ 오른쪽 3)가 텍스트로 부드럽게 안내됩니다. 응답을 강제하지 않으며, 모순된 응답으로 인해 권장 범위를 산출할 수 없을 때는 이전 응답을 수정하도록 안내합니다.", "💡 Note: When enabled, respondents will see a recommended text range (e.g., Left 5 ~ Right 3) to help them maintain consistency. It does not force responses. If a logical contradiction prevents calculating a range, respondents are prompted to adjust their previous answers."))
             else:
                 cr_guide_enabled = False
 
