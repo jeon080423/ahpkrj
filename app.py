@@ -3783,7 +3783,7 @@ with col_main:
         
         # 배포 통계 집계 및 시각화
         st.write("---")
-        st.write("### 📊 설문지 배포 통계")
+        st.write(_("### 📊 설문지 배포 통계", "### 📊 Survey Distribution Statistics"))
         users_df = get_all_users()
         
         # 컬럼 존재 확인 및 결측치 보정
@@ -3801,11 +3801,11 @@ with col_main:
         
         col_stat1, col_stat2, col_stat3 = st.columns(3)
         with col_stat1:
-            st.metric("총 설문 배포 건수", f"{total_dist_surveys}건")
+            st.metric(_("총 설문 배포 건수", "Total Distributed Surveys"), f"{total_dist_surveys}" + _("건", ""))
         with col_stat2:
-            st.metric("설문 배포 경험 회원 수", f"{active_users_count}명")
+            st.metric(_("설문 배포 경험 회원 수", "Members with Distribution Experience"), f"{active_users_count}" + _("명", ""))
         with col_stat3:
-            st.metric("총 가입 회원 수", f"{total_registered_users}명")
+            st.metric(_("총 가입 회원 수", "Total Registered Members"), f"{total_registered_users}" + _("명", ""))
             
         # 2. 사용자별 배포 횟수 차트
         active_users_df = users_df[users_df['survey_count'] > 0].copy()
@@ -3818,10 +3818,10 @@ with col_main:
             fig_dist.update_layout(xaxis_title="회원 ID", yaxis_title="배포 건수")
             st.plotly_chart(fig_dist, use_container_width=True)
         else:
-            st.info("아직 설문을 배포한 사용자가 없습니다.")
+            st.info(_("아직 설문을 배포한 사용자가 없습니다.", "No users have distributed a survey yet."))
             
         st.write("---")
-        st.write("### 👥 가입자 현황 및 최종 배포 링크")
+        st.write(_("### 👥 가입자 현황 및 최종 배포 링크", "### 👥 Subscriber Status and Latest Distribution Links"))
         
         # 컬럼 순서 및 구성 재조정하여 데이터프레임으로 출력
         display_df = users_df[['id', 'role', 'signup_date', 'pw', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info']].copy()
@@ -4095,8 +4095,8 @@ with col_main:
                     model_structure[mc] = sub_list
                     
                     if tier_level == 3 and sub_list:
-                        with st.expander(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", expanded=True):
-                            st.info("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.")
+                        with st.expander(_(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", f"▶ Enter Sub-sub-criteria for '{mc}'"), expanded=True):
+                            st.info(_("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.", "💡 **Mixed-Tier Guide**: If a sub-criterion has no sub-sub-criteria, **leave it blank to automatically calculate as a 2-tier weight**."))
                             for sub_c in sub_list:
                                 sub_sub_input = st.text_input(
                                     f"▶ '{sub_c}'의 소분류 (콤마 구분)", 
@@ -4330,7 +4330,7 @@ with col_main:
         st.subheader(_("2. 데이터 업로드 및 분석", "2. Data Upload & Analysis"))
         
         if st.session_state.get('user_role') == 'admin':
-            st.info("💡 **혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 엑셀 템플릿을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.")
+            st.info(_("💡 **혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 엑셀 템플릿을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "💡 **Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
 
         # 데이터 소스 선택 추가
         data_source = st.radio(
@@ -6232,7 +6232,7 @@ with col_main:
                                 """
                                 st.components.v1.html(paypal_html, height=180)
                             else:
-                                st.markdown("### 💳 정식 사용자 승격 및 무제한 분석")
+                                st.markdown(_("### 💳 정식 사용자 승격 및 무제한 분석", "### 💳 Upgrade to Official User for Unlimited Analysis"))
                                 st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
                                 st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 아래 버튼을 클릭해 주세요.\n(서비스 이용요금: 50만원)")
                                 if st.button("정식 사용자 전환 요청", use_container_width=True, key="main_upgrade_btn"):
@@ -6561,8 +6561,8 @@ Thank you very much for your valuable participation.
 
                 # [신규] 3계층 선택 시 소분류 입력 필드 동적 생성
                 if tier_level == 3 and subs_list:
-                    with st.expander(f"↳ '{mc}' 하위의 소분류 (Sub-sub-criteria) 입력", expanded=True):
-                        st.info("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.")
+                    with st.expander(_(f"↳ '{mc}' 하위의 소분류 (Sub-sub-criteria) 입력", f"↳ Enter Sub-sub-criteria under '{mc}'"), expanded=True):
+                        st.info(_("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.", "💡 **Mixed-Tier Guide**: If a sub-criterion has no sub-sub-criteria, **leave it blank to automatically calculate as a 2-tier weight**."))
                         for sub_c in subs_list:
                             sub_sub_val = "" # 3계층 기본값은 빈칸
                             if sub_c in ["하드웨어", "Hardware"]: sub_sub_val = _("카메라, 배터리, 프로세서", "Camera, Battery, Processor")
@@ -6714,7 +6714,7 @@ Thank you very much for your valuable participation.
                 options_kr = {
                     "realtime": "실시간 권장 범위 시각화 안내 (이탈률 최소화, 편의성 높음)",
                     "post_wizard": "제출 후 지능형 수정 제안 마법사 (가장 학술적인 방식, 편향성 제거)",
-                    "none": "안내 없음 (엄격한 검증만 수행)"
+                    "none": "일관성 가이드 없음(엄격한 검증만 수행)"
                 }
                 options_en = {
                     "realtime": "Real-time Visual Range Guide (Minimizes dropout, high convenience)",
@@ -6911,7 +6911,7 @@ Thank you very much for your valuable participation.
                                 update_user_survey_distribution(st.session_state.user_id, short_url)
 
                                 st.balloons()
-                                st.success("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!" if st.session_state.get("editing_survey_id") else "🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!")
+                                st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))
 
                                 st.code(short_url, language="text")
                                 st.info(f"**위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.**  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
@@ -6927,11 +6927,11 @@ Thank you very much for your valuable participation.
     # [신규] 응답현황 대시보드 탭 (Tab 3) 상세 구현
     # -------------------------------------------------------------------------
     with main_tab3:
-        st.header("실시간 응답 현황")
+        st.header(_("실시간 응답 현황", "Real-time Response Status"))
         selected_sheet_id = None
         
         if st.session_state.user_id is None:
-            st.warning("🔒 **실시간 응답 현황 기능은 회원 전용 서비스입니다.**")
+            st.warning(_("🔒 **실시간 응답 현황 기능은 회원 전용 서비스입니다.**", "🔒 **Real-time response status is a member-only service.**"))
             st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
         else:
             # DB에서 해당 관리자가 생성한 설문 목록 조회
@@ -7036,13 +7036,13 @@ Thank you very much for your valuable participation.
                 stats = st.session_state["survey_stats"]
                 col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                 with col_stat1:
-                    st.metric("총 접속자 수 (Visits)", f"{stats['visits']}명")
+                    st.metric(_("총 접속자 수 (Visits)", "Total Visits"), f"{stats['visits']}" + _("명", ""))
                 with col_stat2:
-                    st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}명")
+                    st.metric(_("완료 응답자 수 (Completed)", "Completed Responses"), f"{stats['completed']}" + _("명", ""))
                 with col_stat3:
-                    st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}회")
+                    st.metric(_("일관성 초과 중단자 (CR Fail)", "CR Fail Abandonments"), f"{stats['abandoned_cr']}" + _("회", " times"))
                 with col_stat4:
-                    st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}명")
+                    st.metric(_("단순 이탈 중단자 (Bounce)", "Bounced Visitors"), f"{stats['abandoned_bounce']}" + _("명", ""))
 
                 # 시각화 차트 추가
                 import plotly.express as px
@@ -7073,12 +7073,12 @@ Thank you very much for your valuable participation.
                 demo_df = st.session_state.get("demo_df", None)
 
                 # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
-                with st.expander("📥 실시간 구글 시트 응답 데이터 다운로드 센터", expanded=True):
+                with st.expander(_("📥 실시간 구글 시트 응답 데이터 다운로드 센터", "📥 Real-time Google Sheet Response Data Download Center"), expanded=True):
                     if not live_df.empty:
                         st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
                         
                         # 📊 AHP 분석 연동 단축 버튼 추가
-                        if st.button("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", type="primary", use_container_width=True):
+                        if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
                             st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                             from survey_manager import load_survey_metadata
                             survey_meta = load_survey_metadata(selected_sheet_id)
@@ -7113,7 +7113,7 @@ Thank you very much for your valuable participation.
                                                 st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce').fillna(1.0)
                                                 
                                 st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                st.info("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.")
+                                st.info(_("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.", "📊 Data analysis preparation is complete! Select the **'📊 AHP Analysis Tool' tab at the top** and choose the **'🌐 Link Distributed Online Survey Data'** radio button to view the results instantly."))
 
                         tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
                         with tab_raw:
