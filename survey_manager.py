@@ -104,7 +104,7 @@ def get_survey_gspread_client(user_id=None):
         st.error(f"gspread 인증 에러: {e}")
         return None
 
-def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_enabled, rewards_info, description="", existing_sheet_id=None, user_id=None):
+def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_method, rewards_info, description="", existing_sheet_id=None, user_id=None):
     """
     고유한 Google Sheet를 동적으로 신규 생성하고 관리자 계정에 쓰기 권한을 부여하거나,
     사용자가 전달한 기존 구글 시트 ID를 기반으로 설문지를 연동합니다.
@@ -215,7 +215,8 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["Demographics", json.dumps(demographics, ensure_ascii=False)],
         ["Definitions", json.dumps(definition_map, ensure_ascii=False)],
         ["CR_Limit", str(cr_limit)],
-        ["CR_Guide_Enabled", str(cr_guide_enabled)],
+        ["CR_Guide_Enabled", str(cr_guide_method == "realtime")],
+        ["CR_Guide_Method", str(cr_guide_method)],
         ["Rewards_Info", json.dumps(rewards_info, ensure_ascii=False)],
         ["Visit_Count", "0"],
         ["Abandoned_CR_Count", "0"]
@@ -344,7 +345,8 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
             "Demographics": demographics,
             "Definitions": definition_map,
             "CR_Limit": float(cr_limit) if cr_limit is not None and str(cr_limit) != "None" else None,
-            "CR_Guide_Enabled": bool(cr_guide_enabled),
+            "CR_Guide_Enabled": bool(cr_guide_method == "realtime"),
+            "CR_Guide_Method": str(cr_guide_method),
             "Rewards_Info": rewards_info
         }
         c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
@@ -384,6 +386,7 @@ def _fetch_survey_metadata_from_sheets(spreadsheet_id):
     meta_dict["Rewards_Info"] = json.loads(meta_dict["Rewards_Info"])
     meta_dict["CR_Limit"] = float(meta_dict.get("CR_Limit", "None")) if meta_dict.get("CR_Limit", "None") != "None" else None
     meta_dict["CR_Guide_Enabled"] = str(meta_dict.get("CR_Guide_Enabled", "False")).lower() == "true"
+    meta_dict["CR_Guide_Method"] = str(meta_dict.get("CR_Guide_Method", "realtime" if meta_dict["CR_Guide_Enabled"] else "none"))
     
     # 로컬 SQLite 캐시에 백업/동기화 저장
     try:
@@ -709,6 +712,75 @@ def generate_pairwise_combinations(model):
             })
             
     return combinations
+
+def get_cr_fix_suggestion(factors, answers):
+    """
+    CR이 한계치를 초과할 때 가장 모순이 큰 쌍(pair)과 추천 값을 반환합니다.
+    반환값: (최악의 쌍 튜플 (factor_i, factor_j), 현재 값, 추천 값)
+    """
+    n = len(factors)
+    if n <= 2:
+        return None, None, None
+
+    # 행렬 구축
+    import numpy as np
+    matrix = np.eye(n)
+    for i in range(n):
+        for j in range(i + 1, n):
+            pair_key = f"{factors[i]}_{factors[j]}"
+            raw_val = answers.get(pair_key, 1)
+            
+            if raw_val == 1:
+                val = 1.0
+            elif raw_val < 0:
+                val = float(abs(raw_val))
+            else:
+                val = 1.0 / float(raw_val)
+                
+            matrix[i, j] = val
+            matrix[j, i] = 1.0 / val
+
+    # 고유값 계산 및 주요 고유벡터 (가중치) 도출
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
+    max_index = np.argmax(np.real(eigenvalues))
+    w = np.real(eigenvectors[:, max_index])
+    w = w / np.sum(w) # 정규화
+
+    max_inconsistency = -1.0
+    worst_pair = None
+    worst_current_val = None
+    suggested_val = None
+
+    valid_raw_vals = list(range(-9, -1)) + [1] + list(range(2, 10))
+    def raw_to_ratio(r):
+        if r == 1: return 1.0
+        if r < 0: return float(abs(r))
+        return 1.0 / float(r)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            expected_ratio = w[i] / w[j]
+            actual_ratio = matrix[i, j]
+            
+            diff = max(actual_ratio / expected_ratio, expected_ratio / actual_ratio)
+            
+            if diff > max_inconsistency:
+                max_inconsistency = diff
+                worst_pair = (factors[i], factors[j])
+                
+                best_raw = 1
+                min_dist = float('inf')
+                for r in valid_raw_vals:
+                    ratio = raw_to_ratio(r)
+                    dist = abs(np.log(ratio) - np.log(expected_ratio))
+                    if dist < min_dist:
+                        min_dist = dist
+                        best_raw = r
+                
+                suggested_val = best_raw
+                worst_current_val = answers.get(f"{factors[i]}_{factors[j]}", 1)
+
+    return worst_pair, worst_current_val, suggested_val
 
 def calculate_matrix_cr(factors, answers):
     """지정된 요인과 응답값을 바탕으로 일관성 비율(CR)을 계산합니다."""
