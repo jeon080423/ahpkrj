@@ -2653,11 +2653,30 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 pass
                                 
                         def format_option(opt):
-                            val_str = str(abs(opt)) if opt < 0 else str(opt) # 가시성을 위해 절대값으로 표시
-                            if cr_guide_enabled and cr_limit is not None:
-                                if opt in valid_options:
-                                    return f"{val_str} ✅"
-                            return val_str
+                            return str(abs(opt)) if opt < 0 else str(opt) # 가시성을 위해 절대값으로 표시
+
+                        if cr_guide_enabled and cr_limit is not None:
+                            valid_sorted = [x for x in clean_options if x in valid_options]
+                            if valid_sorted:
+                                min_val = valid_sorted[0]
+                                max_val = valid_sorted[-1]
+                                
+                                def format_range_val(v):
+                                    if v < 0:
+                                        return _(f"[왼쪽] {abs(v)}", f"[Left] {abs(v)}")
+                                    elif v == 1:
+                                        return _("[양측 동등] 1", "[Equal] 1")
+                                    else:
+                                        return _(f"[오른쪽] {v}", f"[Right] {v}")
+                                        
+                                if min_val == max_val:
+                                    range_str = _(f"💡 CR 권장 응답: {format_range_val(min_val)}", f"💡 Recommended Response: {format_range_val(min_val)}")
+                                else:
+                                    range_str = _(f"💡 CR 권장 범위: {format_range_val(min_val)} ~ {format_range_val(max_val)}", f"💡 Recommended Range: {format_range_val(min_val)} ~ {format_range_val(max_val)}")
+                                
+                                st.caption(f"<div style='color: #059669; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{range_str}</div>", unsafe_allow_html=True)
+                            else:
+                                st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 이전 문항 응답으로 인해 CR 제한을 만족할 수 없습니다.', '⚠️ Due to previous answers, CR limit cannot be satisfied.')}</div>", unsafe_allow_html=True)
 
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
@@ -2668,9 +2687,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
                              horizontal=True,
                              label_visibility="collapsed"
                          )
-                        
-                        if cr_guide_enabled and cr_limit is not None and not valid_options:
-                            st.caption(_("⚠️ 이전 문항 응답으로 인해 CR 제한을 만족할 수 없습니다.", "⚠️ Due to previous answers, CR limit cannot be satisfied."))
                 
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
