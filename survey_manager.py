@@ -728,8 +728,10 @@ def calculate_matrix_cr(factors, answers):
     for i in range(n):
         for j in range(i + 1, n):
             pair_key = f"{factors[i]}_{factors[j]}"
-            # 만약 answers에 없으면 기본값인 1.0(동등) 사용
-            raw_val = answers.get(pair_key, 1)
+            # 만약 answers에 없거나 값이 None이면 기본값인 1.0(동등) 사용
+            raw_val = answers.get(pair_key)
+            if raw_val is None:
+                raw_val = 1
             
             # 음수는 왼쪽 우선, 양수는 오른쪽 우선 스케일 변환
             if raw_val == 1:
