@@ -2726,6 +2726,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         """, unsafe_allow_html=True)
                 
                     ahp_answers[pair_key] = ans_val
+            
+            if ahp_model.get("cr_guide", False) and ahp_model.get("cr_limit") is not None:
+                st.info(_("💡 **안내**: 파란색으로 표시된 범위는 앞선 응답들과의 **논리적 일관성(CR)을 최적으로 유지할 수 있는 권장 선택 구간**입니다.", "💡 **Info**: The blue shaded area indicates the **recommended selection range** to optimally maintain logical consistency (CR) with your previous answers."))
+                
             st.divider()
             
         # 5. 개인정보 수집 및 답례품 동적 노출 및 문구 설정
