@@ -2264,7 +2264,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     # AHP 쌍대비교 기본 선택값을 1(동등)로 설정하기 위해 session_state 사전 초기화 (버전 v3 적용으로 세션 캐시 갱신)
     tier_level = int(survey_meta.get("Tier_Level", 2))
     
-    init_key = f"init_survey_{survey_id_param}_v3"
+    init_key = f"init_survey_{survey_id_param}_v4"
     if init_key not in st.session_state:
         st.session_state[init_key] = True
         
@@ -2277,7 +2277,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         for comb in combinations:
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
-                st.session_state[f"pair_ans_{pair_key}"] = 1
+                st.session_state[f"pair_ans_{pair_key}"] = None
     
     # 단일 스크롤 폼 생성
     # respondent_survey_form context split - sections 1,2,3 are now outside the form
@@ -2639,16 +2639,22 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             try:
                                 group_factors = comb["factors"]
                                 group_answers = {}
+                                other_missing = False
                                 for p_left, p_right in comb["pairs"]:
                                     k = f"{p_left}_{p_right}"
-                                    group_answers[k] = st.session_state.get(f"pair_ans_{k}", 1)
+                                    val = st.session_state.get(f"pair_ans_{k}", None)
+                                    group_answers[k] = val
+                                    if k != pair_key and val is None:
+                                        other_missing = True
                                 
-                                for opt in clean_options:
-                                    test_answers = group_answers.copy()
-                                    test_answers[pair_key] = opt
-                                    test_cr = calculate_matrix_cr(group_factors, test_answers)
-                                    if test_cr <= cr_limit:
-                                        valid_options.add(opt)
+                                # 비교 요인이 2개 초과이고, 그룹 내의 다른 문항들이 모두 응답된 경우에만 권장 범위를 산출합니다.
+                                if len(group_factors) > 2 and not other_missing:
+                                    for opt in clean_options:
+                                        test_answers = group_answers.copy()
+                                        test_answers[pair_key] = opt
+                                        test_cr = calculate_matrix_cr(group_factors, test_answers)
+                                        if test_cr <= cr_limit:
+                                            valid_options.add(opt)
                             except Exception:
                                 pass
                                 
@@ -2656,28 +2662,31 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        if cr_guide_enabled and cr_limit is not None:
-                            valid_sorted = [x for x in clean_options if x in valid_options]
-                            if valid_sorted:
-                                min_val = valid_sorted[0]
-                                max_val = valid_sorted[-1]
-                                
-                                def format_range_val(v):
-                                    if v < 0:
-                                        return _(f"[왼쪽] {abs(v)}", f"[Left] {abs(v)}")
-                                    elif v == 1:
-                                        return _("[양측 동등] 1", "[Equal] 1")
-                                    else:
-                                        return _(f"[오른쪽] {v}", f"[Right] {v}")
-                                        
-                                if min_val == max_val:
-                                    range_str = _(f"💡 CR 권장 응답: {format_range_val(min_val)}", f"💡 Recommended Response: {format_range_val(min_val)}")
-                                else:
-                                    range_str = _(f"💡 CR 권장 범위: {format_range_val(min_val)} ~ {format_range_val(max_val)}", f"💡 Recommended Range: {format_range_val(min_val)} ~ {format_range_val(max_val)}")
-                                
-                                st.caption(f"<div style='color: #059669; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{range_str}</div>", unsafe_allow_html=True)
+                        if cr_guide_enabled and cr_limit is not None and len(comb["factors"]) > 2:
+                            if other_missing:
+                                st.caption(f"<div style='color: #64748b; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('💡 같은 그룹의 다른 문항들을 모두 응답하시면 CR 권장 범위가 표시됩니다.', '💡 The recommended CR range will be displayed once all other questions in this group are answered.')}</div>", unsafe_allow_html=True)
                             else:
-                                st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 논리적 모순이 발생했습니다. 권장 범위를 산출할 수 없으니 위에서 응답하신 내용을 조금씩 수정해 주세요.', '⚠️ A logical contradiction has occurred. Cannot calculate recommended range. Please slightly adjust your previous answers above.')}</div>", unsafe_allow_html=True)
+                                valid_sorted = [x for x in clean_options if x in valid_options]
+                                if valid_sorted:
+                                    min_val = valid_sorted[0]
+                                    max_val = valid_sorted[-1]
+                                    
+                                    def format_range_val(v):
+                                        if v < 0:
+                                            return _(f"[왼쪽] {abs(v)}", f"[Left] {abs(v)}")
+                                        elif v == 1:
+                                            return _("[양측 동등] 1", "[Equal] 1")
+                                        else:
+                                            return _(f"[오른쪽] {v}", f"[Right] {v}")
+                                            
+                                    if min_val == max_val:
+                                        range_str = _(f"💡 CR 권장 응답: {format_range_val(min_val)}", f"💡 Recommended Response: {format_range_val(min_val)}")
+                                    else:
+                                        range_str = _(f"💡 CR 권장 범위: {format_range_val(min_val)} ~ {format_range_val(max_val)}", f"💡 Recommended Range: {format_range_val(min_val)} ~ {format_range_val(max_val)}")
+                                    
+                                    st.caption(f"<div style='color: #059669; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{range_str}</div>", unsafe_allow_html=True)
+                                else:
+                                    st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 논리적 모순이 발생했습니다. 권장 범위를 산출할 수 없으니 위에서 응답하신 내용을 조금씩 수정해 주세요.', '⚠️ A logical contradiction has occurred. Cannot calculate recommended range. Please slightly adjust your previous answers above.')}</div>", unsafe_allow_html=True)
 
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
