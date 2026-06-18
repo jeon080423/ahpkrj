@@ -2656,13 +2656,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                     
                                 bar_html += '</div>'
                                 st.markdown(bar_html, unsafe_allow_html=True)
+                            else:
+                                st.markdown('<div style="display: flex; width: 100%; height: 32px; margin-bottom: -32px; z-index: 0; position: relative;"></div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<div style="display: flex; width: 100%; height: 32px; margin-bottom: -32px; z-index: 0; position: relative;"></div>', unsafe_allow_html=True)
+
+                        ans_key = f"pair_ans_{pair_key}"
+                        current_val = st.session_state.get(ans_key, None)
+                        current_idx = clean_options.index(current_val) if current_val in clean_options else None
 
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
                              options=clean_options,
-                             index=None,
+                             index=current_idx,
                              format_func=format_option,
-                             key=f"pair_ans_{pair_key}",
+                             key=ans_key,
                              horizontal=True,
                              label_visibility="collapsed"
                          )
