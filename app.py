@@ -2686,7 +2686,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 bar_html = '<div style="display: flex; width: 100%; height: 32px; margin-bottom: -32px; z-index: 0; position: relative;">'
                                 for i, opt in enumerate(clean_options):
                                     is_valid = start_idx <= i <= end_idx
-                                    bg_color = "rgba(16, 185, 129, 0.2)" if is_valid else "transparent"
+                                    bg_color = "rgba(59, 130, 246, 0.25)" if is_valid else "transparent"
                                     
                                     # 모서리 둥글게 처리 (시작과 끝)
                                     border_radius = ""
