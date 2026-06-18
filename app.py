@@ -2690,7 +2690,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 css_html = f"""
                                 <div id="cr_guide_{pair_key}"></div>
                                 <style>
-                                div.element-container:has(#cr_guide_{pair_key}) + div.element-container div[data-testid="stRadio"] {{
+                                div[data-testid="stVerticalBlock"] > div:has(#cr_guide_{pair_key}) + div div[role="radiogroup"] {{
                                     background: linear-gradient(to right, 
                                         transparent 0%, 
                                         transparent {start_percent}%, 
