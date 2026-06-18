@@ -2681,27 +2681,24 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 end_idx = clean_options.index(max_val)
                                 N = len(clean_options)
                                 
-                                # 각 라디오 버튼이 차지하는 영역(%) 계산
-                                start_percent = (start_idx / N) * 100
-                                end_percent = ((end_idx + 1) / N) * 100
-                                
-                                css_html = f"""
-                                <div id="cr_guide_{pair_key}"></div>
-                                <style>
-                                div:has(> div > div > #cr_guide_{pair_key}) + div div[role="radiogroup"] {{
-                                    background: linear-gradient(to right, 
-                                        transparent 0%, 
-                                        transparent {start_percent}%, 
-                                        rgba(16, 185, 129, 0.2) {start_percent}%, 
-                                        rgba(16, 185, 129, 0.2) {end_percent}%, 
-                                        transparent {end_percent}%, 
-                                        transparent 100%
-                                    ) !important;
-                                    border-radius: 6px;
-                                }}
-                                </style>
-                                """
-                                st.markdown(css_html, unsafe_allow_html=True)
+                                # 17개의 라디오 버튼에 1:1 매칭되는 시각적 가이드 바(Bar) HTML 생성
+                                # 높이를 라디오 버튼 높이(28px)와 동일하게 맞추고, margin-bottom으로 라디오 버튼 뒤로 숨김
+                                bar_html = '<div style="display: flex; width: 100%; height: 32px; margin-bottom: -32px; z-index: 0; position: relative;">'
+                                for i, opt in enumerate(clean_options):
+                                    is_valid = start_idx <= i <= end_idx
+                                    bg_color = "rgba(16, 185, 129, 0.2)" if is_valid else "transparent"
+                                    
+                                    # 모서리 둥글게 처리 (시작과 끝)
+                                    border_radius = ""
+                                    if i == start_idx:
+                                        border_radius = "border-top-left-radius: 6px; border-bottom-left-radius: 6px;"
+                                    if i == end_idx:
+                                        border_radius += " border-top-right-radius: 6px; border-bottom-right-radius: 6px;"
+                                        
+                                    bar_html += f'<div style="flex: 1 1 0%; background-color: {bg_color}; {border_radius}"></div>'
+                                    
+                                bar_html += '</div>'
+                                st.markdown(bar_html, unsafe_allow_html=True)
 
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
