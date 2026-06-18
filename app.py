@@ -2264,7 +2264,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     # AHP 쌍대비교 기본 선택값을 1(동등)로 설정하기 위해 session_state 사전 초기화 (버전 v3 적용으로 세션 캐시 갱신)
     tier_level = int(survey_meta.get("Tier_Level", 2))
     
-    init_key = f"init_survey_{survey_id_param}_v4"
+    init_key = f"init_survey_{survey_id_param}_v5"
     if init_key not in st.session_state:
         st.session_state[init_key] = True
         
@@ -2646,12 +2646,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                     group_answers[k] = val
                                     if k != pair_key and val is None:
                                         other_missing = True
-                                        
-                                # === DEBUG INFO ===
-                                # To diagnose the 'None' issue:
-                                debug_text = f"DEBUG {pair_key} - other_missing: {other_missing} | vals: " + ", ".join([f"{k}:{v}" for k,v in group_answers.items()])
                                 
-                                # ==================
+                                min_cr_opt = 1
+                                min_cr_val = float('inf')
                                 
                                 # 비교 요인이 2개 초과이고, 그룹 내의 다른 문항들이 모두 응답된 경우에만 권장 범위를 산출합니다.
                                 if len(group_factors) > 2 and not other_missing:
@@ -2661,6 +2658,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                         test_cr = calculate_matrix_cr(group_factors, test_answers)
                                         if test_cr <= cr_limit:
                                             valid_options.add(opt)
+                                        if test_cr < min_cr_val:
+                                            min_cr_val = test_cr
+                                            min_cr_opt = opt
                             except Exception:
                                 pass
                                 
@@ -2669,30 +2669,41 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
                         if cr_guide_enabled and cr_limit is not None and len(comb["factors"]) > 2:
-                            if other_missing:
-                                st.caption(f"<div style='color: #64748b; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('💡 같은 그룹의 다른 문항들을 모두 응답하시면 CR 권장 범위가 표시됩니다.', '💡 The recommended CR range will be displayed once all other questions in this group are answered.')}</div>", unsafe_allow_html=True)
-                            else:
+                            if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
                                 if valid_sorted:
                                     min_val = valid_sorted[0]
                                     max_val = valid_sorted[-1]
-                                    
-                                    def format_range_val(v):
-                                        if v < 0:
-                                            return _(f"[왼쪽] {abs(v)}", f"[Left] {abs(v)}")
-                                        elif v == 1:
-                                            return _("[양측 동등] 1", "[Equal] 1")
-                                        else:
-                                            return _(f"[오른쪽] {v}", f"[Right] {v}")
-                                            
-                                    if min_val == max_val:
-                                        range_str = _(f"💡 CR 권장 응답: {format_range_val(min_val)}", f"💡 Recommended Response: {format_range_val(min_val)}")
-                                    else:
-                                        range_str = _(f"💡 CR 권장 범위: {format_range_val(min_val)} ~ {format_range_val(max_val)}", f"💡 Recommended Range: {format_range_val(min_val)} ~ {format_range_val(max_val)}")
-                                    
-                                    st.caption(f"<div style='color: #059669; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{range_str}</div>", unsafe_allow_html=True)
                                 else:
-                                    st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 논리적 모순이 발생했습니다. 권장 범위를 산출할 수 없으니 위에서 응답하신 내용을 조금씩 수정해 주세요.', '⚠️ A logical contradiction has occurred. Cannot calculate recommended range. Please slightly adjust your previous answers above.')}</div>", unsafe_allow_html=True)
+                                    # 모순 발생 시 가장 CR이 낮은 값을 가이드로 제시
+                                    min_val = min_cr_opt
+                                    max_val = min_cr_opt
+                                    
+                                start_idx = clean_options.index(min_val)
+                                end_idx = clean_options.index(max_val)
+                                N = len(clean_options)
+                                
+                                # 각 라디오 버튼이 차지하는 영역(%) 계산
+                                start_percent = (start_idx / N) * 100
+                                end_percent = ((end_idx + 1) / N) * 100
+                                
+                                css_html = f"""
+                                <div id="cr_guide_{pair_key}"></div>
+                                <style>
+                                div.element-container:has(#cr_guide_{pair_key}) + div.element-container div[data-testid="stRadio"] {{
+                                    background: linear-gradient(to right, 
+                                        transparent 0%, 
+                                        transparent {start_percent}%, 
+                                        rgba(16, 185, 129, 0.2) {start_percent}%, 
+                                        rgba(16, 185, 129, 0.2) {end_percent}%, 
+                                        transparent {end_percent}%, 
+                                        transparent 100%
+                                    ) !important;
+                                    border-radius: 6px;
+                                }}
+                                </style>
+                                """
+                                st.markdown(css_html, unsafe_allow_html=True)
 
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
