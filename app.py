@@ -2426,7 +2426,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     st.divider()
     
-    with st.form("respondent_survey_form"):
+    with st.container():
         # 4. AHP 쌍대비교 문항 생성
         st.subheader(f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)"))
         ahp_section_prefix = f"{section_num}"
@@ -2650,7 +2650,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 # === DEBUG INFO ===
                                 # To diagnose the 'None' issue:
                                 debug_text = f"DEBUG {pair_key} - other_missing: {other_missing} | vals: " + ", ".join([f"{k}:{v}" for k,v in group_answers.items()])
-                                st.caption(f"<div style='color: red; font-size: 10px;'>{debug_text}</div>", unsafe_allow_html=True)
+                                
                                 # ==================
                                 
                                 # 비교 요인이 2개 초과이고, 그룹 내의 다른 문항들이 모두 응답된 경우에만 권장 범위를 산출합니다.
@@ -2746,7 +2746,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             agree_check = st.radio(radio_label, [_("동의", "Agree"), _("비동의", "Disagree")], index=1, key="survey_agree_check")
         
         # 제출 버튼
-        submit_btn = st.form_submit_button(_("설문지 제출하기", "Submit Survey"), type="primary")
+        submit_btn = st.button(_("설문지 제출하기", "Submit Survey"), type="primary")
         if submit_btn:
             # 필수값 유효성 검증
             missing = False
