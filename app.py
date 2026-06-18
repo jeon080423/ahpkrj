@@ -2655,9 +2655,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         def format_option(opt):
                             return str(abs(opt)) if opt < 0 else str(opt) # 가시성을 위해 절대값으로 표시
 
+                        display_options = clean_options
                         if cr_guide_enabled and cr_limit is not None:
                             valid_sorted = [x for x in clean_options if x in valid_options]
                             if valid_sorted:
+                                display_options = valid_sorted
                                 min_val = valid_sorted[0]
                                 max_val = valid_sorted[-1]
                                 
@@ -2670,18 +2672,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                         return _(f"[오른쪽] {v}", f"[Right] {v}")
                                         
                                 if min_val == max_val:
-                                    range_str = _(f"💡 CR 권장 응답: {format_range_val(min_val)}", f"💡 Recommended Response: {format_range_val(min_val)}")
+                                    range_str = _(f"💡 CR 허용 구간: {format_range_val(min_val)}만 선택 가능", f"💡 CR Allowed Range: Only {format_range_val(min_val)} is selectable")
                                 else:
-                                    range_str = _(f"💡 CR 권장 범위: {format_range_val(min_val)} ~ {format_range_val(max_val)}", f"💡 Recommended Range: {format_range_val(min_val)} ~ {format_range_val(max_val)}")
+                                    range_str = _(f"💡 CR 허용 구간: {format_range_val(min_val)} ~ {format_range_val(max_val)} 사이만 선택 가능", f"💡 CR Allowed Range: Only between {format_range_val(min_val)} ~ {format_range_val(max_val)} is selectable")
                                 
                                 st.caption(f"<div style='color: #059669; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{range_str}</div>", unsafe_allow_html=True)
                             else:
-                                st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 이전 문항 응답으로 인해 CR 제한을 만족할 수 없습니다.', '⚠️ Due to previous answers, CR limit cannot be satisfied.')}</div>", unsafe_allow_html=True)
+                                st.caption(f"<div style='color: #e11d48; font-weight: 500; font-size: 13px; margin-bottom: 5px; text-align: center;'>{_('⚠️ 논리적 모순이 발생했습니다. 아무것도 선택할 수 없다면 위에서 응답하신 내용을 조금씩 수정해 주세요.', '⚠️ A logical contradiction has occurred. If you cannot select anything, please slightly adjust your previous answers above.')}</div>", unsafe_allow_html=True)
 
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
-                             options=clean_options,
-                             index=clean_options.index(1),
+                             options=display_options,
+                             index=None,
                              format_func=format_option,
                              key=f"pair_ans_{pair_key}",
                              horizontal=True,
@@ -2735,6 +2737,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
             # 필수값 유효성 검증
             missing = False
             
+            # AHP 응답 누락 검증
+            missing_ahp = [k for k, v in ahp_answers.items() if v is None]
+            
             # 인구통계 필수값
             if demographics.get("name") and not resp_data.get("name"): missing = True
             if demographics.get("affiliation") and not resp_data.get("affiliation"): missing = True
@@ -2749,6 +2754,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 st.error(_("설문제출을 위해 개인정보 수집 동의에 체크해 주세요.", "Please agree to the personal information collection to submit the survey."))
                 st.stop()
                 
+            if missing_ahp:
+                st.error(_("답변하지 않은 AHP 쌍대비교 문항이 있습니다. 모든 문항에 응답해 주십시오.", "There are unanswered AHP pairwise comparison questions. Please answer all questions."))
+                st.stop()
+
             if missing:
                 st.error(_("입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.", "There are missing required fields (*). Please check the form again."))
                 st.stop()
@@ -6645,7 +6654,7 @@ Thank you very much for your valuable participation.
                 st.warning(_("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 대거 무효 처리되어 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다. 응답자 이탈을 낮추기 위해 일관성 비율 허용 기준치를 0.3 이하로 여유롭게 설정하고, 데이터 수집 후 AHP마스터의 일관성 보정 기능을 통해 사후 보정하여 분석하시기를 적극 추천드립니다.", "⚠️ Warning: If the CR limit is set too strict (low), many logically inconsistent surveys will be invalidated. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. To reduce respondent dropout, we strongly recommend setting the consistency ratio tolerance to 0.3 or less and post-calibrating the collected data using the AHP Master consistency calibration feature."))
                 cr_guide_enabled = st.toggle(_("✅ 실시간 CR 가이드라인 기능 켜기 (응답자에게 제한 CR을 맞출 수 있는 척도를 시각적으로 안내합니다)", "✅ Enable Real-time CR Guideline (Visually guides respondents to choose scales that satisfy the CR limit)"), value=st.session_state.get("edit_cr_guide_enabled", False))
                 if cr_guide_enabled:
-                    st.info(_("💡 안내: 이 기능을 켜면 응답자가 설문 중 CR을 맞출 수 있도록 척도 옆에 추천 표시(✅)가 나타납니다. 단, 앞선 응답에 따라 데드락 현상이 발생하거나 응답 편향이 생길 수 있음을 유의하세요.", "💡 Note: When enabled, respondents will see a recommendation mark (✅) next to scales that satisfy the CR limit. However, please be aware that this may cause deadlocks based on previous responses or induce response bias."))
+                    st.info(_("💡 안내: 이 기능을 켜면 응답자가 설문 중 허용되는 권장 범위 내에서만 선택할 수 있도록 라디오 버튼 선택지가 제한됩니다. 이전 답변으로 인해 논리적 모순이 발생하면 아무것도 선택할 수 없는 상태(데드락)가 되며, 이때는 위쪽의 응답을 수정하도록 유도합니다.", "💡 Note: When enabled, radio button options will be restricted so respondents can only select within the recommended range. If a logical contradiction occurs due to previous answers, no options will be selectable (deadlock), and respondents will be prompted to adjust their previous answers."))
             else:
                 cr_guide_enabled = False
 
