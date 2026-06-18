@@ -2373,56 +2373,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     st.divider()
     
-    # 3. 사전 중요도 순위 지정
-    st.subheader(f"{section_num}. " + _("요인별 전반적 중요도 순위 지정 (사전 순위)", "Prior Overall Factor Importance Ranking"))
-    section_num += 1
-    st.info(_("쌍대비교 전 요인들의 직관적인 순위를 매겨주십시오.", "Please rank the factors intuitively before starting pairwise comparisons."))
     main_criteria = ahp_model.get("main", [])
-    # 가로 병렬 배치를 위해 대분류 요인 수만큼 컬럼 생성
-    if main_criteria:
-        cols = st.columns(len(main_criteria))
-        pre_rankings = []
-        
-        please_select = _("선택해 주세요", "Please select")
-        
-        # 이전 단계의 선택 상태를 활용하여 연쇄 필터링 및 selectbox 렌더링
-        for rank_idx in range(len(main_criteria)):
-            with cols[rank_idx]:
-                # 1단계: 전체 요인 중 현재 순위 이전에 선택한 요인들을 제외
-                available_options = [opt for opt in main_criteria if translate_factor_if_default(opt) not in [translate_factor_if_default(pr) for pr in pre_rankings]]
-                available_options_trans = [translate_factor_if_default(opt) for opt in available_options]
-                options = [please_select] + available_options_trans
-                
-                # 2단계: 기존 선택값이 현재 선택 가능 옵션 목록에 존재하면 사용하고, 없으면 widget의 session state를 직접 초기화
-                widget_key = f"pre_rank_widget_{rank_idx}"
-                current_val = st.session_state.get(widget_key, please_select)
-                
-                if current_val not in options:
-                    st.session_state[widget_key] = please_select
-                    current_val = please_select
-                
-                default_index = options.index(current_val)
-                
-                selected_f = st.selectbox(
-                    f"{rank_idx+1}" + _("순위 요인 선택 *", " Rank Factor Selection *"),
-                    options,
-                    index=default_index,
-                    key=widget_key
-                )
-                
-                if selected_f != please_select:
-                    orig_f = selected_f
-                    for opt in main_criteria:
-                        if translate_factor_if_default(opt) == selected_f:
-                            orig_f = opt
-                            break
-                    pre_rankings.append(orig_f)
-        
-        resp_data["pre_ranking"] = "-".join(pre_rankings)
-    else:
-        resp_data["pre_ranking"] = ""
-    
-    st.divider()
     
     with st.container():
         # 4. AHP 쌍대비교 문항 생성
@@ -2818,10 +2769,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
             if demographics.get("email") and not resp_data.get("email"): missing = True
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
-            if len(pre_rankings) < len(main_criteria):
-                st.error(_("사전 요인 중요도 순위 지정을 모두 완성해 주세요.", "Please complete all prior factor importance rankings."))
-                st.stop()
-                
             if agree_check not in ["동의", "Agree"]:
                 st.error(_("설문제출을 위해 개인정보 수집 동의에 체크해 주세요.", "Please agree to the personal information collection to submit the survey."))
                 st.stop()
