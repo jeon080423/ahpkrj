@@ -6892,92 +6892,92 @@ Thank you very much for your valuable participation.
                 btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
                 if st.button(btn_label, type="primary", use_container_width=True):
                     if not existing_sheet_id_input.strip():
-                    st.error(_("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.", "You must enter the Google Spreadsheet URL or ID to link."))
-                    import streamlit.components.v1 as components
-                    alert_msg = _("연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.", "Deployment and linking will fail without a Google Spreadsheet URL.\\nPlease make sure to enter your Google Spreadsheet URL or ID.")
-                    components.html(f"<script>alert('{alert_msg}');</script>", height=0, width=0)
-                elif not survey_admin_email or "@" not in survey_admin_email:
-                    st.error(_("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership."))
-                    import streamlit.components.v1 as components
-                    alert_msg2 = _("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership.")
-                    components.html(f"<script>alert('{alert_msg2}');</script>", height=0, width=0)
-                else:
-                    with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
-                        try:
-                            target_sheet_id = existing_sheet_id_input.strip()
-                            if "docs.google.com/spreadsheets" in target_sheet_id:
-                                parts = target_sheet_id.split("/d/")
-                                if len(parts) > 1:
-                                    target_sheet_id = parts[1].split("/")[0]
-
-                            if tier_level == 3:
-                                from survey_manager_v3 import create_survey_sheet_v3
-                                sheet_id = create_survey_sheet_v3(
-                                    title=survey_title,
-                                    admin_email=survey_admin_email,
-                                    ahp_model=model_structure,
-                                    scale_type=scale_option,
-                                    demographics=demographics_settings,
-                                    definition_map=definitions_map,
-                                    cr_limit=cr_limit,
-                                    cr_guide_enabled=cr_guide_enabled,
-                                    rewards_info=rewards_info,
-                                    description=survey_desc,
-                                    existing_sheet_id=target_sheet_id,
-                                    user_id=st.session_state.user_id
-                                )
-                            else:
-                                sheet_id = create_survey_sheet(
-                                    title=survey_title,
-                                    admin_email=survey_admin_email,
-                                    ahp_model=model_structure,
-                                    scale_type=scale_option,
-                                    demographics=demographics_settings,
-                                    definition_map=definitions_map,
-                                    cr_limit=cr_limit,
-                                    cr_guide_enabled=cr_guide_enabled,
-                                    rewards_info=rewards_info,
-                                    description=survey_desc,
-                                    existing_sheet_id=target_sheet_id,
-                                    user_id=st.session_state.user_id
-                                )
-
-
-
-                            # admin_surveys 테이블에 신규 설문 자동 등록 및 마스터 구글 시트 백업
+                        st.error(_("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.", "You must enter the Google Spreadsheet URL or ID to link."))
+                        import streamlit.components.v1 as components
+                        alert_msg = _("연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.", "Deployment and linking will fail without a Google Spreadsheet URL.\\nPlease make sure to enter your Google Spreadsheet URL or ID.")
+                        components.html(f"<script>alert('{alert_msg}');</script>", height=0, width=0)
+                    elif not survey_admin_email or "@" not in survey_admin_email:
+                        st.error(_("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership."))
+                        import streamlit.components.v1 as components
+                        alert_msg2 = _("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership.")
+                        components.html(f"<script>alert('{alert_msg2}');</script>", height=0, width=0)
+                    else:
+                        with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
                             try:
-                                from survey_manager import save_admin_survey_to_gsheet
-                                save_admin_survey_to_gsheet(sheet_id, survey_title, st.session_state.user_id)
+                                target_sheet_id = existing_sheet_id_input.strip()
+                                if "docs.google.com/spreadsheets" in target_sheet_id:
+                                    parts = target_sheet_id.split("/d/")
+                                    if len(parts) > 1:
+                                        target_sheet_id = parts[1].split("/")[0]
+
+                                if tier_level == 3:
+                                    from survey_manager_v3 import create_survey_sheet_v3
+                                    sheet_id = create_survey_sheet_v3(
+                                        title=survey_title,
+                                        admin_email=survey_admin_email,
+                                        ahp_model=model_structure,
+                                        scale_type=scale_option,
+                                        demographics=demographics_settings,
+                                        definition_map=definitions_map,
+                                        cr_limit=cr_limit,
+                                        cr_guide_enabled=cr_guide_enabled,
+                                        rewards_info=rewards_info,
+                                        description=survey_desc,
+                                        existing_sheet_id=target_sheet_id,
+                                        user_id=st.session_state.user_id
+                                    )
+                                else:
+                                    sheet_id = create_survey_sheet(
+                                        title=survey_title,
+                                        admin_email=survey_admin_email,
+                                        ahp_model=model_structure,
+                                        scale_type=scale_option,
+                                        demographics=demographics_settings,
+                                        definition_map=definitions_map,
+                                        cr_limit=cr_limit,
+                                        cr_guide_enabled=cr_guide_enabled,
+                                        rewards_info=rewards_info,
+                                        description=survey_desc,
+                                        existing_sheet_id=target_sheet_id,
+                                        user_id=st.session_state.user_id
+                                    )
+
+
+
+                                # admin_surveys 테이블에 신규 설문 자동 등록 및 마스터 구글 시트 백업
+                                try:
+                                    from survey_manager import save_admin_survey_to_gsheet
+                                    save_admin_survey_to_gsheet(sheet_id, survey_title, st.session_state.user_id)
                                 
-                                conn = sqlite3.connect('users.db')
-                                cur = conn.cursor()
-                                cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
-                                            (sheet_id, survey_title, st.session_state.user_id))
-                                conn.commit()
-                                conn.close()
-                            except Exception as dbe:
-                                pass
+                                    conn = sqlite3.connect('users.db')
+                                    cur = conn.cursor()
+                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
+                                                (sheet_id, survey_title, st.session_state.user_id))
+                                    conn.commit()
+                                    conn.close()
+                                except Exception as dbe:
+                                    pass
 
-                            # 배포 주소 생성
-                            base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
-                            if "localhost" in base_url or "127.0.0.1" in base_url:
-                                short_url = f"{base_url}?survey_id={sheet_id}"
-                            else:
-                                short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
+                                # 배포 주소 생성
+                                base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
+                                if "localhost" in base_url or "127.0.0.1" in base_url:
+                                    short_url = f"{base_url}?survey_id={sheet_id}"
+                                else:
+                                    short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
 
-                            # 사용자 배포 통계 및 설문 링크 기록
-                            update_user_survey_distribution(st.session_state.user_id, short_url)
+                                # 사용자 배포 통계 및 설문 링크 기록
+                                update_user_survey_distribution(st.session_state.user_id, short_url)
 
-                            st.balloons()
-                            st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))
+                                st.balloons()
+                                st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))
 
-                            st.code(short_url, language="text")
-                            st.info(f"**위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.**  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
-                        except Exception as ex:
-                            st.error(f"구글 시트 연동 실패: {ex}")
-                            import streamlit.components.v1 as components
-                            error_msg = str(ex).replace("'", "\\'").replace("\\n", " ")
-                            components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp2-75@ahp2-486703.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
+                                st.code(short_url, language="text")
+                                st.info(f"**위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.**  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
+                            except Exception as ex:
+                                st.error(f"구글 시트 연동 실패: {ex}")
+                                import streamlit.components.v1 as components
+                                error_msg = str(ex).replace("'", "\\'").replace("\\n", " ")
+                                components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp2-75@ahp2-486703.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
 
 
 
