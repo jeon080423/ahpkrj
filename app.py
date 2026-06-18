@@ -2255,7 +2255,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     demographics = survey_meta["Demographics"]
     definitions = survey_meta["Definitions"]
     cr_limit = survey_meta["CR_Limit"]
-    cr_guide_enabled = survey_meta.get("CR_Guide_Enabled", False)
+    cr_guide_method = survey_meta.get("CR_Guide_Method", "realtime" if survey_meta.get("CR_Guide_Enabled", False) else "none")
     rewards_info = survey_meta["Rewards_Info"]
     scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
     
@@ -2436,17 +2436,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
         - **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
         - **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
         - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
-        
-        💡 :blue[**파란색 배경 가이드: 앞선 응답들과의 논리적 일관성(CR)을 최적으로 유지할 수 있는**] :red[**권장 선택 구간**]:blue[**입니다.**]
-        """, """
+        """ + ("""\n        💡 :blue[**파란색 배경 가이드: 앞선 응답들과의 논리적 일관성(CR)을 최적으로 유지할 수 있는**] :red[**권장 선택 구간**]:blue[**입니다.**]""" if cr_guide_method == "realtime" else ""), """
         **Response Method**: Please select the number in the direction of **the factor you think is more important** between the left factor and the right factor. A larger number means that factor is more important.
 
         - **Equal (1)**: Choose the middle **1** when both factors are equally important.
         - **When the left factor is more important**: Choose a number on the left side (←). A larger number indicates the left factor is much more important.
         - **When the right factor is more important**: Choose a number on the right side (→). A larger number indicates the right factor is much more important.
-        
-        💡 :blue[**Blue Background Guide: Indicates the**] :red[**recommended selection range**] :blue[**to optimally maintain logical consistency (CR) with your previous answers.**]
-        """))
+        """ + ("""\n        💡 :blue[**Blue Background Guide: Indicates the**] :red[**recommended selection range**] :blue[**to optimally maintain logical consistency (CR) with your previous answers.**]""" if cr_guide_method == "realtime" else "")))
         
         if tier_level == 3:
             from survey_manager_v3 import generate_pairwise_combinations_v3
@@ -2639,7 +2635,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         clean_options = [x for x in options if x != -1]
                         
                         valid_options = set()
-                        if cr_guide_enabled and cr_limit is not None:
+                        if cr_guide_method == "realtime" and cr_limit is not None:
                             try:
                                 group_factors = comb["factors"]
                                 group_answers = {}
@@ -2672,7 +2668,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        if cr_guide_enabled and cr_limit is not None and len(comb["factors"]) > 2:
+                        if cr_guide_method == "realtime" and cr_limit is not None and len(comb["factors"]) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
                                 if valid_sorted:
@@ -2757,8 +2753,58 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 
             agree_check = st.radio(radio_label, [_("동의", "Agree"), _("비동의", "Disagree")], index=1, key="survey_agree_check")
         
-        # 제출 버튼
-        submit_btn = st.button(_("설문지 제출하기", "Submit Survey"), type="primary")
+        # 마법사 상태 확인
+        wizard_state_key = f"cr_wizard_state_{survey_id_param}"
+        wizard_state = st.session_state.get(wizard_state_key, {"active": False})
+        
+        if wizard_state.get("active"):
+            st.warning(_("⚠️ 제출 전 일관성 비율(CR) 점검", "⚠️ Pre-submission Consistency Ratio (CR) Check"))
+            st.error(_(f"분석 결과, **[{wizard_state['failed_group']}]** 문항들의 응답 일관성이 부족합니다. (현재 CR: {wizard_state['cr']:.3f} > 기준치: {cr_limit})", f"Analysis shows inconsistent responses for **[{wizard_state['failed_group']}]**. (Current CR: {wizard_state['cr']:.3f} > Limit: {cr_limit})"))
+            
+            w_pair = wizard_state['worst_pair']
+            cur_v = wizard_state['current_val']
+            sug_v = wizard_state['suggested_val']
+            
+            def val_to_text(v, p1, p2):
+                if v == 1: return _("동등함 (1)", "Equal (1)")
+                if v < 0: return f"{p1} 방향으로 {abs(v)}"
+                return f"{p2} 방향으로 {v}"
+                
+            cur_txt = val_to_text(cur_v, w_pair[0], w_pair[1])
+            sug_txt = val_to_text(sug_v, w_pair[0], w_pair[1])
+            
+            st.info(_(f"""
+            💡 **지능형 수정 제안**: 
+            현재 **[{w_pair[0]}]**와 **[{w_pair[1]}]**의 비교 응답이 다른 응답들과 수학적 모순이 가장 큽니다.
+            * 현재 선택하신 값: **{cur_txt}**
+            * 논리적 일관성을 위한 추천 값: **{sug_txt}**
+            """, f"""
+            💡 **Smart Fix Suggestion**: 
+            Your comparison between **[{w_pair[0]}]** and **[{w_pair[1]}]** has the highest mathematical contradiction with your other answers.
+            * Your current selection: **{cur_txt}**
+            * Suggested value for logical consistency: **{sug_txt}**
+            """))
+            
+            col_wiz1, col_wiz2 = st.columns(2)
+            with col_wiz1:
+                if st.button(_("✨ 추천 값으로 자동 수정 후 제출하기", "✨ Auto-fix with suggestion and Submit"), type="primary", use_container_width=True):
+                    # 자동 수정
+                    pair_key = f"{w_pair[0]}_{w_pair[1]}"
+                    # ahp_answers는 세션 스테이트나 캐시가 아니지만 form 제출이 아니면 여기서 값을 못 바꾼다.
+                    # 하지만 streamlit 특성상 위에서 이미 ahp_answers를 파싱했으므로 값을 조작할 방법이 애매하다.
+                    # 가장 좋은 방법은 해당 라디오버튼의 세션 스테이트 키를 강제로 업데이트하는 것이다.
+                    st.session_state[f"q_{survey_id_param}_{pair_key}"] = sug_v
+                    st.session_state[wizard_state_key]["active"] = False
+                    st.rerun()
+            with col_wiz2:
+                if st.button(_("❌ 내가 직접 다시 검토하기", "❌ Review manually"), use_container_width=True):
+                    st.session_state[wizard_state_key]["active"] = False
+                    st.rerun()
+                    
+            submit_btn = False # 마법사 표시 중에는 일반 제출 안함
+        else:
+            # 제출 버튼
+            submit_btn = st.button(_("설문지 제출하기", "Submit Survey"), type="primary")
         if submit_btn:
             # 필수값 유효성 검증
             missing = False
@@ -2788,27 +2834,55 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 st.error(_("입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.", "There are missing required fields (*). Please check the form again."))
                 st.stop()
                 
-            # 실시간 CR 계산 및 검증 피드백
+            # CR 계산 및 마법사 로직
             if cr_limit is not None:
+                cr_failed = False
+                failed_factors = []
+                failed_group_name = ""
+                failed_cr = 0.0
+                
                 # 대분류 CR 체크
                 main_cr = calculate_matrix_cr(main_criteria, ahp_answers)
                 if main_cr > cr_limit:
+                    cr_failed = True
+                    failed_factors = main_criteria
+                    failed_group_name = "대분류"
+                    failed_cr = main_cr
+                
+                # 하위분류 CR 체크
+                if not cr_failed:
+                    for parent, subs in ahp_model.get("subs", {}).items():
+                        if len(subs) >= 3:
+                            sub_cr = calculate_matrix_cr(subs, ahp_answers)
+                            if sub_cr > cr_limit:
+                                cr_failed = True
+                                failed_factors = subs
+                                failed_group_name = parent
+                                failed_cr = sub_cr
+                                break
+
+                if cr_failed:
+                    if cr_guide_method == "post_wizard":
+                        from survey_manager import get_cr_fix_suggestion
+                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers)
+                        
+                        if worst_pair:
+                            st.session_state[f"cr_wizard_state_{survey_id_param}"] = {
+                                "active": True,
+                                "failed_group": failed_group_name,
+                                "cr": failed_cr,
+                                "worst_pair": worst_pair,
+                                "current_val": current_val,
+                                "suggested_val": suggested_val
+                            }
+                            st.rerun()
+                    
+                    # 마법사가 없거나 마법사 제안을 계산할 수 없는 경우 (기존 로직)
                     if not is_preview_mode:
                         from survey_manager import increment_abandoned_cr
                         increment_abandoned_cr(survey_id_param)
-                    st.error(_(f"입력하신 설문의 응답 일관성이 부족합니다. (대분류 일관성 비율: {main_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.", f"The consistency of your responses is insufficient. (Main criteria CR: {main_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
+                    st.error(_(f"[{failed_group_name}] 항목의 응답 일관성이 부족합니다. (일관성 비율: {failed_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.", f"The consistency of your responses for [{failed_group_name}] is insufficient. (CR: {failed_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
                     st.stop()
-                    
-                # 하위분류 CR 체크
-                for parent, subs in ahp_model.get("subs", {}).items():
-                    if len(subs) >= 3:
-                        sub_cr = calculate_matrix_cr(subs, ahp_answers)
-                        if sub_cr > cr_limit:
-                            if not is_preview_mode:
-                                from survey_manager import increment_abandoned_cr
-                                increment_abandoned_cr(survey_id_param)
-                            st.error(_(f"'{parent}' 하위 항목의 응답 일관성이 부족합니다. (일관성 비율: {sub_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.", f"The consistency of responses for sub-criteria under '{parent}' is insufficient. (CR: {sub_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
-                            st.stop()
             
             # 저장 진행
             with st.spinner(_("응답을 안전하게 전송 중입니다...", "Submitting your response safely...")):
@@ -6316,8 +6390,8 @@ with col_main:
                     st.session_state.edit_scale_type = meta.get("Scale_Type", "1-9 Continuous")
                     cr_limit_raw = meta.get("CR_Limit", 0.1)
                     st.session_state.edit_cr_limit = float(cr_limit_raw) if cr_limit_raw is not None and str(cr_limit_raw).lower() != "none" else None
-                    cr_guide_raw = meta.get("CR_Guide_Enabled", "False")
-                    st.session_state.edit_cr_guide_enabled = True if str(cr_guide_raw).lower() == "true" else False
+                    cr_guide_raw = meta.get("CR_Guide_Method", "realtime" if str(meta.get("CR_Guide_Enabled", "False")).lower() == "true" else "none")
+                    st.session_state.edit_cr_guide_method = cr_guide_raw
                     
                     ahp_model = meta.get("AHP_Model_JSON", {})
                     st.session_state.edit_main_input = ", ".join(ahp_model.get("main", []))
@@ -6678,11 +6752,51 @@ Thank you very much for your valuable participation.
 
             if cr_limit is not None:
                 st.warning(_("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 대거 무효 처리되어 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다. 응답자 이탈을 낮추기 위해 일관성 비율 허용 기준치를 0.3 이하로 여유롭게 설정하고, 데이터 수집 후 AHP마스터의 일관성 보정 기능을 통해 사후 보정하여 분석하시기를 적극 추천드립니다.", "⚠️ Warning: If the CR limit is set too strict (low), many logically inconsistent surveys will be invalidated. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. To reduce respondent dropout, we strongly recommend setting the consistency ratio tolerance to 0.3 or less and post-calibrating the collected data using the AHP Master consistency calibration feature."))
-                cr_guide_enabled = st.toggle(_("✅ 실시간 CR 가이드라인 기능 켜기 (응답자에게 제한 CR을 맞출 수 있는 척도를 시각적으로 안내합니다)", "✅ Enable Real-time CR Guideline (Visually guides respondents to choose scales that satisfy the CR limit)"), value=st.session_state.get("edit_cr_guide_enabled", False))
-                if cr_guide_enabled:
-                    st.info(_("💡 안내: 이 기능을 켜면 응답자가 설문 중 일관성을 유지할 수 있도록 권장되는 허용 범위(예: 왼쪽 5 ~ 오른쪽 3)가 텍스트로 부드럽게 안내됩니다. 응답을 강제하지 않으며, 모순된 응답으로 인해 권장 범위를 산출할 수 없을 때는 이전 응답을 수정하도록 안내합니다.", "💡 Note: When enabled, respondents will see a recommended text range (e.g., Left 5 ~ Right 3) to help them maintain consistency. It does not force responses. If a logical contradiction prevents calculating a range, respondents are prompted to adjust their previous answers."))
+                # CR 가이드 방식 선택
+                st.markdown(_("**응답자 일관성 유지(CR) 가이드 방식 선택**", "**Select Consistency Ratio (CR) Guide Method for Respondents**"))
+                
+                default_guide = st.session_state.get("edit_cr_guide_method", "realtime")
+                
+                # Backward compatibility for old surveys that used toggle
+                if "edit_cr_guide_enabled" in st.session_state:
+                    if st.session_state["edit_cr_guide_enabled"] and default_guide not in ["realtime", "post_wizard", "none"]:
+                        default_guide = "realtime"
+                    elif not st.session_state["edit_cr_guide_enabled"] and default_guide not in ["realtime", "post_wizard", "none"]:
+                        default_guide = "none"
+                
+                options_kr = {
+                    "realtime": "실시간 권장 범위 시각화 안내 (이탈률 최소화, 편의성 높음)",
+                    "post_wizard": "제출 후 지능형 수정 제안 마법사 (가장 학술적인 방식, 편향성 제거)",
+                    "none": "안내 없음 (엄격한 검증만 수행)"
+                }
+                options_en = {
+                    "realtime": "Real-time Visual Range Guide (Minimizes dropout, high convenience)",
+                    "post_wizard": "Post-Submission Smart Fix Wizard (Most academic, removes bias)",
+                    "none": "No Guide (Strict validation only)"
+                }
+                
+                def get_idx(val):
+                    keys = list(options_kr.keys())
+                    return keys.index(val) if val in keys else 0
+                    
+                selected_idx = st.radio(
+                    label=_("가이드 방식을 선택하세요", "Choose guide method"),
+                    options=[0, 1, 2],
+                    format_func=lambda x: options_kr[list(options_kr.keys())[x]] if _("ko", "en") == "ko" else options_en[list(options_en.keys())[x]],
+                    index=get_idx(default_guide),
+                    label_visibility="collapsed"
+                )
+                
+                cr_guide_method = list(options_kr.keys())[selected_idx]
+                
+                if cr_guide_method == "realtime":
+                    st.info(_("💡 **실시간 안내**: 응답자가 설문 중 일관성을 유지할 수 있도록 파란색 배경으로 권장되는 허용 범위를 안내합니다. 편의성이 높고 이탈률을 크게 낮출 수 있습니다.", "💡 **Real-time Guide**: Highlights the recommended range with a blue background to help respondents maintain consistency. Highly convenient and reduces dropouts."))
+                elif cr_guide_method == "post_wizard":
+                    st.success(_("💡 **지능형 수정 제안 (추천)**: 응답 중에는 아무런 가이드를 주지 않아 응답자의 진짜 생각을 편향 없이 수집합니다. 제출 버튼을 눌렀을 때 CR이 초과하면, 가장 모순이 큰 딱 1개 문항을 찾아내어 수정을 권고하는 마법사를 띄웁니다.", "💡 **Smart Fix Wizard (Recommended)**: Collects true thoughts without bias by providing no guide during response. If CR exceeds the limit upon submission, a wizard will appear to suggest fixing the single most contradictory question."))
+                else:
+                    st.warning(_("💡 **안내 없음**: 응답자에게 어떤 힌트도 주지 않으며, 제출 시 CR을 초과하면 에러 메시지와 함께 전체 재검토를 요구합니다. 이탈률이 높아질 수 있습니다.", "💡 **No Guide**: Gives no hints. If CR is exceeded upon submission, an error message is shown requiring a full review. Dropouts may increase."))
             else:
-                cr_guide_enabled = False
+                cr_guide_method = "none"
 
             st.divider()
 
@@ -6727,7 +6841,7 @@ Thank you very much for your valuable participation.
                 "Demographics": demographics_settings,
                 "Definitions": definitions_map,
                 "CR_Limit": cr_limit,
-                "CR_Guide_Enabled": cr_guide_enabled,
+                "CR_Guide_Method": cr_guide_method,
                 "Rewards_Info": rewards_info
             }
 
