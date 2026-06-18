@@ -2588,7 +2588,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         clean_options = [x for x in options if x != -1]
                         
                         valid_options = set()
-                        if cr_guide_method == "realtime" and cr_limit is not None:
+                        is_highlight_target = st.session_state.get("highlight_target") == pair_key
+                        should_show_guide = (cr_guide_method == "realtime" or is_highlight_target) and cr_limit is not None
+                        if should_show_guide:
                             try:
                                 group_factors = comb["factors"]
                                 group_answers = {}
@@ -2621,7 +2623,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        if cr_guide_method == "realtime" and cr_limit is not None and len(comb["factors"]) > 2:
+                        if should_show_guide and len(comb["factors"]) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
                                 if valid_sorted:
@@ -2738,19 +2740,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
             st.info(_(f"""
             💡 **지능형 수정 제안**: 
-            현재 **[{w_pair[0]}]**와 **[{w_pair[1]}]**의 비교 응답이 다른 응답들과 수학적 모순이 가장 큽니다.
+            현재 [{w_pair[0]}]와 [{w_pair[1]}]의 비교 응답이 다른 응답들과 수학적 모순이 가장 큽니다.
             * 현재 선택하신 값: **{cur_txt}**
             * 논리적 일관성을 위한 추천 값: **{sug_txt}**
             """, f"""
             💡 **Smart Fix Suggestion**: 
-            Your comparison between **[{w_pair[0]}]** and **[{w_pair[1]}]** has the highest mathematical contradiction with your other answers.
+            Your comparison between [{w_pair[0]}] and [{w_pair[1]}] has the highest mathematical contradiction with your other answers.
             * Your current selection: **{cur_txt}**
             * Suggested value for logical consistency: **{sug_txt}**
             """))
             
             if st.button(_("다시 검토", "Review again"), use_container_width=True):
                 st.session_state[wizard_state_key]["active"] = False
-                st.session_state["scroll_target"] = f"{w_pair[0]}_{w_pair[1]}"
+                target_key = f"{w_pair[0]}_{w_pair[1]}"
+                st.session_state["scroll_target"] = target_key
+                st.session_state["highlight_target"] = target_key
                 st.rerun()
                     
             submit_btn = False # 마법사 표시 중에는 일반 제출 안함
