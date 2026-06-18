@@ -2257,6 +2257,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     demographics = survey_meta["Demographics"]
     definitions = survey_meta["Definitions"]
     cr_limit = survey_meta["CR_Limit"]
+    cr_guide_enabled = survey_meta.get("CR_Guide_Enabled", False)
     rewards_info = survey_meta["Rewards_Info"]
     scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
     
@@ -2632,15 +2633,44 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     with row_cols[1]:
                         # 안전을 위해 options에서 중복 및 -1 값 명시적 제외
                         clean_options = [x for x in options if x != -1]
+                        
+                        valid_options = set()
+                        if cr_guide_enabled and cr_limit is not None:
+                            try:
+                                group_factors = comb["factors"]
+                                group_answers = {}
+                                for p_left, p_right in comb["pairs"]:
+                                    k = f"{p_left}_{p_right}"
+                                    group_answers[k] = st.session_state.get(f"pair_ans_{k}", 1)
+                                
+                                for opt in clean_options:
+                                    test_answers = group_answers.copy()
+                                    test_answers[pair_key] = opt
+                                    test_cr = calculate_matrix_cr(group_factors, test_answers)
+                                    if test_cr <= cr_limit:
+                                        valid_options.add(opt)
+                            except Exception:
+                                pass
+                                
+                        def format_option(opt):
+                            val_str = str(abs(opt)) if opt < 0 else str(opt) # 가시성을 위해 절대값으로 표시
+                            if cr_guide_enabled and cr_limit is not None:
+                                if opt in valid_options:
+                                    return f"{val_str} ✅"
+                            return val_str
+
                         ans_val = st.radio(
                              label=f"select_{pair_key}",
                              options=clean_options,
                              index=clean_options.index(1),
-                             format_func=str,
+                             format_func=format_option,
                              key=f"pair_ans_{pair_key}",
                              horizontal=True,
                              label_visibility="collapsed"
                          )
+                        
+                        if cr_guide_enabled and cr_limit is not None and not valid_options:
+                            st.caption(_("⚠️ 이전 문항 응답으로 인해 CR 제한을 만족할 수 없습니다.", "⚠️ Due to previous answers, CR limit cannot be satisfied."))
                 
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
@@ -6235,6 +6265,8 @@ with col_main:
                     st.session_state.edit_scale_type = meta.get("Scale_Type", "1-9 Continuous")
                     cr_limit_raw = meta.get("CR_Limit", 0.1)
                     st.session_state.edit_cr_limit = float(cr_limit_raw) if cr_limit_raw is not None and str(cr_limit_raw).lower() != "none" else None
+                    cr_guide_raw = meta.get("CR_Guide_Enabled", "False")
+                    st.session_state.edit_cr_guide_enabled = True if str(cr_guide_raw).lower() == "true" else False
                     
                     ahp_model = meta.get("AHP_Model_JSON", {})
                     st.session_state.edit_main_input = ", ".join(ahp_model.get("main", []))
@@ -6594,7 +6626,12 @@ Thank you very much for your valuable participation.
             elif "0.3" in cr_limit_opt: cr_limit = 0.3
 
             if cr_limit is not None:
-                st.warning(_("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 전부 튕겨나가 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다.", "⚠️ Warning: If the CR limit is set too strict (low), all logically inconsistent surveys will be rejected. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. Please proceed with caution."))
+                st.warning(_("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 대거 무효 처리되어 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다. 응답자 이탈을 낮추기 위해 일관성 비율 허용 기준치를 0.3 이하로 여유롭게 설정하고, 데이터 수집 후 AHP마스터의 일관성 보정 기능을 통해 사후 보정하여 분석하시기를 적극 추천드립니다.", "⚠️ Warning: If the CR limit is set too strict (low), many logically inconsistent surveys will be invalidated. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. To reduce respondent dropout, we strongly recommend setting the consistency ratio tolerance to 0.3 or less and post-calibrating the collected data using the AHP Master consistency calibration feature."))
+                cr_guide_enabled = st.toggle(_("✅ 실시간 CR 가이드라인 기능 켜기 (응답자에게 제한 CR을 맞출 수 있는 척도를 시각적으로 안내합니다)", "✅ Enable Real-time CR Guideline (Visually guides respondents to choose scales that satisfy the CR limit)"), value=st.session_state.get("edit_cr_guide_enabled", False))
+                if cr_guide_enabled:
+                    st.info(_("💡 안내: 이 기능을 켜면 응답자가 설문 중 CR을 맞출 수 있도록 척도 옆에 추천 표시(✅)가 나타납니다. 단, 앞선 응답에 따라 데드락 현상이 발생하거나 응답 편향이 생길 수 있음을 유의하세요.", "💡 Note: When enabled, respondents will see a recommendation mark (✅) next to scales that satisfy the CR limit. However, please be aware that this may cause deadlocks based on previous responses or induce response bias."))
+            else:
+                cr_guide_enabled = False
 
             st.divider()
 
@@ -6639,6 +6676,7 @@ Thank you very much for your valuable participation.
                 "Demographics": demographics_settings,
                 "Definitions": definitions_map,
                 "CR_Limit": cr_limit,
+                "CR_Guide_Enabled": cr_guide_enabled,
                 "Rewards_Info": rewards_info
             }
 
@@ -6712,6 +6750,7 @@ Thank you very much for your valuable participation.
                                         demographics=demographics_settings,
                                         definition_map=definitions_map,
                                         cr_limit=cr_limit,
+                                        cr_guide_enabled=cr_guide_enabled,
                                         rewards_info=rewards_info,
                                         description=survey_desc,
                                         existing_sheet_id=target_sheet_id,
@@ -6726,6 +6765,7 @@ Thank you very much for your valuable participation.
                                         demographics=demographics_settings,
                                         definition_map=definitions_map,
                                         cr_limit=cr_limit,
+                                        cr_guide_enabled=cr_guide_enabled,
                                         rewards_info=rewards_info,
                                         description=survey_desc,
                                         existing_sheet_id=target_sheet_id,

@@ -6,7 +6,7 @@ import sqlite3
 import datetime
 from survey_manager import get_survey_gspread_client, run_gspread_with_retry
 
-def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, rewards_info, description="", existing_sheet_id=None, user_id=None):
+def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_enabled, rewards_info, description="", existing_sheet_id=None, user_id=None):
     """
     [3계층 전용] 구글 스프레드시트 템플릿을 생성합니다.
     (대분류 -> 중분류 -> 소분류 조합 헤더 반영)
@@ -90,11 +90,12 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         ["Demographics", json.dumps(demographics, ensure_ascii=False)],
         ["Definitions", json.dumps(definition_map, ensure_ascii=False)],
         ["CR_Limit", str(cr_limit)],
+        ["CR_Guide_Enabled", str(cr_guide_enabled)],
         ["Rewards_Info", json.dumps(rewards_info, ensure_ascii=False)],
         ["Visit_Count", "0"],
         ["Abandoned_CR_Count", "0"]
     ]
-    meta_sheet.update(range_name="A1:B14", values=metadata) # 13 -> 14로 범위 확장
+    meta_sheet.update(range_name="A1:B15", values=metadata)
     
     # Raw Data 헤더 생성 (대분류 -> 중분류 -> 소분류 쌍대비교 조합)
     raw_headers = ["ID", "Type"]
@@ -206,6 +207,7 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
             "Demographics": demographics,
             "Definitions": definition_map,
             "CR_Limit": float(cr_limit) if cr_limit is not None and str(cr_limit) != "None" else None,
+            "CR_Guide_Enabled": bool(cr_guide_enabled),
             "Rewards_Info": rewards_info
         }
         c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",

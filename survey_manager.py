@@ -104,7 +104,7 @@ def get_survey_gspread_client(user_id=None):
         st.error(f"gspread 인증 에러: {e}")
         return None
 
-def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, rewards_info, description="", existing_sheet_id=None, user_id=None):
+def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_enabled, rewards_info, description="", existing_sheet_id=None, user_id=None):
     """
     고유한 Google Sheet를 동적으로 신규 생성하고 관리자 계정에 쓰기 권한을 부여하거나,
     사용자가 전달한 기존 구글 시트 ID를 기반으로 설문지를 연동합니다.
@@ -215,11 +215,12 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["Demographics", json.dumps(demographics, ensure_ascii=False)],
         ["Definitions", json.dumps(definition_map, ensure_ascii=False)],
         ["CR_Limit", str(cr_limit)],
+        ["CR_Guide_Enabled", str(cr_guide_enabled)],
         ["Rewards_Info", json.dumps(rewards_info, ensure_ascii=False)],
         ["Visit_Count", "0"],
         ["Abandoned_CR_Count", "0"]
     ]
-    meta_sheet.update(range_name="A1:B13", values=metadata)
+    meta_sheet.update(range_name="A1:B14", values=metadata)
     
     # 1. Raw_Data 헤더 구성: ID, Type, (Pairwise Combination Fields...), 제출시간
     raw_headers = ["ID", "Type"]
@@ -343,6 +344,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
             "Demographics": demographics,
             "Definitions": definition_map,
             "CR_Limit": float(cr_limit) if cr_limit is not None and str(cr_limit) != "None" else None,
+            "CR_Guide_Enabled": bool(cr_guide_enabled),
             "Rewards_Info": rewards_info
         }
         c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
@@ -380,7 +382,8 @@ def _fetch_survey_metadata_from_sheets(spreadsheet_id):
     meta_dict["Demographics"] = json.loads(meta_dict["Demographics"])
     meta_dict["Definitions"] = json.loads(meta_dict["Definitions"])
     meta_dict["Rewards_Info"] = json.loads(meta_dict["Rewards_Info"])
-    meta_dict["CR_Limit"] = float(meta_dict["CR_Limit"]) if meta_dict["CR_Limit"] != "None" else None
+    meta_dict["CR_Limit"] = float(meta_dict.get("CR_Limit", "None")) if meta_dict.get("CR_Limit", "None") != "None" else None
+    meta_dict["CR_Guide_Enabled"] = str(meta_dict.get("CR_Guide_Enabled", "False")).lower() == "true"
     
     # 로컬 SQLite 캐시에 백업/동기화 저장
     try:
