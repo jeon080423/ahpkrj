@@ -436,9 +436,7 @@ div.st-key-ahp_survey_matrix {
     cursor: pointer !important;
 }
 
-.st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"]:hover {
-    background-color: #fafafa !important; 
-}
+
 
 /* 6. 모바일 가로 스크롤 허용 및 붕괴 방지 */
 @media (max-width: 768px) {
@@ -2690,7 +2688,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 css_html = f"""
                                 <div id="cr_guide_{pair_key}"></div>
                                 <style>
-                                div[data-testid="stVerticalBlock"] > div:has(#cr_guide_{pair_key}) + div div[role="radiogroup"] {{
+                                div:has(> div > div > #cr_guide_{pair_key}) + div div[role="radiogroup"] {{
                                     background: linear-gradient(to right, 
                                         transparent 0%, 
                                         transparent {start_percent}%, 
