@@ -2562,6 +2562,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
                 for left_f, right_f in comb["pairs"]:
                     pair_key = f"{left_f}_{right_f}"
+                    clean_id = pair_key.replace(" ", "_")
+                    st.markdown(f"<div id='anchor_{clean_id}'></div>", unsafe_allow_html=True)
                 
                     row_cols = st.columns([15, 70, 15])
                 
@@ -2681,6 +2683,16 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     ahp_answers[pair_key] = ans_val
             st.divider()
             
+            target = st.session_state.get("scroll_target")
+            if target:
+                import streamlit.components.v1 as components
+                clean_target = target.replace(" ", "_")
+                components.html(
+                    f"<script>window.parent.document.getElementById('anchor_{clean_target}').scrollIntoView({{behavior: 'smooth', block: 'center'}});</script>",
+                    height=0
+                )
+                st.session_state["scroll_target"] = None
+            
         # 5. 개인정보 수집 및 답례품 동적 노출 및 문구 설정
         has_demographics = any(demographics.values()) if demographics else False
         has_rewards = rewards_info.get("enabled", False) if rewards_info else False
@@ -2736,21 +2748,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
             * Suggested value for logical consistency: **{sug_txt}**
             """))
             
-            col_wiz1, col_wiz2 = st.columns(2)
-            with col_wiz1:
-                if st.button(_("✨ 추천 값으로 자동 수정 후 제출하기", "✨ Auto-fix with suggestion and Submit"), type="primary", use_container_width=True):
-                    # 자동 수정
-                    pair_key = f"{w_pair[0]}_{w_pair[1]}"
-                    # ahp_answers는 세션 스테이트나 캐시가 아니지만 form 제출이 아니면 여기서 값을 못 바꾼다.
-                    # 하지만 streamlit 특성상 위에서 이미 ahp_answers를 파싱했으므로 값을 조작할 방법이 애매하다.
-                    # 가장 좋은 방법은 해당 라디오버튼의 세션 스테이트 키를 강제로 업데이트하는 것이다.
-                    st.session_state[f"q_{survey_id_param}_{pair_key}"] = sug_v
-                    st.session_state[wizard_state_key]["active"] = False
-                    st.rerun()
-            with col_wiz2:
-                if st.button(_("❌ 내가 직접 다시 검토하기", "❌ Review manually"), use_container_width=True):
-                    st.session_state[wizard_state_key]["active"] = False
-                    st.rerun()
+            if st.button(_("다시 검토", "Review again"), use_container_width=True):
+                st.session_state[wizard_state_key]["active"] = False
+                st.session_state["scroll_target"] = f"{w_pair[0]}_{w_pair[1]}"
+                st.rerun()
                     
             submit_btn = False # 마법사 표시 중에는 일반 제출 안함
         else:
