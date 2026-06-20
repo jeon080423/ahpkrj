@@ -438,7 +438,7 @@ div.st-key-ahp_survey_matrix {
     }
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
         flex-wrap: nowrap !important;
-        min-width: 750px !important;
+        min-width: 100% !important;
     }
     .st-key-ahp_survey_matrix div[data-testid="column"] {
         flex: 0 0 auto !important;
@@ -447,7 +447,7 @@ div.st-key-ahp_survey_matrix {
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
         width: 25% !important; 
         white-space: normal !important;
-        word-break: keep-all !important;
+        word-break: break-all !important;
     }
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
         width: 50% !important;
@@ -2570,7 +2570,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.markdown(f"""
                         <div title="{left_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
                                     padding: 0px 8px; background-color: {left_style["bg"]}; color: {left_style["text"]}; 
-                                    border-radius: 4px; height: 28px; display: flex; align-items: center; 
+                                    border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
                                     justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
                                 {left_trans}
                         </div>
@@ -2678,7 +2678,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.markdown(f"""
                         <div title="{right_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
                                     padding: 0px 8px; background-color: {right_style["bg"]}; color: {right_style["text"]}; 
-                                    border-radius: 4px; height: 28px; display: flex; align-items: center; 
+                                    border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
                                     justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
                                 {right_trans}
                         </div>
