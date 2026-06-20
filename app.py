@@ -2613,8 +2613,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 for p_left, p_right in comb["pairs"]:
                                     k = f"{p_left}_{p_right}"
                                     import hashlib
-            ans_key_temp = f"ans_{hashlib.md5(k.encode('utf-8')).hexdigest()}"
-            val = st.session_state.get(ans_key_temp, None)
+                                    ans_key_temp = f"ans_{hashlib.md5(k.encode('utf-8')).hexdigest()}"
+                                    val = st.session_state.get(ans_key_temp, None)
                                     group_answers[k] = val
                                     if k != pair_key and val is None:
                                         other_missing = True
