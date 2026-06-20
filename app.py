@@ -6828,9 +6828,6 @@ with col_main:
                     index=get_idx(default_guide),
                     label_visibility="collapsed"
                 )
-                if should_show_guide and len(comb["factors"]) > 2:
-                    if not other_missing:
-                        st.markdown(bar_html, unsafe_allow_html=True)
             
                 cr_guide_method = list(options_kr.keys())[selected_idx]
             
