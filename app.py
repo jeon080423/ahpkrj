@@ -6487,7 +6487,6 @@ with col_main:
             with st.container(border=True):
                 st.markdown(_("**📊 인구통계학적 문항 수집 설정**", "**📊 Demographic Questions Setup**"))
                 demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
-                demo_aff = st.checkbox(_("소속 수집", "Collect Affiliation"), value=st.session_state.get("edit_demo_aff", True))
                 demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
                 st.divider()
@@ -6513,7 +6512,7 @@ with col_main:
                 "gender": demo_gender,
                 "experience": demo_exp,
                 "experience_type": exp_type,
-                "affiliation": demo_aff,
+                "affiliation": False,  # 소속 수집 삭제
                 "email": demo_email,
                 "type_question": type_question,
                 "type_options": [x.strip() for x in type_options.split(",") if x.strip()]
