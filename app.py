@@ -2247,7 +2247,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
     ahp_model = survey_meta["AHP_Model_JSON"]
     demographics = survey_meta["Demographics"]
     definitions = survey_meta["Definitions"]
-    cr_limit = survey_meta["CR_Limit"]
+    cr_limit = survey_meta.get("CR_Limit")
+    if cr_limit is not None and str(cr_limit).lower() != "none":
+        try:
+            cr_limit = float(cr_limit)
+        except ValueError:
+            cr_limit = None
+    else:
+        cr_limit = None
     cr_guide_method = survey_meta.get("CR_Guide_Method", "realtime" if survey_meta.get("CR_Guide_Enabled", False) else "none")
     rewards_info = survey_meta["Rewards_Info"]
     scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
