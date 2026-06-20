@@ -2335,7 +2335,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         for comb in combinations:
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
-                st.session_state[f"pair_ans_{pair_key}"] = None
+                st.session_state[f"pair_ans_{pair_key.replace(' ', '_')}"] = None
     
     # 단일 스크롤 폼 생성
     # respondent_survey_form context split - sections 1,2,3 are now outside the form
@@ -2658,7 +2658,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 other_missing = False
                                 for p_left, p_right in comb["pairs"]:
                                     k = f"{p_left}_{p_right}"
-                                    val = st.session_state.get(f"pair_ans_{k}", None)
+                                    val = st.session_state.get(f"pair_ans_{k.replace(' ', '_')}", None)
                                     group_answers[k] = val
                                     if k != pair_key and val is None:
                                         other_missing = True
@@ -2687,7 +2687,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        ans_key = f"pair_ans_{pair_key}"
+                        ans_key = f"pair_ans_{pair_key.replace(' ', '_')}"
                         if should_show_guide and len(comb["factors"]) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
