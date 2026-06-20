@@ -2688,6 +2688,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
                         ans_key = f"pair_ans_{pair_key.replace(' ', '_')}"
+                        st.warning(f"DEBUG: pair={pair_key}, cr_limit={cr_limit}, guide={cr_guide_method}, other_missing={other_missing}")
                         if should_show_guide and len(comb["factors"]) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
@@ -2699,37 +2700,32 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                     max_val = min_cr_opt
                                 start_idx = clean_options.index(min_val)
                                 end_idx = clean_options.index(max_val)
-                                css = "<style>\n"
+                                bar_html = '<div style="display: flex; width: 100%; height: 32px; margin-top: -32px; z-index: 10; position: relative; pointer-events: none;">'
                                 for j, opt in enumerate(clean_options):
                                     is_valid = start_idx <= j <= end_idx
-                                    if is_valid:
-                                        bg_color = "rgba(59, 130, 246, 0.25) !important;"
-                                        radius = ""
-                                        if j == start_idx:
-                                            radius += "border-top-left-radius: 6px !important; border-bottom-left-radius: 6px !important; "
-                                        if j == end_idx:
-                                            radius += "border-top-right-radius: 6px !important; border-bottom-right-radius: 6px !important; "
-                                        css += f"""
-                                        .st-key-{ans_key} div[role="radiogroup"] > label:nth-child({j+1}),
-                                        .st-key-{ans_key} div[role="radiogroup"] > div:nth-child({j+1}) {{
-                                            background-color: {bg_color}
-                                            {radius}
-                                        }}
-                                        """
-                                css += "</style>"
-                                st.markdown(css, unsafe_allow_html=True)
+                                    bg_color = "rgba(59, 130, 246, 0.25)" if is_valid else "transparent"
+                                    radius = ""
+                                    if j == start_idx:
+                                        radius += "border-top-left-radius: 6px; border-bottom-left-radius: 6px; "
+                                    if j == end_idx:
+                                        radius += "border-top-right-radius: 6px; border-bottom-right-radius: 6px; "
+                                    bar_html += f'<div style="flex: 1 1 0%; background-color: {bg_color}; {radius}"></div>'
+                                bar_html += '</div>'
                         current_val = st.session_state.get(ans_key, None)
                         current_idx = clean_options.index(current_val) if current_val in clean_options else None
 
                         ans_val = st.radio(
-                             label=f"select_{pair_key}",
-                             options=clean_options,
-                             index=current_idx,
-                             format_func=format_option,
-                             key=ans_key,
-                             horizontal=True,
-                             label_visibility="collapsed"
-                         )
+                            label=f"select_{pair_key}",
+                            options=clean_options,
+                            index=current_idx,
+                            format_func=format_option,
+                            key=ans_key,
+                            horizontal=True,
+                            label_visibility="collapsed"
+                        )
+                        if should_show_guide and len(comb["factors"]) > 2:
+                            if not other_missing:
+                                st.markdown(bar_html, unsafe_allow_html=True)
                 
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
@@ -6832,6 +6828,9 @@ with col_main:
                     index=get_idx(default_guide),
                     label_visibility="collapsed"
                 )
+                if should_show_guide and len(comb["factors"]) > 2:
+                    if not other_missing:
+                        st.markdown(bar_html, unsafe_allow_html=True)
             
                 cr_guide_method = list(options_kr.keys())[selected_idx]
             
