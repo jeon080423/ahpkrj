@@ -2688,7 +2688,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
                         ans_key = f"pair_ans_{pair_key.replace(' ', '_')}"
-                        st.warning(f"DEBUG: pair={pair_key}, cr_limit={cr_limit}, guide={cr_guide_method}, other_missing={other_missing}")
                         if should_show_guide and len(comb["factors"]) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
