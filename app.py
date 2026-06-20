@@ -240,10 +240,7 @@ try:
             'About': _("AHP 마스터 - 스마트 일반 및 퍼지 AHP 의사결정 분석 시스템", "AHP Master - Smart Traditional & Fuzzy AHP Decision Analysis System")
         }
     )
-except Exception as e:
-    st.error(f"Guide Error: {e}")
-    import traceback
-    st.error(traceback.format_exc())
+except Exception:
     st.set_page_config(page_title=_("AHP 마스터 | 퍼지 AHP 지원", "AHP Master | Fuzzy AHP Support"), layout="wide", page_icon="📊")
 
 # [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
@@ -534,10 +531,7 @@ def get_gspread_client():
                 # 3단계: Base64 디코딩 (Standard 및 URL-Safe 방식 모두 시도)
                 try:
                     decoded_bytes = base64.b64decode(clean_b64)
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     # Standard 실패 시 URL-Safe 방식 시도 (-와 _ 문자 처리)
                     decoded_bytes = base64.urlsafe_b64decode(clean_b64)
                     
@@ -611,10 +605,7 @@ def get_cached_visit_logs(spreadsheet_id):
                                           (str(ip_val), str(date_val)))
                         conn.commit()
                         conn.close()
-                    except Exception as e:
-                        st.error(f"Guide Error: {e}")
-                        import traceback
-                        st.error(traceback.format_exc())
+                    except Exception:
                         pass
                 return records
             except gspread.exceptions.WorksheetNotFound:
@@ -694,18 +685,12 @@ def init_db():
     try:
         c.execute("ALTER TABLE users ADD COLUMN survey_count INTEGER DEFAULT 0")
         conn.commit()
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
     try:
         c.execute("ALTER TABLE users ADD COLUMN last_survey_link TEXT")
         conn.commit()
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
 
     c.execute('''CREATE TABLE IF NOT EXISTS saved_analyses
@@ -719,10 +704,7 @@ def init_db():
     try:
         c.execute("ALTER TABLE admin_surveys ADD COLUMN short_code TEXT")
         conn.commit()
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
 
     # 기존 데이터에 short_code 가 없는 경우 채워넣기
@@ -735,10 +717,7 @@ def init_db():
                 scode = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
                 c.execute("UPDATE admin_surveys SET short_code = ? WHERE survey_id = ?", (scode, sid))
             conn.commit()
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
         
     c.execute('''CREATE TABLE IF NOT EXISTS user_google_credentials
@@ -769,10 +748,7 @@ def init_db():
                     cell = sheet.find('shjeon')
                     if not cell:
                         sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''])
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
     except sqlite3.IntegrityError:
         pass 
@@ -835,10 +811,7 @@ def init_db():
                             )
 
                         conn.commit()
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
 
         # [복구 로직 2] 방문 로그 복구
@@ -857,18 +830,12 @@ def init_db():
                         conn.commit()
                     except gspread.exceptions.WorksheetNotFound:
                         pass
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
 
         try:
             sync_short_codes_from_gs()
-        except Exception as e:
-            st.error(f"Guide Error: {e}")
-            import traceback
-            st.error(traceback.format_exc())
+        except Exception:
             pass
         
         # 세션당 1회 실행 완료 표시
@@ -980,20 +947,14 @@ def sync_db_from_sheets():
         if conn:
             try:
                 conn.rollback()
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
         return -1
     finally:
         if conn:
             try:
                 conn.close()
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
     return 0
 
@@ -1048,16 +1009,10 @@ def track_visitor():
                     
                     visit_sheet.append_row([ip, now_ts, country, region, city, lat, lon])
                     
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
         st.session_state.visited = True
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
 
 # 방문자 추적 실행부
@@ -1332,10 +1287,7 @@ def update_user_survey_distribution(user_id, survey_link):
                 if cell:
                     run_gspread_with_retry(sheet.update_cell, cell.row, 7, new_count)
                     run_gspread_with_retry(sheet.update_cell, cell.row, 8, survey_link)
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
     except Exception as e:
         import logging
@@ -1359,10 +1311,7 @@ def upgrade_user_password_to_hash(user_id, pw):
             if cell:
                 # 구글 시트의 PW 컬럼은 4번째(D)
                 sheet.update_cell(cell.row, 4, hashed_pw)
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
 
 def check_login(user_id, pw):
@@ -1411,10 +1360,7 @@ def change_user_password(user_id, new_pw):
             if cell:
                 # 구글 시트의 PW 컬럼은 4번째(D)
                 sheet.update_cell(cell.row, 4, hashed_pw)
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
     return True
 
@@ -1515,10 +1461,7 @@ def delete_user(user_id):
                 row_data.append(str(kst_now_ts))
                 del_sheet.append_row(row_data)
                 sheet.delete_rows(target_row_index)
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
 
 # [신규 기능 2] 재가입 시 Deleted_Users 시트에서 해당 유저 삭제
@@ -1534,10 +1477,7 @@ def restore_from_deleted_sheet(user_id):
                     del_sheet.delete_rows(cell.row)
             except (gspread.exceptions.WorksheetNotFound, gspread.exceptions.CellNotFound):
                 pass
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
 
 def save_analysis_to_db(user_id, filename, file_data):
@@ -2677,10 +2617,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                         if test_cr < min_cr_val:
                                             min_cr_val = test_cr
                                             min_cr_opt = opt
-                            except Exception as e:
-                                st.error(f"Guide Error: {e}")
-                                import traceback
-                                st.error(traceback.format_exc())
+                            except Exception:
                                 pass
                                 
                         def format_option(opt):
@@ -3015,10 +2952,7 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
             st.session_state.expiry_date = "9999-12-31"
             st.toast("📅 Subscription expired. Automatically downgraded to Free User.")
             st.rerun()
-    except Exception as e:
-        st.error(f"Guide Error: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+    except Exception:
         pass
 
 # =============================================================================
@@ -3492,10 +3426,7 @@ try:
     c.execute("SELECT COUNT(*) FROM visit_logs")
     total_visits = c.fetchone()[0]
     conn.close()
-except Exception as e:
-    st.error(f"Guide Error: {e}")
-    import traceback
-    st.error(traceback.format_exc())
+except Exception:
     total_visits = 0
 
 col_main_title, col_settings_title = st.columns([3.0, 1.1], gap="large")
@@ -3808,10 +3739,7 @@ with col_main:
                         df_local['Latitude'] = ""
                         df_local['Longitude'] = ""
                         visit_data_gs = df_local.to_dict(orient='records')
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     pass
             daily_df_logs = pd.DataFrame(visit_data_gs)
             if not daily_df_logs.empty:
@@ -4009,10 +3937,7 @@ with col_main:
                         sample_excel_v3 = f.read()
                     _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
                     _v3_filename = "Mock_3Tier_Full.xlsx"
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     sample_excel_v3 = create_sample_excel_v3()
                     _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
                     _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
@@ -4464,10 +4389,7 @@ with col_main:
                 import sqlite3
                 try:
                     sync_short_codes_from_gs()
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     pass
                 conn = sqlite3.connect('users.db')
                 cur = conn.cursor()
@@ -4479,10 +4401,7 @@ with col_main:
                 try:
                     from survey_manager import get_admin_surveys_from_gsheet
                     gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     pass
                 
                 merged_surveys = {}
@@ -6377,20 +6296,14 @@ with col_main:
                     cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
                     sqlite_surveys = cur.fetchall()
                     conn.close()
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     pass
 
                 gs_surveys = []
                 try:
                     from survey_manager import get_admin_surveys_from_gsheet
                     gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     pass
                 
                 merged_surveys = {}
@@ -7077,10 +6990,7 @@ with col_main:
 
             try:
                 sync_short_codes_from_gs()
-            except Exception as e:
-                st.error(f"Guide Error: {e}")
-                import traceback
-                st.error(traceback.format_exc())
+            except Exception:
                 pass
 
             admin_surveys = []
@@ -7095,10 +7005,7 @@ with col_main:
                 try:
                     from survey_manager import get_admin_surveys_from_gsheet
                     gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
-                except Exception as e:
-                    st.error(f"Guide Error: {e}")
-                    import traceback
-                    st.error(traceback.format_exc())
+                except Exception:
                     pass
                 
                 merged_surveys = {}
@@ -7150,10 +7057,7 @@ with col_main:
                             try:
                                 demo_sheet = spreadsheet.worksheet("Demographic_Data")
                                 demo_rows = demo_sheet.get_all_values()
-                            except Exception as e:
-                                st.error(f"Guide Error: {e}")
-                                import traceback
-                                st.error(traceback.format_exc())
+                            except Exception:
                                 demo_rows = []
 
                             if len(all_rows) > 0:
