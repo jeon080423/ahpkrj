@@ -2288,8 +2288,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
                 import hashlib
-                        ans_key = f"ans_{hashlib.md5(pair_key.encode('utf-8')).hexdigest()}"
-                        st.session_state[ans_key] = None
+                ans_key = f"ans_{hashlib.md5(pair_key.encode('utf-8')).hexdigest()}"
+                st.session_state[ans_key] = None
     
     # 단일 스크롤 폼 생성
     # respondent_survey_form context split - sections 1,2,3 are now outside the form
