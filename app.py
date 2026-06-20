@@ -2356,9 +2356,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
         else:
             resp_data["experience"] = st.number_input(f"{exp_label} " + _("(년)", "(Years)"), min_value=0, max_value=60, value=5, key="survey_resp_experience")
             
-    if demographics.get("affiliation"):
-        resp_data["affiliation"] = st.text_input(f"SQ{sq_idx}. " + _("소속 *", "Affiliation *"), key="survey_resp_affiliation")
-        sq_idx += 1
+    # 소속 문항 삭제됨
+    # if demographics.get("affiliation"):
+    #     resp_data["affiliation"] = st.text_input(f"SQ{sq_idx}. " + _("소속 *", "Affiliation *"), key="survey_resp_affiliation")
+    #     sq_idx += 1
         
     if demographics.get("email"):
         resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email")
@@ -2771,7 +2772,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
             # 인구통계 필수값
             if demographics.get("name") and not resp_data.get("name"): missing = True
-            if demographics.get("affiliation") and not resp_data.get("affiliation"): missing = True
+            # if demographics.get("affiliation") and not resp_data.get("affiliation"): missing = True
             if demographics.get("email") and not resp_data.get("email"): missing = True
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
@@ -7333,7 +7334,7 @@ with col_main:
                                 if demographics.get("age"): demo_headers.append("연령")
                                 if demographics.get("gender"): demo_headers.append("성별")
                                 if demographics.get("experience"): demo_headers.append("경력년수")
-                                if demographics.get("affiliation"): demo_headers.append("소속")
+                                # if demographics.get("affiliation"): demo_headers.append("소속")
                                 if demographics.get("email"): demo_headers.append("이메일")
                                 demo_headers.append("사전순위지정")
                                 if rewards_info.get("enabled"):
