@@ -2287,7 +2287,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
         for comb in combinations:
             for left_f, right_f in comb["pairs"]:
                 pair_key = f"{left_f}_{right_f}"
-                st.session_state[f"pair_ans_{pair_key.replace(' ', '_')}"] = None
+                import hashlib
+                        ans_key = f"ans_{hashlib.md5(pair_key.encode('utf-8')).hexdigest()}"
+                        st.session_state[ans_key] = None
     
     # 단일 스크롤 폼 생성
     # respondent_survey_form context split - sections 1,2,3 are now outside the form
@@ -2610,7 +2612,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 other_missing = False
                                 for p_left, p_right in comb["pairs"]:
                                     k = f"{p_left}_{p_right}"
-                                    val = st.session_state.get(f"pair_ans_{k.replace(' ', '_')}", None)
+                                    import hashlib
+            ans_key_temp = f"ans_{hashlib.md5(k.encode('utf-8')).hexdigest()}"
+            val = st.session_state.get(ans_key_temp, None)
                                     group_answers[k] = val
                                     if k != pair_key and val is None:
                                         other_missing = True
@@ -2636,7 +2640,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        ans_key = f"pair_ans_{pair_key.replace(' ', '_')}"
+                        import hashlib
+                        ans_key = f"ans_{hashlib.md5(pair_key.encode('utf-8')).hexdigest()}"
+                        
+                        css = ""
                         if should_show_guide and len(comb["factors"]) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
@@ -2648,20 +2655,31 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                     max_val = min_cr_opt
                                 start_idx = clean_options.index(min_val)
                                 end_idx = clean_options.index(max_val)
-                                bar_html = '<div style="display: flex; width: 100%; height: 32px; margin-top: -32px; z-index: 10; position: relative; pointer-events: none;">'
+                                css = "<style>\n"
                                 for j, opt in enumerate(clean_options):
                                     is_valid = start_idx <= j <= end_idx
-                                    bg_color = "rgba(59, 130, 246, 0.25)" if is_valid else "transparent"
-                                    radius = ""
-                                    if j == start_idx:
-                                        radius += "border-top-left-radius: 6px; border-bottom-left-radius: 6px; "
-                                    if j == end_idx:
-                                        radius += "border-top-right-radius: 6px; border-bottom-right-radius: 6px; "
-                                    bar_html += f'<div style="flex: 1 1 0%; background-color: {bg_color}; {radius}"></div>'
-                                bar_html += '</div>'
+                                    if is_valid:
+                                        bg_color = "rgba(59, 130, 246, 0.25) !important;"
+                                        radius = ""
+                                        if j == start_idx:
+                                            radius += "border-top-left-radius: 6px !important; border-bottom-left-radius: 6px !important; "
+                                        if j == end_idx:
+                                            radius += "border-top-right-radius: 6px !important; border-bottom-right-radius: 6px !important; "
+                                        css += f"""
+                                        .st-key-{ans_key} div[role="radiogroup"] > label:nth-child({j+1}),
+                                        .st-key-{ans_key} div[role="radiogroup"] > div:nth-child({j+1}) {{
+                                            background-color: {bg_color}
+                                            {radius}
+                                        }}
+                                        """
+                                css += "</style>"
+
                         current_val = st.session_state.get(ans_key, None)
                         current_idx = clean_options.index(current_val) if current_val in clean_options else None
 
+                        if css:
+                            st.markdown(css, unsafe_allow_html=True)
+                            
                         ans_val = st.radio(
                             label=f"select_{pair_key}",
                             options=clean_options,
@@ -2671,9 +2689,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             horizontal=True,
                             label_visibility="collapsed"
                         )
-                        if should_show_guide and len(comb["factors"]) > 2:
-                            if not other_missing:
-                                st.markdown(bar_html, unsafe_allow_html=True)
                 
                     # 오른쪽 요인명 출력
                     with row_cols[2]:
@@ -6347,6 +6362,7 @@ with col_main:
                     st.session_state.edit_type_options = ", ".join(demo.get("type_options", []))
                     st.session_state.edit_demo_gender = demo.get("gender", False)
                     st.session_state.edit_demo_aff = demo.get("affiliation", False)
+                                        
                     st.session_state.edit_demo_email = demo.get("email", False)
                     st.session_state.edit_demo_name = demo.get("name", False)
                     st.session_state.edit_demo_age = demo.get("age", False)
@@ -6812,6 +6828,15 @@ with col_main:
             }
 
             st.session_state[f"_preview_data_{preview_id}"] = preview_data
+
+            # [수정됨] 새 탭에서 미리보기 데이터(안내 설정 포함)를 올바르게 읽을 수 있도록 파일로도 반드시 저장합니다
+            try:
+                import os, json
+                os.makedirs("temp_previews", exist_ok=True)
+                with open(f"temp_previews/preview_{preview_id}.json", "w", encoding="utf-8") as f:
+                    json.dump(preview_data, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                pass
 
             col_p1, col_p2 = st.columns(2)
             with col_p1:
