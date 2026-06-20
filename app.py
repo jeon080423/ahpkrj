@@ -2121,7 +2121,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
         if isinstance(preview_id_param, list):
             preview_id_param = preview_id_param[0]
             
-        st.info("⚠️ [미리보기 모드] 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.")
         
         preview_file_path = f"temp_previews/preview_{preview_id_param}.json"
         if os.path.exists(preview_file_path):
@@ -2198,7 +2197,20 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
         st.stop()
             
-    st.info(_("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.", "⚠️ Please note that all entered information will be initialized if you refresh or leave the page."))
+
+if is_preview_mode:
+    st.markdown(f"""
+    <div style="border: 1px solid #e2e8f0; background-color: transparent; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #475569; font-size: 0.95rem;">
+        <div style="margin-bottom: 8px;">⚠️ <strong>[미리보기 모드]</strong> 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.</div>
+        <div>⚠️ {_("페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.", "Please note that all entered information will be initialized if you refresh or leave the page.")}</div>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown(f"""
+    <div style="border: 1px solid #e2e8f0; background-color: transparent; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #475569; font-size: 0.95rem;">
+        <div>⚠️ {_("페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.", "Please note that all entered information will be initialized if you refresh or leave the page.")}</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # 미리보기 모드가 아닌 경우에만 구글 시트에서 메타데이터를 로드
     if not is_preview_mode:
