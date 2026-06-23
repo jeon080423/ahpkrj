@@ -332,6 +332,15 @@ h3 {
     letter-spacing: -0.01em !important;
 }
 
+/* --- 안내창(Alert/Info Box) 및 본문 폰트 크기 일관성 유지 --- */
+div[data-testid="stAlert"] p,
+div[data-testid="stAlert"] div,
+div[data-testid="stMarkdownContainer"] p,
+div[data-testid="stMarkdownContainer"] li {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+}
+
 /* --- 스트림릿 기본 크롬 숨기기 --- */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
