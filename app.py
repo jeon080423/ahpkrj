@@ -2653,7 +2653,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         else:
             col1, _ = st.columns([1, 3])
             with col1:
-                resp_data["age"] = st.number_input(f"{age_label} " + _("(세)", "(Years)"), min_value=1, max_value=120, value=None, placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_num")
+                resp_data["age"] = st.text_input(f"{age_label} " + _("(세)", "(Years)"), value="", placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_text")
             
     if demographics.get("gender"):
         resp_data["gender"] = st.radio(f"SQ{sq_idx}. " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
@@ -2670,7 +2670,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         else:
             col1, _ = st.columns([1, 3])
             with col1:
-                resp_data["experience"] = st.number_input(f"{exp_label} " + _("(년)", "(Years)"), min_value=0, max_value=60, value=None, placeholder=_("예: 5", "e.g. 5"), key="survey_resp_experience_num")
+                resp_data["experience"] = st.text_input(f"{exp_label} " + _("(년)", "(Years)"), value="", placeholder=_("예: 5", "e.g. 5"), key="survey_resp_experience_text")
             
     # 소속 문항 삭제됨
     # if demographics.get("affiliation"):
