@@ -331,6 +331,20 @@ h3 {
     color: #1e293b !important;
     letter-spacing: -0.01em !important;
 }
+h4 {
+    font-weight: 600 !important;
+    font-size: 1.05rem !important;
+    color: #1e293b !important;
+    letter-spacing: -0.01em !important;
+    margin-bottom: 0.75rem !important;
+}
+h5, h6 {
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    color: #334155 !important;
+    letter-spacing: -0.01em !important;
+    margin-bottom: 0.5rem !important;
+}
 
 /* --- 안내창(Alert/Info Box) 및 본문 폰트 크기 일관성 유지 --- */
 div[data-testid="stAlert"] p,
