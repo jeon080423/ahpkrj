@@ -496,6 +496,34 @@ a:hover {
     color: #3730a3 !important;
 }
 
+/* --- 사이드바 컴팩트 레이아웃 --- */
+section[data-testid="stSidebar"] .block-container,
+section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] {
+    gap: 0.3rem !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stVerticalBlockBorderWrapper"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+/* 사이드바 탭 글자 크기 축소 & 여백 줄이기 */
+section[data-testid="stSidebar"] button[data-baseweb="tab"] {
+    font-size: 0.82rem !important;
+    padding: 0.4rem 0.5rem !important;
+    min-height: unset !important;
+}
+/* 사이드바 내부 이미지(로고) 여백 축소 */
+section[data-testid="stSidebar"] img {
+    margin-bottom: 0.25rem !important;
+}
+/* 사이드바 마크다운 여백 축소 */
+section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] {
+    margin-bottom: 0 !important;
+}
+/* 사이드바 전체 패딩 축소 */
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.5rem !important;
+}
 /* =============================================================================
    AHP 척도 전용 고유 클래스 타겟팅 (.st-key-ahp_survey_matrix)
    ============================================================================= */
