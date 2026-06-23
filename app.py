@@ -365,7 +365,7 @@ div[data-testid="stAlert"] {
     border-radius: 8px !important;
 }
 
-div[data-testid="stAlert"] > div[role="alert"] {
+div[data-testid="stAlert"] > div {
     border-left: none !important; /* 좌측 진한 포인트 색 제거 */
     background-color: transparent !important;
     padding-top: 1.5rem !important;
@@ -2517,6 +2517,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
     survey_desc = survey_meta.get("Description", "")
     survey_desc = translate_definition_if_default("Description", survey_desc)
     
+    # 마침표(.)를 기준으로 강제 줄내림 적용하여 긴 문장(특히 개인정보 보호 등) 가독성 향상
+    if survey_desc:
+        survey_desc = survey_desc.replace(". ", ".\n\n")
+    
     survey_email = survey_meta.get("Admin_Email", "temp@ahpmaster.com")
     if not survey_email or str(survey_email).strip() == "":
         survey_email = "temp@ahpmaster.com"
@@ -2748,13 +2752,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         """
                         st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
                 else:
-                    # 대분류 핵심 요인 비교일 때, 비교 대상 대분류들의 전체 설명 노출 (테이블 형태 카드로 일치화)
                     main_rows_html = ""
                     if definitions:
                         for i, mc in enumerate(ahp_model.get("main", [])):
-                            palette = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
-                            text_color = palette["text"]
-                            border = palette["border"]
+                            text_color = "#334155"
+                            border = "#cbd5e1"
                             mc_desc = translate_definition_if_default(mc, definitions.get(mc, ""))
                             mc_trans = translate_factor_if_default(mc)
                             if mc_desc:
@@ -2766,8 +2768,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 """
                     if main_rows_html:
                         card_html = f"""
-                        <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #1e40af; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #1e40af; font-size: 1.0rem; font-weight: bold;">{_("대분류 요인 정의", "Main Criteria Definitions")}</h5>
+                        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-top: 0px; margin-bottom: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("대분류 요인 정의", "Main Criteria Definitions")}</h5>
                             <div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                                 {main_rows_html}
                             </div>
