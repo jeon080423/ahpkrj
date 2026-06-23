@@ -293,28 +293,207 @@ st.markdown(seo_tags, unsafe_allow_html=True)
 global_ahp_css = """
 <style>
 /* =============================================================================
-   전역 테마 디자인 (랜딩페이지 일관성) 및 폰트 적용
+   AHP 마스터 프리미엄 UI 테마 (v2.0)
    ============================================================================= */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
-html, body, [class*="css"] {
-    font-family: 'Pretendard', sans-serif !important;
+/* --- 글로벌 폰트 & 기본 텍스트 --- */
+html, body, [class*="css"], .stMarkdown, .stTextInput label,
+.stSelectbox label, .stRadio label, .stCheckbox label,
+div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+    letter-spacing: -0.01em;
 }
 
-/* 둥근 버튼 및 그림자 효과 */
+/* --- 메인 제목 스타일링 --- */
+h1 {
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    letter-spacing: -0.02em !important;
+}
+h2, h3 {
+    font-weight: 600 !important;
+    color: #334155 !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* --- 스트림릿 기본 크롬(장식) 숨기기 --- */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header[data-testid="stHeader"] {
+    background: rgba(248, 250, 252, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+}
+
+/* --- 사이드바 프리미엄 스타일 --- */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1.5rem !important;
+}
+
+/* --- 프리미엄 버튼 (기본) --- */
 div.stButton > button {
     border-radius: 8px !important;
-    transition: all 0.2s ease-in-out;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    padding: 0.5rem 1.25rem !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    color: #374151 !important;
 }
 div.stButton > button:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15) !important;
+    border-color: #4F46E5 !important;
+    color: #4F46E5 !important;
+    transform: translateY(-1px) !important;
+}
+div.stButton > button:active {
+    transform: translateY(0) !important;
 }
 
-/* 입력창 모서리 다듬기 */
-div.stTextInput > div > div > input,
-div.stSelectbox > div > div > div {
-    border-radius: 6px !important;
+/* --- Primary 버튼 (type=primary) --- */
+div.stButton > button[kind="primary"],
+div.stButton > button[data-testid="stBaseButton-primary"] {
+    background: linear-gradient(135deg, #4F46E5 0%, #6366f1 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25) !important;
+}
+div.stButton > button[kind="primary"]:hover,
+div.stButton > button[data-testid="stBaseButton-primary"]:hover {
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* --- 입력 필드 고급 스타일링 --- */
+div.stTextInput > div > div > input {
+    border-radius: 8px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    padding: 0.6rem 0.85rem !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease !important;
+    background: #ffffff !important;
+}
+div.stTextInput > div > div > input:focus {
+    border-color: #4F46E5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+/* --- 셀렉트박스 스타일 --- */
+div.stSelectbox > div > div {
+    border-radius: 8px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    transition: all 0.2s ease !important;
+}
+div.stSelectbox > div > div:hover {
+    border-color: #4F46E5 !important;
+}
+
+/* --- 탭 고급 스타일 --- */
+button[data-baseweb="tab"] {
+    font-family: 'Pretendard', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 8px 8px 0 0 !important;
+    transition: all 0.15s ease !important;
+}
+button[data-baseweb="tab"]:hover {
+    background-color: rgba(79, 70, 229, 0.05) !important;
+}
+
+/* --- 카드형 Expander 스타일 --- */
+details[data-testid="stExpander"] {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    transition: box-shadow 0.2s ease !important;
+    margin-bottom: 0.5rem !important;
+}
+details[data-testid="stExpander"]:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+details[data-testid="stExpander"] summary {
+    font-weight: 500 !important;
+    color: #334155 !important;
+}
+
+/* --- 알림 박스 (info/success/warning/error) 프리미엄 --- */
+div[data-testid="stAlert"] {
+    border-radius: 10px !important;
+    border-left-width: 4px !important;
+    font-size: 0.9rem !important;
+}
+
+/* --- 메트릭 카드 스타일 --- */
+div[data-testid="stMetric"] {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 1rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* --- 다운로드 버튼 --- */
+div.stDownloadButton > button {
+    border-radius: 8px !important;
+    border: 1.5px solid #4F46E5 !important;
+    color: #4F46E5 !important;
+    background: rgba(79, 70, 229, 0.04) !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+div.stDownloadButton > button:hover {
+    background: #4F46E5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
+}
+
+/* --- 스크롤바 커스텀 --- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* --- 상단 여백 및 메인 컨테이너 --- */
+.block-container {
+    padding-top: 2rem !important;
+    max-width: 1200px !important;
+}
+
+/* --- 사이드바 구분선 세련화 --- */
+section[data-testid="stSidebar"] hr {
+    border: none !important;
+    border-top: 1px solid #e2e8f0 !important;
+    margin: 0.75rem 0 !important;
+}
+
+/* --- 링크 색상 통일 --- */
+a {
+    color: #4F46E5 !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease !important;
+}
+a:hover {
+    color: #3730a3 !important;
 }
 
 /* =============================================================================
