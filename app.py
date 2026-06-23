@@ -274,7 +274,23 @@ seo_tags = """<div style="display:none;">
 <h2>Analytischer Hierarchieprozess (AHP) und Fuzzy AHP</h2>
 <p>AHP-Software und Rechner für akademische Arbeiten und Forschung. Unterstützt automatische Anpassung der Konsistenzrate (CR).</p>
 <h2>Quá trình Phân tích Phân cấp (AHP) & AHP mờ</h2>
-<p>Phần mềm tự động hglobal_ahp_css = """
+<p>Phần mềm tự động hóa phân tích AHP và AHP mờ (Fuzzy AHP) chuyên nghiệp dành for luận văn và nghiên cứu.</p>
+<h2>विश्लेषणात्मक पदानुक्रम प्रक्रिया (AHP) और फ़ज़ी AHP</h2>
+<p>शोध प्रबंध, अकादमिक पत्रों और अनुसंधान के लिए पेशेवर AHP और फ़ज़ी AHP स्वचालित सॉफ्टवेयर टूल。</p>
+<h2>Analitiese Hiërargieproses (AHP) en Vae AHP</h2>
+<p>AHP-sagteware instrument vir proefskrifte en navorsing. Ondersteun outomatiese CR kalibrasie en groep geometriese gemiddelde berekening.</p>
+<h2>Метод анализа иерархий (AHP) 및 Нечеткий AHP</h2>
+<p>Программное обеспечение и калькулятор для метода анализа иерархий (AHP). Идеально подходит для академических диссертаций.</p>
+<h2>عملية التحليل الهرمي (AHP) و عملية التحليل الهرمي الضبابي</h2>
+<p>برنامج آلي لعملية التحليل الهرمي (AHP) للرسائل الأكاديمية والبحوث.</p>
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'KbMsp4y15le5XNyK05UEr6Nq6'},{name:'description',content:'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.'},{name:'keywords',content:'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP'},{property:'og:title',content:'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템'},{property:'og:description',content:'학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
+</div>"""
+st.markdown(seo_tags, unsafe_allow_html=True)
+
+# =============================================================================
+# 전역 AHP 척도 CSS 주입 (메인 화면 및 미리보기 모달 모두에 강제 적용)
+# =============================================================================
+global_ahp_css = """
 <style>
 /* =============================================================================
    AHP 마스터 프리미엄 엔터프라이즈 UI 테마 (v3.0)
