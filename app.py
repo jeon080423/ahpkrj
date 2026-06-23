@@ -2637,7 +2637,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
     sq_idx += 1
     
     if demographics.get("name"):
-        resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name")
+        col1, _ = st.columns([1, 3])
+        with col1:
+            resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name")
         sq_idx += 1
     
     # 연령: 개방형 vs 10세 단위 선택형
@@ -2649,7 +2651,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
             age_options = [_("20대 미만", "Under 20s"), _("20대 (20~29세)", "20s (20-29)"), _("30대 (30~39세)", "30s (30-39)"), _("40대 (40~49세)", "40s (40-49)"), _("50대 (50~59세)", "50s (50-59)"), _("60대 이상", "60s or older")]
             resp_data["age"] = st.radio(age_label, age_options, index=0, key="survey_resp_age", horizontal=True)
         else:
-            resp_data["age"] = st.number_input(f"{age_label} " + _("(세)", "(Years)"), min_value=1, max_value=120, value=30, key="survey_resp_age")
+            col1, _ = st.columns([1, 3])
+            with col1:
+                resp_data["age"] = st.number_input(f"{age_label} " + _("(세)", "(Years)"), min_value=1, max_value=120, value=30, key="survey_resp_age")
             
     if demographics.get("gender"):
         resp_data["gender"] = st.radio(f"SQ{sq_idx}. " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
@@ -2664,7 +2668,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
             exp_options = [_("5년 미만", "Less than 5 years"), _("5년 이상 ~ 10년 미만", "5 to 10 years"), _("10년 이상 ~ 15년 미만", "10 to 15 years"), _("15년 이상 ~ 20년 미만", "15 to 20 years"), _("20년 이상", "20 years or more")]
             resp_data["experience"] = st.radio(exp_label, exp_options, index=0, key="survey_resp_experience", horizontal=True)
         else:
-            resp_data["experience"] = st.number_input(f"{exp_label} " + _("(년)", "(Years)"), min_value=0, max_value=60, value=5, key="survey_resp_experience")
+            col1, _ = st.columns([1, 3])
+            with col1:
+                resp_data["experience"] = st.number_input(f"{exp_label} " + _("(년)", "(Years)"), min_value=0, max_value=60, value=5, key="survey_resp_experience")
             
     # 소속 문항 삭제됨
     # if demographics.get("affiliation"):
@@ -2672,7 +2678,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
     #     sq_idx += 1
         
     if demographics.get("email"):
-        resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email")
+        col1, _ = st.columns([1, 3])
+        with col1:
+            resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email")
         sq_idx += 1
     
     st.divider()
