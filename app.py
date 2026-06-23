@@ -330,13 +330,16 @@ h3 {
     font-size: 1.15rem !important;
     color: #1e293b !important;
     letter-spacing: -0.01em !important;
+    margin-top: 2.5rem !important;
+    margin-bottom: 0.25rem !important;
 }
 h4 {
     font-weight: 600 !important;
     font-size: 1.05rem !important;
     color: #1e293b !important;
     letter-spacing: -0.01em !important;
-    margin-bottom: 0.75rem !important;
+    margin-top: 2rem !important;
+    margin-bottom: 0.25rem !important;
 }
 h5, h6 {
     font-weight: 600 !important;
