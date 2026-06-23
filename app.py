@@ -309,6 +309,7 @@ div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
 /* --- 메인 제목 스타일링 (전문적이고 차분하게) --- */
 h1 {
     font-weight: 700 !important;
+    font-size: 1.6rem !important;
     color: #0f172a !important;
     letter-spacing: -0.02em !important;
     border-bottom: 2px solid #e2e8f0 !important;
@@ -317,8 +318,16 @@ h1 {
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
-h2, h3 {
+h2 {
     font-weight: 600 !important;
+    font-size: 1.3rem !important;
+    color: #1e293b !important;
+    letter-spacing: -0.01em !important;
+    margin-bottom: 1rem !important;
+}
+h3 {
+    font-weight: 600 !important;
+    font-size: 1.15rem !important;
     color: #1e293b !important;
     letter-spacing: -0.01em !important;
 }
