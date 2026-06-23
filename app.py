@@ -416,8 +416,7 @@ button[data-baseweb="tab"] {
     color: #64748b !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    border-bottom: 2px solid #1e3a8a !important;
-    color: #1e3a8a !important;
+    /* 기존 파란색 밑줄과 색상 강제 지정을 제거하여 Streamlit의 기본 Primary Color(코랄 레드)가 자연스럽게 적용되도록 함 */
 }
 button[data-baseweb="tab"]:hover {
     color: #0f172a !important;
