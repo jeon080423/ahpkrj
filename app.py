@@ -2637,7 +2637,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     sq_idx += 1
     
     if demographics.get("name"):
-        col1, _ = st.columns([1, 3])
+        col1, col2 = st.columns([1, 3])
         with col1:
             resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name", value="", placeholder=_("예: 홍길동", "e.g. John Doe"))
         sq_idx += 1
@@ -2651,7 +2651,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             age_options = [_("20대 미만", "Under 20s"), _("20대 (20~29세)", "20s (20-29)"), _("30대 (30~39세)", "30s (30-39)"), _("40대 (40~49세)", "40s (40-49)"), _("50대 (50~59세)", "50s (50-59)"), _("60대 이상", "60s or older")]
             resp_data["age"] = st.radio(age_label, age_options, index=0, key="survey_resp_age", horizontal=True)
         else:
-            col1, _ = st.columns([1, 3])
+            col1, col2 = st.columns([1, 3])
             with col1:
                 resp_data["age"] = st.text_input(f"{age_label} " + _("(세)", "(Years)"), value="", placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_text")
             
@@ -2668,7 +2668,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             exp_options = [_("5년 미만", "Less than 5 years"), _("5년 이상 ~ 10년 미만", "5 to 10 years"), _("10년 이상 ~ 15년 미만", "10 to 15 years"), _("15년 이상 ~ 20년 미만", "15 to 20 years"), _("20년 이상", "20 years or more")]
             resp_data["experience"] = st.radio(exp_label, exp_options, index=0, key="survey_resp_experience", horizontal=True)
         else:
-            col1, _ = st.columns([1, 3])
+            col1, col2 = st.columns([1, 3])
             with col1:
                 resp_data["experience"] = st.text_input(f"{exp_label} " + _("(년)", "(Years)"), value="", placeholder=_("예: 5", "e.g. 5"), key="survey_resp_experience_text")
             
@@ -2678,7 +2678,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     #     sq_idx += 1
         
     if demographics.get("email"):
-        col1, _ = st.columns([1, 3])
+        col1, col2 = st.columns([1, 3])
         with col1:
             resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email", value="", placeholder=_("예: user@example.com", "e.g. user@example.com"))
         sq_idx += 1
