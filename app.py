@@ -293,6 +293,31 @@ st.markdown(seo_tags, unsafe_allow_html=True)
 global_ahp_css = """
 <style>
 /* =============================================================================
+   전역 테마 디자인 (랜딩페이지 일관성) 및 폰트 적용
+   ============================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Pretendard', sans-serif !important;
+}
+
+/* 둥근 버튼 및 그림자 효과 */
+div.stButton > button {
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out;
+}
+div.stButton > button:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+/* 입력창 모서리 다듬기 */
+div.stTextInput > div > div > input,
+div.stSelectbox > div > div > div {
+    border-radius: 6px !important;
+}
+
+/* =============================================================================
    AHP 척도 전용 고유 클래스 타겟팅 (.st-key-ahp_survey_matrix)
    ============================================================================= */
 
@@ -853,7 +878,7 @@ def sync_db_from_sheets():
         st.success(f"✅ SPREADSHEET_ID 발견!")
         st.write(f"값: {st.secrets['SPREADSHEET_ID']}")
     else:
-        st.error("❌ SPREADSHEET_ID가 없습니다!")
+        st.error(" SPREADSHEET_ID가 없습니다!")
         
     if "gcp_service_account" in st.secrets:
         st.write("gcp_service_account 내부 키:", list(st.secrets["gcp_service_account"].keys()))
@@ -865,7 +890,7 @@ def sync_db_from_sheets():
     try:
         client = get_gspread_client()
         if not client: 
-            st.error("❌ 구글 시트 인증(gspread client)에 실패했습니다.")
+            st.error(" 구글 시트 인증(gspread client)에 실패했습니다.")
             return -1
         
         spreadsheet = run_gspread_with_retry(client.open_by_key, st.secrets["SPREADSHEET_ID"])
@@ -2127,7 +2152,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             with open(preview_file_path, "r", encoding="utf-8") as f:
                 survey_meta = json.load(f)
         else:
-            st.warning("⚠️ 미리보기 데이터를 불러올 수 없습니다.")
+            st.warning(" 미리보기 데이터를 불러올 수 없습니다.")
             st.markdown("""
 #### 📋 미리보기 전에 아래 사항을 먼저 완료해 주세요.
 
@@ -3132,11 +3157,11 @@ with st.sidebar:
                 
                 if "정식" in s_role_selection or "Official" in s_role_selection:
                     if st.session_state.get('lang', 'ko') == 'en':
-                        st.warning("⚠️ Official User Signup Guide")
+                        st.warning(" Official User Signup Guide")
                         st.info("Official users are registered as a **Free User** first.")
                         st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 3 months)")
                     else:
-                        st.warning("⚠️ 정식 사용자 가입 안내")
+                        st.warning(" 정식 사용자 가입 안내")
                         acc_info_html = """
                         <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
                           <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 계좌이체 입금 정보</div>
@@ -4076,7 +4101,7 @@ with col_main:
             
             # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
             tier_level = 2
-            st.markdown("##### ⚙️ 계층 구조 설정")
+            st.markdown("#####  계층 구조 설정")
             tier_choice = st.radio(
                 _("계층 레벨을 선택하세요.", "Select Hierarchy Level."),
                 [_("2계층 (대분류 - 중분류)", "2-Tier (Main - Sub)"),
@@ -4241,7 +4266,7 @@ with col_main:
                                 fname, fdata = file_info
                                 st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
                         with col_List4:
-                            if st.button("🗑️", key=f"del_{a_id}"):
+                            if st.button("🗑", key=f"del_{a_id}"):
                                 delete_analysis(a_id)
                                 st.rerun()
     
@@ -7076,7 +7101,7 @@ with col_main:
         # 대시보드 렌더링
         if selected_sheet_id:
 
-            st.info("💡 구글 API 일일 호출 할당량 초과(Quota Exceeded 429 에러)를 방지하기 위해, 데이터는 자동으로 불러오지 않습니다. 아래 버튼을 눌러 최신 데이터를 갱신하세요.")
+            st.info(" 구글 API 일일 호출 할당량 초과(Quota Exceeded 429 에러)를 방지하기 위해, 데이터는 자동으로 불러오지 않습니다. 아래 버튼을 눌러 최신 데이터를 갱신하세요.")
             if st.button("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", type="primary"):
                 from survey_manager import get_survey_stats, get_survey_gspread_client
                 with st.spinner("실시간 설문 현황 로딩 중..."):
