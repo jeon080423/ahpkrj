@@ -2526,13 +2526,22 @@ if "preview_id" in q_params or "survey_id" in q_params:
         survey_email = "temp@ahpmaster.com"
     
     if survey_desc or survey_email:
-        email_md = (
-            f"\n\n---\n**📧 " + _("설문 담당자 문의:", "Contact Survey Administrator:") + f"** [{survey_email}](mailto:{survey_email})"
+        email_html = (
+            f"<div style='margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-weight: bold;'>"
+            f"📧 " + _("설문 담당자 문의:", "Contact Survey Administrator:") + " "
+            f"<a href='mailto:{survey_email}' style='color: #2563eb; text-decoration: none;'>{survey_email}</a>"
+            f"</div>"
         ) if survey_email else ""
         
-        # st.info 대신 border container를 사용하여 마크다운 안의 구분선(---) 등에 의해 박스가 쪼개지는 현상 방지 및 폰트색을 검정색으로 통일
-        with st.container(border=True):
-            st.markdown(f"{survey_desc}{email_md}")
+        survey_desc_html = survey_desc.replace("\n", "<br>")
+        
+        box_html = f"""
+        <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
+            {survey_desc_html}
+            {email_html}
+        </div>
+        """
+        st.markdown(box_html, unsafe_allow_html=True)
 
     
     # 모델 정보와 인구통계 추출
