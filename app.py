@@ -2530,7 +2530,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
             f"\n\n---\n**📧 " + _("설문 담당자 문의:", "Contact Survey Administrator:") + f"** [{survey_email}](mailto:{survey_email})"
         ) if survey_email else ""
         
-        st.info(f"{survey_desc}{email_md}")
+        # st.info 대신 border container를 사용하여 마크다운 안의 구분선(---) 등에 의해 박스가 쪼개지는 현상 방지 및 폰트색을 검정색으로 통일
+        with st.container(border=True):
+            st.markdown(f"{survey_desc}{email_md}")
 
     
     # 모델 정보와 인구통계 추출
