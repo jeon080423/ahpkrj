@@ -295,7 +295,7 @@ global_ahp_css = """
 /* =============================================================================
    전역 테마 디자인 (랜딩페이지 일관성) 및 폰트 적용
    ============================================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap');
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
 html, body, [class*="css"] {
     font-family: 'Pretendard', sans-serif !important;
@@ -2949,7 +2949,7 @@ if st.session_state.user_id is not None:
                 st.session_state.expiry_date = None
                 st.session_state.admin_mode = False
                 st.query_params.clear()
-                st.toast(_("🔒 30분간 활동이 없어 보안을 위해 자동 로그아웃되었습니다.", "🔒 Logged out automatically due to 30 minutes of inactivity."))
+                st.toast(_(" 30분간 활동이 없어 보안을 위해 자동 로그아웃되었습니다.", " Logged out automatically due to 30 minutes of inactivity."))
                 st.rerun()
             else:
                 st.query_params["last_activity"] = str(current_time)
@@ -3401,7 +3401,7 @@ if st.session_state.get('page', 'main') == 'guide':
     
     ---
     
-    ### 📌 Step 1: Prepare the Excel Template (Write & Customize)
+    ###  Step 1: Prepare the Excel Template (Write & Customize)
     AHP Master uses a specifically formatted Excel file to read your survey data.
     
     1. **Download Template**: Go to the AHP Master website (https://ahpkrj.streamlit.app/) and click the **[Download Excel Template]** button on the home screen.
@@ -4041,8 +4041,8 @@ with col_main:
         
         saved_model = None
         if st.session_state.user_id is None:
-            st.info(_("🔒 **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
-                      "🔒 **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
+            st.info(_(" **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
+                      " **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
         else:
             saved_model = load_user_model(st.session_state.user_id)
             is_en = st.session_state.get('lang', 'ko') == 'en'
@@ -4095,7 +4095,7 @@ with col_main:
     
         # default assignments are moved inside expander to react to tier_level
     
-        with st.expander(_("📌 나의 분석 모델 만들기", "📌 Create Custom AHP Model"), expanded=True):
+        with st.expander(_(" 나의 분석 모델 만들기", " Create Custom AHP Model"), expanded=True):
             st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
                       "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
             
@@ -4436,7 +4436,7 @@ with col_main:
         else:
             # 배포된 온라인 설문 데이터 연동
             if st.session_state.user_id is None:
-                st.warning(_("🔒 온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", "🔒 Online survey integration is available for members. Please log in."))
+                st.warning(_(" 온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", " Online survey integration is available for members. Please log in."))
             else:
                 import sqlite3
                 try:
@@ -6305,7 +6305,7 @@ with col_main:
         def _survey_setup_fragment():
             st.header(_(" AHP 온라인 설문 자동 생성 및 배포", " AHP Online Survey Auto-Generator & Deployer"))
             if st.session_state.user_id is None:
-                st.warning(_("🔒 **비회원도 온라인 설문 폼을 미리 작성해 볼 수 있습니다.**", "🔒 **Non-members can also preview and fill out the online survey form.**"))
+                st.warning(_(" **비회원도 온라인 설문 폼을 미리 작성해 볼 수 있습니다.**", " **Non-members can also preview and fill out the online survey form.**"))
                 st.info(_("작성하신 내용은 좌측 사이드바에서 회원가입 및 로그인을 하시면 그대로 유지되어 바로 배포하실 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)", "Once you sign up and log in from the left sidebar, the contents you have written will be maintained and you can deploy immediately. (Free members can also use all features without restriction)"))
 
             st.info(_("응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.\n\n⚠️ **주의:** 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.", "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.\n\n⚠️ **Caution:** We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."))
@@ -6438,12 +6438,12 @@ with col_main:
                         st.rerun()
 
             if has_survey:
-                st.success(_(f"📌 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f"📌 A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
+                st.success(_(f" 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f" A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
                 st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
                 if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary"):
                      confirm_new_survey()
             else:
-                st.info(_("📌 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", "📌 This is a new survey in progress. Please fill out the contents and deploy."))
+                st.info(_(" 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", " This is a new survey in progress. Please fill out the contents and deploy."))
                 if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
                     st.session_state.editing_survey_id = None
                     keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
@@ -6896,9 +6896,9 @@ with col_main:
 
             with col_p2:
                 if st.session_state.user_id is None:
-                    btn_label = _("🔒 무료 회원가입 후 배포하기", "🔒 Deploy after Free Sign Up")
+                    btn_label = _(" 무료 회원가입 후 배포하기", " Deploy after Free Sign Up")
                     if st.button(btn_label, type="primary", use_container_width=True):
-                        st.warning(_("🔒 배포 및 DB 연동은 회원가입 후 가능합니다. (무료 사용자도 제한 없이 배포 및 연동 가능함)", "🔒 Deployment and DB integration are available after sign-up. (Free users can also deploy and link DB)"))
+                        st.warning(_(" 배포 및 DB 연동은 회원가입 후 가능합니다. (무료 사용자도 제한 없이 배포 및 연동 가능함)", " Deployment and DB integration are available after sign-up. (Free users can also deploy and link DB)"))
                         st.info(_("💡 안심하세요. 현재 작성하신 내용은 창을 닫지 않고 왼쪽 사이드바에서 회원가입/로그인을 완료하시면 날아가지 않고 그대로 유지되어 즉시 배포하실 수 있습니다.", "💡 Rest assured. The contents you have written will be maintained if you sign up and log in from the left sidebar without closing the window, allowing you to deploy immediately."))
                     
                         # 로그인 패널(사이드바) 강조 애니메이션 주입
@@ -7043,7 +7043,7 @@ with col_main:
         selected_sheet_id = None
         
         if st.session_state.user_id is None:
-            st.warning(_("🔒 **실시간 응답 현황 기능은 회원 전용 서비스입니다.**", "🔒 **Real-time response status is a member-only service.**"))
+            st.warning(_(" **실시간 응답 현황 기능은 회원 전용 서비스입니다.**", " **Real-time response status is a member-only service.**"))
             st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
         else:
             # DB에서 해당 관리자가 생성한 설문 목록 조회
@@ -7095,7 +7095,7 @@ with col_main:
                 survey_title = selected_survey_info[1]
                 created_at = selected_survey_info[2]
                 
-                st.success(f"📌 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
+                st.success(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
                 st.divider()
 
         # 대시보드 렌더링
