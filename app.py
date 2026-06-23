@@ -456,6 +456,16 @@ div.stDownloadButton > button:hover {
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
 }
+/* 다운로드 버튼 높이·너비 균일화 */
+div.stDownloadButton > button {
+    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: normal !important;
+    line-height: 1.3 !important;
+}
 
 /* --- 스크롤바 커스텀 --- */
 ::-webkit-scrollbar {
