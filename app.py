@@ -358,6 +358,31 @@ div[data-testid="stMarkdownContainer"] li {
     line-height: 1.6 !important;
 }
 
+/* --- 경고창/안내창(Alert/Info Box) 패널 스타일로 단정하게 통일 --- */
+div[data-testid="stAlert"] {
+    background-color: #ffffff !important; /* 전체 배경색과 통일 */
+    border: 1px solid #e2e8f0 !important; /* 연한 회색 테두리 */
+    border-radius: 8px !important;
+}
+
+div[data-testid="stAlert"] > div[role="alert"] {
+    border-left: none !important; /* 좌측 진한 포인트 색 제거 */
+    background-color: transparent !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+
+div[data-testid="stAlert"] div[data-testid="stMarkdownContainer"] > p:first-child {
+    margin-top: 0 !important; /* 환경요인 등 첫 텍스트 상단 공백 제거 (하단과 균형) */
+}
+div[data-testid="stAlert"] div[data-testid="stMarkdownContainer"] > p:last-child {
+    margin-bottom: 0 !important;
+}
+
+div[data-testid="stAlert"] svg {
+    display: none !important; /* 불필요한 기본 아이콘 숨김 */
+}
+
 /* --- 스트림릿 기본 크롬 숨기기 --- */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
