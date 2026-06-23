@@ -274,26 +274,10 @@ seo_tags = """<div style="display:none;">
 <h2>Analytischer Hierarchieprozess (AHP) und Fuzzy AHP</h2>
 <p>AHP-Software und Rechner für akademische Arbeiten und Forschung. Unterstützt automatische Anpassung der Konsistenzrate (CR).</p>
 <h2>Quá trình Phân tích Phân cấp (AHP) & AHP mờ</h2>
-<p>Phần mềm tự động hóa phân tích AHP và AHP mờ (Fuzzy AHP) chuyên nghiệp dành for luận văn và nghiên cứu.</p>
-<h2>विश्लेषणात्मक पदानुक्रम प्रक्रिया (AHP) और फ़ज़ी AHP</h2>
-<p>शोध प्रबंध, अकादमिक पत्रों और अनुसंधान के लिए पेशेवर AHP और फ़ज़ी AHP स्वचालित सॉफ्टवेयर टूल。</p>
-<h2>Analitiese Hiërargieproses (AHP) en Vae AHP</h2>
-<p>AHP-sagteware instrument vir proefskrifte en navorsing. Ondersteun outomatiese CR kalibrasie en groep geometriese gemiddelde berekening.</p>
-<h2>Метод анализа иерархий (AHP) 및 Нечеткий AHP</h2>
-<p>Программное обеспечение и калькулятор для метода анализа иерархий (AHP). Идеально подходит для академических диссертаций.</p>
-<h2>عملية التحليل الهرمي (AHP) و عملية التحليل الهرمي الضبابي</h2>
-<p>برنامج آلي لعملية التحليل الهرمي (AHP) للرسائل الأكاديمية والبحوث.</p>
-<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'KbMsp4y15le5XNyK05UEr6Nq6'},{name:'description',content:'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.'},{name:'keywords',content:'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP'},{property:'og:title',content:'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템'},{property:'og:description',content:'학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
-</div>"""
-st.markdown(seo_tags, unsafe_allow_html=True)
-
-# =============================================================================
-# 전역 AHP 척도 CSS 주입 (메인 화면 및 미리보기 모달 모두에 강제 적용)
-# =============================================================================
-global_ahp_css = """
+<p>Phần mềm tự động hglobal_ahp_css = """
 <style>
 /* =============================================================================
-   AHP 마스터 프리미엄 UI 테마 (v2.0)
+   AHP 마스터 프리미엄 엔터프라이즈 UI 테마 (v3.0)
    ============================================================================= */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
@@ -302,162 +286,170 @@ html, body, [class*="css"], .stMarkdown, .stTextInput label,
 .stSelectbox label, .stRadio label, .stCheckbox label,
 div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    color: #1e293b !important;
 }
 
-/* --- 메인 제목 스타일링 --- */
+/* --- 메인 제목 스타일링 (전문적이고 차분하게) --- */
 h1 {
     font-weight: 700 !important;
-    color: #1e293b !important;
+    color: #0f172a !important;
     letter-spacing: -0.02em !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1.5rem !important;
 }
 h2, h3 {
     font-weight: 600 !important;
-    color: #334155 !important;
+    color: #1e293b !important;
     letter-spacing: -0.01em !important;
 }
 
-/* --- 스트림릿 기본 크롬(장식) 숨기기 --- */
+/* --- 스트림릿 기본 크롬 숨기기 --- */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header[data-testid="stHeader"] {
-    background: rgba(248, 250, 252, 0.85) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+/* --- 메인 레이아웃 폭(간격) 및 여백 최적화 --- */
+/* max-width 제한을 1600px로 대폭 확장하여 사이드바와의 빈 공간 최소화 */
+.block-container {
+    padding-top: 3rem !important;
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+    max-width: 1600px !important; 
 }
 
 /* --- 사이드바 프리미엄 스타일 --- */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border-right: 1px solid #e2e8f0 !important;
+    background-color: #f8fafc !important;
+    border-right: 1px solid #cbd5e1 !important;
 }
 section[data-testid="stSidebar"] > div:first-child {
     padding-top: 1.5rem !important;
 }
 
-/* --- 프리미엄 버튼 (기본) --- */
+/* --- 프리미엄 버튼 (기본) - 플랫/단정 --- */
 div.stButton > button {
-    border-radius: 8px !important;
-    font-weight: 500 !important;
+    border-radius: 4px !important; 
+    font-weight: 600 !important;
     font-size: 0.875rem !important;
-    padding: 0.5rem 1.25rem !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    border: 1px solid #e2e8f0 !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid #cbd5e1 !important;
     background: #ffffff !important;
-    color: #374151 !important;
+    color: #334155 !important;
+    box-shadow: none !important;
 }
 div.stButton > button:hover {
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15) !important;
-    border-color: #4F46E5 !important;
-    color: #4F46E5 !important;
-    transform: translateY(-1px) !important;
-}
-div.stButton > button:active {
-    transform: translateY(0) !important;
+    border-color: #0f172a !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
 }
 
 /* --- Primary 버튼 (type=primary) --- */
 div.stButton > button[kind="primary"],
 div.stButton > button[data-testid="stBaseButton-primary"] {
-    background: linear-gradient(135deg, #4F46E5 0%, #6366f1 100%) !important;
+    background: #1e3a8a !important; /* 딥 블루 (신뢰감) */
     color: #ffffff !important;
-    border: none !important;
+    border: 1px solid #1e3a8a !important;
     font-weight: 600 !important;
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25) !important;
+    box-shadow: none !important;
 }
 div.stButton > button[kind="primary"]:hover,
 div.stButton > button[data-testid="stBaseButton-primary"]:hover {
-    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35) !important;
-    transform: translateY(-2px) !important;
+    background: #172554 !important; /* 더 어두운 블루 */
+    border-color: #172554 !important;
 }
 
 /* --- 입력 필드 고급 스타일링 --- */
 div.stTextInput > div > div > input {
-    border-radius: 8px !important;
-    border: 1.5px solid #e2e8f0 !important;
-    padding: 0.6rem 0.85rem !important;
+    border-radius: 4px !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.5rem 0.75rem !important;
     font-size: 0.9rem !important;
-    transition: all 0.2s ease !important;
     background: #ffffff !important;
+    box-shadow: none !important;
 }
 div.stTextInput > div > div > input:focus {
-    border-color: #4F46E5 !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+    border-color: #1e3a8a !important;
+    box-shadow: 0 0 0 1px #1e3a8a !important;
 }
 
 /* --- 셀렉트박스 스타일 --- */
 div.stSelectbox > div > div {
-    border-radius: 8px !important;
-    border: 1.5px solid #e2e8f0 !important;
-    transition: all 0.2s ease !important;
+    border-radius: 4px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
 }
 div.stSelectbox > div > div:hover {
-    border-color: #4F46E5 !important;
+    border-color: #1e3a8a !important;
 }
 
 /* --- 탭 고급 스타일 --- */
 button[data-baseweb="tab"] {
     font-family: 'Pretendard', sans-serif !important;
-    font-weight: 500 !important;
-    font-size: 0.9rem !important;
-    padding: 0.6rem 1.2rem !important;
-    border-radius: 8px 8px 0 0 !important;
-    transition: all 0.15s ease !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 0 !important; 
+    border-bottom: 2px solid transparent !important;
+    background: transparent !important;
+    color: #64748b !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    border-bottom: 2px solid #1e3a8a !important;
+    color: #1e3a8a !important;
 }
 button[data-baseweb="tab"]:hover {
-    background-color: rgba(79, 70, 229, 0.05) !important;
+    color: #0f172a !important;
 }
 
 /* --- 카드형 Expander 스타일 --- */
 details[data-testid="stExpander"] {
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 10px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
     background: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-    transition: box-shadow 0.2s ease !important;
+    box-shadow: none !important;
     margin-bottom: 0.5rem !important;
 }
-details[data-testid="stExpander"]:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
-}
 details[data-testid="stExpander"] summary {
-    font-weight: 500 !important;
-    color: #334155 !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    background: #f8fafc !important;
+    padding: 0.5rem 1rem !important;
+    border-bottom: 1px solid transparent;
+}
+details[data-testid="stExpander"][open] summary {
+    border-bottom: 1px solid #cbd5e1 !important;
 }
 
-/* --- 알림 박스 (info/success/warning/error) 프리미엄 --- */
+/* --- 알림 박스 --- */
 div[data-testid="stAlert"] {
-    border-radius: 10px !important;
-    border-left-width: 4px !important;
-    font-size: 0.9rem !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    box-shadow: none !important;
 }
 
 /* --- 메트릭 카드 스타일 --- */
 div[data-testid="stMetric"] {
     background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 10px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-left: 4px solid #1e3a8a !important; 
+    border-radius: 4px !important;
     padding: 1rem !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: none !important;
 }
 
 /* --- 다운로드 버튼 --- */
 div.stDownloadButton > button {
-    border-radius: 8px !important;
-    border: 1.5px solid #4F46E5 !important;
-    color: #4F46E5 !important;
-    background: rgba(79, 70, 229, 0.04) !important;
-    font-weight: 500 !important;
-    transition: all 0.2s ease !important;
-}
-div.stDownloadButton > button:hover {
-    background: #4F46E5 !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
-}
-/* 다운로드 버튼 높이·너비 균일화 */
-div.stDownloadButton > button {
+    border-radius: 4px !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+    background: #f8fafc !important;
+    font-weight: 600 !important;
     min-height: 52px !important;
     display: flex !important;
     align-items: center !important;
@@ -465,60 +457,40 @@ div.stDownloadButton > button {
     text-align: center !important;
     white-space: normal !important;
     line-height: 1.3 !important;
+    box-shadow: none !important;
+}
+div.stDownloadButton > button:hover {
+    background: #e2e8f0 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
 }
 
 /* --- 스크롤바 커스텀 --- */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* --- 상단 여백 및 메인 컨테이너 --- */
-.block-container {
-    padding-top: 2rem !important;
-    max-width: 1200px !important;
-}
-
-/* --- 사이드바 구분선 세련화 --- */
+/* --- 사이드바 구분선 --- */
 section[data-testid="stSidebar"] hr {
     border: none !important;
-    border-top: 1px solid #e2e8f0 !important;
-    margin: 0.75rem 0 !important;
+    border-top: 1px solid #cbd5e1 !important;
+    margin: 1rem 0 !important;
 }
 
 /* --- 링크 색상 통일 --- */
 a {
-    color: #4F46E5 !important;
+    color: #1e3a8a !important;
     text-decoration: none !important;
-    transition: color 0.15s ease !important;
 }
 a:hover {
-    color: #3730a3 !important;
+    text-decoration: underline !important;
 }
 
-/* --- 사이드바 컴팩트 레이아웃 --- */
-section[data-testid="stSidebar"] .block-container,
-section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] {
-    gap: 0.3rem !important;
-}
-section[data-testid="stSidebar"] div[data-testid="stVerticalBlockBorderWrapper"] {
-    padding: 0 !important;
-    margin: 0 !important;
-}
 /* 사이드바 탭 글자 크기 축소 & 여백 줄이기 */
 section[data-testid="stSidebar"] button[data-baseweb="tab"] {
-    font-size: 0.82rem !important;
-    padding: 0.4rem 0.5rem !important;
+    font-size: 0.85rem !important;
+    padding: 0.5rem 0.5rem !important;
     min-height: unset !important;
 }
 /* 사이드바 내부 이미지(로고) 여백 축소 */
@@ -534,6 +506,7 @@ section[data-testid="stSidebar"] > div:first-child {
     padding-top: 0.75rem !important;
     padding-bottom: 0.5rem !important;
 }
+
 /* =============================================================================
    AHP 척도 전용 고유 클래스 타겟팅 (.st-key-ahp_survey_matrix)
    ============================================================================= */
@@ -550,6 +523,151 @@ div.st-key-ahp_survey_matrix {
     align-items: center !important;
     width: 100% !important;
     margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.st-key-ahp_survey_matrix div[data-testid="column"] {
+    padding: 0px !important;
+}
+
+/* 2. 라디오 그룹 전체 100% 분배 강제 및 줄바꿈 원천 차단 */
+.st-key-ahp_survey_matrix div[data-testid="stElementContainer"],
+.st-key-ahp_survey_matrix div[data-testid="stRadio"],
+.st-key-ahp_survey_matrix .stRadio {
+    width: 100% !important;
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+.st-key-ahp_survey_matrix div[data-testid="stRadio"] > div,
+.st-key-ahp_survey_matrix div[role="radiogroup"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0px !important;
+    padding: 0px !important; 
+    margin: 0px !important;
+}
+
+/* 2.5. AHP 컨테이너 내부의 수직 요소 간격 초밀착 */
+.st-key-ahp_survey_matrix div[data-testid="stVerticalBlock"] {
+    gap: 0px !important;
+}
+
+/* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] > div,
+.st-key-ahp_survey_matrix div[role="radiogroup"] > label,
+.st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"],
+.st-key-ahp_survey_matrix div[role="radiogroup"] label {
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 32px !important; 
+    margin: 0px !important;
+    padding: 0px !important;
+    min-width: 0px !important;
+    width: 100% !important;
+    border-radius: 2px !important;
+    transition: background-color 0.1s ease-in-out !important;
+    background-color: transparent !important;
+}
+
+/* 3.5. 라디오 그룹 최소 높이 해제 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] {
+    min-height: 32px !important;
+}
+
+/* 감싸는 div가 있을 경우 그 내부의 실제 label도 100% 채우도록 지시 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] > div label,
+.st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"] label {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+/* 4. 기존 텍스트 찌꺼기 완벽 제거 */
+.st-key-ahp_survey_matrix label[data-testid="stWidgetLabel"],
+.st-key-ahp_survey_matrix label p {
+    display: none !important;
+    height: 0px !important;
+    width: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+}
+
+/* stMarkdownContainer의 negative margin 제거하여 컬럼간 수직 평행 맞춤 */
+.st-key-ahp_survey_matrix div[data-testid="stMarkdownContainer"] {
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+/* 라디오 항목 내부의 markdown 컨테이너(텍스트용) 완전히 감추기 */
+.st-key-ahp_survey_matrix div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+    display: none !important;
+    height: 0px !important;
+    width: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+}
+
+/* 동그라미 컨테이너 중앙 정렬 및 여백 마진 제거 */
+.st-key-ahp_survey_matrix label span {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+/* 5. Hover 및 Zebra 효과 */
+.st-key-ahp_survey_matrix label:hover {
+    background-color: #f1f5f9 !important;
+    cursor: pointer !important;
+}
+
+/* 6. 모바일 가로 스크롤 허용 및 붕괴 방지 */
+@media (max-width: 768px) {
+    .stApp > header + div, 
+    .block-container,
+    div[data-testid="stDialog"] {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
+        flex-wrap: nowrap !important;
+        min-width: 100% !important;
+    }
+    .st-key-ahp_survey_matrix div[data-testid="column"] {
+        flex: 0 0 auto !important;
+    }
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
+        width: 25% !important; 
+        white-space: normal !important;
+        word-break: break-all !important;
+        font-size: 0.9em !important;
+    }
+    .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
+        width: 50% !important;
+    }
+}
+</style>
+"""0px !important;
     margin-bottom: 0px !important;
     padding-top: 2px !important;
     padding-bottom: 2px !important;
