@@ -314,6 +314,8 @@ h1 {
     border-bottom: 2px solid #e2e8f0 !important;
     padding-bottom: 0.5rem !important;
     margin-bottom: 1.5rem !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 h2, h3 {
     font-weight: 600 !important;
@@ -332,7 +334,7 @@ header[data-testid="stHeader"] {
 /* --- 메인 레이아웃 폭(간격) 및 여백 최적화 --- */
 /* max-width 제한을 1600px로 대폭 확장하여 사이드바와의 빈 공간 최소화 */
 .block-container {
-    padding-top: 3rem !important;
+    padding-top: 1rem !important;
     padding-left: 3rem !important;
     padding-right: 3rem !important;
     max-width: 1600px !important; 
