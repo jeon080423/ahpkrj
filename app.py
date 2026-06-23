@@ -2639,7 +2639,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     if demographics.get("name"):
         col1, _ = st.columns([1, 3])
         with col1:
-            resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name")
+            resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name", value="", placeholder=_("예: 홍길동", "e.g. John Doe"))
         sq_idx += 1
     
     # 연령: 개방형 vs 10세 단위 선택형
@@ -2653,7 +2653,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         else:
             col1, _ = st.columns([1, 3])
             with col1:
-                resp_data["age"] = st.number_input(f"{age_label} " + _("(세)", "(Years)"), min_value=1, max_value=120, value=30, key="survey_resp_age")
+                resp_data["age"] = st.number_input(f"{age_label} " + _("(세)", "(Years)"), min_value=1, max_value=120, value=None, placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_num")
             
     if demographics.get("gender"):
         resp_data["gender"] = st.radio(f"SQ{sq_idx}. " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
@@ -2670,7 +2670,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         else:
             col1, _ = st.columns([1, 3])
             with col1:
-                resp_data["experience"] = st.number_input(f"{exp_label} " + _("(년)", "(Years)"), min_value=0, max_value=60, value=5, key="survey_resp_experience")
+                resp_data["experience"] = st.number_input(f"{exp_label} " + _("(년)", "(Years)"), min_value=0, max_value=60, value=None, placeholder=_("예: 5", "e.g. 5"), key="survey_resp_experience_num")
             
     # 소속 문항 삭제됨
     # if demographics.get("affiliation"):
@@ -2680,7 +2680,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     if demographics.get("email"):
         col1, _ = st.columns([1, 3])
         with col1:
-            resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email")
+            resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email", value="", placeholder=_("예: user@example.com", "e.g. user@example.com"))
         sq_idx += 1
     
     st.divider()
@@ -3088,7 +3088,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
             # 인구통계 필수값
             if demographics.get("name") and not resp_data.get("name"): missing = True
-            # if demographics.get("affiliation") and not resp_data.get("affiliation"): missing = True
+            if demographics.get("age") and resp_data.get("age") is None: missing = True
+            if demographics.get("experience") and resp_data.get("experience") is None: missing = True
             if demographics.get("email") and not resp_data.get("email"): missing = True
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
