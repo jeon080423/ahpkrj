@@ -3053,7 +3053,7 @@ with st.sidebar:
     try:
         st.image("ahp_master_logo.png", use_container_width=True)
     except:
-        st.subheader(_("📊 AHP 마스터", "📊 AHP Master"))
+        st.subheader(_(" AHP 마스터", " AHP Master"))
 
 
     if st.session_state.user_id is None:
@@ -3104,7 +3104,7 @@ with st.sidebar:
         with tab_signup:
             if st.session_state.get('signup_paypal_user'):
                 user_id = st.session_state.signup_paypal_user
-                st.markdown("### 💳 Upgrade to Official User via PayPal")
+                st.markdown("###  Upgrade to Official User via PayPal")
                 st.info(f"You have registered successfully as **{user_id}**. To complete your upgrade to Official User immediately, please use the PayPal button below:")
                 
                 paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
@@ -3250,7 +3250,7 @@ with st.sidebar:
         if st.session_state.user_role == 'temp':
             with st.expander(_("💳 정식 사용자 승격/결제", "💳 Upgrade to Official User"), expanded=False):
                 if st.session_state.lang == 'en':
-                    st.markdown("##### 💳 PayPal Membership Upgrade")
+                    st.markdown("#####  PayPal Membership Upgrade")
                     st.info("Upgrade to **Official User** to get unlimited access (3 months) for **$350.00 USD**.")
                     
                     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
@@ -3294,7 +3294,7 @@ with st.sidebar:
                     """
                     st.components.v1.html(paypal_html, height=180)
                 else:
-                    st.markdown("##### 💳 정식 사용자 승격 요청")
+                    st.markdown("#####  정식 사용자 승격 요청")
                     
                     acc_info_html = """
                     <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
@@ -3394,7 +3394,7 @@ if st.session_state.get('page', 'main') == 'guide':
         st.session_state.page = "main"
         st.rerun()
     
-    st.title("📖 AHP Master - English User Guide")
+    st.title(" AHP Master - English User Guide")
     st.markdown("""
     🚀 **Welcome!** **AHP Master** is a smart web service that automatically processes the entire Analytic Hierarchy Process (AHP) workflow in 1 second, without requiring complex equations or statistical software.
     This guide is designed to walk first-time users through the step-by-step process of completing their academic thesis statistics and decision analysis smoothly.
@@ -3531,7 +3531,7 @@ def show_cr_distortion_dialog():
     left_col, right_col = st.columns([1.2, 1])
 
     with right_col:
-        st.subheader(_("📊 검증 결과", "📊 Verification Results"))
+        st.subheader(_(" 검증 결과", " Verification Results"))
         st.dataframe(pd.DataFrame([metrics]), use_container_width=True)
 
         # Heatmaps side by side
@@ -3544,7 +3544,7 @@ def show_cr_distortion_dialog():
             st.image(f"data:image/png;base64,{corr_img}", caption=_("보정 행렬", "Corrected Matrix"), use_container_width=True)
 
     with left_col:
-        st.subheader(_("🧪 검증 방법", "🧪 Verification Method"))
+        st.subheader(_(" 검증 방법", " Verification Method"))
         st.markdown(_(
             f"""
 본 검증은 CR(일관성 비율) 보정 과정에서 **원본 응답 데이터가 얼마나 변형되었는지**를 정량적으로 측정합니다.
@@ -3581,7 +3581,7 @@ This verification quantitatively measures **how much the original response data 
 ---
 """))
 
-        st.subheader(_("📝 결과 해석", "📝 Interpretation"))
+        st.subheader(_(" 결과 해석", " Interpretation"))
 
         # Extract metric values
         euc = metrics.get("euclidean", 0)
@@ -3760,7 +3760,7 @@ with col_main:
             st.success(st.session_state["sync_success_msg"])
             del st.session_state["sync_success_msg"]
     
-        st.subheader(_("👥 가입자 현황 및 관리", "👥 Registered Users & Admin Control"))
+        st.subheader(_(" 가입자 현황 및 관리", " Registered Users & Admin Control"))
         
         col_sync1, col_sync2 = st.columns([2, 8])
         with col_sync1:
@@ -3952,7 +3952,7 @@ with col_main:
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
         with st.container(border=True):
-            st.markdown(_("#### ⚡ 빠른 시작 (도시재생 사업 모델)", "#### ⚡ Quick Start (Urban Regeneration Project Model)"))
+            st.markdown(_("####  빠른 시작 (도시재생 사업 모델)", "####  Quick Start (Urban Regeneration Project Model)"))
             st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
                       "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
             
@@ -4644,7 +4644,7 @@ with col_main:
                                 save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
 
                             st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
-                            st.markdown(_('<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;">⚠️ 주의: 새로고침하거나 브라우저를 닫으면 결과가 리셋됩니다. 📑 결과 다운로드 탭에서 반드시 저장하세요.</p>',
+                            st.markdown(_('<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;"> 주의: 새로고침하거나 브라우저를 닫으면 결과가 리셋됩니다.  결과 다운로드 탭에서 반드시 저장하세요.</p>',
                                           '<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;">⚠️ Warning: Results reset on refresh. Download via 📑 Download Results tab.</p>'), unsafe_allow_html=True)
 
                             # --- 3계층 전용 5개 탭 UI ---
@@ -4665,7 +4665,7 @@ with col_main:
 
                             # ─── Tab 1: 종합 분석 ────────────────────────────────────────────
                             with tab3v1:
-                                st.subheader(_("🌐 3계층 종합 중요도 및 순위", "🌐 3-Tier Global Weights & Rankings"))
+                                st.subheader(_(" 3계층 종합 중요도 및 순위", " 3-Tier Global Weights & Rankings"))
                                 if is_english:
                                     _disp_v3 = final_df_v3.rename(columns={
                                         "대분류": "Main Criteria",    "대분류 가중치": "Main Weight",
@@ -4679,7 +4679,7 @@ with col_main:
                                     _disp_v3 = final_df_v3
                                 st.dataframe(_disp_v3.style.format(precision=4), use_container_width=True)
 
-                                st.markdown(_("---\n#### 📊 대분류별 소분류 항목 글로벌 가중치",
+                                st.markdown(_("---\n####  대분류별 소분류 항목 글로벌 가중치",
                                               "---\n#### 📊 Sub-sub-Criteria Global Weights by Main Criteria"))
                                 _non_dummy_v3 = final_df_v3[~final_df_v3["소분류"].str.endswith("_단일항목", na=False)].copy()
                                 if _non_dummy_v3.empty:
@@ -4793,7 +4793,7 @@ with col_main:
 
                             # ─── Tab 4: 시각화 센터 ──────────────────────────────────────────
                             with tab3v4:
-                                st.markdown(_("#### 📊 3계층 AHP 시각화 센터", "#### 📊 3-Tier AHP Visualization Center"))
+                                st.markdown(_("####  3계층 AHP 시각화 센터", "####  3-Tier AHP Visualization Center"))
 
                                 st.markdown(_("**① 글로벌 가중치 순위 버블 차트 (버블 크기 = 중분류 가중치, 색 = 대분류)**",
                                               "**① Global Weight Bubble Chart (bubble size = Sub weight, color = Main Criteria)**"))
@@ -5021,7 +5021,7 @@ with col_main:
 
                             # ─── Tab 5: 결과 다운로드 ────────────────────────────────────────
                             with tab3v5:
-                                st.markdown(_("### 📑 3계층 AHP 종합분석 결과 다운로드",
+                                st.markdown(_("###  3계층 AHP 종합분석 결과 다운로드",
                                               "### 📑 Download 3-Tier AHP Comprehensive Analysis Results"))
                                 st.download_button(
                                     label=_("📥 3계층 AHP 종합분석 결과 다운로드 (.xlsx)", "📥 Download 3-Tier AHP Results (.xlsx)"),
@@ -5871,7 +5871,7 @@ with col_main:
                             save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
     
                         # 결과 휘발성 주의 안내
-                        st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;">⚠️ 주의: 페이지를 새로고침하거나 브라우저를 닫으면 분석 결과가 저장되지 않고 리셋되므로, 결과물 엑셀 파일(📑 결과 다운로드 탭)을 반드시 다운로드하여 저장해 주세요.</p>',
+                        st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;"> 주의: 페이지를 새로고침하거나 브라우저를 닫으면 분석 결과가 저장되지 않고 리셋되므로, 결과물 엑셀 파일( 결과 다운로드 탭)을 반드시 다운로드하여 저장해 주세요.</p>',
                                       '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;">⚠️ Warning: Analysis results are not stored and will be reset if you refresh the page or close the browser. Please make sure to download and save the results Excel file (📑 Download Results tab).</p>'), unsafe_allow_html=True)
     
                         tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -5882,7 +5882,7 @@ with col_main:
                             _("📑 결과 다운로드", "📑 Download Results")
                         ])
                         with tab1:
-                            st.subheader(_("🌐 종합 중요도 및 순위", "🌐 Global Weights & Rankings"))
+                            st.subheader(_(" 종합 중요도 및 순위", " Global Weights & Rankings"))
                             if is_english:
                                 disp_final_df = final_df.rename(columns={
                                     "대분류": "Main Criteria",
@@ -5949,7 +5949,7 @@ with col_main:
                             else:
                                 st.info(_("통계 검정을 위해 2개 이상의 그룹 데이터가 필요합니다.", "At least 2 group datasets are required for statistical testing (ANOVA)."))
                         with tab4:
-                            st.markdown(_("#### 📊 시각화 센터", "#### 📊 Visualization Center"))
+                            st.markdown(_("####  시각화 센터", "####  Visualization Center"))
                             col_chart1, col_chart2 = st.columns(2)
                             with col_chart1:
                                 st.write(_("**종합 중요도 (Bar)**", "**Global Importance (Bar)**"))
@@ -6098,7 +6098,7 @@ with col_main:
                             # ── Fuzzy AHP TFN 삼각퍼지 그래프 (Tab1 결과 화면 직후) ──
                             if ahp_method == 'fuzzy':
                                 st.markdown("---")
-                                st.subheader(_("📐 삼각퍼지수(TFN) 가중치 분포", "📐 Triangular Fuzzy Number (TFN) Weight Distribution"))
+                                st.subheader(_(" 삼각퍼지수(TFN) 가중치 분포", " Triangular Fuzzy Number (TFN) Weight Distribution"))
                                 st.caption(_("각 요인의 삼각퍼지수(L, M, U)와 비퍼지화된 Crisp 가중치를 시각화합니다.",
                                              "Visualizes each factor's Triangular Fuzzy Numbers (L, M, U) and defuzzified Crisp weights."))
     
@@ -6212,7 +6212,7 @@ with col_main:
                                         st.dataframe(pd.DataFrame(sub_tfn_rows).style.format(precision=4), use_container_width=True)
     
                         with tab5:
-                            st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
+                            st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;"> 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
                                           '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
                             st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary")
                             if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
@@ -6240,7 +6240,7 @@ with col_main:
                         st.markdown("---")
                         with st.container(border=True):
                             if is_english:
-                                st.markdown("### 💳 Official User Upgrade & Unlimited Analysis")
+                                st.markdown("###  Official User Upgrade & Unlimited Analysis")
                                 st.markdown("Upgrading to an Official User **instantly removes the 5-sample limit** and allows unlimited access to all features.")
                                 st.info("Upgrade to **Official User** to get unlimited access (3 months) for **$350.00 USD** via PayPal.")
                             
@@ -6285,7 +6285,7 @@ with col_main:
                                 """
                                 st.components.v1.html(paypal_html, height=180)
                             else:
-                                st.markdown(_("### 💳 정식 사용자 승격 및 무제한 분석", "### 💳 Upgrade to Official User for Unlimited Analysis"))
+                                st.markdown(_("###  정식 사용자 승격 및 무제한 분석", "###  Upgrade to Official User for Unlimited Analysis"))
                                 st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
                                 st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 아래 버튼을 클릭해 주세요.\n(서비스 이용요금: 50만원)")
                                 if st.button("정식 사용자 전환 요청", use_container_width=True, key="main_upgrade_btn"):
@@ -6303,7 +6303,7 @@ with col_main:
         # @st.fragment: 위젯 변경 시 이 영역만 재실행 (성능 최적화)
         @st.fragment
         def _survey_setup_fragment():
-            st.header(_("📝 AHP 온라인 설문 자동 생성 및 배포", "📝 AHP Online Survey Auto-Generator & Deployer"))
+            st.header(_(" AHP 온라인 설문 자동 생성 및 배포", " AHP Online Survey Auto-Generator & Deployer"))
             if st.session_state.user_id is None:
                 st.warning(_("🔒 **비회원도 온라인 설문 폼을 미리 작성해 볼 수 있습니다.**", "🔒 **Non-members can also preview and fill out the online survey form.**"))
                 st.info(_("작성하신 내용은 좌측 사이드바에서 회원가입 및 로그인을 하시면 그대로 유지되어 바로 배포하실 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)", "Once you sign up and log in from the left sidebar, the contents you have written will be maintained and you can deploy immediately. (Free members can also use all features without restriction)"))
@@ -6514,7 +6514,7 @@ with col_main:
 
             # 그룹 분류 설정
             with st.container(border=True):
-                st.markdown(_("**👥 그룹 분류 문항 설정**", "**👥 Group Classification Setup**"))
+                st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
                 type_q_val = st.session_state.get("edit_type_question")
                 if type_q_val == "귀하의 소속은 어떻게 되십니까?":
                     type_q_val = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
@@ -6533,7 +6533,7 @@ with col_main:
 
             # 인구통계학 정보 설정
             with st.container(border=True):
-                st.markdown(_("**📊 인구통계학적 문항 수집 설정**", "**📊 Demographic Questions Setup**"))
+                st.markdown(_("** 인구통계학적 문항 수집 설정**", "** Demographic Questions Setup**"))
                 demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
                 demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
@@ -6574,7 +6574,7 @@ with col_main:
             # 계층 구조 선택 (2계층 기준과 동일하게 전체 공개)
             tier_level = 2
             st.markdown("---")
-            st.markdown(_("##### ⚙️ 계층 구조 레벨 선택", "##### ⚙️ Select Hierarchy Level"))
+            st.markdown(_("#####  계층 구조 레벨 선택", "#####  Select Hierarchy Level"))
             tier_choice_tab2 = st.radio(
                 _("설문 모델의 계층 깊이를 선택하세요.", "Select the hierarchy depth for your survey model."),
                 [_("2계층 (대분류 ➔ 중분류)", "2-Tier (Main ➔ Sub)"),
@@ -6653,7 +6653,7 @@ with col_main:
             definitions_map = {}
             for mc in main_list:
                 # 대분류명 파란색 볼드 및 이모티콘을 이용해 대조 설정
-                st.markdown(_(f"#### 🟦 :blue[**대분류: {mc}**]", f"#### 🟦 :blue[**Main Criteria: {mc}**]"))
+                st.markdown(_(f"####  :blue[**대분류: {mc}**]", f"####  :blue[**Main Criteria: {mc}**]"))
                 default_main_def = ""
                 if mc in ["기술 요인", "Technological"]: default_main_def = _("협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인", "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.")
                 elif mc in ["조직 요인", "Organizational"]: default_main_def = _("협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인", "Factors related to the internal capabilities of the organization, top management support, financial and training status.")
@@ -6812,11 +6812,11 @@ with col_main:
 
             # [추가] 구글 스프레드시트 연동 설정
             if st.session_state.get('editing_survey_id'):
-                st.markdown(_("##### ⚙️ 기존 구글 스프레드시트 연동 (수정 모드)", "##### ⚙️ Existing Google Spreadsheet Integration (Edit Mode)"))
+                st.markdown(_("#####  기존 구글 스프레드시트 연동 (수정 모드)", "#####  Existing Google Spreadsheet Integration (Edit Mode)"))
                 st.info(_("현재 **기존 설문 수정 모드**로 진입했습니다. 수정한 설정 내용은 기존 연동된 구글 스프레드시트에 안전하게 덮어씌워집니다.\n\n**연동된 시트 ID:** ", "You have entered **Existing Survey Edit Mode**. The modified settings will be safely overwritten to the existing linked Google Spreadsheet.\n\n**Linked Sheet ID:** ") + st.session_state.editing_survey_id)
                 existing_sheet_id_input = st.session_state.editing_survey_id
             else:
-                st.markdown(_("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *", "##### ⚙️ Setup Your Google Spreadsheet to Link *"))
+                st.markdown(_("#####  연동할 본인의 구글 스프레드시트 설정 *", "#####  Setup Your Google Spreadsheet to Link *"))
                 st.info(_("""
                 **💡 연동 방법:**
                 1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
