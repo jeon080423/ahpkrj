@@ -75,7 +75,12 @@ except ImportError:
 # 다국어(English/Korean) 번역 헬퍼 함수
 # -----------------------------------------------------------------------------
 if 'lang' not in st.session_state:
-    st.session_state.lang = 'ko'
+    try:
+        _init_lang = st.query_params.get("lang", "ko")
+        if isinstance(_init_lang, list): _init_lang = _init_lang[0]
+        st.session_state.lang = _init_lang.lower()
+    except:
+        st.session_state.lang = 'ko'
 
 def _(ko_text, en_text):
     if st.session_state.get('lang', 'ko') == 'en':
@@ -250,7 +255,7 @@ seo_tags = """<div style="display:none;">
 <!-- Multilingual Description -->
 <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. 학위논문 및 연구용 AHP/퍼지 AHP 분석 솔루션. 专业层次分析法(AHP)及模糊层次分析法在线软件与计算器。階層分析法(AHP)ツール。Software del Proceso de Análisis Jerárquico (AHP). Processus d'Analyse Hiérarchique. Analytischer Hierarchieprozess. Quá trình Phân tích Phân cấp. विश्लेषणात्मक पदानुक्रम प्रक्रिया. Analitiese Hiërargieproses. Метод анализа иерархий." />
 <!-- Multilingual Keywords -->
-<meta name="keywords" content="AHP, Fuzzy AHP, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스터, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, 학위논문 AHP 통계, 层次分析法, 模糊层次分析法, 层次分析법计算器, 层次分析법软件, 论文AHP分析, 一致性比例, 階層分析法, ファジィAHP, AHPソフトウェア, AHPツール, Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP, Processus d'Analyse Hiérarchique, AHP Flou, Logiciel AHP, Quá trình Phân tích Phân cấp, AHP mờ, Phần mềm AHP, Analytischer Hierarchieprozess, AHP-Software, AHP Rechner, विश्लेषणात्मक पदानुक्रम प्रक्रिया, फ़ज़ी AHP, AHP SOFTWARE, Analitiese Hiërargieproses, Vae AHP, AHP-sagteware, Метод анализа иерархий, Нечеткий AHP, Программное обеспечение AHP, عملية التحليل الهرمي, عملية التحليل الهرمي الضبابي, برنامج AHP" />
+<meta name="keywords" content="AHP, Fuzzy AHP, Expert AHP Survey, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스터, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, 학위논문 AHP 통계, 层次分析法, 模糊层次分析法, 层次分析법计算器, 层次分析법软件, 论文AHP分析, 一致性比例, 階層分析法, ファジィAHP, AHPソフトウェア, AHPツール, Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP, Processus d'Analyse Hiérarchique, AHP Flou, Logiciel AHP, Quá trình Phân tích Phân cấp, AHP mờ, Phần mềm AHP, Analytischer Hierarchieprozess, AHP-Software, AHP Rechner, विश्लेषणात्मक पदानुक्रम प्रक्रिया, फ़ज़ी AHP, AHP SOFTWARE, Analitiese Hiërargieproses, Vae AHP, AHP-sagteware, Метод анализа иерархий, Нечеткий AHP, Программное обеспечение AHP, عملية التحليل الهرمي, عملية التحليل الهرمي الضبابي, برنامج AHP" />
 <meta name="author" content="AHP Master" />
 <meta name="robots" content="index, follow" />
 <meta name="google-site-verification" content="FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs" />
@@ -276,7 +281,7 @@ seo_tags = """<div style="display:none;">
 <h2>Quá trình Phân tích Phân cấp (AHP) & AHP mờ</h2>
 <p>Phần mềm tự động hóa phân tích AHP và AHP mờ (Fuzzy AHP) chuyên nghiệp dành for luận văn và nghiên cứu.</p>
 <h2>विश्लेषणात्मक पदानुक्रम प्रक्रिया (AHP) और फ़ज़ी AHP</h2>
-<p>शोध प्रबंध, अकादमिक पत्रों और अनुसंधान के लिए पेशेवर AHP और फ़ज़ी AHP स्वचालित सॉफ्टवेयर टूल。</p>
+<p>शोध प्रबंध, अकादमिक पत्रों and अनुसंधान के लिए पेशेवर AHP and फ़ज़ी AHP स्वचालित सॉफ्टवेयर टूल。</p>
 <h2>Analitiese Hiërargieproses (AHP) en Vae AHP</h2>
 <p>AHP-sagteware instrument vir proefskrifte en navorsing. Ondersteun outomatiese CR kalibrasie en groep geometriese gemiddelde berekening.</p>
 <h2>Метод анализа иерархий (AHP) 및 Нечеткий AHP</h2>
@@ -2430,16 +2435,24 @@ if "preview_id" in q_params or "survey_id" in q_params:
             with open(preview_file_path, "r", encoding="utf-8") as f:
                 survey_meta = json.load(f)
         else:
-            st.warning(" 미리보기 데이터를 불러올 수 없습니다.")
-            st.markdown("""
+            st.warning(_("미리보기 데이터를 불러올 수 없습니다.", "Failed to load preview data."))
+            st.markdown(_("""
 #### 📋 미리보기 전에 아래 사항을 먼저 완료해 주세요.
 
 1. **설문지 설정 완료** — 메인 페이지에서 AHP 모델 구조, 요인, 척도 등 설문 설정을 모두 입력합니다.
-2. **구글 스프레드시트 연동** — 섹션 7에서 본인의 구글 스프레드시트 URL 또는 ID를 입력하고, 서비스 계정 이메일(`ahp2-75@ahp2-486703.iam.gserviceaccount.com`)을 편집자로 공유합니다.
+2. **구글 스프레드시트 연동** — 섹션 7에서 본인의 구글 스프레드시트 URL 또는 ID를 입력하고, 서비스 계정 이메일을 편집자로 공유합니다.
 3. **미리보기 버튼 클릭** — 설정이 완료된 후 "👁️ 설문지 응답 화면 미리보기" 버튼을 다시 눌러 주세요.
 
 > 💡 설문 설정 페이지에서 내용을 입력한 뒤 미리보기를 눌러야 정상적으로 표시됩니다.
-            """)
+            """, """
+#### 📋 Please complete the following steps before previewing.
+
+1. **Complete Survey Settings** — Enter all survey settings, including AHP model structure, factors, and scales on the main page.
+2. **Google Spreadsheet Integration** — In Section 7, enter your Google Spreadsheet URL or ID and share it with the service account email as an editor.
+3. **Click Preview Button** — After the setup is complete, click the "👁️ Preview Survey Screen" button again.
+
+> 💡 The preview will display correctly only after entering content on the survey settings page.
+            """))
             st.stop()
             
         survey_id_param = f"preview_{preview_id_param}"
@@ -2504,7 +2517,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     if is_preview_mode:
         st.markdown(f"""
         <div style="border: 1px solid #e2e8f0; background-color: transparent; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #475569; font-size: 0.95rem;">
-            <div style="margin-bottom: 8px;">⚠️ <strong>[미리보기 모드]</strong> 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.</div>
+            <div style="margin-bottom: 8px;">⚠️ <strong>[{_("미리보기 모드", "Preview Mode")}]</strong> {_("이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.", "This screen is a real-time preview of the screen that respondents will see. The entered data is not submitted.")}</div>
             <div>⚠️ {_("페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.", "Please note that all entered information will be initialized if you refresh or leave the page.")}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -2531,7 +2544,27 @@ if "preview_id" in q_params or "survey_id" in q_params:
     survey_title = survey_meta.get('Title', 'AHP 온라인 설문조사')
     if survey_title in ['AHP 온라인 설문조사', '제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문']:
         survey_title = _(survey_title, 'Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots')
-    st.title(survey_title)
+        
+    # --- Survey Language Switcher ---
+    lang_col1, lang_col2 = st.columns([8, 2])
+    with lang_col1:
+        st.title(survey_title)
+    with lang_col2:
+        st.write("") # Add some vertical padding
+        lang_options = {"한국어 (Korean)": "ko", "English (영어)": "en"}
+        current_survey_lang = "en" if st.session_state.get('lang', 'ko') == 'en' else "ko"
+        selected_lang_label = st.selectbox(
+            "Language / 언어", 
+            options=list(lang_options.keys()), 
+            index=0 if current_survey_lang == 'ko' else 1,
+            key=f"survey_lang_selector_{survey_id_param}",
+            label_visibility="collapsed"
+        )
+        new_lang = lang_options[selected_lang_label]
+        if new_lang != current_survey_lang:
+            st.session_state.lang = new_lang
+            st.rerun()
+    # --------------------------------
     
     # 조사 목적 및 안내문, 설문 담당자 이메일 표시 (깔끔한 디자인 적용)
     survey_desc = survey_meta.get("Description", "")
@@ -3135,7 +3168,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 if main_cr > cr_limit:
                     cr_failed = True
                     failed_factors = main_criteria
-                    failed_group_name = "대분류"
+                    failed_group_name = _("대분류", "Main Criteria")
                     failed_cr = main_cr
                 
                 # 하위분류 CR 체크
