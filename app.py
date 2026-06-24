@@ -306,6 +306,11 @@ div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
     color: #1e293b !important;
 }
 
+/* --- 메인 배경색 흰색으로 강제 설정 --- */
+.stApp {
+    background-color: #ffffff !important;
+}
+
 /* --- 메인 제목 스타일링 (전문적이고 차분하게) --- */
 h1 {
     font-weight: 700 !important;
