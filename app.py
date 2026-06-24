@@ -6326,7 +6326,7 @@ with col_main:
         # -------------------------------------------------------------------------
         # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
         # -------------------------------------------------------------------------
-        st.subheader(_("2. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "2. Setup AHP Decision Model & Download Template"))
+        st.subheader(_("2. AHP 분석 모델 설정 및 코딩 양식 다운로드", "2. Setup AHP Decision Model & Download Coding Form"))
         
         saved_model = None
         if st.session_state.user_id is None:
