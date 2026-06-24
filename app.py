@@ -412,6 +412,14 @@ header[data-testid="stHeader"] {
     max-width: 1600px !important; 
 }
 
+/* 모바일 화면에서는 좌우 패딩을 줄여서 글자가 몰리지 않게 설정 */
+@media (max-width: 768px) {
+    .block-container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
 /* --- 사이드바 프리미엄 스타일 --- */
 section[data-testid="stSidebar"] {
     background-color: #f8fafc !important;
@@ -4233,18 +4241,7 @@ with col_main:
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
         with st.container(border=False):
-            st.markdown("""
-                <style>
-                div[data-testid="stVerticalBlock"]:has(span#quick-start-anchor) {
-                    background-color: #f8f9fa !important;
-                    border: none !important;
-                    padding: 1.5rem !important;
-                    border-radius: 8px !important;
-                    margin-top: -1.5rem !important;
-                }
-                </style>
-                <span id="quick-start-anchor"></span>
-            """, unsafe_allow_html=True)
+
             st.markdown(_("####  빠른 시작 (도시재생 사업 모델)", "####  Quick Start (Urban Regeneration Project Model)"))
             st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
                       "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
