@@ -216,9 +216,13 @@ DEFAULT_TRANSLATED_DEFS = {
 def translate_definition_if_default(factor_name, def_text):
     if st.session_state.get('lang', 'ko') != 'en' or not def_text:
         return def_text
+        
+    # [FIX] Handle multi-line survey description explicitly
+    if def_text.strip() == DEFAULT_SURVEY_DESC_KO.strip():
+        return DEFAULT_SURVEY_DESC_EN
     
     import re
-    # Clean up whitespace
+    # Clean up whitespace for other definitions
     clean_def = re.sub(r'\s+', ' ', def_text).strip()
     
     # 1. Direct match in dictionary
@@ -365,7 +369,7 @@ h1 {
     font-size: 1.6rem !important;
     color: #0f172a !important;
     letter-spacing: -0.02em !important;
-    border-bottom: 2px solid #e2e8f0 !important;
+    border-bottom: none !important;
     padding-bottom: 0.5rem !important;
     margin-bottom: 1.5rem !important;
     margin-top: 0 !important;
