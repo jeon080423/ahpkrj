@@ -4318,350 +4318,7 @@ with col_main:
                     disabled=(not fahp_data)
                 )
         
-        st.subheader(_("1. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "1. Setup AHP Decision Model & Download Template"))
-        
-        saved_model = None
-        if st.session_state.user_id is None:
-            st.info(_(" **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
-                      " **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
-        else:
-            saved_model = load_user_model(st.session_state.user_id)
-            is_en = st.session_state.get('lang', 'ko') == 'en'
-        
-        en_default_main = "Governance, Planning, Feasibility, Effectiveness"
-        en_default_subs = {
-            "Governance": "AdminSupport, Community, PM",
-            "Planning": "IssueFit, AlternativeFit, GoalClarity",
-            "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
-            "Effectiveness": "Economic, Social, Performance"
-        }
-        ko_default_main = "거버넌스, 계획타당성, 실현가능성, 사업효과"
-        ko_default_subs = {
-            "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
-            "계획타당성": "현안적정성, 대안적정성, 목표구체성",
-            "실현가능성": "부지확보, 사업구체화, 사업비적정성",
-            "사업효과": "경제적효과, 사회적효과, 성과관리"
-        }
-
-        # [신규] 3계층(V3) 샘플 데이터 (스마트폰 구매 결정)
-        en_default_main_v3 = "Functionality, Design, Economy"
-        en_default_subs_v3 = {
-            "Functionality": "Hardware, Software",
-            "Design": "Appearance, Usability",
-            "Economy": "Device Price, Maintenance"
-        }
-        en_default_sub_subs_v3 = {
-            "Hardware": "Camera, Battery, Processor",
-            "Software": "OS, Default Apps",
-            "Appearance": "Color, Material",
-            "Usability": "", 
-            "Device Price": "Lump Sum, Installment",
-            "Maintenance": "Plan, Repair"
-        }
-
-        ko_default_main_v3 = "기능성, 디자인, 경제성"
-        ko_default_subs_v3 = {
-            "기능성": "하드웨어, 소프트웨어",
-            "디자인": "외관, 편의성",
-            "경제성": "단말기가격, 유지비용"
-        }
-        ko_default_sub_subs_v3 = {
-            "하드웨어": "카메라, 배터리, 프로세서",
-            "소프트웨어": "운영체제, 기본앱",
-            "외관": "색상, 재질",
-            "편의성": "", 
-            "단말기가격": "일시불, 할부",
-            "유지비용": "통신요금, AS비용"
-        }
-    
-        # default assignments are moved inside expander to react to tier_level
-    
-        with st.expander(_(" 나의 분석 모델 만들기", " Create Custom AHP Model"), expanded=True):
-            st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
-                      "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
-            
-            # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
-            tier_level = 2
-            st.markdown("#####  계층 구조 설정")
-            tier_choice = st.radio(
-                _("계층 레벨을 선택하세요.", "Select Hierarchy Level."),
-                [_("2계층 (대분류 - 중분류)", "2-Tier (Main - Sub)"),
-                 _("3계층 (대분류 - 중분류 - 소분류)", "3-Tier (Main - Sub - Sub-sub)")],
-                index=0,
-                horizontal=True,
-                key="tab1_tier_choice"
-            )
-            if _("3계층", "3-Tier") in tier_choice:
-                tier_level = 3
-            st.markdown("---")
-                
-            # [신규] tier_level에 따라 샘플 데이터 스위칭
-            if is_en:
-                default_main = en_default_main_v3 if tier_level == 3 else en_default_main
-                default_subs = en_default_subs_v3 if tier_level == 3 else en_default_subs
-                default_sub_subs = en_default_sub_subs_v3 if tier_level == 3 else {}
-            else:
-                default_main = ko_default_main_v3 if tier_level == 3 else ko_default_main
-                default_subs = ko_default_subs_v3 if tier_level == 3 else ko_default_subs
-                default_sub_subs = ko_default_sub_subs_v3 if tier_level == 3 else {}
-                
-            if saved_model:
-                saved_main = saved_model.get('main', '')
-                if is_en and (saved_main == ko_default_main or saved_main == ko_default_main_v3 or not saved_main):
-                    pass
-                elif not is_en and (saved_main == en_default_main or saved_main == en_default_main_v3 or not saved_main):
-                    pass
-                else:
-                    default_main = saved_main
-                    default_subs = saved_model.get('subs', default_subs)
-                    
-            main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
-            main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
-            
-            model_structure = {}
-            sub_sub_structure = {}
-            if main_criteria_list:
-                for mc in main_criteria_list:
-                    d_val = default_subs.get(mc, "")
-                    if isinstance(d_val, list): d_val = ", ".join(d_val)
-                    sub_input = st.text_input(_(f"'{mc}'의 세부항목", f"Sub-criteria for '{mc}'"), value=d_val, key=f"tab1_sub_{mc}")
-                    sub_list = [x.strip() for x in sub_input.split(',') if x.strip()]
-                    model_structure[mc] = sub_list
-                    
-                    if tier_level == 3 and sub_list:
-                        with st.expander(_(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", f"▶ Enter Sub-sub-criteria for '{mc}'"), expanded=True):
-                            st.info(_("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.", "💡 **Mixed-Tier Guide**: If a sub-criterion has no sub-sub-criteria, **leave it blank to automatically calculate as a 2-tier weight**."))
-                            for sub_c in sub_list:
-                                sub_sub_input = st.text_input(
-                                    f"▶ '{sub_c}'의 소분류 (콤마 구분)", 
-                                    value=default_sub_subs.get(sub_c, ""),
-                                    placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
-                                    help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
-                                    key=f"tab1_sub_sub_{sub_c}"
-                                )
-                                parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
-                                if parsed_sub_subs:
-                                    sub_sub_structure[sub_c] = parsed_sub_subs
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                generate_clicked = st.button(_("1️⃣ 설정한 모델로 입력 엑셀 템플릿 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
-            
-            if generate_clicked:
-                if not main_criteria_list:
-                    st.error(_("대항목 입력 필요", "Main criteria input is required"))
-                else:
-                    current_model = {'main': main_criteria_input, 'subs': model_structure, 'sub_subs': sub_sub_structure, 'Tier_Level': tier_level}
-                    save_user_model(st.session_state.user_id, current_model)
-                    st.toast(_("모델 저장 완료", "Model successfully saved"))
-                    
-                    output_template = io.BytesIO()
-                    with pd.ExcelWriter(output_template, engine='xlsxwriter') as writer:
-                        main_pairs = list(itertools.combinations(main_criteria_list, 2))
-                        main_cols_tpl = ["ID", "Type"] + [f"{a}_{b}" for a, b in main_pairs]
-                        df_template_main = pd.DataFrame(columns=main_cols_tpl)
-                        df_template_main.loc[0] = [1, ""] + [0]*len(main_pairs)
-                        df_template_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
-                        
-                        for mc, subs in model_structure.items():
-                            if len(subs) < 2:
-                                df_sub = pd.DataFrame(columns=["ID", "Type"])
-                            else:
-                                sub_pairs = list(itertools.combinations(subs, 2))
-                                sub_cols = ["ID", "Type"] + [f"{a}_{b}" for a, b in sub_pairs]
-                                df_sub = pd.DataFrame(columns=sub_cols)
-                                df_sub.loc[0] = [1, ""] + [0]*len(sub_pairs)
-                            safe_sheet_name = mc[:31]
-                            df_sub.to_excel(writer, sheet_name=safe_sheet_name, index=False)
-                            
-                        # 3계층 시트 생성
-                        if tier_level == 3:
-                            for mc, subs in model_structure.items():
-                                for sub_c in subs:
-                                    ss_list = sub_sub_structure.get(sub_c, [])
-                                    if len(ss_list) < 2:
-                                        df_ss = pd.DataFrame(columns=["ID", "Type"])
-                                    else:
-                                        ss_pairs = list(itertools.combinations(ss_list, 2))
-                                        ss_cols = ["ID", "Type"] + [f"{a}_{b}" for a, b in ss_pairs]
-                                        df_ss = pd.DataFrame(columns=ss_cols)
-                                        df_ss.loc[0] = [1, ""] + [0]*len(ss_pairs)
-                                    safe_ss_name = sub_c[:31]
-                                    df_ss.to_excel(writer, sheet_name=safe_ss_name, index=False)
-                                    
-                    output_template.seek(0)
-                    
-                    with col2:
-                        st.download_button(
-                            label=_("2️⃣ 📥 엑셀 템플릿 다운로드", "2️⃣ 📥 Download Excel Template"),
-                            data=output_template,
-                            file_name="AHP_Master_Template.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True,
-                            type="primary"
-                        )
-                    
-                    st.info(_("💡 **안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 엑셀 템플릿 파일을 저장하세요.", 
-                              "💡 **Info:** The model has been generated and saved. Click the 2nd button on the right to download the Excel template file to your computer."))
-    
-                    st.markdown(_("""
-                    ---
-                    ### 📝 데이터 입력 가이드
-                    1. **엑셀 파일 열기**: 위 버튼을 눌러 다운로드한 엑셀 파일을 실행합니다.
-                    2. **쌍대비교 데이터 입력**:
-                        - **왼쪽** 항목이 더 중요하면: **음수** 입력 (예: -3)
-                        - **오른쪽** 항목이 더 중요하면: **양수** 입력 (예: 3)
-                        - **동등**하면: `1` 입력
-                    3. **필수 정보 입력**: A열(ID), **B열(Type)에 그룹명 입력 (예: 전문가, 주민 등)**
-                    """,
-                    """
-                    ---
-                    ### 📝 Data Input Guide
-                    1. **Open the Excel file**: Run the Excel template downloaded above.
-                    2. **Enter pairwise comparisons**:
-                        - If the **left** item is more important: enter a **negative** value (e.g., -3)
-                        - If the **right** item is more important: enter a **positive** value (e.g., 3)
-                        - If they are **equal**: enter `1`
-                    3. **Required Information**: Column A (ID), **Column B (Type) for group names (e.g., Expert, Public, etc.)**
-                    """))
-                    img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
-                    caption_text = _("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel")
-                    if os.path.exists(img_file):
-                        st.image(img_file, caption=caption_text)
-    
-        st.markdown("---")
-    
-        if st.session_state.user_role == 'official':
-            with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
-                my_analyses = get_user_analyses(st.session_state.user_id)
-                if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
-                else:
-                    for item in my_analyses:
-                        a_id, filename, save_date = item
-                        col_List1, col_List2, col_List3, col_List4 = st.columns([3, 2, 1, 1])
-                        with col_List1: st.text(f"{filename}")
-                        with col_List2: st.caption(f"{save_date}")
-                        with col_List3:
-                            file_info = get_analysis_file(analysis_id=a_id)
-                            if file_info:
-                                fname, fdata = file_info
-                                st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
-                        with col_List4:
-                            if st.button("🗑", key=f"del_{a_id}"):
-                                delete_analysis(a_id)
-                                st.rerun()
-    
-
-    
-        def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, formats, excluded_df=None):
-            workbook = writer.book
-            if sheet_name in writer.sheets: worksheet = writer.sheets[sheet_name]
-            else:
-                worksheet = workbook.add_worksheet(sheet_name)
-                writer.sheets[sheet_name] = worksheet
-        
-            header_fmt = formats['header']
-            merge_fmt = formats['merge']
-            body_fmt = formats['body']
-            num_fmt = formats['num']
-            sum_row_fmt = formats['sum_row']
-        
-            # [신규 추가] 제외 사례수 및 제외 응답값 데이터 출력
-            if excluded_df is not None:
-                worksheet.write(start_row, 0, _(f"※ 분석 제외 사례수: {len(excluded_df)}건", f"※ Number of cases excluded: {len(excluded_df)}"), workbook.add_format({'bold': True, 'font_color': 'red'}))
-                start_row += 1
-                if not excluded_df.empty:
-                    worksheet.write(start_row, 0, _("▶ 제외된 응답 데이터 (보정 실패)", "▶ Excluded Response Data (Correction Failed)"), workbook.add_format({'bold': True}))
-                    start_row += 1
-                    excluded_df.to_excel(writer, sheet_name=sheet_name, startrow=start_row, index=False)
-                    start_row += len(excluded_df) + 2
-    
-            worksheet.merge_range(start_row, 0, start_row, 6, title_text, workbook.add_format({'bold': True, 'font_size': 12}))
-            start_row += 1
-        
-            headers = _(
-                ["대분류", "가중치(a)", "중분류", "가중치(b)", "종합 가중치(a x b)", "종합 순위", "비고"],
-                ["Main Criteria", "Weight(a)", "Sub-Criteria", "Weight(b)", "Global Weight(a x b)", "Global Rank", "Remarks"]
-            )
-            for col, h in enumerate(headers):
-                worksheet.write(start_row, col, h, header_fmt)
-            start_row += 1
-        
-            main_criteria = df['대분류'].unique()
-            current_row = start_row
-        
-            for main_c in main_criteria:
-                sub_df = df[df['대분류'] == main_c]
-                n_subs = len(sub_df)
-                main_w = sub_df.iloc[0]['대분류 가중치']
-                sub_cr = sub_df.iloc[0]['CR(중분류)']
-                sub_ci = sub_df.iloc[0]['CI(중분류)'] if 'CI(중분류)' in sub_df.columns else 0.0
-                sum_sub_w = sub_df['중분류 가중치'].sum()
-            
-                merge_span = n_subs + 2 
-                if merge_span > 1:
-                    worksheet.merge_range(current_row, 0, current_row + merge_span - 1, 0, main_c, merge_fmt)
-                    worksheet.merge_range(current_row, 1, current_row + merge_span - 1, 1, main_w, num_fmt)
-                else:
-                    worksheet.write(current_row, 0, main_c, merge_fmt)
-                    worksheet.write(current_row, 1, main_w, num_fmt)
-                
-                for idx, row in sub_df.iterrows():
-                    worksheet.write(current_row, 2, row['중분류'], body_fmt)
-                    worksheet.write(current_row, 3, row['중분류 가중치'], num_fmt)
-                    worksheet.write(current_row, 4, row['Global Weight'], num_fmt)
-                    worksheet.write(current_row, 5, row['Global Rank'], body_fmt)
-                    worksheet.write(current_row, 6, "", body_fmt)
-                    current_row += 1
-            
-                worksheet.write(current_row, 2, _("합계", "Total"), sum_row_fmt)
-                worksheet.write(current_row, 3, sum_sub_w, formats['sum_val'])
-                worksheet.write_blank(current_row, 4, "", sum_row_fmt)
-                worksheet.write_blank(current_row, 5, "", sum_row_fmt)
-                worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-                current_row += 1
-            
-                worksheet.write(current_row, 2, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
-                worksheet.write(current_row, 3, sub_cr, formats['num_sum'])
-                worksheet.write(current_row, 4, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
-                worksheet.write(current_row, 5, sub_ci, formats['num_sum'])
-                worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-                current_row += 1
-    
-            worksheet.write(current_row, 0, _("합계", "Total"), sum_row_fmt)
-            worksheet.write(current_row, 1, 1, formats['sum_val'])
-            worksheet.write_blank(current_row, 2, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 3, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 4, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 5, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-        
-            # [신규 추가] 대분류의 일관성 비율(CR) 및 일관성 지수(CI) 출력
-            main_cr = df.iloc[0]['CR(대분류)'] if 'CR(대분류)' in df.columns else 0.0
-            main_ci = df.iloc[0]['CI(대분류)'] if 'CI(대분류)' in df.columns else 0.0
-        
-            current_row += 1
-            worksheet.write(current_row, 0, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
-            worksheet.write(current_row, 1, main_cr, formats['num_sum'])
-            worksheet.write(current_row, 2, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
-            worksheet.write(current_row, 3, main_ci, formats['num_sum'])
-            worksheet.write_blank(current_row, 4, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 5, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-        
-            worksheet.set_column('A:A', 15)
-            worksheet.set_column('B:B', 12)
-            worksheet.set_column('C:C', 25)
-            worksheet.set_column('D:F', 12)
-            return current_row + 2
-    
-        def add_borders_to_data(worksheet, start_row, start_col, df, border_fmt, has_header=True, has_index=False):
-            rows = len(df) + (1 if has_header else 0)
-            cols = len(df.columns) + (1 if has_index else 0)
-            worksheet.conditional_format(start_row, start_col, start_row+rows-1, start_col+cols-1,
-                                          {'type': 'formula', 'criteria': '=TRUE', 'format': border_fmt})
-    
-        st.subheader(_("2. 데이터 업로드 및 분석", "2. Data Upload & Analysis"))
+        st.subheader(_("1. 데이터 업로드 및 분석", "1. Data Upload & Analysis"))
         
         if st.session_state.get('user_role') == 'admin':
             st.info(_("💡 **혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 엑셀 템플릿을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "💡 **Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
@@ -6580,6 +6237,349 @@ with col_main:
         # -------------------------------------------------------------------------
         # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
         # -------------------------------------------------------------------------
+        st.subheader(_("2. AHP 분석 모델 설정 및 입력 템플릿 다운로드", "2. Setup AHP Decision Model & Download Template"))
+        
+        saved_model = None
+        if st.session_state.user_id is None:
+            st.info(_(" **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
+                      " **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
+        else:
+            saved_model = load_user_model(st.session_state.user_id)
+            is_en = st.session_state.get('lang', 'ko') == 'en'
+        
+        en_default_main = "Governance, Planning, Feasibility, Effectiveness"
+        en_default_subs = {
+            "Governance": "AdminSupport, Community, PM",
+            "Planning": "IssueFit, AlternativeFit, GoalClarity",
+            "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
+            "Effectiveness": "Economic, Social, Performance"
+        }
+        ko_default_main = "거버넌스, 계획타당성, 실현가능성, 사업효과"
+        ko_default_subs = {
+            "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
+            "계획타당성": "현안적정성, 대안적정성, 목표구체성",
+            "실현가능성": "부지확보, 사업구체화, 사업비적정성",
+            "사업효과": "경제적효과, 사회적효과, 성과관리"
+        }
+
+        # [신규] 3계층(V3) 샘플 데이터 (스마트폰 구매 결정)
+        en_default_main_v3 = "Functionality, Design, Economy"
+        en_default_subs_v3 = {
+            "Functionality": "Hardware, Software",
+            "Design": "Appearance, Usability",
+            "Economy": "Device Price, Maintenance"
+        }
+        en_default_sub_subs_v3 = {
+            "Hardware": "Camera, Battery, Processor",
+            "Software": "OS, Default Apps",
+            "Appearance": "Color, Material",
+            "Usability": "", 
+            "Device Price": "Lump Sum, Installment",
+            "Maintenance": "Plan, Repair"
+        }
+
+        ko_default_main_v3 = "기능성, 디자인, 경제성"
+        ko_default_subs_v3 = {
+            "기능성": "하드웨어, 소프트웨어",
+            "디자인": "외관, 편의성",
+            "경제성": "단말기가격, 유지비용"
+        }
+        ko_default_sub_subs_v3 = {
+            "하드웨어": "카메라, 배터리, 프로세서",
+            "소프트웨어": "운영체제, 기본앱",
+            "외관": "색상, 재질",
+            "편의성": "", 
+            "단말기가격": "일시불, 할부",
+            "유지비용": "통신요금, AS비용"
+        }
+    
+        # default assignments are moved inside expander to react to tier_level
+    
+        with st.expander(_(" 나의 분석 모델 만들기", " Create Custom AHP Model"), expanded=True):
+            st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
+                      "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
+            
+            # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
+            tier_level = 2
+            st.markdown("#####  계층 구조 설정")
+            tier_choice = st.radio(
+                _("계층 레벨을 선택하세요.", "Select Hierarchy Level."),
+                [_("2계층 (대분류 - 중분류)", "2-Tier (Main - Sub)"),
+                 _("3계층 (대분류 - 중분류 - 소분류)", "3-Tier (Main - Sub - Sub-sub)")],
+                index=0,
+                horizontal=True,
+                key="tab1_tier_choice"
+            )
+            if _("3계층", "3-Tier") in tier_choice:
+                tier_level = 3
+            st.markdown("---")
+                
+            # [신규] tier_level에 따라 샘플 데이터 스위칭
+            if is_en:
+                default_main = en_default_main_v3 if tier_level == 3 else en_default_main
+                default_subs = en_default_subs_v3 if tier_level == 3 else en_default_subs
+                default_sub_subs = en_default_sub_subs_v3 if tier_level == 3 else {}
+            else:
+                default_main = ko_default_main_v3 if tier_level == 3 else ko_default_main
+                default_subs = ko_default_subs_v3 if tier_level == 3 else ko_default_subs
+                default_sub_subs = ko_default_sub_subs_v3 if tier_level == 3 else {}
+                
+            if saved_model:
+                saved_main = saved_model.get('main', '')
+                if is_en and (saved_main == ko_default_main or saved_main == ko_default_main_v3 or not saved_main):
+                    pass
+                elif not is_en and (saved_main == en_default_main or saved_main == en_default_main_v3 or not saved_main):
+                    pass
+                else:
+                    default_main = saved_main
+                    default_subs = saved_model.get('subs', default_subs)
+                    
+            main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
+            main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
+            
+            model_structure = {}
+            sub_sub_structure = {}
+            if main_criteria_list:
+                for mc in main_criteria_list:
+                    d_val = default_subs.get(mc, "")
+                    if isinstance(d_val, list): d_val = ", ".join(d_val)
+                    sub_input = st.text_input(_(f"'{mc}'의 세부항목", f"Sub-criteria for '{mc}'"), value=d_val, key=f"tab1_sub_{mc}")
+                    sub_list = [x.strip() for x in sub_input.split(',') if x.strip()]
+                    model_structure[mc] = sub_list
+                    
+                    if tier_level == 3 and sub_list:
+                        with st.expander(_(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", f"▶ Enter Sub-sub-criteria for '{mc}'"), expanded=True):
+                            st.info(_("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.", "💡 **Mixed-Tier Guide**: If a sub-criterion has no sub-sub-criteria, **leave it blank to automatically calculate as a 2-tier weight**."))
+                            for sub_c in sub_list:
+                                sub_sub_input = st.text_input(
+                                    f"▶ '{sub_c}'의 소분류 (콤마 구분)", 
+                                    value=default_sub_subs.get(sub_c, ""),
+                                    placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
+                                    help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
+                                    key=f"tab1_sub_sub_{sub_c}"
+                                )
+                                parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
+                                if parsed_sub_subs:
+                                    sub_sub_structure[sub_c] = parsed_sub_subs
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                generate_clicked = st.button(_("1️⃣ 설정한 모델로 입력 엑셀 템플릿 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
+            
+            if generate_clicked:
+                if not main_criteria_list:
+                    st.error(_("대항목 입력 필요", "Main criteria input is required"))
+                else:
+                    current_model = {'main': main_criteria_input, 'subs': model_structure, 'sub_subs': sub_sub_structure, 'Tier_Level': tier_level}
+                    save_user_model(st.session_state.user_id, current_model)
+                    st.toast(_("모델 저장 완료", "Model successfully saved"))
+                    
+                    output_template = io.BytesIO()
+                    with pd.ExcelWriter(output_template, engine='xlsxwriter') as writer:
+                        main_pairs = list(itertools.combinations(main_criteria_list, 2))
+                        main_cols_tpl = ["ID", "Type"] + [f"{a}_{b}" for a, b in main_pairs]
+                        df_template_main = pd.DataFrame(columns=main_cols_tpl)
+                        df_template_main.loc[0] = [1, ""] + [0]*len(main_pairs)
+                        df_template_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
+                        
+                        for mc, subs in model_structure.items():
+                            if len(subs) < 2:
+                                df_sub = pd.DataFrame(columns=["ID", "Type"])
+                            else:
+                                sub_pairs = list(itertools.combinations(subs, 2))
+                                sub_cols = ["ID", "Type"] + [f"{a}_{b}" for a, b in sub_pairs]
+                                df_sub = pd.DataFrame(columns=sub_cols)
+                                df_sub.loc[0] = [1, ""] + [0]*len(sub_pairs)
+                            safe_sheet_name = mc[:31]
+                            df_sub.to_excel(writer, sheet_name=safe_sheet_name, index=False)
+                            
+                        # 3계층 시트 생성
+                        if tier_level == 3:
+                            for mc, subs in model_structure.items():
+                                for sub_c in subs:
+                                    ss_list = sub_sub_structure.get(sub_c, [])
+                                    if len(ss_list) < 2:
+                                        df_ss = pd.DataFrame(columns=["ID", "Type"])
+                                    else:
+                                        ss_pairs = list(itertools.combinations(ss_list, 2))
+                                        ss_cols = ["ID", "Type"] + [f"{a}_{b}" for a, b in ss_pairs]
+                                        df_ss = pd.DataFrame(columns=ss_cols)
+                                        df_ss.loc[0] = [1, ""] + [0]*len(ss_pairs)
+                                    safe_ss_name = sub_c[:31]
+                                    df_ss.to_excel(writer, sheet_name=safe_ss_name, index=False)
+                                    
+                    output_template.seek(0)
+                    
+                    with col2:
+                        st.download_button(
+                            label=_("2️⃣ 📥 엑셀 템플릿 다운로드", "2️⃣ 📥 Download Excel Template"),
+                            data=output_template,
+                            file_name="AHP_Master_Template.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True,
+                            type="primary"
+                        )
+                    
+                    st.info(_("💡 **안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 엑셀 템플릿 파일을 저장하세요.", 
+                              "💡 **Info:** The model has been generated and saved. Click the 2nd button on the right to download the Excel template file to your computer."))
+    
+                    st.markdown(_("""
+                    ---
+                    ### 📝 데이터 입력 가이드
+                    1. **엑셀 파일 열기**: 위 버튼을 눌러 다운로드한 엑셀 파일을 실행합니다.
+                    2. **쌍대비교 데이터 입력**:
+                        - **왼쪽** 항목이 더 중요하면: **음수** 입력 (예: -3)
+                        - **오른쪽** 항목이 더 중요하면: **양수** 입력 (예: 3)
+                        - **동등**하면: `1` 입력
+                    3. **필수 정보 입력**: A열(ID), **B열(Type)에 그룹명 입력 (예: 전문가, 주민 등)**
+                    """,
+                    """
+                    ---
+                    ### 📝 Data Input Guide
+                    1. **Open the Excel file**: Run the Excel template downloaded above.
+                    2. **Enter pairwise comparisons**:
+                        - If the **left** item is more important: enter a **negative** value (e.g., -3)
+                        - If the **right** item is more important: enter a **positive** value (e.g., 3)
+                        - If they are **equal**: enter `1`
+                    3. **Required Information**: Column A (ID), **Column B (Type) for group names (e.g., Expert, Public, etc.)**
+                    """))
+                    img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
+                    caption_text = _("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel")
+                    if os.path.exists(img_file):
+                        st.image(img_file, caption=caption_text)
+    
+        st.markdown("---")
+    
+        if st.session_state.user_role == 'official':
+            with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
+                my_analyses = get_user_analyses(st.session_state.user_id)
+                if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
+                else:
+                    for item in my_analyses:
+                        a_id, filename, save_date = item
+                        col_List1, col_List2, col_List3, col_List4 = st.columns([3, 2, 1, 1])
+                        with col_List1: st.text(f"{filename}")
+                        with col_List2: st.caption(f"{save_date}")
+                        with col_List3:
+                            file_info = get_analysis_file(analysis_id=a_id)
+                            if file_info:
+                                fname, fdata = file_info
+                                st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
+                        with col_List4:
+                            if st.button("🗑", key=f"del_{a_id}"):
+                                delete_analysis(a_id)
+                                st.rerun()
+    
+
+    
+        def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, formats, excluded_df=None):
+            workbook = writer.book
+            if sheet_name in writer.sheets: worksheet = writer.sheets[sheet_name]
+            else:
+                worksheet = workbook.add_worksheet(sheet_name)
+                writer.sheets[sheet_name] = worksheet
+        
+            header_fmt = formats['header']
+            merge_fmt = formats['merge']
+            body_fmt = formats['body']
+            num_fmt = formats['num']
+            sum_row_fmt = formats['sum_row']
+        
+            # [신규 추가] 제외 사례수 및 제외 응답값 데이터 출력
+            if excluded_df is not None:
+                worksheet.write(start_row, 0, _(f"※ 분석 제외 사례수: {len(excluded_df)}건", f"※ Number of cases excluded: {len(excluded_df)}"), workbook.add_format({'bold': True, 'font_color': 'red'}))
+                start_row += 1
+                if not excluded_df.empty:
+                    worksheet.write(start_row, 0, _("▶ 제외된 응답 데이터 (보정 실패)", "▶ Excluded Response Data (Correction Failed)"), workbook.add_format({'bold': True}))
+                    start_row += 1
+                    excluded_df.to_excel(writer, sheet_name=sheet_name, startrow=start_row, index=False)
+                    start_row += len(excluded_df) + 2
+    
+            worksheet.merge_range(start_row, 0, start_row, 6, title_text, workbook.add_format({'bold': True, 'font_size': 12}))
+            start_row += 1
+        
+            headers = _(
+                ["대분류", "가중치(a)", "중분류", "가중치(b)", "종합 가중치(a x b)", "종합 순위", "비고"],
+                ["Main Criteria", "Weight(a)", "Sub-Criteria", "Weight(b)", "Global Weight(a x b)", "Global Rank", "Remarks"]
+            )
+            for col, h in enumerate(headers):
+                worksheet.write(start_row, col, h, header_fmt)
+            start_row += 1
+        
+            main_criteria = df['대분류'].unique()
+            current_row = start_row
+        
+            for main_c in main_criteria:
+                sub_df = df[df['대분류'] == main_c]
+                n_subs = len(sub_df)
+                main_w = sub_df.iloc[0]['대분류 가중치']
+                sub_cr = sub_df.iloc[0]['CR(중분류)']
+                sub_ci = sub_df.iloc[0]['CI(중분류)'] if 'CI(중분류)' in sub_df.columns else 0.0
+                sum_sub_w = sub_df['중분류 가중치'].sum()
+            
+                merge_span = n_subs + 2 
+                if merge_span > 1:
+                    worksheet.merge_range(current_row, 0, current_row + merge_span - 1, 0, main_c, merge_fmt)
+                    worksheet.merge_range(current_row, 1, current_row + merge_span - 1, 1, main_w, num_fmt)
+                else:
+                    worksheet.write(current_row, 0, main_c, merge_fmt)
+                    worksheet.write(current_row, 1, main_w, num_fmt)
+                
+                for idx, row in sub_df.iterrows():
+                    worksheet.write(current_row, 2, row['중분류'], body_fmt)
+                    worksheet.write(current_row, 3, row['중분류 가중치'], num_fmt)
+                    worksheet.write(current_row, 4, row['Global Weight'], num_fmt)
+                    worksheet.write(current_row, 5, row['Global Rank'], body_fmt)
+                    worksheet.write(current_row, 6, "", body_fmt)
+                    current_row += 1
+            
+                worksheet.write(current_row, 2, _("합계", "Total"), sum_row_fmt)
+                worksheet.write(current_row, 3, sum_sub_w, formats['sum_val'])
+                worksheet.write_blank(current_row, 4, "", sum_row_fmt)
+                worksheet.write_blank(current_row, 5, "", sum_row_fmt)
+                worksheet.write_blank(current_row, 6, "", sum_row_fmt)
+                current_row += 1
+            
+                worksheet.write(current_row, 2, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
+                worksheet.write(current_row, 3, sub_cr, formats['num_sum'])
+                worksheet.write(current_row, 4, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
+                worksheet.write(current_row, 5, sub_ci, formats['num_sum'])
+                worksheet.write_blank(current_row, 6, "", sum_row_fmt)
+                current_row += 1
+    
+            worksheet.write(current_row, 0, _("합계", "Total"), sum_row_fmt)
+            worksheet.write(current_row, 1, 1, formats['sum_val'])
+            worksheet.write_blank(current_row, 2, "", sum_row_fmt)
+            worksheet.write_blank(current_row, 3, "", sum_row_fmt)
+            worksheet.write_blank(current_row, 4, "", sum_row_fmt)
+            worksheet.write_blank(current_row, 5, "", sum_row_fmt)
+            worksheet.write_blank(current_row, 6, "", sum_row_fmt)
+        
+            # [신규 추가] 대분류의 일관성 비율(CR) 및 일관성 지수(CI) 출력
+            main_cr = df.iloc[0]['CR(대분류)'] if 'CR(대분류)' in df.columns else 0.0
+            main_ci = df.iloc[0]['CI(대분류)'] if 'CI(대분류)' in df.columns else 0.0
+        
+            current_row += 1
+            worksheet.write(current_row, 0, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
+            worksheet.write(current_row, 1, main_cr, formats['num_sum'])
+            worksheet.write(current_row, 2, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
+            worksheet.write(current_row, 3, main_ci, formats['num_sum'])
+            worksheet.write_blank(current_row, 4, "", sum_row_fmt)
+            worksheet.write_blank(current_row, 5, "", sum_row_fmt)
+            worksheet.write_blank(current_row, 6, "", sum_row_fmt)
+        
+            worksheet.set_column('A:A', 15)
+            worksheet.set_column('B:B', 12)
+            worksheet.set_column('C:C', 25)
+            worksheet.set_column('D:F', 12)
+            return current_row + 2
+    
+        def add_borders_to_data(worksheet, start_row, start_col, df, border_fmt, has_header=True, has_index=False):
+            rows = len(df) + (1 if has_header else 0)
+            cols = len(df.columns) + (1 if has_index else 0)
+            worksheet.conditional_format(start_row, start_col, start_row+rows-1, start_col+cols-1,
+                                          {'type': 'formula', 'criteria': '=TRUE', 'format': border_fmt})
+    
     with main_tab2:
         # @st.fragment: 위젯 변경 시 이 영역만 재실행 (성능 최적화)
         @st.fragment
