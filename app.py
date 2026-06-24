@@ -3,10 +3,7 @@ import survey_manager
 import survey_manager_v3
 # Force rebuild 2026-01-24 v3 (Merged Sync & Restore)
 # Force deploy 2026-02-07
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 import io
 import sqlite3
 import datetime
@@ -18,6 +15,46 @@ import os
 import hashlib
 import random
 import string
+import sys
+
+# --- LAZY LOADER FOR HEAVY LIBRARIES (SPEED UP INITIAL LOAD) ---
+class LazyLoader:
+    def __init__(self, name):
+        self.name = name
+        self._module = None
+    def _load(self):
+        if self._module is None:
+            import importlib
+            self._module = importlib.import_module(self.name)
+        return self._module
+    def __getattr__(self, item):
+        return getattr(self._load(), item)
+
+pd = LazyLoader('pandas')
+np = LazyLoader('numpy')
+plt = LazyLoader('matplotlib.pyplot')
+sns = LazyLoader('seaborn')
+fm = LazyLoader('matplotlib.font_manager')
+px = LazyLoader('plotly.express')
+go = LazyLoader('plotly.graph_objects')
+stats = LazyLoader('scipy.stats')
+
+class LazyFunction:
+    def __init__(self, module_name, func_name):
+        self.module_name = module_name
+        self.func_name = func_name
+        self._func = None
+    def __call__(self, *args, **kwargs):
+        if self._func is None:
+            import importlib
+            module = importlib.import_module(self.module_name)
+            self._func = getattr(module, self.func_name)
+        return self._func(*args, **kwargs)
+
+gmean = LazyFunction('scipy.stats', 'gmean')
+ttest_rel = LazyFunction('scipy.stats', 'ttest_rel')
+f_oneway = LazyFunction('scipy.stats', 'f_oneway')
+# ---------------------------------------------------------------
 
 def hash_password(password: str) -> str:
     """SHA-256 Hash a password with a fixed salt for security."""
@@ -31,7 +68,7 @@ def generate_temp_password() -> str:
     # 최소 1개 영문자, 1개 숫자, 1개 특수문자를 포함하도록 구성
     temp = [
         random.choice(string.ascii_lowercase),
-        random.choice(string.ascii_uppercase),
+        random.choice(string.uppercase) if hasattr(string, 'uppercase') else random.choice(string.ascii_uppercase),
         random.choice(string.digits),
         random.choice(specials)
     ]
@@ -39,19 +76,14 @@ def generate_temp_password() -> str:
     temp += [random.choice(chars) for _ in range(4)]
     random.shuffle(temp)
     return "".join(temp)
-import matplotlib.font_manager as fm
+
 from matplotlib import rc
 from email.mime.text import MIMEText
-from scipy.stats import gmean, ttest_rel, f_oneway
 from PIL import Image
 import itertools
 from math import pi
 from dateutil.relativedelta import relativedelta
 
-# [필수] plotly 라이브러리 (requirements.txt에 plotly 추가 필요)
-import plotly.express as px
-import plotly.graph_objects as go
-from scipy import stats
 import gspread
 from google.oauth2.service_account import Credentials
 from signup_agreement import show_agreement_ui, save_agreement_to_sheets, validate_all_agreements
@@ -64,11 +96,15 @@ import base64
 import requests
 
 # ANOVA 및 사후검정을 위한 라이브러리 (없을 경우 예외처리)
-try:
-    from statsmodels.stats.multicomp import pairwise_tukeyhsd
-    STATSMODELS_AVAILABLE = True
-except ImportError:
-    STATSMODELS_AVAILABLE = False
+class LazyTukeyHSD:
+    def __call__(self, *args, **kwargs):
+        try:
+            from statsmodels.stats.multicomp import pairwise_tukeyhsd
+            return pairwise_tukeyhsd(*args, **kwargs)
+        except ImportError:
+            return None
+pairwise_tukeyhsd = LazyTukeyHSD()
+STATSMODELS_AVAILABLE = True
 
 
 # -----------------------------------------------------------------------------
@@ -405,7 +441,14 @@ div[data-testid="stAlert"] svg {
 footer {visibility: hidden;}
 header[data-testid="stHeader"] {
     background: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+header[data-testid="stHeader"]::before {
+    display: none !important;
+    background: none !important;
+    height: 0 !important;
 }
 
 /* --- 메인 레이아웃 폭(간격) 및 여백 최적화 --- */
