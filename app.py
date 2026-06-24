@@ -246,14 +246,14 @@ except Exception:
 # [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
 # [추가] 네이버 서치어드바이저 및 검색 엔진 크롤러 수집을 위해 메타 태그, canonical, JSON-LD 구조화 데이터를 실제 헤드(Parent Head)에 동적으로 삽입하는 1x1 이미지 로더 스크립트 탑재
 seo_tags = """<div style="display:none;">
-<title>AHP Master | Traditional & Fuzzy AHP Decision Analysis System (AHP 마스터, 层次分析법, 階層分析法, Proceso de Análisis Jerárquico)</title>
+<title>AHP마스터 - AHP 의사결정 분석</title>
 <!-- Multilingual Description -->
 <meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. 학위논문 및 연구용 AHP/퍼지 AHP 분석 솔루션. 专业层次分析法(AHP)及模糊层次分析法在线软件与计算器。階層分析法(AHP)ツール。Software del Proceso de Análisis Jerárquico (AHP). Processus d'Analyse Hiérarchique. Analytischer Hierarchieprozess. Quá trình Phân tích Phân cấp. विश्लेषणात्मक पदानुक्रम प्रक्रिया. Analitiese Hiërargieproses. Метод анализа иерархий." />
 <!-- Multilingual Keywords -->
 <meta name="keywords" content="AHP, Fuzzy AHP, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스터, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, 학위논문 AHP 통계, 层次分析法, 模糊层次分析法, 层次分析법计算器, 层次分析법软件, 论文AHP分析, 一致性比例, 階層分析法, ファジィAHP, AHPソフトウェア, AHPツール, Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP, Processus d'Analyse Hiérarchique, AHP Flou, Logiciel AHP, Quá trình Phân tích Phân cấp, AHP mờ, Phần mềm AHP, Analytischer Hierarchieprozess, AHP-Software, AHP Rechner, विश्लेषणात्मक पदानुक्रम प्रक्रिया, फ़ज़ी AHP, AHP SOFTWARE, Analitiese Hiërargieproses, Vae AHP, AHP-sagteware, Метод анализа иерархий, Нечеткий AHP, Программное обеспечение AHP, عملية التحليل الهرمي, عملية التحليل الهرمي الضبابي, برنامج AHP" />
 <meta name="author" content="AHP Master" />
 <meta name="robots" content="index, follow" />
-<meta name="google-site-verification" content="KbMsp4y15le5XNyK05UEr6Nq6" />
+<meta name="google-site-verification" content="FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs" />
 <meta name="naver-site-verification" content="f0561d996c39ca52dcc47cf2aad128c5e586a1d6" />
 <!-- Open Graph Tags -->
 <meta property="og:title" content="AHP Master - Global AHP & Fuzzy AHP Analysis Software (层次分析법, 階層分析法)" />
@@ -283,7 +283,7 @@ seo_tags = """<div style="display:none;">
 <p>Программное обеспечение и калькулятор для метода анализа иерархий (AHP). Идеально подходит для академических диссертаций.</p>
 <h2>عملية التحليل الهرمي (AHP) و عملية التحليل الهرمي الضبابي</h2>
 <p>برنامج آلي لعملية التحليل الهرمي (AHP) للرسائل الأكاديمية والبحوث.</p>
-<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'KbMsp4y15le5XNyK05UEr6Nq6'},{name:'description',content:'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.'},{name:'keywords',content:'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP'},{property:'og:title',content:'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템'},{property:'og:description',content:'학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs'},{name:'description',content:'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.'},{name:'keywords',content:'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP'},{property:'og:title',content:'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템'},{property:'og:description',content:'학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
 </div>"""
 st.markdown(seo_tags, unsafe_allow_html=True)
 
@@ -2517,9 +2517,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
     survey_desc = survey_meta.get("Description", "")
     survey_desc = translate_definition_if_default("Description", survey_desc)
     
-    # 마침표(.)를 기준으로 강제 줄내림 적용하여 긴 문장(특히 개인정보 보호 등) 가독성 향상
-    if survey_desc:
-        survey_desc = survey_desc.replace(". ", ".\n\n")
+    # 마침표(.)를 기준으로 강제 줄내림 적용하여 긴 문장 가독성 향상 (사용자 입력 레이아웃 유지를 위해 비활성화)
+    # if survey_desc:
+    #     survey_desc = survey_desc.replace(". ", ".\n\n")
     
     survey_email = survey_meta.get("Admin_Email", "temp@ahpmaster.com")
     if not survey_email or str(survey_email).strip() == "":
@@ -2533,11 +2533,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
             f"</div>"
         ) if survey_email else ""
         
-        survey_desc_html = survey_desc.replace("\n", "<br>")
-        
+        # 사용자 입력 레이아웃(줄바꿈 및 띄어쓰기)을 그대로 유지하기 위해 white-space: pre-wrap 적용
         box_html = f"""
-        <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
-            {survey_desc_html}
+        <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{survey_desc}
             {email_html}
         </div>
         """
@@ -4222,7 +4220,19 @@ with col_main:
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
-        with st.container(border=True):
+        with st.container(border=False):
+            st.markdown("""
+                <style>
+                div[data-testid="stVerticalBlock"]:has(span#quick-start-anchor) {
+                    background-color: #f8f9fa !important;
+                    border: none !important;
+                    padding: 1.5rem !important;
+                    border-radius: 8px !important;
+                    margin-top: -1.5rem !important;
+                }
+                </style>
+                <span id="quick-start-anchor"></span>
+            """, unsafe_allow_html=True)
             st.markdown(_("####  빠른 시작 (도시재생 사업 모델)", "####  Quick Start (Urban Regeneration Project Model)"))
             st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
                       "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
