@@ -307,8 +307,15 @@ div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
 }
 
 /* --- 메인 배경색 흰색으로 강제 설정 --- */
-.stApp {
+.stApp, 
+.stApp > header,
+.main,
+[data-testid="stAppViewContainer"], 
+[data-testid="stAppViewBlockContainer"], 
+[data-testid="stHeader"], 
+.block-container {
     background-color: #ffffff !important;
+    background: #ffffff !important;
 }
 
 /* --- 메인 제목 스타일링 (전문적이고 차분하게) --- */
