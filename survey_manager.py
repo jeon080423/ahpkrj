@@ -225,11 +225,11 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     
     # 1. Raw_Data 헤더 구성: ID, Type, (Pairwise Combination Fields...), 제출시간
 
-    type_headers = ["Type"]
+    type_headers = ["그룹 분류"]
     if demographics and demographics.get("type_questions"):
-        tq_count = len(demographics["type_questions"])
-        if tq_count > 0:
-            type_headers = [f"Type {i+1}" for i in range(tq_count)]
+        tq_list = demographics["type_questions"]
+        if len(tq_list) > 0:
+            type_headers = [tq.get("q", f"추가 문항 {i}") if i > 0 else tq.get("q", "그룹 분류") for i, tq in enumerate(tq_list)]
     raw_headers = ["ID"] + type_headers
     
     # AHP 쌍대비교 필드명 목록 구성 (대분류 조합)
