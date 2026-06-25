@@ -2073,16 +2073,31 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         # 원본 Rawdata를 정수 형태(-9 ~ 9)로 추출
         raw_values = []
         col_idx = 0
+        has_format_error = False
         for i in range(n):
             for j in range(i + 1, n):
                 if col_idx < len(comp_cols):
                     raw_val = row[comp_cols[col_idx]]
                     raw_values.append(raw_val)
-                    ahp_val = parse_input_value(raw_val)
-                    matrix[i, j] = ahp_val
-                    matrix[j, i] = 1.0 / ahp_val
+                    
+                    if pd.isna(raw_val) or type(raw_val) == str or not (-9 <= float(raw_val) <= 9):
+                        has_format_error = True
+                    
+                    if not has_format_error:
+                        ahp_val = parse_input_value(float(raw_val))
+                        matrix[i, j] = ahp_val
+                        matrix[j, i] = 1.0 / ahp_val
                     col_idx += 1
-        
+                    
+        if has_format_error:
+            excluded_count += 1
+            ex_res = {"ID": respondent_id, "Type": respondent_type}
+            for k, col_name in enumerate(comp_cols):
+                ex_res[col_name] = raw_values[k] if k < len(raw_values) else np.nan
+            ex_res["CR"] = "데이터 오류(Format Error)"
+            excluded_list.append(ex_res)
+            continue
+            
         orig_cr, orig_ci, _unused_lambda = calculate_consistency(matrix, method)
         final_matrix = matrix.copy()
         final_cr = orig_cr
@@ -2478,7 +2493,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
         st.info("⚠️ [미리보기 모드] 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.")
         
-        preview_file_path = f"temp_previews/preview_{preview_id_param}.json"
+        preview_file_path = f"temp_previews/{preview_id_param}.json"
         if os.path.exists(preview_file_path):
             with open(preview_file_path, "r", encoding="utf-8") as f:
                 survey_meta = json.load(f)
@@ -2705,24 +2720,36 @@ if "preview_id" in q_params or "survey_id" in q_params:
         st.session_state.survey_resp_uuid = str(uuid.uuid4())[:8]
     resp_data["id"] = st.session_state.survey_resp_uuid
     
-    # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
     sq_idx = 1
+    
+    # 성명
+    if demographics.get("name"):
+        name_label = f"SQ{sq_idx}. " + _("성명 *", "Name *")
+        sq_idx += 1
+        resp_data["name"] = st.text_input(name_label, key="survey_resp_name")
+    
+    # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
     type_questions_data = demographics.get("type_questions")
     resp_data["types"] = []
     
     if type_questions_data and isinstance(type_questions_data, list):
         for i, tq in enumerate(type_questions_data):
-            tq_q = tq.get("q", "")
+            tq_q = tq.get("q", tq.get("question", ""))
             tq_opts = tq.get("opts", [])
             if not tq_q or tq_q == "귀하의 소속은 어떻게 되십니까?":
                 tq_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
             
             if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["전문가", "일반", "공무원", "기타"]:
-                tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
-            else:
+                if "opts" not in tq: # it was added via UI as short answer text
+                    tq_opts = []
+                else:
+                    tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
+            
+            if tq_opts:
                 tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
-                
-            ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
+                ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
+            else:
+                ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"survey_resp_type_{i}")
             resp_data["types"].append(ans)
             sq_idx += 1
     else:
@@ -4547,7 +4574,7 @@ with col_main:
                                     
                                         for col in raw_df.columns:
                                             if col not in ["ID", "Type", "제출시간", "답례품_연락처"]:
-                                                raw_df[col] = pd.to_numeric(raw_df[col], errors='coerce').fillna(1.0)
+                                                raw_df[col] = pd.to_numeric(raw_df[col], errors='coerce')
                                             
                                         ahp_model = survey_meta["AHP_Model_JSON"]
                                     
@@ -4658,7 +4685,7 @@ with col_main:
                             output_res_v3 = None
                             ui_data_v3 = {}
                             with st.spinner(_("3계층(소분류 포함) AHP 종합 분석 수행 중...", "Performing 3-Tier AHP...")):
-                                from ahp_utils_v3 import run_ahp_analysis_v3
+                                from ahp_utils_v3 import run_ahp_analysis_v3, write_custom_ahp_table_v3
                                 sub_sub_dfs = st.session_state.get("ahp_sub_sub_dfs", {})
                                 success_v3, msg_v3, final_df_v3, output_res_v3, ui_data_v3 = run_ahp_analysis_v3(
                                     df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method,
@@ -5402,10 +5429,10 @@ with col_main:
     
                                 total_excluded_df = pd.concat(total_excl_df_list, ignore_index=True)
                                 sheet_name_comp = _('종합분석', 'Comprehensive Analysis')
-                                current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
+                                current_row_ws = write_custom_ahp_table_v3(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
                                 for grp in unique_groups:
                                     if grp in group_full_dfs:
-                                        current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
+                                        current_row_ws = write_custom_ahp_table_v3(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
     
                                 if len(unique_groups) >= 1:
                                     ws_comp = workbook.add_worksheet('Group_Comparison')
@@ -7680,7 +7707,7 @@ with col_main:
                                 st.session_state["ahp_df_main"] = live_df[main_cols].copy()
                                 for col in st.session_state["ahp_df_main"].columns:
                                     if col not in ["ID", "Type"]:
-                                        st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce').fillna(1.0)
+                                        st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce')
                                 
                                  # 중분류 복사
                                 st.session_state["ahp_sub_dfs"] = {}
@@ -7695,7 +7722,7 @@ with col_main:
                                         st.session_state["ahp_sub_dfs"][main_c] = live_df[sub_cols].copy()
                                         for col in st.session_state["ahp_sub_dfs"][main_c].columns:
                                             if col not in ["ID", "Type"]:
-                                                st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce').fillna(1.0)
+                                                st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
                                                 
                                 st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
                                 st.info(_("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.", "📊 Data analysis preparation is complete! Select the **'📊 AHP Analysis Tool' tab at the top** and choose the **'🌐 Link Distributed Online Survey Data'** radio button to view the results instantly."))
