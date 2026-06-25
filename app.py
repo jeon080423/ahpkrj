@@ -2727,6 +2727,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         name_label = f"SQ{sq_idx}. " + _("성명 *", "Name *")
         sq_idx += 1
         resp_data["name"] = st.text_input(name_label, key="survey_resp_name")
+        st.caption(_("💡 수집된 성명은 원활한 설문 분석 및 관리 목적으로만 사용되며, 그 외의 목적으로 활용되지 않습니다.", "💡 The collected name will only be used for survey analysis and management purposes, and will not be used for any other purposes."))
     
     # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
     type_questions_data = demographics.get("type_questions")
