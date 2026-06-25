@@ -2720,12 +2720,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     resp_data["type"] = st.radio(f"SQ{sq_idx}. {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
     sq_idx += 1
     
-    if demographics.get("name"):
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name", value="", placeholder=_("예: 홍길동 (또는 홍*동)", "e.g. John Doe (or J. Doe)"))
-            st.caption(_("중복 응답 확인을 위해 입력을 요청드립니다. 전체 이름 공개가 불편하신 경우 성씨 또는 성씨와 이름 끝자만 입력하셔도 됩니다.", "Requested to check for duplicate responses. If uncomfortable disclosing your full name, you may enter just your last name or initials."))
-        sq_idx += 1
+
     
     # 연령: 개방형 vs 10세 단위 선택형
     if demographics.get("age"):
@@ -3085,6 +3080,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 )
                 st.session_state["scroll_target"] = None
             
+        if demographics.get("name"):
+            st.subheader(_("응답자 성명 확인", "Respondent Name Verification"))
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                resp_data["name"] = st.text_input(_("성명 *", "Name *"), key="survey_resp_name", value="", placeholder=_("예: 홍길동 (또는 홍*동)", "e.g. John Doe (or J. Doe)"))
+                st.caption(_("중복 응답 확인을 위해 입력을 요청드립니다. 전체 이름 공개가 불편하신 경우 성씨 또는 성씨와 이름 끝자만 입력하셔도 됩니다.", "Requested to check for duplicate responses. If uncomfortable disclosing your full name, you may enter just your last name or initials."))
+            st.divider()
+
         # 5. 개인정보 수집 및 답례품 동적 노출 및 문구 설정
         has_demographics = any(demographics.values()) if demographics else False
         has_rewards = rewards_info.get("enabled", False) if rewards_info else False
@@ -7239,6 +7242,11 @@ with col_main:
             }
 
             st.session_state[f"_preview_data_{preview_id}"] = preview_data
+
+            import json, os
+            os.makedirs("temp_previews", exist_ok=True)
+            with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as f:
+                json.dump(preview_data, f, ensure_ascii=False)
 
             col_p1, col_p2 = st.columns(2)
             with col_p1:
