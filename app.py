@@ -4434,6 +4434,11 @@ with col_main:
                     sheet_names = excel_obj.sheet_names
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
                     
+                    if "Type" not in df_main.columns and len(df_main.columns) > 1:
+                        col1 = df_main.columns[1]
+                        if "_" not in col1 and col1 not in ["ID", "제출시간"]:
+                            df_main.rename(columns={col1: "Type"}, inplace=True)
+                            
                     # 3계층 식별 로직 (df_main 컬럼에서 _ 포함된 것으로 대분류 요인 도출)
                     main_criteria_infer = set()
                     for col in df_main.columns:
@@ -4446,6 +4451,11 @@ with col_main:
                     inferred_sub_sub_dfs = {}
                     for sn in sheet_names[1:]:
                         df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
+                        if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
+                            col1 = df_sheet.columns[1]
+                            if "_" not in col1 and col1 not in ["ID", "제출시간"]:
+                                df_sheet.rename(columns={col1: "Type"}, inplace=True)
+                                
                         # 안전한 시트명(safe_sheet_name)을 위해 앞부분이 일치하는지 확인
                         is_sub = any(sn == mc[:31] for mc in main_criteria_infer)
                         if is_sub:
@@ -4525,6 +4535,11 @@ with col_main:
                                         rows = all_rows[1:]
                                         raw_df = pd.DataFrame(rows, columns=headers)
                                         
+                                        if "Type" not in raw_df.columns and len(raw_df.columns) > 1:
+                                            col1 = raw_df.columns[1]
+                                            if "_" not in col1 and col1 not in ["ID", "제출시간"]:
+                                                raw_df.rename(columns={col1: "Type"}, inplace=True)
+                                                
                                         # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 5표본)
                                         if st.session_state.get('user_role') == 'free' and len(raw_df) > 5:
                                             raw_df = raw_df.head(5)
