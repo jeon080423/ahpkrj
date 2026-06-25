@@ -2726,8 +2726,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
     if demographics.get("name"):
         name_label = f"SQ{sq_idx}. " + _("성명 *", "Name *")
         sq_idx += 1
-        resp_data["name"] = st.text_input(name_label, key="survey_resp_name")
-        st.caption(_("💡 수집된 성명은 원활한 설문 분석 및 관리 목적으로만 사용되며, 그 외의 목적으로 활용되지 않습니다.", "💡 The collected name will only be used for survey analysis and management purposes, and will not be used for any other purposes."))
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            resp_data["name"] = st.text_input(name_label, key="survey_resp_name")
+        st.caption(_("💡 수집된 성명은 중복 응답 검토 용도로만 사용됩니다. 성명 전체 입력을 원치 않으실 경우, 이름의 일부만 입력하셔도 무방합니다. (예: 홍*동, 홍길* 등)", "💡 The collected name is used only for duplicate response checking. If you do not wish to provide your full name, you may enter a partial name. (e.g., J*hn, Joh* Doe)"))
     
     # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
     type_questions_data = demographics.get("type_questions")
