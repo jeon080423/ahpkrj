@@ -2706,19 +2706,44 @@ if "preview_id" in q_params or "survey_id" in q_params:
     resp_data["id"] = st.session_state.survey_resp_uuid
     
     # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
-    type_q = demographics.get("type_question", "")
-    if not type_q or type_q == "귀하의 소속은 어떻게 되십니까?":
-        type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
-    
-    type_opts = demographics.get("type_options", [])
-    if not isinstance(type_opts, list) or not type_opts or type_opts == ["전문가", "일반", "공무원", "기타"]:
-        type_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
-    else:
-        type_opts = [translate_factor_if_default(opt) for opt in type_opts]
-        
     sq_idx = 1
-    resp_data["type"] = st.radio(f"SQ{sq_idx}. {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
-    sq_idx += 1
+    type_questions_data = demographics.get("type_questions")
+    resp_data["types"] = []
+    
+    if type_questions_data and isinstance(type_questions_data, list):
+        for i, tq in enumerate(type_questions_data):
+            tq_q = tq.get("q", "")
+            tq_opts = tq.get("opts", [])
+            if not tq_q or tq_q == "귀하의 소속은 어떻게 되십니까?":
+                tq_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+            
+            if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["전문가", "일반", "공무원", "기타"]:
+                tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
+            else:
+                tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
+                
+            ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
+            resp_data["types"].append(ans)
+            sq_idx += 1
+    else:
+        # 역방향 호환성
+        type_q = demographics.get("type_question", "")
+        if not type_q or type_q == "귀하의 소속은 어떻게 되십니까?":
+            type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+        
+        type_opts = demographics.get("type_options", [])
+        if not isinstance(type_opts, list) or not type_opts or type_opts == ["전문가", "일반", "공무원", "기타"]:
+            type_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
+        else:
+            type_opts = [translate_factor_if_default(opt) for opt in type_opts]
+            
+        ans = st.radio(f"SQ{sq_idx}. {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
+        resp_data["types"].append(ans)
+        sq_idx += 1
+        
+    # 기존 코드와의 호환성을 위해 type 속성도 유지
+    if resp_data["types"]:
+        resp_data["type"] = resp_data["types"][0]
     
 
     
@@ -6360,7 +6385,52 @@ with col_main:
             "유지비용": "통신요금, AS비용"
         }
     
-        # default assignments are moved inside expander to react to tier_level
+        # 그룹 분류 문항 설정
+        with st.container(border=True):
+            st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
+            
+            default_type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+            default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
+            
+            if "edit_type_questions" not in st.session_state:
+                legacy_q = st.session_state.get("edit_type_question")
+                legacy_opts = st.session_state.get("edit_type_options")
+                
+                init_q = legacy_q if legacy_q and legacy_q != "귀하의 소속은 어떻게 되십니까?" else default_type_q
+                init_opts = legacy_opts if legacy_opts and legacy_opts != "전문가, 일반, 공무원, 기타" else default_type_opts
+                st.session_state["edit_type_questions"] = [{"q": init_q, "opts": init_opts}]
+
+            type_questions_state = st.session_state["edit_type_questions"]
+            num_types = len(type_questions_state)
+            
+            col1, col2, col3 = st.columns([6, 2, 2])
+            with col2:
+                if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 3):
+                    st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
+                    st.rerun()
+            with col3:
+                if st.button(_("➖ 문항 삭제", "➖ Remove"), use_container_width=True, disabled=num_types <= 1):
+                    st.session_state["edit_type_questions"].pop()
+                    st.rerun()
+            
+            st.write("")
+            
+            type_questions = []
+            for i in range(num_types):
+                st.markdown(f"**{i+1}.**")
+                q_val = st.text_input(_("그룹 분류 질문 제목", "Group Classification Question Title") + f" ({i+1})", value=type_questions_state[i]["q"], key=f"tq_q_{i}")
+                opts_val = st.text_input(_("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)") + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"tq_opts_{i}")
+                
+                type_questions_state[i]["q"] = q_val
+                type_questions_state[i]["opts"] = opts_val
+                
+                type_questions.append({
+                    "q": q_val,
+                    "opts": [x.strip() for x in opts_val.split(",") if x.strip()]
+                })
+            
+            type_question = type_questions[0]["q"] if type_questions else ""
+            type_options = ", ".join(type_questions[0]["opts"]) if type_questions else ""
     
         with st.expander(_(" 나의 분석 모델 만들기", " Create Custom AHP Model"), expanded=True):
             st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
@@ -6733,6 +6803,11 @@ with col_main:
                     demo = meta.get("Demographics", {})
                     st.session_state.edit_type_question = demo.get("type_question", "")
                     st.session_state.edit_type_options = ", ".join(demo.get("type_options", []))
+                    if "type_questions" in demo:
+                        tqs = []
+                        for tq in demo["type_questions"]:
+                            tqs.append({"q": tq["q"], "opts": ", ".join(tq["opts"])})
+                        st.session_state.edit_type_questions = tqs
                     st.session_state.edit_demo_gender = demo.get("gender", False)
                     st.session_state.edit_demo_aff = demo.get("affiliation", False)
                     st.session_state.edit_demo_email = demo.get("email", False)
@@ -6911,7 +6986,8 @@ with col_main:
                 "affiliation": False,  # 소속 수집 삭제
                 "email": demo_email,
                 "type_question": type_question,
-                "type_options": [x.strip() for x in type_options.split(",") if x.strip()]
+                "type_options": [x.strip() for x in type_options.split(",") if x.strip()],
+                "type_questions": type_questions
             }
 
             st.divider()
