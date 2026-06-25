@@ -2723,7 +2723,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
     if demographics.get("name"):
         col1, col2 = st.columns([1, 3])
         with col1:
-            resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name", value="", placeholder=_("예: 홍길동", "e.g. John Doe"))
+            resp_data["name"] = st.text_input(f"SQ{sq_idx}. " + _("성명 *", "Name *"), key="survey_resp_name", value="", placeholder=_("예: 홍길동 (또는 홍*동)", "e.g. John Doe (or J. Doe)"))
+            st.caption(_("중복 응답 확인을 위해 입력을 요청드립니다. 전체 이름 공개가 불편하신 경우 성씨 또는 성씨와 이름 끝자만 입력하셔도 됩니다.", "Requested to check for duplicate responses. If uncomfortable disclosing your full name, you may enter just your last name or initials."))
         sq_idx += 1
     
     # 연령: 개방형 vs 10세 단위 선택형
@@ -6877,6 +6878,7 @@ with col_main:
             # 인구통계학 정보 설정
             with st.container(border=True):
                 st.markdown(_("** 인구통계학적 문항 수집 설정**", "** Demographic Questions Setup**"))
+                demo_name = st.checkbox(_("이름 수집", "Collect Name"), value=st.session_state.get("edit_demo_name", False))
                 demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
                 demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
@@ -6897,7 +6899,7 @@ with col_main:
                     exp_type = st.radio(_("경력년수 수집 방식", "Experience Collection Method"), exp_type_options, index=0 if st.session_state.get("edit_exp_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_exp_type_setup")
 
             demographics_settings = {
-                "name": False,  # 성명 수집 삭제
+                "name": demo_name,
                 "age": demo_age,
                 "age_type": age_type,
                 "gender": demo_gender,
