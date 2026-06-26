@@ -3600,7 +3600,7 @@ with st.sidebar:
 
         with tab_signup:
             if st.session_state.get('signup_paypal_user') or st.session_state.get('signup_portone_user'):
-                is_en = 'signup_paypal_user' in st.session_state
+                is_en = st.session_state.get('lang', 'ko') == 'en'
                 user_id = st.session_state.signup_paypal_user if is_en else st.session_state.signup_portone_user
                 
                 if is_en:
