@@ -3452,7 +3452,7 @@ def get_portone_payment_html(user_id):
     </head>
     <body style="margin:0; padding:0; display:flex; justify-content:center;">
       <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
-        💳 정식 사용자 결제하기 (50만원)
+        💳 정식 사용자 결제하기
       </button>
       <script>
         function openPaymentWindow() {{
@@ -3485,7 +3485,7 @@ def get_portone_payment_html(user_id):
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
               paymentId: "pay-" + r,
-              orderName: "정식 사용자 (50만원)",
+              orderName: "정식 사용자",
               totalAmount: 500000,
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
@@ -3842,79 +3842,7 @@ with st.sidebar:
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
 
     import streamlit.components.v1 as components
-    payment_html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-    </head>
-    <body style="margin:0; padding:0; display:flex; justify-content:center;">
-      <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
-        💳 정식 사용자 결제하기 (50만원)
-      </button>
-      <script>
-        function openPaymentWindow() {
-          const win = window.open("", "_blank", "width=850,height=700");
-          if (!win) {
-             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
-             return;
-          }
-          win.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <title>안전 결제 진행</title>
-              <script src="https://cdn.portone.io/v2/browser-sdk.js"><\/script>
-            </head>
-            <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
-              <h3>결제 모듈을 안전하게 불러오는 중입니다...</h3>
-              <p>이 창을 닫지 마세요.</p>
-              <script>
-                PortOne.requestPayment({
-                  storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
-                  channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-                  paymentId: "pay-" + crypto.randomUUID().replace(/-/g, ""),
-                  orderName: "정식 사용자 3개월 (50만원)",
-                  totalAmount: 500000,
-                  currency: "CURRENCY_KRW",
-                  payMethod: "CARD",
-                  customer: {
-                    email: "test@ahp.kr",
-                    fullName: "테스터",
-                    phoneNumber: "010-0000-0000"
-                  }
-                }).then(function(response) {
-                  if (response.code != null) {
-                    alert("결제 실패: " + response.message);
-                    window.close();
-                  } else {
-                    alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
-                    window.opener.postMessage("payment_success", "*");
-                    window.close();
-                  }
-                }).catch(function(error) {
-                  alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
-                  window.close();
-                });
-              <\/script>
-            </body>
-            </html>
-          `);
-          win.document.close();
-        }
-
-        window.addEventListener("message", (event) => {
-          if (event.data === "payment_success") {
-             document.body.innerHTML = "<div style='color: green; font-weight: bold; text-align: center; padding: 10px; font-family: sans-serif;'>✅ 결제가 완료되었습니다.</div>";
-          }
-        });
-      </script>
-    </body>
-    </html>
-    """
-    components.html(payment_html, height=60)
-
+    components.html(get_portone_payment_html(st.session_state.user_id), height=60)
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
