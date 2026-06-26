@@ -3461,53 +3461,59 @@ def get_portone_payment_html(user_id):
              alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
              return;
           }}
-          // generate random string for paymentId to avoid crypto.randomUUID issue in http
-          const r = Math.random().toString(36).substring(2, 15);
           win.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
               <meta charset="utf-8">
               <title>안전 결제 진행</title>
-              <script src="https://cdn.portone.io/v2/browser-sdk.js"><\\/script>
             </head>
             <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
-              <h3>결제 모듈을 안전하게 불러오는 중입니다...</h3>
+              <h3 id="statusMsg">결제 모듈을 안전하게 불러오는 중입니다...</h3>
               <p>이 창을 닫지 마세요.</p>
-              <script>
-                PortOne.requestPayment({{
-                  storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
-                  channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-                  paymentId: "pay-" + r,
-                  orderName: "정식 사용자 (50만원)",
-                  totalAmount: 500000,
-                  currency: "CURRENCY_KRW",
-                  payMethod: "CARD",
-                  customer: {{
-                    email: "{user_id}",
-                    fullName: "사용자",
-                    phoneNumber: "010-0000-0000"
-                  }}
-                }}).then(function(response) {{
-                  if (response.code != null) {{
-                    alert("결제 실패: " + response.message);
-                    window.close();
-                  }} else {{
-                    alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
-                    if (window.opener) {{
-                        window.opener.location.href = window.opener.location.pathname + "?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
-                    }}
-                    window.close();
-                  }}
-                }}).catch(function(error) {{
-                  alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
-                  window.close();
-                }});
-              <\\/script>
             </body>
             </html>
           `);
           win.document.close();
+
+          const script = win.document.createElement("script");
+          script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+          script.onload = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
+            const r = Math.random().toString(36).substring(2, 15);
+            win.PortOne.requestPayment({{
+              storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
+              channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
+              paymentId: "pay-" + r,
+              orderName: "정식 사용자 (50만원)",
+              totalAmount: 500000,
+              currency: "CURRENCY_KRW",
+              payMethod: "CARD",
+              customer: {{
+                email: "{user_id}",
+                fullName: "사용자",
+                phoneNumber: "010-0000-0000"
+              }}
+            }}).then(function(response) {{
+              if (response.code != null) {{
+                alert("결제 실패: " + response.message);
+                win.close();
+              }} else {{
+                alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
+                if (win.opener) {{
+                    win.opener.location.href = win.opener.location.pathname + "?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+                }}
+                win.close();
+              }}
+            }}).catch(function(error) {{
+              alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+              win.close();
+            }});
+          }};
+          script.onerror = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
+          }};
+          win.document.head.appendChild(script);
         }}
       </script>
     </body>
