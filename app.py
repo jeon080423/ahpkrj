@@ -1309,6 +1309,19 @@ def sync_db_from_sheets():
                             cnt += 1
             
             conn.commit()
+            
+            # 방문 기록(visit_logs)도 강제 동기화 시도
+            try:
+                visit_sheet = spreadsheet.worksheet("Visit_Logs")
+                records = visit_sheet.get_all_records()
+                for row in records:
+                    c.execute("INSERT OR IGNORE INTO visit_logs (ip_address, visit_date) VALUES (?, ?)", 
+                              (str(row.get('IP', '')), str(row.get('Date', ''))))
+                conn.commit()
+            except Exception as e:
+                # 방문 로그 시트가 없거나 오류가 나도 유저 동기화 결과는 반환
+                pass
+                
             return cnt
     except Exception as e:
         st.error(f"🔍 동기화 에러 상세: {str(e)}")
