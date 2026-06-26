@@ -3382,6 +3382,21 @@ if "lang" in q_params:
     elif str(lang_val).lower() in ["ko", "korean"]:
         st.session_state.lang = "ko"
 
+# PortOne 자동 결제 승격 처리
+if "portone_paid" in q_params and "user_id" in q_params:
+    user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
+    if user_id_param:
+        kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+        new_expiry_date = (kst_now + relativedelta(months=3)).strftime("%Y-%m-%d")
+        update_user_full_info(user_id_param, None, "official", new_expiry_date)
+        
+        if st.session_state.get("user_id") == user_id_param:
+            st.session_state.user_role = "official"
+            st.session_state.expiry_date = new_expiry_date
+        st.toast("🎉 결제가 완료되어 정식 사용자로 승급되었습니다!")
+    st.query_params.clear()
+    st.rerun()
+
 # 페이팔 자동 결제 승격 처리 (서버 검증 포함)
 if "paypal_order_id" in q_params:
     order_id_val = q_params["paypal_order_id"]
@@ -3425,6 +3440,73 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # =============================================================================
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
+
+def get_portone_payment_html(user_id):
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body style="margin:0; padding:0; display:flex; justify-content:center;">
+      <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
+        💳 정식 사용자 결제하기 (50만원)
+      </button>
+      <script>
+        function openPaymentWindow() {{
+          const win = window.open("", "_blank", "width=850,height=700");
+          if (!win) {{
+             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             return;
+          }}
+          win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>안전 결제 진행</title>
+              <script src="https://cdn.portone.io/v2/browser-sdk.js"><\\/script>
+            </head>
+            <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
+              <h3>결제 모듈을 안전하게 불러오는 중입니다...</h3>
+              <p>이 창을 닫지 마세요.</p>
+              <script>
+                PortOne.requestPayment({{
+                  storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
+                  channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
+                  paymentId: "pay-" + crypto.randomUUID().replace(/-/g, ""),
+                  orderName: "정식 사용자 3개월 (50만원)",
+                  totalAmount: 500000,
+                  currency: "CURRENCY_KRW",
+                  payMethod: "CARD",
+                  customer: {{
+                    email: "{user_id}",
+                    fullName: "사용자",
+                    phoneNumber: "010-0000-0000"
+                  }}
+                }}).then(function(response) {{
+                  if (response.code != null) {{
+                    alert("결제 실패: " + response.message);
+                    window.close();
+                  }} else {{
+                    alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
+                    window.opener.location.href = window.opener.location.origin + window.opener.location.pathname + "?portone_paid=true&user_id=" + encodeURIComponent("{user_id}");
+                    window.close();
+                  }}
+                }}).catch(function(error) {{
+                  alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+                  window.close();
+                }});
+              <\\/script>
+            </body>
+            </html>
+          `);
+          win.document.close();
+        }}
+      </script>
+    </body>
+    </html>
+    """
 
 def get_fee_info_text():
     return _(
@@ -3517,52 +3599,63 @@ with st.sidebar:
                     st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
 
         with tab_signup:
-            if st.session_state.get('signup_paypal_user'):
-                user_id = st.session_state.signup_paypal_user
-                st.markdown("###  Upgrade to Official User via PayPal")
-                st.info(f"You have registered successfully as **{user_id}**. To complete your upgrade to Official User immediately, please use the PayPal button below:")
+            if st.session_state.get('signup_paypal_user') or st.session_state.get('signup_portone_user'):
+                is_en = 'signup_paypal_user' in st.session_state
+                user_id = st.session_state.signup_paypal_user if is_en else st.session_state.signup_portone_user
                 
-                paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
-                paypal_html = f"""
-                <div id="paypal-button-container-signup" style="text-align: center; max-width: 100%;"></div>
-                <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
-                <script>
-                  paypal.Buttons({{
-                    style: {{
-                      layout: 'vertical',
-                      color:  'gold',
-                      shape:  'rect',
-                      label:  'paypal',
-                      height: 40
-                    }},
-                    createOrder: function(data, actions) {{
-                      return actions.order.create({{
-                        purchase_units: [{{
-                          amount: {{
-                            value: '350.00'
-                          }},
-                          payee: {{
-                            email_address: 'jeon080423@gmail.com'
-                          }}
-                        }}]
-                      }});
-                    }},
-                    onApprove: function(data, actions) {{
-                      return actions.order.capture().then(function(details) {{
-                        window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
-                      }});
-                    }},
-                    onError: function(err) {{
-                      console.error(err);
-                      alert("Payment failed or was cancelled.");
-                    }}
-                  }}).render('#paypal-button-container-signup');
-                </script>
-                """
-                st.components.v1.html(paypal_html, height=180)
+                if is_en:
+                    st.markdown("###  Upgrade to Official User via PayPal")
+                    st.info(f"You have registered successfully as **{user_id}**. To complete your upgrade to Official User immediately, please use the PayPal button below:")
+                    
+                    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+                    paypal_html = f"""
+                    <div id="paypal-button-container-signup" style="text-align: center; max-width: 100%;"></div>
+                    <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
+                    <script>
+                      paypal.Buttons({{
+                        style: {{
+                          layout: 'vertical',
+                          color:  'gold',
+                          shape:  'rect',
+                          label:  'paypal',
+                          height: 40
+                        }},
+                        createOrder: function(data, actions) {{
+                          return actions.order.create({{
+                            purchase_units: [{{
+                              amount: {{
+                                value: '350.00'
+                              }},
+                              payee: {{
+                                email_address: 'jeon080423@gmail.com'
+                              }}
+                            }}]
+                          }});
+                        }},
+                        onApprove: function(data, actions) {{
+                          return actions.order.capture().then(function(details) {{
+                            window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
+                          }});
+                        }},
+                        onError: function(err) {{
+                          console.error(err);
+                          alert("Payment failed or was cancelled.");
+                        }}
+                      }}).render('#paypal-button-container-signup');
+                    </script>
+                    """
+                    st.components.v1.html(paypal_html, height=180)
+                else:
+                    st.markdown("### 💳 정식 사용자 결제 진행")
+                    st.info(f"**{user_id}**님, 무료사용자로 임시 가입되었습니다.\\n\\n정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요.")
+                    portone_html = get_portone_payment_html(user_id)
+                    st.components.v1.html(portone_html, height=60)
                 
-                if st.button("Back to Login / Sign Up", use_container_width=True, key="back_to_login_btn"):
-                    del st.session_state.signup_paypal_user
+                if st.button(_("로그인 화면으로 돌아가기", "Back to Login / Sign Up"), use_container_width=True, key="back_to_login_btn"):
+                    if is_en:
+                        del st.session_state.signup_paypal_user
+                    else:
+                        del st.session_state.signup_portone_user
                     st.rerun()
             else:
                 agreements = show_agreement_ui()
@@ -3577,30 +3670,7 @@ with st.sidebar:
                         st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 3 months)")
                     else:
                         st.warning(" 정식 사용자 가입 안내")
-                        acc_info_html = """
-                        <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                          <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 계좌이체 입금 정보</div>
-                          <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-                            • <b>은행명</b>: 카카오뱅크<br>
-                            • <b>예금주</b>: ㅈㅅㅎ<br>
-                            • <b>이용요금</b>: 50만원<br>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                              <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
-                              <button onclick="(function(){
-                                const el = document.createElement('textarea');
-                                el.value = '3333-23-8667708';
-                                document.body.appendChild(el);
-                                el.select();
-                                document.execCommand('copy');
-                                document.body.removeChild(el);
-                                alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
-                              })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
-                            </div>
-                          </div>
-                        </div>
-                        """
-                        st.markdown(acc_info_html, unsafe_allow_html=True)
-                        st.info("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 3개월 입니다)")
+                        st.info("가입신청 버튼을 클릭하시면 즉시 결제 창이 나타나며, 결제 완료 시 자동으로 정식 사용자로 승급됩니다.")
                 
                 if st.button(_("가입신청", "Register")):
                     if not agreements.get("agree_personal_info"):
@@ -3619,6 +3689,8 @@ with st.sidebar:
                                 send_application_email(s_id.strip())
                                 if st.session_state.get('lang', 'ko') == 'en':
                                     st.session_state.signup_paypal_user = s_id.strip()
+                                else:
+                                    st.session_state.signup_portone_user = s_id.strip()
                             st.success(_("무료사용자로 가입 완료 되었습니다", "Successfully registered as a Free User."))
                             st.rerun()
                         else:
@@ -3709,37 +3781,10 @@ with st.sidebar:
                     """
                     st.components.v1.html(paypal_html, height=180)
                 else:
-                    st.markdown("#####  정식 사용자 승격 요청")
-                    
-                    acc_info_html = """
-                    <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                      <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-                        • <b>은행명</b>: 카카오뱅크<br>
-                        • <b>예금주</b>: ㅈㅅㅎ<br>
-                        • <b>이용요금</b>: 50만원 (3개월)<br>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                          <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
-                          <button onclick="(function(){
-                            const el = document.createElement('textarea');
-                            el.value = '3333-23-8667708';
-                            document.body.appendChild(el);
-                            el.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(el);
-                            alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
-                          })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
-                        </div>
-                      </div>
-                    </div>
-                    """
-                    st.markdown(acc_info_html, unsafe_allow_html=True)
-                    st.info("입금 완료 후 아래 버튼을 클릭하시면 승격 요청이 관리자에게 즉시 전송됩니다.")
-                    
-                    if st.button("정식 사용자 전환 요청", use_container_width=True, key="sidebar_upgrade_btn"):
-                        if send_conversion_request_email(st.session_state.user_id):
-                            st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                        else:
-                            st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+                    st.markdown("##### 💳 정식 사용자 승격 결제")
+                    st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 3개월)")
+                    portone_html = get_portone_payment_html(st.session_state.user_id)
+                    st.components.v1.html(portone_html, height=60)
         
     if st.session_state.user_id is not None:
         if st.session_state.user_role == 'admin':
@@ -6494,14 +6539,11 @@ with col_main:
                                 """
                                 st.components.v1.html(paypal_html, height=180)
                             else:
-                                st.markdown(_("###  정식 사용자 승격 및 무제한 분석", "###  Upgrade to Official User for Unlimited Analysis"))
+                                st.markdown(_("### 💳 정식 사용자 승격 및 무제한 분석", "### 💳 Upgrade to Official User for Unlimited Analysis"))
                                 st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
-                                st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 아래 버튼을 클릭해 주세요.\n(서비스 이용요금: 50만원)")
-                                if st.button("정식 사용자 전환 요청", use_container_width=True, key="main_upgrade_btn"):
-                                    if send_conversion_request_email(st.session_state.user_id):
-                                        st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                                    else:
-                                        st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+                                st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 3개월)")
+                                portone_html = get_portone_payment_html(st.session_state.user_id)
+                                st.components.v1.html(portone_html, height=60)
             except Exception as e:
                 st.error(f"파일 처리 오류 발생: {e}")
             
