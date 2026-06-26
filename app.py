@@ -3324,8 +3324,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     
     st.stop()
 
-# 자동 로그인 처리 (쿼리 파라미터 기반)
-if st.session_state.user_id is None and "login_user" in q_params and "login_token" in q_params:
+# 자동 로그인 및 권한 갱신 처리 (쿼리 파라미터 기반)
+if "login_user" in q_params and "login_token" in q_params:
     login_user_val = q_params["login_user"]
     if isinstance(login_user_val, list): login_user_val = login_user_val[0]
     login_token_val = q_params["login_token"]
@@ -3340,9 +3340,18 @@ if st.session_state.user_id is None and "login_user" in q_params and "login_toke
         db_user = c.fetchone()
         conn.close()
         if db_user:
+            role_changed = (st.session_state.user_id != login_user_val) or (st.session_state.user_role != db_user[0])
             st.session_state.user_id = login_user_val
             st.session_state.user_role = db_user[0]
             st.session_state.expiry_date = db_user[1]
+            
+            # URL 파라미터를 정리하여 불필요한 반복 쿼리 및 노출 방지
+            st.query_params.pop("login_user", None)
+            st.query_params.pop("login_token", None)
+            
+            if role_changed:
+                st.toast("🎉 Account status updated!")
+                st.rerun()
 
 
 # 자동 로그아웃 처리 (30분 미활동 시)
@@ -3887,8 +3896,9 @@ with st.sidebar:
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
 
-    import streamlit.components.v1 as components
-    components.html(get_portone_payment_html(st.session_state.user_id), height=60)
+    if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
+        import streamlit.components.v1 as components
+        components.html(get_portone_payment_html(st.session_state.user_id), height=60)
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
