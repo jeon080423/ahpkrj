@@ -3475,7 +3475,7 @@ def get_portone_payment_html(user_id):
                   storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
                   channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
                   paymentId: "pay-" + crypto.randomUUID().replace(/-/g, ""),
-                  orderName: "정식 사용자 3개월 (50만원)",
+                  orderName: "정식 사용자 (50만원)",
                   totalAmount: 500000,
                   currency: "CURRENCY_KRW",
                   payMethod: "CARD",
