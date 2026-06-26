@@ -433,7 +433,7 @@ def write_detailed_sheet_ws(writer, sheet_name, matrix_df, detail_df, matrix_tit
     ws.set_column('A:A', 25)
     ws.set_column('B:Z', 15)
 
-def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method, fn_process_single_sheet, fn_fuzzy_ahp):
+def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method, fn_process_single_sheet, fn_fuzzy_ahp, demo_summary_df=None):
     """
     [3계층 전용] 고도화된 AHP 분석 및 엑셀 다운로드 파일 생성 엔진.
     """
@@ -848,6 +848,22 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
 
     with pd.ExcelWriter(output_res, engine='xlsxwriter') as writer:
         workbook = writer.book
+        
+        # [신규 추가] 인구통계 결과 엑셀 시트 출력
+        if demo_summary_df is not None:
+            demo_summary_df.to_excel(writer, sheet_name='Result_Demographics', index=False)
+            # Result_Demographics 엑셀 서식 적용
+            ws_demo = writer.sheets['Result_Demographics']
+            header_format_demo = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1})
+            body_format_demo = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1})
+            for col_num, value in enumerate(demo_summary_df.columns.values):
+                ws_demo.write(0, col_num, value, header_format_demo)
+            for row in range(len(demo_summary_df)):
+                for col in range(len(demo_summary_df.columns)):
+                    ws_demo.write(row+1, col, demo_summary_df.iloc[row, col], body_format_demo)
+            ws_demo.set_column('A:A', 30)
+            ws_demo.set_column('B:D', 20)
+        
         
         # Styles
         formats = {
