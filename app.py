@@ -2425,6 +2425,12 @@ if 'admin_mode' not in st.session_state: st.session_state.admin_mode = False
 if 'model_structure' not in st.session_state: st.session_state.model_structure = {}
 if 'page' not in st.session_state: st.session_state.page = "main"
 if 'signup_paypal_user' not in st.session_state: st.session_state.signup_paypal_user = None
+if 'signup_portone_user' not in st.session_state: st.session_state.signup_portone_user = None
+
+# 로그인 상태일 경우 가입 결제 대기 상태 초기화
+if st.session_state.user_id is not None:
+    st.session_state.signup_paypal_user = None
+    st.session_state.signup_portone_user = None
 
 # Check for foreign access once per session
 check_foreign_access()
@@ -3661,6 +3667,8 @@ with st.sidebar:
                         st.query_params["last_activity"] = str(int(time.time()))
                         if 'signup_paypal_user' in st.session_state:
                             del st.session_state.signup_paypal_user
+                        if 'signup_portone_user' in st.session_state:
+                            del st.session_state.signup_portone_user
                         st.success(_(f"환영합니다, {l_id}님!", f"Welcome, {l_id}!"))
                         st.rerun()
                 else:
@@ -3896,6 +3904,8 @@ with st.sidebar:
             st.session_state.user_role = None
             st.session_state.expiry_date = None
             st.session_state.admin_mode = False
+            st.session_state.signup_paypal_user = None
+            st.session_state.signup_portone_user = None
             st.query_params.pop("login_user", None)
             st.query_params.pop("login_token", None)
             st.rerun()
