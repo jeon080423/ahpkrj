@@ -1002,6 +1002,7 @@ def delete_admin_survey(survey_id, admin_id):
         
     return True
 
+@st.cache_data(ttl=60, show_spinner=False)
 def get_admin_surveys_from_gsheet(admin_id):
     import gspread
     client = get_survey_gspread_client()
