@@ -100,12 +100,62 @@ def show_agreement_ui():
     """
     lang = st.session_state.get('lang', 'ko')
     
+    # 공통 CSS 주입으로 사이드바 줄간격 및 마진 축소
+    st.markdown(
+        """
+        <style>
+        /* 사이드바 위젯들 간의 세로 공백 줄이기 */
+        [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+            gap: 0.55rem !important;
+        }
+        /* 입력 창 라벨 마진 조절 */
+        [data-testid="stSidebar"] label[data-testid="stWidgetLabel"] {
+            margin-bottom: 2px !important;
+            font-size: 0.85rem !important;
+        }
+        /* 라디오 버튼 항목 간의 간격 축소 */
+        [data-testid="stSidebar"] div[role="radiogroup"] {
+            gap: 0.3rem !important;
+        }
+        /* 체크박스 마진 조절 */
+        [data-testid="stSidebar"] div[data-testid="stCheckbox"] {
+            margin-top: -2px !important;
+            margin-bottom: 2px !important;
+        }
+        /* 리스트 스타일 여백 줄이기 */
+        .compact-list {
+            line-height: 1.35;
+            font-size: 0.85rem;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            padding-left: 5px;
+            color: #1e293b;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
     if lang == 'en':
-        st.subheader(" Personal Information Collection & Usage Guide")
+        st.markdown(
+            """
+            <div style='margin-bottom: 1px;'>
+                <span style='font-size: 0.95rem; font-weight: bold; color: #0f172a;'> Personal Information Collection & Usage Guide</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         for item, purpose in PERSONAL_INFO_ITEMS_EN.items():
-            st.write(f"• {item}: {purpose}")
+            st.markdown(f"<div class='compact-list'>• <b>{item}</b>: {purpose}</div>", unsafe_allow_html=True)
             
-        st.subheader(" Privacy Policy Agreement")
+        st.markdown(
+            """
+            <div style='margin-top: 5px; margin-bottom: 1px;'>
+                <span style='font-size: 0.95rem; font-weight: bold; color: #0f172a;'> Privacy Policy Agreement</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         with st.expander("View Full Agreement", expanded=False):
             st.text(PERSONAL_INFO_AGREEMENT_EN)
             
@@ -114,11 +164,25 @@ def show_agreement_ui():
             key="agree_personal_info"
         )
     else:
-        st.subheader(" 개인정보 수집 및 이용 안내")
+        st.markdown(
+            """
+            <div style='margin-bottom: 1px;'>
+                <span style='font-size: 0.95rem; font-weight: bold; color: #0f172a;'> 개인정보 수집 및 이용 안내</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         for item, purpose in PERSONAL_INFO_ITEMS.items():
-            st.write(f"• {item}: {purpose}")
+            st.markdown(f"<div class='compact-list'>• <b>{item}</b>: {purpose}</div>", unsafe_allow_html=True)
             
-        st.subheader(" 개인정보 수집 및 이용 동의서")
+        st.markdown(
+            """
+            <div style='margin-top: 5px; margin-bottom: 1px;'>
+                <span style='font-size: 0.95rem; font-weight: bold; color: #0f172a;'> 개인정보 수집 및 이용 동의서</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         with st.expander("동의서 전문 보기", expanded=False):
             st.text(PERSONAL_INFO_AGREEMENT)
             
