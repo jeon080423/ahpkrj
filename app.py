@@ -16,6 +16,8 @@ import hashlib
 import random
 import string
 import sys
+from ahp_table_utils import write_custom_ahp_table, add_borders_to_data
+from ahp_utils_v3 import write_custom_ahp_table_v3
 
 # --- LAZY LOADER FOR HEAVY LIBRARIES (SPEED UP INITIAL LOAD) ---
 class LazyLoader:
@@ -269,16 +271,17 @@ def fix_base64_padding(data):
 
 # [수정 반영] 1) SEO 태그 삽입, 2) 서비스 명 변경(AHP 마스터), 4) 파비콘 설정
 try:
-    logo_path = "ahp_master_logo.png"
-    if os.path.exists(logo_path):
-        logo_img = Image.open(logo_path)
+    from PIL import Image
+    favicon_path = "favicon.png"
+    if os.path.exists(favicon_path):
+        favicon_img = Image.open(favicon_path)
     else:
-        logo_img = "📊"
+        favicon_img = "📊"
     
     st.set_page_config(
         page_title=_("AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템", "AHP Master | Traditional & Fuzzy AHP Decision Analysis System"), 
         layout="wide", 
-        page_icon=logo_img,
+        page_icon=favicon_img,
         menu_items={
             'Get Help': None,
             'Report a bug': None,
@@ -814,6 +817,17 @@ div.st-key-ahp_survey_matrix {
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
         width: 50% !important;
     }
+/* --- 비밀번호 가시성 토글 버튼(눈 아이콘) 및 래퍼 배경 투명화 --- */
+div[data-baseweb="input"] {
+    background-color: transparent !important;
+    border: none !important;
+}
+div[data-testid="stTextInput"] button,
+[data-testid="stTextInputPasswordVisibilityButton"] {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #475569 !important; /* 아이콘 색상 조정 */
 }
 </style>
 """
@@ -3368,6 +3382,35 @@ if "lang" in q_params:
     elif str(lang_val).lower() in ["ko", "korean"]:
         st.session_state.lang = "ko"
 
+# PortOne 자동 결제 승격 처리
+if "portone_paid" in q_params and "user_id" in q_params:
+    user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
+    if user_id_param:
+        kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+        new_expiry_date = (kst_now + relativedelta(months=3)).strftime("%Y-%m-%d")
+        update_user_full_info(user_id_param, None, "official", new_expiry_date)
+        
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h3 style="color: green;">🎉 결제가 완료되어 정식 사용자로 승급되었습니다!</h3>
+          <p>원래 창을 새로고침 해주세요. 이 창은 3초 뒤에 닫힙니다.</p>
+          <script>
+            try {
+                if (window.opener && window.opener.top) {
+                    window.opener.top.location.reload();
+                }
+            } catch(e) {}
+            setTimeout(() => window.close(), 3000);
+          </script>
+        </body>
+        </html>
+        """
+        st.components.v1.html(html_code, height=400)
+    st.stop()
+
 # 페이팔 자동 결제 승격 처리 (서버 검증 포함)
 if "paypal_order_id" in q_params:
     order_id_val = q_params["paypal_order_id"]
@@ -3412,6 +3455,94 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
+def get_portone_payment_html(user_id):
+    import hashlib
+    login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+    # 이메일 형식 검증 (간단히 @ 포함 여부로 확인) 및 공백 제거
+    safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body style="margin:0; padding:0; display:flex; justify-content:center;">
+      <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
+        💳 정식 사용자 결제하기
+      </button>
+      <script>
+        function openPaymentWindow() {{
+          const win = window.open("", "_blank", "width=850,height=700");
+          if (!win) {{
+             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             return;
+          }}
+          win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>안전 결제 진행</title>
+            </head>
+            <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
+              <h3 id="statusMsg">결제 모듈을 안전하게 불러오는 중입니다...</h3>
+              <p>이 창을 닫지 마세요.</p>
+            </body>
+            </html>
+          `);
+          win.document.close();
+
+          let baseOrigin = "https://ahpkrj.streamlit.app";
+          try {{
+             if (window.top && window.top.location && window.top.location.origin && window.top.location.origin !== "null") {{
+                 baseOrigin = window.top.location.origin + window.top.location.pathname;
+             }}
+          }} catch(e) {{}}
+          if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
+          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+          const script = win.document.createElement("script");
+          script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+          script.onload = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
+            const r = Math.random().toString(36).substring(2, 15);
+            win.PortOne.requestPayment({{
+              storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
+              channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
+              paymentId: "pay-" + r,
+              orderName: "정식 사용자",
+              totalAmount: 500000,
+              currency: "CURRENCY_KRW",
+              payMethod: "CARD",
+              redirectUrl: returnUrl,
+              customer: {{
+                email: "{safe_email}",
+                fullName: "사용자",
+                phoneNumber: "010-0000-0000"
+              }}
+            }}).then(function(response) {{
+              if (response.code != null) {{
+                alert("결제 실패: " + response.message);
+                win.close();
+              }} else {{
+                win.location.href = returnUrl;
+              }}
+            }}).catch(function(error) {{
+              alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+              win.close();
+            }});
+          }};
+          script.onerror = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
+          }};
+          win.document.head.appendChild(script);
+        }}
+      </script>
+    </body>
+    </html>
+    """
+
+
 def get_fee_info_text():
     return _(
         """<div style="line-height: 1.4; font-size: 0.95rem;">
@@ -3421,8 +3552,13 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
     <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; padding-left: 0; text-indent: 0; margin-top: 2px; white-space: nowrap;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
   </ul>
-  <div style="margin-top: 10px; color: #e65100; font-size: 0.85rem; font-weight: 600;">
-    💡 가입 후 3일 내 불만족 시 100% 환불
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
+    <ul style="margin: 0; padding-left: 20px; margin-bottom: 0;">
+      <li style="margin-bottom: 2px;"><b>서비스 제공기간</b>: 3개월</li>
+      <li style="margin-bottom: 2px;"><b>환불정책</b>: 서비스 불만족시 3일 이내 환불</li>
+      <li style="margin-bottom: 2px;"><b>취소규정</b>: 30분 이내 취소신청(24시간 이내 환불)</li>
+      <li style="margin-bottom: 2px;"><b>환불 및 취소 방법</b>: <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none;">jeon080423@gmail.com</a>을 통해 요청</li>
+    </ul>
   </div>
 </div>""",
         """<div style="line-height: 1.4; font-size: 0.95rem;">
@@ -3432,24 +3568,19 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
     <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (3 months unlimited)</li>
   </ul>
-
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
+    <ul style="margin: 0; padding-left: 20px; margin-bottom: 0;">
+      <li style="margin-bottom: 2px;"><b>Service Period</b>: 3 months after payment</li>
+      <li style="margin-bottom: 2px;"><b>Refund Policy</b>: Refund within 3 days if unsatisfied</li>
+      <li style="margin-bottom: 2px;"><b>Cancellation Policy</b>: Refund if requested within 30 mins of payment (processed in 24h)</li>
+      <li style="margin-bottom: 2px;"><b>How to Request</b>: Email <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none;">jeon080423@gmail.com</a></li>
+    </ul>
+  </div>
 </div>"""
     )
 
 with st.sidebar:
-    # 다국어 선택 (Language Switcher)
-    lang_options = {"한국어 🇰🇷": "ko", "English 🇺🇸": "en"}
-    selected_lang_label = st.selectbox(
-        "Language / 언어 선택", 
-        options=list(lang_options.keys()), 
-        index=0 if st.session_state.get('lang', 'ko') == 'ko' else 1,
-        key="sidebar_lang_selector"
-    )
-    new_lang = lang_options[selected_lang_label]
-    if new_lang != st.session_state.get('lang', 'ko'):
-        st.session_state.lang = new_lang
-        st.query_params["lang"] = new_lang
-        st.rerun()
+
 
     try:
         st.image("ahp_master_logo.png", use_container_width=True)
@@ -3503,52 +3634,63 @@ with st.sidebar:
                     st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
 
         with tab_signup:
-            if st.session_state.get('signup_paypal_user'):
-                user_id = st.session_state.signup_paypal_user
-                st.markdown("###  Upgrade to Official User via PayPal")
-                st.info(f"You have registered successfully as **{user_id}**. To complete your upgrade to Official User immediately, please use the PayPal button below:")
+            if st.session_state.get('signup_paypal_user') or st.session_state.get('signup_portone_user'):
+                is_en = st.session_state.get('lang', 'ko') == 'en'
+                user_id = st.session_state.signup_paypal_user if is_en else st.session_state.signup_portone_user
                 
-                paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
-                paypal_html = f"""
-                <div id="paypal-button-container-signup" style="text-align: center; max-width: 100%;"></div>
-                <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
-                <script>
-                  paypal.Buttons({{
-                    style: {{
-                      layout: 'vertical',
-                      color:  'gold',
-                      shape:  'rect',
-                      label:  'paypal',
-                      height: 40
-                    }},
-                    createOrder: function(data, actions) {{
-                      return actions.order.create({{
-                        purchase_units: [{{
-                          amount: {{
-                            value: '350.00'
-                          }},
-                          payee: {{
-                            email_address: 'jeon080423@gmail.com'
-                          }}
-                        }}]
-                      }});
-                    }},
-                    onApprove: function(data, actions) {{
-                      return actions.order.capture().then(function(details) {{
-                        window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
-                      }});
-                    }},
-                    onError: function(err) {{
-                      console.error(err);
-                      alert("Payment failed or was cancelled.");
-                    }}
-                  }}).render('#paypal-button-container-signup');
-                </script>
-                """
-                st.components.v1.html(paypal_html, height=180)
+                if is_en:
+                    st.markdown("###  Upgrade to Official User via PayPal")
+                    st.info(f"You have registered successfully as **{user_id}**. To complete your upgrade to Official User immediately, please use the PayPal button below:")
+                    
+                    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+                    paypal_html = f"""
+                    <div id="paypal-button-container-signup" style="text-align: center; max-width: 100%;"></div>
+                    <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
+                    <script>
+                      paypal.Buttons({{
+                        style: {{
+                          layout: 'vertical',
+                          color:  'gold',
+                          shape:  'rect',
+                          label:  'paypal',
+                          height: 40
+                        }},
+                        createOrder: function(data, actions) {{
+                          return actions.order.create({{
+                            purchase_units: [{{
+                              amount: {{
+                                value: '350.00'
+                              }},
+                              payee: {{
+                                email_address: 'jeon080423@gmail.com'
+                              }}
+                            }}]
+                          }});
+                        }},
+                        onApprove: function(data, actions) {{
+                          return actions.order.capture().then(function(details) {{
+                            window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
+                          }});
+                        }},
+                        onError: function(err) {{
+                          console.error(err);
+                          alert("Payment failed or was cancelled.");
+                        }}
+                      }}).render('#paypal-button-container-signup');
+                    </script>
+                    """
+                    st.components.v1.html(paypal_html, height=180)
+                else:
+                    st.markdown("### 💳 정식 사용자 결제 진행")
+                    st.info(f"**{user_id}**님, 무료사용자로 임시 가입되었습니다.\n\n정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요.")
+                    portone_html = get_portone_payment_html(user_id)
+                    st.components.v1.html(portone_html, height=60)
                 
-                if st.button("Back to Login / Sign Up", use_container_width=True, key="back_to_login_btn"):
-                    del st.session_state.signup_paypal_user
+                if st.button(_("로그인 화면으로 돌아가기", "Back to Login / Sign Up"), use_container_width=True, key="back_to_login_btn"):
+                    if is_en:
+                        del st.session_state.signup_paypal_user
+                    else:
+                        del st.session_state.signup_portone_user
                     st.rerun()
             else:
                 agreements = show_agreement_ui()
@@ -3563,30 +3705,7 @@ with st.sidebar:
                         st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 3 months)")
                     else:
                         st.warning(" 정식 사용자 가입 안내")
-                        acc_info_html = """
-                        <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                          <div style="font-weight: bold; font-size: 0.88rem; color: #2d3748; margin-bottom: 6px;">🏦 계좌이체 입금 정보</div>
-                          <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-                            • <b>은행명</b>: 카카오뱅크<br>
-                            • <b>예금주</b>: ㅈㅅㅎ<br>
-                            • <b>이용요금</b>: 50만원<br>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                              <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
-                              <button onclick="(function(){
-                                const el = document.createElement('textarea');
-                                el.value = '3333-23-8667708';
-                                document.body.appendChild(el);
-                                el.select();
-                                document.execCommand('copy');
-                                document.body.removeChild(el);
-                                alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
-                              })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
-                            </div>
-                          </div>
-                        </div>
-                        """
-                        st.markdown(acc_info_html, unsafe_allow_html=True)
-                        st.info("관리자가 입금 확인 후 **정식 사용자**로 권한이 변경됩니다, 승인 완료 시 이메일로 안내해 드립니다. (사용 기간은 3개월 입니다)")
+                        st.info("가입신청 버튼을 클릭하시면 즉시 결제 창이 나타나며, 결제 완료 시 자동으로 정식 사용자로 승급됩니다.")
                 
                 if st.button(_("가입신청", "Register")):
                     if not agreements.get("agree_personal_info"):
@@ -3605,8 +3724,13 @@ with st.sidebar:
                                 send_application_email(s_id.strip())
                                 if st.session_state.get('lang', 'ko') == 'en':
                                     st.session_state.signup_paypal_user = s_id.strip()
-                            st.success(_("무료사용자로 가입 완료 되었습니다", "Successfully registered as a Free User."))
-                            st.rerun()
+                                else:
+                                    st.session_state.signup_portone_user = s_id.strip()
+                                st.rerun()
+                            else:
+                                st.success(_("무료사용자로 가입 완료 되었습니다. 로그인 탭에서 로그인해주세요.", "Successfully registered as a Free User. Please log in on the Login tab."))
+                                time.sleep(2)
+                                st.rerun()
                         else:
                             st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
@@ -3695,37 +3819,10 @@ with st.sidebar:
                     """
                     st.components.v1.html(paypal_html, height=180)
                 else:
-                    st.markdown("#####  정식 사용자 승격 요청")
-                    
-                    acc_info_html = """
-                    <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                      <div style="font-size: 0.82rem; color: #4a5568; line-height: 1.5;">
-                        • <b>은행명</b>: 카카오뱅크<br>
-                        • <b>예금주</b>: ㅈㅅㅎ<br>
-                        • <b>이용요금</b>: 50만원 (3개월)<br>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                          <span style="font-family: monospace; font-weight: bold; background-color: #edf2f7; padding: 4px 8px; border-radius: 4px; color: #2d3748;">3333-23-8667708</span>
-                          <button onclick="(function(){
-                            const el = document.createElement('textarea');
-                            el.value = '3333-23-8667708';
-                            document.body.appendChild(el);
-                            el.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(el);
-                            alert('계좌번호가 복사되었습니다: 3333-23-8667708 (카카오뱅크)');
-                          })()" style="background-color: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold;">📋 복사</button>
-                        </div>
-                      </div>
-                    </div>
-                    """
-                    st.markdown(acc_info_html, unsafe_allow_html=True)
-                    st.info("입금 완료 후 아래 버튼을 클릭하시면 승격 요청이 관리자에게 즉시 전송됩니다.")
-                    
-                    if st.button("정식 사용자 전환 요청", use_container_width=True, key="sidebar_upgrade_btn"):
-                        if send_conversion_request_email(st.session_state.user_id):
-                            st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                        else:
-                            st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+                    st.markdown("##### 💳 정식 사용자 승격 결제")
+                    st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 3개월)")
+                    portone_html = get_portone_payment_html(st.session_state.user_id)
+                    st.components.v1.html(portone_html, height=60)
         
     if st.session_state.user_id is not None:
         if st.session_state.user_role == 'admin':
@@ -3765,6 +3862,26 @@ with st.sidebar:
 
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
+
+    import streamlit.components.v1 as components
+    components.html(get_portone_payment_html(st.session_state.user_id), height=60)
+    st.markdown("""
+    <div style="line-height: 1.4; font-size: 0.95rem;">
+      <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
+      <h3 style="margin-top: 0; margin-bottom: 8px;">사업자정보</h3>
+      <div style="font-size: 0.85rem; color: #555;">
+        <strong>상호:</strong> 프레쉬인사이트<br>
+        <strong>대표자:</strong> 전상현<br>
+        <strong>사업자등록번호:</strong> 683-27-00122<br>
+        <strong>사업장 주소:</strong> 인천광역시 부평구 원길로 12, 가동 203호<br>
+        <strong>전화번호:</strong> 02-3218-3964<br>
+        <strong>이메일:</strong> jeon080423@gmail.com<br>
+        <strong>개인정보관리책임자:</strong> 전상현<br>
+        <strong>통신판매업 신고번호:</strong> 간이과세자<br>
+        <div style="margin-top: 10px; color: #e65100; font-size: 0.85rem; font-weight: 600;">💡 계산서 발급 가능</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -3889,8 +4006,30 @@ with col_main_title:
 with col_settings_title:
     visitor_label = _("총 누적 방문자 수", "Total Visitors")
     visitor_unit = _("명", " visitors")
+    
+    import urllib.parse
+    current_params = dict(st.query_params)
+    ko_params = current_params.copy()
+    ko_params['lang'] = 'ko'
+    ko_url = "?" + urllib.parse.urlencode(ko_params, doseq=True)
+    
+    en_params = current_params.copy()
+    en_params['lang'] = 'en'
+    en_url = "?" + urllib.parse.urlencode(en_params, doseq=True)
+    
+    cur_lang = st.session_state.get('lang', 'ko')
+    lang_ko_color = "#0369a1" if cur_lang == 'ko' else "#9cb4cc"
+    lang_ko_weight = "bold" if cur_lang == 'ko' else "normal"
+    lang_en_color = "#0369a1" if cur_lang == 'en' else "#9cb4cc"
+    lang_en_weight = "bold" if cur_lang == 'en' else "normal"
+    
     counter_html = f"""
-    <div style="text-align: right; margin-top: 32px;">
+    <div style="text-align: right; margin-top: 32px; display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+        <span style="font-size: 0.85rem;">
+            <a href="{ko_url}" target="_self" style="text-decoration: none; color: {lang_ko_color}; font-weight: {lang_ko_weight};">한국어</a>
+            <span style="color: #ccc; margin: 0 4px;">|</span>
+            <a href="{en_url}" target="_self" style="text-decoration: none; color: {lang_en_color}; font-weight: {lang_en_weight};">English</a>
+        </span>
         <span style="font-size: 0.85rem; color: #0369a1; font-weight: bold;">
             {visitor_label} : {total_visits:,}{visitor_unit}
         </span>
@@ -4344,8 +4483,9 @@ with col_main:
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
         
-    main_tab1, main_tab2, main_tab3 = st.tabs([
+    main_tab1, main_tab_coding, main_tab2, main_tab3 = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
+        _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
         _("실시간 응답 현황", "Live Response Status")
     ])
@@ -4442,7 +4582,7 @@ with col_main:
         st.subheader(_("1. 데이터 업로드 및 분석", "1. Data Upload & Analysis"))
         
         if st.session_state.get('user_role') == 'admin':
-            st.info(_("💡 **혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 엑셀 템플릿을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "💡 **Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
+            st.info(_("💡 **혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 코딩 엑셀 양식을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "💡 **Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
 
         # 데이터 소스 선택 추가
         data_source = st.radio(
@@ -4550,6 +4690,7 @@ with col_main:
                     filename_base = f"Survey_{selected_sheet_id[:6]}"
                 
                     if st.button(_("🔄 구글 시트에서 실시간 응답 가져오기", "🔄 Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
+                        st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                         from survey_manager import load_survey_metadata, get_survey_gspread_client
                         with st.spinner(_("구글 시트에서 설문 데이터 및 구조를 가져오는 중...", "Fetching survey structure and responses...")):
                             survey_meta = load_survey_metadata(selected_sheet_id)
@@ -4678,7 +4819,11 @@ with col_main:
                         if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
                             tier_level = st.session_state.get("inferred_tier_level", 2)
                         else:
-                            tier_level = int(survey_meta.get("Tier_Level", 2)) if 'survey_meta' in locals() else 2
+                            if 'survey_meta' not in locals():
+                                from survey_manager import load_survey_metadata
+                                sheet_id_for_meta = st.session_state.get("selected_survey_for_analysis")
+                                survey_meta = load_survey_metadata(sheet_id_for_meta) if sheet_id_for_meta else {}
+                            tier_level = int(survey_meta.get("Tier_Level", 2)) if survey_meta else 2
                         
                         if tier_level == 3:
                             is_english = (st.session_state.get('lang', 'ko') == 'en')
@@ -6360,21 +6505,46 @@ with col_main:
                                 """
                                 st.components.v1.html(paypal_html, height=180)
                             else:
-                                st.markdown(_("###  정식 사용자 승격 및 무제한 분석", "###  Upgrade to Official User for Unlimited Analysis"))
+                                st.markdown(_("### 💳 정식 사용자 승격 및 무제한 분석", "### 💳 Upgrade to Official User for Unlimited Analysis"))
                                 st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
-                                st.info("카카오뱅크 3333-23-8667708 (예금주: ㅈㅅㅎ) 계좌로 송금하신 후 아래 버튼을 클릭해 주세요.\n(서비스 이용요금: 50만원)")
-                                if st.button("정식 사용자 전환 요청", use_container_width=True, key="main_upgrade_btn"):
-                                    if send_conversion_request_email(st.session_state.user_id):
-                                        st.success("정식 사용자 전환요청이 완료 되었습니다. 입금 확인 후 정식사용자로 전환해 드립니다")
-                                    else:
-                                        st.error("요청 전송 실패. 관리자에게 문의바랍니다.")
+                                st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 3개월)")
+                                portone_html = get_portone_payment_html(st.session_state.user_id)
+                                st.components.v1.html(portone_html, height=60)
             except Exception as e:
                 st.error(f"파일 처리 오류 발생: {e}")
             
+        st.markdown("---")
+    
+        if st.session_state.user_role == 'official':
+            with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
+                my_analyses = get_user_analyses(st.session_state.user_id)
+                if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
+                else:
+                    for item in my_analyses:
+                        a_id, filename, save_date = item
+                        col_List1, col_List2, col_List3, col_List4 = st.columns([3, 2, 1, 1])
+                        with col_List1: st.text(f"{filename}")
+                        with col_List2: st.caption(f"{save_date}")
+                        with col_List3:
+                            file_info = get_analysis_file(analysis_id=a_id)
+                            if file_info:
+                                fname, fdata = file_info
+                                st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
+                        with col_List4:
+                            if st.button("🗑", key=f"del_{a_id}"):
+                                delete_analysis(a_id)
+                                st.rerun()
+    
+
+    
+    # -------------------------------------------------------------------------
+    # [신규] 코딩 엑셀 양식 탭
+    # -------------------------------------------------------------------------
+    with main_tab_coding:
         # -------------------------------------------------------------------------
         # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
         # -------------------------------------------------------------------------
-        st.subheader(_("2. AHP 분석 모델 설정 및 코딩 양식 다운로드", "2. Setup AHP Decision Model & Download Coding Form"))
+        st.subheader(_("AHP 분석 모델 설정 및 코딩 양식 다운로드", "Setup AHP Decision Model & Download Coding Form"))
         
         saved_model = None
         if st.session_state.user_id is None:
@@ -6432,7 +6602,7 @@ with col_main:
     
     
         with st.expander(_(" 나의 분석 모델 만들기", " Create Custom AHP Model"), expanded=True):
-            st.info(_("대항목과 세부항목을 입력하여 나만의 입력 엑셀 템플릿을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
+            st.info(_("대항목과 세부항목을 입력하여 나만의 코딩 엑셀 양식을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
                       "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
             
             # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
@@ -6500,10 +6670,12 @@ with col_main:
             
             col1, col2 = st.columns(2)
             with col1:
-                generate_clicked = st.button(_("1️⃣ 설정한 모델로 입력 엑셀 템플릿 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
+                generate_clicked = st.button(_("1️⃣ 설정한 모델로 AHP 코딩 엑셀 양식 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
             
             if generate_clicked:
-                if not main_criteria_list:
+                if st.session_state.user_id is None:
+                    st.warning(_("코딩 엑셀 양식 생성 및 다운로드는 로그인한 사용자(무료 회원 포함)만 이용 가능합니다. 왼쪽 메뉴에서 로그인하거나 회원가입을 해주세요.", "Generating and downloading Excel templates is only available to logged-in users (including free members). Please log in or sign up from the left menu."))
+                elif not main_criteria_list:
                     st.error(_("대항목 입력 필요", "Main criteria input is required"))
                 else:
                     current_model = {'main': main_criteria_input, 'subs': model_structure, 'sub_subs': sub_sub_structure, 'Tier_Level': tier_level}
@@ -6548,7 +6720,7 @@ with col_main:
                     
                     with col2:
                         st.download_button(
-                            label=_("2️⃣ 📥 엑셀 템플릿 다운로드", "2️⃣ 📥 Download Excel Template"),
+                            label=_("2️⃣ 📥 코딩 엑셀 양식 다운로드", "2️⃣ 📥 Download Excel Template"),
                             data=output_template,
                             file_name="AHP_Master_Template.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -6556,7 +6728,7 @@ with col_main:
                             type="primary"
                         )
                     
-                    st.info(_("💡 **안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 엑셀 템플릿 파일을 저장하세요.", 
+                    st.info(_("💡 **안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 코딩 엑셀 양식 파일을 저장하세요.", 
                               "💡 **Info:** The model has been generated and saved. Click the 2nd button on the right to download the Excel template file to your computer."))
     
                     st.markdown(_("""
@@ -6584,148 +6756,36 @@ with col_main:
                     if os.path.exists(img_file):
                         st.image(img_file, caption=caption_text)
     
-        st.markdown("---")
-    
-        if st.session_state.user_role == 'official':
-            with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
-                my_analyses = get_user_analyses(st.session_state.user_id)
-                if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
-                else:
-                    for item in my_analyses:
-                        a_id, filename, save_date = item
-                        col_List1, col_List2, col_List3, col_List4 = st.columns([3, 2, 1, 1])
-                        with col_List1: st.text(f"{filename}")
-                        with col_List2: st.caption(f"{save_date}")
-                        with col_List3:
-                            file_info = get_analysis_file(analysis_id=a_id)
-                            if file_info:
-                                fname, fdata = file_info
-                                st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
-                        with col_List4:
-                            if st.button("🗑", key=f"del_{a_id}"):
-                                delete_analysis(a_id)
-                                st.rerun()
-    
 
-    
-        def write_custom_ahp_table(writer, sheet_name, df, title_text, start_row, formats, excluded_df=None):
-            workbook = writer.book
-            if sheet_name in writer.sheets: worksheet = writer.sheets[sheet_name]
-            else:
-                worksheet = workbook.add_worksheet(sheet_name)
-                writer.sheets[sheet_name] = worksheet
-        
-            header_fmt = formats['header']
-            merge_fmt = formats['merge']
-            body_fmt = formats['body']
-            num_fmt = formats['num']
-            sum_row_fmt = formats['sum_row']
-        
-            # [신규 추가] 제외 사례수 및 제외 응답값 데이터 출력
-            if excluded_df is not None:
-                worksheet.write(start_row, 0, _(f"※ 분석 제외 사례수: {len(excluded_df)}건", f"※ Number of cases excluded: {len(excluded_df)}"), workbook.add_format({'bold': True, 'font_color': 'red'}))
-                start_row += 1
-                if not excluded_df.empty:
-                    worksheet.write(start_row, 0, _("▶ 제외된 응답 데이터 (보정 실패)", "▶ Excluded Response Data (Correction Failed)"), workbook.add_format({'bold': True}))
-                    start_row += 1
-                    excluded_df.to_excel(writer, sheet_name=sheet_name, startrow=start_row, index=False)
-                    start_row += len(excluded_df) + 2
-    
-            worksheet.merge_range(start_row, 0, start_row, 6, title_text, workbook.add_format({'bold': True, 'font_size': 12}))
-            start_row += 1
-        
-            headers = _(
-                ["대분류", "가중치(a)", "중분류", "가중치(b)", "종합 가중치(a x b)", "종합 순위", "비고"],
-                ["Main Criteria", "Weight(a)", "Sub-Criteria", "Weight(b)", "Global Weight(a x b)", "Global Rank", "Remarks"]
-            )
-            for col, h in enumerate(headers):
-                worksheet.write(start_row, col, h, header_fmt)
-            start_row += 1
-        
-            main_criteria = df['대분류'].unique()
-            current_row = start_row
-        
-            for main_c in main_criteria:
-                sub_df = df[df['대분류'] == main_c]
-                n_subs = len(sub_df)
-                main_w = sub_df.iloc[0]['대분류 가중치']
-                sub_cr = sub_df.iloc[0]['CR(중분류)']
-                sub_ci = sub_df.iloc[0]['CI(중분류)'] if 'CI(중분류)' in sub_df.columns else 0.0
-                sum_sub_w = sub_df['중분류 가중치'].sum()
-            
-                merge_span = n_subs + 2 
-                if merge_span > 1:
-                    worksheet.merge_range(current_row, 0, current_row + merge_span - 1, 0, main_c, merge_fmt)
-                    worksheet.merge_range(current_row, 1, current_row + merge_span - 1, 1, main_w, num_fmt)
-                else:
-                    worksheet.write(current_row, 0, main_c, merge_fmt)
-                    worksheet.write(current_row, 1, main_w, num_fmt)
-                
-                for idx, row in sub_df.iterrows():
-                    worksheet.write(current_row, 2, row['중분류'], body_fmt)
-                    worksheet.write(current_row, 3, row['중분류 가중치'], num_fmt)
-                    worksheet.write(current_row, 4, row['Global Weight'], num_fmt)
-                    worksheet.write(current_row, 5, row['Global Rank'], body_fmt)
-                    worksheet.write(current_row, 6, "", body_fmt)
-                    current_row += 1
-            
-                worksheet.write(current_row, 2, _("합계", "Total"), sum_row_fmt)
-                worksheet.write(current_row, 3, sum_sub_w, formats['sum_val'])
-                worksheet.write_blank(current_row, 4, "", sum_row_fmt)
-                worksheet.write_blank(current_row, 5, "", sum_row_fmt)
-                worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-                current_row += 1
-            
-                worksheet.write(current_row, 2, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
-                worksheet.write(current_row, 3, sub_cr, formats['num_sum'])
-                worksheet.write(current_row, 4, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
-                worksheet.write(current_row, 5, sub_ci, formats['num_sum'])
-                worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-                current_row += 1
-    
-            worksheet.write(current_row, 0, _("합계", "Total"), sum_row_fmt)
-            worksheet.write(current_row, 1, 1, formats['sum_val'])
-            worksheet.write_blank(current_row, 2, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 3, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 4, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 5, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-        
-            # [신규 추가] 대분류의 일관성 비율(CR) 및 일관성 지수(CI) 출력
-            main_cr = df.iloc[0]['CR(대분류)'] if 'CR(대분류)' in df.columns else 0.0
-            main_ci = df.iloc[0]['CI(대분류)'] if 'CI(대분류)' in df.columns else 0.0
-        
-            current_row += 1
-            worksheet.write(current_row, 0, _("일관성 비율(CR)", "Consistency Ratio (CR)"), sum_row_fmt)
-            worksheet.write(current_row, 1, main_cr, formats['num_sum'])
-            worksheet.write(current_row, 2, _("일관성 지수(CI)", "Consistency Index (CI)"), sum_row_fmt)
-            worksheet.write(current_row, 3, main_ci, formats['num_sum'])
-            worksheet.write_blank(current_row, 4, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 5, "", sum_row_fmt)
-            worksheet.write_blank(current_row, 6, "", sum_row_fmt)
-        
-            worksheet.set_column('A:A', 15)
-            worksheet.set_column('B:B', 12)
-            worksheet.set_column('C:C', 25)
-            worksheet.set_column('D:F', 12)
-            return current_row + 2
-    
-        def add_borders_to_data(worksheet, start_row, start_col, df, border_fmt, has_header=True, has_index=False):
-            rows = len(df) + (1 if has_header else 0)
-            cols = len(df.columns) + (1 if has_index else 0)
-            worksheet.conditional_format(start_row, start_col, start_row+rows-1, start_col+cols-1,
-                                          {'type': 'formula', 'criteria': '=TRUE', 'format': border_fmt})
-    
     with main_tab2:
         # @st.fragment: 위젯 변경 시 이 영역만 재실행 (성능 최적화)
         @st.fragment
         def _survey_setup_fragment():
             st.header(_(" AHP 온라인 설문 자동 생성 및 배포", " AHP Online Survey Auto-Generator & Deployer"))
+            box_style = """
+            <div style="background-color: #f8f9fc; border: none; border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; color: #1e293b; font-size: 0.95em; line-height: 1.6; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            """
             if st.session_state.user_id is None:
-                st.warning(_(" **비회원도 온라인 설문 폼을 미리 작성해 볼 수 있습니다.**", " **Non-members can also preview and fill out the online survey form.**"))
-                st.info(_("작성하신 내용은 좌측 사이드바에서 회원가입 및 로그인을 하시면 그대로 유지되어 바로 배포하실 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)", "Once you sign up and log in from the left sidebar, the contents you have written will be maintained and you can deploy immediately. (Free members can also use all features without restriction)"))
-
-            st.info(_("응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.\n\n⚠️ **주의:** 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.", "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.\n\n⚠️ **Caution:** We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."))
+                msg = _(
+                    "<strong>비회원도 온라인 설문 폼을 미리 작성해 볼 수 있습니다.</strong><br>"
+                    "작성하신 내용은 좌측 사이드바에서 회원가입 및 로그인을 하시면 그대로 유지되어 바로 배포하실 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)<br><br>"
+                    "응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.<br>"
+                    "⚠️ <strong>주의:</strong> 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.",
+                    
+                    "<strong>Non-members can also preview and fill out the online survey form.</strong><br>"
+                    "Once you sign up and log in from the left sidebar, the contents you have written will be maintained and you can deploy immediately. (Free members can also use all features without restriction)<br><br>"
+                    "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.<br>"
+                    "⚠️ <strong>Caution:</strong> We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."
+                )
+            else:
+                msg = _(
+                    "응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.<br>"
+                    "⚠️ <strong>주의:</strong> 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.",
+                    
+                    "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.<br>"
+                    "⚠️ <strong>Caution:</strong> We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."
+                )
+            st.markdown(f"{box_style}{msg}</div>", unsafe_allow_html=True)
 
             # [가이드 삽입]
             with st.expander(_("📖 온라인 설문 자동 생성 및 배포 이용 가이드 (클릭하여 펼치기)", "📖 Online Survey Auto-Generation & Deployment Guide (Click to expand)"), expanded=False):
