@@ -3647,7 +3647,7 @@ with st.sidebar:
                     st.components.v1.html(paypal_html, height=180)
                 else:
                     st.markdown("### 💳 정식 사용자 결제 진행")
-                    st.info(f"**{user_id}**님, 무료사용자로 임시 가입되었습니다.\\n\\n정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요.")
+                    st.info(f"**{user_id}**님, 무료사용자로 임시 가입되었습니다.\n\n정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요.")
                     portone_html = get_portone_payment_html(user_id)
                     st.components.v1.html(portone_html, height=60)
                 
