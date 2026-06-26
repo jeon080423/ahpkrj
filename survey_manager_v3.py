@@ -99,7 +99,13 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
     meta_sheet.update(range_name="A1:B15", values=metadata)
     
     # Raw Data 헤더 생성 (대분류 -> 중분류 -> 소분류 쌍대비교 조합)
-    raw_headers = ["ID", "Type"]
+
+    type_headers = ["Type"]
+    if demographics and demographics.get("type_questions"):
+        tq_count = len(demographics["type_questions"])
+        if tq_count > 0:
+            type_headers = [f"Type {i+1}" for i in range(tq_count)]
+    raw_headers = ["ID"] + type_headers
     
     # 1. 대분류
     main_criteria = ahp_model.get("main", [])
@@ -142,7 +148,7 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
     except gspread.WorksheetNotFound:
         main_sheet = spreadsheet.add_worksheet(title="Main_Criteria", rows="1000", cols="20")
     if len(main_sheet.get_all_values()) == 0:
-        main_sheet.append_row(["ID", "Type"] + main_pairs + ["제출시간"])
+        main_sheet.append_row(["ID"] + type_headers + main_pairs + ["제출시간"])
         
     # 중분류 시트 생성
     for main_c in main_criteria:
@@ -158,7 +164,7 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
             except gspread.WorksheetNotFound:
                 s_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
             if len(s_sheet.get_all_values()) == 0:
-                s_sheet.append_row(["ID", "Type"] + sub_pairs + ["제출시간"])
+                s_sheet.append_row(["ID"] + type_headers + sub_pairs + ["제출시간"])
                 
     # 소분류 시트 생성
     for main_c, subs in sub_criteria_map.items():
@@ -175,9 +181,9 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
                 except gspread.WorksheetNotFound:
                     ss_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
                 if len(ss_sheet.get_all_values()) == 0:
-                    ss_sheet.append_row(["ID", "Type"] + ss_pairs + ["제출시간"])
+                    ss_sheet.append_row(["ID"] + type_headers + ss_pairs + ["제출시간"])
     # Demographic Data 헤더 생성
-    demo_headers = ["ID", "Type"]
+    demo_headers = ["ID"] + type_headers
     demo_cols = []
     if demographics.get("name"): demo_cols.append("성명")
     if demographics.get("age"): demo_cols.append("연령")
@@ -271,13 +277,17 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
     
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
     resp_id = respondent_info.get("id", str(uuid.uuid4())[:8])
-    resp_type = respondent_info.get("type", "일반")
+
+    resp_types = respondent_info.get("types", [])
+    if not resp_types:
+        resp_types = [respondent_info.get("type", "일반")]
+
     
-    raw_row_data = [resp_id, resp_type]
+    raw_row_data = [resp_id] + resp_types
     
     # 1. 대분류 답변
     main_criteria = model.get("main", [])
-    main_row_data = [resp_id, resp_type]
+    main_row_data = [resp_id] + resp_types
     for i in range(len(main_criteria)):
         for j in range(i + 1, len(main_criteria)):
             pair_key = f"{main_criteria[i]}_{main_criteria[j]}"
@@ -293,7 +303,7 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
     for main_c in main_criteria:
         subs = sub_criteria_map.get(main_c, [])
         if len(subs) >= 2:
-            s_row = [resp_id, resp_type]
+            s_row = [resp_id] + resp_types
             for i in range(len(subs)):
                 for j in range(i + 1, len(subs)):
                     pair_key = f"{subs[i]}_{subs[j]}"
@@ -307,7 +317,7 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
         for sub_c in subs:
             sub_subs = sub_sub_map.get(sub_c, [])
             if len(sub_subs) >= 2:
-                ss_row = [resp_id, resp_type]
+                ss_row = [resp_id] + resp_types
                 for i in range(len(sub_subs)):
                     for j in range(i + 1, len(sub_subs)):
                         pair_key = f"{sub_subs[i]}_{sub_subs[j]}"
@@ -318,7 +328,7 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
                         
     raw_row_data.append(kst_now)
     
-    demo_row_data = [resp_id, resp_type]
+    demo_row_data = [resp_id] + resp_types
     if demographics_settings.get("name"): demo_row_data.append(respondent_info.get("name", ""))
     if demographics_settings.get("age"): demo_row_data.append(respondent_info.get("age", ""))
     if demographics_settings.get("gender"): demo_row_data.append(respondent_info.get("gender", ""))
