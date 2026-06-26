@@ -1536,7 +1536,7 @@ def send_approval_email(user_email):
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
-    body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 3개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
+    body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender_email
@@ -3396,7 +3396,7 @@ if "portone_paid" in q_params and "user_id" in q_params:
     user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
     if user_id_param:
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-        new_expiry_date = (kst_now + relativedelta(months=3)).strftime("%Y-%m-%d")
+        new_expiry_date = (kst_now + relativedelta(months=2)).strftime("%Y-%m-%d")
         update_user_full_info(user_id_param, None, "official", new_expiry_date)
         
         import hashlib
@@ -3407,7 +3407,7 @@ if "portone_paid" in q_params and "user_id" in q_params:
         <head><meta charset="utf-8"></head>
         <body style="font-family: sans-serif; text-align: center; padding: 50px;">
           <h3 style="color: green;">🎉 결제가 완료되어 정식 사용자로 승급되었습니다!</h3>
-          <p>원래 창을 새로고침 해주세요. 이 창은 3초 뒤에 닫힙니다.</p>
+          <p>원래 창을 새로고침 해주세요.</p>
           <script>
             try {{
                 var mainWin = null;
@@ -3457,7 +3457,7 @@ if "paypal_order_id" in q_params:
         target_user = current_user or user_id_param
         if target_user:
             kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-            new_expiry_date = (kst_now + relativedelta(months=3)).strftime("%Y-%m-%d")
+            new_expiry_date = (kst_now + relativedelta(months=2)).strftime("%Y-%m-%d")
             update_user_full_info(target_user, None, "official", new_expiry_date)
             
             if st.session_state.get("user_id") == target_user:
@@ -3583,11 +3583,11 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (3개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; padding-left: 0; text-indent: 0; margin-top: 2px; white-space: nowrap;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; padding-left: 0; text-indent: 0; margin-top: 2px; white-space: nowrap;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
   </ul>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
     <ul style="margin: 0; padding-left: 20px; margin-bottom: 0;">
-      <li style="margin-bottom: 2px;"><b>서비스 제공기간</b>: 3개월</li>
+      <li style="margin-bottom: 2px;"><b>서비스 제공기간</b> 2개월</li>
       <li style="margin-bottom: 2px;"><b>환불정책</b>: 서비스 불만족시 3일 이내 환불</li>
       <li style="margin-bottom: 2px;"><b>취소규정</b>: 30분 이내 취소신청(24시간 이내 환불)</li>
       <li style="margin-bottom: 2px;"><b>환불 및 취소 방법</b>: <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none;">jeon080423@gmail.com</a>을 통해 요청</li>
@@ -3599,11 +3599,11 @@ def get_fee_info_text():
   <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
-    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (3 months unlimited)</li>
+    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months unlimited)</li>
   </ul>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
     <ul style="margin: 0; padding-left: 20px; margin-bottom: 0;">
-      <li style="margin-bottom: 2px;"><b>Service Period</b>: 3 months after payment</li>
+      <li style="margin-bottom: 2px;"><b>Service Period</b>: 2 months after payment</li>
       <li style="margin-bottom: 2px;"><b>Refund Policy</b>: Refund within 3 days if unsatisfied</li>
       <li style="margin-bottom: 2px;"><b>Cancellation Policy</b>: Refund if requested within 30 mins of payment (processed in 24h)</li>
       <li style="margin-bottom: 2px;"><b>How to Request</b>: Email <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none;">jeon080423@gmail.com</a></li>
@@ -3737,13 +3737,13 @@ with st.sidebar:
                 agreements = show_agreement_ui()
                 s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="s_id")
                 s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="s_pw")
-                s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (3개월, 기능 무제한)", "Official User (3 Months, Unlimited)")), index=0)
+                s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (2개월, 기능 무제한)", "Official User (2 Months, Unlimited)")), index=0)
                 
                 if "정식" in s_role_selection or "Official" in s_role_selection:
                     if st.session_state.get('lang', 'ko') == 'en':
                         st.warning(" Official User Signup Guide")
                         st.info("Official users are registered as a **Free User** first.")
-                        st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 3 months)")
+                        st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 2 months)")
                     else:
                         st.warning(" 정식 사용자 가입 안내")
                         st.info("가입신청 버튼을 클릭하시면 즉시 결제 창이 나타나며, 결제 완료 시 자동으로 정식 사용자로 승급됩니다.")
@@ -3817,7 +3817,7 @@ with st.sidebar:
             with st.expander(_("💳 정식 사용자 승격/결제", "💳 Upgrade to Official User"), expanded=False):
                 if st.session_state.lang == 'en':
                     st.markdown("#####  PayPal Membership Upgrade")
-                    st.info("Upgrade to **Official User** to get unlimited access (3 months) for **$350.00 USD**.")
+                    st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$350.00 USD**.")
                     
                     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                     user_id = st.session_state.user_id
@@ -3861,7 +3861,7 @@ with st.sidebar:
                     st.components.v1.html(paypal_html, height=180)
                 else:
                     st.markdown("##### 💳 정식 사용자 승격 결제")
-                    st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 3개월)")
+                    st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 2개월)")
                     portone_html = get_portone_payment_html(st.session_state.user_id)
                     st.components.v1.html(portone_html, height=60)
         
@@ -4483,8 +4483,8 @@ with col_main:
                                     index=['temp', 'official', 'admin'].index(selected_user['role']))
             
             if new_role_val == 'official' and selected_user['role'] != 'official':
-                suggested_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date() + relativedelta(months=3)
-                new_expiry_val = st.text_input("만료일 설정 (YYYY-MM-DD) - 3개월 기한 자동 제안됨", value=str(suggested_date))
+                suggested_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date() + relativedelta(months=2)
+                new_expiry_val = st.text_input("만료일 설정 (YYYY-MM-DD) - 2개월 기한 자동 제안됨", value=str(suggested_date))
             else:
                 new_expiry_val = st.text_input("만료일 변경 (YYYY-MM-DD)", value=selected_user['expiry_date'])
                 
@@ -6504,7 +6504,7 @@ with col_main:
                             if is_english:
                                 st.markdown("###  Official User Upgrade & Unlimited Analysis")
                                 st.markdown("Upgrading to an Official User **instantly removes the 5-sample limit** and allows unlimited access to all features.")
-                                st.info("Upgrade to **Official User** to get unlimited access (3 months) for **$350.00 USD** via PayPal.")
+                                st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$350.00 USD** via PayPal.")
                             
                                 paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                                 user_id = st.session_state.user_id
@@ -6549,7 +6549,7 @@ with col_main:
                             else:
                                 st.markdown(_("### 💳 정식 사용자 승격 및 무제한 분석", "### 💳 Upgrade to Official User for Unlimited Analysis"))
                                 st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
-                                st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 3개월)")
+                                st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 2개월)")
                                 portone_html = get_portone_payment_html(st.session_state.user_id)
                                 st.components.v1.html(portone_html, height=60)
             except Exception as e:
