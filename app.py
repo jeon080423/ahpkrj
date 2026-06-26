@@ -3479,7 +3479,7 @@ def get_portone_payment_html(user_id):
           `);
           win.document.close();
 
-          const returnUrl = win.opener ? (win.opener.top.location.origin + win.opener.top.location.pathname + "?portone_return=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}")) : "";
+          const returnUrl = window.location.origin + window.location.pathname + "?portone_return=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
           script.onload = function() {{
