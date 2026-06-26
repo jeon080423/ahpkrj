@@ -3390,12 +3390,26 @@ if "portone_paid" in q_params and "user_id" in q_params:
         new_expiry_date = (kst_now + relativedelta(months=3)).strftime("%Y-%m-%d")
         update_user_full_info(user_id_param, None, "official", new_expiry_date)
         
-        if st.session_state.get("user_id") == user_id_param:
-            st.session_state.user_role = "official"
-            st.session_state.expiry_date = new_expiry_date
-        st.toast("🎉 결제가 완료되어 정식 사용자로 승급되었습니다!")
-    st.query_params.clear()
-    st.rerun()
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h3 style="color: green;">🎉 결제가 완료되어 정식 사용자로 승급되었습니다!</h3>
+          <p>원래 창을 새로고침 해주세요. 이 창은 3초 뒤에 닫힙니다.</p>
+          <script>
+            try {
+                if (window.opener && window.opener.top) {
+                    window.opener.top.location.reload();
+                }
+            } catch(e) {}
+            setTimeout(() => window.close(), 3000);
+          </script>
+        </body>
+        </html>
+        """
+        st.components.v1.html(html_code, height=400)
+    st.stop()
 
 # 페이팔 자동 결제 승격 처리 (서버 검증 포함)
 if "paypal_order_id" in q_params:
@@ -3486,7 +3500,7 @@ def get_portone_payment_html(user_id):
              }}
           }} catch(e) {{}}
           if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
-          const returnUrl = baseOrigin + "/?portone_return=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
           script.onload = function() {{
@@ -3511,12 +3525,7 @@ def get_portone_payment_html(user_id):
                 alert("결제 실패: " + response.message);
                 win.close();
               }} else {{
-                if (win.opener) {{
-                    win.opener.top.location.href = win.opener.top.location.pathname + "?portone_return=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
-                }} else {{
-                    win.location.href = returnUrl;
-                }}
-                win.close();
+                win.location.href = returnUrl;
               }}
             }}).catch(function(error) {{
               alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
