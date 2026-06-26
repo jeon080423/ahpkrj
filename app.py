@@ -3442,6 +3442,8 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # =============================================================================
 
 def get_portone_payment_html(user_id):
+    import hashlib
+    login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
     return f"""
     <!DOCTYPE html>
     <html>
@@ -3453,12 +3455,21 @@ def get_portone_payment_html(user_id):
         💳 정식 사용자 결제하기 (50만원)
       </button>
       <script>
+        window.addEventListener("message", function(event) {{
+          if (event.data === "payment_success") {{
+             document.body.innerHTML = "<div style='padding:10px; text-align:center; font-weight:bold; color:green;'>✅ 결제 완료! 화면을 새로고침하는 중입니다...</div>";
+             window.top.location.href = window.top.location.pathname + "?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+          }}
+        }});
+        
         function openPaymentWindow() {{
           const win = window.open("", "_blank", "width=850,height=700");
           if (!win) {{
              alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
              return;
           }}
+          // generate random string for paymentId to avoid crypto.randomUUID issue in http
+          const r = Math.random().toString(36).substring(2, 15);
           win.document.write(`
             <!DOCTYPE html>
             <html>
@@ -3474,7 +3485,7 @@ def get_portone_payment_html(user_id):
                 PortOne.requestPayment({{
                   storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
                   channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-                  paymentId: "pay-" + crypto.randomUUID().replace(/-/g, ""),
+                  paymentId: "pay-" + r,
                   orderName: "정식 사용자 (50만원)",
                   totalAmount: 500000,
                   currency: "CURRENCY_KRW",
@@ -3490,7 +3501,9 @@ def get_portone_payment_html(user_id):
                     window.close();
                   }} else {{
                     alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
-                    window.opener.location.href = window.opener.location.origin + window.opener.location.pathname + "?portone_paid=true&user_id=" + encodeURIComponent("{user_id}");
+                    if (window.opener) {{
+                        window.opener.postMessage("payment_success", "*");
+                    }}
                     window.close();
                   }}
                 }}).catch(function(error) {{
@@ -3507,6 +3520,7 @@ def get_portone_payment_html(user_id):
     </body>
     </html>
     """
+
 
 def get_fee_info_text():
     return _(
