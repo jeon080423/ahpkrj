@@ -3691,8 +3691,11 @@ with st.sidebar:
                                     st.session_state.signup_paypal_user = s_id.strip()
                                 else:
                                     st.session_state.signup_portone_user = s_id.strip()
-                            st.success(_("무료사용자로 가입 완료 되었습니다", "Successfully registered as a Free User."))
-                            st.rerun()
+                                st.rerun()
+                            else:
+                                st.success(_("무료사용자로 가입 완료 되었습니다. 로그인 탭에서 로그인해주세요.", "Successfully registered as a Free User. Please log in on the Login tab."))
+                                time.sleep(2)
+                                st.rerun()
                         else:
                             st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
