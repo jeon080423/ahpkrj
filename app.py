@@ -3480,12 +3480,12 @@ def get_portone_payment_html(user_id):
           win.document.close();
 
           let baseOrigin = "https://ahpkrj.streamlit.app";
-          try {
-             if (window.top && window.top.location && window.top.location.origin && window.top.location.origin !== "null") {
+          try {{
+             if (window.top && window.top.location && window.top.location.origin && window.top.location.origin !== "null") {{
                  baseOrigin = window.top.location.origin + window.top.location.pathname;
-             }
-          } catch(e) {}
-          if (baseOrigin.endsWith("/")) { baseOrigin = baseOrigin.slice(0, -1); }
+             }}
+          }} catch(e) {{}}
+          if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
           const returnUrl = baseOrigin + "/?portone_return=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
