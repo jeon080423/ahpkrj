@@ -3672,8 +3672,12 @@ with st.sidebar:
                 user_id = st.session_state.signup_paypal_user if is_en else st.session_state.signup_portone_user
                 
                 if is_en:
-                    st.markdown("###  Upgrade to Official User via PayPal")
-                    st.info(f"You have registered successfully as **{user_id}**. To complete your upgrade to Official User immediately, please use the PayPal button below:")
+                    st.markdown("### 💳 Pending Official User Payment")
+                    st.info(
+                        f"Registration successful for **{user_id}**.\n\n"
+                        "To start immediately as an Official User, please complete the payment using the PayPal button below. (You will be logged in automatically as an Official User upon payment.)\n\n"
+                        "* If you choose to log in without paying now, you will start as a **Free User** and can upgrade anytime from the sidebar after logging in."
+                    )
                     
                     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
                     paypal_html = f"""
@@ -3714,8 +3718,12 @@ with st.sidebar:
                     """
                     st.components.v1.html(paypal_html, height=180)
                 else:
-                    st.markdown("### 💳 정식 사용자 결제 진행")
-                    st.info(f"**{user_id}**님, 정식 사용자 신청이 완료되었습니다.\n\n가입하신 아이디로 로그인해 주십시오.")
+                    st.markdown("### 💳 정식 사용자 결제 대기")
+                    st.info(
+                        f"**{user_id}**님, 계정 가입이 완료되었습니다.\n\n"
+                        "정식 사용자로 즉시 시작하시려면 아래 **[정식 사용자 결제하기]** 버튼을 통해 결제를 완료해 주십시오. (결제 완료 시 정식 사용자로 자동 로그인됩니다.)\n\n"
+                        "※ 지금 결제하지 않고 로그인하실 경우 **무료사용자** 권한으로 시작되며, 로그인 후 사이드바 하단에서 언제든지 정식사용자로 승격 결제하실 수 있습니다."
+                    )
                     portone_html = get_portone_payment_html(user_id)
                     st.components.v1.html(portone_html, height=60)
                 
