@@ -3820,7 +3820,7 @@ with st.sidebar:
     </body>
     </html>
     """
-    components.html(payment_html, height=55)
+    components.html(payment_html, height=650)
 
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
