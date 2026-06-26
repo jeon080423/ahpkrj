@@ -3479,6 +3479,7 @@ def get_portone_payment_html(user_id):
           `);
           win.document.close();
 
+          const returnUrl = win.opener ? (win.opener.top.location.origin + win.opener.top.location.pathname + "?portone_return=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}")) : "";
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
           script.onload = function() {{
@@ -3492,6 +3493,7 @@ def get_portone_payment_html(user_id):
               totalAmount: 500000,
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
+              redirectUrl: returnUrl,
               customer: {{
                 email: "{safe_email}",
                 fullName: "사용자",
@@ -3502,9 +3504,10 @@ def get_portone_payment_html(user_id):
                 alert("결제 실패: " + response.message);
                 win.close();
               }} else {{
-                alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
                 if (win.opener) {{
-                    win.opener.top.location.href = win.opener.top.location.pathname + "?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+                    win.opener.top.location.href = win.opener.top.location.pathname + "?portone_return=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+                }} else {{
+                    win.location.href = returnUrl;
                 }}
                 win.close();
               }}
