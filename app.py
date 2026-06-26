@@ -3390,7 +3390,9 @@ if "portone_paid" in q_params and "user_id" in q_params:
         new_expiry_date = (kst_now + relativedelta(months=3)).strftime("%Y-%m-%d")
         update_user_full_info(user_id_param, None, "official", new_expiry_date)
         
-        html_code = """
+        import hashlib
+        login_token = hashlib.sha256(f"{user_id_param}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+        html_code = f"""
         <!DOCTYPE html>
         <html>
         <head><meta charset="utf-8"></head>
@@ -3398,12 +3400,34 @@ if "portone_paid" in q_params and "user_id" in q_params:
           <h3 style="color: green;">🎉 결제가 완료되어 정식 사용자로 승급되었습니다!</h3>
           <p>원래 창을 새로고침 해주세요. 이 창은 3초 뒤에 닫힙니다.</p>
           <script>
-            try {
-                if (window.opener && window.opener.top) {
-                    window.opener.top.location.reload();
-                }
-            } catch(e) {}
-            setTimeout(() => window.close(), 3000);
+            try {{
+                var mainWin = null;
+                if (window.top && window.top.opener) {{
+                    mainWin = window.top.opener;
+                }} else if (window.opener) {{
+                    mainWin = window.opener;
+                }}
+                
+                if (mainWin) {{
+                    var baseOrigin = mainWin.location.origin + mainWin.location.pathname;
+                    if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
+                    var loginUrl = baseOrigin + "/?login_user=" + encodeURIComponent("{user_id_param}") + "&login_token=" + encodeURIComponent("{login_token}");
+                    mainWin.location.href = loginUrl;
+                }}
+            }} catch(e) {{
+                console.error("Failed to redirect main window:", e);
+            }}
+            setTimeout(() => {{
+                try {{
+                    if (window.top) {{
+                        window.top.close();
+                    }} else {{
+                        window.close();
+                    }}
+                }} catch(e) {{
+                    window.close();
+                }}
+            }}, 3000);
           </script>
         </body>
         </html>
@@ -3682,7 +3706,7 @@ with st.sidebar:
                     st.components.v1.html(paypal_html, height=180)
                 else:
                     st.markdown("### 💳 정식 사용자 결제 진행")
-                    st.info(f"**{user_id}**님, 무료사용자로 임시 가입되었습니다.\n\n정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요.")
+                    st.info(f"**{user_id}**님, 정식 사용자 신청이 완료되었습니다.\n\n가입하신 아이디로 로그인해 주십시오.")
                     portone_html = get_portone_payment_html(user_id)
                     st.components.v1.html(portone_html, height=60)
                 
