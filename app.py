@@ -3439,7 +3439,7 @@ def get_fee_info_text():
     <ul style="margin: 0; padding-left: 20px; margin-bottom: 0;">
       <li style="margin-bottom: 2px;"><b>서비스 제공기간</b>: 3개월</li>
       <li style="margin-bottom: 2px;"><b>환불정책</b>: 서비스 불만족시 3일 이내 환불</li>
-      <li style="margin-bottom: 2px;"><b>취소규정</b>: 결제 후 30분 이내 신청시 환불(24시간 이내)</li>
+      <li style="margin-bottom: 2px;"><b>취소규정</b>: 30분 이내 취소신청(24시간 이내 환불)</li>
       <li style="margin-bottom: 2px;"><b>환불 및 취소 방법</b>: <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none;">jeon080423@gmail.com</a>을 통해 요청</li>
     </ul>
   </div>
