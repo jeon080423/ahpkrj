@@ -3382,59 +3382,6 @@ if "lang" in q_params:
     elif str(lang_val).lower() in ["ko", "korean"]:
         st.session_state.lang = "ko"
 
-# PortOne 결제 팝업 전용 페이지 렌더링
-if "payment_popup" in q_params:
-    user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
-    login_user_param = q_params.get("login_user", [""])[0] if isinstance(q_params.get("login_user"), list) else q_params.get("login_user", "")
-    login_token_param = q_params.get("login_token", [""])[0] if isinstance(q_params.get("login_token"), list) else q_params.get("login_token", "")
-    
-    html_code = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>안전 결제 진행</title>
-      <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-    </head>
-    <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
-      <h3>결제 모듈을 불러오는 중입니다...</h3>
-      <script>
-        const r = Math.random().toString(36).substring(2, 15);
-        PortOne.requestPayment({{
-          storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
-          channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-          paymentId: "pay-" + r,
-          orderName: "정식 사용자 (50만원)",
-          totalAmount: 500000,
-          currency: "CURRENCY_KRW",
-          payMethod: "CARD",
-          customer: {{
-            email: "{user_id_param}",
-            fullName: "사용자",
-            phoneNumber: "010-0000-0000"
-          }}
-        }}).then(function(response) {{
-          if (response.code != null) {{
-            alert("결제 실패: " + response.message);
-            window.close();
-          }} else {{
-            alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
-            if (window.opener) {{
-                window.opener.location.href = window.opener.location.pathname + "?portone_paid=true&user_id={user_id_param}&login_user={login_user_param}&login_token={login_token_param}";
-            }}
-            window.close();
-          }}
-        }}).catch(function(error) {{
-          alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
-          window.close();
-        }});
-      </script>
-    </body>
-    </html>
-    """
-    st.components.v1.html(html_code, height=700)
-    st.stop()
-
 # PortOne 자동 결제 승격 처리
 if "portone_paid" in q_params and "user_id" in q_params:
     user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
@@ -3509,11 +3456,58 @@ def get_portone_payment_html(user_id):
       </button>
       <script>
         function openPaymentWindow() {{
-          const url = window.top.location.origin + window.top.location.pathname + "?payment_popup=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
-          const win = window.open(url, "_blank", "width=850,height=700");
+          const win = window.open("", "_blank", "width=850,height=700");
           if (!win) {{
              alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             return;
           }}
+          // generate random string for paymentId to avoid crypto.randomUUID issue in http
+          const r = Math.random().toString(36).substring(2, 15);
+          win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>안전 결제 진행</title>
+              <script src="https://cdn.portone.io/v2/browser-sdk.js"><\\/script>
+            </head>
+            <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
+              <h3>결제 모듈을 안전하게 불러오는 중입니다...</h3>
+              <p>이 창을 닫지 마세요.</p>
+              <script>
+                PortOne.requestPayment({{
+                  storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
+                  channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
+                  paymentId: "pay-" + r,
+                  orderName: "정식 사용자 (50만원)",
+                  totalAmount: 500000,
+                  currency: "CURRENCY_KRW",
+                  payMethod: "CARD",
+                  customer: {{
+                    email: "{user_id}",
+                    fullName: "사용자",
+                    phoneNumber: "010-0000-0000"
+                  }}
+                }}).then(function(response) {{
+                  if (response.code != null) {{
+                    alert("결제 실패: " + response.message);
+                    window.close();
+                  }} else {{
+                    alert("결제가 완료되었습니다. 심사용 테스트이므로 실제 비용이 청구되지 않거나 자동 취소됩니다.");
+                    if (window.opener) {{
+                        window.opener.location.href = window.opener.location.pathname + "?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+                    }}
+                    window.close();
+                  }}
+                }}).catch(function(error) {{
+                  alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+                  window.close();
+                }});
+              <\\/script>
+            </body>
+            </html>
+          `);
+          win.document.close();
         }}
       </script>
     </body>
