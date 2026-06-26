@@ -3804,7 +3804,7 @@ with st.sidebar:
             <head>
               <meta charset="utf-8">
               <title>안전 결제 진행</title>
-              <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+              <script src="https://cdn.portone.io/v2/browser-sdk.js"><\/script>
             </head>
             <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
               <h3>결제 모듈을 안전하게 불러오는 중입니다...</h3>
@@ -3836,7 +3836,7 @@ with st.sidebar:
                   alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
                   window.close();
                 });
-              </script>
+              <\/script>
             </body>
             </html>
           `);
