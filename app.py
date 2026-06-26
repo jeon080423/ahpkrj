@@ -1122,119 +1122,48 @@ def init_db():
     except sqlite3.IntegrityError:
         pass 
 
-    # [복구 로직 1~2 및 short_code 동기화] 세션당 1회만 실행 (설문/미리보기 페이지 제외)
+    # [복구 로직 및 동기화] 세션당 1회만 실행 (설문/미리보기 페이지 제외)
+    # 캐싱(cached_sync_db_from_sheets)을 통해 10분에 최대 1회만 Google Sheets API를 호출하도록 제한
     if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
-        c.execute("SELECT COUNT(*) FROM users")
-        if c.fetchone()[0] <= 1:
-            try:
-                client = get_gspread_client()  
-                if client:
-                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-                    sheet = spreadsheet.sheet1
-
-                    # [헤더 보정] 구글 시트의 헤더 컬럼 보정
-                    all_values = sheet.get_all_values()
-                    if all_values and len(all_values[0]) < 8:
-                        sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
-
-                    records = sheet.get_all_records()  # 1행 header 사용
-                    if records:
-                        def pick(row, *keys, default=""):
-                            for k in keys:
-                                if k in row and row[k] is not None and str(row[k]).strip() != "":
-                                        return str(row[k]).strip()
-                            return default
-
-                        kst_today = datetime.datetime.now(
-                            datetime.timezone(datetime.timedelta(hours=9))
-                        ).strftime("%Y-%m-%d")
-
-                        for r in records:
-                            userid = pick(r, "id", "ID", "user_id", "userid", "email")
-                            if not userid or userid == "shjeon":
-                                continue
-
-                            pw = pick(r, "pw", "PW", "password")
-                            role = pick(r, "role", "Role", default="temp")
-                            signupdate = pick(r, "signup_date", "signup_tate", "signupdate", "SignupDate", default=kst_today)
-                            expirydate = pick(r, "expiry_date", "expirydate", "ExpiryDate", default="9999-12-31")
-                            agreeinfo = pick(r, "agree_info", "agreeinfo", "Agree", default="")
-                            survey_count = int(pick(r, "survey_count", "surveycount", default="0"))
-                            last_survey_link = pick(r, "last_survey_link", "lastsurveylink", default="")
-
-                            # [자가 치유] 구글 시트 컬럼 쉬프트 오류 복구
-                            if expirydate in ["Y", "N", "예", "아니오", "yes", "no"]:
-                                if not agreeinfo:
-                                    agreeinfo = expirydate
-                                expirydate = "9999-12-31"
-
-                            if not agreeinfo:
-                                agreeinfo = "Y"
-
-                            if role not in ("temp", "official", "admin"):
-                                role = "temp"
-
-                            c.execute(
-                                "INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                                (userid, role, signupdate, pw, expirydate, agreeinfo, survey_count, last_survey_link),
-                            )
-
-                        conn.commit()
-            except Exception:
-                pass
-
-        # [복구 로직 2] 방문 로그 복구
-        c.execute("SELECT COUNT(*) FROM visit_logs")
-        if c.fetchone()[0] == 0:
-            try:
-                client = get_gspread_client()
-                if client:
-                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
-                    try:
-                        visit_sheet = spreadsheet.worksheet("Visit_Logs")
-                        records = visit_sheet.get_all_records()
-                        for row in records:
-                            c.execute("INSERT OR IGNORE INTO visit_logs (ip_address, visit_date) VALUES (?, ?)", 
-                                      (row['IP'], row['Date']))
-                        conn.commit()
-                    except gspread.exceptions.WorksheetNotFound:
-                        pass
-            except Exception:
-                pass
+        try:
+            cached_sync_db_from_sheets()
+        except Exception:
+            pass
 
         try:
             sync_short_codes_from_gs()
         except Exception:
             pass
-        
+            
         # 세션당 1회 실행 완료 표시
         st.session_state._init_gs_done = True
     conn.close()
 
 # [신규 기능 1] 구글 시트의 내용을 강제로 DB에 동기화하는 함수
-def sync_db_from_sheets():
+def sync_db_from_sheets(silent=False):
     """구글 시트의 데이터를 읽어와 DB에 없으면 유저를 추가하고, 이미 있다면 구글 시트 기준으로 보정(업데이트)합니다."""
     # ★★★ 임시 디버깅 코드 ★★★
-    st.write("🔍 **Secrets 디버깅**")
-    st.write("사용 가능한 최상위 키:", list(st.secrets.keys()))
-    
-    if "SPREADSHEET_ID" in st.secrets:
-        st.success(f"✅ SPREADSHEET_ID 발견!")
-        st.write(f"값: {st.secrets['SPREADSHEET_ID']}")
-    else:
-        st.error(" SPREADSHEET_ID가 없습니다!")
+    if not silent:
+        st.write("🔍 **Secrets 디버깅**")
+        st.write("사용 가능한 최상위 키:", list(st.secrets.keys()))
         
-    if "gcp_service_account" in st.secrets:
-        st.write("gcp_service_account 내부 키:", list(st.secrets["gcp_service_account"].keys()))
-    
-    st.write("---")
+        if "SPREADSHEET_ID" in st.secrets:
+            st.success(f"✅ SPREADSHEET_ID 발견!")
+            st.write(f"값: {st.secrets['SPREADSHEET_ID']}")
+        else:
+            st.error(" SPREADSHEET_ID가 없습니다!")
+            
+        if "gcp_service_account" in st.secrets:
+            st.write("gcp_service_account 내부 키:", list(st.secrets["gcp_service_account"].keys()))
+        
+        st.write("---")
     # ★★★ 디버깅 끝 ★★★
     
     conn = None
     try:
         client = get_gspread_client()
         if not client: 
-            st.error(" 구글 시트 인증(gspread client)에 실패했습니다.")
+            if not silent: st.error(" 구글 시트 인증(gspread client)에 실패했습니다.")
             return -1
         
         spreadsheet = run_gspread_with_retry(client.open_by_key, st.secrets["SPREADSHEET_ID"])
@@ -1324,8 +1253,9 @@ def sync_db_from_sheets():
                 
             return cnt
     except Exception as e:
-        st.error(f"🔍 동기화 에러 상세: {str(e)}")
-        st.error(f"에러 타입: {type(e).__name__}")
+        if not silent:
+            st.error(f"🔍 동기화 에러 상세: {str(e)}")
+            st.error(f"에러 타입: {type(e).__name__}")
         if conn:
             try:
                 conn.rollback()
@@ -1339,6 +1269,12 @@ def sync_db_from_sheets():
             except Exception:
                 pass
     return 0
+
+@st.cache_data(ttl=600, show_spinner=False)
+def cached_sync_db_from_sheets():
+    """백그라운드에서 10분에 한 번씩만 구글 시트 전체 동기화"""
+    return sync_db_from_sheets(silent=True)
+
 
 # 방문자 추적 및 구글 시트 실시간 저장
 def track_visitor():
