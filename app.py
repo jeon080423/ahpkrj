@@ -3635,6 +3635,7 @@ with st.sidebar:
             else:
                 st.caption(_(f"입력하신 이메일({l_id.strip()}) 계정으로 정식 사용자 결제가 진행됩니다.", f"Payment will be processed for the entered Email ID ({l_id.strip()})."))
                 portone_html = get_portone_payment_html(l_id.strip())
+                import streamlit.components.v1 as components
                 components.html(portone_html, height=60)
             st.markdown(get_fee_info_text(), unsafe_allow_html=True)
 
