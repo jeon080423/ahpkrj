@@ -3796,11 +3796,16 @@ with st.sidebar:
           PortOne.requestPayment({
             storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
             channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-            paymentId: `payment-${crypto.randomUUID()}`,
+            paymentId: `pay-${crypto.randomUUID().replace(/-/g, "")}`,
             orderName: "정식 사용자 3개월 (50만원)",
             totalAmount: 500000,
             currency: "CURRENCY_KRW",
             payMethod: "CARD",
+            customer: {
+              email: "test@ahp.kr",
+              fullName: "테스터",
+              phoneNumber: "010-0000-0000"
+            },
           }).then(function(response) {
             if (response.code != null) {
               alert("결제 실패: " + response.message);
