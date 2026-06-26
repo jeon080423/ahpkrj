@@ -3630,8 +3630,8 @@ with st.sidebar:
             # [신규 추가] 비회원 / 임시 사용자 결제 위젯
             st.divider()
             st.markdown(_("### 💳 정식 사용자 결제", "### 💳 Official User Payment"))
-            if not l_id.strip():
-                st.info(_("결제를 진행하시려면 위에 이메일 아이디를 먼저 입력해주세요.", "Please enter your Email ID above to proceed with payment."))
+            if not l_id.strip() or not l_pw.strip():
+                st.info(_("결제를 진행하시려면 위에 이메일 아이디와 비밀번호를 모두 입력해주세요.", "Please enter both your Email ID and Password above to proceed with payment."))
             else:
                 st.caption(_(f"입력하신 이메일({l_id.strip()}) 계정으로 정식 사용자 결제가 진행됩니다.", f"Payment will be processed for the entered Email ID ({l_id.strip()})."))
                 portone_html = get_portone_payment_html(l_id.strip())
