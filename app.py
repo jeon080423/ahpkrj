@@ -3444,6 +3444,9 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 def get_portone_payment_html(user_id):
     import hashlib
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+    # 이메일 형식 검증 (간단히 @ 포함 여부로 확인) 및 공백 제거
+    safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
+    
     return f"""
     <!DOCTYPE html>
     <html>
@@ -3490,7 +3493,7 @@ def get_portone_payment_html(user_id):
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
               customer: {{
-                email: "{user_id}",
+                email: "{safe_email}",
                 fullName: "사용자",
                 phoneNumber: "010-0000-0000"
               }}
