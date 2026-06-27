@@ -4411,14 +4411,7 @@ with col_settings:
             > "The survey data collected in this study was analyzed using 'AHP Master', a web-based dedicated AHP analysis solution. Pairwise comparison matrices were constructed in accordance with Saaty's (1980) Analytic Hierarchy Process to calculate local and global weights, and the validity of the results was secured through the system's consistency ratio (CR) adjustment function to ensure CR was below 0.1."
             """))
 
-        if st.session_state.get('lang', 'ko') == 'ko':
-            pdf_path = "AHP_Master_Accuracy_Paper.pdf"
-            if os.path.exists(pdf_path):
-                with open(pdf_path, "rb") as f:
-                    base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-                pdf_html = f'<a href="data:application/pdf;base64,{base64_pdf}" download="AHP_Master_Accuracy_Paper.pdf" style="text-decoration: underline; font-weight: bold; font-size: 14px; color: #1B2A4A;">📄 AHP 정확성 검증 논문 (PDF) 다운로드</a>'
-                st.markdown("<br/>", unsafe_allow_html=True)
-                st.markdown(pdf_html, unsafe_allow_html=True)
+
 
 with col_main:
                 
