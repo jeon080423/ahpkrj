@@ -3646,7 +3646,7 @@ def get_portone_payment_html(user_id):
 
 
 def get_fee_info_text():
-    tab_click_js = "try { var doc = window.parent.document; var tabs = doc.querySelectorAll('button[role=\"tab\"]'); for (var i = 0; i < tabs.length; i++) { var t = tabs[i].textContent || ''; if (t.indexOf('\ud658\ubd88') !== -1 || t.indexOf('Refund') !== -1) { tabs[i].click(); break; } } } catch(e) {}"
+    tab_click_js = "try{var docs=[document];try{docs.push(window.parent.document)}catch(x){}try{docs.push(window.top.document)}catch(x){}for(var d=0;d<docs.length;d++){var tabs=docs[d].querySelectorAll('button[role=\"tab\"]');for(var i=0;i<tabs.length;i++){var t=tabs[i].textContent||'';if(t.indexOf('\ud658\ubd88')!==-1||t.indexOf('Refund')!==-1){tabs[i].click();return}}}}catch(e){console.error(e)}"
     btn_style = 'display:inline-block; padding:2px 6px; font-size:0.7rem; color:#fff; background-color:#ff4b4b; border:none; border-radius:3px; cursor:pointer; font-weight:normal; line-height:1.3; text-decoration:none; font-family:sans-serif;'
     btn_hover_css = '.rbtn:hover{background-color:#ff3333!important;}'
     return _(
@@ -3997,8 +3997,7 @@ with st.sidebar:
 
 
 
-    import streamlit.components.v1 as _fee_components
-    _fee_components.html(get_fee_info_text(), height=260, scrolling=False)
+    st.html(get_fee_info_text(), height=260)
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
