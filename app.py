@@ -4159,7 +4159,7 @@ with col_main_title:
     st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"))
 
 with col_settings_title:
-    visitor_label = _("총 누적 방문자 수", "Total Visitors")
+    visitor_label = _("누적 방문자", "Total Visitors")
     visitor_unit = _("명", " visitors")
     
     import urllib.parse
@@ -4508,7 +4508,7 @@ with col_main:
                 total_visits = 0
                 daily_df_counts = pd.DataFrame()
     
-            st.write(f"**총 누적 방문자 수:** {total_visits:,}명")
+            st.write(f"**누적 방문자:** {total_visits:,}명")
             st.write("#### 📅 일별 방문자 현황 (날짜별 합산)")
             if not daily_df_counts.empty:
                 fig_visit = px.bar(daily_df_counts, x='Date_Only', y='count', text='count',
