@@ -3911,6 +3911,9 @@ with st.sidebar:
 
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
+    if st.button(_("환불 및 취소 신청", "Refund & Cancellation Request"), key="sidebar_refund_btn", use_container_width=True):
+        st.session_state.go_to_refund = True
+        st.rerun()
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
@@ -4533,13 +4536,22 @@ with col_main:
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
         
-    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_refund = st.tabs([
-        _("AHP 분석 도구", "AHP Analysis Tool"), 
-        _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
-        _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
-        _("실시간 응답 현황", "Live Response Status"),
-        _("환불 및 취소 신청", "Refund & Cancellation Request")
-    ])
+    if st.session_state.get("go_to_refund", False):
+        main_tab_refund, main_tab1, main_tab_coding, main_tab2, main_tab3 = st.tabs([
+            _("환불 및 취소 신청", "Refund & Cancellation Request"),
+            _("AHP 분석 도구", "AHP Analysis Tool"), 
+            _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
+            _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
+            _("실시간 응답 현황", "Live Response Status")
+        ])
+    else:
+        main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_refund = st.tabs([
+            _("AHP 분석 도구", "AHP Analysis Tool"), 
+            _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
+            _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
+            _("실시간 응답 현황", "Live Response Status"),
+            _("환불 및 취소 신청", "Refund & Cancellation Request")
+        ])
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
@@ -8128,6 +8140,10 @@ with col_main:
                 st.caption(f"로컬 백업 조회 불가: {err}")
 
     with main_tab_refund:
+        if st.session_state.get("go_to_refund", False):
+            if st.button(_("← 메인 화면으로 돌아가기", "← Back to Main Menu"), key="back_to_main_refund", use_container_width=True):
+                st.session_state.go_to_refund = False
+                st.rerun()
         st.subheader(_("환불 및 취소 신청서", "Refund & Cancellation Request Form"))
         
         st.markdown(
