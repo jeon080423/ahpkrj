@@ -4002,14 +4002,14 @@ with st.sidebar:
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
       <h3 style="margin-top: 0; margin-bottom: 8px;">사업자정보</h3>
       <div style="font-size: 0.85rem; color: #555;">
-        <strong>상호:</strong> 프레쉬인사이트<br>
-        <strong>대표자:</strong> 전상현<br>
-        <strong>사업자등록번호:</strong> 683-27-00122<br>
-        <strong>사업장 주소:</strong> 인천광역시 부평구 원길로 12, 가동 203호<br>
-        <strong>전화번호:</strong> 02-3218-3964<br>
-        <strong>이메일:</strong> jeon080423@gmail.com<br>
-        <strong>개인정보관리책임자:</strong> 전상현<br>
-        <strong>통신판매업 신고번호:</strong> 간이과세자<br>
+        상호: 프레쉬인사이트<br>
+        대표자: 전상현<br>
+        사업자등록번호: 683-27-00122<br>
+        사업장 주소: 인천광역시 부평구 원길로 12, 가동 203호<br>
+        전화번호: 02-3218-3964<br>
+        이메일: jeon080423@gmail.com<br>
+        개인정보관리책임자: 전상현<br>
+        통신판매업 신고번호: 간이과세자<br>
       </div>
     </div>
     """, unsafe_allow_html=True)
