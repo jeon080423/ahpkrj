@@ -3590,7 +3590,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div><a href="?go_to_refund=true" target="_self" style="display: inline-block; padding: 2px 6px; font-size: 0.8rem; color: #fff; background-color: #0066cc; border-radius: 4px; text-decoration: none; font-weight: bold; line-height: 1.2;">환불 및 취소</a></div>
+      <div><a href="?go_to_refund=true" target="_self" style="display: inline-block; padding: 2px 6px; font-size: 0.8rem; color: #ffffff !important; background-color: #0066cc; border-radius: 4px; text-decoration: none; font-weight: bold; line-height: 1.2;">환불 및 취소</a></div>
     </div>
   </div>
 </div>""",
@@ -3610,7 +3610,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div><a href="?go_to_refund=true" target="_self" style="display: inline-block; padding: 2px 6px; font-size: 0.8rem; color: #fff; background-color: #0066cc; border-radius: 4px; text-decoration: none; font-weight: bold; line-height: 1.2;">Refund & Cancellation</a></div>
+      <div><a href="?go_to_refund=true" target="_self" style="display: inline-block; padding: 2px 6px; font-size: 0.8rem; color: #ffffff !important; background-color: #0066cc; border-radius: 4px; text-decoration: none; font-weight: bold; line-height: 1.2;">Refund & Cancellation</a></div>
     </div>
   </div>
 </div>"""
