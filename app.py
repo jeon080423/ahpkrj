@@ -8135,8 +8135,8 @@ with col_main:
             <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
               <h5 style="margin-top: 0; margin-bottom: 10px; color: #2d3748; font-weight: bold;">⚠️ 환불 및 취소 규정 안내</h5>
               <ul style="margin: 0; padding-left: 20px; color: #4a5568;">
-                <li style="margin-bottom: 6px;"><b>1) 환불 규정</b>: 서비스 불만족 및 이용 불편 시 정식 사용자 결제 후 <b><span style="color: #0066cc;">1일</span></b> 이내 신청 시</li>
-                <li style="margin-bottom: 6px;"><b>2) 취소 규정</b>: 실수, 단순 변심 등으로 <b><span style="color: #0066cc;">30분</span></b> 이내 취소 신청 시</li>
+                <li style="margin-bottom: 6px;"><b>환불 규정</b>: 서비스 불만족 및 이용 불편 시 정식 사용자 결제 후 <b><span style="color: #0066cc;">1일</span></b> 이내 신청 시</li>
+                <li style="margin-bottom: 6px;"><b>취소 규정</b>: 실수, 단순 변심 등으로 <b><span style="color: #0066cc;">30분</span></b> 이내 취소 신청 시</li>
               </ul>
               <hr style="margin: 12px 0; border: 0; border-top: 1px solid #e2e8f0;">
               <div style="font-size: 0.85rem; color: #718096; font-weight: 500;">
@@ -8147,8 +8147,8 @@ with col_main:
             <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
               <h5 style="margin-top: 0; margin-bottom: 10px; color: #2d3748; font-weight: bold;">⚠️ Refund & Cancellation Policy</h5>
               <ul style="margin: 0; padding-left: 20px; color: #4a5568;">
-                <li style="margin-bottom: 6px;"><b>1) Refund Policy</b>: Request within <b><span style="color: #0066cc;">1 day</span></b> after payment if unsatisfied or experiencing inconvenience</li>
-                <li style="margin-bottom: 6px;"><b>2) Cancellation Policy</b>: Request within <b><span style="color: #0066cc;">30 minutes</span></b> for mistakes or change of mind</li>
+                <li style="margin-bottom: 6px;"><b>Refund Policy</b>: Request within <b><span style="color: #0066cc;">1 day</span></b> after payment if unsatisfied or experiencing inconvenience</li>
+                <li style="margin-bottom: 6px;"><b>Cancellation Policy</b>: Request within <b><span style="color: #0066cc;">30 minutes</span></b> for mistakes or change of mind</li>
               </ul>
               <hr style="margin: 12px 0; border: 0; border-top: 1px solid #e2e8f0;">
               <div style="font-size: 0.85rem; color: #718096; font-weight: 500;">
