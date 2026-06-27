@@ -1517,7 +1517,7 @@ def render_refund_form(is_standalone=False):
             st.session_state.go_to_refund = False
             st.rerun()
             
-    st.subheader(_("환불 및 취소 신청서", "Refund & Cancellation Request Form"))
+    st.header(_("환불 및 취소 신청서", "Refund & Cancellation Request Form"))
     
     st.markdown(
         _("""
@@ -4630,92 +4630,91 @@ with col_main:
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
-        with st.container(border=False):
 
-            st.header(_("빠른 시작 (도시재생 사업 모델)", "Quick Start (Urban Regeneration Project Model)"))
-            st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
-                      "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
+        st.header(_("빠른 시작 (도시재생 사업 모델)", "Quick Start (Urban Regeneration Project Model)"))
+        st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
+                  "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
             
-            sample_excel = create_sample_excel()
+        sample_excel = create_sample_excel()
             
-            def load_example_file(path):
-                try:
-                    import os
-                    base_dir = os.path.dirname(__file__)
-                    full_path = os.path.join(base_dir, path)
-                    with open(full_path, "rb") as f:
-                        return f.read(), None
-                except Exception as e:
-                    return b"", str(e)
+        def load_example_file(path):
+            try:
+                import os
+                base_dir = os.path.dirname(__file__)
+                full_path = os.path.join(base_dir, path)
+                with open(full_path, "rb") as f:
+                    return f.read(), None
+            except Exception as e:
+                return b"", str(e)
     
-            is_en = st.session_state.get('lang', 'ko') == 'en'
-            tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
-            fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
+        is_en = st.session_state.get('lang', 'ko') == 'en'
+        tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
+        fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
             
-            tahp_data, tahp_err = load_example_file(tahp_path)
-            fahp_data, fahp_err = load_example_file(fahp_path)
+        tahp_data, tahp_err = load_example_file(tahp_path)
+        fahp_data, fahp_err = load_example_file(fahp_path)
             
-            if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
-            if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
+        if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
+        if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
     
-            # 3계층 샘플 데이터: 권한에 따라 분기
-            # - 정식/관리자: Mock_3Tier_Full.xlsx (100행, 실제 분석 가능)
-            # - 무료/비로그인: create_sample_excel_v3() (5행, 5행 제한 통과)
-            _role_now = st.session_state.get('user_role', None)
-            _is_full_user = (_role_now in ('admin', 'official'))
-            if _is_full_user:
-                try:
-                    with open("Mock_3Tier_Full.xlsx", "rb") as f:
-                        sample_excel_v3 = f.read()
-                    _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
-                    _v3_filename = "Mock_3Tier_Full.xlsx"
-                except Exception:
-                    sample_excel_v3 = create_sample_excel_v3()
-                    _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
-                    _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
-            else:
-                sample_excel_v3 = create_sample_excel_v3()   # 5행 — 무료 5행 제한 통과
+        # 3계층 샘플 데이터: 권한에 따라 분기
+        # - 정식/관리자: Mock_3Tier_Full.xlsx (100행, 실제 분석 가능)
+        # - 무료/비로그인: create_sample_excel_v3() (5행, 5행 제한 통과)
+        _role_now = st.session_state.get('user_role', None)
+        _is_full_user = (_role_now in ('admin', 'official'))
+        if _is_full_user:
+            try:
+                with open("Mock_3Tier_Full.xlsx", "rb") as f:
+                    sample_excel_v3 = f.read()
+                _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+                _v3_filename = "Mock_3Tier_Full.xlsx"
+            except Exception:
+                sample_excel_v3 = create_sample_excel_v3()
                 _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
                 _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
+        else:
+            sample_excel_v3 = create_sample_excel_v3()   # 5행 — 무료 5행 제한 통과
+            _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+            _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
             
-            # 모든 사용자에게 2계층·3계층 샘플 데이터 + 결과 예시 버튼 4개 표시
-            col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
-            with col_btn1:
-                st.download_button(
-                    label=_("📂 2계층 샘플 데이터", "📂 2-Tier Sample Data"),
-                    data=sample_excel,
-                    file_name=_("AHP_UrbanRegeneration_2Tier_Sample.xlsx", "AHP_UrbanRegeneration_2Tier_Sample.xlsx"),
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
-                    type="primary"
-                )
-            with col_btn2:
-                st.download_button(
-                    label=_v3_label,
-                    data=sample_excel_v3,
-                    file_name=_v3_filename,
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
-                    type="primary"
-                )
-            with col_btn3:
-                st.download_button(
-                    label=_("📄 일반 AHP 분석 결과(예시)", "📄 Traditional AHP Report (Example)"),
-                    data=tahp_data if tahp_data else b"",
-                    file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
-                    disabled=(not tahp_data)
-                )
-            with col_btn4:
-                st.download_button(
-                    label=_("📄 퍼지 AHP 분석 결과(예시)", "📄 Fuzzy AHP Report (Example)"),
-                    data=fahp_data if fahp_data else b"",
-                    file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
-                    disabled=(not fahp_data)
-                )
+        # 모든 사용자에게 2계층·3계층 샘플 데이터 + 결과 예시 버튼 4개 표시
+        col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
+        with col_btn1:
+            st.download_button(
+                label=_("📂 2계층 샘플 데이터", "📂 2-Tier Sample Data"),
+                data=sample_excel,
+                file_name=_("AHP_UrbanRegeneration_2Tier_Sample.xlsx", "AHP_UrbanRegeneration_2Tier_Sample.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                type="primary"
+            )
+        with col_btn2:
+            st.download_button(
+                label=_v3_label,
+                data=sample_excel_v3,
+                file_name=_v3_filename,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                type="primary"
+            )
+        with col_btn3:
+            st.download_button(
+                label=_("📄 일반 AHP 분석 결과(예시)", "📄 Traditional AHP Report (Example)"),
+                data=tahp_data if tahp_data else b"",
+                file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                disabled=(not tahp_data)
+            )
+        with col_btn4:
+            st.download_button(
+                label=_("📄 퍼지 AHP 분석 결과(예시)", "📄 Fuzzy AHP Report (Example)"),
+                data=fahp_data if fahp_data else b"",
+                file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                disabled=(not fahp_data)
+            )
         
         st.subheader(_("1. 데이터 업로드 및 분석", "1. Data Upload & Analysis"))
         
@@ -6747,7 +6746,7 @@ with col_main:
         # -------------------------------------------------------------------------
         # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
         # -------------------------------------------------------------------------
-        st.subheader(_("AHP 분석 모델 설정 및 코딩 양식 다운로드", "Setup AHP Decision Model & Download Coding Form"))
+        st.header(_("AHP 분석 모델 설정 및 코딩 양식 다운로드", "Setup AHP Decision Model & Download Coding Form"))
         
         saved_model = None
         if st.session_state.user_id is None:
@@ -6964,7 +6963,7 @@ with col_main:
         # @st.fragment: 위젯 변경 시 이 영역만 재실행 (성능 최적화)
         @st.fragment
         def _survey_setup_fragment():
-            st.header(_(" AHP 온라인 설문 자동 생성 및 배포", " AHP Online Survey Auto-Generator & Deployer"))
+            st.header(_("AHP 온라인 설문 자동 생성 및 배포", "AHP Online Survey Auto-Generator & Deployer"))
             box_style = """
             <div style="background-color: #f8f9fc; border: none; border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; color: #1e293b; font-size: 0.95em; line-height: 1.6; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
             """
