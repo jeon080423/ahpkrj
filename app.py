@@ -120,16 +120,7 @@ if 'lang' not in st.session_state:
     except:
         st.session_state.lang = 'ko'
 
-if 'go_to_refund' not in st.session_state:
-    try:
-        _init_refund = st.query_params.get("go_to_refund", "false")
-        if isinstance(_init_refund, list): _init_refund = _init_refund[0]
-        if _init_refund.lower() == "true":
-            st.session_state.go_to_refund = True
-        else:
-            st.session_state.go_to_refund = False
-    except:
-        st.session_state.go_to_refund = False
+        st.session_state.lang = 'ko'
 
 def _(ko_text, en_text):
     if st.session_state.get('lang', 'ko') == 'en':
@@ -3662,7 +3653,7 @@ def get_fee_info_text():
     padding: 3px 8px !important;
     font-size: 0.8rem !important;
     color: #ffffff !important;
-    background-color: #0066cc !important;
+    background-color: #ff4b4b !important;
     border-radius: 4px !important;
     text-decoration: none !important;
     font-weight: normal !important;
@@ -3670,7 +3661,7 @@ def get_fee_info_text():
     text-align: center !important;
 }
 .refund-btn-link:hover {
-    background-color: #0052a3 !important;
+    background-color: #ff3333 !important;
     color: #ffffff !important;
 }
 </style>
@@ -3690,31 +3681,17 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div><a href="#" onclick="try { const doc = window.parent.document || document; const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); } catch(e) {} return false;" class="refund-btn-link">환불 및 취소</a></div>
+      <div><a href="#" onclick="try { const doc = window.parent ? window.parent.document : document; const tabs = Array.from(doc.querySelectorAll('button[data-baseweb=\\'tab\\'], button[role=\\'tab\\']')); const targetTab = tabs.find(tab => tab.textContent.includes('환불') || tab.textContent.includes('Refund')); if (targetTab) targetTab.click(); } catch(e) { console.error(e); } return false;" class="refund-btn-link">환불 및 취소 신청</a></div>
     </div>
   </div>
-</div>
-<script>
-    setInterval(function() {
-        try {
-            const doc = window.parent.document || document;
-            const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
-            if (btn) {
-                btn.style.display = 'none';
-                if (btn.parentNode && btn.parentNode.parentNode) {
-                    btn.parentNode.parentNode.style.display = 'none';
-                }
-            }
-        } catch (e) {}
-    }, 50);
-</script>""",
+</div>""",
         """<style>
 .refund-btn-link {
     display: inline-block !important;
     padding: 3px 8px !important;
     font-size: 0.8rem !important;
     color: #ffffff !important;
-    background-color: #0066cc !important;
+    background-color: #ff4b4b !important;
     border-radius: 4px !important;
     text-decoration: none !important;
     font-weight: normal !important;
@@ -3722,7 +3699,7 @@ def get_fee_info_text():
     text-align: center !important;
 }
 .refund-btn-link:hover {
-    background-color: #0052a3 !important;
+    background-color: #ff3333 !important;
     color: #ffffff !important;
 }
 </style>
@@ -3742,24 +3719,10 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div><a href="#" onclick="try { const doc = window.parent.document || document; const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); } catch(e) {} return false;" class="refund-btn-link">Refund & Cancellation</a></div>
+      <div><a href="#" onclick="try { const doc = window.parent ? window.parent.document : document; const tabs = Array.from(doc.querySelectorAll('button[data-baseweb=\\'tab\\'], button[role=\\'tab\\']')); const targetTab = tabs.find(tab => tab.textContent.includes('환불') || tab.textContent.includes('Refund')); if (targetTab) targetTab.click(); } catch(e) { console.error(e); } return false;" class="refund-btn-link">Refund & Cancellation</a></div>
     </div>
   </div>
-</div>
-<script>
-    setInterval(function() {
-        try {
-            const doc = window.parent.document || document;
-            const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
-            if (btn) {
-                btn.style.display = 'none';
-                if (btn.parentNode && btn.parentNode.parentNode) {
-                    btn.parentNode.parentNode.style.display = 'none';
-                }
-            }
-        } catch (e) {}
-    }, 50);
-</script>"""
+</div>"""
     )
 
 with st.sidebar:
@@ -4068,9 +4031,6 @@ with st.sidebar:
 
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
-    if st.button("hidden_refund_trigger", key="hidden_refund_btn"):
-        st.session_state.go_to_refund = True
-        st.rerun()
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
@@ -4692,29 +4652,6 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-        
-    if st.session_state.get("go_to_refund", False):
-        st.html("""
-            <script>
-                // Find tab button by text content to avoid matching other tab sets
-                const checkExist = setInterval(function() {
-                    try {
-                        const doc = window.parent.document || document;
-                        const tabs = Array.from(doc.querySelectorAll('button[role="tab"]'));
-                        const targetTab = tabs.find(tab => 
-                            tab.textContent.includes("환불 및 취소 신청") || 
-                            tab.textContent.includes("Refund & Cancellation Request")
-                        );
-                        if (targetTab) {
-                            targetTab.click();
-                            clearInterval(checkExist);
-                        }
-                    } catch (e) {}
-                }, 100); // check every 100ms
-            </script>
-        """)
-        st.session_state.go_to_refund = False
-        
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_refund = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
