@@ -3549,7 +3549,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 서비스 제공기간:</div>
       <div>2개월</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
-      <div>불만족 100% 환불 (1일 이내)</div>
+      <div>불만족 100% 환불</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
@@ -3569,7 +3569,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Service Period:</div>
       <div>2 months after payment</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
-      <div>100% Refund if unsatisfied (within 1 day)</div>
+      <div>100% Refund if unsatisfied</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
