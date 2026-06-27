@@ -7199,7 +7199,7 @@ with col_main:
                     default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
             else:
                 default_admin_email = "temp@ahpmaster.com"
-            survey_admin_email = st.text_input(_("설문조사 담당자 이메일 주소 *", "Survey Admin Email *"), value=st.session_state.get("edit_admin_email", default_admin_email), placeholder="example@gmail.com")
+            survey_admin_email = default_admin_email
 
             st.divider()
 
@@ -7716,11 +7716,6 @@ with col_main:
                             import streamlit.components.v1 as components
                             alert_msg = _("연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.", "Deployment and linking will fail without a Google Spreadsheet URL.\\nPlease make sure to enter your Google Spreadsheet URL or ID.")
                             components.html(f"<script>alert('{alert_msg}');</script>", height=0, width=0)
-                        elif not survey_admin_email or "@" not in survey_admin_email:
-                            st.error(_("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership."))
-                            import streamlit.components.v1 as components
-                            alert_msg2 = _("구글 시트 소유권 공유를 위한 이메일 주소를 입력해 주세요.", "Please enter your email address to share Google Sheet ownership.")
-                            components.html(f"<script>alert('{alert_msg2}');</script>", height=0, width=0)
                         else:
                             with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
                                 try:
