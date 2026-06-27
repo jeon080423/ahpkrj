@@ -3544,13 +3544,17 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
     <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; padding-left: 0; text-indent: 0; margin-top: 2px; white-space: nowrap;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
   </ul>
-  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
-    <ul style="margin: 0; padding-left: 20px; margin-bottom: 0;">
-      <li style="margin-bottom: 2px;"><b>서비스 제공기간</b> 2개월</li>
-      <li style="margin-bottom: 2px;"><b>환불정책</b>: 서비스 불만족시 3일 이내 환불</li>
-      <li style="margin-bottom: 2px;"><b>취소규정</b>: 30분 이내 취소신청(24시간 이내 환불)</li>
-      <li style="margin-bottom: 2px;"><b>환불 및 취소 방법</b>: <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none;">jeon080423@gmail.com</a>을 통해 요청</li>
-    </ul>
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 서비스 제공기간:</div>
+      <div>2개월</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
+      <div>서비스 불만족시 3일 이내 환불</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
+      <div>30분 이내 취소신청 (24시간 이내 환불)</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
+      <div><a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none; word-break: break-all;">jeon080423@gmail.com</a>을 통해 요청</div>
+    </div>
   </div>
 </div>""",
         """<div style="line-height: 1.4; font-size: 0.95rem;">
@@ -3560,13 +3564,17 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
     <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months unlimited)</li>
   </ul>
-  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
-    <ul style="margin: 0; padding-left: 20px; margin-bottom: 0;">
-      <li style="margin-bottom: 2px;"><b>Service Period</b>: 2 months after payment</li>
-      <li style="margin-bottom: 2px;"><b>Refund Policy</b>: Refund within 3 days if unsatisfied</li>
-      <li style="margin-bottom: 2px;"><b>Cancellation Policy</b>: Refund if requested within 30 mins of payment (processed in 24h)</li>
-      <li style="margin-bottom: 2px;"><b>How to Request</b>: Email <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none;">jeon080423@gmail.com</a></li>
-    </ul>
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Service Period:</div>
+      <div>2 months after payment</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
+      <div>Refund within 3 days if unsatisfied</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
+      <div>Refund if requested within 30 mins of payment (processed in 24h)</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
+      <div>Email <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none; word-break: break-all;">jeon080423@gmail.com</a></div>
+    </div>
   </div>
 </div>"""
     )
