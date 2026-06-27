@@ -1480,6 +1480,32 @@ def send_conversion_request_email(user_email):
         print(f"send_conversion_request_email Error: {e}")
         return False
 
+def send_refund_request_email(request_type, user_email, opinion):
+    sender_email = "jeon080423@gmail.com"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    recipient_email = "jeon080423@gmail.com"
+    subject = f"[AHP 마스터] 취소/환불 신청: {user_email}"
+    kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    body = (
+        f"취소/환불 신청이 접수되었습니다.\n\n"
+        f"■ 신청 유형: {request_type}\n"
+        f"■ 신청 ID (이메일): {user_email}\n"
+        f"■ 서비스 개선 의견:\n{opinion}\n\n"
+        f"■ 신청 시간 (KST): {kst_now.strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"send_refund_request_email Error: {e}")
+        return False
+
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
@@ -4507,11 +4533,12 @@ with col_main:
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
         
-    main_tab1, main_tab_coding, main_tab2, main_tab3 = st.tabs([
+    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_refund = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
-        _("실시간 응답 현황", "Live Response Status")
+        _("실시간 응답 현황", "Live Response Status"),
+        _("환불 및 취소 신청", "Refund & Cancellation Request")
     ])
         
     with main_tab1:
@@ -8100,6 +8127,74 @@ with col_main:
             except Exception as err:
                 st.caption(f"로컬 백업 조회 불가: {err}")
 
+    with main_tab_refund:
+        st.subheader(_("📝 환불 및 취소 신청서", "📝 Refund & Cancellation Request Form"))
+        
+        st.markdown(
+            _("""
+            <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
+              <h5 style="margin-top: 0; margin-bottom: 10px; color: #2d3748; font-weight: bold;">⚠️ 환불 및 취소 규정 안내</h5>
+              <ul style="margin: 0; padding-left: 20px; color: #4a5568;">
+                <li style="margin-bottom: 6px;"><b>1) 환불 규정</b>: 서비스 불만족 및 이용 불편 시 정식 사용자 결제 후 <b><span style="color: #0066cc;">1일</span></b> 이내 신청 시</li>
+                <li style="margin-bottom: 6px;"><b>2) 취소 규정</b>: 실수, 단순 변심 등으로 <b><span style="color: #0066cc;">30분</span></b> 이내 취소 신청 시</li>
+              </ul>
+              <hr style="margin: 12px 0; border: 0; border-top: 1px solid #e2e8f0;">
+              <div style="font-size: 0.85rem; color: #718096; font-weight: 500;">
+                💡 취소/환불 입금은 카드사 또는 간편결제 대행사의 처리 일정에 따릅니다.
+              </div>
+            </div>
+            """, """
+            <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
+              <h5 style="margin-top: 0; margin-bottom: 10px; color: #2d3748; font-weight: bold;">⚠️ Refund & Cancellation Policy</h5>
+              <ul style="margin: 0; padding-left: 20px; color: #4a5568;">
+                <li style="margin-bottom: 6px;"><b>1) Refund Policy</b>: Request within <b><span style="color: #0066cc;">1 day</span></b> after payment if unsatisfied or experiencing inconvenience</li>
+                <li style="margin-bottom: 6px;"><b>2) Cancellation Policy</b>: Request within <b><span style="color: #0066cc;">30 minutes</span></b> for mistakes or change of mind</li>
+              </ul>
+              <hr style="margin: 12px 0; border: 0; border-top: 1px solid #e2e8f0;">
+              <div style="font-size: 0.85rem; color: #718096; font-weight: 500;">
+                💡 Refund processing schedules depend on the card issuer or payment gateway.
+              </div>
+            </div>
+            """),
+            unsafe_allow_html=True
+        )
+        
+        with st.form(key="refund_cancellation_form"):
+            req_type = st.radio(
+                _("신청 유형 선택", "Select Request Type"),
+                [_("취소", "Cancellation"), _("환불", "Refund")],
+                horizontal=True
+            )
+            
+            user_email_input = st.text_input(
+                _("회원가입 시 사용 ID (이메일 주소)", "Registered ID (Email Address)"),
+                value=st.session_state.get('user_id', '') if st.session_state.get('user_id') else '',
+                placeholder="example@email.com"
+            )
+            
+            user_opinion = st.text_area(
+                _("서비스 개선을 위한 의견", "Feedback / Suggestions for service improvement"),
+                placeholder=_("불편하셨던 점이나 개선해야 할 사항을 자유롭게 적어주세요. 서비스 개선에 큰 도움이 됩니다.", 
+                             "Please share your feedback or reasons for cancellation/refund to help us improve.")
+            )
+            
+            submit_btn = st.form_submit_button(_("취소/환불 신청", "Submit Request"), use_container_width=True)
+            
+            if submit_btn:
+                clean_email = user_email_input.strip()
+                if not clean_email:
+                    st.error(_("이메일 ID를 입력해 주세요.", "Please enter your Email ID."))
+                elif not validate_email(clean_email):
+                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                else:
+                    with st.spinner(_("신청서를 전송하는 중...", "Submitting request...")):
+                        success = send_refund_request_email(req_type, clean_email, user_opinion)
+                        if success:
+                            st.success(_("취소/환불 신청이 성공적으로 접수되었습니다. 관리자 확인 후 순차 처리해 드리겠습니다.", 
+                                         "Your request has been submitted successfully. We will process it shortly."))
+                        else:
+                            st.error(_("신청 메일 전송 중 오류가 발생했습니다. 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.", 
+                                       "An error occurred while sending the email. Please contact jeon080423@gmail.com directly."))
 
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
