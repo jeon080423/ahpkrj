@@ -3646,16 +3646,19 @@ def get_portone_payment_html(user_id):
 
 
 def get_fee_info_text():
+    tab_click_js = "try { var doc = window.parent.document; var tabs = doc.querySelectorAll('button[role=\"tab\"]'); for (var i = 0; i < tabs.length; i++) { var t = tabs[i].textContent || ''; if (t.indexOf('\ud658\ubd88') !== -1 || t.indexOf('Refund') !== -1) { tabs[i].click(); break; } } } catch(e) {}"
+    btn_style = 'display:inline-block; padding:2px 6px; font-size:0.7rem; color:#fff; background-color:#ff4b4b; border:none; border-radius:3px; cursor:pointer; font-weight:normal; line-height:1.3; text-decoration:none; font-family:sans-serif;'
+    btn_hover_css = '.rbtn:hover{background-color:#ff3333!important;}'
     return _(
-        """<div style="line-height: 1.4; font-size: 0.95rem;">
-  <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
-  <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
+        f"""<html><head><style>body{{margin:0;padding:0;font-family:sans-serif;background:transparent;}} {btn_hover_css}</style></head><body>
+<div style="line-height: 1.4; font-size: 0.85rem;">
+  <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.95rem;">서비스 이용료</h4>
+  <ul style="margin: 0; padding-left: 18px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; padding-left: 0; text-indent: 0; margin-top: 2px; white-space: nowrap;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
+    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월)<br><span style="font-size: 0.78rem; color: #555;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
   </ul>
-  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
-    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
+  <div style="font-size: 0.78rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 4px; column-gap: 6px; line-height: 1.4;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 서비스 제공기간:</div>
       <div>2개월</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
@@ -3663,30 +3666,30 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div>아래 버튼 클릭</div>
+      <div><button class="rbtn" onclick="{tab_click_js}" style="{btn_style}">환불 및 취소 신청</button></div>
     </div>
   </div>
-</div>""",
-        """<div style="line-height: 1.4; font-size: 0.95rem;">
-  <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
-  <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
-    <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
-    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months unlimited)</li>
+</div></body></html>""",
+        f"""<html><head><style>body{{margin:0;padding:0;font-family:sans-serif;background:transparent;}} {btn_hover_css}</style></head><body>
+<div style="line-height: 1.4; font-size: 0.85rem;">
+  <h4 style="margin-top: 0; margin-bottom: 8px; font-size: 0.95rem;">Service Fees</h4>
+  <ul style="margin: 0; padding-left: 18px; margin-bottom: 8px;">
+    <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit)</li>
+    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months)</li>
   </ul>
-  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
-    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
+  <div style="font-size: 0.78rem; color: #444; background-color: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 4px; column-gap: 6px; line-height: 1.4;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Service Period:</div>
       <div>2 months after payment</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
       <div>100% Refund if unsatisfied</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
-      <div>Cancellation within 30 minutes</div>
+      <div>Within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div>Click button below</div>
+      <div><button class="rbtn" onclick="{tab_click_js}" style="{btn_style}">Refund &amp; Cancel</button></div>
     </div>
   </div>
-</div>"""
+</div></body></html>"""
     )
 
 with st.sidebar:
@@ -3994,57 +3997,8 @@ with st.sidebar:
 
 
 
-    st.markdown(get_fee_info_text(), unsafe_allow_html=True)
-    # --- Refund button: uses st.button (Streamlit native) + st.components.v1.html for JS tab switch ---
-    st.markdown("""
-    <style>
-    div[data-testid="stButton"] > button[kind="secondary"]:has(> div > p) {
-        /* Default Streamlit button styling override for refund button */
-    }
-    div.refund-btn-wrapper button {
-        background-color: #ff4b4b !important;
-        color: #ffffff !important;
-        font-weight: normal !important;
-        font-size: 0.8rem !important;
-        padding: 2px 8px !important;
-        min-height: 0 !important;
-        height: auto !important;
-        line-height: 1.4 !important;
-    }
-    div.refund-btn-wrapper button:hover {
-        background-color: #ff3333 !important;
-        color: #ffffff !important;
-        border-color: #ff3333 !important;
-    }
-    div.refund-btn-wrapper {
-        margin-top: -10px;
-        margin-bottom: 5px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    with st.container():
-        st.markdown('<div class="refund-btn-wrapper">', unsafe_allow_html=True)
-        if st.button(_("환불 및 취소 신청", "Refund & Cancellation"), key="sidebar_refund_btn"):
-            # Inject JS via st.components.v1.html to click the refund tab
-            import streamlit.components.v1 as components
-            components.html("""
-            <script>
-                (function() {
-                    try {
-                        var doc = window.parent.document;
-                        var tabs = doc.querySelectorAll('button[role="tab"]');
-                        for (var i = 0; i < tabs.length; i++) {
-                            var txt = tabs[i].textContent || '';
-                            if (txt.indexOf('\ud658\ubd88') !== -1 || txt.indexOf('Refund') !== -1) {
-                                tabs[i].click();
-                                break;
-                            }
-                        }
-                    } catch(e) { console.error(e); }
-                })();
-            </script>
-            """, height=0)
-        st.markdown('</div>', unsafe_allow_html=True)
+    import streamlit.components.v1 as _fee_components
+    _fee_components.html(get_fee_info_text(), height=260, scrolling=False)
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
