@@ -4663,10 +4663,20 @@ with col_main:
         st.stop()
         
     if st.session_state.get("go_to_refund", False):
-        render_refund_form(is_standalone=True)
-        st.markdown("---")
-        st.caption("© 2026 AHP Master. All rights reserved.")
-        st.stop()
+        import streamlit.components.v1 as components
+        components.html("""
+            <script>
+                // Find all tab buttons and click the 5th one (index 4)
+                const checkExist = setInterval(function() {
+                    const tabs = window.parent.document.querySelectorAll('button[role="tab"]');
+                    if (tabs.length >= 5) {
+                        tabs[4].click();
+                        clearInterval(checkExist);
+                    }
+                }, 100); // check every 100ms
+            </script>
+        """, height=0)
+        st.session_state.go_to_refund = False
         
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_refund = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
