@@ -3690,21 +3690,22 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div><a href="#" onclick="const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); return false;" class="refund-btn-link">환불 및 취소</a></div>
+      <div><a href="#" onclick="try { const doc = window.parent.document || document; const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); } catch(e) {} return false;" class="refund-btn-link">환불 및 취소</a></div>
     </div>
   </div>
 </div>
 <script>
-    const hideBtn = setInterval(function() {
-        const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
-        if (btn) {
-            btn.style.display = 'none';
-            // Also hide container to prevent layout shifting
-            if (btn.parentNode && btn.parentNode.parentNode) {
-                btn.parentNode.parentNode.style.display = 'none';
+    setInterval(function() {
+        try {
+            const doc = window.parent.document || document;
+            const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
+            if (btn) {
+                btn.style.display = 'none';
+                if (btn.parentNode && btn.parentNode.parentNode) {
+                    btn.parentNode.parentNode.style.display = 'none';
+                }
             }
-            clearInterval(hideBtn);
-        }
+        } catch (e) {}
     }, 50);
 </script>""",
         """<style>
@@ -3741,20 +3742,22 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div><a href="#" onclick="const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); return false;" class="refund-btn-link">Refund & Cancellation</a></div>
+      <div><a href="#" onclick="try { const doc = window.parent.document || document; const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); } catch(e) {} return false;" class="refund-btn-link">Refund & Cancellation</a></div>
     </div>
   </div>
 </div>
 <script>
-    const hideBtnEn = setInterval(function() {
-        const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
-        if (btn) {
-            btn.style.display = 'none';
-            if (btn.parentNode && btn.parentNode.parentNode) {
-                btn.parentNode.parentNode.style.display = 'none';
+    setInterval(function() {
+        try {
+            const doc = window.parent.document || document;
+            const btn = Array.from(doc.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
+            if (btn) {
+                btn.style.display = 'none';
+                if (btn.parentNode && btn.parentNode.parentNode) {
+                    btn.parentNode.parentNode.style.display = 'none';
+                }
             }
-            clearInterval(hideBtnEn);
-        }
+        } catch (e) {}
     }, 50);
 </script>"""
     )
