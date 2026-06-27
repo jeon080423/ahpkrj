@@ -644,8 +644,12 @@ a:hover {
 /* 사이드바 탭 글자 크기 축소 & 여백 줄이기 */
 section[data-testid="stSidebar"] button[data-baseweb="tab"] {
     font-size: 0.85rem !important;
-    padding: 0.5rem 0.5rem !important;
+    padding: 0.5rem 0.2rem !important;
+    margin-right: 0.2rem !important;
     min-height: unset !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="tab-list"] {
+    gap: 0.2rem !important;
 }
 /* 사이드바 내부 이미지(로고) 여백 축소 */
 section[data-testid="stSidebar"] img {
