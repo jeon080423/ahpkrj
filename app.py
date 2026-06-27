@@ -3553,7 +3553,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div><a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none; word-break: break-all;">jeon080423@gmail.com</a>을 통해 요청</div>
+      <div>환불 및 취소</div>
     </div>
   </div>
 </div>""",
@@ -3573,7 +3573,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div>Email <a href="mailto:jeon080423@gmail.com" style="color: #0066cc; text-decoration: none; word-break: break-all;">jeon080423@gmail.com</a></div>
+      <div>Refund and cancellation</div>
     </div>
   </div>
 </div>"""
