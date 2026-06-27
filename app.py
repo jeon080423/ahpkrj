@@ -81,21 +81,22 @@ def generate_temp_password() -> str:
 
 from matplotlib import rc
 from email.mime.text import MIMEText
-from PIL import Image
 import itertools
 from math import pi
 from dateutil.relativedelta import relativedelta
 
-import gspread
-from google.oauth2.service_account import Credentials
 from signup_agreement import show_agreement_ui, save_agreement_to_sheets, validate_all_agreements
 
-# 1. 추가해야 할 라이브러리 (기존 Credentials 바로 아래 추가)
+# --- LAZY LOAD HEAVY MODULES ---
+gspread = LazyLoader('gspread')
+requests = LazyLoader('requests')
+
+# 1. 추가해야 할 라이브러리
 from streamlit_javascript import st_javascript
 import base64
 
 # IP 위치 추적 및 공인 IP 추출을 위한 라이브러리 추가
-import requests
+# (requests는 LazyLoader로 처리)
 
 # ANOVA 및 사후검정을 위한 라이브러리 (없을 경우 예외처리)
 class LazyTukeyHSD:
@@ -225,7 +226,6 @@ def translate_definition_if_default(factor_name, def_text):
     if def_text.strip() == DEFAULT_SURVEY_DESC_KO.strip():
         return DEFAULT_SURVEY_DESC_EN
     
-    import re
     # Clean up whitespace for other definitions
     clean_def = re.sub(r'\s+', ' ', def_text).strip()
     
@@ -865,7 +865,10 @@ set_font_config()
 
 # [중요 수정] 구글 시트 연결 헬퍼 함수 - 인증 정보 로드 로직 전면 재검토 및 수정
 # TOML(Dict), JSON String, Base64 Encoded String 등 다양한 포맷에 대응하도록 강화
+@st.cache_resource
 def get_gspread_client():
+    from google.oauth2.service_account import Credentials
+    import gspread
     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     
     # st.secrets에서 값 가져오기 (없을 경우 에러 처리)
@@ -3758,7 +3761,7 @@ with st.sidebar:
             st.divider()
             st.markdown(_("### 💳 정식 사용자 결제", "### 💳 Official User Payment"))
             if not l_id.strip() or not l_pw.strip():
-                st.info(_("결제를 진행하시려면 위에 이메일 아이디와 비밀번호를 모두 입력해주세요.", "Please enter both your Email ID and Password above to proceed with payment."))
+                st.info(_("결제 진행을 위해 아이디와 비밀번호를 모두 입력해주세요", "Please enter both your ID and Password to proceed with payment."))
             else:
                 st.caption(_(f"입력하신 이메일({l_id.strip()}) 계정으로 정식 사용자 결제가 진행됩니다.", f"Payment will be processed for the entered Email ID ({l_id.strip()})."))
                 portone_html = get_portone_payment_html(l_id.strip())
@@ -4629,7 +4632,7 @@ with col_main:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
         with st.container(border=False):
 
-            st.markdown(_("####  빠른 시작 (도시재생 사업 모델)", "####  Quick Start (Urban Regeneration Project Model)"))
+            st.header(_("빠른 시작 (도시재생 사업 모델)", "Quick Start (Urban Regeneration Project Model)"))
             st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
                       "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
             
