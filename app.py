@@ -7234,7 +7234,6 @@ with col_main:
                         st.session_state["edit_type_questions"].pop()
                         st.rerun()
                 
-                st.write("")
                 
                 type_questions = []
                 for i in range(num_types):
@@ -7260,7 +7259,6 @@ with col_main:
                 type_question = type_questions[0]["q"] if type_questions else ""
                 type_options = ", ".join(type_questions[0]["opts"]) if type_questions else ""
 
-            st.write("")
 
             # 인구통계학 정보 설정
             with st.container(border=True):
@@ -7269,7 +7267,7 @@ with col_main:
                 demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
                 demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
-                st.divider()
+                st.markdown("<hr style='margin: 0.5rem 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
                 demo_age = st.checkbox(_("연령 수집", "Collect Age"), value=st.session_state.get("edit_demo_age", True))
                 age_type = "개방형 (숫자 직접 입력)"
@@ -7277,7 +7275,7 @@ with col_main:
                     age_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("10세 단위 선택형", "Multiple Choice (10-year intervals)")]
                     age_type = st.radio(_("연령 수집 방식", "Age Collection Method"), age_type_options, index=0 if st.session_state.get("edit_age_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_age_type_setup")
 
-                st.divider()
+                st.markdown("<hr style='margin: 0.5rem 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
                 demo_exp = st.checkbox(_("경력년수 수집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", True))
                 exp_type = "개방형 (숫자 직접 입력)"
@@ -7299,7 +7297,7 @@ with col_main:
                 "type_questions": type_questions
             }
 
-            st.divider()
+            st.markdown("<hr style='margin: 0.5rem 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
             # 섹션 2: AHP 모델 계층구조 입력 폼
             st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
