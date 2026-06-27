@@ -4694,23 +4694,25 @@ with col_main:
         st.stop()
         
     if st.session_state.get("go_to_refund", False):
-        import streamlit.components.v1 as components
-        components.html("""
+        st.html("""
             <script>
                 // Find tab button by text content to avoid matching other tab sets
                 const checkExist = setInterval(function() {
-                    const tabs = Array.from(window.parent.document.querySelectorAll('button[role="tab"]'));
-                    const targetTab = tabs.find(tab => 
-                        tab.textContent.includes("환불 및 취소 신청") || 
-                        tab.textContent.includes("Refund & Cancellation Request")
-                    );
-                    if (targetTab) {
-                        targetTab.click();
-                        clearInterval(checkExist);
-                    }
+                    try {
+                        const doc = window.parent.document || document;
+                        const tabs = Array.from(doc.querySelectorAll('button[role="tab"]'));
+                        const targetTab = tabs.find(tab => 
+                            tab.textContent.includes("환불 및 취소 신청") || 
+                            tab.textContent.includes("Refund & Cancellation Request")
+                        );
+                        if (targetTab) {
+                            targetTab.click();
+                            clearInterval(checkExist);
+                        }
+                    } catch (e) {}
                 }, 100); // check every 100ms
             </script>
-        """, height=0)
+        """)
         st.session_state.go_to_refund = False
         
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_refund = st.tabs([
