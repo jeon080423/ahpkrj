@@ -120,6 +120,17 @@ if 'lang' not in st.session_state:
     except:
         st.session_state.lang = 'ko'
 
+if 'go_to_refund' not in st.session_state:
+    try:
+        _init_refund = st.query_params.get("go_to_refund", "false")
+        if isinstance(_init_refund, list): _init_refund = _init_refund[0]
+        if _init_refund.lower() == "true":
+            st.session_state.go_to_refund = True
+        else:
+            st.session_state.go_to_refund = False
+    except:
+        st.session_state.go_to_refund = False
+
 def _(ko_text, en_text):
     if st.session_state.get('lang', 'ko') == 'en':
         return en_text
@@ -3579,7 +3590,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div>환불 및 취소</div>
+      <div><a href="?go_to_refund=true" target="_self" style="display: inline-block; padding: 2px 6px; font-size: 0.8rem; color: #fff; background-color: #0066cc; border-radius: 4px; text-decoration: none; font-weight: bold; line-height: 1.2;">환불 및 취소</a></div>
     </div>
   </div>
 </div>""",
@@ -3599,7 +3610,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div>Refund and cancellation</div>
+      <div><a href="?go_to_refund=true" target="_self" style="display: inline-block; padding: 2px 6px; font-size: 0.8rem; color: #fff; background-color: #0066cc; border-radius: 4px; text-decoration: none; font-weight: bold; line-height: 1.2;">Refund & Cancellation</a></div>
     </div>
   </div>
 </div>"""
@@ -3911,9 +3922,6 @@ with st.sidebar:
 
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
-    if st.button(_("환불 및 취소 신청", "Refund & Cancellation Request"), key="sidebar_refund_btn", use_container_width=True):
-        st.session_state.go_to_refund = True
-        st.rerun()
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
