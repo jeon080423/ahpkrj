@@ -4021,14 +4021,14 @@ with st.sidebar:
         ### Contact
         - **Email**: jeon080423@gmail.com
         - **KakaoTalk ID**: AHPkr
-        - **Homepage**: [morison.tistory.com](https://morison.tistory.com/)
+        - **Blog**: [morison.tistory.com](https://morison.tistory.com/)
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
         ### 문의처
         - **이메일**: jeon080423@gmail.com
         - **카톡ID**: AHPkr
-        - **홈페이지**: [morison.tistory.com](https://morison.tistory.com/)
+        - **블로그**: [morison.tistory.com](https://morison.tistory.com/)
 
         """, unsafe_allow_html=True)
 
