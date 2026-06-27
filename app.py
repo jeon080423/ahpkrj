@@ -3637,9 +3637,7 @@ with st.sidebar:
                 portone_html = get_portone_payment_html(l_id.strip())
                 import streamlit.components.v1 as components
                 components.html(portone_html, height=60)
-            st.markdown(get_fee_info_text(), unsafe_allow_html=True)
-
-
+            
         with tab_signup:
             if st.session_state.get('signup_paypal_user') or st.session_state.get('signup_portone_user'):
                 is_en = st.session_state.get('lang', 'ko') == 'en'
