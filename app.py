@@ -3655,6 +3655,7 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; margin-top: 2px;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
   </ul>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="margin-bottom: 8px; color: #e65100; font-size: 0.85rem; font-weight: 600;">💡 계산서 발급 가능</div>
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 서비스 제공기간:</div>
       <div>2개월</div>
@@ -3673,6 +3674,7 @@ def get_fee_info_text():
     <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months unlimited)</li>
   </ul>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="margin-bottom: 8px; color: #e65100; font-size: 0.85rem; font-weight: 600;">💡 Tax Invoice Available</div>
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Service Period:</div>
       <div>2 months after payment</div>
@@ -4008,7 +4010,6 @@ with st.sidebar:
         <strong>이메일:</strong> jeon080423@gmail.com<br>
         <strong>개인정보관리책임자:</strong> 전상현<br>
         <strong>통신판매업 신고번호:</strong> 간이과세자<br>
-        <div style="margin-top: 10px; color: #e65100; font-size: 0.85rem; font-weight: 600;">💡 계산서 발급 가능</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
