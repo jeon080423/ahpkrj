@@ -3665,7 +3665,7 @@ def get_fee_info_text():
     background-color: #0066cc !important;
     border-radius: 4px !important;
     text-decoration: none !important;
-    font-weight: bold !important;
+    font-weight: normal !important;
     line-height: 1.2 !important;
     text-align: center !important;
 }
@@ -3690,10 +3690,23 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div><a href="?go_to_refund=true" target="_self" class="refund-btn-link">환불 및 취소</a></div>
+      <div><a href="#" onclick="const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); return false;" class="refund-btn-link">환불 및 취소</a></div>
     </div>
   </div>
-</div>""",
+</div>
+<script>
+    const hideBtn = setInterval(function() {
+        const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
+        if (btn) {
+            btn.style.display = 'none';
+            // Also hide container to prevent layout shifting
+            if (btn.parentNode && btn.parentNode.parentNode) {
+                btn.parentNode.parentNode.style.display = 'none';
+            }
+            clearInterval(hideBtn);
+        }
+    }, 50);
+</script>""",
         """<style>
 .refund-btn-link {
     display: inline-block !important;
@@ -3703,7 +3716,7 @@ def get_fee_info_text():
     background-color: #0066cc !important;
     border-radius: 4px !important;
     text-decoration: none !important;
-    font-weight: bold !important;
+    font-weight: normal !important;
     line-height: 1.2 !important;
     text-align: center !important;
 }
@@ -3728,10 +3741,22 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div><a href="?go_to_refund=true" target="_self" class="refund-btn-link">Refund & Cancellation</a></div>
+      <div><a href="#" onclick="const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger'); if (btn) btn.click(); return false;" class="refund-btn-link">Refund & Cancellation</a></div>
     </div>
   </div>
-</div>"""
+</div>
+<script>
+    const hideBtnEn = setInterval(function() {
+        const btn = Array.from(window.parent.document.querySelectorAll('button')).find(b => b.textContent.trim() === 'hidden_refund_trigger');
+        if (btn) {
+            btn.style.display = 'none';
+            if (btn.parentNode && btn.parentNode.parentNode) {
+                btn.parentNode.parentNode.style.display = 'none';
+            }
+            clearInterval(hideBtnEn);
+        }
+    }, 50);
+</script>"""
     )
 
 with st.sidebar:
@@ -4040,6 +4065,9 @@ with st.sidebar:
 
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
+    if st.button("hidden_refund_trigger", key="hidden_refund_btn"):
+        st.session_state.go_to_refund = True
+        st.rerun()
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
