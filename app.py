@@ -4666,11 +4666,15 @@ with col_main:
         import streamlit.components.v1 as components
         components.html("""
             <script>
-                // Find all tab buttons and click the 5th one (index 4)
+                // Find tab button by text content to avoid matching other tab sets
                 const checkExist = setInterval(function() {
-                    const tabs = window.parent.document.querySelectorAll('button[role="tab"]');
-                    if (tabs.length >= 5) {
-                        tabs[4].click();
+                    const tabs = Array.from(window.parent.document.querySelectorAll('button[role="tab"]'));
+                    const targetTab = tabs.find(tab => 
+                        tab.textContent.includes("환불 및 취소 신청") || 
+                        tab.textContent.includes("Refund & Cancellation Request")
+                    );
+                    if (targetTab) {
+                        targetTab.click();
                         clearInterval(checkExist);
                     }
                 }, 100); // check every 100ms
