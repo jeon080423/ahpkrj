@@ -3647,25 +3647,7 @@ def get_portone_payment_html(user_id):
 
 def get_fee_info_text():
     return _(
-        """<style>
-.refund-btn-link {
-    display: inline-block !important;
-    padding: 3px 8px !important;
-    font-size: 0.8rem !important;
-    color: #ffffff !important;
-    background-color: #ff4b4b !important;
-    border-radius: 4px !important;
-    text-decoration: none !important;
-    font-weight: normal !important;
-    line-height: 1.2 !important;
-    text-align: center !important;
-}
-.refund-btn-link:hover {
-    background-color: #ff3333 !important;
-    color: #ffffff !important;
-}
-</style>
-<div style="line-height: 1.4; font-size: 0.95rem;">
+        """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
@@ -3681,29 +3663,11 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 및 취소 방법:</div>
-      <div><a href="#" onclick="try { const doc = window.parent ? window.parent.document : document; const tabs = Array.from(doc.querySelectorAll('button[data-baseweb=\\'tab\\'], button[role=\\'tab\\']')); const targetTab = tabs.find(tab => tab.textContent.includes('환불') || tab.textContent.includes('Refund')); if (targetTab) targetTab.click(); } catch(e) { console.error(e); } return false;" class="refund-btn-link">환불 및 취소 신청</a></div>
+      <div>아래 버튼 클릭</div>
     </div>
   </div>
 </div>""",
-        """<style>
-.refund-btn-link {
-    display: inline-block !important;
-    padding: 3px 8px !important;
-    font-size: 0.8rem !important;
-    color: #ffffff !important;
-    background-color: #ff4b4b !important;
-    border-radius: 4px !important;
-    text-decoration: none !important;
-    font-weight: normal !important;
-    line-height: 1.2 !important;
-    text-align: center !important;
-}
-.refund-btn-link:hover {
-    background-color: #ff3333 !important;
-    color: #ffffff !important;
-}
-</style>
-<div style="line-height: 1.4; font-size: 0.95rem;">
+        """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
@@ -3719,7 +3683,7 @@ def get_fee_info_text():
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• How to Request:</div>
-      <div><a href="#" onclick="try { const doc = window.parent ? window.parent.document : document; const tabs = Array.from(doc.querySelectorAll('button[data-baseweb=\\'tab\\'], button[role=\\'tab\\']')); const targetTab = tabs.find(tab => tab.textContent.includes('환불') || tab.textContent.includes('Refund')); if (targetTab) targetTab.click(); } catch(e) { console.error(e); } return false;" class="refund-btn-link">Refund & Cancellation</a></div>
+      <div>Click button below</div>
     </div>
   </div>
 </div>"""
@@ -4031,6 +3995,56 @@ with st.sidebar:
 
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
+    # --- Refund button: uses st.button (Streamlit native) + st.components.v1.html for JS tab switch ---
+    st.markdown("""
+    <style>
+    div[data-testid="stButton"] > button[kind="secondary"]:has(> div > p) {
+        /* Default Streamlit button styling override for refund button */
+    }
+    div.refund-btn-wrapper button {
+        background-color: #ff4b4b !important;
+        color: #ffffff !important;
+        font-weight: normal !important;
+        font-size: 0.8rem !important;
+        padding: 2px 8px !important;
+        min-height: 0 !important;
+        height: auto !important;
+        line-height: 1.4 !important;
+    }
+    div.refund-btn-wrapper button:hover {
+        background-color: #ff3333 !important;
+        color: #ffffff !important;
+        border-color: #ff3333 !important;
+    }
+    div.refund-btn-wrapper {
+        margin-top: -10px;
+        margin-bottom: 5px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="refund-btn-wrapper">', unsafe_allow_html=True)
+        if st.button(_("환불 및 취소 신청", "Refund & Cancellation"), key="sidebar_refund_btn"):
+            # Inject JS via st.components.v1.html to click the refund tab
+            import streamlit.components.v1 as components
+            components.html("""
+            <script>
+                (function() {
+                    try {
+                        var doc = window.parent.document;
+                        var tabs = doc.querySelectorAll('button[role="tab"]');
+                        for (var i = 0; i < tabs.length; i++) {
+                            var txt = tabs[i].textContent || '';
+                            if (txt.indexOf('\ud658\ubd88') !== -1 || txt.indexOf('Refund') !== -1) {
+                                tabs[i].click();
+                                break;
+                            }
+                        }
+                    } catch(e) { console.error(e); }
+                })();
+            </script>
+            """, height=0)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
