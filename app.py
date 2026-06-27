@@ -3649,13 +3649,12 @@ def get_fee_info_text():
     return _(
         """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료</h3>
+  <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료 <span style="font-size: 0.8rem; color: #e65100; font-weight: 600; margin-left: 6px;">💡 계산서 발급 가능</span></h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
     <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; margin-top: 2px;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
   </ul>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
-    <div style="margin-bottom: 8px; color: #e65100; font-size: 0.85rem; font-weight: 600;">💡 계산서 발급 가능</div>
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 서비스 제공기간:</div>
       <div>2개월</div>
@@ -3668,13 +3667,12 @@ def get_fee_info_text():
 </div>""",
         """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees</h3>
+  <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees <span style="font-size: 0.8rem; color: #e65100; font-weight: 600; margin-left: 6px;">💡 Tax Invoice Available</span></h3>
   <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
     <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
     <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months unlimited)</li>
   </ul>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
-    <div style="margin-bottom: 8px; color: #e65100; font-size: 0.85rem; font-weight: 600;">💡 Tax Invoice Available</div>
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Service Period:</div>
       <div>2 months after payment</div>
