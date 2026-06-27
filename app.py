@@ -3997,7 +3997,7 @@ with st.sidebar:
 
 
 
-    st.html(get_fee_info_text(), height=260)
+    st.html(get_fee_info_text())
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
