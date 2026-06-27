@@ -3689,9 +3689,22 @@ with st.sidebar:
 
 
     try:
-        st.image("ahp_master_logo.png", use_container_width=True)
+        import base64
+        with open("ahp_master_logo.png", "rb") as f:
+            encoded_logo = base64.b64encode(f.read()).decode()
+        st.markdown(
+            f'<a href="https://jeon080423.github.io/AHPkr" target="_blank">'
+            f'<img src="data:image/png;base64,{encoded_logo}" style="width:100%; border-radius: 4px; display: block; margin-bottom: 10px;">'
+            f'</a>',
+            unsafe_allow_html=True
+        )
     except:
-        st.subheader(_(" AHP 마스터", " AHP Master"))
+        st.markdown(
+            f'<a href="https://jeon080423.github.io/AHPkr" target="_blank" style="text-decoration: none; color: inherit;">'
+            f'<h3 style="margin-top: 0; margin-bottom: 10px;">{_(" AHP 마스터", " AHP Master")}</h3>'
+            f'</a>',
+            unsafe_allow_html=True
+        )
 
 
     if st.session_state.user_id is None:
