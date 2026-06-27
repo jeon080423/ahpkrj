@@ -3991,47 +3991,6 @@ with st.sidebar:
 
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
-    # --- 환불 버튼: st.button + streamlit-javascript로 탭 전환 ---
-    st.markdown("""
-    <style>
-    div.refund-btn-area button {
-        background-color: #ff4b4b !important;
-        color: #ffffff !important;
-        font-weight: normal !important;
-        font-size: 0.78rem !important;
-        padding: 2px 8px !important;
-        min-height: 0 !important;
-        height: auto !important;
-        line-height: 1.4 !important;
-    }
-    div.refund-btn-area button:hover {
-        background-color: #ff3333 !important;
-        color: #ffffff !important;
-        border-color: #ff3333 !important;
-    }
-    div.refund-btn-area {
-        margin-top: -8px;
-        margin-bottom: 5px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    st.markdown('<div class="refund-btn-area">', unsafe_allow_html=True)
-    if st.button(_("환불 및 취소 신청", "Refund & Cancellation"), key="sidebar_refund_btn"):
-        from streamlit_javascript import st_javascript
-        st_javascript("""
-            (function() {
-                var tabs = document.querySelectorAll('button[role="tab"]');
-                for (var i = 0; i < tabs.length; i++) {
-                    var t = tabs[i].textContent || '';
-                    if (t.indexOf('\ud658\ubd88') !== -1 || t.indexOf('Refund') !== -1) {
-                        tabs[i].click();
-                        return 'clicked';
-                    }
-                }
-                return 'not_found';
-            })()
-        """)
-    st.markdown('</div>', unsafe_allow_html=True)
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         import streamlit.components.v1 as components
