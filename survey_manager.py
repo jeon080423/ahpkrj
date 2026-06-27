@@ -28,7 +28,10 @@ def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwar
             else:
                 raise e
 
+@st.cache_resource
 def get_survey_gspread_client(user_id=None):
+    from google.oauth2.service_account import Credentials
+    import gspread
     """gspread 클라이언트를 반환합니다. 사용자 OAuth 우선, 없을 시 서비스 계정 사용."""
     if user_id:
         user_client = get_user_gspread_client(user_id)
