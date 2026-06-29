@@ -5789,10 +5789,10 @@ with col_main:
     
                                 total_excluded_df = pd.concat(total_excl_df_list, ignore_index=True)
                                 sheet_name_comp = _('종합분석', 'Comprehensive Analysis')
-                                current_row_ws = write_custom_ahp_table_v3(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
+                                current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
                                 for grp in unique_groups:
                                     if grp in group_full_dfs:
-                                        current_row_ws = write_custom_ahp_table_v3(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
+                                        current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
     
                                 if len(unique_groups) >= 1:
                                     ws_comp = workbook.add_worksheet('Group_Comparison')
