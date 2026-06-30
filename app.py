@@ -1076,6 +1076,11 @@ def init_db():
         conn.commit()
     except Exception:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN plan_type TEXT")
+        conn.commit()
+    except Exception:
+        pass
 
     c.execute('''CREATE TABLE IF NOT EXISTS saved_analyses
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, filename TEXT, save_date TEXT, file_data BLOB)''')
@@ -1811,13 +1816,19 @@ def get_all_users():
     conn.close()
     return df
 
-def update_user_full_info(user_id, new_pw, new_role, new_expiry):
+def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    if new_pw is not None and new_pw != "":
-        c.execute("UPDATE users SET pw=?, role=?, expiry_date=? WHERE id=?", (new_pw, new_role, new_expiry, user_id))
+    if plan_type:
+        if new_pw is not None and new_pw != "":
+            c.execute("UPDATE users SET pw=?, role=?, expiry_date=?, plan_type=? WHERE id=?", (new_pw, new_role, new_expiry, plan_type, user_id))
+        else:
+            c.execute("UPDATE users SET role=?, expiry_date=?, plan_type=? WHERE id=?", (new_role, new_expiry, plan_type, user_id))
     else:
-        c.execute("UPDATE users SET role=?, expiry_date=? WHERE id=?", (new_role, new_expiry, user_id))
+        if new_pw is not None and new_pw != "":
+            c.execute("UPDATE users SET pw=?, role=?, expiry_date=? WHERE id=?", (new_pw, new_role, new_expiry, user_id))
+        else:
+            c.execute("UPDATE users SET role=?, expiry_date=? WHERE id=?", (new_role, new_expiry, user_id))
     conn.commit()
     conn.close()
     
@@ -3472,10 +3483,12 @@ if "lang" in q_params:
 # PortOne 자동 결제 승격 처리
 if "portone_paid" in q_params and "user_id" in q_params:
     user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
+    months_param = int(q_params.get("months", ["2"])[0] if isinstance(q_params.get("months"), list) else q_params.get("months", 2))
+    plan_name_param = q_params.get("plan_name", ["정식 사용자"])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "정식 사용자")
     if user_id_param:
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-        new_expiry_date = (kst_now + relativedelta(months=2)).strftime("%Y-%m-%d")
-        update_user_full_info(user_id_param, None, "official", new_expiry_date)
+        new_expiry_date = (kst_now + relativedelta(months=months_param)).strftime("%Y-%m-%d")
+        update_user_full_info(user_id_param, None, "official", new_expiry_date, plan_type=plan_name_param)
         
         import hashlib
         login_token = hashlib.sha256(f"{user_id_param}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
@@ -3570,7 +3583,7 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
-def get_portone_payment_html(user_id):
+def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2):
     import hashlib
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
     # 이메일 형식 검증 (간단히 @ 포함 여부로 확인) 및 공백 제거
@@ -3584,7 +3597,7 @@ def get_portone_payment_html(user_id):
     </head>
     <body style="margin:0; padding:0; display:flex; justify-content:center;">
       <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
-        💳 정식 사용자 결제하기
+        💳 결제하기 ({plan_name})
       </button>
       <script>
         function openPaymentWindow() {{
@@ -3615,7 +3628,7 @@ def get_portone_payment_html(user_id):
              }}
           }} catch(e) {{}}
           if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
-          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}");
+          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}");
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
           script.onload = function() {{
@@ -3625,8 +3638,8 @@ def get_portone_payment_html(user_id):
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
               paymentId: "pay-" + r,
-              orderName: "정식 사용자",
-              totalAmount: 500000,
+              orderName: "{plan_name}",
+              totalAmount: {amount},
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
               redirectUrl: returnUrl,
@@ -3662,38 +3675,38 @@ def get_fee_info_text():
     return _(
         """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <h3 style="margin-top: 0; margin-bottom: 8px;">서비스 이용료 <span style="font-size: 0.8rem; color: #e65100; font-weight: 600; margin-left: 6px;">💡 계산서 발급 가능</span></h3>
-  <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
-    <li style="margin-bottom: 2px;"><b>무료사용자</b>: 5표본 분석 가능</li>
-    <li style="margin-bottom: 2px;"><b>정식 사용자</b>: 50만원 (2개월)<br><span style="font-size: 0.85rem; color: #555; display: inline-block; margin-top: 2px;">(온라인 설문 셋팅 대행 5만원, 셀프 무료)</span></li>
-  </ul>
+  <h3 style="margin-top: 0; margin-bottom: 8px;">환불 및 취소 규정</h3>
+  <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 모든 유료 플랜 세금계산서 발급 가능</span>
+  </div>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 서비스 제공기간:</div>
-      <div>2개월</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
       <div>불만족 100% 환불</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
       <div>30분 이내 취소 신청</div>
     </div>
   </div>
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #777;">
+    자세한 요금제는 <b>서비스 요금</b> 탭을 확인해 주세요.
+  </div>
 </div>""",
         """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <h3 style="margin-top: 0; margin-bottom: 8px;">Service Fees <span style="font-size: 0.8rem; color: #e65100; font-weight: 600; margin-left: 6px;">💡 Tax Invoice Available</span></h3>
-  <ul style="margin: 0; padding-left: 20px; margin-bottom: 8px;">
-    <li style="margin-bottom: 2px;"><b>Free User</b>: Free (5 samples limit, no other limitations)</li>
-    <li style="margin-bottom: 2px;"><b>Official User</b>: $350 USD (2 months unlimited)</li>
-  </ul>
+  <h3 style="margin-top: 0; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
+  <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice Available for all paid plans</span>
+  </div>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Service Period:</div>
-      <div>2 months after payment</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
       <div>100% Refund if unsatisfied</div>
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
     </div>
+  </div>
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #777;">
+    Please check the <b>Service Pricing</b> tab for detailed plans.
   </div>
 </div>"""
     )
@@ -3973,9 +3986,7 @@ with st.sidebar:
                     st.components.v1.html(paypal_html, height=180)
                 else:
                     st.markdown("##### 💳 정식 사용자 승격 결제")
-                    st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 2개월)")
-                    portone_html = get_portone_payment_html(st.session_state.user_id)
-                    st.components.v1.html(portone_html, height=60)
+                    st.info("메인 페이지의 **서비스 요금** 탭에서 결제를 진행해 주세요.")
         
     if st.session_state.user_id is not None:
         if st.session_state.user_role == 'admin':
@@ -4630,11 +4641,12 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_refund = st.tabs([
+    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_refund = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
         _("실시간 응답 현황", "Live Response Status"),
+        _("서비스 요금", "Service Pricing"),
         _("환불 및 취소 신청", "Refund & Cancellation Request")
     ])
         
@@ -6719,9 +6731,7 @@ with col_main:
                             else:
                                 st.markdown(_("### 💳 정식 사용자 승격 및 무제한 분석", "### 💳 Upgrade to Official User for Unlimited Analysis"))
                                 st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
-                                st.info("정식 사용자로 즉시 승격하시려면 아래 결제 버튼을 클릭해 주세요. (이용요금: 50만원 / 2개월)")
-                                portone_html = get_portone_payment_html(st.session_state.user_id)
-                                st.components.v1.html(portone_html, height=60)
+                                st.info("정식 사용자로 즉시 승격하시려면 상단의 **서비스 요금** 탭을 클릭하여 결제를 진행해 주세요.")
             except Exception as e:
                 st.error(f"파일 처리 오류 발생: {e}")
             
@@ -8216,6 +8226,80 @@ with col_main:
                     st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
             except Exception as err:
                 st.caption(f"로컬 백업 조회 불가: {err}")
+
+    with main_tab_pricing:
+        st.header(_("서비스 요금 안내", "Service Pricing"))
+        st.write(_("AHP MASTER는 논문 작성부터 전문 리서치까지 다양한 목적에 맞는 합리적인 요금제를 제공합니다.", "AHP MASTER offers reasonable pricing plans for various purposes."))
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+        
+        # 1개월
+        with col_p1:
+            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%;'>", unsafe_allow_html=True)
+            st.markdown("### 1개월\n<span style='color: #888; font-size: 1.2rem;'>Basic</span>", unsafe_allow_html=True)
+            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>300,000원</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #555;'>월 300,000원</p>", unsafe_allow_html=True)
+            st.caption("단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.")
+            st.markdown("---")
+            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 일반 이메일 지원")
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.session_state.user_id:
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 300000, 1), height=55)
+            else:
+                st.info("로그인 후 결제 가능합니다.")
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # 3개월
+        with col_p2:
+            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%; position: relative;'>", unsafe_allow_html=True)
+            st.markdown("<div style='position: absolute; top: -10px; right: 10px; background-color: #ff4b4b; color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;'>BEST</div>", unsafe_allow_html=True)
+            st.markdown("### 3개월\n<span style='color: #888; font-size: 1.2rem;'>Standard</span>", unsafe_allow_html=True)
+            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>750,000원</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #555;'>월 250,000원</p>", unsafe_allow_html=True)
+            st.caption("일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.")
+            st.markdown("---")
+            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 일반 이메일 지원")
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.session_state.user_id:
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (3개월)", 750000, 3), height=55)
+            else:
+                st.info("로그인 후 결제 가능합니다.")
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # 6개월
+        with col_p3:
+            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%;'>", unsafe_allow_html=True)
+            st.markdown("### 6개월\n<span style='color: #888; font-size: 1.2rem;'>Pro</span>", unsafe_allow_html=True)
+            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>1,320,000원</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #555;'>월 220,000원 <span style='color: #e65100;'>(12% 할인)</span></p>", unsafe_allow_html=True)
+            st.caption("대학 연구실 단위 및 다수 프로젝트를 진행하는 컨설팅 기업에 적합합니다.")
+            st.markdown("---")
+            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 최우선 기술/오류 지원\n- **설문 셋팅 1회 무료 대행**")
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.session_state.user_id:
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 1320000, 6), height=55)
+            else:
+                st.info("로그인 후 결제 가능합니다.")
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # 12개월
+        with col_p4:
+            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%;'>", unsafe_allow_html=True)
+            st.markdown("### 12개월\n<span style='color: #888; font-size: 1.2rem;'>Enterprise</span>", unsafe_allow_html=True)
+            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>2,160,000원</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #555;'>월 180,000원 <span style='color: #e65100;'>(28% 할인)</span></p>", unsafe_allow_html=True)
+            st.caption("기업 HR/기획팀 및 전문 리서치/컨설팅 펌에 적합합니다.")
+            st.markdown("---")
+            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 1:1 셋팅 컨설팅\n- **설문 셋팅 3회 무료 대행**")
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.session_state.user_id:
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 2160000, 12), height=55)
+            else:
+                st.info("로그인 후 결제 가능합니다.")
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+        st.markdown("<br><br>", unsafe_allow_html=True)
 
     with main_tab_refund:
         render_refund_form(is_standalone=False)
