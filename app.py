@@ -1768,12 +1768,12 @@ def check_login(user_id, pw):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     # 평문 패스워드 로그인 및 자동 업그레이드를 지원하기 위해 pw 컬럼도 함께 조회합니다.
-    c.execute("SELECT role, expiry_date, pw FROM users WHERE id=?", (user_id,))
+    c.execute("SELECT role, expiry_date, pw, plan_type FROM users WHERE id=?", (user_id,))
     row = c.fetchone()
     conn.close()
     
     if row:
-        stored_role, stored_expiry, stored_pw = row
+        stored_role, stored_expiry, stored_pw, stored_plan = row
         hashed_pw = hash_password(pw)
         
         # 평문 패스워드가 정확히 일치하거나 해시 패스워드가 일치하는 경우
@@ -1781,7 +1781,7 @@ def check_login(user_id, pw):
             # 평문 패스워드로 로그인 성공한 경우, 즉시 해시 패스워드로 업데이트 (보안 승급)
             if stored_pw == pw:
                 upgrade_user_password_to_hash(user_id, pw)
-            return stored_role, stored_expiry
+            return stored_role, stored_expiry, stored_plan
             
     return None
 
@@ -3802,6 +3802,7 @@ with st.sidebar:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
                         st.session_state.expiry_date = result[1]
+                        st.session_state.plan_type = result[2] if len(result) > 2 else None
                         st.query_params["login_user"] = l_id.strip()
                         st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                         st.query_params["last_activity"] = str(int(time.time()))
@@ -3841,7 +3842,13 @@ with st.sidebar:
                         st.error(_("등록되지 않은 아이디입니다.", "ID is not registered."))
 
     else:
-        role_disp = _("관리자", "Admin") if st.session_state.user_role == 'admin' else (_("정식 사용자", "Official User") if st.session_state.user_role == 'official' else _("무료사용자", "Free User"))
+        if st.session_state.user_role == 'admin':
+            role_disp = _("관리자", "Admin")
+        elif st.session_state.user_role == 'official':
+            pt = st.session_state.get('plan_type')
+            role_disp = f"{_('정식 사용자', 'Official User')} ({pt})" if pt else _("정식 사용자", "Official User")
+        else:
+            role_disp = _("무료사용자", "Free User")
         
         expiry_info = ""
         if st.session_state.expiry_date:
@@ -3933,6 +3940,7 @@ with st.sidebar:
             st.session_state.user_id = None
             st.session_state.user_role = None
             st.session_state.expiry_date = None
+            st.session_state.plan_type = None
             st.session_state.admin_mode = False
             st.session_state.signup_paypal_user = None
             st.session_state.signup_portone_user = None
@@ -4556,14 +4564,14 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_refund, main_tab_signup = st.tabs([
+    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup, main_tab_refund = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
         _("실시간 응답 현황", "Live Response Status"),
         _("서비스 요금", "Service Pricing"),
-        _("환불 및 취소 신청", "Refund & Cancellation Request"),
-        _("회원가입", "Sign Up")
+        _("회원가입", "Sign Up"),
+        _("환불 신청", "Refund Request")
     ])
         
     with main_tab1:
