@@ -3592,7 +3592,7 @@ def get_login_redirect_html(plan_name="정식 사용자"):
     </head>
     <body style="margin:0; padding:0; display:flex; justify-content:center;">
       <button onclick="alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 먼저 진행해주세요.'); window.parent.scrollTo(0, 0);" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
-        💳 결제하기 ({plan_name})
+        결제 {plan_name.split(" (")[0]}
       </button>
     </body>
     </html>
@@ -3612,7 +3612,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     </head>
     <body style="margin:0; padding:0; display:flex; justify-content:center;">
       <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
-        💳 결제하기 ({plan_name})
+        결제 {plan_name.split(" (")[0]}
       </button>
       <script>
         function openPaymentWindow() {{
@@ -8144,7 +8144,7 @@ with col_main:
         # 1개월
         with col_p1:
             st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px;'>
+            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
                 <h3 style='margin-bottom:0;'>1개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Basic</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>300,000원</h2>
@@ -8166,7 +8166,7 @@ with col_main:
         # 3개월
         with col_p2:
             st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 2px solid #ff4b4b; height: 480px; position: relative;'>
+            <div style='padding: 15px; border-radius: 10px; border: 2px solid #ff4b4b; height: 480px; position: relative; margin-bottom: 15px;'>
                 <div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>
                 <h3 style='margin-bottom:0;'>3개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Standard</span>
@@ -8189,7 +8189,7 @@ with col_main:
         # 6개월
         with col_p3:
             st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px;'>
+            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
                 <h3 style='margin-bottom:0;'>6개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Pro</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,320,000원</h2>
@@ -8212,7 +8212,7 @@ with col_main:
         # 12개월
         with col_p4:
             st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px;'>
+            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
                 <h3 style='margin-bottom:0;'>12개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Enterprise</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,160,000원</h2>
