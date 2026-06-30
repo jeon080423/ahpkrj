@@ -3591,7 +3591,7 @@ def get_login_redirect_html(plan_name="정식 사용자"):
       <meta charset="utf-8">
     </head>
     <body style="margin:0; padding:0; display:flex; justify-content:center;">
-      <button onclick="redirectSignup()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
+      <button onclick="redirectSignup()" style="width:100%; padding: 10px; background-color: #333333; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
         결제 {plan_name.split(" (")[0]}
       </button>
       <script>
@@ -3626,7 +3626,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
       <meta charset="utf-8">
     </head>
     <body style="margin:0; padding:0; display:flex; justify-content:center;">
-      <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
+      <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #333333; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
         결제 {plan_name.split(" (")[0]}
       </button>
       <script>
