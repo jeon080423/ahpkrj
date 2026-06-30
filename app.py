@@ -3595,19 +3595,19 @@ def get_login_redirect_html(plan_name="정식 사용자"):
         결제 {plan_name.split(" (")[0]}
       </button>
       <script>
-        function redirectSignup() {
+        function redirectSignup() {{
             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
-            for (let i = 0; i < tabs.length; i++) {
-                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {
+            for (let i = 0; i < tabs.length; i++) {{
+                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
                     tabs[i].click();
                     window.parent.scrollTo(0, 0);
                     return;
-                }
-            }
+                }}
+            }}
             // Fallback
             alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요.');
             window.parent.scrollTo(0, 0);
-        }
+        }}
       </script>
     </body>
     </html>
