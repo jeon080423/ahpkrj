@@ -8232,8 +8232,8 @@ with col_main:
             inner_1 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>1개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Basic</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>300,000원</h2>
-                <p style='color: #555; margin-top:0;'>월 300,000원</p>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>250,000원</h2>
+                <p style='color: #555; margin-top:0;'>월 250,000원</p>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8243,7 +8243,7 @@ with col_main:
                 </ul>
             """
             if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 300000, 1, inner_html=inner_1, is_best=False), height=520)
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 250000, 1, inner_html=inner_1, is_best=False), height=520)
             else:
                 st.components.v1.html(get_login_redirect_html("Basic (1개월)", inner_html=inner_1, is_best=False), height=520)
 
