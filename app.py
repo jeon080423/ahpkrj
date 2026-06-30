@@ -3672,7 +3672,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
               paymentId: "pay-" + r,
-              orderName: "{plan_name}",
+              orderName: "{plan_name} - {safe_email}",
               totalAmount: {amount},
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
