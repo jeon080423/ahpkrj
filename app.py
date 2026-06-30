@@ -3692,7 +3692,7 @@ def get_fee_info_text():
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <h3 style="margin-top: 0; margin-bottom: 8px;">환불 및 취소 규정</h3>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 모든 유료 플랜 세금계산서 발급 가능</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서 발급 가능</span>
   </div>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
@@ -3710,7 +3710,7 @@ def get_fee_info_text():
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <h3 style="margin-top: 0; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice Available for all paid plans</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice Available</span>
   </div>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
