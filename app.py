@@ -8141,7 +8141,7 @@ with col_main:
 
     with main_tab_pricing:
         st.header(_("서비스 요금 안내", "Service Pricing"))
-        st.write(_("AHP MASTER는 논문 작성부터 전문 리서치까지 다양한 목적에 맞는 합리적인 요금제를 제공합니다.", "AHP MASTER offers reasonable pricing plans for various purposes."))
+
         st.markdown("<br>", unsafe_allow_html=True)
         
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
