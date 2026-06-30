@@ -3583,6 +3583,21 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
+def get_login_redirect_html(plan_name="정식 사용자"):
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+    </head>
+    <body style="margin:0; padding:0; display:flex; justify-content:center;">
+      <button onclick="alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 먼저 진행해주세요.'); window.parent.scrollTo(0, 0);" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
+        💳 결제하기 ({plan_name})
+      </button>
+    </body>
+    </html>
+    """
+
 def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2):
     import hashlib
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
@@ -3734,7 +3749,7 @@ with st.sidebar:
 
 
     if st.session_state.user_id is None:
-        tab_login, tab_signup, tab_find_pw = st.tabs([_("로그인", "Login"), _("회원가입", "Sign Up"), _("비밀번호 찾기", "Find Password")])
+        tab_login, tab_find_pw = st.tabs([_("로그인", "Login"), _("비밀번호 찾기", "Find Password")])
         
         with tab_login:
             l_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="l_id")
@@ -3791,115 +3806,6 @@ with st.sidebar:
                 import streamlit.components.v1 as components
                 components.html(portone_html, height=60)
             
-        with tab_signup:
-            if st.session_state.get('signup_paypal_user') or st.session_state.get('signup_portone_user'):
-                is_en = st.session_state.get('lang', 'ko') == 'en'
-                user_id = st.session_state.signup_paypal_user if is_en else st.session_state.signup_portone_user
-                
-                if is_en:
-                    st.markdown("### 💳 Pending Official User Payment")
-                    st.info(
-                        f"Registration successful for **{user_id}**.\n\n"
-                        "To start immediately as an Official User, please complete the payment using the PayPal button below. (You will be logged in automatically as an Official User upon payment.)\n\n"
-                        "* If you choose to log in without paying now, you will start as a **Free User** and can upgrade anytime from the sidebar after logging in."
-                    )
-                    
-                    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
-                    paypal_html = f"""
-                    <div id="paypal-button-container-signup" style="text-align: center; max-width: 100%;"></div>
-                    <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
-                    <script>
-                      paypal.Buttons({{
-                        style: {{
-                          layout: 'vertical',
-                          color:  'gold',
-                          shape:  'rect',
-                          label:  'paypal',
-                          height: 40
-                        }},
-                        createOrder: function(data, actions) {{
-                          return actions.order.create({{
-                            purchase_units: [{{
-                              amount: {{
-                                value: '350.00'
-                              }},
-                              payee: {{
-                                email_address: 'jeon080423@gmail.com'
-                              }}
-                            }}]
-                          }});
-                        }},
-                        onApprove: function(data, actions) {{
-                          return actions.order.capture().then(function(details) {{
-                            window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
-                          }});
-                        }},
-                        onError: function(err) {{
-                          console.error(err);
-                          alert("Payment failed or was cancelled.");
-                        }}
-                      }}).render('#paypal-button-container-signup');
-                    </script>
-                    """
-                    st.components.v1.html(paypal_html, height=180)
-                else:
-                    st.markdown("### 💳 정식 사용자 결제 대기")
-                    st.info(
-                        f"**{user_id}**님, 계정 가입이 완료되었습니다.\n\n"
-                        "정식 사용자로 즉시 시작하시려면 아래 **[정식 사용자 결제하기]** 버튼을 통해 결제를 완료해 주십시오. (결제 완료 시 정식 사용자로 자동 로그인됩니다.)\n\n"
-                        "※ 지금 결제하지 않고 로그인하실 경우 **무료사용자** 권한으로 시작되며, 로그인 후 사이드바 하단에서 언제든지 정식사용자로 승격 결제하실 수 있습니다."
-                    )
-                    portone_html = get_portone_payment_html(user_id)
-                    st.components.v1.html(portone_html, height=60)
-                
-                if st.button(_("로그인 화면으로 돌아가기", "Back to Login / Sign Up"), use_container_width=True, key="back_to_login_btn"):
-                    if is_en:
-                        del st.session_state.signup_paypal_user
-                    else:
-                        del st.session_state.signup_portone_user
-                    st.rerun()
-            else:
-                agreements = show_agreement_ui()
-                s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="s_id")
-                s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="s_pw")
-                s_role_selection = st.radio(_("이용 권한 선택", "Select Account Type"), (_("무료사용자", "Free User"), _("정식 사용자 (2개월, 기능 무제한)", "Official User (2 Months, Unlimited)")), index=0)
-                
-                if "정식" in s_role_selection or "Official" in s_role_selection:
-                    if st.session_state.get('lang', 'ko') == 'en':
-                        st.warning(" Official User Signup Guide")
-                        st.info("Official users are registered as a **Free User** first.")
-                        st.info("You will be prompted to pay via **PayPal** immediately after clicking 'Register' to upgrade your account instantly. (Access period is 2 months)")
-                    else:
-                        st.warning(" 정식 사용자 가입 안내")
-                        st.info("가입신청 버튼을 클릭하시면 즉시 결제 창이 나타나며, 결제 완료 시 자동으로 정식 사용자로 승급됩니다.")
-                
-                if st.button(_("가입신청", "Register")):
-                    if not agreements.get("agree_personal_info"):
-                        st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
-                    elif not validate_email(s_id):
-                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                    elif not validate_password(s_pw):
-                        st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
-                    else:
-                        restore_from_deleted_sheet(s_id.strip())
-                        initial_role = 'temp'
-                        actual_requested_role = 'official' if ("정식" in s_role_selection or "Official" in s_role_selection) else 'temp'
-                        # 동의 기록을 'Y'로 저장
-                        if add_user(s_id.strip(), s_pw, initial_role, agree_info="Y"):
-                            if actual_requested_role == 'official':
-                                send_application_email(s_id.strip())
-                                if st.session_state.get('lang', 'ko') == 'en':
-                                    st.session_state.signup_paypal_user = s_id.strip()
-                                else:
-                                    st.session_state.signup_portone_user = s_id.strip()
-                                st.rerun()
-                            else:
-                                st.success(_("무료사용자로 가입 완료 되었습니다. 로그인 탭에서 로그인해주세요.", "Successfully registered as a Free User. Please log in on the Login tab."))
-                                time.sleep(2)
-                                st.rerun()
-                        else:
-                            st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
-
         with tab_find_pw:
             st.write(_("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.",
                        "Please enter the email address used at registration. A new temporary password will be sent to your email."))
@@ -4641,13 +4547,14 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_refund = st.tabs([
+    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_refund, main_tab_signup = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
         _("실시간 응답 현황", "Live Response Status"),
         _("서비스 요금", "Service Pricing"),
-        _("환불 및 취소 신청", "Refund & Cancellation Request")
+        _("환불 및 취소 신청", "Refund & Cancellation Request"),
+        _("회원가입", "Sign Up")
     ])
         
     with main_tab1:
@@ -8254,7 +8161,7 @@ with col_main:
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 300000, 1), height=55)
             else:
-                st.info("로그인 후 결제 가능합니다.")
+                st.components.v1.html(get_login_redirect_html("Basic (1개월)"), height=55)
 
         # 3개월
         with col_p2:
@@ -8277,7 +8184,7 @@ with col_main:
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (3개월)", 750000, 3), height=55)
             else:
-                st.info("로그인 후 결제 가능합니다.")
+                st.components.v1.html(get_login_redirect_html("Standard (3개월)"), height=55)
 
         # 6개월
         with col_p3:
@@ -8300,7 +8207,7 @@ with col_main:
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 1320000, 6), height=55)
             else:
-                st.info("로그인 후 결제 가능합니다.")
+                st.components.v1.html(get_login_redirect_html("Pro (6개월)"), height=55)
 
         # 12개월
         with col_p4:
@@ -8323,12 +8230,38 @@ with col_main:
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 2160000, 12), height=55)
             else:
-                st.info("로그인 후 결제 가능합니다.")
+                st.components.v1.html(get_login_redirect_html("Enterprise (12개월)"), height=55)
             
         st.markdown("<br><br>", unsafe_allow_html=True)
 
     with main_tab_refund:
         render_refund_form(is_standalone=False)
+
+    with main_tab_signup:
+        if st.session_state.user_id:
+            st.info(_("이미 로그인되어 있습니다.", "You are already logged in."))
+        else:
+            agreements = show_agreement_ui()
+            s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
+            s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
+            
+            if st.button(_("가입신청", "Register"), key="main_btn_signup"):
+                if not agreements.get("agree_personal_info"):
+                    st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
+                elif not validate_email(s_id):
+                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                elif not validate_password(s_pw):
+                    st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                else:
+                    restore_from_deleted_sheet(s_id.strip())
+                    # 가입 시 무조건 'temp' 권한으로 배정
+                    if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y"):
+                        st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
+                        import time
+                        time.sleep(2)
+                        st.rerun()
+                    else:
+                        st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
