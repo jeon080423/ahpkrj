@@ -545,15 +545,19 @@ div.stSelectbox > div > div:hover {
 }
 
 /* --- 탭 고급 스타일 --- */
+div[data-baseweb="tab-list"] {
+    gap: 0.2rem !important;
+}
 button[data-baseweb="tab"] {
     font-family: 'Pretendard', sans-serif !important;
     font-weight: 600 !important;
-    font-size: 0.95rem !important;
-    padding: 0.75rem 1rem !important;
+    font-size: 0.85rem !important;
+    padding: 0.5rem 0.6rem !important;
     border-radius: 0 !important; 
     border-bottom: 2px solid transparent !important;
     background: transparent !important;
     color: #64748b !important;
+    white-space: nowrap !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
     /* 기존 파란색 밑줄과 색상 강제 지정을 제거하여 Streamlit의 기본 Primary Color(코랄 레드)가 자연스럽게 적용되도록 함 */
