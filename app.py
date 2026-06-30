@@ -1069,7 +1069,7 @@ def init_db():
     # [수정] 구글 시트 구조에 맞춰 agree_info 및 배포통계 컬럼 추가
     c.execute('''CREATE TABLE IF NOT EXISTS users
                   (id TEXT PRIMARY KEY, role TEXT, signup_date TEXT, pw TEXT, expiry_date TEXT, agree_info TEXT, 
-                   survey_count INTEGER DEFAULT 0, last_survey_link TEXT)''')
+                   survey_count INTEGER DEFAULT 0, last_survey_link TEXT, plan_type TEXT)''')
     try:
         c.execute("ALTER TABLE users ADD COLUMN survey_count INTEGER DEFAULT 0")
         conn.commit()
@@ -1245,8 +1245,8 @@ def sync_db_from_sheets(silent=False):
                     c.execute("SELECT id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link FROM users WHERE id=?", (user_id,))
                     db_user = c.fetchone()
                     if not db_user:
-                        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                                  (user_id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link))
+                        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                                  (user_id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, None))
                         cnt += 1
                     else:
                         db_role, db_signup_date, db_pw, db_expiry_date, db_agree_info, db_survey_count, db_last_link = db_user[1], db_user[2], db_user[3], db_user[4], db_user[5], db_user[6], db_user[7]
@@ -1679,8 +1679,8 @@ def add_user(user_id, pw, role, agree_info="Y"):
     hashed_pw = hash_password(pw)
     try:
         # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link)
-        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, ""))
+        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, "", None))
         conn.commit()
         log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "")
         success = True
@@ -1767,9 +1767,14 @@ def upgrade_user_password_to_hash(user_id, pw):
 def check_login(user_id, pw):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    # 평문 패스워드 로그인 및 자동 업그레이드를 지원하기 위해 pw 컬럼도 함께 조회합니다.
-    c.execute("SELECT role, expiry_date, pw, plan_type FROM users WHERE id=?", (user_id,))
-    row = c.fetchone()
+    try:
+        c.execute("SELECT role, expiry_date, pw, plan_type FROM users WHERE id=?", (user_id,))
+        row = c.fetchone()
+    except sqlite3.OperationalError:
+        c.execute("SELECT role, expiry_date, pw FROM users WHERE id=?", (user_id,))
+        row = c.fetchone()
+        if row:
+            row = (row[0], row[1], row[2], None)
     conn.close()
     
     if row:
