@@ -8236,68 +8236,94 @@ with col_main:
         
         # 1개월
         with col_p1:
-            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%;'>", unsafe_allow_html=True)
-            st.markdown("### 1개월\n<span style='color: #888; font-size: 1.2rem;'>Basic</span>", unsafe_allow_html=True)
-            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>300,000원</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='color: #555;'>월 300,000원</p>", unsafe_allow_html=True)
-            st.caption("단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.")
-            st.markdown("---")
-            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 일반 이메일 지원")
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("""
+            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 350px;'>
+                <h3 style='margin-bottom:0;'>1개월</h3>
+                <span style='color: #888; font-size: 1.1rem;'>Basic</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>300,000원</h2>
+                <p style='color: #555; margin-top:0;'>월 300,000원</p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>모든 기능 무제한</b></li>
+                    <li>프로젝트 생성 무제한</li>
+                    <li>일반 이메일 지원</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 300000, 1), height=55)
             else:
                 st.info("로그인 후 결제 가능합니다.")
-            st.markdown("</div>", unsafe_allow_html=True)
 
         # 3개월
         with col_p2:
-            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%; position: relative;'>", unsafe_allow_html=True)
-            st.markdown("<div style='position: absolute; top: -10px; right: 10px; background-color: #ff4b4b; color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;'>BEST</div>", unsafe_allow_html=True)
-            st.markdown("### 3개월\n<span style='color: #888; font-size: 1.2rem;'>Standard</span>", unsafe_allow_html=True)
-            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>750,000원</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='color: #555;'>월 250,000원</p>", unsafe_allow_html=True)
-            st.caption("일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.")
-            st.markdown("---")
-            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 일반 이메일 지원")
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("""
+            <div style='padding: 15px; border-radius: 10px; border: 2px solid #ff4b4b; height: 350px; position: relative;'>
+                <div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>
+                <h3 style='margin-bottom:0;'>3개월</h3>
+                <span style='color: #888; font-size: 1.1rem;'>Standard</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>750,000원</h2>
+                <p style='color: #555; margin-top:0;'>월 250,000원</p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>모든 기능 무제한</b></li>
+                    <li>프로젝트 생성 무제한</li>
+                    <li>일반 이메일 지원</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (3개월)", 750000, 3), height=55)
             else:
                 st.info("로그인 후 결제 가능합니다.")
-            st.markdown("</div>", unsafe_allow_html=True)
 
         # 6개월
         with col_p3:
-            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%;'>", unsafe_allow_html=True)
-            st.markdown("### 6개월\n<span style='color: #888; font-size: 1.2rem;'>Pro</span>", unsafe_allow_html=True)
-            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>1,320,000원</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='color: #555;'>월 220,000원 <span style='color: #e65100;'>(12% 할인)</span></p>", unsafe_allow_html=True)
-            st.caption("대학 연구실 단위 및 다수 프로젝트를 진행하는 컨설팅 기업에 적합합니다.")
-            st.markdown("---")
-            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 최우선 기술/오류 지원\n- **설문 셋팅 1회 무료 대행**")
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("""
+            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 350px;'>
+                <h3 style='margin-bottom:0;'>6개월</h3>
+                <span style='color: #888; font-size: 1.1rem;'>Pro</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,320,000원</h2>
+                <p style='color: #555; margin-top:0;'>월 220,000원 <span style='color: #e65100; font-size: 0.8rem;'>(12% 할인)</span></p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 다수 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>모든 기능 무제한</b></li>
+                    <li>프로젝트 생성 무제한</li>
+                    <li>최우선 기술/오류 지원</li>
+                    <li><b>설문 셋팅 1회 무료 대행</b></li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 1320000, 6), height=55)
             else:
                 st.info("로그인 후 결제 가능합니다.")
-            st.markdown("</div>", unsafe_allow_html=True)
 
         # 12개월
         with col_p4:
-            st.markdown("<div style='padding: 20px; border-radius: 10px; border: 1px solid #ddd; height: 100%;'>", unsafe_allow_html=True)
-            st.markdown("### 12개월\n<span style='color: #888; font-size: 1.2rem;'>Enterprise</span>", unsafe_allow_html=True)
-            st.markdown("<h2 style='margin-top: 10px; color: #ff4b4b;'>2,160,000원</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='color: #555;'>월 180,000원 <span style='color: #e65100;'>(28% 할인)</span></p>", unsafe_allow_html=True)
-            st.caption("기업 HR/기획팀 및 전문 리서치/컨설팅 펌에 적합합니다.")
-            st.markdown("---")
-            st.markdown("- **모든 기능 무제한**\n- 프로젝트 생성 무제한\n- 1:1 셋팅 컨설팅\n- **설문 셋팅 3회 무료 대행**")
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("""
+            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 350px;'>
+                <h3 style='margin-bottom:0;'>12개월</h3>
+                <span style='color: #888; font-size: 1.1rem;'>Enterprise</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,160,000원</h2>
+                <p style='color: #555; margin-top:0;'>월 180,000원 <span style='color: #e65100; font-size: 0.8rem;'>(28% 할인)</span></p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기업 HR/기획팀 및 전문 리서치/컨설팅 펌에 적합합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>모든 기능 무제한</b></li>
+                    <li>프로젝트 생성 무제한</li>
+                    <li>1:1 셋팅 컨설팅</li>
+                    <li><b>설문 셋팅 3회 무료 대행</b></li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
             if st.session_state.user_id:
                 st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 2160000, 12), height=55)
             else:
                 st.info("로그인 후 결제 가능합니다.")
-            st.markdown("</div>", unsafe_allow_html=True)
             
         st.markdown("<br><br>", unsafe_allow_html=True)
 
