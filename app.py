@@ -3591,9 +3591,24 @@ def get_login_redirect_html(plan_name="정식 사용자"):
       <meta charset="utf-8">
     </head>
     <body style="margin:0; padding:0; display:flex; justify-content:center;">
-      <button onclick="alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 먼저 진행해주세요.'); window.parent.scrollTo(0, 0);" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
+      <button onclick="redirectSignup()" style="width:100%; padding: 10px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
         결제 {plan_name.split(" (")[0]}
       </button>
+      <script>
+        function redirectSignup() {
+            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {
+                    tabs[i].click();
+                    window.parent.scrollTo(0, 0);
+                    return;
+                }
+            }
+            // Fallback
+            alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요.');
+            window.parent.scrollTo(0, 0);
+        }
+      </script>
     </body>
     </html>
     """
