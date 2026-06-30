@@ -8272,8 +8272,8 @@ with col_main:
             inner_6 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>6개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Pro</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,300,000원</h2>
-                <p style='color: #555; margin-top:0;'>월 약 216,000원 <span style='color: #e65100; font-size: 0.8rem;'>(13% 할인)</span></p>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
+                <p style='color: #555; margin-top:0;'>월 약 158,000원</p>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8284,7 +8284,7 @@ with col_main:
                 </ul>
             """
             if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 1300000, 6, inner_html=inner_6, is_best=False), height=520)
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 950000, 6, inner_html=inner_6, is_best=False), height=520)
             else:
                 st.components.v1.html(get_login_redirect_html("Pro (6개월)", inner_html=inner_6, is_best=False), height=520)
 
@@ -8293,8 +8293,8 @@ with col_main:
             inner_12 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>12개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Enterprise</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,200,000원</h2>
-                <p style='color: #555; margin-top:0;'>월 약 183,000원 <span style='color: #e65100; font-size: 0.8rem;'>(27% 할인)</span></p>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,900,000원</h2>
+                <p style='color: #555; margin-top:0;'>월 약 158,000원</p>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기업 HR/기획팀 및 전문 리서치/컨설팅 펌에 적합합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8305,7 +8305,7 @@ with col_main:
                 </ul>
             """
             if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 2200000, 12, inner_html=inner_12, is_best=False), height=520)
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 1900000, 12, inner_html=inner_12, is_best=False), height=520)
             else:
                 st.components.v1.html(get_login_redirect_html("Enterprise (12개월)", inner_html=inner_12, is_best=False), height=520)
             
