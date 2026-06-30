@@ -8162,7 +8162,7 @@ with col_main:
         with col_p1:
             st.markdown("""
             <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
-                <h3 style='margin-bottom:0;'>1개월</h3>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>1개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Basic</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>300,000원</h2>
                 <p style='color: #555; margin-top:0;'>월 300,000원</p>
@@ -8185,7 +8185,7 @@ with col_main:
             st.markdown("""
             <div style='padding: 15px; border-radius: 10px; border: 2px solid #ff4b4b; height: 480px; position: relative; margin-bottom: 15px;'>
                 <div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>
-                <h3 style='margin-bottom:0;'>3개월</h3>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>3개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Standard</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>750,000원</h2>
                 <p style='color: #555; margin-top:0;'>월 250,000원</p>
@@ -8207,11 +8207,11 @@ with col_main:
         with col_p3:
             st.markdown("""
             <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
-                <h3 style='margin-bottom:0;'>6개월</h3>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>6개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Pro</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,300,000원</h2>
                 <p style='color: #555; margin-top:0;'>월 약 216,000원 <span style='color: #e65100; font-size: 0.8rem;'>(13% 할인)</span></p>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 다수 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                     <li><b>모든 기능 무제한</b></li>
@@ -8230,7 +8230,7 @@ with col_main:
         with col_p4:
             st.markdown("""
             <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
-                <h3 style='margin-bottom:0;'>12개월</h3>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>12개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Enterprise</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,200,000원</h2>
                 <p style='color: #555; margin-top:0;'>월 약 183,000원 <span style='color: #e65100; font-size: 0.8rem;'>(27% 할인)</span></p>
