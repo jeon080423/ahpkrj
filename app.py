@@ -8154,8 +8154,6 @@ with col_main:
     with main_tab_pricing:
         st.header(_("서비스 요금 안내", "Service Pricing"))
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         
         # 1개월
