@@ -3810,16 +3810,6 @@ with st.sidebar:
                 else:
                     st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
             
-            # [신규 추가] 비회원 / 임시 사용자 결제 위젯
-            st.divider()
-            st.markdown(_("### 💳 정식 사용자 결제", "### 💳 Official User Payment"))
-            if not l_id.strip() or not l_pw.strip():
-                st.info(_("결제 진행을 위해 아이디와 비밀번호를 모두 입력해주세요", "Please enter both your ID and Password to proceed with payment."))
-            else:
-                st.caption(_(f"입력하신 이메일({l_id.strip()}) 계정으로 정식 사용자 결제가 진행됩니다.", f"Payment will be processed for the entered Email ID ({l_id.strip()})."))
-                portone_html = get_portone_payment_html(l_id.strip())
-                import streamlit.components.v1 as components
-                components.html(portone_html, height=60)
             
         with tab_find_pw:
             st.write(_("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.",
