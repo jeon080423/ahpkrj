@@ -3587,17 +3587,50 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
-def get_login_redirect_html(plan_name="정식 사용자"):
+def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False):
+    border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
+    best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     return f"""
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            {border_css}
+            height: 480px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .btn {{
+            margin-top: auto;
+            width: 100%;
+            padding: 12px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
+        }}
+        .btn:hover {{ background-color: #555555; }}
+      </style>
     </head>
-    <body style="margin:0; padding:0; display:flex; justify-content:center;">
-      <button onclick="redirectSignup()" style="width:100%; padding: 10px; background-color: #333333; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
-        결제 {plan_name.split(" (")[0]}
-      </button>
+    <body>
+      <div class="pricing-box">
+          {best_badge}
+          <div>{inner_html}</div>
+          <button class="btn" onclick="redirectSignup()">결제 {plan_name.split(" (")[0]}</button>
+      </div>
       <script>
         function redirectSignup() {{
             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
@@ -3617,22 +3650,55 @@ def get_login_redirect_html(plan_name="정식 사용자"):
     </html>
     """
 
-def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2):
+def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2, inner_html="", is_best=False):
     import hashlib
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
     # 이메일 형식 검증 (간단히 @ 포함 여부로 확인) 및 공백 제거
     safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
     
+    border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
+    best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     return f"""
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            {border_css}
+            height: 480px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .btn {{
+            margin-top: auto;
+            width: 100%;
+            padding: 12px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
+        }}
+        .btn:hover {{ background-color: #555555; }}
+      </style>
     </head>
-    <body style="margin:0; padding:0; display:flex; justify-content:center;">
-      <button onclick="openPaymentWindow()" style="width:100%; padding: 10px; background-color: #333333; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; font-family: sans-serif;">
-        결제 {plan_name.split(" (")[0]}
-      </button>
+    <body>
+      <div class="pricing-box">
+          {best_badge}
+          <div>{inner_html}</div>
+          <button class="btn" onclick="openPaymentWindow()">결제 {plan_name.split(" (")[0]}</button>
+      </div>
       <script>
         function openPaymentWindow() {{
           const win = window.open("", "_blank", "width=850,height=700");
@@ -8158,8 +8224,7 @@ with col_main:
         
         # 1개월
         with col_p1:
-            st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
+            inner_1 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>1개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Basic</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>300,000원</h2>
@@ -8171,18 +8236,15 @@ with col_main:
                     <li>프로젝트 생성 무제한</li>
                     <li>일반 이메일 지원</li>
                 </ul>
-            </div>
-            """, unsafe_allow_html=True)
+            """
             if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 300000, 1), height=55)
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 300000, 1, inner_html=inner_1, is_best=False), height=520)
             else:
-                st.components.v1.html(get_login_redirect_html("Basic (1개월)"), height=55)
+                st.components.v1.html(get_login_redirect_html("Basic (1개월)", inner_html=inner_1, is_best=False), height=520)
 
         # 3개월
         with col_p2:
-            st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 2px solid #ff4b4b; height: 480px; position: relative; margin-bottom: 15px;'>
-                <div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>
+            inner_3 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>3개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Standard</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>750,000원</h2>
@@ -8194,17 +8256,15 @@ with col_main:
                     <li>프로젝트 생성 무제한</li>
                     <li>일반 이메일 지원</li>
                 </ul>
-            </div>
-            """, unsafe_allow_html=True)
+            """
             if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (3개월)", 750000, 3), height=55)
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (3개월)", 750000, 3, inner_html=inner_3, is_best=True), height=520)
             else:
-                st.components.v1.html(get_login_redirect_html("Standard (3개월)"), height=55)
+                st.components.v1.html(get_login_redirect_html("Standard (3개월)", inner_html=inner_3, is_best=True), height=520)
 
         # 6개월
         with col_p3:
-            st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
+            inner_6 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>6개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Pro</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,300,000원</h2>
@@ -8217,17 +8277,15 @@ with col_main:
                     <li>최우선 기술/오류 지원</li>
                     <li><b>설문 셋팅 1회 무료 대행</b></li>
                 </ul>
-            </div>
-            """, unsafe_allow_html=True)
+            """
             if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 1300000, 6), height=55)
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 1300000, 6, inner_html=inner_6, is_best=False), height=520)
             else:
-                st.components.v1.html(get_login_redirect_html("Pro (6개월)"), height=55)
+                st.components.v1.html(get_login_redirect_html("Pro (6개월)", inner_html=inner_6, is_best=False), height=520)
 
         # 12개월
         with col_p4:
-            st.markdown("""
-            <div style='padding: 15px; border-radius: 10px; border: 1px solid #ddd; height: 480px; margin-bottom: 15px;'>
+            inner_12 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>12개월</h3>
                 <span style='color: #888; font-size: 1.1rem;'>Enterprise</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,200,000원</h2>
@@ -8240,12 +8298,11 @@ with col_main:
                     <li>1:1 셋팅 컨설팅</li>
                     <li><b>설문 셋팅 3회 무료 대행</b></li>
                 </ul>
-            </div>
-            """, unsafe_allow_html=True)
+            """
             if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 2200000, 12), height=55)
+                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 2200000, 12, inner_html=inner_12, is_best=False), height=520)
             else:
-                st.components.v1.html(get_login_redirect_html("Enterprise (12개월)"), height=55)
+                st.components.v1.html(get_login_redirect_html("Enterprise (12개월)", inner_html=inner_12, is_best=False), height=520)
             
         st.markdown("<br><br>", unsafe_allow_html=True)
 
