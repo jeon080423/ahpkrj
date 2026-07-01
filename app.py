@@ -3775,6 +3775,254 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     </html>
     """
 
+def get_portone_custom_services_html(user_id=None):
+    import hashlib
+    login_token = ""
+    safe_email = "test@ahp.kr"
+    if user_id:
+        login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+        safe_email = user_id.strip() if "@" in user_id else "test@ahp.kr"
+
+    is_logged_in = "true" if user_id else "false"
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 1px solid #ddd;
+            height: 480px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .title {{ margin-top: 0 !important; margin-bottom: 0; font-size: 1.3rem; font-weight: bold; color: #333; }}
+        .subtitle {{ color: #888; font-size: 1.1rem; }}
+        .price-container {{ margin-top: 15px; margin-bottom: 5px; }}
+        .price {{ color: #ff4b4b; font-size: 2rem; font-weight: bold; margin: 0; }}
+        .period {{ color: #555; margin-top:0; font-size: 1rem; }}
+        .desc {{ font-size: 0.85rem; color: #666; min-height: 40px; margin: 0; }}
+        .divider {{ margin: 10px 0; border: 0; border-top: 1px solid #eee; }}
+        
+        .svc-list {{
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.8;
+            flex-grow: 1;
+        }}
+        .svc-item {{
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }}
+        .svc-item input[type="checkbox"] {{
+            margin-right: 8px;
+            margin-top: 4px;
+            cursor: pointer;
+            accent-color: #ff4b4b;
+        }}
+        .svc-item span {{
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }}
+        
+        .btn {{
+            margin-top: auto;
+            width: 100%;
+            padding: 12px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
+        }}
+        .btn:hover {{ background-color: #555555; }}
+      </style>
+    </head>
+    <body>
+      <div class="pricing-box">
+          <h3 class="title">부가 서비스 대행</h3>
+          <span class="subtitle">Custom Services</span>
+          <div class="price-container">
+              <h2 class="price" id="totalPriceDisplay">0원</h2>
+          </div>
+          <p class="period">선택된 서비스 합계 금액</p>
+          <p class="desc" id="statusDesc">필요한 대행 서비스를 선택해 주세요.</p>
+          <hr class="divider">
+          
+          <ul class="svc-list">
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅" onchange="updatePrice()">
+                      <span>AHP 온라인 설문 셋팅<br><span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_2" value="50000" data-name="결과 분석 대행" onchange="updatePrice()">
+                      <span>AHP 결과 분석 대행<br><span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 엑셀 양식 설정 대행" onchange="updatePrice()">
+                      <span>AHP 코딩 엑셀 양식 설정 대행<br><span style="color: #666; font-size: 0.75rem;">(30,000원)</span></span>
+                  </label>
+              </li>
+          </ul>
+          
+          <button class="btn" id="payBtn" onclick="handlePayAction()">결제하기</button>
+      </div>
+      
+      <script>
+        function updatePrice() {{
+            const opt1 = document.getElementById("svc_opt_1");
+            const opt2 = document.getElementById("svc_opt_2");
+            const opt3 = document.getElementById("svc_opt_3");
+            
+            let total = 0;
+            let count = 0;
+            if (opt1.checked) {{ total += parseInt(opt1.value); count++; }}
+            if (opt2.checked) {{ total += parseInt(opt2.value); count++; }}
+            if (opt3.checked) {{ total += parseInt(opt3.value); count++; }}
+            
+            document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + "원";
+            if (count > 0) {{
+                document.getElementById("statusDesc").innerText = "선택된 대행 서비스 총 " + count + "건";
+                document.getElementById("payBtn").innerText = "결제하기";
+                document.getElementById("payBtn").style.backgroundColor = "#ff4b4b";
+            }} else {{
+                document.getElementById("statusDesc").innerText = "필요한 대행 서비스를 선택해 주세요.";
+                document.getElementById("payBtn").innerText = "옵션을 선택해주세요";
+                document.getElementById("payBtn").style.backgroundColor = "#333333";
+            }}
+        }}
+        
+        updatePrice();
+        
+        function handlePayAction() {{
+            const opt1 = document.getElementById("svc_opt_1");
+            const opt2 = document.getElementById("svc_opt_2");
+            const opt3 = document.getElementById("svc_opt_3");
+            
+            let total = 0;
+            let items = [];
+            if (opt1.checked) {{ total += parseInt(opt1.value); items.push(opt1.getAttribute("data-name")); }}
+            if (opt2.checked) {{ total += parseInt(opt2.value); items.push(opt2.getAttribute("data-name")); }}
+            if (opt3.checked) {{ total += parseInt(opt3.value); items.push(opt3.getAttribute("data-name")); }}
+            
+            if (total === 0) {{
+                alert("결제하실 부가 서비스 대행 옵션을 하나 이상 선택해주세요.");
+                return;
+            }}
+            
+            if ({is_logged_in}) {{
+                openPaymentWindow(total, items.join(", "));
+            }} else {{
+                redirectSignup();
+            }}
+        }}
+        
+        function redirectSignup() {{
+            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+            for (let i = 0; i < tabs.length; i++) {{
+                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
+                    tabs[i].click();
+                    window.parent.scrollTo(0, 0);
+                    return;
+                }}
+            }}
+            alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요.');
+            window.parent.scrollTo(0, 0);
+        }}
+        
+        function openPaymentWindow(amount, planName) {{
+          const win = window.open("", "_blank", "width=850,height=700");
+          if (!win) {{
+             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             return;
+          }}
+          win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>안전 결제 진행</title>
+            </head>
+            <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
+              <h3 id="statusMsg">결제 모듈을 안전하게 불러오는 중입니다...</h3>
+              <p>이 창을 닫지 마세요.</p>
+            </body>
+            </html>
+          `);
+          win.document.close();
+          
+          let baseOrigin = "https://ahpkrj.streamlit.app";
+          try {{
+             if (window.top && window.top.location && window.top.location.origin && window.top.location.origin !== "null") {{
+                 baseOrigin = window.top.location.origin + window.top.location.pathname;
+             }}
+          }} catch(e) {{}}
+          if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
+          
+          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months=0&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
+          
+          const script = win.document.createElement("script");
+          script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+          script.onload = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
+            const r = Math.random().toString(36).substring(2, 15);
+            win.PortOne.requestPayment({{
+              storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
+              channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
+              paymentId: "pay-" + r,
+              orderName: "부가 서비스: " + planName + " - {safe_email}",
+              totalAmount: amount,
+              currency: "CURRENCY_KRW",
+              payMethod: "CARD",
+              redirectUrl: returnUrl,
+              customer: {{
+                email: "{safe_email}",
+                fullName: "사용자",
+                phoneNumber: "010-0000-0000"
+              }}
+            }}).then(function(response) {{
+              if (response.code != null) {{
+                alert("결제 실패: " + response.message);
+                win.close();
+              }} else {{
+                win.location.href = returnUrl;
+              }}
+            }}).catch(function(error) {{
+              alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+              win.close();
+            }});
+          }};
+          script.onerror = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
+          }};
+          win.document.head.appendChild(script);
+        }}
+      </script>
+    </body>
+    </html>
+    """
+
 
 def get_fee_info_text():
     return _(
@@ -8290,60 +8538,7 @@ with col_main:
 
         # 부가 서비스 대행
         with col_p4:
-            st.markdown("<h5 style='text-align: center; color: #333; margin-top: 0; margin-bottom: 10px;'>부가 서비스 대행</h5>", unsafe_allow_html=True)
-            
-            # 서비스 옵션 체크박스
-            svc_1 = st.checkbox("온라인 설문 (+5만)", key="svc_1")
-            svc_2 = st.checkbox("결과 분석 (+5만)", key="svc_2")
-            svc_3 = st.checkbox("엑셀 설정 (+3만)", key="svc_3")
-            
-            total_svc_price = 0
-            svc_items = []
-            
-            if svc_1:
-                total_svc_price += 50000
-                svc_items.append("온라인 설문 셋팅")
-            if svc_2:
-                total_svc_price += 50000
-                svc_items.append("결과 분석 대행")
-            if svc_3:
-                total_svc_price += 30000
-                svc_items.append("코딩 엑셀 양식 설정")
-                
-            if svc_items:
-                svc_title = "부가 서비스: " + ", ".join(svc_items)
-                svc_display_text = f"선택된 서비스 {len(svc_items)}건"
-            else:
-                svc_title = "부가 서비스 선택"
-                svc_display_text = "필요한 서비스를 선택해주세요."
-                
-            inner_svc = f"""
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>부가 서비스</h3>
-                <span style='color: #888; font-size: 1.0rem;'>Custom Services</span>
-                <h2 style='margin-top: 10px; margin-bottom: 5px; color: #ff4b4b; font-size: 1.5rem;'>{total_svc_price:,}원</h2>
-                <p style='color: #555; margin-top:0; font-size: 0.85rem;'>합계 금액</p>
-                <p style='font-size: 0.8rem; color: #666; min-height: 35px;'>{svc_display_text}</p>
-                <hr style='margin: 8px 0;'>
-                <ul style='font-size: 0.8rem; padding-left: 15px; color: #333; line-height: 1.4;'>
-            """
-            if svc_items:
-                for item in svc_items:
-                    inner_svc += f"<li>{item}</li>"
-            else:
-                inner_svc += "<li><span style='color: #999;'>선택 내역 없음</span></li>"
-                
-            inner_svc += """
-                </ul>
-            """
-            
-            # 체크박스 영역의 높이를 감안하여 iframe의 높이를 360px로 조정해 전체 높이를 맞춥니다.
-            if total_svc_price > 0:
-                if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, svc_title, total_svc_price, 0, inner_html=inner_svc, is_best=False), height=360)
-                else:
-                    st.components.v1.html(get_login_redirect_html(svc_title, inner_html=inner_svc, is_best=False), height=360)
-            else:
-                st.components.v1.html(get_login_redirect_html(svc_title, inner_html=inner_svc, is_best=False), height=360)
+            st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
             
         st.markdown("<br><br>", unsafe_allow_html=True)
 
