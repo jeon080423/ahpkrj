@@ -3579,14 +3579,36 @@ if "paypal_order_id" in q_params:
         user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
         target_user = current_user or user_id_param
         if target_user:
+            months_param = int(q_params.get("months", ["2"])[0] if isinstance(q_params.get("months"), list) else q_params.get("months", 2))
+            plan_name_param = q_params.get("plan_name", ["정식 사용자"])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "정식 사용자")
+            
             kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-            new_expiry_date = (kst_now + relativedelta(months=2)).strftime("%Y-%m-%d")
-            update_user_full_info(target_user, None, "official", new_expiry_date)
+            
+            # 기존 사용자 정보 조회
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("SELECT role, expiry_date FROM users WHERE id=?", (target_user,))
+            res = c.fetchone()
+            conn.close()
+            
+            current_role = "temp"
+            current_expiry = kst_now.strftime("%Y-%m-%d")
+            if res:
+                current_role, current_expiry = res[0], res[1]
+                
+            if months_param > 0:
+                new_expiry_date = (kst_now + relativedelta(months=months_param)).strftime("%Y-%m-%d")
+                target_role = "official"
+            else:
+                new_expiry_date = current_expiry
+                target_role = current_role
+                
+            update_user_full_info(target_user, None, target_role, new_expiry_date, plan_type=plan_name_param)
             
             if st.session_state.get("user_id") == target_user:
-                st.session_state.user_role = "official"
+                st.session_state.user_role = target_role
                 st.session_state.expiry_date = new_expiry_date
-            st.toast("🎉 PayPal Payment successful! Account upgraded to Official User.")
+            st.toast("🎉 PayPal Payment successful! Account upgraded/updated.")
     else:
         st.error(f"Payment verification failed: {msg}")
         
@@ -4040,6 +4062,274 @@ def get_portone_custom_services_html(user_id=None):
             win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
           }};
           win.document.head.appendChild(script);
+        }}
+      </script>
+    </body>
+    </html>
+    """
+
+def get_paypal_payment_html(user_id, plan_name="Official User", amount_usd=162.00, months=1, inner_html="", is_best=False):
+    import hashlib
+    login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+    border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
+    best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
+    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            {border_css}
+            height: 480px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .paypal-btn-container {{
+            margin-top: auto;
+            width: 100%;
+        }}
+      </style>
+    </head>
+    <body>
+      <div class="pricing-box">
+          {best_badge}
+          <div>{inner_html}</div>
+          <div class="paypal-btn-container" id="paypal-button-container"></div>
+      </div>
+      <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
+      <script>
+        paypal.Buttons({{
+          style: {{
+            layout: 'vertical',
+            color:  'gold',
+            shape:  'rect',
+            label:  'paypal',
+            height: 40
+          }},
+          createOrder: function(data, actions) {{
+            return actions.order.create({{
+              purchase_units: [{{
+                amount: {{
+                  value: '{amount_usd:.2f}'
+                }},
+                description: '{plan_name}'
+              }}]
+            }});
+          }},
+          onApprove: function(data, actions) {{
+            return actions.order.capture().then(function(details) {{
+              window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}");
+            }});
+          }},
+          onError: function(err) {{
+            alert('PayPal payment failed or was cancelled.');
+          }}
+        }}).render('#paypal-button-container');
+      </script>
+    </body>
+    </html>
+    """
+
+
+def get_paypal_custom_services_html(user_id=None):
+    import hashlib
+    login_token = ""
+    safe_email = "test@ahp.kr"
+    if user_id:
+        login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+        safe_email = user_id.strip() if "@" in user_id else "test@ahp.kr"
+
+    is_logged_in = "true" if user_id else "false"
+    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 1px solid #ddd;
+            height: 480px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .title {{ margin-top: 0 !important; margin-bottom: 0; font-size: 1.3rem; font-weight: bold; color: #333; }}
+        .subtitle {{ color: #888; font-size: 1.1rem; }}
+        .price-container {{ margin-top: 15px; margin-bottom: 5px; }}
+        .price {{ color: #ff4b4b; font-size: 2rem; font-weight: bold; margin: 0; }}
+        .period {{ color: #555; margin-top:0; font-size: 1rem; }}
+        .desc {{ font-size: 0.85rem; color: #666; min-height: 40px; margin: 0; }}
+        .divider {{ margin: 10px 0; border: 0; border-top: 1px solid #eee; }}
+        
+        .svc-list {{
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.8;
+            flex-grow: 1;
+        }}
+        .svc-item {{
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }}
+        .svc-item input[type="checkbox"] {{
+            margin-right: 8px;
+            margin-top: 4px;
+            cursor: pointer;
+            accent-color: #ff4b4b;
+        }}
+        .svc-item span {{
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }}
+        .paypal-btn-container {{
+            margin-top: auto;
+            width: 100%;
+            min-height: 40px;
+        }}
+      </style>
+    </head>
+    <body>
+      <div class="pricing-box">
+          <h3 class="title">Proxy Services</h3>
+          <span class="subtitle">Custom Services</span>
+          <div class="price-container">
+              <h2 class="price" id="totalPriceDisplay">$0 USD</h2>
+          </div>
+          <p class="period">Total Selected Amount</p>
+          <p class="desc" id="statusDesc">Please select the proxy services you need.</p>
+          <hr class="divider">
+          
+          <ul class="svc-list">
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_1" value="33" data-name="Online Survey Setup" onchange="updatePrice()">
+                      <span>AHP Online Survey Setup<br><span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_2" value="33" data-name="Result Analysis Proxy" onchange="updatePrice()">
+                      <span>AHP Result Analysis Proxy<br><span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_3" value="20" data-name="Coding Excel Sheet Setup" onchange="updatePrice()">
+                      <span>AHP Coding Excel Sheet Setup<br><span style="color: #666; font-size: 0.75rem;">($20 USD)</span></span>
+                  </label>
+              </li>
+          </ul>
+          
+          <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
+              Proxy Request/Inquiry : <br>Kakao Talk ID: <b>AHPkr</b>
+          </div>
+          
+          <div class="paypal-btn-container" id="paypal-button-container"></div>
+      </div>
+      
+      <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
+      <script>
+        function updatePrice() {{
+            const opt1 = document.getElementById("svc_opt_1");
+            const opt2 = document.getElementById("svc_opt_2");
+            const opt3 = document.getElementById("svc_opt_3");
+            
+            let total = 0;
+            let count = 0;
+            let items = [];
+            if (opt1.checked) {{ total += parseInt(opt1.value); count++; items.push(opt1.getAttribute("data-name")); }}
+            if (opt2.checked) {{ total += parseInt(opt2.value); count++; items.push(opt2.getAttribute("data-name")); }}
+            if (opt3.checked) {{ total += parseInt(opt3.value); count++; items.push(opt3.getAttribute("data-name")); }}
+            
+            document.getElementById("totalPriceDisplay").innerText = "$" + total.toLocaleString() + " USD";
+            
+            if (count > 0) {{
+                document.getElementById("statusDesc").innerText = "Selected services: " + count + " item(s)";
+            }} else {{
+                document.getElementById("statusDesc").innerText = "Please select the proxy services you need.";
+            }}
+            
+            renderPaypalButton(total, items.join(", "));
+        }}
+        
+        function renderPaypalButton(amount, planName) {{
+            const container = document.getElementById("paypal-button-container");
+            container.innerHTML = "";
+            
+            if (amount === 0) {{
+                container.innerHTML = '<div style="text-align: center; padding: 10px; background: #eee; font-size: 0.85rem; border-radius: 5px; color: #777; font-weight: bold;">Select an option above</div>';
+                return;
+            }}
+            
+            paypal.Buttons({{
+              style: {{
+                layout: 'vertical',
+                color:  'gold',
+                shape:  'rect',
+                label:  'paypal',
+                height: 35
+              }},
+              createOrder: function(data, actions) {{
+                if (!{is_logged_in}) {{
+                    redirectSignup();
+                    return Promise.reject("Sign in required");
+                }}
+                return actions.order.create({{
+                  purchase_units: [{{
+                    amount: {{
+                      value: amount.toFixed(2)
+                    }},
+                    description: "Proxy Services: " + planName
+                  }}]
+                }});
+              }},
+              onApprove: function(data, actions) {{
+                return actions.order.capture().then(function(details) {{
+                  window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months=0&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
+                }});
+              }},
+              onError: function(err) {{
+                alert('PayPal payment failed or was cancelled.');
+              }}
+            }}).render('#paypal-button-container');
+        }}
+        
+        updatePrice();
+        
+        function redirectSignup() {{
+            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+            for (let i = 0; i < tabs.length; i++) {{
+                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
+                    tabs[i].click();
+                    window.parent.scrollTo(0, 0);
+                    return;
+                }}
+            }}
+            alert('Login or Sign-up is required. Please proceed in the main tab or sidebar.');
+            window.parent.scrollTo(0, 0);
         }}
       </script>
     </body>
@@ -8498,70 +8788,136 @@ with col_main:
 
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         
-        # 1개월
-        with col_p1:
-            inner_1 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>1개월</h3>
-                <span style='color: #888; font-size: 1.1rem;'>Basic</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>250,000원</h2>
-                <p style='color: #555; margin-top:0;'>월 250,000원</p>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.</p>
-                <hr style='margin: 10px 0;'>
-                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>모든 기능 무제한</b></li>
-                    <li>프로젝트 생성 무제한</li>
-                    <li>일반 이메일 지원</li>
-                </ul>
-            """
-            if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 250000, 1, inner_html=inner_1, is_best=False), height=520)
-            else:
-                st.components.v1.html(get_login_redirect_html("Basic (1개월)", inner_html=inner_1, is_best=False), height=520)
+        if st.session_state.lang == 'en':
+            # 1 Month
+            with col_p1:
+                inner_1 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>1 Month</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>Basic</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$162 USD</h2>
+                    <p style='color: #555; margin-top:0;'>$162 / month</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for short-term paper writers and one-off small projects.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>All features unlimited</b></li>
+                        <li>Unlimited project creation</li>
+                        <li>Standard email support</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Basic (1 Month)", 162.0, 1, inner_html=inner_1, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Basic (1 Month)", inner_html=inner_1, is_best=False), height=520)
 
-        # 3개월
-        with col_p2:
-            inner_3 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>3개월</h3>
-                <span style='color: #888; font-size: 1.1rem;'>Standard</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>500,000원</h2>
-                <p style='color: #555; margin-top:0;'>월 약 166,000원</p>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.</p>
-                <hr style='margin: 10px 0;'>
-                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>모든 기능 무제한</b></li>
-                    <li>프로젝트 생성 무제한</li>
-                    <li>일반 이메일 지원</li>
-                </ul>
-            """
-            if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (3개월)", 500000, 3, inner_html=inner_3, is_best=True), height=520)
-            else:
-                st.components.v1.html(get_login_redirect_html("Standard (3개월)", inner_html=inner_3, is_best=True), height=520)
+            # 3 Months
+            with col_p2:
+                inner_3 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>3 Months</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>Standard</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$324 USD</h2>
+                    <p style='color: #555; margin-top:0;'>About $108 / month</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for general academic theses and medium-term research projects.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>All features unlimited</b></li>
+                        <li>Unlimited project creation</li>
+                        <li>Standard email support</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Standard (3 Months)", 324.0, 3, inner_html=inner_3, is_best=True), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Standard (3 Months)", inner_html=inner_3, is_best=True), height=520)
 
-        # 6개월
-        with col_p3:
-            inner_6 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>6개월</h3>
-                <span style='color: #888; font-size: 1.1rem;'>Pro</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
-                <p style='color: #555; margin-top:0;'>월 약 158,000원</p>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
-                <hr style='margin: 10px 0;'>
-                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>모든 기능 무제한</b></li>
-                    <li>프로젝트 생성 무제한</li>
-                    <li>최우선 기술/오류 지원</li>
-                    <li><b>설문 셋팅 1회 무료 대행</b></li>
-                </ul>
-            """
-            if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 950000, 6, inner_html=inner_6, is_best=False), height=520)
-            else:
-                st.components.v1.html(get_login_redirect_html("Pro (6개월)", inner_html=inner_6, is_best=False), height=520)
+            # 6 Months
+            with col_p3:
+                inner_6 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>6 Months</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>Pro</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$614 USD</h2>
+                    <p style='color: #555; margin-top:0;'>About $102 / month</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for university labs and research consulting firms.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>All features unlimited</b></li>
+                        <li>Unlimited project creation</li>
+                        <li>Priority tech/bug support</li>
+                        <li><b>1 Free survey setup proxy</b></li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Pro (6 Months)", 614.0, 6, inner_html=inner_6, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Pro (6 Months)", inner_html=inner_6, is_best=False), height=520)
 
-        # 부가 서비스 대행
-        with col_p4:
-            st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
+            # Proxy Services (PayPal)
+            with col_p4:
+                st.components.v1.html(get_paypal_custom_services_html(st.session_state.user_id), height=520)
+        else:
+            # 1개월
+            with col_p1:
+                inner_1 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>1개월</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>Basic</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>250,000원</h2>
+                    <p style='color: #555; margin-top:0;'>월 250,000원</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>모든 기능 무제한</b></li>
+                        <li>프로젝트 생성 무제한</li>
+                        <li>일반 이메일 지원</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (1개월)", 250000, 1, inner_html=inner_1, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Basic (1개월)", inner_html=inner_1, is_best=False), height=520)
+
+            # 3개월
+            with col_p2:
+                inner_3 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>3개월</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>Standard</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>500,000원</h2>
+                    <p style='color: #555; margin-top:0;'>월 약 166,000원</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>모든 기능 무제한</b></li>
+                        <li>프로젝트 생성 무제한</li>
+                        <li>일반 이메일 지원</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (3개월)", 500000, 3, inner_html=inner_3, is_best=True), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Standard (3개월)", inner_html=inner_3, is_best=True), height=520)
+
+            # 6개월
+            with col_p3:
+                inner_6 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>6개월</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>Pro</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
+                    <p style='color: #555; margin-top:0;'>월 약 158,000원</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>모든 기능 무제한</b></li>
+                        <li>프로젝트 생성 무제한</li>
+                        <li>최우선 기술/오류 지원</li>
+                        <li><b>설문 셋팅 1회 무료 대행</b></li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (6개월)", 950000, 6, inner_html=inner_6, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Pro (6개월)", inner_html=inner_6, is_best=False), height=520)
+
+            # 부가 서비스 대행
+            with col_p4:
+                st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
             
         st.markdown("<br><br>", unsafe_allow_html=True)
 
