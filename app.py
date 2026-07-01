@@ -4248,7 +4248,7 @@ def get_paypal_custom_services_html(user_id=None):
           </ul>
           
           <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
-              Proxy Request/Inquiry : <br>Kakao Talk ID: <b>AHPkr</b>
+              Proxy Request/Inquiry : <br>Email: <b>jeon080423@gmail.com</b>
           </div>
           
           <div class="paypal-btn-container" id="paypal-button-container"></div>
