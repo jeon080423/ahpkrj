@@ -1,6 +1,6 @@
 import streamlit as st
-import survey_manager
-import survey_manager_v3
+
+
 # Force rebuild 2026-01-24 v3 (Merged Sync & Restore)
 # Force deploy 2026-02-07
 
@@ -15,9 +15,9 @@ import os
 import hashlib
 import random
 import string
-import sys
+
 from ahp_table_utils import write_custom_ahp_table, add_borders_to_data
-from ahp_utils_v3 import write_custom_ahp_table_v3
+
 
 # --- LAZY LOADER FOR HEAVY LIBRARIES (SPEED UP INITIAL LOAD) ---
 class LazyLoader:
@@ -82,10 +82,10 @@ def generate_temp_password() -> str:
 from matplotlib import rc
 from email.mime.text import MIMEText
 import itertools
-from math import pi
+
 from dateutil.relativedelta import relativedelta
 
-from signup_agreement import show_agreement_ui, save_agreement_to_sheets, validate_all_agreements
+from signup_agreement import show_agreement_ui
 
 # --- LAZY LOAD HEAVY MODULES ---
 gspread = LazyLoader('gspread')
@@ -2159,7 +2159,7 @@ def calculate_pairwise_ttest(df, factors):
     return p_values
 
 def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geometric', ahp_method='traditional'):
-    meta_cols = df.columns[:2]
+
     comp_cols = df.columns[2:]
     factors, n = infer_factors_from_columns(comp_cols)
     
@@ -4073,8 +4073,8 @@ def get_portone_custom_services_html(user_id=None):
     """
 
 def get_paypal_payment_html(user_id, plan_name="Official User", amount_usd=162.00, months=1, inner_html="", is_best=False):
-    import hashlib
-    login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+
+
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
@@ -4146,12 +4146,12 @@ def get_paypal_payment_html(user_id, plan_name="Official User", amount_usd=162.0
 
 
 def get_paypal_custom_services_html(user_id=None):
-    import hashlib
-    login_token = ""
-    safe_email = "test@ahp.kr"
-    if user_id:
-        login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
-        safe_email = user_id.strip() if "@" in user_id else "test@ahp.kr"
+
+
+
+
+
+
 
     is_logged_in = "true" if user_id else "false"
     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
@@ -4770,8 +4770,8 @@ def show_warning_dialog():
 # ---------- CR Distortion Verification Dialog ----------
 @st.dialog(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), width="large")
 def show_cr_distortion_dialog():
-    import numpy as np
-    from cr_analysis import run_analysis, generate_report, matrix_to_heatmap_img
+
+    from cr_analysis import run_analysis, matrix_to_heatmap_img
         
     st.info(_("📊 업로드된 메인 기준 데이터(응답자 전체 기하평균 행렬)를 바탕으로 검증을 수행합니다.", "📊 Performing verification based on the uploaded Main Criteria data (geometric mean matrix of all respondents)."))
     original_matrix = st.session_state.uploaded_matrix
@@ -5593,7 +5593,7 @@ with col_main:
                             output_res_v3 = None
                             ui_data_v3 = {}
                             with st.spinner(_("3계층(소분류 포함) AHP 종합 분석 수행 중...", "Performing 3-Tier AHP...")):
-                                from ahp_utils_v3 import run_ahp_analysis_v3, write_custom_ahp_table_v3
+                                from ahp_utils_v3 import run_ahp_analysis_v3
                                 sub_sub_dfs = st.session_state.get("ahp_sub_sub_dfs", {})
                                 
                                 # 인구통계 요약본 생성하여 전달
@@ -7716,7 +7716,7 @@ with col_main:
 
             st.divider()
 
-            from survey_manager import create_survey_sheet, generate_pairwise_combinations
+            from survey_manager import create_survey_sheet
 
             # 7개 섹션 설문지 생성 폼 구성
             # 섹션 1: 기본 정보
