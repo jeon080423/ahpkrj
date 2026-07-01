@@ -3496,8 +3496,27 @@ if "portone_paid" in q_params and "user_id" in q_params:
     plan_name_param = q_params.get("plan_name", ["정식 사용자"])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "정식 사용자")
     if user_id_param:
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-        new_expiry_date = (kst_now + relativedelta(months=months_param)).strftime("%Y-%m-%d")
-        update_user_full_info(user_id_param, None, "official", new_expiry_date, plan_type=plan_name_param)
+        
+        # 기존 사용자 정보 조회
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute("SELECT role, expiry_date FROM users WHERE id=?", (user_id_param,))
+        res = c.fetchone()
+        conn.close()
+        
+        current_role = "temp"
+        current_expiry = kst_now.strftime("%Y-%m-%d")
+        if res:
+            current_role, current_expiry = res[0], res[1]
+            
+        if months_param > 0:
+            new_expiry_date = (kst_now + relativedelta(months=months_param)).strftime("%Y-%m-%d")
+            target_role = "official"
+        else:
+            new_expiry_date = current_expiry
+            target_role = current_role
+            
+        update_user_full_info(user_id_param, None, target_role, new_expiry_date, plan_type=plan_name_param)
         
         import hashlib
         login_token = hashlib.sha256(f"{user_id_param}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
