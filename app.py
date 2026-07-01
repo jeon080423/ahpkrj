@@ -3886,6 +3886,10 @@ def get_portone_custom_services_html(user_id=None):
               </li>
           </ul>
           
+          <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
+              부가 서비스 대행 요청/문의 : <br>카톡아이디: <b>AHPkr</b>
+          </div>
+          
           <button class="btn" id="payBtn" onclick="handlePayAction()">결제하기</button>
       </div>
       
@@ -8539,15 +8543,6 @@ with col_main:
         # 부가 서비스 대행
         with col_p4:
             st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
-            st.markdown(
-                """
-                <div style="font-size: 0.8rem; color: #555; line-height: 1.45; margin-top: 10px; text-align: left; border: 1px dashed #ccc; padding: 10px; border-radius: 6px; background-color: #fafafa;">
-                    💡 부가 서비스 대행을 원하실 때는 반드시 카카오톡 또는 이메일로 문의해 주세요.<br>
-                    (카톡아이디: <b>AHPkr</b> / <b>jeon080423@gmail.com</b>)
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
             
         st.markdown("<br><br>", unsafe_allow_html=True)
 
