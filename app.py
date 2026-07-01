@@ -3633,9 +3633,13 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
-def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False):
+def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False, lang="ko"):
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
+    
+    btn_label = f"Pay {plan_name.split(' (')[0]}" if lang == "en" else f"결제 {plan_name.split(' (')[0]}"
+    alert_msg = "Login or Sign-up is required. Please proceed in the main tab or sidebar." if lang == "en" else "로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요."
+    
     return f"""
     <!DOCTYPE html>
     <html>
@@ -3675,7 +3679,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
       <div class="pricing-box">
           {best_badge}
           <div>{inner_html}</div>
-          <button class="btn" onclick="redirectSignup()">결제 {plan_name.split(" (")[0]}</button>
+          <button class="btn" onclick="redirectSignup()">{btn_label}</button>
       </div>
       <script>
         function redirectSignup() {{
@@ -3688,7 +3692,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
                 }}
             }}
             // Fallback
-            alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요.');
+            alert('{alert_msg}');
             window.parent.scrollTo(0, 0);
         }}
       </script>
@@ -8807,7 +8811,7 @@ with col_main:
                 if st.session_state.user_id:
                     st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Basic (1 Month)", 162.0, 1, inner_html=inner_1, is_best=False), height=520)
                 else:
-                    st.components.v1.html(get_login_redirect_html("Basic (1 Month)", inner_html=inner_1, is_best=False), height=520)
+                    st.components.v1.html(get_login_redirect_html("Basic (1 Month)", inner_html=inner_1, is_best=False, lang="en"), height=520)
 
             # 3 Months
             with col_p2:
@@ -8827,7 +8831,7 @@ with col_main:
                 if st.session_state.user_id:
                     st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Standard (3 Months)", 324.0, 3, inner_html=inner_3, is_best=True), height=520)
                 else:
-                    st.components.v1.html(get_login_redirect_html("Standard (3 Months)", inner_html=inner_3, is_best=True), height=520)
+                    st.components.v1.html(get_login_redirect_html("Standard (3 Months)", inner_html=inner_3, is_best=True, lang="en"), height=520)
 
             # 6 Months
             with col_p3:
@@ -8848,7 +8852,7 @@ with col_main:
                 if st.session_state.user_id:
                     st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Pro (6 Months)", 614.0, 6, inner_html=inner_6, is_best=False), height=520)
                 else:
-                    st.components.v1.html(get_login_redirect_html("Pro (6 Months)", inner_html=inner_6, is_best=False), height=520)
+                    st.components.v1.html(get_login_redirect_html("Pro (6 Months)", inner_html=inner_6, is_best=False, lang="en"), height=520)
 
             # Proxy Services (PayPal)
             with col_p4:
