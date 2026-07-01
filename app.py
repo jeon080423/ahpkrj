@@ -8288,26 +8288,62 @@ with col_main:
             else:
                 st.components.v1.html(get_login_redirect_html("Pro (6개월)", inner_html=inner_6, is_best=False), height=520)
 
-        # 12개월
+        # 부가 서비스 대행
         with col_p4:
-            inner_12 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>12개월</h3>
-                <span style='color: #888; font-size: 1.1rem;'>Enterprise</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,900,000원</h2>
-                <p style='color: #555; margin-top:0;'>월 약 158,000원</p>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기업 HR/기획팀 및 전문 리서치/컨설팅 펌에 적합합니다.</p>
-                <hr style='margin: 10px 0;'>
-                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>모든 기능 무제한</b></li>
-                    <li>프로젝트 생성 무제한</li>
-                    <li>1:1 셋팅 컨설팅</li>
-                    <li><b>설문 셋팅 3회 무료 대행</b></li>
+            st.markdown("<h5 style='text-align: center; color: #333; margin-top: 0; margin-bottom: 10px;'>부가 서비스 대행</h5>", unsafe_allow_html=True)
+            
+            # 서비스 옵션 체크박스
+            svc_1 = st.checkbox("온라인 설문 (+5만)", key="svc_1")
+            svc_2 = st.checkbox("결과 분석 (+5만)", key="svc_2")
+            svc_3 = st.checkbox("엑셀 설정 (+3만)", key="svc_3")
+            
+            total_svc_price = 0
+            svc_items = []
+            
+            if svc_1:
+                total_svc_price += 50000
+                svc_items.append("온라인 설문 셋팅")
+            if svc_2:
+                total_svc_price += 50000
+                svc_items.append("결과 분석 대행")
+            if svc_3:
+                total_svc_price += 30000
+                svc_items.append("코딩 엑셀 양식 설정")
+                
+            if svc_items:
+                svc_title = "부가 서비스: " + ", ".join(svc_items)
+                svc_display_text = f"선택된 서비스 {len(svc_items)}건"
+            else:
+                svc_title = "부가 서비스 선택"
+                svc_display_text = "필요한 서비스를 선택해주세요."
+                
+            inner_svc = f"""
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>부가 서비스</h3>
+                <span style='color: #888; font-size: 1.0rem;'>Custom Services</span>
+                <h2 style='margin-top: 10px; margin-bottom: 5px; color: #ff4b4b; font-size: 1.5rem;'>{total_svc_price:,}원</h2>
+                <p style='color: #555; margin-top:0; font-size: 0.85rem;'>합계 금액</p>
+                <p style='font-size: 0.8rem; color: #666; min-height: 35px;'>{svc_display_text}</p>
+                <hr style='margin: 8px 0;'>
+                <ul style='font-size: 0.8rem; padding-left: 15px; color: #333; line-height: 1.4;'>
+            """
+            if svc_items:
+                for item in svc_items:
+                    inner_svc += f"<li>{item}</li>"
+            else:
+                inner_svc += "<li><span style='color: #999;'>선택 내역 없음</span></li>"
+                
+            inner_svc += """
                 </ul>
             """
-            if st.session_state.user_id:
-                st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Enterprise (12개월)", 1900000, 12, inner_html=inner_12, is_best=False), height=520)
+            
+            # 체크박스 영역의 높이를 감안하여 iframe의 높이를 360px로 조정해 전체 높이를 맞춥니다.
+            if total_svc_price > 0:
+                if st.session_state.user_id:
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, svc_title, total_svc_price, 0, inner_html=inner_svc, is_best=False), height=360)
+                else:
+                    st.components.v1.html(get_login_redirect_html(svc_title, inner_html=inner_svc, is_best=False), height=360)
             else:
-                st.components.v1.html(get_login_redirect_html("Enterprise (12개월)", inner_html=inner_12, is_best=False), height=520)
+                st.components.v1.html(get_login_redirect_html(svc_title, inner_html=inner_svc, is_best=False), height=360)
             
         st.markdown("<br><br>", unsafe_allow_html=True)
 
