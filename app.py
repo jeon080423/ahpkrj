@@ -3752,7 +3752,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            height: 480px; 
+            height: 500px; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -3820,7 +3820,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            height: 480px; 
+            height: 500px; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -3942,7 +3942,7 @@ def get_portone_custom_services_html(user_id=None):
             padding: 15px; 
             border-radius: 10px; 
             border: 1px solid #ddd;
-            height: 480px; 
+            height: 500px; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -4198,7 +4198,7 @@ def get_paypal_payment_html(user_id, plan_name="Official User", amount_usd=162.0
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            height: 480px; 
+            height: 500px; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -4275,7 +4275,7 @@ def get_paypal_custom_services_html(user_id=None):
             padding: 15px; 
             border-radius: 10px; 
             border: 1px solid #ddd;
-            height: 480px; 
+            height: 500px; 
             position: relative;
             display: flex;
             flex-direction: column;
