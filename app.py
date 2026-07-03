@@ -1628,7 +1628,7 @@ def render_refund_form(is_standalone=False, show_header=True):
     st.markdown(
         _("""
         <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
-          <h5 style="margin-top: 0; margin-bottom: 12px; color: #2d3748; font-weight: bold;">환불 및 취소 규정 안내</h5>
+          <h5 style="margin-top: -5px; margin-bottom: 12px; color: #2d3748; font-weight: bold;">환불 및 취소 규정 안내</h5>
           <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 8px; column-gap: 12px; color: #4a5568;">
             <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 규정:</div>
             <div>서비스 불만족 및 이용 불편 시 정식 사용자 결제 후 <b><span style="color: #0066cc;">1일</span></b> 이내 신청 시</div>
@@ -1642,7 +1642,7 @@ def render_refund_form(is_standalone=False, show_header=True):
         </div>
         """, """
         <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
-          <h5 style="margin-top: 0; margin-bottom: 12px; color: #2d3748; font-weight: bold;">Refund & Cancellation Policy</h5>
+          <h5 style="margin-top: -5px; margin-bottom: 12px; color: #2d3748; font-weight: bold;">Refund & Cancellation Policy</h5>
           <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 8px; column-gap: 12px; color: #4a5568;">
             <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
             <div>Request within <b><span style="color: #0066cc;">1 day</span></b> after payment if unsatisfied or experiencing inconvenience</div>
@@ -4462,7 +4462,7 @@ def get_fee_info_text():
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
     <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서 발급 가능</span>
   </div>
-  <h3 style="margin-top: 0; margin-bottom: 8px;">환불 및 취소 규정</h3>
+  <h3 style="margin-top: -5px; margin-bottom: 8px;">환불 및 취소 규정</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
@@ -4477,7 +4477,7 @@ def get_fee_info_text():
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
     <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice Available</span>
   </div>
-  <h3 style="margin-top: 0; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
+  <h3 style="margin-top: -5px; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
       <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
@@ -4505,7 +4505,7 @@ with st.sidebar:
     except:
         st.markdown(
             f'<a href="https://jeon080423.github.io/AHPkr" target="_blank" style="text-decoration: none; color: inherit;">'
-            f'<h3 style="margin-top: 0; margin-bottom: 10px;">{_(" AHP 마스터", " AHP Master")}</h3>'
+            f'<h3 style="margin-top: -5px; margin-bottom: 10px;">{_(" AHP 마스터", " AHP Master")}</h3>'
             f'</a>',
             unsafe_allow_html=True
         )
@@ -4704,7 +4704,7 @@ with st.sidebar:
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-      <h3 style="margin-top: 0; margin-bottom: 8px;">사업자정보</h3>
+      <h3 style="margin-top: -5px; margin-bottom: 8px;">사업자정보</h3>
       <div style="font-size: 0.85rem; color: #555;">
         상호: 프레쉬인사이트<br>
         대표자: 전상현<br>
@@ -8888,8 +8888,8 @@ with col_main:
 
         st.markdown(
             _("""
-<div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;"><h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;"><span>🎓</span> 대학원생 및 연구원 대상 안내</h4><p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">AHP 마스터의 모든 요금제는 소속 기관의 <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">연구비/산학협력단 법인카드 결제</span>를 완벽하게 지원합니다.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;"><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#연구비카드 환영</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#세금계산서 100%발행</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#대학증빙용 견적서 자동발급</span></div></div>""", """
-<div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;"><h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;"><span>🎓</span> Notice for Graduate Students and Researchers</h4><p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">All AHP Master plans fully support payments using your institution's <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">Research Funding / Corporate Cards</span>.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;"><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Research Cards Welcome</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Tax Invoices Available</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Institutional Quotes Provided</span></div></div>"""),
+<div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 5px 20px 15px 20px; margin-top: -30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;"><h4 style="margin-top: -5px; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;"><span>🎓</span> 대학원생 및 연구원 대상 안내</h4><p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">AHP 마스터의 모든 요금제는 소속 기관의 <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">연구비/산학협력단 법인카드 결제</span>를 완벽하게 지원합니다.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;"><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#연구비카드 환영</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#세금계산서 100%발행</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#대학증빙용 견적서 자동발급</span></div></div>""", """
+<div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 5px 20px 15px 20px; margin-top: -30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;"><h4 style="margin-top: -5px; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;"><span>🎓</span> Notice for Graduate Students and Researchers</h4><p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">All AHP Master plans fully support payments using your institution's <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">Research Funding / Corporate Cards</span>.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;"><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Research Cards Welcome</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Tax Invoices Available</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Institutional Quotes Provided</span></div></div>"""),
             unsafe_allow_html=True
         )
 
@@ -9035,7 +9035,7 @@ with col_main:
         st.markdown(
             _("""
             <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: 0; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+              <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                 <span>✨</span> 전문 분석 및 AHP/통계 컨설팅 문의
               </h4>
               <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
@@ -9051,7 +9051,7 @@ with col_main:
             </div>
             """, """
             <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: 0; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+              <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                 <span>✨</span> Professional AHP & Statistical Consulting
               </h4>
               <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
