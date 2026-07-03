@@ -323,12 +323,12 @@ def test_3tier_for_tier(tier_name):
             if has_anova_cols:
                 break
                 
-        if tier_name == 'Pro':
+        if tier_name in ['Standard', 'Pro']:
             if not has_anova_cols:
-                print("  [FAIL] Pro tier must have ANOVA columns!")
+                print(f"  [FAIL] {tier_name} tier must have ANOVA columns!")
                 return False
             else:
-                print("  [PASS] Pro tier correctly contains ANOVA columns.")
+                print(f"  [PASS] {tier_name} tier correctly contains ANOVA columns.")
         else:
             if has_anova_cols:
                 print(f"  [FAIL] {tier_name} tier MUST NOT have ANOVA columns!")
@@ -403,11 +403,11 @@ def test_2tier_for_tier(tier_name):
             s_row_cp += 1
             
             tier = mock_get_current_tier()
-            if tier != 'Pro':
-                ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Pro 등급 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+            if tier not in ['Standard', 'Pro']:
+                ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Standard 등급 이상 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Standard and Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
                 s_row_cp += 1
         
-            if tier == 'Pro' and not anova_df.empty:
+            if tier in ['Standard', 'Pro'] and not anova_df.empty:
                 anova_for_merge = anova_df.rename(columns={'요인': '중분류'})
                 integrated_df = comparison_df.merge(anova_for_merge, on='중분류', how='left')
             else:
@@ -417,7 +417,7 @@ def test_2tier_for_tier(tier_name):
             
             integrated_df_excel.to_excel(writer, sheet_name='Group_Comparison', startrow=s_row_cp, index=False)
             
-            if tier == 'Pro':
+            if tier in ['Standard', 'Pro']:
                 guide_start_row = s_row_cp + len(integrated_df_excel) + 3
                 comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
                                "※ Reasons why group differences are not statistically significant despite variation in priorities")
@@ -446,12 +446,12 @@ def test_2tier_for_tier(tier_name):
         if has_anova_cols:
             break
             
-    if tier_name == 'Pro':
+    if tier_name in ['Standard', 'Pro']:
         if not has_anova_cols:
-            print("  [FAIL] 2-Tier Pro tier must have ANOVA columns!")
+            print(f"  [FAIL] 2-Tier {tier_name} tier must have ANOVA columns!")
             return False
         else:
-            print("  [PASS] 2-Tier Pro tier correctly contains ANOVA columns.")
+            print(f"  [PASS] 2-Tier {tier_name} tier correctly contains ANOVA columns.")
     else:
         if has_anova_cols:
             print(f"  [FAIL] 2-Tier {tier_name} tier MUST NOT have ANOVA columns!")
