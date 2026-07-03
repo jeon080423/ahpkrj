@@ -2247,7 +2247,8 @@ def calculate_pairwise_ttest(df, factors):
 
 def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geometric', ahp_method='traditional'):
 
-    comp_cols = df.columns[2:]
+    # ID와 인구통계(Type) 관련 컬럼을 제외한 나머지를 쌍대비교 컬럼으로 간주
+    comp_cols = [c for c in df.columns if str(c).strip().lower() != 'id' and not str(c).strip().lower().startswith('type')]
     factors, n = infer_factors_from_columns(comp_cols)
     
     # 시트 전체 데이터의 로우데이터 최대값/최솟값 계산
@@ -5407,22 +5408,13 @@ with col_main:
             if summary_rows:
                 return pd.DataFrame(summary_rows)
             return None
-            
+
         def preprocess_uploaded_df(df):
             # 1. 제출시간/타임스탬프 제거
             drop_cols = [c for c in df.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
             if drop_cols:
                 df = df.drop(columns=drop_cols)
-            # 2. 다중 인구통계(Type 1, Type 2...) 단일 Type 컬럼으로 병합 (온라인 설문용)
-            type_cols = [c for c in df.columns if str(c).strip().lower().startswith("type ")]
-            if type_cols:
-                df["Type"] = df[type_cols].astype(str).agg(' - '.join, axis=1)
-                df = df.drop(columns=type_cols)
-                cols = df.columns.tolist()
-                if "Type" in cols:
-                    cols.remove("Type")
-                    cols.insert(1, "Type")
-                    df = df[cols]
+            # 다중 인구통계(Type 1, Type 2...)는 유지하여 향후 선택적 분석이 가능하도록 함
             return df
             
         df_main = None
