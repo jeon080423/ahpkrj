@@ -8868,6 +8868,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>All features unlimited</b></li>
+                        <li><b>Unlimited sample size</b></li>
                         <li>Unlimited project creation</li>
                         <li>Standard email support</li>
                     </ul>
@@ -8888,6 +8889,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>All features unlimited</b></li>
+                        <li><b>Unlimited sample size</b></li>
                         <li>Unlimited project creation</li>
                         <li>Standard email support</li>
                     </ul>
@@ -8908,6 +8910,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>All features unlimited</b></li>
+                        <li><b>Unlimited sample size</b></li>
                         <li>Unlimited project creation</li>
                         <li>Priority tech/bug support</li>
                         <li><b>1 Free survey setup proxy</b></li>
@@ -8933,6 +8936,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>모든 기능 무제한</b></li>
+                        <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
                         <li>일반 이메일 지원</li>
                     </ul>
@@ -8953,6 +8957,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>모든 기능 무제한</b></li>
+                        <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
                         <li>일반 이메일 지원</li>
                     </ul>
@@ -8973,6 +8978,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>모든 기능 무제한</b></li>
+                        <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
                         <li>최우선 기술/오류 지원</li>
                         <li><b>설문 셋팅 1회 무료 대행</b></li>
