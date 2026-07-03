@@ -4088,7 +4088,7 @@ def get_portone_custom_services_html(user_id=None):
             }}
             
             if ({is_logged_in}) {{
-                openPaymentWindow(total, items.join(", "));
+                openPaymentWindow(total, items.join(", "), addMonths);
             }} else {{
                 redirectSignup();
             }}
@@ -4107,7 +4107,7 @@ def get_portone_custom_services_html(user_id=None):
             window.parent.scrollTo(0, 0);
         }}
         
-        function openPaymentWindow(amount, planName) {{
+        function openPaymentWindow(amount, planName, addMonths) {{
           const win = window.open("", "_blank", "width=850,height=700");
           if (!win) {{
              alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
@@ -4136,7 +4136,7 @@ def get_portone_custom_services_html(user_id=None):
           }} catch(e) {{}}
           if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
           
-          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months=0&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
+          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months=" + addMonths + "&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
           
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
@@ -4426,7 +4426,7 @@ def get_paypal_custom_services_html(user_id=None):
               }},
               onApprove: function(data, actions) {{
                 return actions.order.capture().then(function(details) {{
-                  window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months=0&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
+                  window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months=" + addMonths + "&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
                 }});
               }},
               onError: function(err) {{
