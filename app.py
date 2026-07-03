@@ -566,8 +566,8 @@ button[data-baseweb="tab"]:hover {
     color: #0f172a !important;
 }
 
-/* 첫 번째 탭 (분석 문의 및 컨설팅) 강조 스타일 */
-button[data-baseweb="tab"]:first-child {
+/* 두 번째 탭 (분석 문의 및 컨설팅) 강조 스타일 */
+button[data-baseweb="tab"]:nth-child(2) {
     background-color: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
     font-weight: 600 !important;
@@ -576,11 +576,11 @@ button[data-baseweb="tab"]:first-child {
     padding-right: 1rem !important;
     transition: all 0.3s ease !important;
 }
-button[data-baseweb="tab"]:first-child:hover {
+button[data-baseweb="tab"]:nth-child(2):hover {
     background-color: #ff4b4b !important;
     color: #ffffff !important;
 }
-button[data-baseweb="tab"]:first-child[aria-selected="true"] {
+button[data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {
     background-color: #ff4b4b !important;
     color: #ffffff !important;
     border-bottom: 2px solid #ff4b4b !important;
@@ -5264,9 +5264,9 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
-        _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
+    main_tab1, main_tab_consulting, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
+        _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문 및 배포", "Online AHP Survey & Deployment"), 
         _("실시간 응답 현황", "Live Response Status"),
@@ -8337,45 +8337,7 @@ with col_main:
                         st.warning(_(" 배포 및 DB 연동은 회원가입 후 가능합니다. (무료 사용자도 제한 없이 배포 및 연동 가능함)", " Deployment and DB integration are available after sign-up. (Free users can also deploy and link DB)"))
                         st.info(_("💡 안심하세요. 현재 작성하신 내용은 창을 닫지 않고 왼쪽 사이드바에서 회원가입/로그인을 완료하시면 날아가지 않고 그대로 유지되어 즉시 배포하실 수 있습니다.", "💡 Rest assured. The contents you have written will be maintained if you sign up and log in from the left sidebar without closing the window, allowing you to deploy immediately."))
                     
-                        # 로그인 패널(사이드바) 강조 애니메이션 주입
-                        highlight_html = """
-                        <style>
-                        @keyframes pulse-sidebar {
-                            0% { box-shadow: inset -5px 0 15px rgba(255, 75, 75, 0.8); }
-                            50% { box-shadow: inset -5px 0 30px rgba(255, 75, 75, 0.2); }
-                            100% { box-shadow: inset -5px 0 15px rgba(255, 75, 75, 0.8); }
-                        }
-                        .floating-arrow {
-                            position: fixed;
-                            top: 20%;
-                            left: 330px; /* 사이드바 너비 고려 */
-                            font-size: 60px;
-                            color: #ff4b4b;
-                            z-index: 9999999;
-                            pointer-events: none;
-                            animation: bounce-left 0.8s infinite alternate;
-                            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-                        }
-                        @keyframes bounce-left {
-                            from { transform: translateX(20px); }
-                            to { transform: translateX(0px); }
-                        }
-                        </style>
-                        <div class="floating-arrow">👈</div>
-                        <script>
-                            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-                            if (sidebar) {
-                                sidebar.style.animation = 'pulse-sidebar 1.5s infinite';
-                                sidebar.style.borderRight = '4px solid #ff4b4b';
-                                setTimeout(() => {
-                                    sidebar.style.animation = '';
-                                    sidebar.style.borderRight = '';
-                                }, 5000);
-                            }
-                        </script>
-                        """
-                        import streamlit.components.v1 as components
-                        components.html(highlight_html, height=0, width=0)
+                        pass
                 else:
                     btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
                     if st.button(btn_label, type="primary", use_container_width=True):
