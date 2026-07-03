@@ -6437,7 +6437,12 @@ with col_main:
                                     ws_comp.write_string(s_row_cp, 0, _("그룹 간 비교(일원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
                                     s_row_cp += 1
                                 
-                                    if not anova_df.empty:
+                                    tier = get_current_tier()
+                                    if tier != 'Pro':
+                                        ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Pro 등급 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+                                        s_row_cp += 1
+                                
+                                    if tier == 'Pro' and not anova_df.empty:
                                         anova_for_merge = anova_df.rename(columns={'요인': '중분류'})
                                         integrated_df = comparison_df.merge(anova_for_merge, on='중분류', how='left')
                                     else:
@@ -6489,9 +6494,10 @@ with col_main:
                                     text_fmt = workbook.add_format({'font_size': 10, 'text_wrap': True, 'valign': 'top', 'align': 'left', 'border': 1})
                                     ws_comp.set_column('A:G', 20) 
                                 
-                                    comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
-                                                   "※ Reasons why group differences are not statistically significant despite variation in priorities")
-                                    ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
+                                    if tier == 'Pro':
+                                        comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
+                                                       "※ Reasons why group differences are not statistically significant despite variation in priorities")
+                                        ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
     
                                     guide_content_ko = [
                                         ("1. 그룹 내 편차(분산)가 너무 큰 경우", "ANOVA는 '그룹 간의 차이'와 '그룹 내의 차이'를 비교합니다.\n\n■ 원리: 그룹 간 평균 차이가 크더라도, 각 그룹 내부 데이터들이 서로 들쭉날쭉(분산이 큼)하다면 통계적으로는 '이 차이가 우연히 발생했을 가능성이 높다'고 판단합니다."),
@@ -6505,7 +6511,7 @@ with col_main:
                                         ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
                                     ]
                                 
-                                    guide_content = guide_content_en if st.session_state.get('lang', 'ko') == 'en' else guide_content_ko
+                                    guide_content = (guide_content_en if st.session_state.get('lang', 'ko') == 'en' else guide_content_ko) if tier == 'Pro' else []
     
                                     current_row_comp = guide_start_row + 1
                                     for title, body in guide_content:
