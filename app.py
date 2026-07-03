@@ -2080,6 +2080,20 @@ def load_user_model(user_id):
     return None
 
 # -----------------------------------------------------------------------------
+# User Tier Resolution
+# -----------------------------------------------------------------------------
+def get_current_tier():
+    if not st.session_state.get('user_id') or st.session_state.get('user_role') in ['temp', 'free', None]:
+        return 'Free'
+    if st.session_state.get('user_role') == 'admin':
+        return 'Pro'
+    pt = st.session_state.get('plan_type') or ''
+    if 'Pro' in pt: return 'Pro'
+    elif 'Standard' in pt: return 'Standard'
+    elif 'Basic' in pt: return 'Basic'
+    return 'Free'
+
+# -----------------------------------------------------------------------------
 # Saaty(1980) AHP Functions
 # -----------------------------------------------------------------------------
 def get_ri(n):
@@ -4988,6 +5002,13 @@ with col_settings:
             st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("AHP 분석 설정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
             ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
             ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
+            if ahp_method == 'fuzzy':
+                tier = get_current_tier()
+                if tier != 'Pro':
+                    st.error(_("🔒 퍼지 AHP는 Pro 요금제 전용 기능입니다.", "🔒 Fuzzy AHP is exclusive to Pro Tier."))
+                    st.warning(_("현재 무료 및 일반 회원 등급에서는 일반 AHP 결과만 분석 및 제공됩니다. 퍼지 AHP 분석을 이용하시려면 Pro 등급으로 업그레이드해주시기 바랍니다.", 
+                                 "In your current tier, only Traditional AHP results are analyzed and provided. To use Fuzzy AHP, please upgrade to the Pro Tier."))
+                    ahp_method = 'traditional'
             mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
             mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
             cr_threshold_label = st.selectbox(
