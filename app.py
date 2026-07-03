@@ -2763,8 +2763,34 @@ if "preview_id" in q_params or "survey_id" in q_params:
         </div>
         """, unsafe_allow_html=True)
         
-        # 2. 창 닫기 버튼 렌더링 및 자바스크립트 실행 트리거
         import streamlit.components.v1 as components
+        
+        # 1.5. 모바일 가로 모드 전체화면 자동 해제 및 방향 잠금 해제 스크립트 주입
+        components.html("""
+        <script>
+        try {
+            const parent = window.parent.document;
+            if (parent.fullscreenElement || parent.webkitFullscreenElement) {
+                if (parent.exitFullscreen) {
+                    parent.exitFullscreen().catch(e => console.log(e));
+                } else if (parent.webkitExitFullscreen) {
+                    parent.webkitExitFullscreen();
+                }
+            }
+            
+            // 화면 방향 잠금 해제 (세로 모드로 복원 가능하게)
+            if (window.screen.orientation && window.screen.orientation.unlock) {
+                window.screen.orientation.unlock();
+            } else if (parent.screen.orientation && parent.screen.orientation.unlock) {
+                parent.screen.orientation.unlock();
+            }
+        } catch(e) {
+            console.log("Error exiting fullscreen:", e);
+        }
+        </script>
+        """, height=0)
+        
+        # 2. 창 닫기 버튼 렌더링 및 자바스크립트 실행 트리거
         close_clicked = st.button(_("🚪 창 닫기", "🚪 Close Window"), use_container_width=True)
         if close_clicked:
             components.html("""
