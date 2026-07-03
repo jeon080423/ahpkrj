@@ -566,6 +566,25 @@ button[data-baseweb="tab"]:hover {
     color: #0f172a !important;
 }
 
+/* 첫 번째 탭 (분석 문의 및 컨설팅) 강조 스타일 */
+button[data-baseweb="tab"]:first-child {
+    background-color: #e6f7ff !important;
+    color: #0050b3 !important;
+    font-weight: bold !important;
+    border-radius: 4px 4px 0 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+button[data-baseweb="tab"]:first-child:hover {
+    background-color: #bae7ff !important;
+    color: #003a8c !important;
+}
+button[data-baseweb="tab"]:first-child[aria-selected="true"] {
+    background-color: #1890ff !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #096dd9 !important;
+}
+
 /* --- 카드형 Expander 스타일 --- */
 details[data-testid="stExpander"] {
     border: 1px solid #cbd5e1 !important;
@@ -5246,7 +5265,7 @@ with col_main:
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
     main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
-        _("💬 분석 문의 및 컨설팅", "💬 Analysis Inquiry & Consulting"),
+        _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
