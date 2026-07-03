@@ -566,8 +566,8 @@ button[data-baseweb="tab"]:hover {
     color: #0f172a !important;
 }
 
-/* 두 번째 탭 (분석 문의 및 컨설팅) 강조 스타일 */
-button[data-baseweb="tab"]:nth-child(2) {
+/* 첫 번째 탭 (AHP 분석 도구) 은은한 음영 고정 스타일 */
+div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:first-child {
     background-color: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
     font-weight: 600 !important;
@@ -576,13 +576,13 @@ button[data-baseweb="tab"]:nth-child(2) {
     padding-right: 1rem !important;
     transition: all 0.3s ease !important;
 }
-button[data-baseweb="tab"]:nth-child(2):hover {
-    background-color: #ff4b4b !important;
-    color: #ffffff !important;
+div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:first-child:hover {
+    background-color: rgba(255, 75, 75, 0.15) !important;
+    color: #ff4b4b !important;
 }
-button[data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {
-    background-color: #ff4b4b !important;
-    color: #ffffff !important;
+div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:first-child[aria-selected="true"] {
+    background-color: rgba(255, 75, 75, 0.12) !important;
+    color: #ff4b4b !important;
     border-bottom: 2px solid #ff4b4b !important;
 }
 
