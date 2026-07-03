@@ -5268,7 +5268,7 @@ with col_main:
         _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
-        _("온라인 AHP 설문 및 배포", "Online AHP Survey & Deployment"), 
+        _("온라인 AHP 설문/배포(:red[**무료**])", "Online AHP Survey/Deployment (:red[**Free**])"), 
         _("실시간 응답 현황", "Live Response Status"),
         _("서비스 요금", "Service Pricing"),
         _("회원가입", "Sign Up")
