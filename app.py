@@ -8888,8 +8888,8 @@ with col_main:
 
         st.markdown(
             _("""
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 0px 20px 15px 20px; margin-top: -35px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: -5px; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -35px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
                 <span>🎓</span> 대학원생 및 연구원 대상 안내
               </h4>
               <p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">
@@ -8902,8 +8902,8 @@ with col_main:
               </div>
             </div>
             """, """
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 0px 20px 15px 20px; margin-top: -35px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: -5px; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -35px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
                 <span>🎓</span> Notice for Graduate Students and Researchers
               </h4>
               <p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">
