@@ -8974,7 +8974,7 @@ with col_main:
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>고급 교차 통계 분석 (T-Test, ANOVA) 제공</b></li>
+                        <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
                         <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
                         <li>일반 이메일 지원</li>
@@ -8996,7 +8996,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
-                        <li>고급 교차 통계 분석 (T-Test, ANOVA) 제공</li>
+                        <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
                         <li>표본수 무제한 및 프로젝트 무제한</li>
                         <li>최우선 기술/오류 지원</li>
                         <li><b>설문 셋팅 1회 무료 대행</b></li>
