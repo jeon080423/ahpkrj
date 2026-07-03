@@ -566,8 +566,8 @@ button[data-baseweb="tab"]:hover {
     color: #0f172a !important;
 }
 
-/* 첫 번째 탭 (AHP 분석 도구) 은은한 음영 고정 스타일 */
-div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:first-child {
+/* 두 번째 탭 (AHP 분석 도구) 은은한 음영 고정 스타일 */
+div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:nth-child(2) {
     background-color: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
     font-weight: 600 !important;
@@ -576,11 +576,11 @@ div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:first-chil
     padding-right: 1rem !important;
     transition: all 0.3s ease !important;
 }
-div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:first-child:hover {
+div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:nth-child(2):hover {
     background-color: rgba(255, 75, 75, 0.15) !important;
     color: #ff4b4b !important;
 }
-div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:first-child[aria-selected="true"] {
+div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {
     background-color: rgba(255, 75, 75, 0.12) !important;
     color: #ff4b4b !important;
     border-bottom: 2px solid #ff4b4b !important;
@@ -5264,9 +5264,9 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab1, main_tab_consulting, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
-        _("AHP 분석 도구", "AHP Analysis Tool"), 
+    main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
         _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
+        _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문 및 배포", "Online AHP Survey & Deployment"), 
         _("실시간 응답 현황", "Live Response Status"),
