@@ -8959,7 +8959,7 @@ with col_main:
                 inner_1 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>250,000원</h2>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>350,000원</h2>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8970,7 +8970,7 @@ with col_main:
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 250000, 2, inner_html=inner_1, is_best=False), height=520)
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 350000, 2, inner_html=inner_1, is_best=False), height=520)
                 else:
                     st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
 
@@ -8979,7 +8979,7 @@ with col_main:
                 inner_3 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>450,000원</h2>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>500,000원</h2>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8990,7 +8990,7 @@ with col_main:
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 450000, 2, inner_html=inner_3, is_best=True), height=520)
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=520)
                 else:
                     st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
 
