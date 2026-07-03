@@ -8886,6 +8886,85 @@ with col_main:
     with main_tab_pricing:
         st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 세금계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Tax Invoices 100% Supported</span>"), unsafe_allow_html=True)
 
+        st.markdown(
+            _("""
+<div style="margin-bottom: 40px; margin-top: 20px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #f1f5f9;">
+    <h3 style="background-color: #f8fafc; color: #334155; padding: 16px 20px; margin: 0; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; text-align: center;">📊 기존 엑셀 템플릿 방식 vs <span style="color: #0ea5e9; font-weight: bold;">AHP 마스터 (SaaS 플랫폼)</span></h3>
+    <div style="padding: 0; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; min-width: 600px;">
+            <thead>
+                <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569;">
+                    <th style="padding: 14px 20px; font-weight: 600; width: 20%;">비교 항목</th>
+                    <th style="padding: 14px 20px; font-weight: 600; width: 40%; color: #64748b;">일반 엑셀 템플릿 서비스</th>
+                    <th style="padding: 14px 20px; font-weight: 700; width: 40%; color: #0ea5e9; background-color: #f0f9ff; border-left: 2px solid #bae6fd;">AHP 마스터 플랫폼</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">설문 배포 및 취합</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">응답자 개별로 이메일 전송 및 회신받아 수동 취합</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">웹 링크(URL) 하나로 카톡/문자 공유 및 실시간 자동 취합</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">응답 기기 지원</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">PC 환경에서만 가능 (모바일 응답 불가)</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">스마트폰, 태블릿, PC 등 모든 기기 100% 완벽 지원</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">호환성 및 보안</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">관공서/기업 보안 PC 및 Mac 환경에서 매크로 차단 에러</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">설치 불필요, 인터넷만 연결되면 모든 환경에서 즉시 구동</td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">C.R (일관성) 관리</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">엑셀 수식을 통한 사후 경고 확인</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">인터랙티브 UI로 C.R 0.1 이하 스마트 유도 (재설문 방지)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+""", """
+<div style="margin-bottom: 40px; margin-top: 20px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #f1f5f9;">
+    <h3 style="background-color: #f8fafc; color: #334155; padding: 16px 20px; margin: 0; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; text-align: center;">📊 Excel Template Method vs <span style="color: #0ea5e9; font-weight: bold;">AHP 마스터 (SaaS 플랫폼)</span></h3>
+    <div style="padding: 0; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; min-width: 600px;">
+            <thead>
+                <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569;">
+                    <th style="padding: 14px 20px; font-weight: 600; width: 20%;">Features</th>
+                    <th style="padding: 14px 20px; font-weight: 600; width: 40%; color: #64748b;">General Excel Template Service</th>
+                    <th style="padding: 14px 20px; font-weight: 700; width: 40%; color: #0ea5e9; background-color: #f0f9ff; border-left: 2px solid #bae6fd;">AHP Master Platform</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Distribution & Collection</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">Manual collection via email</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">Share URL link & Auto real-time collection</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Device Support</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">PC only (No Mobile support)</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">100% fully supported on Smart phones, Tablets, PCs</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Compatibility & Security</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">Macro blocking errors in corporate/gov security PCs and Mac</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">No installation required, runs seamlessly in any environment</td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px 20px; font-weight: 600; color: #334155;">C.R Management</td>
+                    <td style="padding: 16px 20px; color: #64748b; line-height: 1.5;">Post-warning via Excel formula</td>
+                    <td style="padding: 16px 20px; color: #0369a1; font-weight: 600; background-color: #f0f9ff; border-left: 2px solid #bae6fd; line-height: 1.5;">Interactive UI intelligently guides C.R under 0.1</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+"""),
+            unsafe_allow_html=True
+        )
+
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         
         if st.session_state.lang == 'en':
