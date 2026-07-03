@@ -1082,59 +1082,6 @@ except AttributeError:
         _q = {}
 _is_survey_or_preview = "preview_id" in _q or "survey_id" in _q
 
-# --- 소셜 로그인 콜백 처리 ---
-try:
-    if "code" in _q and "state" in _q:
-        import auth_social
-        import time
-        oauth_code = _q.get("code")
-        if isinstance(oauth_code, list): oauth_code = oauth_code[0]
-        oauth_state = _q.get("state")
-        if isinstance(oauth_state, list): oauth_state = oauth_state[0]
-        
-        if oauth_state == "google":
-            user_info = auth_social.get_google_user_info(oauth_code, auth_social.get_redirect_uri())
-            if "error" not in user_info and "email" in user_info:
-                email = user_info["email"].strip()
-                
-                # DB 연동 처리
-                conn = sqlite3.connect('users.db')
-                c = conn.cursor()
-                c.execute("SELECT id FROM users WHERE id=?", (email,))
-                user_exists = c.fetchone()
-                
-                if not user_exists:
-                    # 신규가입
-                    signup_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
-                    expiry_date = "9999-12-31"
-                    hashed_pw = hash_password("OAUTH_USER")
-                    c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                              (email, "temp", signup_date, hashed_pw, expiry_date, "Y", 0, "", None))
-                    conn.commit()
-                    try:
-                        log_to_sheets(email, "temp", signup_date, hashed_pw, "Y", expiry_date, 0, "")
-                    except:
-                        pass
-                
-                c.execute("SELECT role, expiry_date, plan_type FROM users WHERE id=?", (email,))
-                u_row = c.fetchone()
-                conn.close()
-                
-                st.session_state.user_id = email
-                st.session_state.user_role = u_row[0] if u_row else "temp"
-                st.session_state.expiry_date = u_row[1] if u_row else "9999-12-31"
-                st.session_state.plan_type = u_row[2] if u_row and len(u_row)>2 else None
-                
-                st.query_params.clear()
-                st.query_params["login_user"] = email
-                st.query_params["login_token"] = hashlib.sha256(f"{email}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
-                st.query_params["last_activity"] = str(int(time.time()))
-                
-                st.rerun()
-except Exception as e:
-    pass
-
-
 # DB 초기화 및 구글 시트로부터 데이터(회원+방문로그) 복구 로직
 def init_db():
     conn = sqlite3.connect('users.db')
@@ -4703,11 +4650,6 @@ with st.sidebar:
         tab_login, tab_find_pw = st.tabs([_("로그인", "Login"), _("비밀번호 찾기", "Find Password")])
         
         with tab_login:
-            import auth_social
-            google_auth_url = auth_social.get_google_auth_url(auth_social.get_redirect_uri())
-            st.markdown(f'<a href="{google_auth_url}" target="_self" style="display:flex; justify-content:center; align-items:center; gap:10px; padding: 10px; background-color: #ffffff; color: #3c4043; border: 1px solid #dadce0; border-radius: 4px; text-decoration: none; font-weight: 500; font-family: \'Google Sans\', sans-serif; margin-bottom:15px;"><img src="https://developers.google.com/identity/images/g-logo.png" style="width:18px; height:18px;"><span>{_("구글로 로그인", "Continue with Google")}</span></a>', unsafe_allow_html=True)
-            st.markdown("<div style='text-align:center; color:#888; font-size:0.9em; margin-bottom:10px;'>OR</div>", unsafe_allow_html=True)
-
             l_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="l_id")
             l_pw = st.text_input(_("비밀번호 (PW)", "Password (PW)"), type="password", key="l_pw")
             if st.button(_("로그인 실행", "Login")):
@@ -9324,12 +9266,6 @@ with col_main:
             st.info(_("이미 로그인되어 있습니다.", "You are already logged in."))
         else:
             agreements = show_agreement_ui()
-            
-            import auth_social
-            google_auth_url = auth_social.get_google_auth_url(auth_social.get_redirect_uri())
-            st.markdown(f'<a href="{google_auth_url}" target="_self" style="display:flex; justify-content:center; align-items:center; gap:10px; padding: 12px; background-color: #ffffff; color: #3c4043; border: 1px solid #dadce0; border-radius: 4px; text-decoration: none; font-weight: 500; font-family: \'Google Sans\', sans-serif; margin-top:20px; margin-bottom:20px;"><img src="https://developers.google.com/identity/images/g-logo.png" style="width:18px; height:18px;"><span>{_("구글 계정으로 3초 만에 시작하기", "Continue with Google")}</span></a>', unsafe_allow_html=True)
-            st.markdown("<div style='text-align:center; color:#888; font-size:0.9em; margin-bottom:10px;'>OR</div>", unsafe_allow_html=True)
-            
             s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
             s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
             
