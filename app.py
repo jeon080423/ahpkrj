@@ -2874,8 +2874,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
             f"</div>"
         ) if survey_email else ""
         
+        mobile_hint_html = (
+            f"<div style='margin-top: 16px; padding: 12px; background-color: #f1f5f9; border-radius: 6px; font-size: 0.9rem; color: #334155; display: flex; gap: 8px; align-items: center;'>"
+            f"<span style='font-size: 1.2rem;'>📱</span> <span>" + _("스마트폰으로 접속하신 경우, <b>기기를 가로로 회전</b>하시면 더욱 편리하게 설문에 응답하실 수 있습니다.", "If you are using a smartphone, you can respond to the survey more conveniently by <b>rotating the screen horizontally</b>.") + "</span>"
+            f"</div>"
+        )
+        
         # 사용자 입력 레이아웃(줄바꿈 및 띄어쓰기)을 그대로 유지하기 위해 white-space: pre-wrap 적용
-        box_html = f'<div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{survey_desc}\n{email_html}</div>'
+        box_html = f'<div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{survey_desc}\n{email_html}\n{mobile_hint_html}</div>'
         st.markdown(box_html, unsafe_allow_html=True)
 
     
