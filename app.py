@@ -5269,7 +5269,7 @@ with col_main:
         _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
-        _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
+        _("온라인 AHP 설문 및 배포", "Online AHP Survey & Deployment"), 
         _("실시간 응답 현황", "Live Response Status"),
         _("서비스 요금", "Service Pricing"),
         _("회원가입", "Sign Up")
@@ -5408,6 +5408,23 @@ with col_main:
                 return pd.DataFrame(summary_rows)
             return None
             
+        def preprocess_uploaded_df(df):
+            # 1. 제출시간/타임스탬프 제거
+            drop_cols = [c for c in df.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
+            if drop_cols:
+                df = df.drop(columns=drop_cols)
+            # 2. 다중 인구통계(Type 1, Type 2...) 단일 Type 컬럼으로 병합 (온라인 설문용)
+            type_cols = [c for c in df.columns if str(c).strip().lower().startswith("type ")]
+            if type_cols:
+                df["Type"] = df[type_cols].astype(str).agg(' - '.join, axis=1)
+                df = df.drop(columns=type_cols)
+                cols = df.columns.tolist()
+                if "Type" in cols:
+                    cols.remove("Type")
+                    cols.insert(1, "Type")
+                    df = df[cols]
+            return df
+            
         df_main = None
         sub_dfs = {}
         sheet_names = []
@@ -5420,9 +5437,7 @@ with col_main:
                     excel_obj = pd.ExcelFile(uploaded_file)
                     sheet_names = excel_obj.sheet_names
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
-                    drop_cols = [c for c in df_main.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
-                    if drop_cols:
-                        df_main = df_main.drop(columns=drop_cols)
+                    df_main = preprocess_uploaded_df(df_main)
                     
                     if "Type" not in df_main.columns and len(df_main.columns) > 1:
                         col1 = df_main.columns[1]
@@ -5446,15 +5461,11 @@ with col_main:
                         if sn_lower in ignore_sheets:
                             if "demographic" in sn_lower:
                                 st.session_state["demo_df"] = pd.read_excel(uploaded_file, sheet_name=sn)
-                                drop_cols_demo = [c for c in st.session_state["demo_df"].columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
-                                if drop_cols_demo:
-                                    st.session_state["demo_df"] = st.session_state["demo_df"].drop(columns=drop_cols_demo)
+                                st.session_state["demo_df"] = preprocess_uploaded_df(st.session_state["demo_df"])
                             continue
                             
                         df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
-                        drop_cols_sheet = [c for c in df_sheet.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
-                        if drop_cols_sheet:
-                            df_sheet = df_sheet.drop(columns=drop_cols_sheet)
+                        df_sheet = preprocess_uploaded_df(df_sheet)
                         if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
                             col1 = df_sheet.columns[1]
                             if "_" not in col1 and col1 not in ["ID", "제출시간"]:
@@ -6220,9 +6231,7 @@ with col_main:
                                             df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
                                         else:
                                             df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
-                                            drop_cols_sub = [c for c in df_sub.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
-                                            if drop_cols_sub:
-                                                df_sub = df_sub.drop(columns=drop_cols_sub)
+                                            df_sub = preprocess_uploaded_df(df_sub)
                                             
                                         sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
                                             df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
