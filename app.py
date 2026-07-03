@@ -4671,25 +4671,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("---")
 
-
-    
-    if st.session_state.get('lang', 'ko') == 'en':
-        st.markdown("""
-        ### Contact
-        - **Email**: jeon080423@gmail.com
-        - **KakaoTalk ID**: AHPkr
-        - **Blog**: [morison.tistory.com](https://morison.tistory.com/)
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        ### 문의처
-        - **이메일**: jeon080423@gmail.com
-        - **카톡ID**: AHPkr
-        - **블로그**: [morison.tistory.com](https://morison.tistory.com/)
-
-        """, unsafe_allow_html=True)
 
 # =============================================================================
 # 4. Main Content Logic
@@ -5263,13 +5245,13 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_consulting, main_tab_signup = st.tabs([
+    main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
+        _("💬 분석 문의 및 컨설팅", "💬 Analysis Inquiry & Consulting"),
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문지 작성 및 배포(무료)", "Create & Deploy Online AHP Survey (Free)"), 
         _("실시간 응답 현황", "Live Response Status"),
         _("서비스 요금", "Service Pricing"),
-        _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
         _("회원가입", "Sign Up")
     ])
         
@@ -8994,18 +8976,36 @@ with col_main:
         # 안내 문구 및 전화번호
         st.markdown(
             _("""
-            <div style="background-color: #f0f7ff; border-left: 4px solid #1890ff; padding: 16px; margin-bottom: 20px; border-radius: 4px; font-size: 0.95rem; line-height: 1.6;">
-              <h5 style="margin-top: 0; margin-bottom: 8px; color: #0050b3; font-weight: bold;">📞 유선 상담 및 컨설팅 문의</h5>
-              <div style="font-weight: 500; color: #333; margin-bottom: 4px;">• 전화번호: <b>0507-1347-2610</b></div>
-              <div style="font-weight: 500; color: #333;">• 카카오톡 ID: <b>AHPkr</b></div>
-              <div style="font-size: 0.85rem; color: #666; margin-top: 6px;">궁금하신 사항은 언제든 전화, 카카오톡 또는 아래 양식으로 남겨주시면 성심껏 답변해 드리겠습니다.</div>
+            <div style="background: linear-gradient(135deg, #e6f7ff 0%, #f0f5ff 100%); border-left: 5px solid #1890ff; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: 0; margin-bottom: 12px; color: #0050b3; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                <span>✨</span> 전문 분석 및 AHP/통계 컨설팅 문의
+              </h4>
+              <p style="color: #4a5568; margin-bottom: 16px; font-size: 0.9rem;">
+                학위논문, 연구보고서, 리서치 프로젝트 등 AHP 및 통계 분석에 대한 전문적인 컨설팅을 제공해 드립니다.
+              </p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e1ecf4;">
+                <div style="font-weight: 600; color: #2d3748;">📞 전화번호: <span style="color: #1890ff; font-weight: bold;">0507-1347-2610</span></div>
+                <div style="font-weight: 600; color: #2d3748;">💬 카카오톡 ID: <span style="color: #1890ff; font-weight: bold;">AHPkr</span></div>
+              </div>
+              <div style="font-size: 0.85rem; color: #718096; margin-top: 12px; font-weight: 500;">
+                💡 궁금하신 사항은 전화, 카카오톡 또는 아래 문의 폼을 통해 편하게 연락주시면 신속하게 안내해 드리겠습니다.
+              </div>
             </div>
             """, """
-            <div style="background-color: #f0f7ff; border-left: 4px solid #1890ff; padding: 16px; margin-bottom: 20px; border-radius: 4px; font-size: 0.95rem; line-height: 1.6;">
-              <h5 style="margin-top: 0; margin-bottom: 8px; color: #0050b3; font-weight: bold;">📞 Phone Consultation & Inquiry</h5>
-              <div style="font-weight: 500; color: #333; margin-bottom: 4px;">• Phone: <b>0507-1347-2610</b></div>
-              <div style="font-weight: 500; color: #333;">• KakaoTalk ID: <b>AHPkr</b></div>
-              <div style="font-size: 0.85rem; color: #666; margin-top: 6px;">Please feel free to call us, search KakaoTalk ID, or submit the form below. We will get back to you shortly.</div>
+            <div style="background: linear-gradient(135deg, #e6f7ff 0%, #f0f5ff 100%); border-left: 5px solid #1890ff; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: 0; margin-bottom: 12px; color: #0050b3; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                <span>✨</span> Professional AHP & Statistical Consulting
+              </h4>
+              <p style="color: #4a5568; margin-bottom: 16px; font-size: 0.9rem;">
+                We provide professional consultation on AHP and statistical analysis for academic theses, research reports, and market research.
+              </p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e1ecf4;">
+                <div style="font-weight: 600; color: #2d3748;">📞 Phone: <span style="color: #1890ff; font-weight: bold;">0507-1347-2610</span></div>
+                <div style="font-weight: 600; color: #2d3748;">💬 KakaoTalk ID: <span style="color: #1890ff; font-weight: bold;">AHPkr</span></div>
+              </div>
+              <div style="font-size: 0.85rem; color: #718096; margin-top: 12px; font-weight: 500;">
+                💡 Please feel free to call us, find KakaoTalk ID, or submit the form below. We will get back to you shortly.
+              </div>
             </div>
             """),
             unsafe_allow_html=True
