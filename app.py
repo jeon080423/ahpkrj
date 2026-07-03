@@ -2249,6 +2249,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
 
     # ID와 인구통계(Type) 관련 컬럼을 제외한 나머지를 쌍대비교 컬럼으로 간주
     comp_cols = [c for c in df.columns if str(c).strip().lower() != 'id' and not str(c).strip().lower().startswith('type')]
+    meta_cols = [c for c in df.columns if c not in comp_cols]
     factors, n = infer_factors_from_columns(comp_cols)
     
     # 시트 전체 데이터의 로우데이터 최대값/최솟값 계산
@@ -2260,8 +2261,8 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
     excluded_list = []
     excluded_count = 0
     for idx, row in df.iterrows():
-        respondent_id = row.iloc[0]
-        respondent_type = row.iloc[1]
+        meta_data = {c: row[c] for c in meta_cols}
+        respondent_id = meta_data.get('ID', row.iloc[0]) if 'ID' in meta_data else row.iloc[0]
         matrix = np.eye(n)
         
         # 원본 Rawdata를 정수 형태(-9 ~ 9)로 추출
@@ -2285,7 +2286,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
                     
         if has_format_error:
             excluded_count += 1
-            ex_res = {"ID": respondent_id, "Type": respondent_type}
+            ex_res = meta_data.copy()
             for k, col_name in enumerate(comp_cols):
                 ex_res[col_name] = raw_values[k] if k < len(raw_values) else np.nan
             ex_res["CR"] = "데이터 오류(Format Error)"
@@ -2305,7 +2306,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         # 만약 최대 반복을 수행했음에도 CR이 임계값을 초과할 경우 해당 응답자 제외
         if final_cr > cr_threshold:
             excluded_count += 1
-            ex_res = {"ID": respondent_id, "Type": respondent_type}
+            ex_res = meta_data.copy()
             for k, col_name in enumerate(comp_cols):
                 ex_res[col_name] = raw_values[k]
             ex_res["CR"] = final_cr
@@ -2329,10 +2330,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
             final_weights = calculate_weights(final_matrix, method)
         
         # 결과 딕셔너리 구성 (요청사항 5 재배치 반영)
-        res = {
-            "ID": respondent_id,
-            "Type": respondent_type
-        }
+        res = meta_data.copy()
         
         # [수정] 1. 보정 전 Rawdata 삽입
         for k, col_name in enumerate(comp_cols):
@@ -6297,6 +6295,22 @@ with col_main:
                         
                             main_cr_final_avg = main_results_df['Final_CR'].mean()
                         
+                            # --- 다중 인구통계 변수 처리 UI ---
+                            demo_cols = [c for c in main_results_df.columns if str(c).strip().lower() == 'type' or str(c).strip().lower().startswith('type ')]
+                            if len(demo_cols) > 1 and tier == 'Pro':
+                                selected_demo = st.selectbox(_("📊 교차분석 그룹 기준 변수 선택", "📊 Select Grouping Variable for Analysis"), demo_cols)
+                                main_results_df['Type'] = main_results_df[selected_demo]
+                                for mf in main_factors:
+                                    sub_results_storage[mf]['df']['Type'] = sub_results_storage[mf]['df'][selected_demo]
+                            elif len(demo_cols) > 0:
+                                main_results_df['Type'] = main_results_df[demo_cols[0]]
+                                for mf in main_factors:
+                                    sub_results_storage[mf]['df']['Type'] = sub_results_storage[mf]['df'][demo_cols[0]]
+                            else:
+                                main_results_df['Type'] = 'All'
+                                for mf in main_factors:
+                                    sub_results_storage[mf]['df']['Type'] = 'All'
+
                             indiv_global_data = []
                             all_ids = main_results_df['ID'].unique()
                         
