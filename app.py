@@ -3157,6 +3157,41 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
                     format_func = lambda x: _(f"왼쪽 중요도 {abs(x)}", f"Left importance {abs(x)}") if x < 0 else (_("동등 (1)", "Equal (1)") if x == 1 else _(f"오른쪽 중요도 {x}", f"Right importance {x}"))
                 
+                # 모바일 최적화: 가로 스크롤 영역 지정을 위한 컨테이너 생성
+                survey_container = st.container()
+                survey_container.markdown("<div class='ahp_scrollable_area'></div>", unsafe_allow_html=True)
+                
+                # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 모바일 가로 스크롤 지원
+                mobile_css = """
+                <style>
+                /* 모바일 (768px 이하) 환경에서 가로 스크롤 허용 및 세로 쌓임 방지 */
+                @media (max-width: 768px) {
+                    /* 직계 자식으로 마커를 가진 stVerticalBlock 만 선택하여 부모 컨테이너 레이아웃 파괴 방지 */
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) {
+                        overflow-x: auto !important;
+                        padding-bottom: 15px;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) > div {
+                        min-width: 700px !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] {
+                        flex-wrap: nowrap !important;
+                        flex-direction: row !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+                        width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+                        width: 70% !important; min-width: 70% !important; flex: 1 1 70% !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
+                        width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
+                    }
+                }
+                </style>
+                """
+                survey_container.markdown(mobile_css, unsafe_allow_html=True)
+                
                 # PDF 설문지와 유사한 헤더 스타일 표 생성
                 # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
                 if scale_type == "1-3-5 Discrete":
@@ -3214,15 +3249,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     </tr>
                 </table>
                 """
-                st.markdown(header_html, unsafe_allow_html=True)
+                survey_container.markdown(header_html, unsafe_allow_html=True)
 
                 # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
                 for left_f, right_f in comb["pairs"]:
                     pair_key = f"{left_f}_{right_f}"
                     clean_id = pair_key.replace(" ", "_")
-                    st.markdown(f"<div id='anchor_{clean_id}'></div>", unsafe_allow_html=True)
+                    survey_container.markdown(f"<div id='anchor_{clean_id}'></div>", unsafe_allow_html=True)
                 
-                    row_cols = st.columns([15, 70, 15])
+                    row_cols = survey_container.columns([15, 70, 15])
                 
                     # 왼쪽 요인명 출력
                     with row_cols[0]:
