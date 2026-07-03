@@ -8884,7 +8884,7 @@ with col_main:
                 st.caption(f"로컬 백업 조회 불가: {err}")
 
     with main_tab_pricing:
-        st.markdown(_("## 서비스 요금 안내 <span style='font-size: 1.1rem; font-weight: normal; color: #555; margin-left: 15px; vertical-align: middle;'>(계산서 발행 가능)</span>", "## Service Pricing <span style='font-size: 1.1rem; font-weight: normal; color: #555; margin-left: 15px; vertical-align: middle;'>(Tax Invoice Available)</span>"), unsafe_allow_html=True)
+        st.markdown(_("## 서비스 요금 안내", "## Service Pricing"), unsafe_allow_html=True)
 
         st.markdown(
             _("""
