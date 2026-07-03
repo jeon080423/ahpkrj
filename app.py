@@ -568,21 +568,22 @@ button[data-baseweb="tab"]:hover {
 
 /* 첫 번째 탭 (분석 문의 및 컨설팅) 강조 스타일 */
 button[data-baseweb="tab"]:first-child {
-    background-color: #f1f5f9 !important;
-    color: #475569 !important;
+    background-color: rgba(255, 75, 75, 0.08) !important;
+    color: #ff4b4b !important;
     font-weight: 600 !important;
     border-radius: 6px 6px 0 0 !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+    transition: all 0.3s ease !important;
 }
 button[data-baseweb="tab"]:first-child:hover {
-    background-color: #e2e8f0 !important;
-    color: #0f172a !important;
+    background-color: #ff4b4b !important;
+    color: #ffffff !important;
 }
 button[data-baseweb="tab"]:first-child[aria-selected="true"] {
-    background-color: #1e293b !important;
+    background-color: #ff4b4b !important;
     color: #ffffff !important;
-    border-bottom: 2px solid #1e293b !important;
+    border-bottom: 2px solid #ff4b4b !important;
 }
 
 /* --- 카드형 Expander 스타일 --- */
@@ -5419,8 +5420,9 @@ with col_main:
                     excel_obj = pd.ExcelFile(uploaded_file)
                     sheet_names = excel_obj.sheet_names
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
-                    if len(df_main.columns) > 0 and str(df_main.columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
-                        df_main = df_main.drop(columns=[df_main.columns[0]])
+                    drop_cols = [c for c in df_main.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
+                    if drop_cols:
+                        df_main = df_main.drop(columns=drop_cols)
                     
                     if "Type" not in df_main.columns and len(df_main.columns) > 1:
                         col1 = df_main.columns[1]
@@ -5444,13 +5446,15 @@ with col_main:
                         if sn_lower in ignore_sheets:
                             if "demographic" in sn_lower:
                                 st.session_state["demo_df"] = pd.read_excel(uploaded_file, sheet_name=sn)
-                                if len(st.session_state["demo_df"].columns) > 0 and str(st.session_state["demo_df"].columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
-                                    st.session_state["demo_df"] = st.session_state["demo_df"].drop(columns=[st.session_state["demo_df"].columns[0]])
+                                drop_cols_demo = [c for c in st.session_state["demo_df"].columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
+                                if drop_cols_demo:
+                                    st.session_state["demo_df"] = st.session_state["demo_df"].drop(columns=drop_cols_demo)
                             continue
                             
                         df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
-                        if len(df_sheet.columns) > 0 and str(df_sheet.columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
-                            df_sheet = df_sheet.drop(columns=[df_sheet.columns[0]])
+                        drop_cols_sheet = [c for c in df_sheet.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
+                        if drop_cols_sheet:
+                            df_sheet = df_sheet.drop(columns=drop_cols_sheet)
                         if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
                             col1 = df_sheet.columns[1]
                             if "_" not in col1 and col1 not in ["ID", "제출시간"]:
@@ -6216,8 +6220,9 @@ with col_main:
                                             df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
                                         else:
                                             df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
-                                            if len(df_sub.columns) > 0 and str(df_sub.columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
-                                                df_sub = df_sub.drop(columns=[df_sub.columns[0]])
+                                            drop_cols_sub = [c for c in df_sub.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
+                                            if drop_cols_sub:
+                                                df_sub = df_sub.drop(columns=drop_cols_sub)
                                             
                                         sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
                                             df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
