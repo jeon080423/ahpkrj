@@ -8888,34 +8888,8 @@ with col_main:
 
         st.markdown(
             _("""
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -35px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-                <span>🎓</span> 대학원생 및 연구원 대상 안내
-              </h4>
-              <p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">
-                AHP 마스터의 모든 요금제는 소속 기관의 <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">연구비/산학협력단 법인카드 결제</span>를 완벽하게 지원합니다.
-              </p>
-              <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
-                  <span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#연구비카드 환영</span>
-                  <span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#세금계산서 100%발행</span>
-                  <span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#대학증빙용 견적서 자동발급</span>
-              </div>
-            </div>
-            """, """
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -35px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-                <span>🎓</span> Notice for Graduate Students and Researchers
-              </h4>
-              <p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">
-                All AHP Master plans fully support payments using your institution's <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">Research Funding / Corporate Cards</span>.
-              </p>
-              <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
-                  <span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Research Cards Welcome</span>
-                  <span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Tax Invoices Available</span>
-                  <span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Institutional Quotes Provided</span>
-              </div>
-            </div>
-            """),
+<div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;"><h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;"><span>🎓</span> 대학원생 및 연구원 대상 안내</h4><p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">AHP 마스터의 모든 요금제는 소속 기관의 <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">연구비/산학협력단 법인카드 결제</span>를 완벽하게 지원합니다.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;"><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#연구비카드 환영</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#세금계산서 100%발행</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#대학증빙용 견적서 자동발급</span></div></div>""", """
+<div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 5px solid #0ea5e9; padding: 15px 20px 15px 20px; margin-top: -30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08); font-size: 0.95rem; line-height: 1.6;"><h4 style="margin-top: 0; margin-bottom: 6px; color: #0369a1; font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;"><span>🎓</span> Notice for Graduate Students and Researchers</h4><p style="color: #0c4a6e; margin-bottom: 6px; font-size: 0.95rem; font-weight: 500;">All AHP Master plans fully support payments using your institution's <span style="background-color: #fef08a; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #854d0e;">Research Funding / Corporate Cards</span>.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;"><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Research Cards Welcome</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Tax Invoices Available</span><span style="background: white; border: 1px solid #7dd3fc; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">#Institutional Quotes Provided</span></div></div>"""),
             unsafe_allow_html=True
         )
 
