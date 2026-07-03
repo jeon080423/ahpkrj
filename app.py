@@ -3054,6 +3054,78 @@ if "preview_id" in q_params or "survey_id" in q_params:
         - **When the right factor is more important**: Choose a number on the right side (→). A larger number indicates the right factor is much more important.
         """ + ("""\n        💡 :blue[**Blue Background Guide: Indicates the**] :red[**recommended selection range**] :blue[**to optimally maintain logical consistency (CR) with your previous answers.**]""" if cr_guide_method == "realtime" else "")))
         
+        # 모바일 가로 모드 강제 전환 오버레이
+        import streamlit.components.v1 as components
+        mobile_landscape_overlay_html = """
+        <script>
+        try {
+            const parent = window.parent.document;
+            if (!parent.getElementById('mobile-landscape-overlay')) {
+                const overlay = parent.createElement('div');
+                overlay.id = 'mobile-landscape-overlay';
+                
+                const style = parent.createElement('style');
+                style.innerHTML = `
+                    #mobile-landscape-overlay {
+                        display: none;
+                        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                        background-color: rgba(255,255,255,0.98);
+                        z-index: 999999; flex-direction: column;
+                        justify-content: center; align-items: center; text-align: center;
+                        padding: 20px; box-sizing: border-box;
+                    }
+                    @media (orientation: portrait) and (max-width: 768px) {
+                        #mobile-landscape-overlay { display: flex; }
+                    }
+                    .landscape-btn {
+                        background-color: #ff4b4b; color: white; border: none; border-radius: 8px;
+                        padding: 15px 25px; font-size: 18px; font-weight: bold; margin-top: 20px;
+                        cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 320px;
+                    }
+                    .landscape-note {
+                        font-size: 13.5px; color: #555; margin-top: 20px; line-height: 1.5; word-break: keep-all; background: #f8f9fa; padding: 15px; border-radius: 8px; max-width: 320px; text-align: left;
+                    }
+                `;
+                parent.head.appendChild(style);
+
+                overlay.innerHTML = `
+                    <div style="font-size: 50px; margin-bottom: 15px;">📱🔄</div>
+                    <h2 style="color: #333; margin-bottom: 10px; font-size: 22px;">가로 모드 최적화</h2>
+                    <p style="color: #444; font-size: 15px; margin-bottom: 5px;">이 설문(AHP 쌍대비교)은 표가 넓어<br>가로 화면에서 가장 쾌적하게 응답할 수 있습니다.</p>
+                    <button class="landscape-btn" id="btn-force-landscape">전체화면 가로 모드로 시작하기</button>
+                    <div class="landscape-note">
+                        ※ <b>아이폰(iOS) 사용자 안내</b><br>
+                        iOS 정책상 위 버튼이 작동하지 않을 수 있습니다.<br>
+                        이 경우 기기의 <b>'화면 회전 잠금'을 풀고</b> 스마트폰을 물리적으로 눕혀주시면 안내창이 자동으로 사라집니다.
+                    </div>
+                `;
+                parent.body.appendChild(overlay);
+
+                parent.getElementById('btn-force-landscape').addEventListener('click', function() {
+                    const docElm = parent.documentElement;
+                    if (docElm.requestFullscreen) {
+                        docElm.requestFullscreen().then(() => {
+                            if (window.screen.orientation && window.screen.orientation.lock) {
+                                window.screen.orientation.lock('landscape').catch(e => console.log(e));
+                            } else if (parent.screen.orientation && parent.screen.orientation.lock) {
+                                parent.screen.orientation.lock('landscape').catch(e => console.log(e));
+                            }
+                        }).catch(e => console.log(e));
+                    } else if (docElm.webkitRequestFullscreen) {
+                        docElm.webkitRequestFullscreen();
+                        if (parent.screen.orientation && parent.screen.orientation.lock) {
+                            parent.screen.orientation.lock('landscape').catch(e => console.log(e));
+                        }
+                    }
+                });
+            }
+        } catch(e) {
+            console.log("Error injecting overlay:", e);
+        }
+        </script>
+        """
+        components.html(mobile_landscape_overlay_html, height=0)
+        
         if tier_level == 3:
             from survey_manager_v3 import generate_pairwise_combinations_v3
             combinations = generate_pairwise_combinations_v3(ahp_model)
