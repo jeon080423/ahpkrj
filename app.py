@@ -9000,7 +9000,7 @@ with col_main:
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>가장 고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
