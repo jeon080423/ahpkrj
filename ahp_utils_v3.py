@@ -900,13 +900,30 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             ws_comp.write_string(s_row_cp, 0, _("그룹 간 비교(일원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
             s_row_cp += 1
             
+            # 등급 검사
+            tier = 'Free'
+            if st.session_state.get('user_role') == 'admin':
+                tier = 'Pro'
+            elif st.session_state.get('user_id') and st.session_state.get('user_role') != 'temp':
+                pt = st.session_state.get('plan_type') or ''
+                if 'Pro' in pt:
+                    tier = 'Pro'
+                elif 'Standard' in pt:
+                    tier = 'Standard'
+                elif 'Basic' in pt:
+                    tier = 'Basic'
+            
+            if tier != 'Pro':
+                ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Pro 등급 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+                s_row_cp += 1
+            
             comparison_df = final_df[['대분류', '중분류', '소분류', 'Global Weight']].copy()
             comparison_df.rename(columns={'Global Weight': '종합평균(Overall)'}, inplace=True)
             for grp, df_res in group_analysis_results.items():
                 temp_df = df_res.rename(columns={'Global Weight': grp})
                 comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류', '소분류'], how='left')
                 
-            if not anova_df.empty:
+            if tier == 'Pro' and not anova_df.empty:
                 # Merge ANOVA results:
                 # 1. For rows that are dummy/virtual leaf nodes (i.e. '소분류' ends with '_단일항목'), we want to match ANOVA result where '요인' == '중분류'
                 # 2. For standard rows, we match ANOVA result where '요인' == '소분류'
@@ -981,9 +998,10 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             text_fmt = workbook.add_format({'font_size': 10, 'text_wrap': True, 'valign': 'top', 'align': 'left', 'border': 1})
             ws_comp.set_column('A:G', 20)
             
-            comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
-                           "※ Reasons why group differences are not statistically significant despite variation in priorities")
-            ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
+            if tier == 'Pro':
+                comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
+                               "※ Reasons why group differences are not statistically significant despite variation in priorities")
+                ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
             
             guide_content_ko = [
                 ("1. 그룹 내 편차(분산)가 너무 큰 경우", "ANOVA는 '그룹 간의 차이'와 '그룹 내의 차이'를 비교합니다.\n\n■ 원리: 그룹 간 평균 차이가 크더라도, 각 그룹 내부 데이터들이 서로 들쭉날쭉(분산이 큼)하다면 통계적으로는 '이 차이가 우연히 발생했을 가능성이 높다'고 판단합니다."),
@@ -995,7 +1013,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                 ("2. Insufficient Sample Size", "Statistical significance is highly sensitive to the number of samples.\n\n■ Phenomenon: If the number of data points (sample size) in each group is too small, statistical power is insufficient to detect significant differences."),
                 ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
             ]
-            guide_content = guide_content_en if is_en else guide_content_ko
+            guide_content = (guide_content_en if is_en else guide_content_ko) if tier == 'Pro' else []
             
             current_row_comp = guide_start_row + 1
             for title, body in guide_content:
