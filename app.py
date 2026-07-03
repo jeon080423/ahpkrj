@@ -568,21 +568,21 @@ button[data-baseweb="tab"]:hover {
 
 /* 첫 번째 탭 (분석 문의 및 컨설팅) 강조 스타일 */
 button[data-baseweb="tab"]:first-child {
-    background-color: #e6f7ff !important;
-    color: #0050b3 !important;
-    font-weight: bold !important;
-    border-radius: 4px 4px 0 0 !important;
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    border-radius: 6px 6px 0 0 !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
 }
 button[data-baseweb="tab"]:first-child:hover {
-    background-color: #bae7ff !important;
-    color: #003a8c !important;
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
 }
 button[data-baseweb="tab"]:first-child[aria-selected="true"] {
-    background-color: #1890ff !important;
+    background-color: #1e293b !important;
     color: #ffffff !important;
-    border-bottom: 2px solid #096dd9 !important;
+    border-bottom: 2px solid #1e293b !important;
 }
 
 /* --- 카드형 Expander 스타일 --- */
@@ -8995,34 +8995,34 @@ with col_main:
         # 안내 문구 및 전화번호
         st.markdown(
             _("""
-            <div style="background: linear-gradient(135deg, #e6f7ff 0%, #f0f5ff 100%); border-left: 5px solid #1890ff; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: 0; margin-bottom: 12px; color: #0050b3; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: 0; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                 <span>✨</span> 전문 분석 및 AHP/통계 컨설팅 문의
               </h4>
-              <p style="color: #4a5568; margin-bottom: 16px; font-size: 0.9rem;">
+              <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
                 학위논문, 연구보고서, 리서치 프로젝트 등 AHP 및 통계 분석에 대한 전문적인 컨설팅을 제공해 드립니다.
               </p>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e1ecf4;">
-                <div style="font-weight: 600; color: #2d3748;">📞 전화번호: <span style="color: #1890ff; font-weight: bold;">0507-1347-2610</span></div>
-                <div style="font-weight: 600; color: #2d3748;">💬 카카오톡 ID: <span style="color: #1890ff; font-weight: bold;">AHPkr</span></div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #1e293b;">📞 전화번호: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                <div style="font-weight: 600; color: #1e293b;">💬 카카오톡 ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
               </div>
-              <div style="font-size: 0.85rem; color: #718096; margin-top: 12px; font-weight: 500;">
+              <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
                 💡 궁금하신 사항은 전화, 카카오톡 또는 아래 문의 폼을 통해 편하게 연락주시면 신속하게 안내해 드리겠습니다.
               </div>
             </div>
             """, """
-            <div style="background: linear-gradient(135deg, #e6f7ff 0%, #f0f5ff 100%); border-left: 5px solid #1890ff; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: 0; margin-bottom: 12px; color: #0050b3; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: 0; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                 <span>✨</span> Professional AHP & Statistical Consulting
               </h4>
-              <p style="color: #4a5568; margin-bottom: 16px; font-size: 0.9rem;">
+              <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
                 We provide professional consultation on AHP and statistical analysis for academic theses, research reports, and market research.
               </p>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e1ecf4;">
-                <div style="font-weight: 600; color: #2d3748;">📞 Phone: <span style="color: #1890ff; font-weight: bold;">0507-1347-2610</span></div>
-                <div style="font-weight: 600; color: #2d3748;">💬 KakaoTalk ID: <span style="color: #1890ff; font-weight: bold;">AHPkr</span></div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #1e293b;">📞 Phone: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                <div style="font-weight: 600; color: #1e293b;">💬 KakaoTalk ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
               </div>
-              <div style="font-size: 0.85rem; color: #718096; margin-top: 12px; font-weight: 500;">
+              <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
                 💡 Please feel free to call us, find KakaoTalk ID, or submit the form below. We will get back to you shortly.
               </div>
             </div>
