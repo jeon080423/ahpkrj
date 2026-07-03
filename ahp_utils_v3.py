@@ -913,8 +913,8 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                 elif 'Basic' in pt:
                     tier = 'Basic'
             
-            if tier != 'Pro':
-                ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Pro 등급 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+            if tier not in ['Standard', 'Pro']:
+                ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Standard 등급 이상 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Standard and Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
                 s_row_cp += 1
             
             comparison_df = final_df[['대분류', '중분류', '소분류', 'Global Weight']].copy()
@@ -923,7 +923,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                 temp_df = df_res.rename(columns={'Global Weight': grp})
                 comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류', '소분류'], how='left')
                 
-            if tier == 'Pro' and not anova_df.empty:
+            if tier in ['Standard', 'Pro'] and not anova_df.empty:
                 # Merge ANOVA results:
                 # 1. For rows that are dummy/virtual leaf nodes (i.e. '소분류' ends with '_단일항목'), we want to match ANOVA result where '요인' == '중분류'
                 # 2. For standard rows, we match ANOVA result where '요인' == '소분류'
@@ -998,7 +998,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             text_fmt = workbook.add_format({'font_size': 10, 'text_wrap': True, 'valign': 'top', 'align': 'left', 'border': 1})
             ws_comp.set_column('A:G', 20)
             
-            if tier == 'Pro':
+            if tier in ['Standard', 'Pro']:
                 comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
                                "※ Reasons why group differences are not statistically significant despite variation in priorities")
                 ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
@@ -1013,7 +1013,7 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                 ("2. Insufficient Sample Size", "Statistical significance is highly sensitive to the number of samples.\n\n■ Phenomenon: If the number of data points (sample size) in each group is too small, statistical power is insufficient to detect significant differences."),
                 ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
             ]
-            guide_content = (guide_content_en if is_en else guide_content_ko) if tier == 'Pro' else []
+            guide_content = (guide_content_en if is_en else guide_content_ko) if tier in ['Standard', 'Pro'] else []
             
             current_row_comp = guide_start_row + 1
             for title, body in guide_content:

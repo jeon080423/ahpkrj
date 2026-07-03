@@ -5671,6 +5671,7 @@ with col_main:
                                      f"⛔ **Free Users** can only analyze up to 5 samples per sheet. (Current: {len(df_main)} samples)")
             
                 if permission_granted:
+                    tier = get_current_tier()
                     try:
                         if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
                             tier_level = st.session_state.get("inferred_tier_level", 2)
@@ -6318,7 +6319,7 @@ with col_main:
                         
                             # --- 다중 인구통계 변수 처리 UI ---
                             demo_cols = [c for c in main_results_df.columns if str(c).strip().lower() == 'type' or str(c).strip().lower().startswith('type ')]
-                            if len(demo_cols) > 1 and tier == 'Pro':
+                            if len(demo_cols) > 1 and tier in ['Standard', 'Pro']:
                                 selected_demo = st.selectbox(_("📊 교차분석 그룹 기준 변수 선택", "📊 Select Grouping Variable for Analysis"), demo_cols)
                                 main_results_df['Type'] = main_results_df[selected_demo]
                                 for mf in main_factors:
@@ -6487,11 +6488,11 @@ with col_main:
                                     s_row_cp += 1
                                 
                                     tier = get_current_tier()
-                                    if tier != 'Pro':
-                                        ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Pro 등급 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+                                    if tier not in ['Standard', 'Pro']:
+                                        ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Standard 등급 이상 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Standard and Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
                                         s_row_cp += 1
                                 
-                                    if tier == 'Pro' and not anova_df.empty:
+                                    if tier in ['Standard', 'Pro'] and not anova_df.empty:
                                         anova_for_merge = anova_df.rename(columns={'요인': '중분류'})
                                         integrated_df = comparison_df.merge(anova_for_merge, on='중분류', how='left')
                                     else:
@@ -6543,7 +6544,7 @@ with col_main:
                                     text_fmt = workbook.add_format({'font_size': 10, 'text_wrap': True, 'valign': 'top', 'align': 'left', 'border': 1})
                                     ws_comp.set_column('A:G', 20) 
                                 
-                                    if tier == 'Pro':
+                                    if tier in ['Standard', 'Pro']:
                                         comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
                                                        "※ Reasons why group differences are not statistically significant despite variation in priorities")
                                         ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
@@ -6560,7 +6561,7 @@ with col_main:
                                         ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
                                     ]
                                 
-                                    guide_content = (guide_content_en if st.session_state.get('lang', 'ko') == 'en' else guide_content_ko) if tier == 'Pro' else []
+                                    guide_content = (guide_content_en if st.session_state.get('lang', 'ko') == 'en' else guide_content_ko) if tier in ['Standard', 'Pro'] else []
     
                                     current_row_comp = guide_start_row + 1
                                     for title, body in guide_content:
@@ -8905,7 +8906,7 @@ with col_main:
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for general academic theses and medium-term research projects.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>Includes Fuzzy AHP</b></li>
+                        <li><b>Includes Advanced Cross-Statistical Analysis (T-Test, ANOVA)</b></li>
                         <li><b>Unlimited sample size</b></li>
                         <li>Unlimited project creation</li>
                         <li>Standard email support</li>
@@ -8926,8 +8927,8 @@ with col_main:
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for university labs and research consulting firms.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>Advanced cross-statistical analysis (T-Test, ANOVA)</b></li>
-                        <li>Includes Fuzzy AHP</li>
+                        <li><b>Includes Fuzzy AHP</b></li>
+                        <li>Advanced cross-statistical analysis (T-Test, ANOVA)</li>
                         <li>Unlimited sample size & projects</li>
                         <li>Priority tech/bug support</li>
                         <li><b>1 Free survey setup proxy</b></li>
@@ -8973,7 +8974,7 @@ with col_main:
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>Fuzzy AHP 기능 포함</b></li>
+                        <li><b>고급 교차 통계 분석 (T-Test, ANOVA) 제공</b></li>
                         <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
                         <li>일반 이메일 지원</li>
@@ -8994,8 +8995,8 @@ with col_main:
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>고급 교차 통계 분석 (T-Test, ANOVA) 제공</b></li>
-                        <li>Fuzzy AHP 기능 포함</li>
+                        <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
+                        <li>고급 교차 통계 분석 (T-Test, ANOVA) 제공</li>
                         <li>표본수 무제한 및 프로젝트 무제한</li>
                         <li>최우선 기술/오류 지원</li>
                         <li><b>설문 셋팅 1회 무료 대행</b></li>
