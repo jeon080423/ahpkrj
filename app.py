@@ -5272,7 +5272,7 @@ with col_main:
         _("실시간 응답 현황", "Live Response Status"),
         _("서비스 요금", "Service Pricing"),
         _("회원가입", "Sign Up")
-    ])
+    ], default=_("AHP 분석 도구", "AHP Analysis Tool"))
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
