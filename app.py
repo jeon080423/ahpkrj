@@ -8302,8 +8302,8 @@ with col_main:
 
             # 섹션 6: 실시간 CR 검증 레벨 설정
             st.subheader(_("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨", "Section 6: Pre-submission Consistency Ratio (CR) Validation Level"))
-            # Get default index from edit state if editing, otherwise default to index 4 (0.3 이하)
-            default_cr_idx = 4
+            # Get default index from edit state if editing, otherwise default to index 3 (0.2 이하)
+            default_cr_idx = 3
             if st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is not None:
                 cr_val = float(st.session_state.get("edit_cr_limit"))
                 if cr_val <= 0.1: default_cr_idx = 1
