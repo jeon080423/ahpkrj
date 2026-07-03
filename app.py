@@ -3091,12 +3091,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 overlay.innerHTML = `
                     <div style="font-size: 50px; margin-bottom: 15px;">📱🔄</div>
                     <h2 style="color: #333; margin-bottom: 10px; font-size: 22px;">가로 모드 최적화</h2>
-                    <p style="color: #444; font-size: 15px; margin-bottom: 5px;">이 설문(AHP 쌍대비교)은 표가 넓어<br>가로 화면에서 가장 쾌적하게 응답할 수 있습니다.</p>
-                    <button class="landscape-btn" id="btn-force-landscape">전체화면 가로 모드로 시작하기</button>
+                    <p style="color: #444; font-size: 15px; margin-bottom: 5px;">이 설문(AHP 쌍대비교)은 가로 화면에서<br>가장 편하게 응답하실 수 있습니다.</p>
+                    <button class="landscape-btn" id="btn-force-landscape">🔄 화면을 가로로 돌리고 설문 계속하기</button>
                     <div class="landscape-note">
                         ※ <b>아이폰(iOS) 사용자 안내</b><br>
-                        iOS 정책상 위 버튼이 작동하지 않을 수 있습니다.<br>
-                        이 경우 기기의 <b>'화면 회전 잠금'을 풀고</b> 스마트폰을 물리적으로 눕혀주시면 안내창이 자동으로 사라집니다.
+                        위 버튼이 작동하지 않을 수 있습니다.<br>
+                        기기의 <b>'자동 회전'을 켜고</b> 스마트폰을 눕혀주시면 안내창이 사라집니다.
                     </div>
                 `;
                 parent.body.appendChild(overlay);
