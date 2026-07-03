@@ -4007,7 +4007,7 @@ def get_portone_custom_services_html(user_id=None):
               <h2 class="price" id="totalPriceDisplay">0원</h2>
           </div>
           <p class="period">선택된 서비스 합계 금액</p>
-          <p class="desc" id="statusDesc">필요한 서비스를 선택해 주세요.</p>
+          <p class="desc" id="statusDesc"></p>
           <hr class="divider">
           
           <ul class="svc-list">
@@ -4063,7 +4063,7 @@ def get_portone_custom_services_html(user_id=None):
                 document.getElementById("payBtn").innerText = "결제하기";
                 document.getElementById("payBtn").style.backgroundColor = "#ff4b4b";
             }} else {{
-                document.getElementById("statusDesc").innerText = "필요한 서비스를 선택해 주세요.";
+                document.getElementById("statusDesc").innerText = "";
                 document.getElementById("payBtn").innerText = "옵션을 선택해주세요";
                 document.getElementById("payBtn").style.backgroundColor = "#333333";
             }}
