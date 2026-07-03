@@ -5419,6 +5419,8 @@ with col_main:
                     excel_obj = pd.ExcelFile(uploaded_file)
                     sheet_names = excel_obj.sheet_names
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
+                    if len(df_main.columns) > 0 and str(df_main.columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
+                        df_main = df_main.drop(columns=[df_main.columns[0]])
                     
                     if "Type" not in df_main.columns and len(df_main.columns) > 1:
                         col1 = df_main.columns[1]
@@ -5442,9 +5444,13 @@ with col_main:
                         if sn_lower in ignore_sheets:
                             if "demographic" in sn_lower:
                                 st.session_state["demo_df"] = pd.read_excel(uploaded_file, sheet_name=sn)
+                                if len(st.session_state["demo_df"].columns) > 0 and str(st.session_state["demo_df"].columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
+                                    st.session_state["demo_df"] = st.session_state["demo_df"].drop(columns=[st.session_state["demo_df"].columns[0]])
                             continue
                             
                         df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
+                        if len(df_sheet.columns) > 0 and str(df_sheet.columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
+                            df_sheet = df_sheet.drop(columns=[df_sheet.columns[0]])
                         if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
                             col1 = df_sheet.columns[1]
                             if "_" not in col1 and col1 not in ["ID", "제출시간"]:
@@ -6210,6 +6216,8 @@ with col_main:
                                             df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
                                         else:
                                             df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
+                                            if len(df_sub.columns) > 0 and str(df_sub.columns[0]).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]:
+                                                df_sub = df_sub.drop(columns=[df_sub.columns[0]])
                                             
                                         sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
                                             df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
