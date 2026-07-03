@@ -4039,7 +4039,7 @@ def get_portone_custom_services_html(user_id=None):
           </ul>
           
           <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
-              연구비용 견적서 발급 및 부가서비스 문의: <br>카톡아이디: <b>AHPkr</b>
+              견적서 발급 및 부가서비스 문의: <br>카톡아이디: <b>AHPkr</b>
           </div>
           
           <button class="btn" id="payBtn" onclick="handlePayAction()">결제하기</button>
