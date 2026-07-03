@@ -4014,26 +4014,26 @@ def get_portone_custom_services_html(user_id=None):
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅" onchange="updatePrice()">
-                      <span>AHP 온라인 설문 셋팅<br><span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                      <span>AHP 온라인 설문 셋팅 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
                   </label>
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_2" value="50000" data-name="결과 분석 대행" onchange="updatePrice()">
-                      <span>AHP 결과 분석 대행<br><span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                      <span>AHP 결과 분석 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
                   </label>
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 엑셀 양식 설정 대행" onchange="updatePrice()">
-                      <span>AHP 코딩 엑셀 양식 설정 대행<br><span style="color: #666; font-size: 0.75rem;">(30,000원)</span></span>
+                      <span>AHP 코딩 엑셀 설정 대행 <span style="color: #666; font-size: 0.75rem;">(30,000원)</span></span>
                   </label>
               </li>
           
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_ext" value="100000" data-name="1개월 이용 연장" onchange="updatePrice()">
-                      <span>1개월 이용 연장<br><span style="color: #666; font-size: 0.75rem;">(100,000원)</span></span>
+                      <span>1개월 이용 연장 <span style="color: #666; font-size: 0.75rem;">(100,000원)</span></span>
                   </label>
               </li>
           </ul>
@@ -4343,7 +4343,7 @@ def get_paypal_custom_services_html(user_id=None):
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_2" value="33" data-name="Result Analysis Proxy" onchange="updatePrice()">
-                      <span>AHP Result Analysis Proxy<br><span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
+                      <span>AHP Result Analysis Proxy <span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
                   </label>
               </li>
               <li class="svc-item">
@@ -4356,7 +4356,7 @@ def get_paypal_custom_services_html(user_id=None):
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_ext" value="74" data-name="1 Month Extension" onchange="updatePrice()">
-                      <span>1 Month Extension<br><span style="color: #666; font-size: 0.75rem;">($74 USD)</span></span>
+                      <span>1 Month Extension <span style="color: #666; font-size: 0.75rem;">($74 USD)</span></span>
                   </label>
               </li>
           </ul>
@@ -8892,10 +8892,9 @@ with col_main:
             # 1 Month
             with col_p1:
                 inner_1 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>2 Months</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>Basic</span>
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$185 USD</h2>
-                    <p style='color: #555; margin-top:0;'>$162 / month</p>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for short-term paper writers and one-off small projects.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8913,10 +8912,9 @@ with col_main:
             # 3 Months
             with col_p2:
                 inner_3 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>2 Months</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>Standard</span>
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$330 USD</h2>
-                    <p style='color: #555; margin-top:0;'>About $165 / month</p>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for general academic theses and medium-term research projects.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8934,10 +8932,9 @@ with col_main:
             # 6 Months
             with col_p3:
                 inner_6 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>2 Months</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>Pro</span>
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$700 USD</h2>
-                    <p style='color: #555; margin-top:0;'>About $350 / month</p>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for university labs and research consulting firms.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8960,10 +8957,9 @@ with col_main:
             # 1개월
             with col_p1:
                 inner_1 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>2개월</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>Basic</span>
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>250,000원</h2>
-                    <p style='color: #555; margin-top:0;'>월 125,000원</p>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -8981,10 +8977,9 @@ with col_main:
             # 3개월
             with col_p2:
                 inner_3 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>2개월</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>Standard</span>
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>450,000원</h2>
-                    <p style='color: #555; margin-top:0;'>월 225,000원</p>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -9002,10 +8997,9 @@ with col_main:
             # 6개월
             with col_p3:
                 inner_6 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>2개월</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>Pro</span>
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
-                    <p style='color: #555; margin-top:0;'>월 475,000원</p>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
