@@ -8895,7 +8895,7 @@ with col_main:
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$185 USD</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for short-term paper writers and one-off small projects.</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for small-scale projects aiming for reliable results using standard AHP methodology.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>Standard AHP features</b></li>
@@ -8915,7 +8915,7 @@ with col_main:
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$330 USD</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for general academic theses and medium-term research projects.</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for professional research requiring precise conclusions through demographic group-difference analysis.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>Includes Advanced Cross-Statistical Analysis (T-Test, ANOVA)</b></li>
@@ -8935,7 +8935,7 @@ with col_main:
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$700 USD</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for university labs and research consulting firms.</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for research institutions and top-tier academic journals requiring advanced Fuzzy AHP analysis and priority support.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>Includes Fuzzy AHP</b></li>
@@ -8960,7 +8960,7 @@ with col_main:
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>250,000원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단기 논문 작성자 및 1회성 소규모 프로젝트에 적합합니다.</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>일반 AHP 기능 제공</b></li>
@@ -8980,7 +8980,7 @@ with col_main:
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>450,000원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>일반 학위 논문 및 중단기 리서치 프로젝트에 적합합니다.</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
@@ -9000,7 +9000,7 @@ with col_main:
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
                     <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>대학 연구실 및 리서치를 진행하는 컨설팅 기업에 적합합니다.</p>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>가장 고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
