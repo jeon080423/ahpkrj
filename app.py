@@ -3956,10 +3956,10 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
         event_ui_html = """
         <div id="event-container" style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 8px; font-size: 0.82rem; text-align: left;">
             <div style="font-weight: bold; color: #0284c7; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-                <span>🎓</span> <b>[기간한정] 학위논문 5만원 할인 진행 중</b>
+                <b>[기간한정] 학위논문 5만원 할인 진행 중</b>
             </div>
             <div style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
-                ~2026.07.30 限. 석/박사 학위논문 대상<br>
+                ~2026.07.30. 석/박사 학위논문 대상<br>
                 ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개 동의
             </div>
         </div>
@@ -4050,10 +4050,10 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
         event_ui_html = """
         <div id="event-container" style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 8px; font-size: 0.82rem; text-align: left;">
             <div style="font-weight: bold; color: #0284c7; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-                <span>🎓</span> <b>[기간한정] 학위논문 5만원 할인</b>
+                <b>[기간한정] 학위논문 5만원 할인</b>
             </div>
             <div style="font-size: 0.75rem; color: #475569; margin-bottom: 10px; line-height: 1.4;">
-                ~2026.07.30 限. 석/박사 학위논문 대상<br>
+                ~2026.07.30. 석/박사 학위논문 대상<br>
                 ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개에 동의 (학위논문 내 AHP마스터 기재는 선택사항)
             </div>
             <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: #1e293b; margin-bottom: 10px; cursor: pointer; user-select: none;">
