@@ -1157,7 +1157,7 @@ def init_db():
     c.execute("SELECT COUNT(*) FROM event_settings WHERE id = 1")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO event_settings (id, event_active, event_title, event_desc, event_deadline, event_discount) VALUES (?, ?, ?, ?, ?, ?)",
-                  (1, 1, "[이벤트] 학위논문 할인 (~7/30)", "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수", "2026-07-30", 50000))
+                  (1, 1, "[이벤트] 학위논문 5만원 할인 (~7/30)", "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수", "2026-07-30", 50000))
         conn.commit()
     
     # 관리자 계정 생성
@@ -1227,7 +1227,7 @@ def get_event_settings():
         conn.close()
     return {
         "active": True,
-        "title": "[이벤트] 학위논문 할인 (~7/30)",
+        "title": "[이벤트] 학위논문 5만원 할인 (~7/30)",
         "desc": "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수",
         "deadline": "2026-07-30",
         "discount": 50000
