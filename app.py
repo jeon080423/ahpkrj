@@ -5252,27 +5252,24 @@ with st.sidebar:
                     key="q_tier_select"
                 )
                 
-                if st.button(_("견적서 출력 (인쇄/PDF 저장)", "Print Estimate (PDF)"), use_container_width=True, key="btn_print_quote"):
-                    if not q_client.strip():
-                        st.error(_("의뢰기관명을 입력해 주세요.", "Please enter the Client Institution."))
-                    elif not q_project.strip():
-                        st.error(_("과제명을 입력해 주세요.", "Please enter the Project Name."))
-                    else:
-                        plan_label, amount, plan_name = q_tier
-                        q_html = get_quotation_html(q_client.strip(), q_project.strip(), amount, plan_name)
-                        
-                        import json
-                        escaped_html = json.dumps(q_html)
-                        popup_js = f"""
-                        <script>
-                            var w = window.open("", "_blank");
-                            w.document.write({escaped_html});
-                            w.document.close();
-                        </script>
-                        """
-                        st.components.v1.html(popup_js, height=0)
-                        st.success(_("새 창에서 견적서가 로드되었습니다. 브라우저 인쇄 대화창에서 'PDF로 저장'을 선택해 저장해 주세요.",
-                                     "Estimate loaded in a new window. Select 'Save as PDF' in the print dialog to download."))
+                clean_client = q_client.strip()
+                clean_project = q_project.strip()
+                
+                if clean_client and clean_project:
+                    plan_label, amount, plan_name = q_tier
+                    q_html = get_quotation_html(clean_client, clean_project, amount, plan_name)
+                    
+                    st.download_button(
+                        label=_("견적서 다운로드", "Download Estimate"),
+                        data=q_html,
+                        file_name=f"견적서_{clean_client}.html",
+                        mime="text/html",
+                        use_container_width=True,
+                        key="btn_download_quote"
+                    )
+                else:
+                    st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.", 
+                                 "Please enter the Client Institution and Project Name to enable download."))
             
             with tab_tax:
                 t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
