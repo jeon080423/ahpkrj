@@ -3947,20 +3947,18 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
     event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
     is_event_active = kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard")) and lang == "ko"
     
-    box_height_css = "min-height: 520px; height: auto;" if is_event_active else "height: 500px;"
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     
     event_ui_html = ""
     if is_event_active:
         event_ui_html = """
-        <div id="event-container" style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 8px; font-size: 0.82rem; text-align: left;">
-            <div style="font-weight: bold; color: #0284c7; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-                <b>[기간한정] 학위논문 5만원 할인 진행 중</b>
+        <div id="event-container" style="margin-top: 6px; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
+            <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">
+                <b>[이벤트] 학위논문 5만원 할인 (~7/30)</b>
             </div>
-            <div style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
-                ~2026.07.30. 석/박사 학위논문 대상<br>
-                ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개 동의
+            <div style="font-size: 0.65rem; color: #475569;">
+                석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수
             </div>
         </div>
         """
@@ -3980,7 +3978,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            {box_height_css}
+            height: 500px; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -4041,33 +4039,31 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
     is_event_active = kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard"))
     
-    box_height_css = "min-height: 520px; height: auto;" if is_event_active else "height: 500px;"
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     
     event_ui_html = ""
     if is_event_active:
         event_ui_html = """
-        <div id="event-container" style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 8px; font-size: 0.82rem; text-align: left;">
-            <div style="font-weight: bold; color: #0284c7; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-                <b>[기간한정] 학위논문 5만원 할인</b>
+        <div id="event-container" style="margin-top: 6px; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
+            <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">
+                <b>[이벤트] 학위논문 5만원 할인 (~7/30)</b>
             </div>
-            <div style="font-size: 0.75rem; color: #475569; margin-bottom: 10px; line-height: 1.4;">
-                ~2026.07.30. 석/박사 학위논문 대상<br>
-                ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개에 동의 (학위논문 내 AHP마스터 기재는 선택사항)
+            <div style="font-size: 0.65rem; color: #475569; margin-bottom: 4px;">
+                석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수
             </div>
-            <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: #1e293b; margin-bottom: 10px; cursor: pointer; user-select: none;">
-                <input type="checkbox" id="event-agree" onchange="toggleEvent()" style="accent-color: #0284c7; cursor: pointer; width: 16px; height: 16px;">
-                할인 혜택 동의 및 신청 (5만원 즉시 할인)
+            <label style="display: flex; align-items: center; gap: 4px; font-weight: bold; color: #1e293b; cursor: pointer; user-select: none; font-size: 0.7rem; margin: 0;">
+                <input type="checkbox" id="event-agree" onchange="toggleEvent()" style="accent-color: #0284c7; cursor: pointer; width: 13px; height: 13px; margin: 0;">
+                할인 신청 (5만원 즉시 할인)
             </label>
-            <div id="event-inputs" style="display: none; flex-direction: column; gap: 8px; background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <div>
-                    <div style="margin-bottom: 4px; color: #334155; font-weight: 600; font-size: 0.78rem;">대학명 (필수)</div>
-                    <input type="text" id="univ-name" placeholder="예: 한국대학교 대학원" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 0.8rem; outline: none; font-family: inherit;">
+            <div id="event-inputs" style="display: none; flex-direction: column; gap: 4px; background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 45px;">대학명:</span>
+                    <input type="text" id="univ-name" placeholder="예: 한국대 대학원" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
-                <div>
-                    <div style="margin-bottom: 4px; color: #334155; font-weight: 600; font-size: 0.78rem;">학위논문 제목 (필수)</div>
-                    <input type="text" id="thesis-title" placeholder="예: AHP를 이용한 의사결정 연구" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 0.8rem; outline: none; font-family: inherit;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 45px;">논문제목:</span>
+                    <input type="text" id="thesis-title" placeholder="예: AHP 의사결정 연구" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
             </div>
         </div>
@@ -4085,7 +4081,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            {box_height_css}
+            height: 500px; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -9287,10 +9283,10 @@ with col_main:
                 inner_1 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>350,000</span>원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <h2 style='margin-top: 8px; margin-bottom: 4px; color: #ff4b4b;'><span id='basic-price-display-span'>350,000</span>원</h2>
+                    <p style='font-size: 0.78rem; color: #666; min-height: 28px; margin: 4px 0;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
+                    <hr style='margin: 5px 0;'>
+                    <ul style='font-size: 0.82rem; padding-left: 15px; color: #333; line-height: 1.35; margin: 4px 0;'>
                         <li><b>일반 AHP 기능 제공</b></li>
                         <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
@@ -9298,19 +9294,19 @@ with col_main:
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 350000, 2, inner_html=inner_1, is_best=False), height=650)
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 350000, 2, inner_html=inner_1, is_best=False), height=520)
                 else:
-                    st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=650)
+                    st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
 
             # 3개월
             with col_p2:
                 inner_3 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <h2 style='margin-top: 8px; margin-bottom: 4px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
+                    <p style='font-size: 0.78rem; color: #666; min-height: 28px; margin: 4px 0;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
+                    <hr style='margin: 5px 0;'>
+                    <ul style='font-size: 0.82rem; padding-left: 15px; color: #333; line-height: 1.35; margin: 4px 0;'>
                         <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
                         <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
@@ -9318,9 +9314,9 @@ with col_main:
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=650)
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=520)
                 else:
-                    st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=650)
+                    st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
 
             # 6개월
             with col_p3:
