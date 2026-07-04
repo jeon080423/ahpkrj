@@ -5033,8 +5033,7 @@ with st.sidebar:
                     """
                     st.components.v1.html(paypal_html, height=180)
                 else:
-                    st.markdown("##### 💳 정식 사용자 승격 결제")
-                    st.info("메인 페이지의 **서비스 요금** 탭에서 결제를 진행해 주세요.")
+                    st.info("**서비스 요금** 탭에서 결제를 진행해 주세요.")
         
     if st.session_state.user_id is not None:
         if st.session_state.user_role == 'admin':
