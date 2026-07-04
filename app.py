@@ -1803,9 +1803,23 @@ def num_to_kor(num):
 # [신규 추가] 견적서 인쇄용 HTML 출력 (프레쉬인사이트 포맷 + CSS 도장 포함)
 def get_quotation_html(client_name, project_name, amount, plan_name):
     import datetime
+    import base64
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
     today_str = today.strftime("%Y년 %m월 %d일")
     kor_amount = num_to_kor(amount)
+    
+    # 실제 도장 이미지 로드 및 base64 인코딩
+    stamp_b64 = ""
+    try:
+        with open("stamp.png", "rb") as f:
+            stamp_b64 = base64.b64encode(f.read()).decode("utf-8")
+    except Exception as e:
+        print(f"Error loading stamp.png: {e}")
+        
+    if stamp_b64:
+        stamp_element = f'<img src="data:image/png;base64,{stamp_b64}" style="position: absolute; top: -12px; right: -28px; width: 34px; height: 34px; mix-blend-mode: multiply; pointer-events: none;" />'
+    else:
+        stamp_element = '<div class="stamp">전상현<br>인</div>'
     
     return f"""<!DOCTYPE html>
 <html>
@@ -1872,7 +1886,7 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
                     <td>
                         <div class="stamp-container">
                             전 상 현
-                            <div class="stamp">전상현<br>인</div>
+                            {stamp_element}
                         </div>
                     </td>
                 </tr>
