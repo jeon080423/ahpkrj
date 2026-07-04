@@ -9372,10 +9372,10 @@ with col_main:
                 inner_1 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 8px; margin-bottom: 4px; color: #ff4b4b;'><span id='basic-price-display-span'>350,000</span>원</h2>
-                    <p style='font-size: 0.78rem; color: #666; min-height: 28px; margin: 4px 0;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
-                    <hr style='margin: 5px 0;'>
-                    <ul style='font-size: 0.82rem; padding-left: 15px; color: #333; line-height: 1.35; margin: 4px 0;'>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>350,000</span>원</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>일반 AHP 기능 제공</b></li>
                         <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
@@ -9392,10 +9392,10 @@ with col_main:
                 inner_3 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 8px; margin-bottom: 4px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
-                    <p style='font-size: 0.78rem; color: #666; min-height: 28px; margin: 4px 0;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
-                    <hr style='margin: 5px 0;'>
-                    <ul style='font-size: 0.82rem; padding-left: 15px; color: #333; line-height: 1.35; margin: 4px 0;'>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
                         <li><b>표본수 무제한</b></li>
                         <li>프로젝트 생성 무제한</li>
