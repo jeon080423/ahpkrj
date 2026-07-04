@@ -5187,55 +5187,6 @@ with st.sidebar:
 </div>"""
         st.markdown(info_html, unsafe_allow_html=True)
         
-        if st.session_state.user_role == 'temp':
-            with st.expander(_("💳 정식 사용자 승격/결제", "💳 Upgrade to Official User"), expanded=False):
-                if st.session_state.lang == 'en':
-                    st.markdown("#####  PayPal Membership Upgrade")
-                    st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$350.00 USD**.")
-                    
-                    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
-                    user_id = st.session_state.user_id
-                    
-                    paypal_html = f"""
-                    <div id="paypal-button-container" style="text-align: center; max-width: 100%;"></div>
-                    <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
-                    <script>
-                      paypal.Buttons({{
-                        style: {{
-                          layout: 'vertical',
-                          color:  'gold',
-                          shape:  'rect',
-                          label:  'paypal',
-                          height: 40
-                        }},
-                        createOrder: function(data, actions) {{
-                          return actions.order.create({{
-                            purchase_units: [{{
-                              amount: {{
-                                value: '350.00'
-                              }},
-                              payee: {{
-                                email_address: 'jeon080423@gmail.com'
-                              }}
-                            }}]
-                          }});
-                        }},
-                        onApprove: function(data, actions) {{
-                          return actions.order.capture().then(function(details) {{
-                            window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}");
-                          }});
-                        }},
-                        onError: function(err) {{
-                          console.error(err);
-                          alert("Payment failed or was cancelled.");
-                        }}
-                      }}).render('#paypal-button-container');
-                    </script>
-                    """
-                    st.components.v1.html(paypal_html, height=180)
-                else:
-                    st.info("**서비스 요금** 탭에서 결제를 진행해 주세요.")
-        
     if st.session_state.user_id is not None:
         if st.session_state.user_role == 'admin':
             btn_label = _("🔧 관리자 화면 닫기", "🔧 Exit Admin Panel") if st.session_state.get('admin_mode', False) else _("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")
@@ -5243,142 +5194,140 @@ with st.sidebar:
                 st.session_state.admin_mode = not st.session_state.admin_mode
                 st.rerun()
 
-        with st.expander(_("📄 견적서 출력 및 계산서 신청", "📄 Estimate & Invoice Request")):
-            tab_quote, tab_tax = st.tabs([_("견적서 (즉시 출력)", "Estimate (Print PDF)"), _("계산서 (신청 접수)", "Invoice (Apply)")])
+        # [신규 분리] 1. 견적서 출력 expander
+        with st.expander(_("📄 견적서 출력", "📄 Print Estimate")):
+            q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: (주)에이치피테크", "e.g., HP Tech Co., Ltd."), key="q_client_input")
+            q_project = st.text_input(_("과제명 (프로젝트명)", "Project / Task Name"), placeholder=_("예: AHP 가중치 평가 분석", "e.g., AHP Weight Assessment Analysis"), key="q_project_input")
             
-            with tab_quote:
-                q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: (주)에이치피테크", "e.g., HP Tech Co., Ltd."), key="q_client_input")
-                q_project = st.text_input(_("과제명 (프로젝트명)", "Project / Task Name"), placeholder=_("예: AHP 가중치 평가 분석", "e.g., AHP Weight Assessment Analysis"), key="q_project_input")
+            q_tier = st.selectbox(
+                _("서비스 구분 (요금제)", "Pricing Plan Tier"),
+                options=[
+                    (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), 350000, "Basic"),
+                    (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), 500000, "Standard"),
+                    (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), 950000, "Pro")
+                ],
+                format_func=lambda x: x[0],
+                key="q_tier_select"
+            )
+            
+            clean_client = q_client.strip()
+            clean_project = q_project.strip()
+            
+            if clean_client and clean_project:
+                plan_label, amount, plan_name = q_tier
+                q_html = get_quotation_html(clean_client, clean_project, amount, plan_name)
                 
-                q_tier = st.selectbox(
-                    _("서비스 구분 (요금제)", "Pricing Plan Tier"),
-                    options=[
-                        (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), 350000, "Basic"),
-                        (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), 500000, "Standard"),
-                        (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), 950000, "Pro")
-                    ],
-                    format_func=lambda x: x[0],
-                    key="q_tier_select"
-                )
+                import json
+                escaped_html = json.dumps(q_html)
                 
-                clean_client = q_client.strip()
-                clean_project = q_project.strip()
+                button_iframe = f"""
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+                <style>
+                    .btn {{
+                        width: 100%;
+                        height: 38px;
+                        background-color: #000000;
+                        color: white;
+                        border: 1px solid #000000;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 14px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: sans-serif;
+                    }}
+                </style>
+                <button class="btn" id="dl-pdf-btn">📄 견적서 다운로드 (PDF)</button>
+                <div id="hidden-q-container" style="display: none; width: 720px; background: white; padding: 10px;"></div>
                 
-                if clean_client and clean_project:
-                    plan_label, amount, plan_name = q_tier
-                    q_html = get_quotation_html(clean_client, clean_project, amount, plan_name)
-                    
-                    import json
-                    escaped_html = json.dumps(q_html)
-                    
-                    # html2pdf.js를 활용하여 팝업 차단 없이 브라우저 단에서 직접 PDF를 빌드/다운로드
-                    button_iframe = f"""
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-                    <style>
-                        .btn {{
-                            width: 100%;
-                            height: 38px;
-                            background-color: #000000;
-                            color: white;
-                            border: 1px solid #000000;
-                            border-radius: 4px;
-                            font-weight: bold;
-                            cursor: pointer;
-                            font-size: 14px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-family: sans-serif;
-                        }}
-                    </style>
-                    <button class="btn" id="dl-pdf-btn">📄 견적서 다운로드 (PDF)</button>
-                    <div id="hidden-q-container" style="display: none; width: 720px; background: white; padding: 10px;"></div>
-                    
-                    <script>
-                        document.getElementById('dl-pdf-btn').onclick = function() {{
-                            var container = document.getElementById('hidden-q-container');
-                            container.innerHTML = {escaped_html};
-                            container.style.display = 'block';
-                            
-                            var opt = {{
-                                margin:       [10, 10, 10, 10],
-                                filename:     '견적서_{clean_client}.pdf',
-                                image:        {{ type: 'jpeg', quality: 0.98 }},
-                                html2canvas:  {{ scale: 2.2, useCORS: true, logging: false }},
-                                jsPDF:        {{ unit: 'mm', format: 'a4', orientation: 'portrait' }}
-                            }};
-                            
-                            html2pdf().from(container).set(opt).save().then(function() {{
-                                container.style.display = 'none';
-                            }});
+                <script>
+                    document.getElementById('dl-pdf-btn').onclick = function() {{
+                        var container = document.getElementById('hidden-q-container');
+                        container.innerHTML = {escaped_html};
+                        container.style.display = 'block';
+                        
+                        var opt = {{
+                            margin:       [10, 10, 10, 10],
+                            filename:     '견적서_{clean_client}.pdf',
+                            image:        {{ type: 'jpeg', quality: 0.98 }},
+                            html2canvas:  {{ scale: 2.2, useCORS: true, logging: false }},
+                            jsPDF:        {{ unit: 'mm', format: 'a4', orientation: 'portrait' }}
                         }};
-                    </script>
-                    """
-                    st.components.v1.html(button_iframe, height=45)
-                else:
-                    st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.", 
-                                 "Please enter the Client Institution and Project Name to enable download."))
+                        
+                        html2pdf().from(container).set(opt).save().then(function() {{
+                            container.style.display = 'none';
+                        }});
+                    }};
+                </script>
+                """
+                st.components.v1.html(button_iframe, height=45)
+            else:
+                st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.", 
+                             "Please enter the Client Institution and Project Name to enable download."))
+
+        # [신규 분리] 2. 계산서 발행 신청 expander
+        with st.expander(_("📄 계산서 발행 신청", "📄 Request Invoice")):
+            t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
+            t_biz_name = st.text_input(_("상호 (회사명)", "Company Name"), key="t_biz_name_input")
+            t_rep_name = st.text_input(_("대표자명", "CEO Name"), key="t_rep_name_input")
+            t_address = st.text_input(_("사업장 주소", "Business Address"), key="t_address_input")
+            t_biz_type = st.text_input(_("업태 / 업종", "Business Category / Type"), key="t_biz_type_input")
+            t_email = st.text_input(_("계산서 수신 이메일", "Invoice Email"), key="t_email_input")
             
-            with tab_tax:
-                t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
-                t_biz_name = st.text_input(_("상호 (회사명)", "Company Name"), key="t_biz_name_input")
-                t_rep_name = st.text_input(_("대표자명", "CEO Name"), key="t_rep_name_input")
-                t_address = st.text_input(_("사업장 주소", "Business Address"), key="t_address_input")
-                t_biz_type = st.text_input(_("업태 / 업종", "Business Category / Type"), key="t_biz_type_input")
-                t_email = st.text_input(_("계산서 수신 이메일", "Invoice Email"), key="t_email_input")
-                
-                t_tier = st.selectbox(
-                    _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
-                    options=[
-                        (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), "Basic"),
-                        (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), "Standard"),
-                        (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), "Pro")
-                    ],
-                    format_func=lambda x: x[0],
-                    key="t_tier_select"
-                )
-                
-                if st.button(_("계산서 발행 신청하기", "Submit Invoice Request"), use_container_width=True, key="btn_request_tax"):
-                    if not t_biz_num.strip():
-                        st.error(_("사업자 등록번호를 입력해 주세요.", "Please enter the Business Registration Number."))
-                    elif not t_biz_name.strip():
-                        st.error(_("상호를 입력해 주세요.", "Please enter the Company Name."))
-                    elif not t_rep_name.strip():
-                        st.error(_("대표자명을 입력해 주세요.", "Please enter the CEO Name."))
-                    elif not t_email.strip():
-                        st.error(_("이메일을 입력해 주세요.", "Please enter the Email."))
-                    elif not validate_email(t_email.strip()):
-                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                    else:
-                        with st.spinner(_("신청서를 제출하는 중...", "Submitting request...")):
-                            import sqlite3
-                            conn = sqlite3.connect('users.db')
-                            c = conn.cursor()
-                            try:
-                                import datetime
-                                now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
-                                c.execute("""
-                                    INSERT INTO tax_invoice_requests 
-                                    (user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name, request_date, status)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                """, (st.session_state.user_id, t_biz_num.strip(), t_biz_name.strip(), t_rep_name.strip(), t_address.strip(), t_biz_type.strip(), t_email.strip(), t_tier[1], now_str, 'pending'))
-                                conn.commit()
-                                
-                                mail_success = send_tax_invoice_request_email(
-                                    st.session_state.user_id, t_biz_num.strip(), t_biz_name.strip(), t_rep_name.strip(), 
-                                    t_address.strip(), t_biz_type.strip(), t_email.strip(), t_tier[0]
-                                )
-                                
-                                if mail_success:
-                                    st.success(_("계산서 신청이 접수되었습니다! 관리자 확인 후 계산서가 발행됩니다.", 
-                                                 "Request submitted! The invoice will be issued after review."))
-                                else:
-                                    st.warning(_("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.", 
-                                                 "Saved to DB, but email alert failed. The admin will review it soon."))
-                            except Exception as e:
-                                st.error(_(f"신청 중 오류가 발생했습니다: {e}", f"Error during submission: {e}"))
-                            finally:
-                                conn.close()
+            t_tier = st.selectbox(
+                _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
+                options=[
+                    (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), "Basic"),
+                    (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), "Standard"),
+                    (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), "Pro")
+                ],
+                format_func=lambda x: x[0],
+                key="t_tier_select"
+            )
+            
+            if st.button(_("계산서 발행 신청하기", "Submit Invoice Request"), use_container_width=True, key="btn_request_tax"):
+                if not t_biz_num.strip():
+                    st.error(_("사업자 등록번호를 입력해 주세요.", "Please enter the Business Registration Number."))
+                elif not t_biz_name.strip():
+                    st.error(_("상호를 입력해 주세요.", "Please enter the Company Name."))
+                elif not t_rep_name.strip():
+                    st.error(_("대표자명을 입력해 주세요.", "Please enter the CEO Name."))
+                elif not t_email.strip():
+                    st.error(_("이메일을 입력해 주세요.", "Please enter the Email."))
+                elif not validate_email(t_email.strip()):
+                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                else:
+                    with st.spinner(_("신청서를 제출하는 중...", "Submitting request...")):
+                        import sqlite3
+                        conn = sqlite3.connect('users.db')
+                        c = conn.cursor()
+                        try:
+                            import datetime
+                            now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+                            c.execute("""
+                                INSERT INTO tax_invoice_requests 
+                                (user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name, request_date, status)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (st.session_state.user_id, t_biz_num.strip(), t_biz_name.strip(), t_rep_name.strip(), t_address.strip(), t_biz_type.strip(), t_email.strip(), t_tier[1], now_str, 'pending'))
+                            conn.commit()
+                            
+                            mail_success = send_tax_invoice_request_email(
+                                st.session_state.user_id, t_biz_num.strip(), t_biz_name.strip(), t_rep_name.strip(), 
+                                t_address.strip(), t_biz_type.strip(), t_email.strip(), t_tier[0]
+                            )
+                            
+                            if mail_success:
+                                st.success(_("계산서 신청이 접수되었습니다! 관리자 확인 후 계산서가 발행됩니다.", 
+                                             "Request submitted! The invoice will be issued after review."))
+                            else:
+                                st.warning(_("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.", 
+                                             "Saved to DB, but email alert failed. The admin will review it soon."))
+                        except Exception as e:
+                            st.error(_(f"신청 중 오류가 발생했습니다: {e}", f"Error during submission: {e}"))
+                        finally:
+                            conn.close()
 
         with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
             cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
