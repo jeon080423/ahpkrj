@@ -5187,14 +5187,45 @@ with st.sidebar:
 </div>"""
         st.markdown(info_html, unsafe_allow_html=True)
         
-    if st.session_state.user_id is not None:
         if st.session_state.user_role == 'admin':
             btn_label = _("🔧 관리자 화면 닫기", "🔧 Exit Admin Panel") if st.session_state.get('admin_mode', False) else _("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")
             if st.button(btn_label):
                 st.session_state.admin_mode = not st.session_state.admin_mode
                 st.rerun()
 
-        # [신규 분리] 1. 견적서 출력 expander
+        # [위치 이동] 1. 비밀번호 변경 expander
+        with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
+            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
+            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_new")
+            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_new")
+            
+            if st.button(_("비밀번호 변경", "Change Password"), key="btn_chg_pw_new"):
+                if new_pw_val != confirm_pw:
+                    st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
+                elif not validate_password(new_pw_val):
+                    st.error(_("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.", "Password must be at least 4 characters and contain letters and special characters."))
+                else:
+                    chk_res = check_login(st.session_state.user_id, cur_pw)
+                    if chk_res:
+                        change_user_password(st.session_state.user_id, new_pw_val)
+                        st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
+                    else:
+                        st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
+
+        # [위치 이동] 2. 로그아웃 버튼
+        if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
+            st.session_state.user_id = None
+            st.session_state.user_role = None
+            st.session_state.expiry_date = None
+            st.session_state.plan_type = None
+            st.session_state.admin_mode = False
+            st.session_state.signup_paypal_user = None
+            st.session_state.signup_portone_user = None
+            st.query_params.pop("login_user", None)
+            st.query_params.pop("login_token", None)
+            st.rerun()
+
+        # [신규 분리 & 로그아웃 하단 배치] 3. 견적서 출력 expander
         with st.expander(_("📄 견적서 출력", "📄 Print Estimate")):
             q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: (주)에이치피테크", "e.g., HP Tech Co., Ltd."), key="q_client_input")
             q_project = st.text_input(_("과제명 (프로젝트명)", "Project / Task Name"), placeholder=_("예: AHP 가중치 평가 분석", "e.g., AHP Weight Assessment Analysis"), key="q_project_input")
@@ -5267,7 +5298,7 @@ with st.sidebar:
                 st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.", 
                              "Please enter the Client Institution and Project Name to enable download."))
 
-        # [신규 분리] 2. 계산서 발행 신청 expander
+        # [신규 분리 & 로그아웃 하단 배치] 4. 계산서 발행 신청 expander
         with st.expander(_("📄 계산서 발행 신청", "📄 Request Invoice")):
             t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
             t_biz_name = st.text_input(_("상호 (회사명)", "Company Name"), key="t_biz_name_input")
@@ -5328,37 +5359,6 @@ with st.sidebar:
                             st.error(_(f"신청 중 오류가 발생했습니다: {e}", f"Error during submission: {e}"))
                         finally:
                             conn.close()
-
-        with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
-            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
-            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_new")
-            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_new")
-            
-            if st.button(_("비밀번호 변경", "Change Password"), key="btn_chg_pw_new"):
-                if new_pw_val != confirm_pw:
-                    st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
-                elif not validate_password(new_pw_val):
-                    st.error(_("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.", "Password must be at least 4 characters and contain letters and special characters."))
-                else:
-                    chk_res = check_login(st.session_state.user_id, cur_pw)
-                    if chk_res:
-                        change_user_password(st.session_state.user_id, new_pw_val)
-                        st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
-                    else:
-                        st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
-
-
-        if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
-            st.session_state.user_id = None
-            st.session_state.user_role = None
-            st.session_state.expiry_date = None
-            st.session_state.plan_type = None
-            st.session_state.admin_mode = False
-            st.session_state.signup_paypal_user = None
-            st.session_state.signup_portone_user = None
-            st.query_params.pop("login_user", None)
-            st.query_params.pop("login_token", None)
-            st.rerun()
 
 
 
