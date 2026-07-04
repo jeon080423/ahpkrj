@@ -1813,35 +1813,30 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
     <meta charset="utf-8">
     <title>견적서</title>
     <style>
-        body {{ font-family: 'Malgun Gothic', 'Dotum', sans-serif; margin: 40px; color: #000; line-height: 1.5; background: #fff; }}
-        .title {{ text-align: center; font-size: 32px; font-weight: bold; text-decoration: underline; margin-bottom: 40px; letter-spacing: 5px; }}
-        .meta-list {{ list-style: none; padding: 0; margin: 0 0 30px 0; font-size: 14px; }}
-        .meta-list li {{ margin-bottom: 8px; font-weight: bold; }}
-        .meta-list span.lbl {{ display: inline-block; width: 100px; color: #111; }}
+        body {{ font-family: 'Malgun Gothic', 'Dotum', sans-serif; margin: 10px; color: #000; line-height: 1.5; background: #fff; }}
+        .title {{ text-align: center; font-size: 30px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; letter-spacing: 5px; }}
+        .meta-list {{ list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 13px; }}
+        .meta-list li {{ margin-bottom: 6px; font-weight: bold; }}
+        .meta-list span.lbl {{ display: inline-block; width: 90px; color: #111; }}
         
-        .main-layout {{ display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; }}
-        .info-left {{ width: 55%; }}
-        .info-right {{ width: 40%; text-align: right; font-size: 13px; }}
-        .provider-table {{ border-collapse: collapse; width: 100%; font-size: 13px; text-align: left; }}
-        .provider-table th, .provider-table td {{ border: 1px solid #000; padding: 5px 8px; }}
-        .provider-table th {{ background: #f2f2f2; width: 90px; text-align: center; }}
+        .main-layout {{ display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 20px; gap: 15px; }}
+        .info-left {{ width: 52%; }}
+        .info-right {{ width: 46%; }}
+        .provider-table {{ border-collapse: collapse; width: 100%; font-size: 12px; table-layout: fixed; text-align: left; }}
+        .provider-table th, .provider-table td {{ border: 1px solid #000; padding: 6px 8px; word-break: keep-all; }}
+        .provider-table th {{ background: #f2f2f2; width: 65px; text-align: center; font-weight: bold; }}
+        .provider-table td {{ line-height: 1.4; }}
         
-        .stamp-container {{ position: relative; display: inline-block; vertical-align: middle; }}
-        .stamp {{ position: absolute; top: -14px; right: -30px; width: 34px; height: 34px; border: 2px solid #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff0000; font-size: 9px; font-weight: bold; font-family: 'Batang', serif; transform: rotate(-5deg); background-color: rgba(255, 0, 0, 0.05); user-select: none; line-height: 1.1; }}
+        .stamp-container {{ position: relative; display: inline-block; white-space: nowrap; }}
+        .stamp {{ position: absolute; top: -10px; right: -32px; width: 32px; height: 32px; border: 2px solid #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff0000; font-size: 9px; font-weight: bold; font-family: 'Batang', serif; transform: rotate(-5deg); background-color: rgba(255, 0, 0, 0.05); user-select: none; line-height: 1.1; }}
 
-        .items-table {{ width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }}
+        .items-table {{ width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }}
         .items-table th, .items-table td {{ border: 1px solid #000; padding: 8px 10px; }}
         .items-table th {{ background: #000; color: #fff; text-align: center; font-weight: bold; }}
         .items-table td {{ text-align: center; }}
         
         .sum-row {{ font-weight: bold; background: #f9f9f9; }}
-        .footer-note {{ font-size: 12px; color: #555; margin-top: 15px; }}
     </style>
-    <script>
-        window.onload = function() {{
-            window.print();
-        }}
-    </script>
 </head>
 <body>
     <div class="title">견 적 서</div>
@@ -1854,23 +1849,23 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
                 <li><span class="lbl">■ 서비스명 :</span> AHP 의사결정 분석 솔루션(AHP마스터)</li>
                 <li><span class="lbl">■ 소요예산 :</span> {kor_amount} (\\₩{amount:,}, VAT 포함)</li>
                 <li><span class="lbl">■ 작성일 :</span> {today_str}</li>
-                <li><span class="lbl">■ 담 당 자 :</span> 전상현 / jeon080423@gmail.com / 010-2142-2610</li>
+                <li><span class="lbl">■ 담 당 자 :</span> 전상현 / jeon080423@gmail.com / 0507-1347-2610</li>
             </ul>
         </div>
         <div class="info-right">
             <table class="provider-table">
                 <tr>
-                    <th rowspan="4">공<br>급<br>자</th>
+                    <th rowspan="4" style="width: 25px; font-size: 11px;">공<br>급<br>자</th>
                     <th>상호</th>
                     <td>프레쉬인사이트</td>
                 </tr>
                 <tr>
                     <th>등록번호</th>
-                    <td>683-27-00122</td>
+                    <td style="font-size: 11px; font-weight: bold;">683-27-00122</td>
                 </tr>
                 <tr>
                     <th>주소</th>
-                    <td>인천 부평구 원길로 12, 가동 203호<br>선우빌딩</td>
+                    <td style="font-size: 11px;">인천 부평구 원길로 12, 가동 203호 (갈산동, 선우빌딩)</td>
                 </tr>
                 <tr>
                     <th>대표자</th>
@@ -1895,13 +1890,13 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
             </tr>
         </thead>
         <tbody>
-            <tr style="height: 40px;">
+            <tr style="height: 35px;">
                 <td style="font-weight: bold; background: #eee;">1. 경비 소계</td>
                 <td></td>
                 <td></td>
                 <td></td>
             </tr>
-            <tr style="height: 60px;">
+            <tr style="height: 50px;">
                 <td style="text-align: left; padding-left: 20px;">
                     AHP 분석<br>솔루션 이용료 ({plan_name})
                 </td>
@@ -1909,12 +1904,12 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
                 <td>{amount:,} 원 X 1 식</td>
                 <td>AHPMASTER</td>
             </tr>
-            <tr style="height: 120px;">
+            <tr style="height: 90px;">
                 <td></td>
-                <td colspan="2" style="color: #666; font-size: 14px; vertical-align: top; padding-top: 15px;">이하 여백</td>
+                <td colspan="2" style="color: #666; font-size: 12px; vertical-align: top; padding-top: 15px;">이하 여백</td>
                 <td></td>
             </tr>
-            <tr class="sum-row" style="height: 40px;">
+            <tr class="sum-row" style="height: 35px;">
                 <td>총 합 계</td>
                 <td style="text-align: right;">{amount:,}</td>
                 <td></td>
@@ -1923,7 +1918,7 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
         </tbody>
     </table>
     
-    <div style="font-weight: bold; font-size: 13px; margin-bottom: 20px;">※ 간이과세자</div>
+    <div style="font-weight: bold; font-size: 12px; margin-bottom: 10px;">※ 간이과세자</div>
 </body>
 </html>
 """
@@ -5259,14 +5254,58 @@ with st.sidebar:
                     plan_label, amount, plan_name = q_tier
                     q_html = get_quotation_html(clean_client, clean_project, amount, plan_name)
                     
-                    st.download_button(
-                        label=_("견적서 다운로드", "Download Estimate"),
-                        data=q_html,
-                        file_name=f"견적서_{clean_client}.html",
-                        mime="text/html",
-                        use_container_width=True,
-                        key="btn_download_quote"
-                    )
+                    import json
+                    escaped_html = json.dumps(q_html)
+                    
+                    # html2pdf.js를 활용하여 팝업 차단 없이 브라우저 단에서 직접 PDF를 빌드/다운로드
+                    button_iframe = f"""
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+                    <style>
+                        .btn {{
+                            width: 100%;
+                            height: 38px;
+                            background-color: #262730;
+                            color: white;
+                            border: 1px solid rgba(49, 51, 63, 0.2);
+                            border-radius: 4px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            font-size: 14px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-family: sans-serif;
+                            transition: background-color 0.2s;
+                        }}
+                        .btn:hover {{
+                            background-color: #ff4b4b;
+                            border-color: #ff4b4b;
+                        }}
+                    </style>
+                    <button class="btn" id="dl-pdf-btn">📄 견적서 다운로드 (PDF)</button>
+                    <div id="hidden-q-container" style="display: none; width: 720px; background: white; padding: 10px;"></div>
+                    
+                    <script>
+                        document.getElementById('dl-pdf-btn').onclick = function() {{
+                            var container = document.getElementById('hidden-q-container');
+                            container.innerHTML = {escaped_html};
+                            container.style.display = 'block';
+                            
+                            var opt = {{
+                                margin:       [10, 10, 10, 10],
+                                filename:     '견적서_{clean_client}.pdf',
+                                image:        {{ type: 'jpeg', quality: 0.98 }},
+                                html2canvas:  {{ scale: 2.2, useCORS: true, logging: false }},
+                                jsPDF:        {{ unit: 'mm', format: 'a4', orientation: 'portrait' }}
+                            }};
+                            
+                            html2pdf().from(container).set(opt).save().then(function() {{
+                                container.style.display = 'none';
+                            }});
+                        }};
+                    </script>
+                    """
+                    st.components.v1.html(button_iframe, height=45)
                 else:
                     st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.", 
                                  "Please enter the Client Institution and Project Name to enable download."))
@@ -5468,7 +5507,7 @@ if st.session_state.get('page', 'main') == 'guide':
     If you have any questions during analysis, or need custom AHP consulting (expert survey execution, thesis statistical consulting, etc.), please contact us:
     * **Email**: jeon080423@gmail.com
     * **KakaoTalk ID**: AHPkr
-    * **Mobile**: +82-10-2142-2610
+    * **Mobile**: 0507-1347-2610
     """)
     
     if st.button("← Back to AHP Analysis Tool", use_container_width=True, key="btn_back_to_main_bottom"):
