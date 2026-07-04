@@ -1105,6 +1105,21 @@ def init_db():
         conn.commit()
     except Exception:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN event_applied TEXT")
+        conn.commit()
+    except Exception:
+        pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN thesis_title TEXT")
+        conn.commit()
+    except Exception:
+        pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN university TEXT")
+        conn.commit()
+    except Exception:
+        pass
 
     c.execute('''CREATE TABLE IF NOT EXISTS saved_analyses
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, filename TEXT, save_date TEXT, file_data BLOB)''')
@@ -1746,14 +1761,26 @@ ID: {user_email}
 
 # --- DB CRUD ---
 
-def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31", survey_count=0, last_survey_link=""):
+def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31", survey_count=0, last_survey_link="", event_applied="", thesis_title="", university=""):
     try:
         client = get_gspread_client()
         if client:
             spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
             sheet = spreadsheet.sheet1
-            # [수정] 구글 시트 8개 컬럼 순서(id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) 보장
-            sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info, survey_count, last_survey_link])
+            
+            # --- 구글 시트 헤더 체크 및 자동 확장 ---
+            try:
+                headers = sheet.row_values(1)
+            except Exception:
+                headers = []
+            
+            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university']
+            if len(headers) < 11 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university']):
+                sheet.update(range_name='A1:K1', values=[expected_headers])
+            # ----------------------------------------
+            
+            # [수정] 구글 시트 11개 컬럼 순서 보장
+            sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info, survey_count, last_survey_link, event_applied, thesis_title, university])
     except Exception as e:
         st.error(f"Google Sheets 로깅 오류: {e}")
 
@@ -1769,7 +1796,8 @@ def add_user(user_id, pw, role, agree_info="Y"):
         c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                   (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, "", None))
         conn.commit()
-        log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "")
+        # 11개 컬럼 호출에 맞춰 기본 빈값 전달
+        log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "", "", "", "")
         success = True
     except sqlite3.IntegrityError:
         success = False
@@ -1912,14 +1940,22 @@ def get_all_users():
     conn.close()
     return df
 
-def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None):
+def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None, event_applied=None, thesis_title=None, university=None):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     if plan_type:
-        if new_pw is not None and new_pw != "":
-            c.execute("UPDATE users SET pw=?, role=?, expiry_date=?, plan_type=? WHERE id=?", (new_pw, new_role, new_expiry, plan_type, user_id))
+        if event_applied is not None:
+            if new_pw is not None and new_pw != "":
+                c.execute("UPDATE users SET pw=?, role=?, expiry_date=?, plan_type=?, event_applied=?, thesis_title=?, university=? WHERE id=?", 
+                          (new_pw, new_role, new_expiry, plan_type, event_applied, thesis_title, university, user_id))
+            else:
+                c.execute("UPDATE users SET role=?, expiry_date=?, plan_type=?, event_applied=?, thesis_title=?, university=? WHERE id=?", 
+                          (new_role, new_expiry, plan_type, event_applied, thesis_title, university, user_id))
         else:
-            c.execute("UPDATE users SET role=?, expiry_date=?, plan_type=? WHERE id=?", (new_role, new_expiry, plan_type, user_id))
+            if new_pw is not None and new_pw != "":
+                c.execute("UPDATE users SET pw=?, role=?, expiry_date=?, plan_type=? WHERE id=?", (new_pw, new_role, new_expiry, plan_type, user_id))
+            else:
+                c.execute("UPDATE users SET role=?, expiry_date=?, plan_type=? WHERE id=?", (new_role, new_expiry, plan_type, user_id))
     else:
         if new_pw is not None and new_pw != "":
             c.execute("UPDATE users SET pw=?, role=?, expiry_date=? WHERE id=?", (new_pw, new_role, new_expiry, user_id))
@@ -1933,6 +1969,18 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None)
         if client:
             spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
             sheet = spreadsheet.sheet1
+            
+            # --- 구글 시트 헤더 체크 및 자동 확장 ---
+            try:
+                headers = sheet.row_values(1)
+            except Exception:
+                headers = []
+            
+            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university']
+            if len(headers) < 11 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university']):
+                sheet.update(range_name='A1:K1', values=[expected_headers])
+            # ----------------------------------------
+
             cell = sheet.find(user_id)
             kst_today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
             
@@ -1948,7 +1996,7 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None)
             
             if cell:
                 row_num = cell.row
-                # 기존 데이터 보존을 위해 현재 시트 데이터 로드 (6개 컬럼 대응)
+                # 기존 데이터 보존을 위해 현재 시트 데이터 로드 (11개 컬럼까지 대비)
                 current_row_data = sheet.row_values(row_num)
                 # agree_info는 6번째 컬럼(index 5)에 있어야 합니다. 없으면 5번째(index 4) 혹은 기본값 "Y"
                 agree_info = current_row_data[5] if len(current_row_data) >= 6 else (current_row_data[4] if len(current_row_data) >= 5 else "Y")
@@ -1965,12 +2013,24 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None)
                 survey_count_val = current_row_data[6] if len(current_row_data) >= 7 else 0
                 last_survey_link_val = current_row_data[7] if len(current_row_data) >= 8 else ""
                 
-                # 시트 순서: ID, Role, SignupDate, PW, expiry_date, agree_info, survey_count, last_survey_link (A:H)
-                sheet.update(range_name=f'A{row_num}:H{row_num}', values=[[user_id, new_role, final_signup_date, final_pw, new_expiry, agree_info, survey_count_val, last_survey_link_val]])
+                # 이벤트 데이터 보존 및 업데이트
+                event_applied_val = event_applied if event_applied is not None else (current_row_data[8] if len(current_row_data) >= 9 else "")
+                thesis_title_val = thesis_title if thesis_title is not None else (current_row_data[9] if len(current_row_data) >= 10 else "")
+                university_val = university if university is not None else (current_row_data[10] if len(current_row_data) >= 11 else "")
+                
+                # 시트 순서: ID, Role, SignupDate, PW, expiry_date, agree_info, survey_count, last_survey_link, event_applied, thesis_title, university (A:K)
+                sheet.update(range_name=f'A{row_num}:K{row_num}', values=[[
+                    user_id, new_role, final_signup_date, final_pw, new_expiry, 
+                    agree_info, survey_count_val, last_survey_link_val,
+                    event_applied_val, thesis_title_val, university_val
+                ]])
             else:
                 final_pw = new_pw if (new_pw and new_pw != "") else ""
                 final_signup_date = db_signup_date or kst_today
-                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, ""])
+                event_applied_val = event_applied if event_applied is not None else ""
+                thesis_title_val = thesis_title if thesis_title is not None else ""
+                university_val = university if university is not None else ""
+                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, "", event_applied_val, thesis_title_val, university_val])
     except Exception as e:
         st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}") 
 
@@ -3729,6 +3789,12 @@ if "portone_paid" in q_params and "user_id" in q_params:
     user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
     months_param = int(q_params.get("months", ["2"])[0] if isinstance(q_params.get("months"), list) else q_params.get("months", 2))
     plan_name_param = q_params.get("plan_name", ["정식 사용자"])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "정식 사용자")
+    
+    # 이벤트 관련 파라미터 파싱 (추가)
+    event_applied_param = q_params.get("event_applied", ["N"])[0] if isinstance(q_params.get("event_applied"), list) else q_params.get("event_applied", "N")
+    university_param = q_params.get("university", [""])[0] if isinstance(q_params.get("university"), list) else q_params.get("university", "")
+    thesis_title_param = q_params.get("thesis_title", [""])[0] if isinstance(q_params.get("thesis_title"), list) else q_params.get("thesis_title", "")
+    
     if user_id_param:
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         
@@ -3751,7 +3817,14 @@ if "portone_paid" in q_params and "user_id" in q_params:
             new_expiry_date = current_expiry
             target_role = current_role
             
-        update_user_full_info(user_id_param, None, target_role, new_expiry_date, plan_type=plan_name_param)
+        # update_user_full_info 인자에 이벤트 데이터 추가 전달
+        update_user_full_info(
+            user_id_param, None, target_role, new_expiry_date, 
+            plan_type=plan_name_param, 
+            event_applied=event_applied_param, 
+            thesis_title=thesis_title_param, 
+            university=university_param
+        )
         
         import hashlib
         login_token = hashlib.sha256(f"{user_id_param}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
@@ -3937,12 +4010,48 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
 
 def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2, inner_html="", is_best=False):
     import hashlib
+    import datetime
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
     # 이메일 형식 검증 (간단히 @ 포함 여부로 확인) 및 공백 제거
     safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
     
+    # 이벤트 활성화 여부 기한 검사 (2026년 7월 30일 23:59:59 KST)
+    kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+    is_event_active = kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard"))
+    
+    box_height_css = "min-height: 520px; height: auto;" if is_event_active else "height: 500px;"
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
+    
+    event_ui_html = ""
+    if is_event_active:
+        event_ui_html = """
+        <div id="event-container" style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 8px; font-size: 0.82rem; text-align: left;">
+            <div style="font-weight: bold; color: #0284c7; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>🎓</span> <b>[기간한정] 학위논문 5만원 할인</b>
+            </div>
+            <div style="font-size: 0.75rem; color: #475569; margin-bottom: 10px; line-height: 1.4;">
+                ~2026.07.30 限. 석/박사 학위논문 대상<br>
+                ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개에 동의 (학위논문 내 AHP마스터 기재는 선택사항)
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: #1e293b; margin-bottom: 10px; cursor: pointer; user-select: none;">
+                <input type="checkbox" id="event-agree" onchange="toggleEvent()" style="accent-color: #0284c7; cursor: pointer; width: 16px; height: 16px;">
+                할인 혜택 동의 및 신청 (5만원 즉시 할인)
+            </label>
+            <div id="event-inputs" style="display: none; flex-direction: column; gap: 8px; background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div>
+                    <div style="margin-bottom: 4px; color: #334155; font-weight: 600; font-size: 0.78rem;">대학명 (필수)</div>
+                    <input type="text" id="univ-name" placeholder="예: 한국대학교 대학원" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 0.8rem; outline: none; font-family: inherit;">
+                </div>
+                <div>
+                    <div style="margin-bottom: 4px; color: #334155; font-weight: 600; font-size: 0.78rem;">학위논문 제목 (필수)</div>
+                    <input type="text" id="thesis-title" placeholder="예: AHP를 이용한 의사결정 연구" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 0.8rem; outline: none; font-family: inherit;">
+                </div>
+            </div>
+        </div>
+        """
+
     return f"""
     <!DOCTYPE html>
     <html>
@@ -3955,7 +4064,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            height: 500px; 
+            {box_height_css}
             position: relative;
             display: flex;
             flex-direction: column;
@@ -3982,10 +4091,67 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
       <div class="pricing-box">
           {best_badge}
           <div>{inner_html}</div>
+          {event_ui_html}
           <button class="btn" onclick="openPaymentWindow()">결제 {plan_name.split(" (")[0]}</button>
       </div>
       <script>
+        let isEventApplied = false;
+        const originalAmount = {amount};
+        let finalAmount = originalAmount;
+
+        function toggleEvent() {{
+            const agreeCheckbox = document.getElementById("event-agree");
+            const inputDiv = document.getElementById("event-inputs");
+            const priceSpan = window.parent.document.getElementById("price-display-span");
+            
+            if (agreeCheckbox && agreeCheckbox.checked) {{
+                if (inputDiv) inputDiv.style.display = "flex";
+                finalAmount = originalAmount - 50000;
+                isEventApplied = true;
+            }} else {{
+                if (inputDiv) inputDiv.style.display = "none";
+                finalAmount = originalAmount;
+                isEventApplied = false;
+                if (document.getElementById("univ-name")) document.getElementById("univ-name").value = "";
+                if (document.getElementById("thesis-title")) document.getElementById("thesis-title").value = "";
+            }}
+            
+            // iframe 밖의 메인 문서에 정의된 가격 텍스트도 변경을 시도합니다.
+            // basic-price-display-span, standard-price-display-span 등으로 찾아봅니다.
+            let priceSpanOuter = null;
+            if (originalAmount === 350000) {{
+                priceSpanOuter = window.parent.document.getElementById("basic-price-display-span");
+            }} else if (originalAmount === 500000) {{
+                priceSpanOuter = window.parent.document.getElementById("standard-price-display-span");
+            }}
+            
+            if (priceSpanOuter) {{
+                priceSpanOuter.innerText = finalAmount.toLocaleString();
+            }}
+        }}
+
         function openPaymentWindow() {{
+          let univ = "";
+          let thesis = "";
+          
+          if (isEventApplied) {{
+              const uInput = document.getElementById("univ-name");
+              const tInput = document.getElementById("thesis-title");
+              univ = uInput ? uInput.value.trim() : "";
+              thesis = tInput ? tInput.value.trim() : "";
+              
+              if (!univ) {{
+                  alert("이벤트 혜택 적용을 위해 대학명을 입력해 주세요.");
+                  if (uInput) uInput.focus();
+                  return;
+              }}
+              if (!thesis) {{
+                  alert("이벤트 혜택 적용을 위해 학위논문 제목을 입력해 주세요.");
+                  if (tInput) tInput.focus();
+                  return;
+              }}
+          }}
+
           const win = window.open("", "_blank", "width=850,height=700");
           if (!win) {{
              alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
@@ -4013,7 +4179,13 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
              }}
           }} catch(e) {{}}
           if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
-          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}");
+          
+          let eventParams = "&event_applied=" + (isEventApplied ? "Y" : "N") + 
+                            "&university=" + encodeURIComponent(univ) + 
+                            "&thesis_title=" + encodeURIComponent(thesis);
+                            
+          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}") + eventParams;
+          
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
           script.onload = function() {{
@@ -4024,7 +4196,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
               paymentId: "pay-" + r,
               orderName: "{plan_name} - {safe_email}",
-              totalAmount: {amount},
+              totalAmount: finalAmount,
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
               redirectUrl: returnUrl,
@@ -4050,6 +4222,10 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
           }};
           win.document.head.appendChild(script);
         }}
+      </script>
+    </body>
+    </html>
+    """
       </script>
     </body>
     </html>
@@ -9094,7 +9270,7 @@ with col_main:
                 inner_1 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>350,000원</h2>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>350,000</span>원</h2>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -9105,16 +9281,16 @@ with col_main:
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 350000, 2, inner_html=inner_1, is_best=False), height=520)
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 350000, 2, inner_html=inner_1, is_best=False), height=650)
                 else:
-                    st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
+                    st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=650)
 
             # 3개월
             with col_p2:
                 inner_3 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>500,000원</h2>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -9125,9 +9301,9 @@ with col_main:
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=520)
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=650)
                 else:
-                    st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
+                    st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=650)
 
             # 6개월
             with col_p3:
