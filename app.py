@@ -3999,7 +3999,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
     event_ui_html = ""
     if is_event_active:
         event_ui_html = f"""
-        <div id="event-container" style="margin-top: 6px; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
+        <div id="event-container" style="margin-top: auto; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
             <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">
                 <b>{event_title}</b>
             </div>
@@ -4103,7 +4103,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     event_ui_html = ""
     if is_event_active:
         event_ui_html = f"""
-        <div id="event-container" style="margin-top: 6px; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
+        <div id="event-container" style="margin-top: auto; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
             <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">
                 <b>{event_title}</b>
             </div>
