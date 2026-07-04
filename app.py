@@ -1151,6 +1151,15 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS user_google_credentials
                   (user_id TEXT PRIMARY KEY, token TEXT, refresh_token TEXT, token_uri TEXT, client_id TEXT, client_secret TEXT, scopes TEXT, expiry TEXT)''')
     
+    # [추가] 학위논문 할인 이벤트 설정 테이블
+    c.execute('''CREATE TABLE IF NOT EXISTS event_settings
+                  (id INTEGER PRIMARY KEY, event_active INTEGER, event_title TEXT, event_desc TEXT, event_deadline TEXT, event_discount INTEGER)''')
+    c.execute("SELECT COUNT(*) FROM event_settings WHERE id = 1")
+    if c.fetchone()[0] == 0:
+        c.execute("INSERT INTO event_settings (id, event_active, event_title, event_desc, event_deadline, event_discount) VALUES (?, ?, ?, ?, ?, ?)",
+                  (1, 1, "[이벤트] 학위논문 5만원 할인 (~7/30)", "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수", "2026-07-30", 50000))
+        conn.commit()
+    
     # 관리자 계정 생성
     try:
         # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
@@ -1197,6 +1206,32 @@ def init_db():
         # 세션당 1회 실행 완료 표시
         st.session_state._init_gs_done = True
     conn.close()
+
+def get_event_settings():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    try:
+        c.execute("SELECT event_active, event_title, event_desc, event_deadline, event_discount FROM event_settings WHERE id = 1")
+        row = c.fetchone()
+        if row:
+            return {
+                "active": bool(row[0]),
+                "title": row[1],
+                "desc": row[2],
+                "deadline": row[3],
+                "discount": int(row[4])
+            }
+    except Exception:
+        pass
+    finally:
+        conn.close()
+    return {
+        "active": True,
+        "title": "[이벤트] 학위논문 5만원 할인 (~7/30)",
+        "desc": "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수",
+        "deadline": "2026-07-30",
+        "discount": 50000
+    }
 
 # [신규 기능 1] 구글 시트의 내용을 강제로 DB에 동기화하는 함수
 def sync_db_from_sheets(silent=False):
@@ -3943,22 +3978,33 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 
 def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False, lang="ko"):
     import datetime
+    event_cfg = get_event_settings()
+    is_cfg_active = event_cfg["active"]
+    event_title = event_cfg["title"]
+    event_desc = event_cfg["desc"]
+    event_deadline_str = event_cfg["deadline"]
+    
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-    event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
-    is_event_active = kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard")) and lang == "ko"
+    try:
+        event_deadline = datetime.datetime.strptime(event_deadline_str, "%Y-%m-%d")
+        event_deadline = event_deadline.replace(hour=23, minute=59, second=59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+    except Exception:
+        event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+        
+    is_event_active = is_cfg_active and kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard")) and lang == "ko"
     
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     
     event_ui_html = ""
     if is_event_active:
-        event_ui_html = """
+        event_ui_html = f"""
         <div id="event-container" style="margin-top: 6px; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
             <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">
-                <b>[이벤트] 학위논문 5만원 할인 (~7/30)</b>
+                <b>{event_title}</b>
             </div>
             <div style="font-size: 0.65rem; color: #475569;">
-                석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수
+                {event_desc}
             </div>
         </div>
         """
@@ -4034,27 +4080,39 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     # 이메일 형식 검증 (간단히 @ 포함 여부로 확인) 및 공백 제거
     safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
     
-    # 이벤트 활성화 여부 기한 검사 (2026년 7월 30일 23:59:59 KST)
+    event_cfg = get_event_settings()
+    is_cfg_active = event_cfg["active"]
+    event_title = event_cfg["title"]
+    event_desc = event_cfg["desc"]
+    event_deadline_str = event_cfg["deadline"]
+    event_discount = event_cfg["discount"]
+    
+    # 이벤트 활성화 여부 기한 검사
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-    event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
-    is_event_active = kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard"))
+    try:
+        event_deadline = datetime.datetime.strptime(event_deadline_str, "%Y-%m-%d")
+        event_deadline = event_deadline.replace(hour=23, minute=59, second=59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+    except Exception:
+        event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+        
+    is_event_active = is_cfg_active and kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard"))
     
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     
     event_ui_html = ""
     if is_event_active:
-        event_ui_html = """
+        event_ui_html = f"""
         <div id="event-container" style="margin-top: 6px; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2;">
             <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">
-                <b>[이벤트] 학위논문 5만원 할인 (~7/30)</b>
+                <b>{event_title}</b>
             </div>
             <div style="font-size: 0.65rem; color: #475569; margin-bottom: 4px;">
-                석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수
+                {event_desc}
             </div>
             <label style="display: flex; align-items: center; gap: 4px; font-weight: bold; color: #1e293b; cursor: pointer; user-select: none; font-size: 0.7rem; margin: 0;">
                 <input type="checkbox" id="event-agree" onchange="toggleEvent()" style="accent-color: #0284c7; cursor: pointer; width: 13px; height: 13px; margin: 0;">
-                할인 신청 (5만원 즉시 할인)
+                할인 신청 ({event_discount:,}원 즉시 할인)
             </label>
             <div id="event-inputs" style="display: none; flex-direction: column; gap: 4px; background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px;">
                 <div style="display: flex; align-items: center; gap: 4px;">
@@ -4123,7 +4181,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             
             if (agreeCheckbox && agreeCheckbox.checked) {{
                 if (inputDiv) inputDiv.style.display = "flex";
-                finalAmount = originalAmount - 50000;
+                finalAmount = originalAmount - {event_discount};
                 isEventApplied = true;
             }} else {{
                 if (inputDiv) inputDiv.style.display = "none";
@@ -5615,6 +5673,37 @@ with col_main:
                     delete_user(del_id)
                     st.success("삭제 완료")
                     st.rerun()
+
+        with st.expander("🎁 학위논문 할인 이벤트 설정 및 제어"):
+            event_cfg = get_event_settings()
+            
+            new_active = st.checkbox("이벤트 활성화 여부", value=event_cfg["active"], key="admin_event_active")
+            new_title = st.text_input("이벤트 제목", value=event_cfg["title"], key="admin_event_title")
+            new_desc = st.text_area("이벤트 내용/설명", value=event_cfg["desc"], key="admin_event_desc")
+            
+            try:
+                default_deadline_date = datetime.datetime.strptime(event_cfg["deadline"], "%Y-%m-%d").date()
+            except Exception:
+                default_deadline_date = datetime.date(2026, 7, 30)
+            new_deadline_date = st.date_input("이벤트 종료일", value=default_deadline_date, key="admin_event_deadline")
+            new_deadline_str = str(new_deadline_date)
+            
+            new_discount = st.number_input("할인 금액 (원)", min_value=0, max_value=500000, value=event_cfg["discount"], step=5000, key="admin_event_discount")
+            
+            if st.button("이벤트 설정 저장", use_container_width=True):
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                try:
+                    c.execute("UPDATE event_settings SET event_active=?, event_title=?, event_desc=?, event_deadline=?, event_discount=? WHERE id=1",
+                              (1 if new_active else 0, new_title, new_desc, new_deadline_str, int(new_discount)))
+                    conn.commit()
+                    st.success("🎉 이벤트 설정이 성공적으로 저장되었습니다!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"설정 저장 실패: {e}")
+                finally:
+                    conn.close()
+
         st.divider()
     
     # -------------------------------------------------------------------------
