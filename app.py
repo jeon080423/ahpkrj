@@ -5278,22 +5278,17 @@ with st.sidebar:
                         .btn {{
                             width: 100%;
                             height: 38px;
-                            background-color: #262730;
+                            background-color: #000000;
                             color: white;
-                            border: 1px solid rgba(49, 51, 63, 0.2);
+                            border: 1px solid #000000;
                             border-radius: 4px;
-                            font-weight: 500;
+                            font-weight: bold;
                             cursor: pointer;
                             font-size: 14px;
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             font-family: sans-serif;
-                            transition: background-color 0.2s;
-                        }}
-                        .btn:hover {{
-                            background-color: #ff4b4b;
-                            border-color: #ff4b4b;
                         }}
                     </style>
                     <button class="btn" id="dl-pdf-btn">📄 견적서 다운로드 (PDF)</button>
