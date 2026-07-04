@@ -1155,14 +1155,16 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS event_settings
                   (id INTEGER PRIMARY KEY, event_active INTEGER, event_title TEXT, event_desc TEXT, event_deadline TEXT, event_discount INTEGER)''')
     c.execute("SELECT COUNT(*) FROM event_settings WHERE id = 1")
+    event_exists = c.fetchone()[0]
     
-    # [추가] 세금계산서 신청 내역 테이블
-    c.execute('''CREATE TABLE IF NOT EXISTS tax_invoice_requests
-                  (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, biz_num TEXT, biz_name TEXT, rep_name TEXT, address TEXT, biz_type TEXT, email TEXT, plan_name TEXT, request_date TEXT, status TEXT)''')
-    if c.fetchone()[0] == 0:
+    if event_exists == 0:
         c.execute("INSERT INTO event_settings (id, event_active, event_title, event_desc, event_deadline, event_discount) VALUES (?, ?, ?, ?, ?, ?)",
                   (1, 1, "[이벤트] 학위논문 5만원 할인 (~7/30)", "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수", "2026-07-30", 50000))
         conn.commit()
+
+    # [추가] 세금계산서 신청 내역 테이블
+    c.execute('''CREATE TABLE IF NOT EXISTS tax_invoice_requests
+                  (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, biz_num TEXT, biz_name TEXT, rep_name TEXT, address TEXT, biz_type TEXT, email TEXT, plan_name TEXT, request_date TEXT, status TEXT)''')
     
     # 관리자 계정 생성
     try:
