@@ -3960,8 +3960,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
             </div>
             <div style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
                 ~2026.07.30 限. 석/박사 학위논문 대상<br>
-                ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개 동의<br>
-                <span style="color: #0284c7; font-weight: bold;">(로그인 후 즉시 할인 결제가 가능합니다.)</span>
+                ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개 동의
             </div>
         </div>
         """
