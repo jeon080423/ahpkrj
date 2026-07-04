@@ -1937,14 +1937,14 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
 </html>
 """
 
-# [신규 추가] 세금계산서 신청 알림 메일 전송
+# [신규 추가] 계산서 신청 알림 메일 전송
 def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] 세금계산서 발행 신청 접수 ({biz_name})"
+    subject = f"[AHP 마스터] 계산서 발행 신청 접수 ({biz_name})"
     body = f"""
-[AHP 마스터 세금계산서 신청 알림]
+[AHP 마스터 계산서 신청 알림]
 
 - 신청 ID: {user_id}
 - 사업자 등록번호: {biz_num}
@@ -5243,8 +5243,8 @@ with st.sidebar:
                 st.session_state.admin_mode = not st.session_state.admin_mode
                 st.rerun()
 
-        with st.expander(_("📄 견적서 출력 및 세금계산서 신청", "📄 Estimate & Tax Invoice Request")):
-            tab_quote, tab_tax = st.tabs([_("견적서 (즉시 출력)", "Estimate (Print PDF)"), _("세금계산서 (신청 접수)", "Tax Invoice (Apply)")])
+        with st.expander(_("📄 견적서 출력 및 계산서 신청", "📄 Estimate & Invoice Request")):
+            tab_quote, tab_tax = st.tabs([_("견적서 (즉시 출력)", "Estimate (Print PDF)"), _("계산서 (신청 접수)", "Invoice (Apply)")])
             
             with tab_quote:
                 q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: (주)에이치피테크", "e.g., HP Tech Co., Ltd."), key="q_client_input")
@@ -5325,7 +5325,7 @@ with st.sidebar:
                 t_rep_name = st.text_input(_("대표자명", "CEO Name"), key="t_rep_name_input")
                 t_address = st.text_input(_("사업장 주소", "Business Address"), key="t_address_input")
                 t_biz_type = st.text_input(_("업태 / 업종", "Business Category / Type"), key="t_biz_type_input")
-                t_email = st.text_input(_("세금계산서 수신 이메일", "Tax Invoice Email"), key="t_email_input")
+                t_email = st.text_input(_("계산서 수신 이메일", "Invoice Email"), key="t_email_input")
                 
                 t_tier = st.selectbox(
                     _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
@@ -5338,7 +5338,7 @@ with st.sidebar:
                     key="t_tier_select"
                 )
                 
-                if st.button(_("세금계산서 발행 신청하기", "Submit Tax Invoice Request"), use_container_width=True, key="btn_request_tax"):
+                if st.button(_("계산서 발행 신청하기", "Submit Invoice Request"), use_container_width=True, key="btn_request_tax"):
                     if not t_biz_num.strip():
                         st.error(_("사업자 등록번호를 입력해 주세요.", "Please enter the Business Registration Number."))
                     elif not t_biz_name.strip():
@@ -5370,8 +5370,8 @@ with st.sidebar:
                                 )
                                 
                                 if mail_success:
-                                    st.success(_("세금계산서 신청이 접수되었습니다! 관리자 확인 후 세금계산서가 발행됩니다.", 
-                                                 "Request submitted! The tax invoice will be issued after review."))
+                                    st.success(_("계산서 신청이 접수되었습니다! 관리자 확인 후 계산서가 발행됩니다.", 
+                                                 "Request submitted! The invoice will be issued after review."))
                                 else:
                                     st.warning(_("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.", 
                                                  "Saved to DB, but email alert failed. The admin will review it soon."))
@@ -9634,7 +9634,7 @@ with col_main:
                 st.caption(f"로컬 백업 조회 불가: {err}")
 
     with main_tab_pricing:
-        st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 세금계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Tax Invoices 100% Supported</span>"), unsafe_allow_html=True)
+        st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
 
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         
