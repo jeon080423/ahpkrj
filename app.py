@@ -4114,13 +4114,13 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
                 <input type="checkbox" id="event-agree" onchange="toggleEvent()" style="accent-color: #0284c7; cursor: pointer; width: 13px; height: 13px; margin: 0;">
                 할인 신청 ({event_discount:,}원 즉시 할인)
             </label>
-            <div id="event-inputs" style="display: none; flex-direction: column; gap: 4px; background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px;">
+            <div id="event-inputs" style="display: none; flex-direction: column; gap: 4px; background: white; padding: 6px 24px 6px 10px; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px;">
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 45px;">대학명:</span>
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">대학명:</span>
                     <input type="text" id="univ-name" placeholder="예: 한국대 대학원" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 45px;">논문명:</span>
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">논문명:</span>
                     <input type="text" id="thesis-title" placeholder="예: AHP 의사결정 연구" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
             </div>
