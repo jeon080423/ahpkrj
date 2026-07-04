@@ -1155,6 +1155,10 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS event_settings
                   (id INTEGER PRIMARY KEY, event_active INTEGER, event_title TEXT, event_desc TEXT, event_deadline TEXT, event_discount INTEGER)''')
     c.execute("SELECT COUNT(*) FROM event_settings WHERE id = 1")
+    
+    # [추가] 세금계산서 신청 내역 테이블
+    c.execute('''CREATE TABLE IF NOT EXISTS tax_invoice_requests
+                  (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, biz_num TEXT, biz_name TEXT, rep_name TEXT, address TEXT, biz_type TEXT, email TEXT, plan_name TEXT, request_date TEXT, status TEXT)''')
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO event_settings (id, event_active, event_title, event_desc, event_deadline, event_discount) VALUES (?, ?, ?, ?, ?, ?)",
                   (1, 1, "[이벤트] 학위논문 5만원 할인 (~7/30)", "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수", "2026-07-30", 50000))
@@ -1766,6 +1770,194 @@ def send_approval_email(user_email):
         return True
     except Exception as e:
         print(f"send_approval_email Error: {e}")
+        return False
+
+# [신규 추가] 아라비아 숫자를 한국어 금액 명칭으로 변환 (예: 500000 -> 일금오십만원정)
+def num_to_kor(num):
+    units = ["", "십", "백", "천"]
+    g_units = ["", "만", "억", "조"]
+    digits = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"]
+    
+    if num == 0:
+        return "영"
+        
+    num_str = str(num)
+    length = len(num_str)
+    result = []
+    
+    for i, char in enumerate(num_str):
+        power = length - i - 1
+        digit = int(char)
+        if digit != 0:
+            result.append(digits[digit] + units[power % 4])
+        if power % 4 == 0:
+            g_idx = power // 4
+            if g_idx > 0:
+                result.append(g_units[g_idx])
+                
+    kor = "".join(result)
+    if kor.startswith("일십"):
+        kor = kor[1:]
+    return f"일금 {kor}원정"
+
+# [신규 추가] 견적서 인쇄용 HTML 출력 (프레쉬인사이트 포맷 + CSS 도장 포함)
+def get_quotation_html(client_name, project_name, amount, plan_name):
+    import datetime
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    today_str = today.strftime("%Y년 %m월 %d일")
+    kor_amount = num_to_kor(amount)
+    
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>견적서</title>
+    <style>
+        body {{ font-family: 'Malgun Gothic', 'Dotum', sans-serif; margin: 40px; color: #000; line-height: 1.5; background: #fff; }}
+        .title {{ text-align: center; font-size: 32px; font-weight: bold; text-decoration: underline; margin-bottom: 40px; letter-spacing: 5px; }}
+        .meta-list {{ list-style: none; padding: 0; margin: 0 0 30px 0; font-size: 14px; }}
+        .meta-list li {{ margin-bottom: 8px; font-weight: bold; }}
+        .meta-list span.lbl {{ display: inline-block; width: 100px; color: #111; }}
+        
+        .main-layout {{ display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; }}
+        .info-left {{ width: 55%; }}
+        .info-right {{ width: 40%; text-align: right; font-size: 13px; }}
+        .provider-table {{ border-collapse: collapse; width: 100%; font-size: 13px; text-align: left; }}
+        .provider-table th, .provider-table td {{ border: 1px solid #000; padding: 5px 8px; }}
+        .provider-table th {{ background: #f2f2f2; width: 90px; text-align: center; }}
+        
+        .stamp-container {{ position: relative; display: inline-block; vertical-align: middle; }}
+        .stamp {{ position: absolute; top: -14px; right: -30px; width: 34px; height: 34px; border: 2px solid #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff0000; font-size: 9px; font-weight: bold; font-family: 'Batang', serif; transform: rotate(-5deg); background-color: rgba(255, 0, 0, 0.05); user-select: none; line-height: 1.1; }}
+
+        .items-table {{ width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }}
+        .items-table th, .items-table td {{ border: 1px solid #000; padding: 8px 10px; }}
+        .items-table th {{ background: #000; color: #fff; text-align: center; font-weight: bold; }}
+        .items-table td {{ text-align: center; }}
+        
+        .sum-row {{ font-weight: bold; background: #f9f9f9; }}
+        .footer-note {{ font-size: 12px; color: #555; margin-top: 15px; }}
+    </style>
+    <script>
+        window.onload = function() {{
+            window.print();
+        }}
+    </script>
+</head>
+<body>
+    <div class="title">견 적 서</div>
+    
+    <div class="main-layout">
+        <div class="info-left">
+            <ul class="meta-list">
+                <li><span class="lbl">■ 과 제 명 :</span> {project_name}</li>
+                <li><span class="lbl">■ 의뢰기관 :</span> {client_name}</li>
+                <li><span class="lbl">■ 서비스명 :</span> AHP 의사결정 분석 솔루션(AHP마스터)</li>
+                <li><span class="lbl">■ 소요예산 :</span> {kor_amount} (\\₩{amount:,}, VAT 포함)</li>
+                <li><span class="lbl">■ 작성일 :</span> {today_str}</li>
+                <li><span class="lbl">■ 담 당 자 :</span> 전상현 / jeon080423@gmail.com / 010-2142-2610</li>
+            </ul>
+        </div>
+        <div class="info-right">
+            <table class="provider-table">
+                <tr>
+                    <th rowspan="4">공<br>급<br>자</th>
+                    <th>상호</th>
+                    <td>프레쉬인사이트</td>
+                </tr>
+                <tr>
+                    <th>등록번호</th>
+                    <td>683-27-00122</td>
+                </tr>
+                <tr>
+                    <th>주소</th>
+                    <td>인천 부평구 원길로 12, 가동 203호<br>선우빌딩</td>
+                </tr>
+                <tr>
+                    <th>대표자</th>
+                    <td>
+                        <div class="stamp-container">
+                            전 상 현
+                            <div class="stamp">전상현<br>인</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">비 목</th>
+                <th style="width: 20%;">금 액</th>
+                <th style="width: 35%;">산 출 내 역</th>
+                <th style="width: 20%;">비 고</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="height: 40px;">
+                <td style="font-weight: bold; background: #eee;">1. 경비 소계</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr style="height: 60px;">
+                <td style="text-align: left; padding-left: 20px;">
+                    AHP 분석<br>솔루션 이용료 ({plan_name})
+                </td>
+                <td style="text-align: right;">{amount:,}</td>
+                <td>{amount:,} 원 X 1 식</td>
+                <td>AHPMASTER</td>
+            </tr>
+            <tr style="height: 120px;">
+                <td></td>
+                <td colspan="2" style="color: #666; font-size: 14px; vertical-align: top; padding-top: 15px;">이하 여백</td>
+                <td></td>
+            </tr>
+            <tr class="sum-row" style="height: 40px;">
+                <td>총 합 계</td>
+                <td style="text-align: right;">{amount:,}</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div style="font-weight: bold; font-size: 13px; margin-bottom: 20px;">※ 간이과세자</div>
+</body>
+</html>
+"""
+
+# [신규 추가] 세금계산서 신청 알림 메일 전송
+def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
+    sender_email = "jeon080423@gmail.com"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    recipient_email = "jeon080423@gmail.com"
+    subject = f"[AHP 마스터] 세금계산서 발행 신청 접수 ({biz_name})"
+    body = f"""
+[AHP 마스터 세금계산서 신청 알림]
+
+- 신청 ID: {user_id}
+- 사업자 등록번호: {biz_num}
+- 상호(회사명): {biz_name}
+- 대표자명: {rep_name}
+- 사업장 주소: {address}
+- 업태/업종: {biz_type}
+- 수신 이메일 주소: {email}
+- 신청 요금제: {plan_name}
+- 신청 시간: {datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m-%d %H:%M:%S')} (KST)
+"""
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"send_tax_invoice_request_email Error: {e}")
         return False
 
 def send_password_recovery_email(user_email, temp_pw):
@@ -5041,6 +5233,107 @@ with st.sidebar:
             if st.button(btn_label):
                 st.session_state.admin_mode = not st.session_state.admin_mode
                 st.rerun()
+
+        with st.expander(_("📄 견적서 출력 및 세금계산서 신청", "📄 Estimate & Tax Invoice Request")):
+            tab_quote, tab_tax = st.tabs([_("견적서 (즉시 출력)", "Estimate (Print PDF)"), _("세금계산서 (신청 접수)", "Tax Invoice (Apply)")])
+            
+            with tab_quote:
+                q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: 딜로이트 안진", "e.g., Deloitte Anjin"), key="q_client_input")
+                q_project = st.text_input(_("과제명 (프로젝트명)", "Project / Task Name"), placeholder=_("예: AHP 가중치 평가 분석", "e.g., AHP Weight Assessment Analysis"), key="q_project_input")
+                
+                q_tier = st.selectbox(
+                    _("서비스 구분 (요금제)", "Pricing Plan Tier"),
+                    options=[
+                        (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), 350000, "Basic"),
+                        (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), 500000, "Standard"),
+                        (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), 950000, "Pro")
+                    ],
+                    format_func=lambda x: x[0],
+                    key="q_tier_select"
+                )
+                
+                if st.button(_("견적서 출력 (인쇄/PDF 저장)", "Print Estimate (PDF)"), use_container_width=True, key="btn_print_quote"):
+                    if not q_client.strip():
+                        st.error(_("의뢰기관명을 입력해 주세요.", "Please enter the Client Institution."))
+                    elif not q_project.strip():
+                        st.error(_("과제명을 입력해 주세요.", "Please enter the Project Name."))
+                    else:
+                        plan_label, amount, plan_name = q_tier
+                        q_html = get_quotation_html(q_client.strip(), q_project.strip(), amount, plan_name)
+                        
+                        import json
+                        escaped_html = json.dumps(q_html)
+                        popup_js = f"""
+                        <script>
+                            var w = window.open("", "_blank");
+                            w.document.write({escaped_html});
+                            w.document.close();
+                        </script>
+                        """
+                        st.components.v1.html(popup_js, height=0)
+                        st.success(_("새 창에서 견적서가 로드되었습니다. 브라우저 인쇄 대화창에서 'PDF로 저장'을 선택해 저장해 주세요.",
+                                     "Estimate loaded in a new window. Select 'Save as PDF' in the print dialog to download."))
+            
+            with tab_tax:
+                t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
+                t_biz_name = st.text_input(_("상호 (회사명)", "Company Name"), key="t_biz_name_input")
+                t_rep_name = st.text_input(_("대표자명", "CEO Name"), key="t_rep_name_input")
+                t_address = st.text_input(_("사업장 주소", "Business Address"), key="t_address_input")
+                t_biz_type = st.text_input(_("업태 / 업종", "Business Category / Type"), key="t_biz_type_input")
+                t_email = st.text_input(_("세금계산서 수신 이메일", "Tax Invoice Email"), key="t_email_input")
+                
+                t_tier = st.selectbox(
+                    _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
+                    options=[
+                        (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), "Basic"),
+                        (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), "Standard"),
+                        (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), "Pro")
+                    ],
+                    format_func=lambda x: x[0],
+                    key="t_tier_select"
+                )
+                
+                if st.button(_("세금계산서 발행 신청하기", "Submit Tax Invoice Request"), use_container_width=True, key="btn_request_tax"):
+                    if not t_biz_num.strip():
+                        st.error(_("사업자 등록번호를 입력해 주세요.", "Please enter the Business Registration Number."))
+                    elif not t_biz_name.strip():
+                        st.error(_("상호를 입력해 주세요.", "Please enter the Company Name."))
+                    elif not t_rep_name.strip():
+                        st.error(_("대표자명을 입력해 주세요.", "Please enter the CEO Name."))
+                    elif not t_email.strip():
+                        st.error(_("이메일을 입력해 주세요.", "Please enter the Email."))
+                    elif not validate_email(t_email.strip()):
+                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                    else:
+                        with st.spinner(_("신청서를 제출하는 중...", "Submitting request...")):
+                            import sqlite3
+                            conn = sqlite3.connect('users.db')
+                            c = conn.cursor()
+                            try:
+                                import datetime
+                                now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+                                c.execute("""
+                                    INSERT INTO tax_invoice_requests 
+                                    (user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name, request_date, status)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                """, (st.session_state.user_id, t_biz_num.strip(), t_biz_name.strip(), t_rep_name.strip(), t_address.strip(), t_biz_type.strip(), t_email.strip(), t_tier[1], now_str, 'pending'))
+                                conn.commit()
+                                
+                                mail_success = send_tax_invoice_request_email(
+                                    st.session_state.user_id, t_biz_num.strip(), t_biz_name.strip(), t_rep_name.strip(), 
+                                    t_address.strip(), t_biz_type.strip(), t_email.strip(), t_tier[0]
+                                )
+                                
+                                if mail_success:
+                                    st.success(_("세금계산서 신청이 접수되었습니다! 관리자 확인 후 세금계산서가 발행됩니다.", 
+                                                 "Request submitted! The tax invoice will be issued after review."))
+                                else:
+                                    st.warning(_("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.", 
+                                                 "Saved to DB, but email alert failed. The admin will review it soon."))
+                            except Exception as e:
+                                st.error(_(f"신청 중 오류가 발생했습니다: {e}", f"Error during submission: {e}"))
+                            finally:
+                                conn.close()
 
         with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
             cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
