@@ -3942,9 +3942,30 @@ if st.session_state.user_id is not None and st.session_state.user_role == 'offic
 # =============================================================================
 
 def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False, lang="ko"):
+    import datetime
+    kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+    is_event_active = kst_now <= event_deadline and (plan_name.startswith("Basic") or plan_name.startswith("Standard")) and lang == "ko"
+    
+    box_height_css = "min-height: 520px; height: auto;" if is_event_active else "height: 500px;"
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     
+    event_ui_html = ""
+    if is_event_active:
+        event_ui_html = """
+        <div id="event-container" style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 8px; font-size: 0.82rem; text-align: left;">
+            <div style="font-weight: bold; color: #0284c7; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>🎓</span> <b>[기간한정] 학위논문 5만원 할인 진행 중</b>
+            </div>
+            <div style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
+                ~2026.07.30 限. 석/박사 학위논문 대상<br>
+                ※ 혜택 조건: 학위논문 제목 및 대학명을 AHP마스터 사이트 내 공개 동의<br>
+                <span style="color: #0284c7; font-weight: bold;">(로그인 후 즉시 할인 결제가 가능합니다.)</span>
+            </div>
+        </div>
+        """
+        
     btn_label = f"Pay {plan_name.split(' (')[0]}" if lang == "en" else f"결제 {plan_name.split(' (')[0]}"
     alert_msg = "Login or Sign-up is required. Please proceed in the main tab or sidebar." if lang == "en" else "로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요."
     
@@ -3960,7 +3981,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            height: 500px; 
+            {box_height_css}
             position: relative;
             display: flex;
             flex-direction: column;
@@ -3987,6 +4008,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
       <div class="pricing-box">
           {best_badge}
           <div>{inner_html}</div>
+          {event_ui_html}
           <button class="btn" onclick="redirectSignup()">{btn_label}</button>
       </div>
       <script>
