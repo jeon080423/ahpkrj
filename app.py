@@ -4120,7 +4120,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
                     <input type="text" id="univ-name" placeholder="예: 한국대 대학원" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 45px;">논문제목:</span>
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 45px;">논문명:</span>
                     <input type="text" id="thesis-title" placeholder="예: AHP 의사결정 연구" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
             </div>
@@ -4221,7 +4221,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
                   return;
               }}
               if (!thesis) {{
-                  alert("이벤트 혜택 적용을 위해 학위논문 제목을 입력해 주세요.");
+                  alert("이벤트 혜택 적용을 위해 논문명을 입력해 주세요.");
                   if (tInput) tInput.focus();
                   return;
               }}
