@@ -5238,7 +5238,7 @@ with st.sidebar:
             tab_quote, tab_tax = st.tabs([_("견적서 (즉시 출력)", "Estimate (Print PDF)"), _("세금계산서 (신청 접수)", "Tax Invoice (Apply)")])
             
             with tab_quote:
-                q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: 딜로이트 안진", "e.g., Deloitte Anjin"), key="q_client_input")
+                q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: (주)에이치피테크", "e.g., HP Tech Co., Ltd."), key="q_client_input")
                 q_project = st.text_input(_("과제명 (프로젝트명)", "Project / Task Name"), placeholder=_("예: AHP 가중치 평가 분석", "e.g., AHP Weight Assessment Analysis"), key="q_project_input")
                 
                 q_tier = st.selectbox(
