@@ -325,8 +325,8 @@ def run():
 
     /* --- 사이드바 프리미엄 스타일 --- */
     section[data-testid="stSidebar"] {
-        background-color: #1a365d !important;
-        border-right: 1px solid #102a43 !important;
+        background-color: #2d3436 !important;
+        border-right: 1px solid #222829 !important;
     }
     section[data-testid="stSidebar"] > div:first-child {
         padding-top: 1.5rem !important;
@@ -851,8 +851,9 @@ def run():
                 q_tier = st.selectbox(
                     _("서비스 구분 (요금제)", "Pricing Plan Tier"),
                     options=[
-                        (_("단건 분석권 (300,000원)", "Single Plan (300,000 KRW)"), 300000, "단건 분석권"),
-                        (_("연간 라이선스 (3,000,000원)", "Annual License (3,000,000 KRW)"), 3000000, "연간 라이선스")
+                        (_("월간 이용권 (190,000원)", "Monthly Plan (190,000 KRW)"), 190000, "월간 이용권"),
+                        (_("연간 이용권 (1,200,000원)", "Annual Plan (1,200,000 KRW)"), 1200000, "연간 이용권"),
+                        (_("기관 라이선스 (3,000,000원)", "Enterprise License (3,000,000 KRW)"), 3000000, "기관 라이선스")
                     ],
                     format_func=lambda x: x[0],
                     key="q_tier_select_yeta"
@@ -927,8 +928,9 @@ def run():
                 t_tier = st.selectbox(
                     _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
                     options=[
-                        (_("단건 분석권 (300,000원)", "Single Plan (300,000 KRW)"), "단건 분석권"),
-                        (_("연간 라이선스 (3,000,000원)", "Annual License (3,000,000 KRW)"), "연간 라이선스")
+                        (_("월간 이용권 (190,000원)", "Monthly Plan (190,000 KRW)"), "월간 이용권"),
+                        (_("연간 이용권 (1,200,000원)", "Annual Plan (1,200,000 KRW)"), "연간 이용권"),
+                        (_("기관 라이선스 (3,000,000원)", "Enterprise License (3,000,000 KRW)"), "기관 라이선스")
                     ],
                     format_func=lambda x: x[0],
                     key="t_tier_select_yeta"
@@ -2534,16 +2536,16 @@ def run():
             else:
                 st.components.v1.html(get_yeta_login_redirect_html("무료 체험판 (영구)", inner_html=inner_1, is_best=False), height=520)
 
-        # 2. [Lite] 단건 분석권
+        # 2. [Standard] 월간 이용권
         with col_p2:
             inner_2 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Lite] 단건 분석권</h3>
-                <span style='color: #888; font-size: 1.1rem;'>프로젝트 1건, 1개월</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>300,000</span>원</h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단일 예타 프로젝트에 대해 인원 제한 없이 전문가 데이터 집계 및 아웃라이어 정제 분석을 수행합니다.</p>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Standard] 월간 이용권</h3>
+                <span style='color: #888; font-size: 1.1rem;'>1개월 무제한 이용</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>190,000</span>원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>1개월 동안 평가자 수·분석 횟수 제한 없이 예타 AHP 전체 기능을 자유롭게 이용할 수 있습니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>프로젝트 1건, 1개월 분석</b></li>
+                    <li><b>1개월간 분석 횟수 무제한</b></li>
                     <li>평가자 수 제한 없음 (무제한)</li>
                     <li>최대/최소 아웃라이어 제외 자동 연산</li>
                     <li>보고서 제출용 Excel 원본 내보내기</li>
@@ -2551,41 +2553,41 @@ def run():
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Lite] 단건 분석권", 300000, 1, inner_html=inner_2, is_best=False), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Standard] 월간 이용권", 190000, 1, inner_html=inner_2, is_best=False), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("[Lite] 단건 분석권", inner_html=inner_2, is_best=False), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("[Standard] 월간 이용권", inner_html=inner_2, is_best=False), height=520)
 
-        # 3. [Pro] 팀 라이선스 (BEST)
+        # 3. [Pro] 연간 이용권 (BEST)
         with col_p3:
             inner_3 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Pro] 팀 라이선스</h3>
-                <span style='color: #888; font-size: 1.1rem;'>연간 5건, 1년 구독</span>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Pro] 연간 이용권</h3>
+                <span style='color: #888; font-size: 1.1rem;'>1년 무제한 이용</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,200,000원</h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단건 대비 20% 저렴한 비용으로 연구실/팀 단위의 예타 AHP 분석과 전문가 배포 설문을 1년간 수행합니다.</p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>월간 대비 47% 절감된 비용으로 1년간 횟수 제한 없이 예타 AHP 분석과 설문 배포를 수행합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>1년간 최대 5개 프로젝트 분석</b></li>
-                    <li><b>단건 대비 건당 비용 절감 효과</b></li>
+                    <li><b>1년간 분석 횟수 무제한</b></li>
+                    <li><b>월 100,000원 수준 (47% 절감)</b></li>
                     <li>무제한 전문가 설문 및 아웃라이어 연산</li>
                     <li>B2B 기업용 견적서/세금계산서 발행</li>
                     <li>연구팀 통합 데이터베이스 제공</li>
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Pro] 팀 라이선스", 1200000, 12, inner_html=inner_3, is_best=True), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Pro] 연간 이용권", 1200000, 12, inner_html=inner_3, is_best=True), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("[Pro] 팀 라이선스", inner_html=inner_3, is_best=True), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("[Pro] 연간 이용권", inner_html=inner_3, is_best=True), height=520)
 
-        # 4. [Enterprise] 연간 라이선스
+        # 4. [Enterprise] 기관 라이선스
         with col_p4:
             inner_4 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Enterprise] 라이선스</h3>
-                <span style='color: #888; font-size: 1.1rem;'>연간 무제한 구독</span>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Enterprise] 기관 라이선스</h3>
+                <span style='color: #888; font-size: 1.1rem;'>1년 다중 사용자</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>3,000,000원</h2>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기관/연구원 전체 임직원이 1년 동안 횟수 제한 없이 예타 AHP 분석과 전문가 배포 설문을 수행합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>1년간 전 직원 무제한 프로젝트 분석</b></li>
+                    <li><b>1년간 다중 사용자 무제한 이용</b></li>
                     <li><b>커스텀 도메인 및 기관 전용 DB 구축</b></li>
                     <li>무제한 전문가 설문 및 아웃라이어 연산</li>
                     <li>B2B 기업용 견적서 즉시 발행</li>
@@ -2593,9 +2595,9 @@ def run():
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Enterprise] 연간 라이선스", 3000000, 12, inner_html=inner_4, is_best=False), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Enterprise] 기관 라이선스", 3000000, 12, inner_html=inner_4, is_best=False), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("[Enterprise] 연간 라이선스", inner_html=inner_4, is_best=False), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("[Enterprise] 기관 라이선스", inner_html=inner_4, is_best=False), height=520)
 
         # 5. 부가 서비스 대행
         with col_p5:
@@ -2623,7 +2625,7 @@ def run():
                 address = st.text_input("사업장 주소", key="tax_address")
                 biz_type = st.text_input("업태 및 종목", key="tax_biz_type")
                 email = st.text_input("세금계산서 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
-                plan_choice = st.selectbox("선택 요금제 플랜", ["단건 분석권 (300,000원)", "연간 라이선스 (3,000,000원)"])
+                plan_choice = st.selectbox("선택 요금제 플랜", ["월간 이용권 (190,000원)", "연간 이용권 (1,200,000원)", "기관 라이선스 (3,000,000원)"])
                 
                 submit_tax = st.form_submit_button("세금계산서/인보이스 발행 요청", use_container_width=True)
                 if submit_tax:
