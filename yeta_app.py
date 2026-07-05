@@ -1957,51 +1957,11 @@ def run():
         except Exception as e:
             st.error(f"결제 데이터 데이터베이스 저장 실패: {str(e)}")
 
-    # 5. Page Header Section (Split into left and right columns)
-    col_main_title, col_settings_title = st.columns([3.0, 1.2], gap="large")
-    
-    with col_main_title:
-        st.markdown(f"""
-        <div class="yeta-body">
-            <div class="yeta-header">
-                <h1>{_("국가 예비타당성조사 종합평가(AHP) 시스템", "Preliminary Feasibility Study AHP System")}</h1>
-                <p>{_("기획재정부 및 KDI 표준 지침을 준수하는 공공투자사업 AHP 종합 평가 모듈입니다.", "AHP comprehensive evaluation module for public investment projects in compliance with MoEF & KDI standard guidelines.")}</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col_settings_title:
-        import urllib.parse
-        current_params = dict(st.query_params)
-        ko_params = current_params.copy()
-        ko_params['lang'] = 'ko'
-        ko_url = "?" + urllib.parse.urlencode(ko_params, doseq=True)
-        
-        en_params = current_params.copy()
-        en_params['lang'] = 'en'
-        en_url = "?" + urllib.parse.urlencode(en_params, doseq=True)
-        
-        cur_lang = st.session_state.get('lang', 'ko')
-        lang_ko_color = "#1a365d" if cur_lang == 'ko' else "#9cb4cc"
-        lang_ko_weight = "bold" if cur_lang == 'ko' else "normal"
-        lang_en_color = "#1a365d" if cur_lang == 'en' else "#9cb4cc"
-        lang_en_weight = "bold" if cur_lang == 'en' else "normal"
-        
-        lang_html = f"""
-        <div style="text-align: right; margin-top: 15px; margin-bottom: 10px;">
-            <span style="font-size: 0.85rem;">
-                <a href="{ko_url}" target="_self" style="text-decoration: none; color: {lang_ko_color}; font-weight: {lang_ko_weight};">한국어</a>
-                <span style="color: #ccc; margin: 0 4px;">|</span>
-                <a href="{en_url}" target="_self" style="text-decoration: none; color: {lang_en_color}; font-weight: {lang_en_weight};">English</a>
-            </span>
-        </div>
-        """
-        st.markdown(lang_html, unsafe_allow_html=True)
-        
-        if st.button(_("🏠 메인 포털로 돌아가기", "🏠 Back to Main Portal"), key="btn_back_to_gateway", use_container_width=True):
-            st.session_state.mode = None
-            st.query_params.pop("mode", None)
-            st.rerun()
+    # 5. Page Header Section
+    st.markdown(f"""
+    <h1 style='text-align: center; color: #1e3a8a; margin-bottom: 5px; font-weight: 800; font-family: "Pretendard", sans-serif; letter-spacing: -1.0px;'>{_("국가 예비타당성조사 종합평가(AHP) 시스템", "Preliminary Feasibility Study AHP System")}</h1>
+    <p style='text-align: center; color: #666; font-size: 1.05rem; margin-bottom: 30px;'>{_("기획재정부 및 KDI 표준 지침을 준수하는 공공투자사업 AHP 종합 평가 모듈입니다.", "AHP comprehensive evaluation module for public investment projects in compliance with MoEF & KDI standard guidelines.")}</p>
+    """, unsafe_allow_html=True)
 
     # --- ADMIN MODE INTERCEPTOR ---
     if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
