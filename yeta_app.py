@@ -2795,6 +2795,7 @@ def run():
                 div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] {
                     flex-wrap: nowrap !important;
                     flex-direction: row !important;
+                    gap: 0px !important;
                 }
                 div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
                     width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
