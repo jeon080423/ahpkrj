@@ -2743,13 +2743,23 @@ def run():
                 st.write("**[제1계층 평가: 상수합법]**")
                 st.caption("아래 1계층 평가항목의 합이 100이 되도록 중요도를 직접 분배해주십시오.")
                 
-                v1 = st.slider("경제성", 0, 100, 45, key="prev_v1")
-                v2 = st.slider("정책성", 0, 100, 35, key="prev_v2")
-                v3 = 0
-                if "비수도권" in yeta_p_type:
-                    v3 = st.slider("지역균형발전", 0, 100, 20, key="prev_v3")
+                if "비수도권" in yeta_p_type and "건설" in yeta_p_type:
+                    b_eco, b_pol, b_reg = (30, 45, 35), (25, 40, 30), (30, 40, 35)
+                    reg_label = "지역균형발전"
+                elif "수도권" in yeta_p_type and "건설" in yeta_p_type:
+                    b_eco, b_pol, b_reg = (60, 70, 65), (30, 40, 35), None
                 elif "R&D" in yeta_p_type:
-                    v3 = st.slider("기술성", 0, 100, 20, key="prev_v4")
+                    b_eco, b_pol, b_reg = (40, 50, 45), (20, 30, 25), (30, 40, 30)
+                    reg_label = "기술성"
+                else:
+                    b_eco, b_pol, b_reg = (0, 100, 40), (0, 100, 30), (0, 100, 30)
+                    reg_label = "지역균형발전"
+                
+                v1 = st.slider("경제성", b_eco[0], b_eco[1], b_eco[2], key="prev_v1")
+                v2 = st.slider("정책성", b_pol[0], b_pol[1], b_pol[2], key="prev_v2")
+                v3 = 0
+                if b_reg:
+                    v3 = st.slider(reg_label, b_reg[0], b_reg[1], b_reg[2], key="prev_v3")
                 
                 total_sum = v1 + v2 + v3
                 color = "#16a34a" if total_sum == 100 else "#dc2626"
