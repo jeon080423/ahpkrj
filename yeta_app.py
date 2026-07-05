@@ -2705,7 +2705,6 @@ def run():
         st.info(_("모든 설정이 완료되었다면, 응답 데이터를 실시간으로 수집할 구글 시트를 연동하고 배포용 URL을 생성합니다.", "When ready, connect a Google Sheet to collect responses and generate the deployment URL."))
         
         with st.expander(_("❓ 구글 시트 연동 방법 안내", "Google Sheets Integration Guide")):
-            import os
             guide_img_path = os.path.join(os.path.dirname(__file__), "manual_sheet_url_guide.png")
             if os.path.exists(guide_img_path):
                 st.image(guide_img_path, caption="Google Sheets Sharing Guide", use_container_width=True)
@@ -2724,7 +2723,6 @@ def run():
                 st.error("구글 시트 URL을 입력해주세요.")
             else:
                 with st.spinner("구글 시트 연동 및 배포 URL 생성 중..."):
-                    import time
                     time.sleep(1)
                 st.success(_("🎉 예타 AHP 설문지 배포가 완료되었습니다. 아래 URL을 복사하여 전문가들에게 발송하세요.", "Survey successfully deployed! Send the URL below to experts."))
                 st.code("https://ahpkrj.streamlit.app/survey/yeta-expert-preview-106")
