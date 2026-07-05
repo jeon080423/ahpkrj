@@ -2384,19 +2384,21 @@ def run():
                                 
     # 7. Navigation Tabs
     if st.session_state.user_id:
-        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_pricing = st.tabs([
+        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
             _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
             _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 AHP 설문 작성 및 배포", "Create Yeta Survey"),
+            _("실시간 응답 현황", "Live Response Status"),
             _("서비스 요금", "Pricing & License")
         ])
     else:
-        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_pricing, tab_signup = st.tabs([
+        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing, tab_signup = st.tabs([
             _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
             _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 AHP 설문 작성 및 배포", "Create Yeta Survey"),
+            _("실시간 응답 현황", "Live Response Status"),
             _("서비스 요금", "Pricing & License"),
             _("회원가입", "Sign Up")
         ])
@@ -3042,7 +3044,7 @@ def run():
             else:
                 st.warning("가이드 이미지를 찾을 수 없습니다.")
 
-        admin_email = st.text_input(_("관리자 이메일 (결과 수신용)", "Admin Email"))
+        
         sheet_url = st.text_input(_("공유된 구글 시트 URL", "Shared Google Sheet URL"))
         
         if st.button(_("🚀 예타 AHP 설문지 배포 및 구글 시트 연동", "Deploy Yeta Survey & Connect Google Sheets"), type="primary", use_container_width=True):
@@ -3054,6 +3056,700 @@ def run():
                 st.success(_("🎉 예타 AHP 설문지 배포가 완료되었습니다. 아래 URL을 복사하여 전문가들에게 발송하세요.", "Survey successfully deployed! Send the URL below to experts."))
                 st.code("https://ahpkrj.streamlit.app/survey/yeta-expert-preview-106")
                 st.info("구글 시트에 접속하시면 실시간으로 누적되는 응답 데이터를 확인하고 다운로드할 수 있습니다.")
+
+    # =========================================================================
+    # 실시간 응답 현황 탭
+    # =========================================================================
+    with tab_live_response:
+        st.header(_("실시간 응답 현황", "Real-time Response Status"))
+        selected_sheet_id = None
+        
+        if st.session_state.user_id is None:
+            st.warning(_(" **실시간 응답 현황 기능은 회원 전용 서비스입니다.**", " **Real-time response status is a member-only service.**"))
+            st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
+        else:
+            # DB에서 해당 관리자가 생성한 설문 목록 조회
+            import sqlite3
+            import pandas as pd
+
+            try:
+                sync_short_codes_from_gs()
+            except Exception:
+                pass
+
+            admin_surveys = []
+            try:
+                conn = sqlite3.connect('users.db')
+                cur = conn.cursor()
+                cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
+                sqlite_surveys = cur.fetchall()
+                conn.close()
+                
+                gs_surveys = []
+                try:
+                    from survey_manager import get_admin_surveys_from_gsheet
+                    gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
+                except Exception:
+                    pass
+                
+                merged_surveys = {}
+                for s in gs_surveys + sqlite_surveys:
+                    if s[0] not in merged_surveys:
+                        merged_surveys[s[0]] = s
+                admin_surveys = list(merged_surveys.values())
+                admin_surveys.sort(key=lambda x: x[2], reverse=True)
+            except Exception as e:
+                st.error(f"설문 목록 조회 실패: {e}")
+
+            if not admin_surveys:
+                st.warning("배포된 설문지가 존재하지 않습니다. '온라인 설문지 제작' 탭에서 설문을 먼저 배포해 주세요.")
+            else:
+                # 로그인한 아이디에 맞춰 본인의 설문들만 드롭다운에 노출시킵니다.
+                survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
+                selected_label = st.selectbox(
+                    "실시간 현황을 확인할 설문 선택",
+                    list(survey_options.keys()),
+                    key="tab3_survey_select"
+                )
+                selected_sheet_id = survey_options[selected_label]
+                
+                selected_survey_info = next(s for s in admin_surveys if s[0] == selected_sheet_id)
+                survey_title = selected_survey_info[1]
+                created_at = selected_survey_info[2]
+                
+                st.success(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
+                st.divider()
+
+        # 대시보드 렌더링
+        if selected_sheet_id:
+
+            st.info(" 구글 API 일일 호출 할당량 초과(Quota Exceeded 429 에러)를 방지하기 위해, 데이터는 자동으로 불러오지 않습니다. 아래 버튼을 눌러 최신 데이터를 갱신하세요.")
+            if st.button("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", type="primary"):
+                from survey_manager import get_survey_stats, get_survey_gspread_client
+                with st.spinner("실시간 설문 현황 로딩 중..."):
+                    # 1. Stats Loading
+                    st.session_state["survey_stats"] = get_survey_stats(selected_sheet_id.strip())
+                    
+                    # 2. Raw Data Loading
+                    g_client = get_survey_gspread_client()
+                    if g_client:
+                        try:
+                            spreadsheet = g_client.open_by_key(selected_sheet_id.strip())
+                            raw_sheet = spreadsheet.worksheet("Raw_Data")
+                            all_rows = raw_sheet.get_all_values()
+
+                            try:
+                                demo_sheet = spreadsheet.worksheet("Demographic_Data")
+                                demo_rows = demo_sheet.get_all_values()
+                            except Exception:
+                                demo_rows = []
+
+                            if len(all_rows) > 0:
+                                headers = all_rows[0]
+                                rows = all_rows[1:]
+                                st.session_state["live_df"] = pd.DataFrame(rows, columns=headers)
+
+                                if len(demo_rows) > 0:
+                                    demo_headers = demo_rows[0]
+                                    demo_vals = demo_rows[1:]
+                                    st.session_state["demo_df"] = pd.DataFrame(demo_vals, columns=demo_headers)
+                                else:
+                                    st.session_state["demo_df"] = None
+                            else:
+                                st.session_state["live_df"] = pd.DataFrame()
+                                st.session_state["demo_df"] = None
+
+                        except Exception as g_err:
+                            st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")
+                            st.session_state["live_df"] = None
+                    else:
+                        st.warning("구글 Sheets API 클라이언트 연결 실패로 인해 구글 시트 내 데이터를 직접 다운로드할 수 없습니다.")
+                        st.session_state["live_df"] = None
+
+            if "survey_stats" in st.session_state:
+                stats = st.session_state["survey_stats"]
+                col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+                with col_stat1:
+                    st.metric(_("총 접속자 수 (Visits)", "Total Visits"), f"{stats['visits']}" + _("명", ""))
+                with col_stat2:
+                    st.metric(_("완료 응답자 수 (Completed)", "Completed Responses"), f"{stats['completed']}" + _("명", ""))
+                with col_stat3:
+                    st.metric(_("일관성 초과 중단자 (CR Fail)", "CR Fail Abandonments"), f"{stats['abandoned_cr']}" + _("회", " times"))
+                with col_stat4:
+                    st.metric(_("단순 이탈 중단자 (Bounce)", "Bounced Visitors"), f"{stats['abandoned_bounce']}" + _("명", ""))
+
+                # 시각화 차트 추가
+                import plotly.express as px
+
+                chart_data = pd.DataFrame({
+                    "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
+                    "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
+                })
+
+                fig_stats = px.bar(
+                    chart_data,
+                    x="구분",
+                    y="인원수",
+                    text="인원수",
+                    color="구분",
+                    color_discrete_map={
+                        "응답 완료": "#2E7D32",
+                        "일관성 초과 중단": "#C62828",
+                        "단순 페이지 이탈": "#EF6C00"
+                    },
+                    title="설문 참여 상태별 분포"
+                )
+                fig_stats.update_layout(showlegend=False)
+                st.plotly_chart(fig_stats, use_container_width=True)
+
+            if "live_df" in st.session_state and st.session_state["live_df"] is not None:
+                live_df = st.session_state["live_df"]
+                demo_df = st.session_state.get("demo_df", None)
+
+                # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
+                with st.expander(_("📥 실시간 구글 시트 응답 데이터 다운로드 센터", "📥 Real-time Google Sheet Response Data Download Center"), expanded=True):
+                    if not live_df.empty:
+                        st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
+                        
+                        # 📊 AHP 분석 연동 단축 버튼 추가
+                        if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
+                            st.session_state["selected_survey_for_analysis"] = selected_sheet_id
+                            from survey_manager import load_survey_metadata
+                            survey_meta = load_survey_metadata(selected_sheet_id)
+                            if survey_meta:
+                                ahp_model = survey_meta["AHP_Model_JSON"]
+                                base_cols = ["ID", "Type"]
+                                main_criteria = ahp_model.get("main", [])
+                                main_pairs = []
+                                for i in range(len(main_criteria)):
+                                    for j in range(i + 1, len(main_criteria)):
+                                        main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
+                                main_cols = [c for c in base_cols if c in live_df.columns] + [p for p in main_pairs if p in live_df.columns]
+                                
+                                st.session_state["ahp_df_main"] = live_df[main_cols].copy()
+                                for col in st.session_state["ahp_df_main"].columns:
+                                    if col not in ["ID", "Type"]:
+                                        st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce')
+                                
+                                 # 중분류 복사
+                                st.session_state["ahp_sub_dfs"] = {}
+                                sub_criteria_map = ahp_model.get("subs", {})
+                                for main_c, subs in sub_criteria_map.items():
+                                    if len(subs) >= 2:
+                                        sub_pairs = []
+                                        for i in range(len(subs)):
+                                            for j in range(i + 1, len(subs)):
+                                                sub_pairs.append(f"{subs[i]}_{subs[j]}")
+                                        sub_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_pairs if p in live_df.columns]
+                                        st.session_state["ahp_sub_dfs"][main_c] = live_df[sub_cols].copy()
+                                        for col in st.session_state["ahp_sub_dfs"][main_c].columns:
+                                            if col not in ["ID", "Type"]:
+                                                st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
+                                                
+                                st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
+                                st.info(_("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.", "📊 Data analysis preparation is complete! Select the **'📊 AHP Analysis Tool' tab at the top** and choose the **'🌐 Link Distributed Online Survey Data'** radio button to view the results instantly."))
+
+                        tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
+                        with tab_raw:
+                            st.dataframe(live_df, use_container_width=True)
+                        with tab_demo:
+                            if demo_df is not None:
+                                st.dataframe(demo_df, use_container_width=True)
+                            else:
+                                st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
+
+                        # Excel 및 CSV 내보내기 버튼 제공
+                        import io
+
+                        # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
+                        excel_buffer = io.BytesIO()
+                        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                            from survey_manager import load_survey_metadata
+                            survey_meta = load_survey_metadata(selected_sheet_id)
+                            parsed_ok = False
+                            
+                            if survey_meta:
+                                ahp_model = survey_meta.get("AHP_Model_JSON", {})
+                                tier_level = int(survey_meta.get("Tier_Level", 2))
+                                base_cols = ["ID", "Type"]
+                                main_criteria = ahp_model.get("main", [])
+                                main_pairs = []
+                                for i in range(len(main_criteria)):
+                                    for j in range(i + 1, len(main_criteria)):
+                                        main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
+                                main_cols = [c for c in base_cols if c in live_df.columns] + [p for p in main_pairs if p in live_df.columns]
+                                
+                                if len(main_cols) > 2:
+                                    df_main_dl = live_df[main_cols].copy()
+                                    df_main_dl.to_excel(writer, index=False, sheet_name="Main_Criteria")
+                                    
+                                    sub_criteria_map = ahp_model.get("subs", {})
+                                    for main_c, subs in sub_criteria_map.items():
+                                        if len(subs) >= 2:
+                                            sub_pairs = []
+                                            for i in range(len(subs)):
+                                                for j in range(i + 1, len(subs)):
+                                                    sub_pairs.append(f"{subs[i]}_{subs[j]}")
+                                            sub_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_pairs if p in live_df.columns]
+                                            df_sub_dl = live_df[sub_cols].copy()
+                                            df_sub_dl.to_excel(writer, index=False, sheet_name=main_c[:31])
+                                            
+                                    if tier_level == 3:
+                                        sub_sub_map = ahp_model.get("sub_subs", {})
+                                        for main_c, subs in sub_criteria_map.items():
+                                            for sub_c in subs:
+                                                sub_subs = sub_sub_map.get(sub_c, [])
+                                                if len(sub_subs) >= 2:
+                                                    sub_sub_pairs = []
+                                                    for i in range(len(sub_subs)):
+                                                        for j in range(i + 1, len(sub_subs)):
+                                                            sub_sub_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                                                    ss_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_sub_pairs if p in live_df.columns]
+                                                    df_ss_dl = live_df[ss_cols].copy()
+                                                    df_ss_dl.to_excel(writer, index=False, sheet_name=sub_c[:31])
+                                    parsed_ok = True
+                            
+                            if not parsed_ok:
+                                live_df.to_excel(writer, index=False, sheet_name='Raw_Data')
+                            else:
+                                live_df.to_excel(writer, index=False, sheet_name='Raw_Data_Dump')
+                                
+                            if demo_df is not None:
+                                demo_df.to_excel(writer, index=False, sheet_name='Demographic_Data')
+
+                        col_dl1, col_dl2 = st.columns(2)
+                        with col_dl1:
+                            st.download_button(
+                                "📥 실시간 응답 Excel 다운로드 (.xlsx)",
+                                data=excel_buffer.getvalue(),
+                                file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.xlsx",
+                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                use_container_width=True,
+                                type="primary"
+                            )
+                        # 2. CSV 내보내기 (Raw_Data 우선 내보내기)
+                        csv_buffer = io.StringIO()
+                        live_df.to_csv(csv_buffer, index=False, header=True)
+                        with col_dl2:
+                            st.download_button(
+                                "📥 실시간 응답 CSV 다운로드 (.csv)",
+                                data=csv_buffer.getvalue().encode('utf-8-sig'),
+                                file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.csv",
+                                mime="text/csv",
+                                use_container_width=True
+                            )
+                    else:
+                        st.info("구글 시트에 수집된 응답 로데이터가 아직 비어 있습니다.")
+
+            # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
+            try:
+                conn = sqlite3.connect('users.db')
+                backup_df = pd.read_sql_query(
+                    "SELECT id, respondent_id, response_json, created_at FROM survey_backup_responses WHERE survey_id = ?",
+                    conn, params=(selected_sheet_id.strip(),)
+                )
+                conn.close()
+
+                if not backup_df.empty:
+                    with st.expander("🛡️ 서버 로컬 안전 백업 관리 센터"):
+                        st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
+                        st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
+
+                        # 전체 로 데이터 복구 엑셀/CSV 데이터 빌드
+                        recovered_raw_rows = []
+                        recovered_demo_rows = []
+                        for idx_b, r_b in backup_df.iterrows():
+                            payload = json.loads(r_b["response_json"])
+                            if "raw_row_data" in payload:
+                                recovered_raw_rows.append(payload["raw_row_data"])
+                            elif "row_data" in payload:
+                                # 하위 호환성
+                                recovered_raw_rows.append(payload["row_data"])
+
+                            if "demo_row_data" in payload:
+                                recovered_demo_rows.append(payload["demo_row_data"])
+
+                        if recovered_raw_rows:
+                            import io
+
+                            # 헤더 복구 로직 추가
+                            raw_headers = None
+                            demo_headers = None
+                            from survey_manager import load_survey_metadata
+                            survey_meta = load_survey_metadata(selected_sheet_id.strip())
+                            if survey_meta:
+                                ahp_model = survey_meta.get("AHP_Model_JSON", {})
+                                demographics = survey_meta.get("Demographics", {})
+                                rewards_info = survey_meta.get("Rewards_Info", {})
+                                tier_level = str(survey_meta.get("Tier_Level", "2"))
+                                
+                                raw_headers = ["ID", "Type"]
+                                main_criteria = ahp_model.get("main", [])
+                                for i in range(len(main_criteria)):
+                                    for j in range(i + 1, len(main_criteria)):
+                                        raw_headers.append(f"{main_criteria[i]}_{main_criteria[j]}")
+                                sub_criteria_map = ahp_model.get("subs", {})
+                                for main_c in main_criteria:
+                                    subs = sub_criteria_map.get(main_c, [])
+                                    if len(subs) >= 2:
+                                        for i in range(len(subs)):
+                                            for j in range(i + 1, len(subs)):
+                                                raw_headers.append(f"{subs[i]}_{subs[j]}")
+                                if tier_level == "3":
+                                    sub_sub_map = ahp_model.get("sub_subs", {})
+                                    for main_c in main_criteria:
+                                        subs = sub_criteria_map.get(main_c, [])
+                                        for sub_c in subs:
+                                            sub_subs = sub_sub_map.get(sub_c, [])
+                                            if len(sub_subs) >= 2:
+                                                for i in range(len(sub_subs)):
+                                                    for j in range(i + 1, len(sub_subs)):
+                                                        raw_headers.append(f"{sub_subs[i]}_{sub_subs[j]}")
+                                raw_headers.append("제출시간")
+                                
+                                demo_headers = ["ID", "Type"]
+                                if demographics.get("name"): demo_headers.append("성명")
+                                if demographics.get("age"): demo_headers.append("연령")
+                                if demographics.get("gender"): demo_headers.append("성별")
+                                if demographics.get("experience"): demo_headers.append("경력년수")
+                                # if demographics.get("affiliation"): demo_headers.append("소속")
+                                if demographics.get("email"): demo_headers.append("이메일")
+                                demo_headers.append("사전순위지정")
+                                if rewards_info.get("enabled"):
+                                    demo_headers.append("경품연락처" if tier_level == "3" else "답례품_연락처")
+                                demo_headers.append("제출시간")
+
+                            df_raw_backup = pd.DataFrame(recovered_raw_rows)
+                            if raw_headers and len(raw_headers) == len(df_raw_backup.columns):
+                                df_raw_backup.columns = raw_headers
+                            elif raw_headers and len(raw_headers) > len(df_raw_backup.columns):
+                                df_raw_backup.columns = raw_headers[:len(df_raw_backup.columns)]
+                                
+                            df_demo_backup = None
+                            if recovered_demo_rows:
+                                df_demo_backup = pd.DataFrame(recovered_demo_rows)
+                                if demo_headers and len(demo_headers) == len(df_demo_backup.columns):
+                                    df_demo_backup.columns = demo_headers
+                                elif demo_headers and len(demo_headers) > len(df_demo_backup.columns):
+                                    df_demo_backup.columns = demo_headers[:len(df_demo_backup.columns)]
+
+                            # Excel로 백업 데이터를 템플릿 구조에 맞춰 분할하여 다운로드
+                            if survey_meta and "AHP_Model_JSON" in survey_meta:
+                                excel_backup_buffer = export_to_template_excel(df_raw_backup, df_demo_backup, survey_meta["AHP_Model_JSON"], survey_meta.get("Tier_Level", 2))
+                            else:
+                                excel_backup_buffer = io.BytesIO()
+                                with pd.ExcelWriter(excel_backup_buffer, engine='openpyxl') as writer:
+                                    df_raw_backup.to_excel(writer, index=False, header=bool(raw_headers), sheet_name='Raw_Data')
+                                    if df_demo_backup is not None:
+                                        df_demo_backup.to_excel(writer, index=False, header=bool(demo_headers), sheet_name='Demographic_Data')
+
+                            col_b_dl1, col_b_dl2 = st.columns(2)
+                            with col_b_dl1:
+                                st.download_button(
+                                    "📥 로컬 백업 Excel 다운로드 (.xlsx)",
+                                    data=excel_backup_buffer.getvalue(),
+                                    file_name=f"Backup_Recovery_{selected_sheet_id.strip()[:6]}.xlsx",
+                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                    use_container_width=True,
+                                    type="primary"
+                                )
+
+                            with col_b_dl2:
+                                # CSV 파일 형태로 복구 파일 내보내기 (Raw_Data 우선)
+                                output_csv = io.StringIO()
+                                df_raw_backup.to_csv(output_csv, index=False, header=bool(raw_headers))
+                                st.download_button(
+                                    "📥 로컬 백업 Raw_Data CSV 다운로드 (.csv)",
+                                    data=output_csv.getvalue().encode('utf-8-sig'),
+                                    file_name=f"Backup_Recovery_Raw_{selected_sheet_id.strip()[:6]}.csv",
+                                    mime="text/csv",
+                                    use_container_width=True
+                                )
+                else:
+                    st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
+            except Exception as err:
+                st.caption(f"로컬 백업 조회 불가: {err}")
+
+    with main_tab_pricing:
+        st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
+
+        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+        
+        if st.session_state.lang == 'en':
+            # 1 Month
+            with col_p1:
+                inner_1 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$185 USD</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for small-scale projects aiming for reliable results using standard AHP methodology.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>Standard AHP features</b></li>
+                        <li><b>Unlimited sample size</b></li>
+                        <li>Unlimited project creation</li>
+                        <li>Standard email support</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Basic (2 Months)", 185.0, 2, inner_html=inner_1, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Basic (2 Months)", inner_html=inner_1, is_best=False, lang="en"), height=520)
+
+            # 3 Months
+            with col_p2:
+                inner_3 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$330 USD</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for professional research requiring precise conclusions through demographic group-difference analysis.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>Includes Advanced Cross-Statistical Analysis (T-Test, ANOVA)</b></li>
+                        <li><b>Unlimited sample size</b></li>
+                        <li>Unlimited project creation</li>
+                        <li>Standard email support</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Standard (2 Months)", 330.0, 2, inner_html=inner_3, is_best=True), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Standard (2 Months)", inner_html=inner_3, is_best=True, lang="en"), height=520)
+
+            # 6 Months
+            with col_p3:
+                inner_6 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$700 USD</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for research institutions and top-tier academic journals requiring advanced Fuzzy AHP analysis and priority support.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>Includes Fuzzy AHP</b></li>
+                        <li>Advanced cross-statistical analysis (T-Test, ANOVA)</li>
+                        <li>Unlimited sample size & projects</li>
+                        <li>Priority tech/bug support</li>
+                        <li><b>1 Free survey setup proxy</b></li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Pro (2 Months)", 700.0, 2, inner_html=inner_6, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Pro (2 Months)", inner_html=inner_6, is_best=False, lang="en"), height=520)
+
+            # Proxy Services (PayPal)
+            with col_p4:
+                st.components.v1.html(get_paypal_custom_services_html(st.session_state.user_id), height=520)
+        else:
+            # 1개월
+            with col_p1:
+                inner_1 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>350,000</span>원</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>일반 AHP 기능 제공</b></li>
+                        <li><b>표본수 무제한</b></li>
+                        <li>프로젝트 생성 무제한</li>
+                        <li>일반 이메일 지원</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 350000, 2, inner_html=inner_1, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
+
+            # 3개월
+            with col_p2:
+                inner_3 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
+                        <li><b>표본수 무제한</b></li>
+                        <li>프로젝트 생성 무제한</li>
+                        <li>일반 이메일 지원</li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
+
+            # 6개월
+            with col_p3:
+                inner_6 = """
+                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
+                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
+                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
+                    <hr style='margin: 10px 0;'>
+                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                        <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
+                        <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
+                        <li>표본수 무제한 및 프로젝트 무제한</li>
+                        <li>최우선 기술/오류 지원</li>
+                        <li><b>설문 셋팅 1회 무료 대행</b></li>
+                    </ul>
+                """
+                if st.session_state.user_id:
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (2개월)", 950000, 2, inner_html=inner_6, is_best=False), height=520)
+                else:
+                    st.components.v1.html(get_login_redirect_html("Pro (2개월)", inner_html=inner_6, is_best=False), height=520)
+
+            # 부가 서비스 대행
+            with col_p4:
+                st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
+            
+        st.markdown("<br><br>", unsafe_allow_html=True)
+
+    with main_tab_consulting:
+        st.header(_("분석 문의 및 컨설팅 신청", "Analysis Inquiry & Consulting Application"))
+        
+        # 안내 문구 및 전화번호
+        st.markdown(
+            _("""
+            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                <span>✨</span> 전문 분석 및 AHP/통계 컨설팅 문의
+              </h4>
+              <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
+                학위논문, 연구보고서, 리서치 프로젝트 등 AHP 및 통계 분석에 대한 전문적인 컨설팅을 제공해 드립니다.
+              </p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #1e293b;">📞 전화번호: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                <div style="font-weight: 600; color: #1e293b;">💬 카카오톡 ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
+              </div>
+              <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
+                💡 궁금하신 사항은 전화, 카카오톡 또는 아래 문의 폼을 통해 편하게 연락주시면 신속하게 안내해 드리겠습니다.
+              </div>
+            </div>
+            """, """
+            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
+              <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                <span>✨</span> Professional AHP & Statistical Consulting
+              </h4>
+              <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
+                We provide professional consultation on AHP and statistical analysis for academic theses, research reports, and market research.
+              </p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #1e293b;">📞 Phone: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                <div style="font-weight: 600; color: #1e293b;">💬 KakaoTalk ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
+              </div>
+              <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
+                💡 Please feel free to call us, find KakaoTalk ID, or submit the form below. We will get back to you shortly.
+              </div>
+            </div>
+            """),
+            unsafe_allow_html=True
+        )
+        
+        with st.form(key="consulting_inquiry_form"):
+            c_name = st.text_input(_("성함 (필수)", "Name (Required)"), key="c_name")
+            c_company = st.text_input(_("소속 기관/회사/학교 (선택)", "Organization/Company/School (Optional)"), key="c_company")
+            c_phone = st.text_input(_("연락처 (선택)", "Contact Number (Optional)"), key="c_phone", placeholder="010-1234-5678")
+            c_email = st.text_input(
+                _("답변 받으실 이메일 (필수)", "Email to Receive Answer (Required)"), 
+                value=st.session_state.get('user_id', '') if st.session_state.get('user_id') else '',
+                key="c_email"
+            )
+            
+            c_type = st.selectbox(
+                _("문의 유형 선택 (필수)", "Select Inquiry Type (Required)"),
+                [
+                    _("AHP 분석 및 컨설팅", "AHP Analysis & Consulting"),
+                    _("Fuzzy AHP 분석 및 컨설팅", "Fuzzy AHP Analysis & Consulting"),
+                    _("AHP 온라인 설문 셋팅 대행", "AHP Online Survey Setup Agency"),
+                    _("일관성(CR) 오류 보정 및 조정", "Consistency Ratio (CR) Error Correction"),
+                    _("기타 분석 및 통계 관련 문의", "Other Statistical / Analysis Inquiries")
+                ],
+                key="c_type"
+            )
+            
+            c_details = st.text_area(
+                _("상세 문의 내용 (필수)", "Detailed Inquiry (Required)"),
+                placeholder=_("분석 목적, 표본 수, 모형의 계층 구조 등 구체적인 내용을 기재해 주시면 더 정확하고 빠른 상담이 가능합니다.",
+                             "Please describe your project details, sample size, or structure for a faster response."),
+                key="c_details"
+            )
+            
+            c_file = st.file_uploader(
+                _("관련 참고 파일 첨부 (선택, 최대 10MB)", "Attach Reference File (Optional, Max 10MB)"), 
+                type=["xlsx", "xls", "pdf", "docx", "zip", "png", "jpg"],
+                key="c_file"
+            )
+            
+            c_submit = st.form_submit_button(_("문의하기", "Submit Inquiry"), use_container_width=True)
+            
+            if c_submit:
+                if not c_name.strip():
+                    st.error(_("성함을 입력해 주세요.", "Please enter your name."))
+                elif not c_email.strip():
+                    st.error(_("이메일 주소를 입력해 주세요.", "Please enter your email address."))
+                elif not validate_email(c_email.strip()):
+                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                elif not c_details.strip():
+                    st.error(_("상세 문의 내용을 입력해 주세요.", "Please enter the detailed inquiry."))
+                else:
+                    with st.spinner(_("문의 내용을 전송하는 중...", "Submitting inquiry...")):
+                        success = send_consulting_email(
+                            name=c_name.strip(),
+                            company=c_company.strip(),
+                            email=c_email.strip(),
+                            phone=c_phone.strip(),
+                            inquiry_type=c_type,
+                            details=c_details.strip(),
+                            uploaded_file=c_file
+                        )
+                        if success:
+                            st.success(_("문의 신청이 성공적으로 접수되었습니다. 담당자가 확인 후 신속하게 연락해 드리겠습니다.", 
+                                         "Your inquiry has been submitted successfully. We will get back to you shortly."))
+                        else:
+                            st.error(_("문의 메일 전송 중 오류가 발생했습니다. 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.", 
+                                       "An error occurred while sending the email. Please contact jeon080423@gmail.com directly."))
+
+    with main_tab_signup:
+        if st.session_state.user_id:
+            st.info(_("이미 로그인되어 있습니다.", "You are already logged in."))
+        else:
+            agreements = show_agreement_ui()
+            s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
+            s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
+            
+            s_cust_type = st.radio(
+                _("서비스 구분", "Service Type"),
+                options=["standard", "yeta"],
+                format_func=lambda x: _("일반/학술 분석용 AHP 마스터", "Standard AHP Master") if x == "standard" else _("예비타당성조사 종합평가(AHP) 분석기", "YETA AHP Analyzer"),
+                key="main_s_cust_type"
+            )
+            
+            if st.button(_("가입신청", "Register"), key="main_btn_signup"):
+                if not agreements.get("agree_personal_info"):
+                    st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
+                elif not validate_email(s_id):
+                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                elif not validate_password(s_pw):
+                    st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                else:
+                    restore_from_deleted_sheet(s_id.strip())
+                    # 가입 시 무조건 'temp' 권한으로 배정
+                    if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                        st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
+                        import time
+                        time.sleep(2)
+                        st.rerun()
+                    else:
+                        st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+
+    st.markdown("---")
+    st.caption("© 2026 AHP Master. All rights reserved.")
+
+
 
     # =========================================================================
     # TAB 3: Guidelines Guide
