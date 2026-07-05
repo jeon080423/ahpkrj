@@ -2447,20 +2447,37 @@ def run():
                 st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
                 
                 st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('B. 1계층 상수합 가중치 (%)', 'B. Level 1 Weights (%)')}</div>", unsafe_allow_html=True)
-                if "rnd" in p_type:
-                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 30) / 100.0
-                    tech_w = st.slider(_("과학기술적 타당성", "Science/Tech Weight"), 0, 100, 45) / 100.0
-                    policy_w = st.slider(_("정책적 타당성", "Policy Weight"), 0, 100, 25) / 100.0
+                if p_type == "rnd_bc":
+                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 45) / 100.0
+                    tech_w = st.slider(_("과학기술적 타당성", "Science/Tech Weight"), 0, 100, 35) / 100.0
+                    policy_w = st.slider(_("정책적 타당성", "Policy Weight"), 0, 100, 20) / 100.0
                     regional_w = 0.0
-                else:
-                    tech_w = 0.0
+                elif p_type == "rnd_ec":
                     econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 35) / 100.0
+                    tech_w = st.slider(_("과학기술적 타당성", "Science/Tech Weight"), 0, 100, 45) / 100.0
+                    policy_w = st.slider(_("정책적 타당성", "Policy Weight"), 0, 100, 20) / 100.0
+                    regional_w = 0.0
+                elif p_type == "construction_capital":
+                    tech_w = 0.0
+                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 65) / 100.0
                     policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 35) / 100.0
-                    if has_regional:
-                        regional_w = st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 30) / 100.0
-                    else:
-                        regional_w = 0.0
-                        st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 0, disabled=True)
+                    regional_w = 0.0
+                    st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 0, disabled=True)
+                elif p_type == "other_bc":
+                    tech_w = 0.0
+                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 40) / 100.0
+                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 60) / 100.0
+                    regional_w = 0.0
+                elif p_type == "other_ec":
+                    tech_w = 0.0
+                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 30) / 100.0
+                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 70) / 100.0
+                    regional_w = 0.0
+                else: # construction_non_capital
+                    tech_w = 0.0
+                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 40) / 100.0
+                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 30) / 100.0
+                    regional_w = st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 30) / 100.0
 
                 valid_w, w_msg = yeta_utils.validate_yeta_level1_weights(p_type, econ_w, policy_w, regional_w, tech_w)
                 if valid_w:
