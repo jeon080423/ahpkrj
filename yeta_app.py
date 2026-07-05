@@ -129,8 +129,6 @@ def num_to_kor(num):
     return f"일금 {kor}원정"
 
 def get_quotation_html(client_name, project_name, amount, plan_name):
-    import datetime
-    import base64
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
     today_str = today.strftime("%Y년 %m월 %d일")
     kor_amount = num_to_kor(amount)
@@ -403,7 +401,6 @@ def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is
 
 def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=300000, months=2, inner_html="", is_best=False):
     import hashlib
-    import datetime
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
     safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
     
@@ -3740,7 +3737,6 @@ def run():
                     # 가입 시 무조건 'temp' 권한으로 배정
                     if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
                         st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
-                        import time
                         time.sleep(2)
                         st.rerun()
                     else:
