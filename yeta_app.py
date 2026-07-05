@@ -2568,14 +2568,21 @@ def run():
                 ex_p_type = excel_project_type[0]
                 
                 st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
-                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('모델별 가중치 평가 항목 구성', 'Model Weight Factor Structure')}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('2계층 평가 요인 커스터마이징', 'Customize Level 2 Factors')}</div>", unsafe_allow_html=True)
+                st.caption(_("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요.", "Enter sub-factors separated by commas according to the project characteristics."))
                 
+                policy_input = st.text_input(_("정책성 하위 요인", "Policy Factors"), value="정책의 일관성, 사업추진상의 위험요인")
+                policy_factors = [x.strip() for x in policy_input.split(",") if x.strip()]
+                
+                regional_factors = []
+                if "non_capital" in ex_p_type or "other" in ex_p_type:
+                    reg_input = st.text_input(_("지역균형 하위 요인", "Regional Factors"), value="지역경제 파급효과, 지역개발계획과의 부합성")
+                    regional_factors = [x.strip() for x in reg_input.split(",") if x.strip()]
+                    
+                tech_factors = []
                 if "rnd" in ex_p_type:
-                    st.info("📊 1계층: 경제성, 과학기술적 타당성, 정책적 타당성")
-                elif "capital" in ex_p_type and "non" not in ex_p_type:
-                    st.info("📊 1계층: 경제성, 정책성")
-                else:
-                    st.info("📊 1계층: 경제성, 정책성, 지역균형발전")
+                    tech_input = st.text_input(_("기술성 하위 요인", "Tech Factors"), value="기술개발계획의 적절성, 기술개발 성공가능성, 중복성")
+                    tech_factors = [x.strip() for x in tech_input.split(",") if x.strip()]
 
         with ex_main_col:
             with st.container(border=True):
@@ -2591,7 +2598,7 @@ def run():
                 """, unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
-                template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type)
+                template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type, policy_factors, regional_factors, tech_factors)
                 st.download_button(
                     label=_("👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)", "👉 Download Custom Yeta AHP Excel Template (.xlsx)"),
                     data=template_bytes,
