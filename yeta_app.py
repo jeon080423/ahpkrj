@@ -851,9 +851,8 @@ def run():
                 q_tier = st.selectbox(
                     _("서비스 구분 (요금제)", "Pricing Plan Tier"),
                     options=[
-                        (_("월간 이용권 (190,000원)", "Monthly Plan (190,000 KRW)"), 190000, "월간 이용권"),
-                        (_("연간 이용권 (1,200,000원)", "Annual Plan (1,200,000 KRW)"), 1200000, "연간 이용권"),
-                        (_("기관 라이선스 (3,000,000원)", "Enterprise License (3,000,000 KRW)"), 3000000, "기관 라이선스")
+                        (_("월간 이용권 (300,000원)", "Monthly Plan (300,000 KRW)"), 300000, "월간 이용권"),
+                        (_("연간 이용권 (2,800,000원)", "Annual Plan (2,800,000 KRW)"), 2800000, "연간 이용권")
                     ],
                     format_func=lambda x: x[0],
                     key="q_tier_select_yeta"
@@ -928,9 +927,8 @@ def run():
                 t_tier = st.selectbox(
                     _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
                     options=[
-                        (_("월간 이용권 (190,000원)", "Monthly Plan (190,000 KRW)"), "월간 이용권"),
-                        (_("연간 이용권 (1,200,000원)", "Annual Plan (1,200,000 KRW)"), "연간 이용권"),
-                        (_("기관 라이선스 (3,000,000원)", "Enterprise License (3,000,000 KRW)"), "기관 라이선스")
+                        (_("월간 이용권 (300,000원)", "Monthly Plan (300,000 KRW)"), "월간 이용권"),
+                        (_("연간 이용권 (2,800,000원)", "Annual Plan (2,800,000 KRW)"), "연간 이용권")
                     ],
                     format_func=lambda x: x[0],
                     key="t_tier_select_yeta"
@@ -2513,7 +2511,7 @@ def run():
     with tab_pricing:
         st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
 
-        col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(5)
+        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         user_id = st.session_state.get("user_id")
 
         # 1. 무료 체험판
@@ -2541,7 +2539,7 @@ def run():
             inner_2 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Standard] 월간 이용권</h3>
                 <span style='color: #888; font-size: 1.1rem;'>1개월 무제한 이용</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>190,000</span>원</h2>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>300,000</span>원</h2>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>1개월 동안 평가자 수·분석 횟수 제한 없이 예타 AHP 전체 기능을 자유롭게 이용할 수 있습니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -2553,7 +2551,7 @@ def run():
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Standard] 월간 이용권", 190000, 1, inner_html=inner_2, is_best=False), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Standard] 월간 이용권", 300000, 1, inner_html=inner_2, is_best=False), height=520)
             else:
                 st.components.v1.html(get_yeta_login_redirect_html("[Standard] 월간 이용권", inner_html=inner_2, is_best=False), height=520)
 
@@ -2562,45 +2560,24 @@ def run():
             inner_3 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Pro] 연간 이용권</h3>
                 <span style='color: #888; font-size: 1.1rem;'>1년 무제한 이용</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,200,000원</h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>월간 대비 47% 절감된 비용으로 1년간 횟수 제한 없이 예타 AHP 분석과 설문 배포를 수행합니다.</p>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,800,000원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>월간 대비 22% 절감된 비용으로 1년간 횟수 제한 없이 예타 AHP 분석과 설문 배포를 수행합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                     <li><b>1년간 분석 횟수 무제한</b></li>
-                    <li><b>월 100,000원 수준 (47% 절감)</b></li>
+                    <li><b>월 약 233,000원 수준 (22% 절감)</b></li>
                     <li>무제한 전문가 설문 및 아웃라이어 연산</li>
                     <li>B2B 기업용 견적서/세금계산서 발행</li>
                     <li>연구팀 통합 데이터베이스 제공</li>
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Pro] 연간 이용권", 1200000, 12, inner_html=inner_3, is_best=True), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Pro] 연간 이용권", 2800000, 12, inner_html=inner_3, is_best=True), height=520)
             else:
                 st.components.v1.html(get_yeta_login_redirect_html("[Pro] 연간 이용권", inner_html=inner_3, is_best=True), height=520)
 
-        # 4. [Enterprise] 기관 라이선스
+        # 4. 부가 서비스 대행
         with col_p4:
-            inner_4 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Enterprise] 기관 라이선스</h3>
-                <span style='color: #888; font-size: 1.1rem;'>1년 다중 사용자</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>3,000,000원</h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기관/연구원 전체 임직원이 1년 동안 횟수 제한 없이 예타 AHP 분석과 전문가 배포 설문을 수행합니다.</p>
-                <hr style='margin: 10px 0;'>
-                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>1년간 다중 사용자 무제한 이용</b></li>
-                    <li><b>커스텀 도메인 및 기관 전용 DB 구축</b></li>
-                    <li>무제한 전문가 설문 및 아웃라이어 연산</li>
-                    <li>B2B 기업용 견적서 즉시 발행</li>
-                    <li>우선 기술 지원 및 교육 제공</li>
-                </ul>
-            """
-            if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Enterprise] 기관 라이선스", 3000000, 12, inner_html=inner_4, is_best=False), height=520)
-            else:
-                st.components.v1.html(get_yeta_login_redirect_html("[Enterprise] 기관 라이선스", inner_html=inner_4, is_best=False), height=520)
-
-        # 5. 부가 서비스 대행
-        with col_p5:
             if user_id:
                 st.components.v1.html(get_yeta_portone_custom_services_html(user_id), height=520)
             else:
@@ -2625,7 +2602,7 @@ def run():
                 address = st.text_input("사업장 주소", key="tax_address")
                 biz_type = st.text_input("업태 및 종목", key="tax_biz_type")
                 email = st.text_input("세금계산서 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
-                plan_choice = st.selectbox("선택 요금제 플랜", ["월간 이용권 (190,000원)", "연간 이용권 (1,200,000원)", "기관 라이선스 (3,000,000원)"])
+                plan_choice = st.selectbox("선택 요금제 플랜", ["월간 이용권 (300,000원)", "연간 이용권 (2,800,000원)"])
                 
                 submit_tax = st.form_submit_button("세금계산서/인보이스 발행 요청", use_container_width=True)
                 if submit_tax:
