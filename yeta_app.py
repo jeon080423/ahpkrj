@@ -1979,156 +1979,6 @@ def run():
     </div>
     """, unsafe_allow_html=True)
 
-    # --- ADMIN MODE INTERCEPTOR ---
-    if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
-        st.subheader(_("👥 가입자 현황 및 관리 (예타 전용 뷰)", "Registered Users & Admin Control (YETA View)"))
-        
-        col_sync1, col_sync2 = st.columns([2, 8])
-        with col_sync1:
-            if st.button("🔄 구글 시트와 동기화"):
-                with st.spinner("구글 시트 데이터 불러오는 중..."):
-                    sync_count = sync_db_from_sheets()
-                if sync_count >= 0:
-                    st.success(f"🎉 동기화 완료! (보정 및 복구된 데이터: {sync_count}건)")
-                    st.rerun()
-                else:
-                    st.error("동기화 중 오류가 발생했습니다. 화면상의 에러 메시지를 확인해 주세요.")
-
-        try:
-            spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
-            visit_data_gs = get_cached_visit_logs(spreadsheet_id) if spreadsheet_id else []
-            if not visit_data_gs:
-                try:
-                    conn = sqlite3.connect('users.db')
-                    df_local = pd.read_sql_query("SELECT ip_address as IP, visit_date as Date FROM visit_logs", conn)
-                    conn.close()
-                    if not df_local.empty:
-                        df_local['Country'] = ""
-                        df_local['Region'] = ""
-                        df_local['City'] = ""
-                        df_local['Latitude'] = ""
-                        df_local['Longitude'] = ""
-                        visit_data_gs = df_local.to_dict(orient='records')
-                except Exception:
-                    pass
-            
-            daily_df_logs = pd.DataFrame(visit_data_gs)
-            if not daily_df_logs.empty:
-                daily_df_logs['Date_Only'] = daily_df_logs['Date'].astype(str).str[:10]
-                daily_df_counts = daily_df_logs.groupby('Date_Only').size().reset_index(name='count')
-                total_visits = len(daily_df_logs)
-                
-                st.write(f"**누적 방문자:** {total_visits:,}명")
-                st.write("#### 📅 일별 방문자 현황")
-                fig_visit = px.bar(daily_df_counts, x='Date_Only', y='count', text='count',
-                                    labels={'Date_Only': '날짜', 'count': '방문자 수'})
-                fig_visit.update_traces(textposition='outside')
-                fig_visit.update_layout(xaxis_title="날짜", yaxis_title="방문자 수", showlegend=False, xaxis={'type': 'category'})
-                st.plotly_chart(fig_visit, use_container_width=True)
-            else:
-                st.info("방문 기록이 없습니다.")
-        except Exception as e:
-            st.error(f"통계 오류: {e}")
-            
-        st.divider()
-        st.write("### 👥 가입자 현황 및 최종 배포 링크")
-        
-        users_df = get_all_users()
-        if 'survey_count' not in users_df.columns:
-            users_df['survey_count'] = 0
-        if 'last_survey_link' not in users_df.columns:
-            users_df['last_survey_link'] = ""
-        users_df['survey_count'] = pd.to_numeric(users_df['survey_count'].fillna(0)).astype(int)
-        
-        display_df = users_df[['id', 'role', 'signup_date', 'pw', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info', 'customer_type']].copy()
-        st.dataframe(
-            display_df,
-            column_config={
-                "id": "회원 ID",
-                "role": "권한",
-                "signup_date": "가입일",
-                "pw": "비밀번호",
-                "survey_count": "배포 횟수",
-                "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
-                "expiry_date": "만료일",
-                "agree_info": "동의여부",
-                "customer_type": "고객군"
-            },
-            hide_index=True,
-            use_container_width=True
-        )
-
-        with st.expander("회원 정보 수정 (비밀번호 초기화 포함)"):
-            edit_id = st.selectbox("수정할 회원 ID", users_df['id'].unique())
-            selected_user = users_df[users_df['id'] == edit_id].iloc[0]
-            new_role_val = st.selectbox("권한 변경", ['temp', 'official', 'admin'], 
-                                    index=['temp', 'official', 'admin'].index(selected_user['role']))
-            
-            if new_role_val == 'official' and selected_user['role'] != 'official':
-                new_expiry_val_default = str(datetime.date.today() + datetime.timedelta(days=60))
-            else:
-                new_expiry_val_default = selected_user['expiry_date']
-                
-            new_expiry_val = st.text_input("만료일 설정/변경 (YYYY-MM-DD)", value=new_expiry_val_default)
-            new_pw_edit = st.text_input("새 비밀번호 (입력 시 변경됨)", type="password", placeholder="변경하지 않으려면 비워두세요")
-            
-            col_admin_act1, col_admin_act2 = st.columns(2)
-            with col_admin_act1:
-                if st.button("정보 수정 적용", use_container_width=True):
-                    update_user_full_info(edit_id, new_pw_edit, new_role_val, new_expiry_val)
-                    if new_role_val == 'official' and selected_user['role'] != 'official':
-                        send_approval_email(edit_id)
-                    st.success(f"{edit_id} 회원의 정보가 수정되었습니다.")
-                    st.rerun()
-            with col_admin_act2:
-                if st.button("🔑 이 계정으로 로그인", use_container_width=True, type="secondary"):
-                    st.session_state.user_id = edit_id
-                    st.session_state.user_role = selected_user['role']
-                    st.session_state.expiry_date = selected_user['expiry_date']
-                    st.session_state.admin_mode = False
-                    st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
-                    st.rerun()
-
-        with st.expander("회원 삭제"):
-            del_id = st.selectbox("삭제할 회원 ID 선택", users_df['id'].unique(), key='del_user_select')
-            if st.button("선택한 회원 삭제"):
-                if del_id == st.session_state.user_id:
-                    st.error("본인은 삭제할 수 없습니다.")
-                else:
-                    delete_user(del_id)
-                    st.success("삭제 완료")
-                    st.rerun()
-
-        with st.expander("🎁 학위논문 할인 이벤트 설정 및 제어"):
-            event_cfg = get_event_settings()
-            new_active = st.checkbox("이벤트 활성화 여부", value=event_cfg["active"], key="admin_event_active")
-            new_title = st.text_input("이벤트 제목", value=event_cfg["title"], key="admin_event_title")
-            new_desc = st.text_area("이벤트 내용/설명", value=event_cfg["desc"], key="admin_event_desc")
-            
-            try:
-                default_deadline_date = datetime.datetime.strptime(event_cfg["deadline"], "%Y-%m-%d").date()
-            except Exception:
-                default_deadline_date = datetime.date(2026, 7, 30)
-            new_deadline_date = st.date_input("이벤트 종료일", value=default_deadline_date, key="admin_event_deadline")
-            new_deadline_str = str(new_deadline_date)
-            new_discount = st.number_input("할인 금액 (원)", min_value=0, max_value=500000, value=event_cfg["discount"], step=5000, key="admin_event_discount")
-            
-            if st.button("이벤트 설정 저장", use_container_width=True):
-                conn = sqlite3.connect('users.db')
-                c = conn.cursor()
-                try:
-                    c.execute("UPDATE event_settings SET event_active=?, event_title=?, event_desc=?, event_deadline=?, event_discount=? WHERE id=1",
-                              (1 if new_active else 0, new_title, new_desc, new_deadline_str, int(new_discount)))
-                    conn.commit()
-                    st.success("🎉 이벤트 설정이 성공적으로 저장되었습니다!")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"설정 저장 실패: {e}")
-                finally:
-                    conn.close()
-
-        st.stop()
-
     # 6. Sidebar Configuration (Authentication & Yeta Settings)
     with st.sidebar:
         # AHP Master Logo
@@ -2398,6 +2248,156 @@ def run():
                                 conn.close()
                                 
     # 7. Navigation Tabs
+    # --- ADMIN MODE INTERCEPTOR ---
+    if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
+        st.subheader(_("👥 가입자 현황 및 관리 (예타 전용 뷰)", "Registered Users & Admin Control (YETA View)"))
+        
+        col_sync1, col_sync2 = st.columns([2, 8])
+        with col_sync1:
+            if st.button("🔄 구글 시트와 동기화"):
+                with st.spinner("구글 시트 데이터 불러오는 중..."):
+                    sync_count = sync_db_from_sheets()
+                if sync_count >= 0:
+                    st.success(f"🎉 동기화 완료! (보정 및 복구된 데이터: {sync_count}건)")
+                    st.rerun()
+                else:
+                    st.error("동기화 중 오류가 발생했습니다. 화면상의 에러 메시지를 확인해 주세요.")
+
+        try:
+            spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+            visit_data_gs = get_cached_visit_logs(spreadsheet_id) if spreadsheet_id else []
+            if not visit_data_gs:
+                try:
+                    conn = sqlite3.connect('users.db')
+                    df_local = pd.read_sql_query("SELECT ip_address as IP, visit_date as Date FROM visit_logs", conn)
+                    conn.close()
+                    if not df_local.empty:
+                        df_local['Country'] = ""
+                        df_local['Region'] = ""
+                        df_local['City'] = ""
+                        df_local['Latitude'] = ""
+                        df_local['Longitude'] = ""
+                        visit_data_gs = df_local.to_dict(orient='records')
+                except Exception:
+                    pass
+            
+            daily_df_logs = pd.DataFrame(visit_data_gs)
+            if not daily_df_logs.empty:
+                daily_df_logs['Date_Only'] = daily_df_logs['Date'].astype(str).str[:10]
+                daily_df_counts = daily_df_logs.groupby('Date_Only').size().reset_index(name='count')
+                total_visits = len(daily_df_logs)
+                
+                st.write(f"**누적 방문자:** {total_visits:,}명")
+                st.write("#### 📅 일별 방문자 현황")
+                fig_visit = px.bar(daily_df_counts, x='Date_Only', y='count', text='count',
+                                    labels={'Date_Only': '날짜', 'count': '방문자 수'})
+                fig_visit.update_traces(textposition='outside')
+                fig_visit.update_layout(xaxis_title="날짜", yaxis_title="방문자 수", showlegend=False, xaxis={'type': 'category'})
+                st.plotly_chart(fig_visit, use_container_width=True)
+            else:
+                st.info("방문 기록이 없습니다.")
+        except Exception as e:
+            st.error(f"통계 오류: {e}")
+            
+        st.divider()
+        st.write("### 👥 가입자 현황 및 최종 배포 링크")
+        
+        users_df = get_all_users()
+        if 'survey_count' not in users_df.columns:
+            users_df['survey_count'] = 0
+        if 'last_survey_link' not in users_df.columns:
+            users_df['last_survey_link'] = ""
+        users_df['survey_count'] = pd.to_numeric(users_df['survey_count'].fillna(0)).astype(int)
+        
+        display_df = users_df[['id', 'role', 'signup_date', 'pw', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info', 'customer_type']].copy()
+        st.dataframe(
+            display_df,
+            column_config={
+                "id": "회원 ID",
+                "role": "권한",
+                "signup_date": "가입일",
+                "pw": "비밀번호",
+                "survey_count": "배포 횟수",
+                "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
+                "expiry_date": "만료일",
+                "agree_info": "동의여부",
+                "customer_type": "고객군"
+            },
+            hide_index=True,
+            use_container_width=True
+        )
+
+        with st.expander("회원 정보 수정 (비밀번호 초기화 포함)"):
+            edit_id = st.selectbox("수정할 회원 ID", users_df['id'].unique())
+            selected_user = users_df[users_df['id'] == edit_id].iloc[0]
+            new_role_val = st.selectbox("권한 변경", ['temp', 'official', 'admin'], 
+                                    index=['temp', 'official', 'admin'].index(selected_user['role']))
+            
+            if new_role_val == 'official' and selected_user['role'] != 'official':
+                new_expiry_val_default = str(datetime.date.today() + datetime.timedelta(days=60))
+            else:
+                new_expiry_val_default = selected_user['expiry_date']
+                
+            new_expiry_val = st.text_input("만료일 설정/변경 (YYYY-MM-DD)", value=new_expiry_val_default)
+            new_pw_edit = st.text_input("새 비밀번호 (입력 시 변경됨)", type="password", placeholder="변경하지 않으려면 비워두세요")
+            
+            col_admin_act1, col_admin_act2 = st.columns(2)
+            with col_admin_act1:
+                if st.button("정보 수정 적용", use_container_width=True):
+                    update_user_full_info(edit_id, new_pw_edit, new_role_val, new_expiry_val)
+                    if new_role_val == 'official' and selected_user['role'] != 'official':
+                        send_approval_email(edit_id)
+                    st.success(f"{edit_id} 회원의 정보가 수정되었습니다.")
+                    st.rerun()
+            with col_admin_act2:
+                if st.button("🔑 이 계정으로 로그인", use_container_width=True, type="secondary"):
+                    st.session_state.user_id = edit_id
+                    st.session_state.user_role = selected_user['role']
+                    st.session_state.expiry_date = selected_user['expiry_date']
+                    st.session_state.admin_mode = False
+                    st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
+                    st.rerun()
+
+        with st.expander("회원 삭제"):
+            del_id = st.selectbox("삭제할 회원 ID 선택", users_df['id'].unique(), key='del_user_select')
+            if st.button("선택한 회원 삭제"):
+                if del_id == st.session_state.user_id:
+                    st.error("본인은 삭제할 수 없습니다.")
+                else:
+                    delete_user(del_id)
+                    st.success("삭제 완료")
+                    st.rerun()
+
+        with st.expander("🎁 학위논문 할인 이벤트 설정 및 제어"):
+            event_cfg = get_event_settings()
+            new_active = st.checkbox("이벤트 활성화 여부", value=event_cfg["active"], key="admin_event_active")
+            new_title = st.text_input("이벤트 제목", value=event_cfg["title"], key="admin_event_title")
+            new_desc = st.text_area("이벤트 내용/설명", value=event_cfg["desc"], key="admin_event_desc")
+            
+            try:
+                default_deadline_date = datetime.datetime.strptime(event_cfg["deadline"], "%Y-%m-%d").date()
+            except Exception:
+                default_deadline_date = datetime.date(2026, 7, 30)
+            new_deadline_date = st.date_input("이벤트 종료일", value=default_deadline_date, key="admin_event_deadline")
+            new_deadline_str = str(new_deadline_date)
+            new_discount = st.number_input("할인 금액 (원)", min_value=0, max_value=500000, value=event_cfg["discount"], step=5000, key="admin_event_discount")
+            
+            if st.button("이벤트 설정 저장", use_container_width=True):
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                try:
+                    c.execute("UPDATE event_settings SET event_active=?, event_title=?, event_desc=?, event_deadline=?, event_discount=? WHERE id=1",
+                              (1 if new_active else 0, new_title, new_desc, new_deadline_str, int(new_discount)))
+                    conn.commit()
+                    st.success("🎉 이벤트 설정이 성공적으로 저장되었습니다!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"설정 저장 실패: {e}")
+                finally:
+                    conn.close()
+
+        st.stop()
+
     if st.session_state.user_id:
         tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
             _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
