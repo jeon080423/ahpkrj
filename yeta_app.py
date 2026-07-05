@@ -2357,7 +2357,7 @@ def run():
     with tab_pricing:
         st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
 
-        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+        col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(5)
         user_id = st.session_state.get("user_id")
 
         # 1. 무료 체험판
@@ -2380,50 +2380,71 @@ def run():
             else:
                 st.components.v1.html(get_yeta_login_redirect_html("무료 체험판 (영구)", inner_html=inner_1, is_best=False), height=520)
 
-        # 2. 단건 분석권 (BEST)
+        # 2. [Lite] 단건 분석권
         with col_p2:
             inner_2 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>단건 분석권</h3>
-                <span style='color: #888; font-size: 1.1rem;'>프로젝트 1건, 2개월</span>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Lite] 단건 분석권</h3>
+                <span style='color: #888; font-size: 1.1rem;'>프로젝트 1건, 1개월</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>300,000</span>원</h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>특정 예타 프로젝트 1건에 대해 인원 제한 없이 전문가 AHP 데이터 집계 및 아웃라이어 정제 분석을 수행합니다.</p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단일 예타 프로젝트에 대해 인원 제한 없이 전문가 데이터 집계 및 아웃라이어 정제 분석을 수행합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><b>특정 프로젝트 1건, 2개월 분석</b></li>
-                    <li><b>평가자 수 제한 없음 (무제한)</b></li>
-                    <li><b>최대/최소 아웃라이어 제외 자동 연산</b></li>
+                    <li><b>프로젝트 1건, 1개월 분석</b></li>
+                    <li>평가자 수 제한 없음 (무제한)</li>
+                    <li>최대/최소 아웃라이어 제외 자동 연산</li>
                     <li>보고서 제출용 Excel 원본 내보내기</li>
                     <li>세금계산서 및 영수증 발행 지원</li>
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "단건 분석권", 300000, 2, inner_html=inner_2, is_best=True), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Lite] 단건 분석권", 300000, 1, inner_html=inner_2, is_best=False), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("단건 분석권", inner_html=inner_2, is_best=True), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("[Lite] 단건 분석권", inner_html=inner_2, is_best=False), height=520)
 
-        # 3. 연간 라이선스
+        # 3. [Pro] 팀 라이선스 (BEST)
         with col_p3:
             inner_3 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>연간 라이선스</h3>
-                <span style='color: #888; font-size: 1.1rem;'>연간 구독형</span>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Pro] 팀 라이선스</h3>
+                <span style='color: #888; font-size: 1.1rem;'>연간 5건, 1년 구독</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>1,200,000원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>단건 대비 20% 저렴한 비용으로 연구실/팀 단위의 예타 AHP 분석과 전문가 배포 설문을 1년간 수행합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>1년간 최대 5개 프로젝트 분석</b></li>
+                    <li><b>단건 대비 건당 비용 절감 효과</b></li>
+                    <li>무제한 전문가 설문 및 아웃라이어 연산</li>
+                    <li>B2B 기업용 견적서/세금계산서 발행</li>
+                    <li>연구팀 통합 데이터베이스 제공</li>
+                </ul>
+            """
+            if user_id:
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Pro] 팀 라이선스", 1200000, 12, inner_html=inner_3, is_best=True), height=520)
+            else:
+                st.components.v1.html(get_yeta_login_redirect_html("[Pro] 팀 라이선스", inner_html=inner_3, is_best=True), height=520)
+
+        # 4. [Enterprise] 연간 라이선스
+        with col_p4:
+            inner_4 = """
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Enterprise] 라이선스</h3>
+                <span style='color: #888; font-size: 1.1rem;'>연간 무제한 구독</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>3,000,000원</h2>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기관/연구원 전체 임직원이 1년 동안 횟수 제한 없이 예타 AHP 분석과 전문가 배포 설문을 수행합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                     <li><b>1년간 전 직원 무제한 프로젝트 분석</b></li>
-                    <li><b>무제한 전문가 설문 및 아웃라이어 연산</b></li>
-                    <li>B2B 기업용 견적서/세금계산서 즉시 발행</li>
-                    <li>기관 전용 커스텀 DB 구축 매핑 지원</li>
+                    <li><b>커스텀 도메인 및 기관 전용 DB 구축</b></li>
+                    <li>무제한 전문가 설문 및 아웃라이어 연산</li>
+                    <li>B2B 기업용 견적서 즉시 발행</li>
                     <li>우선 기술 지원 및 교육 제공</li>
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "연간 라이선스", 3000000, 12, inner_html=inner_3, is_best=False), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Enterprise] 연간 라이선스", 3000000, 12, inner_html=inner_4, is_best=False), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("연간 라이선스", inner_html=inner_3, is_best=False), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("[Enterprise] 연간 라이선스", inner_html=inner_4, is_best=False), height=520)
 
-        # 4. 부가 서비스 대행
-        with col_p4:
+        # 5. 부가 서비스 대행
+        with col_p5:
             if user_id:
                 st.components.v1.html(get_yeta_portone_custom_services_html(user_id), height=520)
             else:
