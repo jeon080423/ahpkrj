@@ -2698,12 +2698,21 @@ def run():
                 st.divider()
                 st.write("**[제1계층 평가: 상수합법]**")
                 st.caption("아래 1계층 평가항목의 합이 100이 되도록 중요도를 직접 분배해주십시오.")
-                st.slider("경제성", 0, 100, 45)
-                st.slider("정책성", 0, 100, 35)
+                
+                v1 = st.slider("경제성", 0, 100, 45, key="prev_v1")
+                v2 = st.slider("정책성", 0, 100, 35, key="prev_v2")
+                v3 = 0
                 if "비수도권" in yeta_p_type:
-                    st.slider("지역균형발전", 0, 100, 20)
+                    v3 = st.slider("지역균형발전", 0, 100, 20, key="prev_v3")
                 elif "R&D" in yeta_p_type:
-                    st.slider("기술성", 0, 100, 20)
+                    v3 = st.slider("기술성", 0, 100, 20, key="prev_v4")
+                
+                total_sum = v1 + v2 + v3
+                color = "#16a34a" if total_sum == 100 else "#dc2626"
+                st.markdown(f"<div style='text-align: right; font-size: 1.1em; font-weight: bold;'>합계: <span style='color: {color};'>{total_sum}</span> / 100</div>", unsafe_allow_html=True)
+                
+                if total_sum != 100:
+                    st.warning("⚠️ 1계층 평가항목의 가중치 합계가 정확히 100이 되어야 제출할 수 있습니다.")
                 
                 st.divider()
                 st.write("**[제2계층 평가: 9점 척도 쌍대비교]**")
@@ -2781,7 +2790,7 @@ def run():
                     </div>
                     """, unsafe_allow_html=True)
                 
-                if st.button("닫기", type="primary", use_container_width=True):
+                if st.button("모의 설문 제출 (닫기)", type="primary", use_container_width=True, disabled=(total_sum != 100)):
                     st.rerun()
             preview_modal()
 
