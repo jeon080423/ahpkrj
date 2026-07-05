@@ -2567,6 +2567,13 @@ def run():
                 )
                 ex_p_type = excel_project_type[0]
                 
+                if "rnd" in ex_p_type:
+                    st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 과학기술성", "📊 Fixed Level 1: Economics, Policy, Science/Tech"))
+                elif "capital" in ex_p_type and "non" not in ex_p_type:
+                    st.info(_("📊 1계층 고정 항목: 경제성, 정책성", "📊 Fixed Level 1: Economics, Policy"))
+                else:
+                    st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 지역균형발전", "📊 Fixed Level 1: Economics, Policy, Regional Balance"))
+                
                 st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
                 st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('2계층 평가 요인 커스터마이징', 'Customize Level 2 Factors')}</div>", unsafe_allow_html=True)
                 st.caption(_("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요.", "Enter sub-factors separated by commas according to the project characteristics."))
