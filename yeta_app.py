@@ -2718,15 +2718,19 @@ def run():
         st.info(_("모든 설정이 완료되었다면, 응답 데이터를 실시간으로 수집할 구글 시트를 연동하고 배포용 URL을 생성합니다.", "When ready, connect a Google Sheet to collect responses and generate the deployment URL."))
         
         with st.expander(_("❓ 구글 시트 연동 방법 안내", "Google Sheets Integration Guide")):
+            st.markdown("""
+            **💡 연동 방법:**
+            
+            1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
+            2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
+               * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+            3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
+            """)
             guide_img_path = os.path.join(os.path.dirname(__file__), "manual_sheet_url_guide.png")
             if os.path.exists(guide_img_path):
-                st.image(guide_img_path, caption="Google Sheets Sharing Guide", use_container_width=True)
+                st.image(guide_img_path, caption="구글 스프레드시트 URL 주소창 복사 예시", use_container_width=True)
             else:
                 st.warning("가이드 이미지를 찾을 수 없습니다.")
-            st.markdown("""
-            1. 새 구글 시트를 만들고 **'링크가 있는 모든 사용자가 편집자'** 권한을 갖도록 공유 설정을 변경합니다.
-            2. 해당 구글 시트의 **URL(주소창 링크)**을 복사하여 아래에 붙여넣습니다.
-            """)
 
         admin_email = st.text_input(_("관리자 이메일 (결과 수신용)", "Admin Email"))
         sheet_url = st.text_input(_("공유된 구글 시트 URL", "Shared Google Sheet URL"))
