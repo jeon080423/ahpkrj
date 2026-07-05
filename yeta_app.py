@@ -1,12 +1,12 @@
-import streamlit as st
+import sqlite3
 import pandas as pd
+import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 import yeta_utils
 import math
 import os
-import sqlite3
 import datetime
 import hashlib
 import string
@@ -2565,7 +2565,6 @@ def run():
                     uploaded_file = st.file_uploader(_("응답이 완료된 AHP 엑셀 파일 첨부", "Upload the completed AHP Excel file"), type=["xlsx"])
                     if uploaded_file is not None:
                         try:
-                            import pandas as pd
                             df = pd.read_excel(uploaded_file)
                             st.success(_("데이터 로드 성공! 연산을 시작합니다.", "Data loaded successfully! Starting computation."))
                         except Exception as e:
@@ -2574,7 +2573,6 @@ def run():
                     if st.session_state.user_id is None:
                         st.warning(_("온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", "Online survey integration is available for members. Please log in."))
                     else:
-                        import sqlite3
                         try:
                             from survey_manager import sync_short_codes_from_gs, get_admin_surveys_from_gsheet, load_survey_metadata, get_survey_gspread_client
                             sync_short_codes_from_gs()
@@ -2617,7 +2615,6 @@ def run():
                                     g_client = get_survey_gspread_client()
                                     if g_client:
                                         try:
-                                            import pandas as pd
                                             spreadsheet = g_client.open_by_key(selected_sheet_id)
                                             raw_sheet = spreadsheet.worksheet("Raw_Data")
                                             all_rows = raw_sheet.get_all_values()
@@ -3186,8 +3183,6 @@ def run():
             st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
         else:
             # DB에서 해당 관리자가 생성한 설문 목록 조회
-            import sqlite3
-            import pandas as pd
 
             try:
                 sync_short_codes_from_gs()
