@@ -222,7 +222,9 @@ def save_agreement_to_sheets(email, password, agreements, user_type):
     try:
         # [수정] 메인 코드와 동일한 인증 로직 적용 (String/Dict 호환 및 패딩 보정)
         scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-        raw_auth = st.secrets["gcp_service_account"]
+        raw_auth = st.secrets.get("gcp_service_account")
+        if not raw_auth:
+            return False
 
         if isinstance(raw_auth, str):
             auth_str = raw_auth.strip().strip('"').strip("'")
@@ -246,7 +248,10 @@ def save_agreement_to_sheets(email, password, agreements, user_type):
         client = gspread.authorize(creds_obj)
         
         # [수정] secrets에서 시트 ID 가져오기
-        sh = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if not spreadsheet_id:
+            return False
+        sh = client.open_by_key(spreadsheet_id)
         worksheet = sh.sheet1  # 첫 번째 시트 사용 ('시트1'과 동일)
         
         # [수정] 대한민국 시간(KST) 기준 타임스탬프 생성

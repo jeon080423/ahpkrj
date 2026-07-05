@@ -89,8 +89,9 @@ def change_user_password(user_id, new_pw):
     
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if client and spreadsheet_id:
+            spreadsheet = client.open_by_key(spreadsheet_id)
             sheet = spreadsheet.sheet1
             cell = sheet.find(user_id)
             if cell:
@@ -98,6 +99,227 @@ def change_user_password(user_id, new_pw):
     except Exception:
         pass
     return True
+
+# --- MISSING HELPERS ADDED ---
+def num_to_kor(num):
+    units = ["", "십", "백", "천"]
+    g_units = ["", "만", "억", "조"]
+    digits = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"]
+    
+    if num == 0:
+        return "영"
+        
+    num_str = str(num)
+    length = len(num_str)
+    result = []
+    
+    for i, char in enumerate(num_str):
+        power = length - i - 1
+        digit = int(char)
+        if digit != 0:
+            result.append(digits[digit] + units[power % 4])
+        if power % 4 == 0:
+            g_idx = power // 4
+            if g_idx > 0:
+                result.append(g_units[g_idx])
+                
+    kor = "".join(result)
+    if kor.startswith("일십"):
+        kor = kor[1:]
+    return f"일금 {kor}원정"
+
+def get_quotation_html(client_name, project_name, amount, plan_name):
+    import datetime
+    import base64
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    today_str = today.strftime("%Y년 %m월 %d일")
+    kor_amount = num_to_kor(amount)
+    
+    stamp_b64 = ""
+    try:
+        with open("stamp.png", "rb") as f:
+            stamp_b64 = base64.b64encode(f.read()).decode("utf-8")
+    except Exception as e:
+        print(f"Error loading stamp.png: {e}")
+        
+    if stamp_b64:
+        stamp_element = f'<img src="data:image/png;base64,{stamp_b64}" style="position: absolute; top: -12px; right: -28px; width: 34px; height: 34px; mix-blend-mode: multiply; pointer-events: none;" />'
+    else:
+        stamp_element = '<div class="stamp">전상현<br>인</div>'
+    
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>견적서</title>
+    <style>
+        body {{ font-family: 'Malgun Gothic', 'Dotum', sans-serif; margin: 10px; color: #000; line-height: 1.5; background: #fff; }}
+        .title {{ text-align: center; font-size: 30px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; letter-spacing: 5px; }}
+        .meta-list {{ list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 13px; }}
+        .meta-list li {{ margin-bottom: 6px; font-weight: bold; }}
+        .meta-list span.lbl {{ display: inline-block; width: 90px; color: #111; }}
+        
+        .main-layout {{ display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 20px; gap: 15px; }}
+        .info-left {{ width: 52%; }}
+        .info-right {{ width: 46%; }}
+        .provider-table {{ border-collapse: collapse; width: 100%; font-size: 12px; table-layout: fixed; text-align: left; }}
+        .provider-table th, .provider-table td {{ border: 1px solid #000; padding: 6px 8px; word-break: keep-all; }}
+        .provider-table th {{ background: #f2f2f2; width: 65px; text-align: center; font-weight: bold; }}
+        .provider-table td {{ line-height: 1.4; }}
+        
+        .stamp-container {{ position: relative; display: inline-block; white-space: nowrap; }}
+        .stamp {{ position: absolute; top: -10px; right: -32px; width: 32px; height: 32px; border: 2px solid #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff0000; font-size: 9px; font-weight: bold; font-family: 'Batang', serif; transform: rotate(-5deg); background-color: rgba(255, 0, 0, 0.05); user-select: none; line-height: 1.1; }}
+
+        .items-table {{ width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }}
+        .items-table th, .items-table td {{ border: 1px solid #000; padding: 8px 10px; }}
+        .items-table th {{ background: #000; color: #fff; text-align: center; font-weight: bold; }}
+        .items-table td {{ text-align: center; }}
+        
+        .sum-row {{ font-weight: bold; background: #f9f9f9; }}
+    </style>
+</head>
+<body>
+    <div class="title">견 적 서</div>
+    
+    <div class="main-layout">
+        <div class="info-left">
+            <ul class="meta-list">
+                <li><span class="lbl">■ 과 제 명 :</span> {project_name}</li>
+                <li><span class="lbl">■ 의뢰기관 :</span> {client_name}</li>
+                <li><span class="lbl">■ 서비스명 :</span> AHP 의사결정 분석 솔루션(AHP마스터)</li>
+                <li><span class="lbl">■ 소요예산 :</span> {kor_amount} (\\₩{amount:,}, VAT 포함)</li>
+                <li><span class="lbl">■ 작성일 :</span> {today_str}</li>
+                <li><span class="lbl">■ 담 당 자 :</span> 전상현 / jeon080423@gmail.com / 0507-1347-2610</li>
+            </ul>
+        </div>
+        <div class="info-right">
+            <table class="provider-table">
+                <tr>
+                    <th rowspan="4" style="width: 25px; font-size: 11px;">공<br>급<br>자</th>
+                    <th>상호</th>
+                    <td>프레쉬인사이트</td>
+                </tr>
+                <tr>
+                    <th>등록번호</th>
+                    <td style="font-size: 11px; font-weight: bold;">683-27-00122</td>
+                </tr>
+                <tr>
+                    <th>주소</th>
+                    <td style="font-size: 11px;">인천 부평구 원길로 12, 가동 203호 (갈산동, 선우빌딩)</td>
+                </tr>
+                <tr>
+                    <th>대표자</th>
+                    <td>
+                        <div class="stamp-container">
+                            전 상 현
+                            {stamp_element}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">비 목</th>
+                <th style="width: 20%;">금 액</th>
+                <th style="width: 35%;">산 출 내 역</th>
+                <th style="width: 20%;">비 고</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="height: 35px;">
+                <td style="font-weight: bold; background: #eee;">1. 경비 소계</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr style="height: 50px;">
+                <td style="text-align: left; padding-left: 20px;">
+                    AHP 분석<br>솔루션 이용료 ({plan_name})
+                </td>
+                <td style="text-align: right;">{amount:,}</td>
+                <td>{amount:,} 원 X 1 식</td>
+                <td>AHPMASTER</td>
+            </tr>
+            <tr style="height: 90px;">
+                <td></td>
+                <td colspan="2" style="color: #666; font-size: 12px; vertical-align: top; padding-top: 15px;">이하 여백</td>
+                <td></td>
+            </tr>
+            <tr class="sum-row" style="height: 35px;">
+                <td>총 합 계</td>
+                <td style="text-align: right;">{amount:,}</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div style="font-weight: bold; font-size: 12px; margin-bottom: 10px;">※ 간이과세자</div>
+</body>
+</html>
+"""
+
+def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
+    sender_email = "jeon080423@gmail.com"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    recipient_email = "jeon080423@gmail.com"
+    subject = f"[AHP 마스터] 계산서 발행 신청 접수 ({biz_name})"
+    body = f"""
+[AHP 마스터 계산서 신청 알림]
+
+- 신청 ID: {user_id}
+- 사업자 등록번호: {biz_num}
+- 상호(회사명): {biz_name}
+- 대표자명: {rep_name}
+- 사업장 주소: {address}
+- 업태/업종: {biz_type}
+- 수신 이메일 주소: {email}
+- 신청 요금제: {plan_name}
+- 신청 시간: {datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m-%d %H:%M:%S')} (KST)
+"""
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"send_tax_invoice_request_email Error: {e}")
+        return False
+
+def send_password_recovery_email(user_email, temp_pw):
+    sender_email = "jeon080423@gmail.com"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    recipient_email = user_email
+    subject = "[AHP 마스터] 임시 비밀번호 안내"
+    body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
+
+ID: {user_email}
+임시 비밀번호: {temp_pw}
+
+로그인 후 즉시 비밀번호를 변경하시기를 권장합니다.
+감사합니다.
+"""
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"send_password_recovery_email Error: {e}")
+        return False
+# -----------------------------
 
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
@@ -118,8 +340,9 @@ def upgrade_user_password_to_hash(user_id, pw):
     
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if client and spreadsheet_id:
+            spreadsheet = client.open_by_key(spreadsheet_id)
             sheet = spreadsheet.sheet1
             cell = sheet.find(user_id)
             if cell:
@@ -131,9 +354,9 @@ def upgrade_user_password_to_hash(user_id, pw):
 @st.cache_resource
 def get_gspread_client():
     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-    if "gcp_service_account" not in st.secrets:
+    raw_auth = st.secrets.get("gcp_service_account")
+    if not raw_auth:
         return None
-    raw_auth = st.secrets["gcp_service_account"]
     auth_info = {}
     if isinstance(raw_auth, dict) or hasattr(raw_auth, "keys"):
         auth_info = dict(raw_auth)
@@ -243,9 +466,10 @@ def sync_db_from_sheets(silent=False):
     conn = None
     try:
         client = get_gspread_client()
-        if not client: 
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if not client or not spreadsheet_id: 
             return -1
-        spreadsheet = run_gspread_with_retry(client.open_by_key, st.secrets["SPREADSHEET_ID"])
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
         sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
         all_values = run_gspread_with_retry(sheet.get_all_values)
         
@@ -360,8 +584,9 @@ def delete_user(user_id):
 
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if client and spreadsheet_id:
+            spreadsheet = client.open_by_key(spreadsheet_id)
             sheet = spreadsheet.sheet1
             
             try:
@@ -409,8 +634,9 @@ def add_user(user_id, pw, role, agree_info="Y", customer_type="standard"):
 def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31", survey_count=0, last_survey_link="", event_applied="", thesis_title="", university="", customer_type="standard"):
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if client and spreadsheet_id:
+            spreadsheet = client.open_by_key(spreadsheet_id)
             sheet = spreadsheet.sheet1
             
             try:
@@ -429,8 +655,9 @@ def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9
 def restore_from_deleted_sheet(user_id):
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if client and spreadsheet_id:
+            spreadsheet = client.open_by_key(spreadsheet_id)
             try:
                 del_sheet = spreadsheet.worksheet("Deleted_Users")
                 cell = del_sheet.find(user_id)
@@ -486,8 +713,9 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
     
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+        if client and spreadsheet_id:
+            spreadsheet = client.open_by_key(spreadsheet_id)
             sheet = spreadsheet.sheet1
             
             try:
@@ -1157,7 +1385,8 @@ def run():
                     st.error("동기화 중 오류가 발생했습니다. 화면상의 에러 메시지를 확인해 주세요.")
 
         try:
-            visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
+            spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
+            visit_data_gs = get_cached_visit_logs(spreadsheet_id) if spreadsheet_id else []
             if not visit_data_gs:
                 try:
                     conn = sqlite3.connect('users.db')
