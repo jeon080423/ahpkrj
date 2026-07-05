@@ -2665,62 +2665,68 @@ def run():
     with tab_guide:
         st.markdown(f"""
         <div style="padding: 10px 20px;">
-        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">📊 1. AHP 종합평가의 개요 및 목적</h3>
-        <p style="font-size: 1.05rem; line-height: 1.6;">
-        예비타당성조사에서 AHP는 경제성, 정책성, 지역균형발전 분석 등 다양한 평가항목의 결과를 토대로 <b>다기준분석</b>을 수행하여, 사업의 종합적인 타당성을 계량화된 수치로 판단하는 의사결정 도구입니다. 이를 통해 평가자 간의 이견을 종합하고, 의사결정 과정의 투명성과 객관성을 확보하여 공공투자 사업의 시행 여부를 결정합니다.
+        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">1. AHP 종합평가의 개요 및 목적</h3>
+        <p style="font-size: 1.05rem; line-height: 1.8;">
+        예비타당성조사에서 AHP는 경제성, 정책성, 지역균형발전 분석 등<br>다양한 평가항목의 결과를 토대로 <b>다기준분석</b>을 수행하여,<br>사업의 종합적인 타당성을 계량화된 수치로 판단하는 의사결정 도구입니다.<br><br>이를 통해 평가자 간의 이견을 종합하고, 의사결정 과정의 투명성과 객관성을 확보하여<br>공공투자 사업의 시행 여부를 결정합니다.
         </p>
 
-        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px;">🏗️ 2. AHP 평가 계층구조 설계</h3>
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
-        <li><b>제1계층 (대분류):</b> 종합평가를 구성하는 주요 부문으로 경제성 분석, 정책성 분석, 지역균형발전 분석(수도권 사업의 경우 제외) 등으로 나뉩니다.</li>
-        <li><b>제2·3계층 (세부 항목):</b> 정책성 분석 하위의 사업추진 여건(정책 일치성, 주민 사업태도 등)과 정책효과(일자리 효과, 환경성, 안전성 등), 지역균형발전 하위의 지역낙후도 및 파급효과 등으로 구성됩니다.</li>
-        <li><b>최하위 대안:</b> 최종 의사결정을 위한 최하위 계층은 철저히 <b>'사업 시행'과 '사업 미시행'</b> 두 가지 대안으로 고정하여 평가를 수행합니다.</li>
+        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">2. AHP 평가 계층구조 설계</h3>
+        <ul style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 10px;">
+        <li style="margin-bottom: 8px;"><b>제1계층 (대분류):</b><br>종합평가를 구성하는 주요 부문으로 경제성 분석, 정책성 분석, 지역균형발전 분석(수도권 사업의 경우 제외) 등으로 나뉩니다.</li>
+        <li style="margin-bottom: 8px;"><b>제2·3계층 (세부 항목):</b><br>정책성 분석 하위의 사업추진 여건(정책 일치성, 주민 사업태도 등)과 정책효과(일자리 효과, 환경성, 안전성 등), 지역균형발전 하위의 지역낙후도 및 파급효과 등으로 구성됩니다.</li>
+        <li><b>최하위 대안:</b><br>최종 의사결정을 위한 최하위 계층은 철저히 <b>'사업 시행'과 '사업 미시행'</b> 두 가지 대안으로 고정하여 평가를 수행합니다.</li>
         </ul>
 
-        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px;">⚖️ 3. 부문별 가중치 적용 기준 (상수합법)</h3>
-        <p style="font-size: 1.05rem; line-height: 1.6;">
-        제1계층의 가중치는 응답자의 자의성을 줄이기 위해 100점 만점을 기준으로 평가자가 직접 분배하는 <b>상수합법(Constant-Sum)</b>을 사용하여 측정합니다. 예비타당성조사 수행 총괄지침에 명시된 주요 사업유형별 가중치 허용 범위는 다음과 같습니다.
+        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">3. 부문별 가중치 적용 기준 (상수합법)</h3>
+        <p style="font-size: 1.05rem; line-height: 1.8;">
+        제1계층의 가중치는 응답자의 자의성을 줄이기 위해 100점 만점을 기준으로<br>평가자가 직접 분배하는 <b>상수합법(Constant-Sum)</b>을 사용하여 측정합니다.<br><br>예비타당성조사 수행 총괄지침에 명시된 주요 사업유형별 가중치 허용 범위는 다음과 같습니다.
         </p>
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
+        <ul style="font-size: 1.05rem; line-height: 1.8; background-color: #f8fafc; padding: 15px 20px 15px 40px; border-radius: 8px;">
         <li><b>건설사업 (비수도권 유형):</b> 경제성 30~45%, 정책성 25~40%, 지역균형발전 30~40%</li>
         <li><b>건설사업 (수도권 유형):</b> 경제성 60~70%, 정책성 30~40% (지역균형발전 항목 제외)</li>
         <li><b>정보화/R&D 사업 (B/C 분석 시):</b> 경제성 40~50%, 기술성 30~40%, 정책성 20~30%</li>
         </ul>
 
-        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px;">📝 4. 설문 수행 및 점수 산정 (일관성 검증 및 극단값 배제)</h3>
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
-        <li><b>9점 척도 쌍대비교:</b> 세부 항목 간의 상대적 중요도 및 대안의 선호도는 기본적으로 9점 척도를 활용하여 쌍대비교(Pairwise Comparison)를 수행합니다.</li>
-        <li><b>객관적 지표의 표준점수화:</b> 주관적 편향을 막기 위해 경제성(B/C 비율)과 지역낙후도 지수(LIR)는 정해진 수학적 전환식을 적용하여 일괄 반영합니다.</li>
-        <li><b>일관성 검증 (CR):</b> 실무적 한계를 고려해 <b>CR이 0.15 이하</b>인 경우에만 신뢰할 수 있는 유효 응답으로 인정하며, 이를 초과할 시 환류(Feedback)하여 재조사 등을 요구합니다.</li>
-        <li><b>극단값 배제 지침:</b> 집단 의사결정 시 점수 왜곡을 방지하고자, 최종 합산 과정에서 사업 시행 대안에 대해 <b style="color: #ef4444;">가장 높은 점수를 준 1인(최고점)과 가장 낮은 점수를 준 1인(최저점)의 응답을 배제</b>하고, 나머지 결과의 기하평균을 구합니다.</li>
+        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">4. 조사 방법 및 조사 표본(전문가 구성)</h3>
+        <ul style="font-size: 1.05rem; line-height: 1.8;">
+        <li style="margin-bottom: 10px;"><b>조사 표본 (평가진 규모 및 구성):</b><br>평가의 전문성과 객관성을 확보하기 위해 사업의 특성에 맞는 관련 분야(경제, 정책, 기술, 지역 등)의 학계 및 연구계 전문가 등 <b>보통 7~10인 내외의 전문가 패널</b>을 구성하여 설문을 진행합니다.</li>
+        <li><b>조사 방법 (정보 제공 및 브리핑):</b><br>단순한 설문조사가 아닌, 사업의 개요와 선행 분석 결과(B/C 비율, 정책성 및 지역균형 분석 자료 등)가 모두 수록된 <b>'AHP 자료집'</b>을 전문가들에게 제공합니다. 이를 바탕으로 평가 회의(브리핑) 또는 서면/온라인 방식을 통해 충분한 정보를 숙지한 상태에서 평가를 실시하게 됩니다.</li>
         </ul>
 
-        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px;">🎯 5. 최종 타당성 판단 기준 (회색영역)</h3>
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
-        <li>기본적으로 산출된 <b>최종 AHP 종합점수가 0.5 이상이면 사업 시행이 타당성(바람직함)이 있는 것</b>으로 판정합니다.</li>
-        <li><b>회색영역(Gray Area) 운용:</b> 의사결정의 강건성을 확보하기 위해 종합평점이 0.5 부근인 특정 구간(예: 0.473~0.527)을 '회색영역'으로 규정합니다. 점수가 이 구간에 위치하거나 평가자 간 의견 불일치가 뚜렷할 경우 획일적인 0.5 기준 적용을 지양하고, '약간 신중', '신중' 등의 세부 판단을 거쳐 최종 사업 추진 여부를 결정하도록 권고합니다.</li>
+        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">5. 설문 수행 및 점수 산정 (일관성 검증 및 극단값 배제)</h3>
+        <ul style="font-size: 1.05rem; line-height: 1.8;">
+        <li style="margin-bottom: 10px;"><b>9점 척도 쌍대비교:</b><br>세부 항목 간의 상대적 중요도 및 대안의 선호도는 기본적으로 9점 척도를 활용하여 쌍대비교(Pairwise Comparison)를 수행합니다.</li>
+        <li style="margin-bottom: 10px;"><b>객관적 지표의 표준점수화:</b><br>주관적 편향을 막기 위해 경제성(B/C 비율)과 지역낙후도 지수(LIR)는 정해진 수학적 전환식을 적용하여 일괄 반영합니다.</li>
+        <li style="margin-bottom: 10px;"><b>일관성 검증 (CR):</b><br>실무적 한계를 고려해 <b>CR이 0.15 이하</b>인 경우에만 신뢰할 수 있는 유효 응답으로 인정하며, 이를 초과할 시 환류(Feedback)하여 재조사 등을 요구합니다.</li>
+        <li><b>극단값 배제 지침:</b><br>집단 의사결정 시 점수 왜곡을 방지하고자, 최종 합산 과정에서 사업 시행 대안에 대해 <b style="color: #ef4444;">가장 높은 점수를 준 1인(최고점)과 가장 낮은 점수를 준 1인(최저점)의 응답을 배제</b>하고, 나머지 결과의 기하평균을 구합니다.</li>
         </ul>
 
-        <hr style="margin-top: 40px; margin-bottom: 20px; border: 0; border-top: 1px solid #e5e7eb;">
+        <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">6. 최종 타당성 판단 기준 (회색영역)</h3>
+        <ul style="font-size: 1.05rem; line-height: 1.8;">
+        <li style="margin-bottom: 10px;">기본적으로 산출된 <b>최종 AHP 종합점수가 0.5 이상이면 사업 시행이 타당성(바람직함)이 있는 것</b>으로 판정합니다.</li>
+        <li><b>회색영역(Gray Area) 운용:</b><br>의사결정의 강건성을 확보하기 위해 종합평점이 0.5 부근인 특정 구간(예: 0.473~0.527)을 '회색영역'으로 규정합니다.<br>점수가 이 구간에 위치하거나 평가자 간 의견 불일치가 뚜렷할 경우 획일적인 0.5 기준 적용을 지양하고, '약간 신중', '신중' 등의 세부 판단을 거쳐 최종 사업 추진 여부를 결정하도록 권고합니다.</li>
+        </ul>
+
+        <hr style="margin-top: 45px; margin-bottom: 25px; border: 0; border-top: 1px solid #e5e7eb;">
         
-        <h3 style="color: #0f766e; margin-bottom: 15px;">📥 6. 관련 지침 및 가이드라인 공식 다운로드 링크</h3>
-        <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 15px;">
+        <h3 style="color: #0f766e; margin-bottom: 15px;">7. 관련 지침 및 가이드라인 공식 다운로드 링크</h3>
+        <p style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px;">
         상기 AHP 수행 기준의 근거가 되는 공식 가이드 문서는 다음의 웹사이트에서 원문을 다운로드하실 수 있습니다.
         </p>
         
-        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e; margin-bottom: 10px;">
-        <a href="https://pimac.kdi.re.kr/study/study_list.jsp?classcd=F1" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">📄 KDI 공공투자관리센터 (PIMAC)</a>
-        <p style="margin-top: 5px; color: #475569; font-size: 0.95rem;">각 사업 부문별(일반, 도로/철도 등) 예비타당성조사 수행 세부지침 및 역대 조사보고서 다운로드</p>
+        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e; margin-bottom: 15px;">
+        <a href="https://pimac.kdi.re.kr/study/study_list.jsp?classcd=F1" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">KDI 공공투자관리센터 (PIMAC)</a>
+        <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">각 사업 부문별(일반, 도로/철도 등) 예비타당성조사 수행 세부지침 및 역대 조사보고서 다운로드</p>
         </div>
         
-        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e; margin-bottom: 10px;">
-        <a href="https://www.kipf.re.kr/gmac/Publication/Finance/kiPublish/CA6/Center/list.do" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">📄 한국조세재정연구원 정부투자분석센터 (KIPF GMAC)</a>
-        <p style="margin-top: 5px; color: #475569; font-size: 0.95rem;">정보화 등 특정 부문 사업에 대한 세부 가이드라인 및 착수회의/조사보고서 다운로드</p>
+        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e; margin-bottom: 15px;">
+        <a href="https://www.kipf.re.kr/gmac/Publication/Finance/kiPublish/CA6/Center/list.do" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">한국조세재정연구원 정부투자분석센터 (KIPF GMAC)</a>
+        <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">정보화 등 특정 부문 사업에 대한 세부 가이드라인 및 착수회의/조사보고서 다운로드</p>
         </div>
         
         <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e;">
-        <a href="https://www.law.go.kr" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">🏛️ 국가법령정보센터</a>
-        <p style="margin-top: 5px; color: #475569; font-size: 0.95rem;">법적 구속력을 갖춘 기획재정부 훈령인 「예비타당성조사 운용지침」 및 「예비타당성조사 수행 총괄지침」 전문 열람</p>
+        <a href="https://www.law.go.kr" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">국가법령정보센터</a>
+        <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">법적 구속력을 갖춘 기획재정부 훈령인 「예비타당성조사 운용지침」 및 「예비타당성조사 수행 총괄지침」 전문 열람</p>
         </div>
         </div>
         """, unsafe_allow_html=True)
