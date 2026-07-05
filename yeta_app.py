@@ -151,12 +151,6 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
     <meta charset="utf-8">
     <title>견적서</title>
     <style>
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-                color: white !important;
-            }
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
-                background-color: white !important;
-            }
 
         body {{ font-family: 'Malgun Gothic', 'Dotum', sans-serif; margin: 10px; color: #000; line-height: 1.5; background: #fff; }}
         .title {{ text-align: center; font-size: 30px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; letter-spacing: 5px; }}
@@ -474,12 +468,6 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
     <head>
       <meta charset="utf-8">
       <style>
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-                color: white !important;
-            }
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
-                background-color: white !important;
-            }
 
         @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
         body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
@@ -677,12 +665,6 @@ def get_yeta_portone_custom_services_html(user_id=None):
     <head>
       <meta charset="utf-8">
       <style>
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-                color: white !important;
-            }
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
-                background-color: white !important;
-            }
 
         @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
         body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
@@ -1479,12 +1461,6 @@ def run():
     # 3. Custom CSS Styling (Premium Corporate Theme)
     st.markdown("""
     <style>
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-                color: white !important;
-            }
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
-                background-color: white !important;
-            }
 
     /* =============================================================================
        AHP 마스터 프리미엄 엔터프라이즈 UI 테마 (v3.0) - 예타 모듈용
@@ -2318,12 +2294,6 @@ def run():
                     button_iframe = f"""
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
                     <style>
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-                color: white !important;
-            }
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
-                background-color: white !important;
-            }
 
                         .btn {{
                             width: 100%;
@@ -2914,12 +2884,6 @@ def run():
                 # 쌍대비교 라디오 버튼 가로폭 강제 할당 및 모바일 겹침 방지 CSS
                 mobile_css = """
                 <style>
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-                color: white !important;
-            }
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
-                background-color: white !important;
-            }
 
                 /* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
                 div.st-key-ahp_survey_matrix {
