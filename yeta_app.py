@@ -2780,6 +2780,10 @@ def run():
                     justify-content: center;
                     margin-right: 0px !important;
                 }
+                /* 라디오 버튼의 텍스트(숫자)를 숨겨서 동그라미만 남기고 중앙 정렬되도록 함 */
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+                    display: none !important;
+                }
                 /* 컨테이너 너비 제약과 무관하게 가로 스크롤 허용 및 겹침 방지 (모달 최적화) */
                 div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) {
                     overflow-x: auto !important;
