@@ -701,7 +701,7 @@ def run():
     # 5. Page Header Section
     st.markdown(f"""
     <div style='margin-top: 55px;'>
-        <h1>{_('국가 예비타당성조사 종합평가(AHP) 시스템', 'Preliminary Feasibility Study AHP System')}</h1>
+        <h1>{_('국가 예비타당성조사 종합평가(AHP) 솔루션', 'Preliminary Feasibility Study AHP Solution')}</h1>
         <p style='color: #666; font-size: 1.05rem; margin-bottom: 30px;'>{_('기획재정부 및 KDI 표준 지침을 준수하는 공공투자사업 AHP 종합 평가 모듈입니다.', 'AHP comprehensive evaluation module for public investment projects in compliance with MoEF & KDI standard guidelines.')}</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1257,6 +1257,8 @@ def run():
                         except:
                             pass
 
+                auto_correct_cr = st.checkbox(_("CR 0.15 초과 시 행렬 자동 보정", "Auto-correct matrix if CR > 0.15"), value=True, help=_("평가자의 일관성 비율(CR)이 0.15를 초과하는 경우, AHP 보정 알고리즘을 통해 일관성 있는 행렬로 자동 조정합니다.", "If the Consistency Ratio (CR) exceeds 0.15, the AHP correction algorithm automatically adjusts it to a consistent matrix."))
+                
                 data_source = st.radio(
                     _("데이터 소스 선택", "Select Data Source"),
                     [_("📂 엑셀 파일 직접 업로드", "Upload Excel File"), _("🌐 배포된 온라인 설문 데이터 연동", "Link Online Survey Data")],
@@ -1269,7 +1271,41 @@ def run():
                     if uploaded_file is not None:
                         try:
                             df = pd.read_excel(uploaded_file)
-                            st.success(_("데이터 로드 성공! 연산을 시작합니다.", "Data loaded successfully! Starting computation."))
+                            
+                            # --- [사업 모델 및 계층 구조 자동 인식 로직 시작] ---
+                            inferred_p_type = "construction_capital"
+                            has_reg = "1계층_지역균형발전(%)" in df.columns
+                            has_tech = "1계층_기술성(%)" in df.columns
+                            
+                            if has_tech:
+                                inferred_p_type = "rnd"
+                            elif has_reg:
+                                inferred_p_type = "construction_non_capital"
+                            
+                            # 하위 요인 추출
+                            inferred_factors = {}
+                            for col in df.columns:
+                                if col.startswith("대안평가_[") and "]_" in col:
+                                    cat = col.split("]_")[0].replace("대안평가_[", "")
+                                    factor = col.split("]_")[1].split("(시행선호")[0]
+                                    if cat not in inferred_factors: inferred_factors[cat] = set()
+                                    inferred_factors[cat].add(factor)
+                                    
+                            factor_msg = []
+                            for cat, factors in inferred_factors.items():
+                                factor_msg.append(f"**{cat}**: {', '.join(list(factors))}")
+                                
+                            p_type_ko = "R&D 사업" if inferred_p_type == "rnd" else ("비수도권 사업 (지역균형발전 포함)" if inferred_p_type == "construction_non_capital" else "수도권 사업 (경제성/정책성 위주)")
+                            
+                            st.success(_(f"데이터 로드 성공! 엑셀 데이터를 통해 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}", f"Data loaded! Auto-detected model: {p_type_ko}"))
+                            with st.expander("인식된 하위 계층 구조 보기"):
+                                for msg in factor_msg:
+                                    st.markdown("- " + msg)
+                            # -----------------------------------------------------
+                            
+                            # Override p_type with inferred one for accurate processing
+                            p_type = inferred_p_type
+                            
                         except Exception as e:
                             st.error(f"엑셀 로드 중 오류가 발생했습니다: {str(e)}")
                 else:
@@ -1325,7 +1361,39 @@ def run():
                                                 headers = all_rows[0]
                                                 rows = all_rows[1:]
                                                 df = pd.DataFrame(rows, columns=headers)
-                                                st.success(_("온라인 설문 데이터를 성공적으로 불러왔습니다! 연산을 시작합니다.", "Successfully fetched online survey data! Starting computation."))
+                                                
+                                                # --- [사업 모델 및 계층 구조 자동 인식 로직 시작] ---
+                                                inferred_p_type = "construction_capital"
+                                                has_reg = "1계층_지역균형발전(%)" in df.columns
+                                                has_tech = "1계층_기술성(%)" in df.columns
+                                                
+                                                if has_tech:
+                                                    inferred_p_type = "rnd"
+                                                elif has_reg:
+                                                    inferred_p_type = "construction_non_capital"
+                                                
+                                                inferred_factors = {}
+                                                for col in df.columns:
+                                                    if col.startswith("대안평가_[") and "]_" in col:
+                                                        cat = col.split("]_")[0].replace("대안평가_[", "")
+                                                        factor = col.split("]_")[1].split("(시행선호")[0]
+                                                        if cat not in inferred_factors: inferred_factors[cat] = set()
+                                                        inferred_factors[cat].add(factor)
+                                                        
+                                                factor_msg = []
+                                                for cat, factors in inferred_factors.items():
+                                                    factor_msg.append(f"**{cat}**: {', '.join(list(factors))}")
+                                                    
+                                                p_type_ko = "R&D 사업" if inferred_p_type == "rnd" else ("비수도권 사업 (지역균형발전 포함)" if inferred_p_type == "construction_non_capital" else "수도권 사업 (경제성/정책성 위주)")
+                                                
+                                                st.success(_(f"온라인 설문 데이터를 성공적으로 불러왔습니다! 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}", f"Successfully fetched online data! Auto-detected model: {p_type_ko}"))
+                                                with st.expander("인식된 하위 계층 구조 보기"):
+                                                    for msg in factor_msg:
+                                                        st.markdown("- " + msg)
+                                                        
+                                                p_type = inferred_p_type
+                                                # -----------------------------------------------------
+                                                
                                             else:
                                                 st.warning(_("아직 수집된 응답 데이터가 없습니다.", "No response data collected yet."))
                                         except Exception as e:
@@ -1338,10 +1406,39 @@ def run():
                             st.warning(f"⚠️ 무료 사용자는 최대 {max_free_evals}명의 설문 데이터만 분석 가능합니다. (정식 결제 시 무제한 분석 가능)")
                             df = df.head(max_free_evals)
                             
-                        res_df, final_yeta_score = yeta_utils.process_yeta_ahp_data(df, p_type, bc_ratio, lir_value)
+                        res_df, final_yeta_score = yeta_utils.process_yeta_ahp_data(df, p_type, bc_ratio, lir_value, auto_correct_cr=auto_correct_cr)
                         
                         st.markdown("---")
                         st.markdown("### " + _("📊 종합평가(AHP) 최종 결과", "📊 Final AHP Evaluation Results"))
+                        
+                        # --- Create standard AHP summary table ---
+                        passed_evals = res_df[res_df["CR 통과"] == "PASS"]
+                        if len(passed_evals) > 0:
+                            avg_w_econ = passed_evals["경제성 가중치"].mean()
+                            avg_w_policy = passed_evals["정책성 가중치"].mean()
+                            avg_w_reg = passed_evals["지역균형 가중치"].mean()
+                            avg_w_tech = passed_evals["기술성 가중치"].mean()
+                            
+                            avg_s_econ = passed_evals["경제성 점수"].mean()
+                            avg_s_policy = passed_evals["정책성 점수"].mean()
+                            avg_s_reg = passed_evals["지역균형 점수"].mean()
+                            avg_s_tech = passed_evals["기술성 점수"].mean()
+                            
+                            summary_data = []
+                            summary_data.append({"평가항목": "경제성 분석", "가중치": f"{avg_w_econ:.3f}", "평가 결과 (점수)": f"{avg_s_econ:.3f}", "비고": "B/C, NPV 등 반영"})
+                            summary_data.append({"평가항목": "정책성 분석", "가중치": f"{avg_w_policy:.3f}", "평가 결과 (점수)": f"{avg_s_policy:.3f}", "비고": "정책효과, 추진여건 등"})
+                            
+                            if "rnd" in p_type:
+                                summary_data.append({"평가항목": "기술성 분석", "가중치": f"{avg_w_tech:.3f}", "평가 결과 (점수)": f"{avg_s_tech:.3f}", "비고": "기술개발 성공가능성 등"})
+                            if "non_capital" in p_type or p_type in ["other_bc", "other_ec"]:
+                                summary_data.append({"평가항목": "지역균형발전 분석", "가중치": f"{avg_w_reg:.3f}", "평가 결과 (점수)": f"{avg_s_reg:.3f}", "비고": "지역낙후도, 파급효과 등"})
+                                
+                            summary_data.append({"평가항목": "**종합평가 (AHP)**", "가중치": "**1.000**", "평가 결과 (점수)": f"**{final_yeta_score:.3f}**", "비고": "**최종 결과값**"})
+                            
+                            st.write("#### " + _("[표] AHP를 이용한 종합평가 결과", "[Table] Comprehensive AHP Evaluation Results"))
+                            st.markdown(pd.DataFrame(summary_data).to_markdown(index=False))
+                            st.markdown("<br>", unsafe_allow_html=True)
+                        # ----------------------------------------
                         
                         is_pass = final_yeta_score >= 0.5
                         card_class = "verdict-pass" if is_pass else "verdict-fail"
@@ -2366,7 +2463,7 @@ def run():
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>무료 체험판</h3>
                 <span style='color: #888; font-size: 1.1rem;'>기본 제공</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>0원</h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>예타 분석 시스템의 핵심 연산과 결과물 구성을 사전에 시뮬레이션할 수 있는 무료 버전입니다.</p>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>예타 분석 솔루션의 핵심 연산과 결과물 구성을 사전에 시뮬레이션할 수 있는 무료 버전입니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                     <li><b>B/C 표준점수 로그 변환 연산</b></li>
@@ -2501,7 +2598,7 @@ def run():
     # =========================================================================
     if not st.session_state.user_id:
         with tab_signup:
-            st.write("### " + _("AHP 마스터 예타 분석 시스템 회원가입", "AHP Master YETA Sign Up"))
+            st.write("### " + _("AHP 마스터 예타 분석 솔루션 회원가입", "AHP Master YETA Sign Up"))
             
             agreements = signup_agreement.show_agreement_ui()
             

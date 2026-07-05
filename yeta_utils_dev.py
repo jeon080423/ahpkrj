@@ -143,33 +143,6 @@ def calculate_ahp_eigenvector_and_cr(matrix_size, matrix_data):
     except Exception as e:
         return None, None
 
-def improve_yeta_consistency(matrix_data, threshold=0.15, max_iter=500, learning_rate=0.6):
-    current_matrix = np.array(matrix_data, dtype=float)
-    n = current_matrix.shape[0]
-    weights, cr = calculate_ahp_eigenvector_and_cr(n, current_matrix)
-    if cr is None or cr <= threshold:
-        return weights, cr
-        
-    for _ in range(max_iter):
-        consistent_matrix = np.outer(weights, 1.0 / weights)
-        new_matrix = (current_matrix * (1 - learning_rate)) + (consistent_matrix * learning_rate)
-        np.fill_diagonal(new_matrix, 1.0)
-        
-        for i in range(n):
-            for j in range(i+1, n):
-                val = new_matrix[i, j]
-                if val < 1/9.0: val = 1/9.0
-                elif val > 9.0: val = 9.0
-                new_matrix[i, j] = val
-                new_matrix[j, i] = 1.0 / val
-                
-        current_matrix = new_matrix
-        weights, cr = calculate_ahp_eigenvector_and_cr(n, current_matrix)
-        if cr is None or cr <= threshold:
-            break
-            
-    return weights, cr
-
 def generate_yeta_excel_template(project_type, policy_factors=None, regional_factors=None, tech_factors=None):
     if not policy_factors: policy_factors = ["정책1", "정책2"]
     if not regional_factors: regional_factors = ["지역균형1", "지역균형2"]
@@ -228,24 +201,11 @@ def generate_yeta_excel_template(project_type, policy_factors=None, regional_fac
         
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        guide_data = {
-            "📊 데이터 입력 가이드": [
-                "1. 쌍대비교 및 대안평가 데이터 입력 (음수/양수 활용)",
-                "  - 왼쪽(시행) 항목이 더 중요하면: 음수 입력 (예: -3)",
-                "  - 오른쪽(미시행) 항목이 더 중요하면: 양수 입력 (예: 3)",
-                "  - 두 항목이 동등하게 중요하면: 1 입력",
-                "",
-                "2. 필수 정보 입력",
-                "  - A열(평가자_ID), B/C열에 그룹명 등 식별 정보를 입력합니다.",
-                "  - 모든 쌍대비교 칸에 빈칸 없이 숫자를 입력해 주시기 바랍니다."
-            ]
-        }
-        pd.DataFrame(guide_data).to_excel(writer, index=False, sheet_name='입력_가이드')
         df.to_excel(writer, index=False, sheet_name='YETA_AHP_Data')
         
     return output.getvalue()
 
-def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr=True):
+def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
     results = []
     
     from yeta_utils import convert_bc_to_ahp_pairwise, convert_lir_to_ahp_pairwise, aggregate_yeta_group_ahp
@@ -294,18 +254,12 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
                         for j in range(i+1, n):
                             col_name = f"쌍대비교_[{cat}]_{factors[i]}_vs_{factors[j]}(실수형)"
                             v = float(row.get(col_name, 1.0))
-                            if v == 0 or v == 1: 
-                                mat_v = 1.0
-                            elif v < 0: 
-                                mat_v = abs(v) # Left preferred
-                            else:
-                                mat_v = 1.0 / v # Right preferred
-                            mat[i, j] = mat_v
-                            mat[j, i] = 1.0 / mat_v
+                            if v < 0: v = abs(v) # basic robust fix
+                            if v == 0: v = 1.0
+                            mat[i, j] = v
+                            mat[j, i] = 1.0 / v
                             
                     weights, cr = calculate_ahp_eigenvector_and_cr(n, mat)
-                    if cr is not None and cr > 0.15 and auto_correct_cr:
-                        weights, cr = improve_yeta_consistency(mat, threshold=0.15)
                     if cr is None: cr = 0.0
                     max_cr = max(max_cr, cr)
                 elif n == 1:
@@ -317,13 +271,9 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
                 for i, factor in enumerate(factors):
                     alt_col = f"대안평가_[{cat}]_{factor}(시행선호_1~9_역수)"
                     alt_v = float(row.get(alt_col, 1.0))
-                    if alt_v == 0 or alt_v == 1:
-                        mat_alt_v = 1.0
-                    elif alt_v < 0:
-                        mat_alt_v = abs(alt_v) # Left (Implementation) preferred
-                    else:
-                        mat_alt_v = 1.0 / alt_v # Right (Non-implementation) preferred
-                    alt_go = mat_alt_v / (mat_alt_v + 1.0)
+                    if alt_v < 0: alt_v = abs(alt_v)
+                    if alt_v == 0: alt_v = 1.0
+                    alt_go = alt_v / (alt_v + 1.0)
                     cat_go += weights[i] * alt_go
                     
                 cat_scores[cat] = cat_go

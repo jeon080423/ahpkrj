@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime
+from yeta_db import get_event_settings
 
 def get_quotation_html(client_name, project_name, amount, plan_name):
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
