@@ -3291,7 +3291,6 @@ def run():
                     st.metric(_("단순 이탈 중단자 (Bounce)", "Bounced Visitors"), f"{stats['abandoned_bounce']}" + _("명", ""))
 
                 # 시각화 차트 추가
-                import plotly.express as px
 
                 chart_data = pd.DataFrame({
                     "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
