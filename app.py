@@ -18,6 +18,37 @@ try:
 except Exception:
     pass
 
+import sqlite3
+
+def migrate_db():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                  (id TEXT PRIMARY KEY, role TEXT, signup_date TEXT, pw TEXT, expiry_date TEXT, agree_info TEXT, 
+                   survey_count INTEGER DEFAULT 0, last_survey_link TEXT, plan_type TEXT, 
+                   event_applied TEXT, thesis_title TEXT, university TEXT, customer_type TEXT)''')
+    columns_to_add = [
+        ("survey_count", "INTEGER DEFAULT 0"),
+        ("last_survey_link", "TEXT"),
+        ("plan_type", "TEXT"),
+        ("event_applied", "TEXT"),
+        ("thesis_title", "TEXT"),
+        ("university", "TEXT"),
+        ("customer_type", "TEXT")
+    ]
+    for col_name, col_type in columns_to_add:
+        try:
+            c.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+            conn.commit()
+        except Exception:
+            pass
+    conn.close()
+
+try:
+    migrate_db()
+except Exception as e:
+    st.error(f"DB 마이그레이션 오류: {e}")
+
 # 2. Re-resolve language settings
 if 'lang' not in st.session_state:
     try:

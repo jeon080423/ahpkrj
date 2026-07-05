@@ -1776,7 +1776,7 @@ def send_approval_email(user_email):
         print(f"send_approval_email Error: {e}")
         return False
 
-# [신규 추가] 아라비아 숫자를 한국어 금액 명칭으로 변환 (예: 500000 -> 일금오십만원정)
+# 아라비아 숫자를 한국어 금액 명칭으로 변환 (예: 500000 -> 일금오십만원정)
 def num_to_kor(num):
     units = ["", "십", "백", "천"]
     g_units = ["", "만", "억", "조"]
@@ -1804,7 +1804,7 @@ def num_to_kor(num):
         kor = kor[1:]
     return f"일금 {kor}원정"
 
-# [신규 추가] 견적서 인쇄용 HTML 출력 (프레쉬인사이트 포맷 + CSS 도장 포함)
+# 견적서 인쇄용 HTML 출력 (프레쉬인사이트 포맷 + CSS 도장 포함)
 def get_quotation_html(client_name, project_name, amount, plan_name):
     import datetime
     import base64
@@ -1812,7 +1812,6 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
     today_str = today.strftime("%Y년 %m월 %d일")
     kor_amount = num_to_kor(amount)
     
-    # 실제 도장 이미지 로드 및 base64 인코딩
     stamp_b64 = ""
     try:
         with open("stamp.png", "rb") as f:
@@ -1941,7 +1940,7 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
 </html>
 """
 
-# [신규 추가] 계산서 신청 알림 메일 전송
+# 계산서 신청 알림 메일 전송
 def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
@@ -1999,9 +1998,7 @@ ID: {user_email}
         print(f"send_password_recovery_email Error: {e}")
         return False
 
-# --- DB CRUD ---
-
-def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31", survey_count=0, last_survey_link="", event_applied="", thesis_title="", university=""):
+def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31", survey_count=0, last_survey_link="", event_applied="", thesis_title="", university="", customer_type="standard"):
     try:
         client = get_gspread_client()
         if client:
@@ -2014,30 +2011,31 @@ def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9
             except Exception:
                 headers = []
             
-            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university']
-            if len(headers) < 11 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university']):
-                sheet.update(range_name='A1:K1', values=[expected_headers])
+            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university', 'customer_type']
+            if len(headers) < 12 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university', 'customer_type']):
+                sheet.update(range_name='A1:L1', values=[expected_headers])
             # ----------------------------------------
             
-            # [수정] 구글 시트 11개 컬럼 순서 보장
-            sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info, survey_count, last_survey_link, event_applied, thesis_title, university])
+            # [수정] 구글 시트 12개 컬럼 순서 보장
+            sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info, survey_count, last_survey_link, event_applied, thesis_title, university, customer_type])
     except Exception as e:
         st.error(f"Google Sheets 로깅 오류: {e}")
 
-def add_user(user_id, pw, role, agree_info="Y"):
+def add_user(user_id, pw, role, agree_info="Y", customer_type="standard"):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
     signup_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
     expiry_date = "9999-12-31"
     hashed_pw = hash_password(pw)
+    plan_type = 'yeta_free' if customer_type == 'yeta' else 'free'
     try:
-        # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link)
-        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, "", None))
+        # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type)
+        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, "", plan_type, customer_type))
         conn.commit()
-        # 11개 컬럼 호출에 맞춰 기본 빈값 전달
-        log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "", "", "", "")
+        # 12개 컬럼 호출에 맞춰 기본 빈값 및 고객 종류 전달
+        log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "", "", "", "", customer_type)
         success = True
     except sqlite3.IntegrityError:
         success = False
@@ -2123,17 +2121,23 @@ def check_login(user_id, pw):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     try:
-        c.execute("SELECT role, expiry_date, pw, plan_type FROM users WHERE id=?", (user_id,))
+        c.execute("SELECT role, expiry_date, pw, plan_type, customer_type FROM users WHERE id=?", (user_id,))
         row = c.fetchone()
     except sqlite3.OperationalError:
-        c.execute("SELECT role, expiry_date, pw FROM users WHERE id=?", (user_id,))
-        row = c.fetchone()
-        if row:
-            row = (row[0], row[1], row[2], None)
+        try:
+            c.execute("SELECT role, expiry_date, pw, plan_type FROM users WHERE id=?", (user_id,))
+            row = c.fetchone()
+            if row:
+                row = (row[0], row[1], row[2], row[3], "standard")
+        except sqlite3.OperationalError:
+            c.execute("SELECT role, expiry_date, pw FROM users WHERE id=?", (user_id,))
+            row = c.fetchone()
+            if row:
+                row = (row[0], row[1], row[2], None, "standard")
     conn.close()
     
     if row:
-        stored_role, stored_expiry, stored_pw, stored_plan = row
+        stored_role, stored_expiry, stored_pw, stored_plan, stored_customer = row
         hashed_pw = hash_password(pw)
         
         # 평문 패스워드가 정확히 일치하거나 해시 패스워드가 일치하는 경우
@@ -2141,7 +2145,7 @@ def check_login(user_id, pw):
             # 평문 패스워드로 로그인 성공한 경우, 즉시 해시 패스워드로 업데이트 (보안 승급)
             if stored_pw == pw:
                 upgrade_user_password_to_hash(user_id, pw)
-            return stored_role, stored_expiry, stored_plan
+            return stored_role, stored_expiry, stored_plan, stored_customer
             
     return None
 
@@ -2160,7 +2164,7 @@ def change_user_password(user_id, new_pw):
     c.execute("UPDATE users SET pw=? WHERE id=?", (hashed_pw, user_id))
     conn.commit()
     conn.close()
-
+ 
     try:
         client = get_gspread_client()
         if client:
@@ -2180,27 +2184,46 @@ def get_all_users():
     conn.close()
     return df
 
-def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None, event_applied=None, thesis_title=None, university=None):
+def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None, event_applied=None, thesis_title=None, university=None, customer_type=None):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    if plan_type:
-        if event_applied is not None:
-            if new_pw is not None and new_pw != "":
-                c.execute("UPDATE users SET pw=?, role=?, expiry_date=?, plan_type=?, event_applied=?, thesis_title=?, university=? WHERE id=?", 
-                          (new_pw, new_role, new_expiry, plan_type, event_applied, thesis_title, university, user_id))
-            else:
-                c.execute("UPDATE users SET role=?, expiry_date=?, plan_type=?, event_applied=?, thesis_title=?, university=? WHERE id=?", 
-                          (new_role, new_expiry, plan_type, event_applied, thesis_title, university, user_id))
-        else:
-            if new_pw is not None and new_pw != "":
-                c.execute("UPDATE users SET pw=?, role=?, expiry_date=?, plan_type=? WHERE id=?", (new_pw, new_role, new_expiry, plan_type, user_id))
-            else:
-                c.execute("UPDATE users SET role=?, expiry_date=?, plan_type=? WHERE id=?", (new_role, new_expiry, plan_type, user_id))
-    else:
-        if new_pw is not None and new_pw != "":
-            c.execute("UPDATE users SET pw=?, role=?, expiry_date=? WHERE id=?", (new_pw, new_role, new_expiry, user_id))
-        else:
-            c.execute("UPDATE users SET role=?, expiry_date=? WHERE id=?", (new_role, new_expiry, user_id))
+    
+    update_fields = []
+    update_params = []
+    
+    if new_pw is not None and new_pw != "":
+        update_fields.append("pw=?")
+        update_params.append(new_pw)
+    
+    update_fields.append("role=?")
+    update_params.append(new_role)
+    
+    update_fields.append("expiry_date=?")
+    update_params.append(new_expiry)
+    
+    if plan_type is not None:
+        update_fields.append("plan_type=?")
+        update_params.append(plan_type)
+        
+    if event_applied is not None:
+        update_fields.append("event_applied=?")
+        update_params.append(event_applied)
+        
+    if thesis_title is not None:
+        update_fields.append("thesis_title=?")
+        update_params.append(thesis_title)
+        
+    if university is not None:
+        update_fields.append("university=?")
+        update_params.append(university)
+        
+    if customer_type is not None:
+        update_fields.append("customer_type=?")
+        update_params.append(customer_type)
+        
+    update_params.append(user_id)
+    sql = f"UPDATE users SET {', '.join(update_fields)} WHERE id=?"
+    c.execute(sql, tuple(update_params))
     conn.commit()
     conn.close()
     
@@ -2216,53 +2239,45 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
             except Exception:
                 headers = []
             
-            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university']
-            if len(headers) < 11 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university']):
-                sheet.update(range_name='A1:K1', values=[expected_headers])
+            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university', 'customer_type']
+            if len(headers) < 12 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university', 'customer_type']):
+                sheet.update(range_name='A1:L1', values=[expected_headers])
             # ----------------------------------------
 
             cell = sheet.find(user_id)
             kst_today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
             
-            # SQLite DB에서 실제 저장된 기존 가입 날짜 조회 (가입일 훼손 방지)
+            # SQLite DB에서 실제 저장된 기존 가입 날짜 및 고객군 정보 조회
             db_signup_date = None
+            db_customer_type = "standard"
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
-            c.execute("SELECT signup_date FROM users WHERE id=?", (user_id,))
+            c.execute("SELECT signup_date, customer_type FROM users WHERE id=?", (user_id,))
             res = c.fetchone()
             if res:
                 db_signup_date = res[0]
+                db_customer_type = res[1] or "standard"
             conn.close()
             
             if cell:
                 row_num = cell.row
-                # 기존 데이터 보존을 위해 현재 시트 데이터 로드 (11개 컬럼까지 대비)
                 current_row_data = sheet.row_values(row_num)
-                # agree_info는 6번째 컬럼(index 5)에 있어야 합니다. 없으면 5번째(index 4) 혹은 기본값 "Y"
-                agree_info = current_row_data[5] if len(current_row_data) >= 6 else (current_row_data[4] if len(current_row_data) >= 5 else "Y")
-                
-                # 구글 시트 기존 가입일 확인
+                agree_info = current_row_data[5] if len(current_row_data) >= 6 else "Y"
                 sheet_signup_date = current_row_data[2] if len(current_row_data) >= 3 else None
-                
-                # DB의 가입일을 우선순위로 하고, 없으면 구글 시트 기존 가입일, 그마저도 없으면 kst_today 사용
                 final_signup_date = db_signup_date or sheet_signup_date or kst_today
-                
                 final_pw = new_pw if (new_pw and new_pw != "") else (current_row_data[3] if len(current_row_data) >= 4 else "")
-                
-                # 배포 통계 및 설문 링크 보존 (G:H 컬럼 대응)
                 survey_count_val = current_row_data[6] if len(current_row_data) >= 7 else 0
                 last_survey_link_val = current_row_data[7] if len(current_row_data) >= 8 else ""
-                
-                # 이벤트 데이터 보존 및 업데이트
                 event_applied_val = event_applied if event_applied is not None else (current_row_data[8] if len(current_row_data) >= 9 else "")
                 thesis_title_val = thesis_title if thesis_title is not None else (current_row_data[9] if len(current_row_data) >= 10 else "")
                 university_val = university if university is not None else (current_row_data[10] if len(current_row_data) >= 11 else "")
                 
-                # 시트 순서: ID, Role, SignupDate, PW, expiry_date, agree_info, survey_count, last_survey_link, event_applied, thesis_title, university (A:K)
-                sheet.update(range_name=f'A{row_num}:K{row_num}', values=[[
+                final_cust_type = customer_type or db_customer_type or (current_row_data[11] if len(current_row_data) >= 12 else "standard")
+                
+                sheet.update(range_name=f'A{row_num}:L{row_num}', values=[[
                     user_id, new_role, final_signup_date, final_pw, new_expiry, 
                     agree_info, survey_count_val, last_survey_link_val,
-                    event_applied_val, thesis_title_val, university_val
+                    event_applied_val, thesis_title_val, university_val, final_cust_type
                 ]])
             else:
                 final_pw = new_pw if (new_pw and new_pw != "") else ""
@@ -2270,9 +2285,10 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
                 event_applied_val = event_applied if event_applied is not None else ""
                 thesis_title_val = thesis_title if thesis_title is not None else ""
                 university_val = university if university is not None else ""
-                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, "", event_applied_val, thesis_title_val, university_val])
+                final_cust_type = customer_type or db_customer_type or "standard"
+                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, "", event_applied_val, thesis_title_val, university_val, final_cust_type])
     except Exception as e:
-        st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}") 
+        st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}")
 
 def delete_user(user_id):
     conn = sqlite3.connect('users.db')
@@ -9837,6 +9853,13 @@ with col_main:
             s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
             s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
             
+            s_cust_type = st.radio(
+                _("서비스 구분", "Service Type"),
+                options=["standard", "yeta"],
+                format_func=lambda x: _("일반/학술 분석용 AHP 마스터", "Standard AHP Master") if x == "standard" else _("예비타당성조사 종합평가(AHP) 분석기", "YETA AHP Analyzer"),
+                key="main_s_cust_type"
+            )
+            
             if st.button(_("가입신청", "Register"), key="main_btn_signup"):
                 if not agreements.get("agree_personal_info"):
                     st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
@@ -9847,7 +9870,7 @@ with col_main:
                 else:
                     restore_from_deleted_sheet(s_id.strip())
                     # 가입 시 무조건 'temp' 권한으로 배정
-                    if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y"):
+                    if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
                         st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
                         import time
                         time.sleep(2)
