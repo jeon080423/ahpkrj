@@ -1436,7 +1436,7 @@ def run():
                             summary_data.append({"평가항목": "**종합평가 (AHP)**", "가중치": "**1.000**", "평가 결과 (점수)": f"**{final_yeta_score:.3f}**", "비고": "**최종 결과값**"})
                             
                             st.write("#### " + _("[표] AHP를 이용한 종합평가 결과", "[Table] Comprehensive AHP Evaluation Results"))
-                            st.markdown(pd.DataFrame(summary_data).to_markdown(index=False))
+                            st.table(pd.DataFrame(summary_data))
                             st.markdown("<br>", unsafe_allow_html=True)
                         # ----------------------------------------
                         
