@@ -2415,7 +2415,7 @@ def run():
             # SECTION 1: 분석 환경 설정 (Settings)
             # ==========================================
             with st.container(border=True):
-                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {_('AHP 분석 설정', 'AHP Analysis Settings')}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {_('예타 종합평가(AHP) 가중치 설정', 'Yeta AHP Weights Settings')}</div>", unsafe_allow_html=True)
                 
                 project_type = st.selectbox(
                     _("사업 유형(모델) 선택", "Select Project Type (Model)"),
