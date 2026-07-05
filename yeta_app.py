@@ -2357,7 +2357,7 @@ def run():
     with tab_pricing:
         st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
 
-        col_p1, col_p2, col_p3 = st.columns(3)
+        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         user_id = st.session_state.get("user_id")
 
         # 1. 무료 체험판
@@ -2380,8 +2380,29 @@ def run():
             else:
                 st.components.v1.html(get_yeta_login_redirect_html("무료 체험판 (영구)", inner_html=inner_1, is_best=False), height=520)
 
+        # 2. 단건 분석권 (BEST)
+        with col_p2:
+            inner_2 = """
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>단건 분석권</h3>
+                <span style='color: #888; font-size: 1.1rem;'>프로젝트 1건, 2개월</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>300,000</span>원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>특정 예타 프로젝트 1건에 대해 인원 제한 없이 전문가 AHP 데이터 집계 및 아웃라이어 정제 분석을 수행합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>특정 프로젝트 1건, 2개월 분석</b></li>
+                    <li><b>평가자 수 제한 없음 (무제한)</b></li>
+                    <li><b>최대/최소 아웃라이어 제외 자동 연산</b></li>
+                    <li>보고서 제출용 Excel 원본 내보내기</li>
+                    <li>세금계산서 및 영수증 발행 지원</li>
+                </ul>
+            """
+            if user_id:
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "단건 분석권", 300000, 2, inner_html=inner_2, is_best=True), height=520)
+            else:
+                st.components.v1.html(get_yeta_login_redirect_html("단건 분석권", inner_html=inner_2, is_best=True), height=520)
+
         # 3. 연간 라이선스
-        with col_p2:  # 연간 라이선스
+        with col_p3:
             inner_3 = """
                 <h3 style='margin-top: 0 !important; margin-bottom: 0;'>연간 라이선스</h3>
                 <span style='color: #888; font-size: 1.1rem;'>연간 구독형</span>
@@ -2402,7 +2423,7 @@ def run():
                 st.components.v1.html(get_yeta_login_redirect_html("연간 라이선스", inner_html=inner_3, is_best=False), height=520)
 
         # 4. 부가 서비스 대행
-        with col_p3:  # 부가 서비스 대행
+        with col_p4:
             if user_id:
                 st.components.v1.html(get_yeta_portone_custom_services_html(user_id), height=520)
             else:
