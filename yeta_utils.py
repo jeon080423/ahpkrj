@@ -115,3 +115,169 @@ def aggregate_yeta_group_ahp(evaluator_scores):
     log_sum = sum(math.log(s) for s in filtered_scores if s > 0)
     geom_mean = math.exp(log_sum / len(filtered_scores))
     return geom_mean
+import pandas as pd
+import numpy as np
+import io
+
+def calculate_ahp_eigenvector_and_cr(matrix_size, matrix_data):
+    try:
+        eigvals, eigvecs = np.linalg.eig(matrix_data)
+        max_index = np.argmax(np.real(eigvals))
+        max_eigval = np.real(eigvals[max_index])
+        
+        principal_eigvec = np.real(eigvecs[:, max_index])
+        weights = principal_eigvec / np.sum(principal_eigvec)
+        
+        ri_dict = {1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49}
+        n = matrix_size
+        if n <= 2:
+            cr = 0.0
+        else:
+            ci = (max_eigval - n) / (n - 1)
+            ri = ri_dict.get(n, 1.49)
+            cr = ci / ri if ri > 0 else 0.0
+            
+        return weights, cr
+    except Exception as e:
+        return None, None
+
+def generate_yeta_excel_template(project_type):
+    columns = ["?‰ê???ID", "?Œì†_ë°??±ëª…", "?„ë¬¸_??• "]
+    
+    if project_type == "construction_non_capital":
+        columns.extend(["1ê³„ì¸µ_ê²½ì œ??%)", "1ê³„ì¸µ_?•ì±…??%)", "1ê³„ì¸µ_ì§€??· ?•ë°œ??%)"])
+    elif project_type == "construction_capital":
+        columns.extend(["1ê³„ì¸µ_ê²½ì œ??%)", "1ê³„ì¸µ_?•ì±…??%)"])
+    elif "rnd" in project_type:
+        columns.extend(["1ê³„ì¸µ_ê²½ì œ??%)", "1ê³„ì¸µ_ê¸°ìˆ ??%)", "1ê³„ì¸µ_?•ì±…??%)"])
+    else:
+        columns.extend(["1ê³„ì¸µ_ê²½ì œ??%)", "1ê³„ì¸µ_?•ì±…??%)"])
+        
+    columns.extend([
+        "?ë?ë¹„êµ_?•ì±…1_vs_?•ì±…2(?¤ìˆ˜??", 
+        "?ë?ë¹„êµ_?•ì±…1_vs_?•ì±…3(?¤ìˆ˜??", 
+        "?ë?ë¹„êµ_?•ì±…2_vs_?•ì±…3(?¤ìˆ˜??"
+    ])
+    
+    columns.extend([
+        "?€?ˆí‰ê°€_?•ì±…1(?œí–‰? í˜¸_1~9_??ˆ˜)",
+        "?€?ˆí‰ê°€_?•ì±…2(?œí–‰? í˜¸_1~9_??ˆ˜)",
+        "?€?ˆí‰ê°€_?•ì±…3(?œí–‰? í˜¸_1~9_??ˆ˜)"
+    ])
+    
+    df = pd.DataFrame(columns=columns)
+    for i in range(1, 11):
+        row_data = [f"E{i:02d}", "", ""]
+        if project_type == "construction_non_capital":
+            row_data.extend([40, 30, 30])
+        elif project_type == "construction_capital":
+            row_data.extend([60, 40])
+        elif "rnd" in project_type:
+            row_data.extend([40, 40, 20])
+        else:
+            row_data.extend([40, 60])
+            
+        row_data.extend([1.0, 3.0, 1/3])  # Sample pairwise
+        row_data.extend([5.0, 1.0, 1/5])  # Sample alternatives
+        df.loc[i-1] = row_data
+        
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='YETA_AHP_Data')
+        
+    return output.getvalue()
+
+def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
+    results = []
+    
+    # To avoid circular import, we call functions directly if they are in the same module
+    from yeta_utils import convert_bc_to_ahp_pairwise, convert_lir_to_ahp_pairwise, aggregate_yeta_group_ahp
+    
+    bc_pairwise = convert_bc_to_ahp_pairwise(bc_ratio)
+    bc_weight_go = bc_pairwise / (bc_pairwise + 1.0)
+    
+    lir_weight_go = 0.5
+    has_regional = False
+    if "non_capital" in project_type or project_type in ["other_bc", "other_ec"]:
+        has_regional = True
+        lir_pairwise = convert_lir_to_ahp_pairwise(lir_value)
+        lir_weight_go = lir_pairwise / (lir_pairwise + 1.0)
+        
+    for idx, row in df.iterrows():
+        try:
+            eval_id = row.get("?‰ê???ID", f"Evaluator_{idx+1}")
+            
+            w_econ = float(row.get("1ê³„ì¸µ_ê²½ì œ??%)", 0)) / 100.0
+            w_policy = float(row.get("1ê³„ì¸µ_?•ì±…??%)", 0)) / 100.0
+            w_tech = float(row.get("1ê³„ì¸µ_ê¸°ìˆ ??%)", 0)) / 100.0 if "rnd" in project_type else 0.0
+            w_reg = float(row.get("1ê³„ì¸µ_ì§€??· ?•ë°œ??%)", 0)) / 100.0 if has_regional else 0.0
+            
+            total_w = w_econ + w_policy + w_tech + w_reg
+            if total_w > 0:
+                w_econ /= total_w; w_policy /= total_w; w_tech /= total_w; w_reg /= total_w
+                
+            v12 = float(row.get("?ë?ë¹„êµ_?•ì±…1_vs_?•ì±…2(?¤ìˆ˜??", 1.0))
+            v13 = float(row.get("?ë?ë¹„êµ_?•ì±…1_vs_?•ì±…3(?¤ìˆ˜??", 1.0))
+            v23 = float(row.get("?ë?ë¹„êµ_?•ì±…2_vs_?•ì±…3(?¤ìˆ˜??", 1.0))
+            
+            mat = np.array([
+                [1.0, v12, v13],
+                [1.0/v12, 1.0, v23],
+                [1.0/v13, 1.0/v23, 1.0]
+            ])
+            
+            policy_weights, cr = calculate_ahp_eigenvector_and_cr(3, mat)
+            if cr is None: cr = 0.0
+            
+            alt_p1 = float(row.get("?€?ˆí‰ê°€_?•ì±…1(?œí–‰? í˜¸_1~9_??ˆ˜)", 1.0))
+            alt_p2 = float(row.get("?€?ˆí‰ê°€_?•ì±…2(?œí–‰? í˜¸_1~9_??ˆ˜)", 1.0))
+            alt_p3 = float(row.get("?€?ˆí‰ê°€_?•ì±…3(?œí–‰? í˜¸_1~9_??ˆ˜)", 1.0))
+            
+            w_alt_p1_go = alt_p1 / (alt_p1 + 1.0)
+            w_alt_p2_go = alt_p2 / (alt_p2 + 1.0)
+            w_alt_p3_go = alt_p3 / (alt_p3 + 1.0)
+            
+            policy_go = policy_weights[0]*w_alt_p1_go + policy_weights[1]*w_alt_p2_go + policy_weights[2]*w_alt_p3_go
+            
+            final_go = w_econ * bc_weight_go + w_policy * policy_go + w_reg * lir_weight_go
+            if "rnd" in project_type:
+                final_go += w_tech * 0.5  # Mock tech score
+                
+            cr_pass = "PASS" if cr <= 0.15 else "FAIL"
+            
+            results.append({
+                "?‰ê???ID": eval_id,
+                "CR": cr,
+                "CR?µê³¼": cr_pass,
+                "?œí–‰?ìˆ˜": final_go,
+                "ë¯¸ì‹œ?‰ì ??: 1.0 - final_go
+            })
+            
+        except Exception as e:
+            results.append({
+                "?‰ê???ID": row.get("?‰ê???ID", f"Row_{idx+1}"),
+                "CR": 0.0,
+                "CR?µê³¼": f"ERROR",
+                "?œí–‰?ìˆ˜": 0.0,
+                "ë¯¸ì‹œ?‰ì ??: 1.0
+            })
+            
+    res_df = pd.DataFrame(results)
+    
+    valid_df = res_df[res_df["CR?µê³¼"] == "PASS"].copy()
+    valid_df["ê·¹ë‹¨ê°’ë°°??] = "?¬í•¨"
+    
+    if len(valid_df) >= 3:
+        max_idx = valid_df["?œí–‰?ìˆ˜"].idxmax()
+        min_idx = valid_df["?œí–‰?ìˆ˜"].idxmin()
+        valid_df.loc[max_idx, "ê·¹ë‹¨ê°’ë°°??] = "ë°°ì œ(Max)"
+        valid_df.loc[min_idx, "ê·¹ë‹¨ê°’ë°°??] = "ë°°ì œ(Min)"
+        
+    res_df = res_df.merge(valid_df[["?‰ê???ID", "ê·¹ë‹¨ê°’ë°°??]], on="?‰ê???ID", how="left")
+    res_df["ê·¹ë‹¨ê°’ë°°??] = res_df["ê·¹ë‹¨ê°’ë°°??].fillna("?œì™¸(CR Fail/Error)")
+    
+    final_scores = valid_df[valid_df["ê·¹ë‹¨ê°’ë°°??] == "?¬í•¨"]["?œí–‰?ìˆ˜"].tolist()
+    geom_mean = aggregate_yeta_group_ahp(final_scores) if final_scores else 0.0
+    
+    return res_df, geom_mean
+

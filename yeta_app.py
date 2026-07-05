@@ -2405,7 +2405,11 @@ def run():
     with tab_analysis:
         st.write("### " + _("예비타당성조사 AHP 종합평가 연산", "Preliminary Feasibility AHP Synthesis"))
         
-        # 1. Project Type & Guideline Limits Selection
+        # ==========================================
+        # SECTION 1: 분석 환경 설정 (Settings)
+        # ==========================================
+        st.markdown(f"### {_('환경 설정 및 기초 데이터 입력', 'Settings & Base Data')}")
+        
         col_proj_type, col_proj_limits = st.columns([1.5, 2.5], gap="large")
         with col_proj_type:
             project_type = st.selectbox(
@@ -2438,27 +2442,10 @@ def run():
         
         st.markdown("---")
         
-        # User Tier Check
-        is_official = False
-        if st.session_state.get("user_id"):
-            if st.session_state.get("user_role") in ["official", "admin"]:
-                is_official = True
-            else:
-                try:
-                    conn = sqlite3.connect('users.db')
-                    c = conn.cursor()
-                    c.execute("SELECT role FROM users WHERE id=?", (st.session_state.user_id,))
-                    res = c.fetchone()
-                    if res and res[0] in ["official", "admin"]:
-                        is_official = True
-                    conn.close()
-                except:
-                    pass
-                
         col_inputs1, col_inputs2 = st.columns(2, gap="large")
         
         with col_inputs1:
-            st.markdown(f"#### 1. {_("기초 정량 데이터 입력", "Input Quantitative Data")}")
+            st.markdown(f"#### 1. {_('기초 정량 데이터 입력', 'Input Quantitative Data')}")
             bc_ratio = st.number_input(_("경제성 분석 결과 (B/C 비율)", "B/C Ratio"), min_value=0.0, max_value=10.0, value=1.05, step=0.05)
             
             has_regional = "non_capital" in p_type or p_type == "other_bc" or p_type == "other_ec"
@@ -2469,7 +2456,7 @@ def run():
                 st.text_input(_("지역낙후도 표준화지수 (LIR/MIR)", "Regional Backwardness Index (LIR/MIR)"), value="수도권/해당없음 (제외)", disabled=True)
 
         with col_inputs2:
-            st.markdown(f"#### 2. {_("제1계층 상수합 가중치 설정 (%)", "Set Level 1 Weights (%)")}")
+            st.markdown(f"#### 2. {_('제1계층 상수합 가중치 설정 (%)', 'Set Level 1 Weights (%)')}")
             
             if "rnd" in p_type:
                 econ_w = st.slider(_("경제성 분석 가중치", "Economics Weight"), 0, 100, 30) / 100.0
@@ -2493,98 +2480,85 @@ def run():
                 st.warning(_("가중치 지침 미부합: ", "Weights Warning: ") + w_msg)
 
         st.markdown("---")
-        st.markdown(f"#### 3. {_("전문가 설문 데이터 종합", "Expert Survey Data Synthesis")}")
         
-        max_free_evals = 3
-        use_mock = st.checkbox(_("샘플 데이터로 분석 시뮬레이션 (Excel 업로드 생략)", "Simulate with Sample Data"), value=True)
-        evaluator_scores = []
+        # ==========================================
+        # SECTION 2: 엑셀 데이터 업로드 및 분석 (Upload & Analyze)
+        # ==========================================
+        st.markdown(f"### {_('엑셀 데이터 업로드 및 결과 분석', 'Upload Excel Data & Analyze')}")
         
-        if use_mock:
-            if not is_official:
-                st.warning(f"⚠️ 무료 사용자는 최대 {max_free_evals}명의 설문 데이터만 분석 가능합니다. (정식 결제 시 무제한 분석 가능)")
-                evaluator_scores = [0.52, 0.48, 0.56][:max_free_evals]
+        # User Tier Check
+        is_official = False
+        if st.session_state.get("user_id"):
+            if st.session_state.get("user_role") in ["official", "admin"]:
+                is_official = True
             else:
-                st.info(_("8명의 전문가 설문 결과를 기준으로 예타 AHP 연산을 시뮬레이션합니다.", "Simulating AHP calculations based on 8 expert responses."))
-                evaluator_scores = [0.52, 0.48, 0.56, 0.61, 0.54, 0.49, 0.57, 0.45]
-        else:
-            uploaded_file = st.file_uploader(_("AHP 코딩 엑셀 데이터 파일 업로드 (.xlsx)", "Upload AHP Coding Excel File (.xlsx)"), type=["xlsx"])
-            if uploaded_file is not None:
-                st.info("엑셀 파싱 및 개별 평가자 연산을 수행합니다.")
-                if not is_official:
+                try:
+                    conn = sqlite3.connect('users.db')
+                    c = conn.cursor()
+                    c.execute("SELECT role FROM users WHERE id=?", (st.session_state.user_id,))
+                    res = c.fetchone()
+                    if res and res[0] in ["official", "admin"]:
+                        is_official = True
+                    conn.close()
+                except:
+                    pass
+
+        uploaded_file = st.file_uploader(_("AHP 코딩 엑셀 데이터 파일 업로드 (.xlsx)", "Upload AHP Coding Excel File (.xlsx)"), type=["xlsx"])
+        
+        if uploaded_file is not None:
+            try:
+                import pandas as pd
+                df = pd.read_excel(uploaded_file)
+                st.success(_("데이터 로드 성공!", "Data loaded successfully!"))
+                
+                max_free_evals = 3
+                if not is_official and len(df) > max_free_evals:
                     st.warning(f"⚠️ 무료 사용자는 최대 {max_free_evals}명의 설문 데이터만 분석 가능합니다. (정식 결제 시 무제한 분석 가능)")
-                    evaluator_scores = [0.52, 0.48, 0.56][:max_free_evals]
-                else:
-                    evaluator_scores = [0.52, 0.48, 0.56, 0.61, 0.54, 0.49, 0.57, 0.45]
+                    df = df.head(max_free_evals)
+                    
+                # Call independent AHP logic
+                res_df, final_yeta_score = yeta_utils.process_yeta_ahp_data(df, p_type, bc_ratio, lir_value)
                 
-        if evaluator_scores:
-            bc_pairwise = yeta_utils.convert_bc_to_ahp_pairwise(bc_ratio)
-            bc_weight_go = bc_pairwise / (bc_pairwise + 1.0)
-            
-            lir_pairwise = yeta_utils.convert_lir_to_ahp_pairwise(lir_value)
-            lir_weight_go = lir_pairwise / (lir_pairwise + 1.0)
-            
-            final_scores_go = []
-            for idx, q_score in enumerate(evaluator_scores):
-                if "rnd" in p_type:
-                    score_go = bc_weight_go * econ_w + q_score * (tech_w + policy_w)
-                else:
-                    if has_regional:
-                        reg_go = lir_weight_go * 0.5 + q_score * 0.5
-                        score_go = bc_weight_go * econ_w + q_score * policy_w + reg_go * regional_w
-                    else:
-                        score_go = bc_weight_go * econ_w + q_score * policy_w
-                final_scores_go.append(score_go)
+                st.markdown("### " + _("예비타당성조사 AHP 종합평가 결과", "Preliminary Feasibility AHP Results"))
                 
-            final_yeta_score = yeta_utils.aggregate_yeta_group_ahp(final_scores_go)
-            
-            st.markdown("### " + _("예비타당성조사 AHP 종합평가 결과", "Preliminary Feasibility AHP Results"))
-            
-            is_pass = final_yeta_score >= 0.5
-            card_class = "verdict-pass" if is_pass else "verdict-fail"
-            verdict_text = _("사업 타당성 확보 (시행)", "Project Feasible (Go)") if is_pass else _("사업 타당성 미흡 (미시행)", "Project Not Feasible (Stop)")
-            
-            st.markdown(f"""
-            <div class="verdict-card {card_class}">
-                <div class="verdict-title">{_("최종 종합 평가 판정", "Final Comprehensive Evaluation Verdict")}</div>
-                <div class="verdict-score">{final_yeta_score:.3f}</div>
-                <div style="font-size: 1.3rem; font-weight: bold;">{verdict_text}</div>
-                <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.85;">
-                    {_("KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보", "MoEF & KDI standard: Feasible when AHP score >= 0.5")}
+                is_pass = final_yeta_score >= 0.5
+                card_class = "verdict-pass" if is_pass else "verdict-fail"
+                verdict_text = _("사업 타당성 확보 (시행)", "Project Feasible (Go)") if is_pass else _("사업 타당성 미흡 (미시행)", "Project Not Feasible (Stop)")
+                
+                st.markdown(f"""
+                <div class="verdict-card {card_class}">
+                    <div class="verdict-title">{_("최종 종합 평가 판정", "Final Comprehensive Evaluation Verdict")}</div>
+                    <div class="verdict-score">{final_yeta_score:.3f}</div>
+                    <div style="font-size: 1.3rem; font-weight: bold;">{verdict_text}</div>
+                    <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.85;">
+                        {_("KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보", "MoEF & KDI standard: Feasible when AHP score >= 0.5")}
+                    </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.write("#### " + _("평가자별 점수 분포 (극단값 제외 처리 현황)", "Evaluator Score Distribution"))
-            
-            sorted_scores = sorted(final_scores_go)
-            df_evals = pd.DataFrame({
-                _("평가자 구분", "Evaluator"): [f"Expert {i+1}" for i in range(len(sorted_scores))],
-                _("최종 AHP 점수 (사업시행)", "Final AHP Score (Go)"): sorted_scores,
-                _("배제 여부", "Status"): [_("최소값 배제 (아웃라이어)", "Excluded (Min)") if i == 0 and len(sorted_scores) >= 3 else (_("최대값 배제 (아웃라이어)", "Excluded (Max)") if i == len(sorted_scores)-1 and len(sorted_scores) >= 3 else _("집계 반영", "Included")) for i in range(len(sorted_scores))]
-            })
-            
-            st.dataframe(df_evals, use_container_width=True)
-            
-            fig = go.Figure()
-            fig.add_trace(go.Bar(
-                x=[f"Expert {i+1}" for i in range(len(sorted_scores))],
-                y=sorted_scores,
-                marker_color=['#E53E3E' if i == 0 and len(sorted_scores) >= 3 else ('#3182CE' if i == len(sorted_scores)-1 and len(sorted_scores) >= 3 else '#4A5568') for i in range(len(sorted_scores))],
-                text=[f"{s:.3f}" for s in sorted_scores],
-                textposition='auto',
-                name="AHP Score"
-            ))
-            fig.add_shape(type="line",
-                x0=-0.5, y0=0.5, x1=len(sorted_scores)-0.5, y1=0.5,
-                line=dict(color="Red", width=2, dash="dash"),
-                name="Pass Threshold (0.5)"
-            )
-            fig.update_layout(
-                title=_("평가자별 점수 분포 및 제외값 시각화", "Evaluator Scores & Exclusion Visualization"),
-                yaxis=dict(title=_("AHP 종합점수 (사업시행)", "AHP Score (Go)"), range=[0.0, 1.0]),
-                showlegend=False
-            )
-            st.plotly_chart(fig, use_container_width=True)
+                """, unsafe_allow_html=True)
+                
+                st.write("#### " + _("평가자별 점수 분포 및 제외 처리 현황", "Evaluator Score Distribution & Exclusion"))
+                st.dataframe(res_df, use_container_width=True)
+                
+            except Exception as e:
+                st.error(f"엑셀 분석 중 오류가 발생했습니다: {str(e)}")
+
+        st.markdown("---")
+        
+        # ==========================================
+        # SECTION 3: 엑셀 펀칭 폼 템플릿 생성 (Template Download)
+        # ==========================================
+        st.markdown(f"### {_('설문 응답 펀칭 템플릿 다운로드', 'Download Survey Punching Template')}")
+        st.info(_("현재 설정된 사업 모델(유형)에 맞춘 빈 엑셀 펀칭 폼을 다운로드합니다.", "Download an empty Excel punching form tailored to the current project model setting."))
+        
+        template_bytes = yeta_utils.generate_yeta_excel_template(p_type)
+        st.download_button(
+            label=_("엑셀 템플릿 다운로드", "Download Excel Template"),
+            data=template_bytes,
+            file_name=f"yeta_ahp_template_{p_type}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary"
+        )
+
 
     # =========================================================================
     # TAB 2: Yeta Survey Creator
