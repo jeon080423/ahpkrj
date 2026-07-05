@@ -45,7 +45,9 @@ mode = st.session_state.get("mode")
 # 4. Route to standard_app or yeta_app
 if mode == "yeta":
     import yeta_app
-    importlib.reload(yeta_app)
+    yeta_app.run()
 else:
+    import sys
+    if "standard_app" in sys.modules:
+        del sys.modules["standard_app"]
     import standard_app
-    importlib.reload(standard_app)
