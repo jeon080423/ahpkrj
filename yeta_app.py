@@ -2646,7 +2646,18 @@ def run():
         
         st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
         survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=_("재정투자사업 종합평가(AHP) 전문가 설문", "Expert AHP Survey for Preliminary Feasibility Study"))
-        survey_desc = st.text_area(_("설문 안내문", "Instructions"), value=_("본 설문조사는 정부 예비타당성조사 지침에 따라 사업의 종합적인 추진 타당성을 계층 분석(AHP)하기 위한 용도로 사용됩니다.", "This survey is used for Analytic Hierarchy Process (AHP) comprehensive evaluation in accordance with government guidelines."))
+        default_survey_desc = _(
+            "안녕하십니까, 전문가님.\n"
+            "본 설문은 KDI 예비타당성조사 수행 지침에 의거하여, 해당 재정투자사업의 타당성 및 추진 여부를 최종 판단하기 위한 '종합평가(AHP)' 용도로 기획되었습니다.\n\n"
+            "전문가님께서는 제공된 'AHP 자료집' 및 사업 개요를 충분히 숙지하신 후, 각 평가항목(경제성, 정책성, 지역균형발전, 기술성 등) 간의 상대적 중요도를 평가해주시기 바랍니다.\n\n"
+            "■ 주요 평가 유의사항\n"
+            "1. (제1계층 평가) 대분류 항목 간의 상대적 중요도를 '총합이 100'이 되도록 배분해 주십시오. (상수합법)\n"
+            "2. (제2계층 평가) 세부 항목 간 쌍대비교 시, 두 항목 중 더 중요하다고 판단되는 쪽으로 9점 척도 기준 가중치를 부여해 주십시오.\n"
+            "3. 설문 응답의 일관성 비율(CR)이 권고 수준(0.15 미만)을 유지할 수 있도록 논리적인 평가를 당부드립니다.\n\n"
+            "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다.",
+            "Hello, Expert.\nThis survey is designed to comprehensively evaluate the feasibility of the proposed public investment project using the AHP method based on KDI guidelines..."
+        )
+        survey_desc = st.text_area(_("설문 안내문", "Instructions"), value=default_survey_desc, height=250)
         
         project_desc = st.text_area(_("사업 개요 설명", "Project Overview Description"), placeholder="응답자가 사업 내용을 파악할 수 있도록 주요 사업 개요를 입력하세요.")
         project_url = st.text_input(_("사업 설명 자료 첨부 (URL 링크)", "Project Material Link (URL)"), placeholder="예: 구글 드라이브, 노션 링크 등 (응답자가 다운로드/열람할 수 있는 외부 링크)")
