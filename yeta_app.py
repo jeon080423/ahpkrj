@@ -2831,14 +2831,17 @@ def run():
                     flex-direction: row !important;
                     gap: 0px !important;
                 }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1) {
                     width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
                 }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
                     width: 70% !important; min-width: 70% !important; flex: 1 1 70% !important;
                 }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
                     width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
+                }
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stRadio"] {
+                    width: 100% !important;
                 }
                 </style>
                 """
@@ -2896,21 +2899,6 @@ def run():
                                 horizontal=True,
                                 label_visibility="collapsed"
                             )
-                            # 가상의 CR 가이드 바 (Mockup 용) 첫 번째 항목에만 예시로 표시
-                            if i == 0:
-                                bar_html = '<div style="display: flex; width: 100%; height: 32px; margin-top: -32px; z-index: 10; position: relative; pointer-events: none;">'
-                                start_idx, end_idx = 6, 10  # 대략 중간 범위 (동등 및 약한 중요도) 하이라이트 예시
-                                for j in range(17):
-                                    is_valid = start_idx <= j <= end_idx
-                                    bg_color = "rgba(59, 130, 246, 0.25)" if is_valid else "transparent"
-                                    radius = ""
-                                    if j == start_idx:
-                                        radius += "border-top-left-radius: 6px; border-bottom-left-radius: 6px; "
-                                    if j == end_idx:
-                                        radius += "border-top-right-radius: 6px; border-bottom-right-radius: 6px; "
-                                    bar_html += f'<div style="flex: 1 1 0%; background-color: {bg_color}; {radius}"></div>'
-                                bar_html += '</div>'
-                                st.markdown(bar_html, unsafe_allow_html=True)
                                 
                         with row_cols[2]:
                             st.markdown(f"""
