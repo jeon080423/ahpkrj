@@ -2674,6 +2674,7 @@ def run():
         # Depending on project type, show expanders for factor descriptions.
         with st.expander("📝 1계층 및 2계층 평가항목 상세 설명 설정", expanded=True):
             st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
+            st.markdown("<div style='margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 1계층 평가항목</div>", unsafe_allow_html=True)
             st.text_input("경제성(Economic Feasibility) 설명", placeholder="예: 사업의 B/C 비율 등 경제적 타당성을 평가합니다.")
             st.text_input("정책성(Policy Feasibility) 설명", placeholder="예: 정책의 일관성, 추진 의지 등 정책적 타당성을 평가합니다.")
             if "비수도권" in yeta_p_type:
@@ -2681,8 +2682,19 @@ def run():
             if "R&D" in yeta_p_type:
                 st.text_input("기술성(Technical Feasibility) 설명", placeholder="예: 기술개발의 성공 가능성 및 기술적 파급효과 등을 평가합니다.")
             
-            st.text_input("정책성 하위: 사업추진 여건 설명", placeholder="관련 부처의 의지 및 주민 태도 등을 포함합니다.")
-            st.text_input("정책성 하위: 정책효과 설명", placeholder="일자리 창출, 환경성, 안전성 등 사회적 가치를 평가합니다.")
+            st.markdown("<hr style='margin: 15px 0px; border-color: #cbd5e1;'>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 2계층 평가항목 (쌍대비교 하위 요인)</div>", unsafe_allow_html=True)
+            
+            for f in policy_factors:
+                st.text_input(f"정책성 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
+                
+            if "비수도권" in yeta_p_type and regional_factors:
+                for f in regional_factors:
+                    st.text_input(f"지역균형발전 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
+                    
+            if "R&D" in yeta_p_type and tech_factors:
+                for f in tech_factors:
+                    st.text_input(f"과학기술성 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
 
         st.markdown("#### 섹션 1.5: 응답자 수집 정보 및 그룹 분류")
         with st.container(border=True):
