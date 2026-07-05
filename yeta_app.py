@@ -2756,24 +2756,20 @@ def run():
                     b_eco, b_pol, b_reg = (0, 100, 40), (0, 100, 30), (0, 100, 30)
                     reg_label = "지역균형발전"
                 
-                v1 = st.slider(f"경제성 (허용범위: {b_eco[0]}~{b_eco[1]})", 0, 100, b_eco[2], key="prev_v1")
-                v2 = st.slider(f"정책성 (허용범위: {b_pol[0]}~{b_pol[1]})", 0, 100, b_pol[2], key="prev_v2")
+                def enforce_slider_bounds(key, min_val, max_val, label):
+                    val = st.session_state[key]
+                    if val < min_val or val > max_val:
+                        st.session_state[key] = max(min_val, min(max_val, val))
+                        st.toast(f"⚠️ {label} 허용범위는 {min_val}% ~ {max_val}% 입니다.")
+                
+                v1 = st.slider(f"경제성 (허용범위: {b_eco[0]}~{b_eco[1]})", 0, 100, b_eco[2], key="prev_v1", on_change=enforce_slider_bounds, args=("prev_v1", b_eco[0], b_eco[1], "경제성"))
+                v2 = st.slider(f"정책성 (허용범위: {b_pol[0]}~{b_pol[1]})", 0, 100, b_pol[2], key="prev_v2", on_change=enforce_slider_bounds, args=("prev_v2", b_pol[0], b_pol[1], "정책성"))
                 v3 = 0
                 if b_reg:
-                    v3 = st.slider(f"{reg_label} (허용범위: {b_reg[0]}~{b_reg[1]})", 0, 100, b_reg[2], key="prev_v3")
-                
-                valid_v1 = b_eco[0] <= v1 <= b_eco[1]
-                valid_v2 = b_pol[0] <= v2 <= b_pol[1]
-                valid_v3 = True
-                if b_reg:
-                    valid_v3 = b_reg[0] <= v3 <= b_reg[1]
-                
-                if not valid_v1: st.error(f"⚠️ 경제성 입력값이 허용 범위({b_eco[0]}~{b_eco[1]})를 벗어났습니다.")
-                if not valid_v2: st.error(f"⚠️ 정책성 입력값이 허용 범위({b_pol[0]}~{b_pol[1]})를 벗어났습니다.")
-                if b_reg and not valid_v3: st.error(f"⚠️ {reg_label} 입력값이 허용 범위({b_reg[0]}~{b_reg[1]})를 벗어났습니다.")
+                    v3 = st.slider(f"{reg_label} (허용범위: {b_reg[0]}~{b_reg[1]})", 0, 100, b_reg[2], key="prev_v3", on_change=enforce_slider_bounds, args=("prev_v3", b_reg[0], b_reg[1], reg_label))
                 
                 total_sum = v1 + v2 + v3
-                all_valid = valid_v1 and valid_v2 and valid_v3 and (total_sum == 100)
+                all_valid = (total_sum == 100)
                 
                 color = "#16a34a" if all_valid else "#dc2626"
                 st.markdown(f"<div style='text-align: right; font-size: 1.1em; font-weight: bold;'>합계: <span style='color: {color};'>{total_sum}</span> / 100</div>", unsafe_allow_html=True)
