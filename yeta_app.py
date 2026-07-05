@@ -2540,80 +2540,75 @@ def run():
 
 
     # =========================================================================
+    # =========================================================================
     # TAB 1.5: Yeta Excel Template Generator
     # =========================================================================
     with tab_excel:
-        st.write("### " + _("예비타당성조사 AHP 코딩 엑셀 양식 다운로드", "Download Yeta AHP Coding Excel Form"))
+        st.write("### " + _("예비타당성조사 AHP 코딩 엑셀 양식 설정 및 다운로드", "Setup & Download Yeta AHP Coding Excel Form"))
         st.markdown("<br>", unsafe_allow_html=True)
         
-        ex_main_col, ex_settings_col = st.columns([3.0, 1.2], gap="large")
+        st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 10px;'><i class='fas fa-check-circle'></i> 1단계: 분석 모델(사업 유형) 선택</h4>", unsafe_allow_html=True)
+        with st.container(border=True):
+            excel_project_type = st.selectbox(
+                _("대상 사업 유형", "Select Project Type"),
+                options=[
+                    ("construction_non_capital", _("건설사업 (비수도권)", "Construction (Non-capital)")),
+                    ("construction_capital", _("건설사업 (수도권)", "Construction (Capital)")),
+                    ("rnd_bc", _("R&D사업 (B/C)", "R&D (B/C)")),
+                    ("rnd_ec", _("R&D사업 (E/C)", "R&D (E/C)")),
+                    ("other_bc", _("기타 재정사업 (B/C)", "Other Fiscal (B/C)")),
+                    ("other_ec", _("기타 재정사업 (E/C)", "Other Fiscal (E/C)"))
+                ],
+                format_func=lambda x: x[1],
+                key="yeta_excel_project_type_select"
+            )
+            ex_p_type = excel_project_type[0]
+            
+            if "rnd" in ex_p_type:
+                st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 과학기술성", "📊 Fixed Level 1: Economics, Policy, Science/Tech"))
+            elif "capital" in ex_p_type and "non" not in ex_p_type:
+                st.info(_("📊 1계층 고정 항목: 경제성, 정책성", "📊 Fixed Level 1: Economics, Policy"))
+            else:
+                st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 지역균형발전", "📊 Fixed Level 1: Economics, Policy, Regional Balance"))
         
-        with ex_settings_col:
-            with st.container(border=True):
-                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {_('분석 모델 설정', 'Analysis Model Settings')}</div>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 25px;'><i class='fas fa-list'></i> 2단계: 2계층 평가 요인 커스터마이징</h4>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.caption(_("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요. 입력한 요인 개수에 맞춰 쌍대비교 폼이 자동 계산됩니다.", "Enter sub-factors separated by commas according to the project characteristics. Pairwise forms are auto-calculated."))
+            
+            policy_input = st.text_input(_("정책성 하위 요인", "Policy Factors"), value="정책의 일관성, 사업추진상의 위험요인")
+            policy_factors = [x.strip() for x in policy_input.split(",") if x.strip()]
+            
+            regional_factors = []
+            if "non_capital" in ex_p_type or "other" in ex_p_type:
+                reg_input = st.text_input(_("지역균형발전 하위 요인", "Regional Factors"), value="지역경제 파급효과, 지역개발계획과의 부합성")
+                regional_factors = [x.strip() for x in reg_input.split(",") if x.strip()]
                 
-                excel_project_type = st.selectbox(
-                    _("사업 유형(모델) 선택", "Select Project Type (Model)"),
-                    options=[
-                        ("construction_non_capital", _("건설사업 (비수도권)", "Construction (Non-capital)")),
-                        ("construction_capital", _("건설사업 (수도권)", "Construction (Capital)")),
-                        ("rnd_bc", _("R&D사업 (B/C)", "R&D (B/C)")),
-                        ("rnd_ec", _("R&D사업 (E/C)", "R&D (E/C)")),
-                        ("other_bc", _("기타 재정사업 (B/C)", "Other Fiscal (B/C)")),
-                        ("other_ec", _("기타 재정사업 (E/C)", "Other Fiscal (E/C)"))
-                    ],
-                    format_func=lambda x: x[1],
-                    key="yeta_excel_project_type_select"
-                )
-                ex_p_type = excel_project_type[0]
-                
-                if "rnd" in ex_p_type:
-                    st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 과학기술성", "📊 Fixed Level 1: Economics, Policy, Science/Tech"))
-                elif "capital" in ex_p_type and "non" not in ex_p_type:
-                    st.info(_("📊 1계층 고정 항목: 경제성, 정책성", "📊 Fixed Level 1: Economics, Policy"))
-                else:
-                    st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 지역균형발전", "📊 Fixed Level 1: Economics, Policy, Regional Balance"))
-                
-                st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
-                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('2계층 평가 요인 커스터마이징', 'Customize Level 2 Factors')}</div>", unsafe_allow_html=True)
-                st.caption(_("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요.", "Enter sub-factors separated by commas according to the project characteristics."))
-                
-                policy_input = st.text_input(_("정책성 하위 요인", "Policy Factors"), value="정책의 일관성, 사업추진상의 위험요인")
-                policy_factors = [x.strip() for x in policy_input.split(",") if x.strip()]
-                
-                regional_factors = []
-                if "non_capital" in ex_p_type or "other" in ex_p_type:
-                    reg_input = st.text_input(_("지역균형 하위 요인", "Regional Factors"), value="지역경제 파급효과, 지역개발계획과의 부합성")
-                    regional_factors = [x.strip() for x in reg_input.split(",") if x.strip()]
-                    
-                tech_factors = []
-                if "rnd" in ex_p_type:
-                    tech_input = st.text_input(_("기술성 하위 요인", "Tech Factors"), value="기술개발계획의 적절성, 기술개발 성공가능성, 중복성")
-                    tech_factors = [x.strip() for x in tech_input.split(",") if x.strip()]
+            tech_factors = []
+            if "rnd" in ex_p_type:
+                tech_input = st.text_input(_("과학기술성 하위 요인", "Tech Factors"), value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성")
+                tech_factors = [x.strip() for x in tech_input.split(",") if x.strip()]
 
-        with ex_main_col:
-            with st.container(border=True):
-                st.markdown(f"<h3 style='color: #047857; margin-bottom: 10px; font-size: 1.3rem;'><i class='fas fa-file-excel'></i> {_('맞춤형 예타 AHP 엑셀 폼 생성기', 'Custom Yeta AHP Excel Form Generator')}</h3>", unsafe_allow_html=True)
-                st.markdown(_("<span style='font-size: 0.95rem; color: #4b5563;'>우측에서 선택한 <b>예비타당성조사 분석 모델</b>에 맞춰진 전용 엑셀 펀칭 폼입니다.</span>", "This is a dedicated Excel punching form tailored to the Yeta analysis model selected on the right."), unsafe_allow_html=True)
-                
-                st.markdown("""
-                <div style='background-color: #f9fafb; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #3b82f6;'>
-                    <strong>[양식 구조 안내]</strong><br>
-                    ✔️ <b>동일한 부분</b>: 2계층 이후 항목들 간의 9점 척도 쌍대비교 입력 방식 및 CR(일관성 비율) 검증 로직은 일반 AHP와 동일합니다.<br>
-                    ✔️ <b>달라지는 부분</b>: 예타 지침에 따라 1계층(경제/정책/지역) 가중치는 쌍대비교가 아닌 <b>100점 상수합법(Constant-Sum)</b> 비율로 직접 기입하도록 열(Column) 구조가 특수하게 분리되어 있습니다.
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type, policy_factors, regional_factors, tech_factors)
-                st.download_button(
-                    label=_("👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)", "👉 Download Custom Yeta AHP Excel Template (.xlsx)"),
-                    data=template_bytes,
-                    file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    type="primary",
-                    use_container_width=True
-                )
+        st.markdown(f"<h4 style='color: #047857; margin-top: 25px;'><i class='fas fa-file-excel'></i> 3단계: 맞춤형 엑셀 폼 생성 및 다운로드</h4>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown(_("<span style='font-size: 0.95rem; color: #4b5563;'>위 1단계와 2단계에서 설정한 <b>예비타당성조사 분석 모델 및 요인</b>에 맞춰진 전용 엑셀 펀칭 폼입니다.</span>", "This is a dedicated Excel punching form tailored to the Yeta analysis model and factors set above."), unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style='background-color: #f9fafb; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px;'>
+                <strong>[양식 구조 안내]</strong><br>
+                ✔️ <b>동일한 부분</b>: 2계층 이후 항목들 간의 9점 척도 쌍대비교 입력 방식 및 CR(일관성 비율) 검증 로직은 일반 AHP와 동일합니다.<br>
+                ✔️ <b>달라지는 부분</b>: 예타 지침에 따라 1계층(경제/정책/지역) 가중치는 쌍대비교가 아닌 <b>100점 상수합법(Constant-Sum)</b> 비율로 직접 기입하도록 열(Column) 구조가 특수하게 분리되어 있습니다.
+            </div>
+            """, unsafe_allow_html=True)
+            
+            template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type, policy_factors, regional_factors, tech_factors)
+            st.download_button(
+                label=_("👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)", "👉 Download Custom Yeta AHP Excel Template (.xlsx)"),
+                data=template_bytes,
+                file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                type="primary",
+                use_container_width=True
+            )
 
     # =========================================================================
     # TAB 2: Yeta Survey Creator
