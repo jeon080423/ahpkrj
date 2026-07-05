@@ -1408,9 +1408,7 @@ def run():
                             
                         res_df, final_yeta_score = yeta_utils.process_yeta_ahp_data(df, p_type, bc_ratio, lir_value, auto_correct_cr=auto_correct_cr)
                         
-                        # 수치 데이터를 소수점 3자리로 반올림
-                        numeric_cols = res_df.select_dtypes(include=['float64', 'float32']).columns
-                        res_df[numeric_cols] = res_df[numeric_cols].round(3)
+                        # 웹 출력용으로만 소수점 포맷팅 적용 (데이터 원본 보존)
                         st.markdown("---")
                         st.markdown("### " + _("📊 종합평가(AHP) 최종 결과", "📊 Final AHP Evaluation Results"))
                         
@@ -1428,15 +1426,15 @@ def run():
                             avg_s_tech = passed_evals["기술성 점수"].mean()
                             
                             summary_data = []
-                            summary_data.append({"평가항목": "경제성 분석", "가중치": round(avg_w_econ, 3), "평가 결과 (점수)": round(avg_s_econ, 3), "비고": "B/C, NPV 등 반영"})
-                            summary_data.append({"평가항목": "정책성 분석", "가중치": round(avg_w_policy, 3), "평가 결과 (점수)": round(avg_s_policy, 3), "비고": "정책효과, 추진여건 등"})
+                            summary_data.append({"평가항목": "경제성 분석", "가중치": avg_w_econ, "평가 결과 (점수)": avg_s_econ, "비고": "B/C, NPV 등 반영"})
+                            summary_data.append({"평가항목": "정책성 분석", "가중치": avg_w_policy, "평가 결과 (점수)": avg_s_policy, "비고": "정책효과, 추진여건 등"})
                             
                             if "rnd" in p_type:
-                                summary_data.append({"평가항목": "기술성 분석", "가중치": round(avg_w_tech, 3), "평가 결과 (점수)": round(avg_s_tech, 3), "비고": "기술개발 성공가능성 등"})
+                                summary_data.append({"평가항목": "기술성 분석", "가중치": avg_w_tech, "평가 결과 (점수)": avg_s_tech, "비고": "기술개발 성공가능성 등"})
                             if "non_capital" in p_type or p_type in ["other_bc", "other_ec"]:
-                                summary_data.append({"평가항목": "지역균형발전 분석", "가중치": round(avg_w_reg, 3), "평가 결과 (점수)": round(avg_s_reg, 3), "비고": "지역낙후도, 파급효과 등"})
+                                summary_data.append({"평가항목": "지역균형발전 분석", "가중치": avg_w_reg, "평가 결과 (점수)": avg_s_reg, "비고": "지역낙후도, 파급효과 등"})
                                 
-                            summary_data.append({"평가항목": "**종합평가 (AHP)**", "가중치": 1.000, "평가 결과 (점수)": round(final_yeta_score, 3), "비고": "**최종 결과값**"})
+                            summary_data.append({"평가항목": "**종합평가 (AHP)**", "가중치": 1.000, "평가 결과 (점수)": final_yeta_score, "비고": "**최종 결과값**"})
                             
                             st.write("#### " + _("[표] AHP를 이용한 종합평가 결과", "[Table] Comprehensive AHP Evaluation Results"))
                             summary_df_for_excel = pd.DataFrame(summary_data)
@@ -1448,7 +1446,11 @@ def run():
                             # Add Excel Download Button
                             try:
                                 from yeta_utils import export_yeta_result_excel
-                                excel_data = export_yeta_result_excel(summary_df_for_excel, res_df)
+                                
+                                # 미리 is_pass 계산
+                                is_pass = final_yeta_score >= 0.5
+                                excel_data = export_yeta_result_excel(summary_df_for_excel, res_df, final_score=final_yeta_score, is_pass=is_pass)
+                                
                                 st.download_button(
                                     label=_("📥 종합평가(AHP) 엑셀 결과 다운로드", "📥 Download AHP Excel Results"),
                                     data=excel_data,
