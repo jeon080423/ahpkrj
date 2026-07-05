@@ -2672,7 +2672,7 @@ def run():
         )
         
         # Depending on project type, show expanders for factor descriptions.
-        with st.expander("📝 1계층 및 2계층 평가항목 상세 설명 설정 (선택사항)"):
+        with st.expander("📝 1계층 및 2계층 평가항목 상세 설명 설정", expanded=True):
             st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
             st.text_input("경제성(Economic Feasibility) 설명", placeholder="예: 사업의 B/C 비율 등 경제적 타당성을 평가합니다.")
             st.text_input("정책성(Policy Feasibility) 설명", placeholder="예: 정책의 일관성, 추진 의지 등 정책적 타당성을 평가합니다.")
@@ -2924,7 +2924,7 @@ def run():
         st.markdown("#### 5. 구글 시트 연동 및 배포")
         st.info(_("모든 설정이 완료되었다면, 응답 데이터를 실시간으로 수집할 구글 시트를 연동하고 배포용 URL을 생성합니다.", "When ready, connect a Google Sheet to collect responses and generate the deployment URL."))
         
-        with st.expander(_("❓ 구글 시트 연동 방법 안내", "Google Sheets Integration Guide")):
+        with st.expander(_("❓ 구글 시트 연동 방법 안내", "Google Sheets Integration Guide"), expanded=True):
             st.markdown("""
             **💡 연동 방법:**
             
