@@ -1476,7 +1476,39 @@ def run():
                                 {_("KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보", "MoEF & KDI standard: Feasible when AHP score >= 0.5")}
                             </div>
                         </div>
+                        <br>
                         """, unsafe_allow_html=True)
+                        
+                        st.info(f"💡 **조사 결과 해석**: 본 예비타당성조사는 응답자 {len(res_df)}명의 설문 결과를 바탕으로, 극단값(최고점 1명, 최저점 1명)을 제외한 {max(1, len(res_df)-2 if len(res_df) >= 3 else len(res_df))}명의 점수를 종합하여 도출되었습니다. 최종 AHP 종합점수가 {final_yeta_score:.3f}으로 0.5를 {'넘어 사업 타당성을 확보했습니다' if is_pass else '넘지 못해 사업 타당성이 미흡한 것으로 분석되었습니다'}.")
+                        
+                        with st.expander(_("📚 AHP 산출식 및 변환 공식 안내", "📚 AHP Formula Guide")):
+                            st.markdown(_("""
+                            #### 1. 정량 데이터 쌍대비교 척도 변환
+                            경제성 등 정량적 수치를 설문조사의 9점 척도와 동등하게 맞추기 위해 KDI 표준 공식을 사용합니다.
+                            - **B/C 비율 변환**: `표준점수 = 8.592933 × ln(B/C비율) ± 1`
+                            - **지역낙후도(LIR) 변환**: `표준점수 = 2.0 × LIR + 1.0`
+                            
+                            #### 2. 쌍대비교 척도의 가중치(AHP 점수) 변환
+                            위에서 도출된 표준점수(`Score`)를 바탕으로 '시행(Go)' 대안의 평가 결과(점수)를 계산합니다.
+                            - **시행(Go) 가중치** = `Score / (Score + 1.0)`
+                            - 예) B/C 환산 표준점수가 1.419라면, 시행 점수는 `1.419 / (1.419 + 1) = 0.5866`
+                            
+                            #### 3. 개인별 점수 합산 및 최종 종합점수 산출
+                            각 평가자의 항목별 가중치와 위에서 구한 각 항목별 점수를 곱해 개인별 최종 점수를 계산합니다. 
+                            이후 응답자가 3명 이상일 경우, 가장 높은 점수 1명과 가장 낮은 점수 1명을 집계에서 배제(극단값 배제)한 뒤 남은 인원들의 점수를 **기하평균(Geometric Mean)**하여 최종 AHP 평점을 산출합니다.
+                            """, """
+                            #### 1. Conversion of Quantitative Data to Pairwise Scale
+                            Quantitative figures like the B/C ratio are converted into a 9-point scale using standard KDI formulas.
+                            - **B/C Ratio Conversion**: `Score = 8.592933 × ln(B/C) ± 1`
+                            - **LIR Conversion**: `Score = 2.0 × LIR + 1.0`
+                            
+                            #### 2. AHP Score Conversion
+                            The standard `Score` derived above is used to calculate the evaluation score for the 'Go' alternative.
+                            - **Go Weight** = `Score / (Score + 1.0)`
+                            
+                            #### 3. Final Score Aggregation
+                            Individual final scores are calculated by multiplying the weights by the respective scores. Then, extreme outliers (the highest and lowest scores) are excluded, and the **Geometric Mean** of the remaining scores is computed to derive the final AHP score.
+                            """))
                         
                         st.markdown("<br>", unsafe_allow_html=True)
                         st.write("#### " + _("👨‍🔬 평가자별 점수 분포 및 극단값 배제 현황", "👨‍🔬 Evaluator Distribution & Outlier Exclusion"))
