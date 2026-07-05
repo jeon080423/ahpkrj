@@ -1584,11 +1584,42 @@ def run():
 
     /* --- 사이드바 프리미엄 스타일 --- */
     section[data-testid="stSidebar"] {
-        background-color: #f8fafc !important;
-        border-right: 1px solid #cbd5e1 !important;
+        background-color: #1a365d !important;
+        border-right: 1px solid #102a43 !important;
     }
     section[data-testid="stSidebar"] > div:first-child {
         padding-top: 1.5rem !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] span,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] h4,
+    section[data-testid="stSidebar"] h5 {
+        color: #f8fafc !important;
+    }
+    section[data-testid="stSidebar"] input {
+        color: #0f172a !important;
+    }
+    /* 사이드바 내의 일반 버튼 */
+    section[data-testid="stSidebar"] div.stButton > button {
+        background-color: #2c5282 !important;
+        color: #ffffff !important;
+        border: 1px solid #2c5282 !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button:hover {
+        background-color: #3182ce !important;
+        border-color: #3182ce !important;
+        color: #ffffff !important;
+    }
+    /* 사이드바 내의 Expander */
+    section[data-testid="stSidebar"] [data-testid="stExpander"] {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stExpander"] details summary p,
+    section[data-testid="stSidebar"] [data-testid="stExpander"] details summary span {
+        color: #ffffff !important;
     }
 
     /* --- 프리미엄 버튼 (기본) - 플랫/단정 --- */
@@ -1747,7 +1778,7 @@ def run():
         text-decoration: underline !important;
     }
 
-    /* 사이드바 탭 글자 크기 축소 & 여백 줄이기 */
+    /* 사이드바 탭 글자 크기 축소 & 여백 줄이기 & 색상 통일 */
     section[data-testid="stSidebar"] button[data-baseweb="tab"] {
         flex: 1 !important;
         justify-content: center !important;
@@ -1755,6 +1786,16 @@ def run():
         padding: 0.5rem 0 !important;
         margin: 0 !important;
         min-height: unset !important;
+        color: #cbd5e1 !important;
+        background-color: transparent !important;
+        border-bottom: 2px solid transparent !important;
+    }
+    section[data-testid="stSidebar"] button[data-baseweb="tab"][aria-selected="true"] {
+        color: #ffffff !important;
+        border-bottom: 2px solid #ffffff !important;
+    }
+    section[data-testid="stSidebar"] button[data-baseweb="tab"]:hover {
+        color: #ffffff !important;
     }
     section[data-testid="stSidebar"] div[data-baseweb="tab-list"] {
         display: flex !important;
