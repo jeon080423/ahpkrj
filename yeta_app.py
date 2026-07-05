@@ -401,7 +401,7 @@ def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is
     </html>
     """
 
-def get_yeta_portone_payment_html(user_id, plan_name="예타 단건 분석권", amount=550000, months=9999, inner_html="", is_best=False):
+def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=550000, months=9999, inner_html="", is_best=False):
     import hashlib
     import datetime
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
@@ -421,7 +421,7 @@ def get_yeta_portone_payment_html(user_id, plan_name="예타 단건 분석권", 
     except Exception:
         event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
         
-    is_event_active = is_cfg_active and kst_now <= event_deadline and plan_name == "예타 단건 분석권"
+    is_event_active = is_cfg_active and kst_now <= event_deadline and plan_name == "단건 분석권"
     
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
@@ -456,7 +456,7 @@ def get_yeta_portone_payment_html(user_id, plan_name="예타 단건 분석권", 
     if plan_name == "무료 체험판 (영구)":
         btn_onclick = "redirectAnalysis()"
         btn_label = "체험하기"
-    elif plan_name == "기관 연간 라이선스":
+    elif plan_name == "연간 라이선스":
         btn_onclick = "scrollToB2B()"
         btn_label = "세금계산서/인보이스 신청"
     else:
@@ -1894,7 +1894,7 @@ def run():
     # 4. Handle PortOne Payment Callback inside Yeta
     if "portone_paid" in q_params and "user_id" in q_params:
         user_id_param = q_params.get("user_id")
-        plan_name_param = q_params.get("plan_name", "예타 단건 분석권")
+        plan_name_param = q_params.get("plan_name", "단건 분석권")
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         new_expiry_date = (kst_now + datetime.timedelta(days=365)).strftime("%Y-%m-%d")
         
@@ -2257,8 +2257,8 @@ def run():
                 q_tier = st.selectbox(
                     _("서비스 구분 (요금제)", "Pricing Plan Tier"),
                     options=[
-                        (_("예타 단건 분석권 (550,000원)", "Yeta Single Plan (550,000 KRW)"), 550000, "예타 단건 분석권"),
-                        (_("기관 연간 라이선스 (2,640,000원)", "Yeta Annual License (2,640,000 KRW)"), 2640000, "기관 연간 라이선스")
+                        (_("단건 분석권 (550,000원)", "Single Plan (550,000 KRW)"), 550000, "단건 분석권"),
+                        (_("연간 라이선스 (2,640,000원)", "Annual License (2,640,000 KRW)"), 2640000, "연간 라이선스")
                     ],
                     format_func=lambda x: x[0],
                     key="q_tier_select_yeta"
@@ -2332,8 +2332,8 @@ def run():
                 t_tier = st.selectbox(
                     _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
                     options=[
-                        (_("예타 단건 분석권 (550,000원)", "Yeta Single Plan (550,000 KRW)"), "예타 단건 분석권"),
-                        (_("기관 연간 라이선스 (2,640,000원)", "Yeta Annual License (2,640,000 KRW)"), "기관 연간 라이선스")
+                        (_("단건 분석권 (550,000원)", "Single Plan (550,000 KRW)"), "단건 분석권"),
+                        (_("연간 라이선스 (2,640,000원)", "Annual License (2,640,000 KRW)"), "연간 라이선스")
                     ],
                     format_func=lambda x: x[0],
                     key="t_tier_select_yeta"
@@ -2655,10 +2655,10 @@ def run():
             else:
                 st.components.v1.html(get_yeta_login_redirect_html("무료 체험판 (영구)", inner_html=inner_1, is_best=False), height=520)
 
-        # 2. 예타 단건 분석권 (BEST)
+        # 2. 단건 분석권 (BEST)
         with col_p2:
             inner_2 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>예타 단건 분석권</h3>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>단건 분석권</h3>
                 <span style='color: #888; font-size: 1.1rem;'>프로젝트 1건</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>550,000</span>원</h2>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>특정 예타 프로젝트 1건에 대해 인원 제한 없이 전문가 AHP 데이터 집계 및 아웃라이어 정제 분석을 수행합니다.</p>
@@ -2672,14 +2672,14 @@ def run():
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "예타 단건 분석권", 550000, 9999, inner_html=inner_2, is_best=True), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "단건 분석권", 550000, 9999, inner_html=inner_2, is_best=True), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("예타 단건 분석권", inner_html=inner_2, is_best=True), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("단건 분석권", inner_html=inner_2, is_best=True), height=520)
 
-        # 3. 기관 연간 라이선스
+        # 3. 연간 라이선스
         with col_p3:
             inner_3 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>기관 연간 라이선스</h3>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>연간 라이선스</h3>
                 <span style='color: #888; font-size: 1.1rem;'>연간 구독형</span>
                 <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,640,000원</h2>
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기관/연구원 전체 임직원이 1년 동안 횟수 제한 없이 예타 AHP 분석과 전문가 배포 설문을 수행합니다.</p>
@@ -2693,9 +2693,9 @@ def run():
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "기관 연간 라이선스", 2640000, 12, inner_html=inner_3, is_best=False), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "연간 라이선스", 2640000, 12, inner_html=inner_3, is_best=False), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("기관 연간 라이선스", inner_html=inner_3, is_best=False), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("연간 라이선스", inner_html=inner_3, is_best=False), height=520)
 
         # 4. 부가 서비스 대행
         with col_p4:
@@ -2723,7 +2723,7 @@ def run():
                 address = st.text_input("사업장 주소", key="tax_address")
                 biz_type = st.text_input("업태 및 종목", key="tax_biz_type")
                 email = st.text_input("세금계산서 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
-                plan_choice = st.selectbox("선택 요금제 플랜", ["예타 단건 분석권 (550,000원)", "기관 연간 라이선스 (2,640,000원)"])
+                plan_choice = st.selectbox("선택 요금제 플랜", ["단건 분석권 (550,000원)", "연간 라이선스 (2,640,000원)"])
                 
                 submit_tax = st.form_submit_button("세금계산서/인보이스 발행 요청", use_container_width=True)
                 if submit_tax:
