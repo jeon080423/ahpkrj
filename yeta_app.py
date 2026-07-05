@@ -2760,10 +2760,13 @@ def run():
                 
                 st.divider()
                 st.write("**[제2계층 평가: 9점 척도 쌍대비교]**")
-                st.caption("두 항목 중 상대적으로 더 중요한 쪽에 가중치를 부여해주십시오.")
+                st.caption("두 항목 중 상대적으로 더 중요한 쪽에 가중치를 부여해주십시오. (CR 검증 가이드 바 활성화 예시 포함)")
                 
-                # 쌍대비교 라디오 버튼 가로폭 강제 할당 CSS (모달 내부에만 적용)
-                st.markdown("""
+                survey_container = st.container()
+                survey_container.markdown("<div class='ahp_scrollable_area'></div>", unsafe_allow_html=True)
+                
+                # 쌍대비교 라디오 버튼 가로폭 강제 할당 및 모바일 겹침 방지 CSS
+                mobile_css = """
                 <style>
                 div[role="radiogroup"] {
                     display: flex;
@@ -2777,14 +2780,38 @@ def run():
                     justify-content: center;
                     margin-right: 0px !important;
                 }
+                /* 모바일 (768px 이하) 환경에서 가로 스크롤 허용 및 세로 쌓임 방지 */
+                @media (max-width: 768px) {
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) {
+                        overflow-x: auto !important;
+                        padding-bottom: 15px;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) > div {
+                        min-width: 700px !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] {
+                        flex-wrap: nowrap !important;
+                        flex-direction: row !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+                        width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+                        width: 70% !important; min-width: 70% !important; flex: 1 1 70% !important;
+                    }
+                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
+                        width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
+                    }
+                }
                 </style>
-                """, unsafe_allow_html=True)
+                """
+                survey_container.markdown(mobile_css, unsafe_allow_html=True)
                 
                 import itertools
                 
                 def render_preview_group(title, factors, color_left, bg_left, color_right, bg_right):
                     if len(factors) < 2: return
-                    st.markdown(f"<div style='margin-top: 20px; margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 14px;'>📌 {title} 부문 내 쌍대비교</div>", unsafe_allow_html=True)
+                    survey_container.markdown(f"<div style='margin-top: 20px; margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 14px;'>📌 {title} 부문 내 쌍대비교</div>", unsafe_allow_html=True)
                     header_html = f"""
                     <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px; margin-bottom: 5px;">
                         <colgroup>
@@ -2807,13 +2834,13 @@ def run():
                         </tr>
                     </table>
                     """
-                    st.markdown(header_html, unsafe_allow_html=True)
+                    survey_container.markdown(header_html, unsafe_allow_html=True)
                     
                     pairs = list(itertools.combinations(factors, 2))
                     options = [-9, -8, -7, -6, -5, -4, -3, -2, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                     
                     for i, (left_f, right_f) in enumerate(pairs):
-                        row_cols = st.columns([15, 70, 15])
+                        row_cols = survey_container.columns([15, 70, 15])
                         with row_cols[0]:
                             st.markdown(f"""
                             <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
@@ -2832,6 +2859,22 @@ def run():
                                 horizontal=True,
                                 label_visibility="collapsed"
                             )
+                            # 가상의 CR 가이드 바 (Mockup 용) 첫 번째 항목에만 예시로 표시
+                            if i == 0:
+                                bar_html = '<div style="display: flex; width: 100%; height: 32px; margin-top: -32px; z-index: 10; position: relative; pointer-events: none;">'
+                                start_idx, end_idx = 6, 10  # 대략 중간 범위 (동등 및 약한 중요도) 하이라이트 예시
+                                for j in range(17):
+                                    is_valid = start_idx <= j <= end_idx
+                                    bg_color = "rgba(59, 130, 246, 0.25)" if is_valid else "transparent"
+                                    radius = ""
+                                    if j == start_idx:
+                                        radius += "border-top-left-radius: 6px; border-bottom-left-radius: 6px; "
+                                    if j == end_idx:
+                                        radius += "border-top-right-radius: 6px; border-bottom-right-radius: 6px; "
+                                    bar_html += f'<div style="flex: 1 1 0%; background-color: {bg_color}; {radius}"></div>'
+                                bar_html += '</div>'
+                                st.markdown(bar_html, unsafe_allow_html=True)
+                                
                         with row_cols[2]:
                             st.markdown(f"""
                             <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
