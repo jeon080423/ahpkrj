@@ -2708,7 +2708,78 @@ def run():
                 st.divider()
                 st.write("**[제2계층 평가: 9점 척도 쌍대비교]**")
                 st.caption("두 항목 중 상대적으로 더 중요한 쪽에 가중치를 부여해주십시오.")
-                st.select_slider("사업추진 여건 vs 정책효과", options=["<- 극히 중요", "<- 매우 중요", "<- 중요", "<- 약간 중요", "같음", "약간 중요 ->", "중요 ->", "매우 중요 ->", "극히 중요 ->"], value="같음")
+                
+                # 쌍대비교 라디오 버튼 가로폭 강제 할당 CSS (모달 내부에만 적용)
+                st.markdown("""
+                <style>
+                div[role="radiogroup"] {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                    margin-top: -8px;
+                }
+                div[role="radiogroup"] > label {
+                    flex: 1;
+                    display: flex;
+                    justify-content: center;
+                    margin-right: 0px !important;
+                }
+                </style>
+                """, unsafe_allow_html=True)
+
+                header_html = f"""
+                <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px; margin-bottom: 5px;">
+                    <colgroup>
+                        <col style="width: 15%;" />
+                        {"".join(['<col style="width: 4.11%;" />' for _ in range(8)])}
+                        <col style="width: 4.11%;" />
+                        {"".join(['<col style="width: 4.11%;" />' for _ in range(8)])}
+                        <col style="width: 15%;" />
+                    </colgroup>
+                    <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="8">← 좌측 요인 중요도</th>
+                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">동등<br>(1)</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="8">우측 요인 중요도 →</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+                    </tr>
+                    <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in range(9, 1, -1)])}
+                        {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in range(2, 10)])}
+                    </tr>
+                </table>
+                """
+                st.markdown(header_html, unsafe_allow_html=True)
+                
+                row_cols = st.columns([15, 70, 15])
+                with row_cols[0]:
+                    st.markdown("""
+                    <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
+                                padding: 0px 8px; background-color: #fce7f3; color: #db2777; 
+                                border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
+                                justify-content: center; font-size: 12px; margin: 0px;'>
+                            사업추진 여건
+                    </div>
+                    """, unsafe_allow_html=True)
+                with row_cols[1]:
+                    options = [-9, -8, -7, -6, -5, -4, -3, -2, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                    st.radio(
+                        label="preview_pair",
+                        options=options,
+                        index=8,
+                        format_func=lambda x: str(abs(x)) + "\u200B" if x < 0 else str(x),
+                        horizontal=True,
+                        label_visibility="collapsed"
+                    )
+                with row_cols[2]:
+                    st.markdown("""
+                    <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
+                                padding: 0px 8px; background-color: #dcfce7; color: #059669; 
+                                border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
+                                justify-content: center; font-size: 12px; margin: 0px;'>
+                            정책효과
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 if st.button("닫기", type="primary", use_container_width=True):
                     st.rerun()
