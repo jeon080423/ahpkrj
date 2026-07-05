@@ -460,8 +460,11 @@ def export_yeta_result_excel(summary_df, res_df, final_score=None, is_pass=None)
         # Sheet 2: 로우데이터(Raw_Data)
         res_df.to_excel(writer, sheet_name='로우데이터(Raw_Data)', index=False)
         worksheet2 = writer.sheets['로우데이터(Raw_Data)']
+        
+        raw_cell_format = workbook.add_format({'num_format': '0.00000'})
+        worksheet2.set_column(0, len(res_df.columns)-1, 15, raw_cell_format)
+        
         for col_num, value in enumerate(res_df.columns.values):
             worksheet2.write(0, col_num, value, header_format)
-        worksheet2.set_column(0, len(res_df.columns)-1, 15)
         
     return output.getvalue()
