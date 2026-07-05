@@ -2683,7 +2683,7 @@ def run():
             st.text_input("정책성 하위: 사업추진 여건 설명", placeholder="관련 부처의 의지 및 주민 태도 등을 포함합니다.")
             st.text_input("정책성 하위: 정책효과 설명", placeholder="일자리 창출, 환경성, 안전성 등 사회적 가치를 평가합니다.")
 
-        st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
+        st.markdown("#### 섹션 1.5: 응답자 수집 정보 및 그룹 분류")
         with st.container(border=True):
             st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
             
@@ -2698,11 +2698,11 @@ def run():
             
             col1, col2, col3 = st.columns([6, 2, 2])
             with col2:
-                if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 3, key="yeta_add_q"):
+                if st.button(_("+ 문항 추가", "+ Add Question"), use_container_width=True, disabled=num_types >= 3, key="yeta_add_q"):
                     st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
                     st.rerun()
             with col3:
-                if st.button(_("➖ 문항 삭제", "➖ Remove"), use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q"):
+                if st.button(_("- 문항 삭제", "- Remove"), use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q"):
                     st.session_state["edit_type_questions"].pop()
                     st.rerun()
             
