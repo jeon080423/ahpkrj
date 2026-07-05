@@ -8,6 +8,10 @@ import os
 import sqlite3
 import datetime
 
+# Helper function for Korean translation fallback
+def _(ko_text, en_text):
+    return ko_text
+
 def run():
     # 1. Custom CSS Styling for Premium Corporate Look
     st.markdown("""
