@@ -389,7 +389,7 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
     
     return res_df, final_score
 
-def export_yeta_result_excel(summary_df, res_df):
+def export_yeta_result_excel(summary_df, res_df, final_score=None, is_pass=None):
     import io
     import pandas as pd
     
@@ -404,6 +404,8 @@ def export_yeta_result_excel(summary_df, res_df):
         })
         cell_format = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '0.000'})
         bold_format = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'valign': 'vcenter', 'fg_color': '#FCE4D6', 'num_format': '0.000'})
+        text_format = workbook.add_format({'text_wrap': True, 'valign': 'top'})
+        title_format = workbook.add_format({'bold': True, 'font_size': 11})
         
         # Sheet 1: 종합평가_결과
         summary_df.to_excel(writer, sheet_name='종합평가_결과', index=False)
@@ -425,6 +427,35 @@ def export_yeta_result_excel(summary_df, res_df):
         worksheet1.set_column(0, 0, 25)
         worksheet1.set_column(1, 2, 20)
         worksheet1.set_column(3, 3, 35)
+        
+        # 엑셀 하단 결과 해석 및 산출식 추가
+        start_row = len(summary_df) + 3
+        
+        if final_score is not None and is_pass is not None:
+            verdict_text = '사업 타당성을 확보했습니다' if is_pass else '사업 타당성이 미흡한 것으로 분석되었습니다'
+            n_res = len(res_df)
+            n_filtered = max(1, n_res - 2 if n_res >= 3 else n_res)
+            interp_text = f"💡 조사 결과 해석: 본 예비타당성조사는 응답자 {n_res}명의 설문 결과를 바탕으로, 극단값(최고점 1명, 최저점 1명)을 제외한 {n_filtered}명의 점수를 종합하여 도출되었습니다. 최종 AHP 종합점수가 {final_score:.3f}으로 0.5를 {verdict_text}."
+            worksheet1.merge_range(start_row, 0, start_row, 3, interp_text, text_format)
+            worksheet1.set_row(start_row, 35)
+            start_row += 2
+            
+        formula_title = "📚 AHP 산출식 및 변환 공식 안내"
+        formula_text = (
+            "1. 정량 데이터 쌍대비교 척도 변환\n"
+            "   - 경제성 등 정량적 수치를 설문조사의 9점 척도와 동등하게 맞추기 위해 KDI 표준 공식을 사용합니다.\n"
+            "   - B/C 비율 변환: 표준점수 = 8.592933 × ln(B/C비율) ± 1\n"
+            "   - 지역낙후도(LIR) 변환: 표준점수 = 2.0 × LIR + 1.0\n\n"
+            "2. 쌍대비교 척도의 가중치(AHP 점수) 변환\n"
+            "   - 위에서 도출된 표준점수(Score)를 바탕으로 '시행(Go)' 대안의 가중치를 계산합니다.\n"
+            "   - 시행(Go) 가중치 = Score / (Score + 1.0)\n\n"
+            "3. 개인별 점수 합산 및 최종 종합점수 산출\n"
+            "   - 각 평가자의 항목별 가중치와 항목별 점수를 곱해 개인별 최종 점수를 계산합니다.\n"
+            "   - 이후 응답자가 3명 이상일 경우, 극단값(최고점 1명, 최저점 1명)을 제외하고 남은 인원들의 점수를 기하평균(Geometric Mean)하여 최종 AHP 평점을 산출합니다."
+        )
+        worksheet1.write(start_row, 0, formula_title, title_format)
+        worksheet1.merge_range(start_row + 1, 0, start_row + 1, 3, formula_text, text_format)
+        worksheet1.set_row(start_row + 1, 160)
         
         # Sheet 2: 로우데이터(Raw_Data)
         res_df.to_excel(writer, sheet_name='로우데이터(Raw_Data)', index=False)
