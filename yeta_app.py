@@ -2037,153 +2037,125 @@ def run():
     # TAB 4: B2B Pricing & Payment (Hybrid Pricing Applied)
     # =========================================================================
     with tab_pricing:
-        st.write("### " + _("서비스 요금 및 라이선스 안내", "Service Pricing & Licensing"))
-        st.write(_("예비타당성조사 AHP 분석 시스템은 기업 및 연구원 맞춤형 B2B 플랜을 제공합니다.", "B2B plans tailored for corporations and research institutes."))
-        
-        st.markdown("""
-        <div class="pricing-grid">
-            <div class="price-card" style="border-top: 4px solid #718096;">
-                <div>
-                    <div class="price-card-tier">무료 체험판</div>
-                    <div class="price-card-amount">0 원</div>
-                    <ul class="price-card-features">
-                        <li>B/C 표준점수 로그 변환 연산</li>
-                        <li>지역낙후도 표준화지수(LIR) 변환</li>
-                        <li>설문 데이터 입력 (최대 3명 제한)</li>
-                        <li>화면 결과 리포트 출력</li>
-                    </ul>
-                </div>
-                <div style="text-align: center; color: #718096; font-size: 0.9rem;">기본 제공</div>
-            </div>
-            <div class="price-card" style="border-top: 4px solid #3182CE; box-shadow: 0 4px 15px rgba(49, 130, 206, 0.15);">
-                <div>
-                    <div class="price-card-tier" style="color: #3182CE;">예타 단건 분석권</div>
-                    <div class="price-card-amount">550,000 원</div>
-                    <ul class="price-card-features">
-                        <li>특정 프로젝트 1건 영구 분석</li>
-                        <li>평가자 수 제한 없음 (무제한)</li>
-                        <li>최대/최소 아웃라이어 제외 자동 연산</li>
-                        <li>보고서 제출용 Excel 원본 내보내기</li>
-                        <li>세금계산서 및 영수증 발행 지원</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="price-card" style="border-top: 4px solid #1A365D;">
-                <div>
-                    <div class="price-card-tier">기관 연간 라이선스</div>
-                    <div class="price-card-amount">2,640,000 원</div>
-                    <ul class="price-card-features">
-                        <li>1년간 전 직원 무제한 프로젝트 분석</li>
-                        <li>무제한 전문가 설문 및 아웃라이어 연산</li>
-                        <li>B2B 기업용 견적서/세금계산서 즉시 발행</li>
-                        <li>기관 전용 커스텀 DB 구축 매핑 지원</li>
-                        <li>우선 기술 지원 및 교육 제공</li>
-                    </ul>
-                </div>
-                <div style="text-align: center; color: #1A365D; font-size: 0.9rem; font-weight: bold;">연간 구독형</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        st.write("#### " + _("결제 및 정식 라이선스 활성화", "Payment & License Activation"))
-        
+        st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
+
+        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         user_id = st.session_state.get("user_id")
+
+        # 1. 무료 체험판
+        with col_p1:
+            inner_1 = """
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>무료 체험판</h3>
+                <span style='color: #888; font-size: 1.1rem;'>기본 제공</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>0원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>예타 분석 시스템의 핵심 연산과 결과물 구성을 사전에 시뮬레이션할 수 있는 무료 버전입니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>B/C 표준점수 로그 변환 연산</b></li>
+                    <li><b>지역낙후도 표준화지수(LIR) 변환</b></li>
+                    <li>설문 데이터 입력 (최대 3명 제한)</li>
+                    <li>화면 결과 리포트 출력</li>
+                </ul>
+            """
+            if user_id:
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "무료 체험판 (영구)", 0, 9999, inner_html=inner_1, is_best=False), height=520)
+            else:
+                st.components.v1.html(get_yeta_login_redirect_html("무료 체험판 (영구)", inner_html=inner_1, is_best=False), height=520)
+
+        # 2. 예타 단건 분석권 (BEST)
+        with col_p2:
+            inner_2 = """
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>예타 단건 분석권</h3>
+                <span style='color: #888; font-size: 1.1rem;'>프로젝트 1건</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>550,000</span>원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>특정 예타 프로젝트 1건에 대해 인원 제한 없이 전문가 AHP 데이터 집계 및 아웃라이어 정제 분석을 수행합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>특정 프로젝트 1건 영구 분석</b></li>
+                    <li><b>평가자 수 제한 없음 (무제한)</b></li>
+                    <li><b>최대/최소 아웃라이어 제외 자동 연산</b></li>
+                    <li>보고서 제출용 Excel 원본 내보내기</li>
+                    <li>세금계산서 및 영수증 발행 지원</li>
+                </ul>
+            """
+            if user_id:
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "예타 단건 분석권", 550000, 9999, inner_html=inner_2, is_best=True), height=520)
+            else:
+                st.components.v1.html(get_yeta_login_redirect_html("예타 단건 분석권", inner_html=inner_2, is_best=True), height=520)
+
+        # 3. 기관 연간 라이선스
+        with col_p3:
+            inner_3 = """
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>기관 연간 라이선스</h3>
+                <span style='color: #888; font-size: 1.1rem;'>연간 구독형</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,640,000원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>기관/연구원 전체 임직원이 1년 동안 횟수 제한 없이 예타 AHP 분석과 전문가 배포 설문을 수행합니다.</p>
+                <hr style='margin: 10px 0;'>
+                <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                    <li><b>1년간 전 직원 무제한 프로젝트 분석</b></li>
+                    <li><b>무제한 전문가 설문 및 아웃라이어 연산</b></li>
+                    <li>B2B 기업용 견적서/세금계산서 즉시 발행</li>
+                    <li>기관 전용 커스텀 DB 구축 매핑 지원</li>
+                    <li>우선 기술 지원 및 교육 제공</li>
+                </ul>
+            """
+            if user_id:
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "기관 연간 라이선스", 2640000, 12, inner_html=inner_3, is_best=False), height=520)
+            else:
+                st.components.v1.html(get_yeta_login_redirect_html("기관 연간 라이선스", inner_html=inner_3, is_best=False), height=520)
+
+        # 4. 부가 서비스 대행
+        with col_p4:
+            if user_id:
+                st.components.v1.html(get_yeta_portone_custom_services_html(user_id), height=520)
+            else:
+                st.components.v1.html(get_yeta_portone_custom_services_html(None), height=520)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
         if not user_id:
             st.warning(_("⚠️ 결제 및 세금계산서 신청을 위해서는 로그인이 필요합니다. 메인 포털 또는 사이드바에서 로그인 후 이용해 주세요.", "⚠️ Login required for payment and invoice requests. Please login in main portal or sidebar first."))
         else:
             st.info(f"접속 계정: {user_id} | 라이선스 권한: {'정식 회원' if is_official else '무료 체험 회원'}")
             
-            pay_col1, pay_col2 = st.columns(2, gap="medium")
+            st.markdown("<div id='b2b-payment-section'></div>", unsafe_allow_html=True)
+            st.write("---")
             
-            with pay_col1:
-                st.write("**신용카드 온라인 안전결제 (PortOne)**")
-                if st.button("예타 단건 분석권 신용카드 결제하기 (550,000원)", key="btn_pay_yeta_single", use_container_width=True, type="primary"):
-                    safe_email = user_id if "@" in user_id else f"{user_id}@ahpmaster.com"
-                    
-                    checkout_html = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-                    </head>
-                    <body>
-                        <script>
-                            const r = Math.random().toString(36).substring(2, 15);
-                            let baseOrigin = window.location.origin;
-                            if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
-                            
-                            const returnUrl = baseOrigin + "/?portone_paid=true&mode=yeta&user_id=" + encodeURIComponent("{user_id}") + "&plan_name=" + encodeURIComponent("예타 단건 분석권");
-                            
-                            window.PortOne.requestPayment({{
-                                storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
-                                channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-                                paymentId: "pay-" + r,
-                                orderName: "예타 단건 분석권 - {user_id}",
-                                totalAmount: 550000,
-                                currency: "CURRENCY_KRW",
-                                payMethod: "CARD",
-                                redirectUrl: returnUrl,
-                                customer: {{
-                                    email: "{safe_email}",
-                                    fullName: "{user_id}",
-                                    phoneNumber: "010-0000-0000"
-                                }}
-                            }}).then(function(response) {{
-                                if (response.code != null) {{
-                                    alert("결제 실패: " + response.message);
-                                }} else {{
-                                    window.location.href = returnUrl;
-                                }}
-                            }}).catch(function(error) {{
-                                alert("결제 진행 중 오류: " + error.message);
-                            }});
-                        </script>
-                    </body>
-                    </html>
-                    """
-                    st.components.v1.html(checkout_html, height=100)
-                    
-            with pay_col2:
-                st.write("**B2B 기업/연구소 전용 지불 처리**")
-                show_form = st.checkbox("세금계산서/견적서 발행 및 계좌이체 신청", key="chk_tax_form")
+            with st.form("yeta_tax_form"):
+                st.write("**B2B 기업/연구소 전용 지불 처리 (계좌이체 및 세금계산서 신청)**")
+                st.write("세금계산서 발행 및 기관 계좌이체 승인에 필요한 정보를 입력해 주세요.")
+                biz_name = st.text_input("상호 / 법인명", key="tax_biz_name")
+                biz_num = st.text_input("사업자등록번호 (숫자만 입력)", key="tax_biz_num")
+                rep_name = st.text_input("대표자명", key="tax_rep_name")
+                address = st.text_input("사업장 주소", key="tax_address")
+                biz_type = st.text_input("업태 및 종목", key="tax_biz_type")
+                email = st.text_input("세금계산서 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
+                plan_choice = st.selectbox("선택 요금제 플랜", ["예타 단건 분석권 (550,000원)", "기관 연간 라이선스 (2,640,000원)"])
                 
-                if show_form:
-                    with st.form("yeta_tax_form"):
-                        st.write("세금계산서 발행 및 기관 계좌이체 승인에 필요한 정보를 입력해 주세요.")
-                        biz_name = st.text_input("상호 / 법인명", key="tax_biz_name")
-                        biz_num = st.text_input("사업자등록번호 (숫자만 입력)", key="tax_biz_num")
-                        rep_name = st.text_input("대표자명", key="tax_rep_name")
-                        address = st.text_input("사업장 주소", key="tax_address")
-                        biz_type = st.text_input("업태 및 종목", key="tax_biz_type")
-                        email = st.text_input("세금계산서 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
-                        plan_choice = st.selectbox("선택 요금제 플랜", ["예타 단건 분석권 (550,000원)", "기관 연간 라이선스 (2,640,000원)"])
-                        
-                        submit_tax = st.form_submit_button("세금계산서/인보이스 발행 요청", use_container_width=True)
-                        if submit_tax:
-                            if not biz_name or not biz_num or not email:
-                                st.error("상호명, 사업자번호, 이메일은 필수 입력 사항입니다.")
-                            else:
-                                try:
-                                    conn = sqlite3.connect('users.db')
-                                    c = conn.cursor()
-                                    today_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                    c.execute("""
-                                        INSERT INTO tax_invoice_requests 
-                                        (user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name, request_date, status)
-                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                    """, (user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_choice, today_str, "pending"))
-                                    conn.commit()
-                                    
-                                    # Send tax invoice email
-                                    send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_choice)
-                                    
-                                    st.success("✓ 세금계산서 및 결제 요청이 접수되었습니다! 입력하신 이메일로 24시간 이내에 인보이스/견적서 발송 및 입금 계좌를 안내해 드립니다.")
-                                except Exception as e:
-                                    st.error(f"요청 접수 실패: {str(e)}")
-                                finally:
-                                    conn.close()
+                submit_tax = st.form_submit_button("세금계산서/인보이스 발행 요청", use_container_width=True)
+                if submit_tax:
+                    if not biz_name or not biz_num or not email:
+                        st.error("상호명, 사업자번호, 이메일은 필수 입력 사항입니다.")
+                    else:
+                        try:
+                            conn = sqlite3.connect('users.db')
+                            c = conn.cursor()
+                            today_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            c.execute("""
+                                INSERT INTO tax_invoice_requests 
+                                (user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name, request_date, status)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_choice, today_str, "pending"))
+                            conn.commit()
+                            
+                            # Send tax invoice email
+                            send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_choice)
+                            
+                            st.success("✓ 세금계산서 및 결제 요청이 접수되었습니다! 입력하신 이메일로 24시간 이내에 인보이스/견적서 발송 및 입금 계좌를 안내해 드립니다.")
+                        except Exception as e:
+                            st.error(f"요청 접수 실패: {str(e)}")
+                        finally:
+                            conn.close()
 
     # =========================================================================
     # TAB 5: Sign Up (Only shown when not logged in)
