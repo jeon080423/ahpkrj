@@ -2384,19 +2384,19 @@ def run():
                                 
     # 7. Navigation Tabs
     if st.session_state.user_id:
-        tab_analysis, tab_excel, tab_survey_create, tab_guide, tab_pricing = st.tabs([
+        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_pricing = st.tabs([
+            _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
             _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 AHP 설문 작성 및 배포", "Create Yeta Survey"),
-            _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("서비스 요금", "Pricing & License")
         ])
     else:
-        tab_analysis, tab_excel, tab_survey_create, tab_guide, tab_pricing, tab_signup = st.tabs([
+        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_pricing, tab_signup = st.tabs([
+            _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
             _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 AHP 설문 작성 및 배포", "Create Yeta Survey"),
-            _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("서비스 요금", "Pricing & License"),
             _("회원가입", "Sign Up")
         ])
