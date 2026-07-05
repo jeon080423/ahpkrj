@@ -9853,12 +9853,7 @@ with col_main:
             s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
             s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
             
-            s_cust_type = st.radio(
-                _("서비스 구분", "Service Type"),
-                options=["standard", "yeta"],
-                format_func=lambda x: _("일반/학술 분석용 AHP 마스터", "Standard AHP Master") if x == "standard" else _("예비타당성조사 종합평가(AHP) 분석기", "YETA AHP Analyzer"),
-                key="main_s_cust_type"
-            )
+            s_cust_type = "standard"
             
             if st.button(_("가입신청", "Register"), key="main_btn_signup"):
                 if not agreements.get("agree_personal_info"):
