@@ -2605,6 +2605,11 @@ def run():
             </div>
             """, unsafe_allow_html=True)
             
+            img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
+            caption_text = _("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel")
+            if os.path.exists(img_file):
+                st.image(img_file, caption=caption_text)
+            
             template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type, policy_factors, regional_factors, tech_factors)
             st.download_button(
                 label=_("👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)", "👉 Download Custom Yeta AHP Excel Template (.xlsx)"),
