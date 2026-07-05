@@ -377,7 +377,7 @@ def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is
             if ("{plan_name}".includes("무료 체험판")) {{
                 const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
                 for (let i = 0; i < tabs.length; i++) {{
-                    if (tabs[i].innerText.includes('예타 종합평가 분석기') || tabs[i].innerText.includes('Preliminary Feasibility')) {{
+                    if (tabs[i].innerText.includes('예타 종합평가(AHP) 분석') || tabs[i].innerText.includes('Preliminary Feasibility')) {{
                         tabs[i].click();
                         window.parent.scrollTo(0, 0);
                         return;
@@ -535,7 +535,7 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
         function redirectAnalysis() {{
             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
             for (let i = 0; i < tabs.length; i++) {{
-                if (tabs[i].innerText.includes('예타 종합평가 분석기') || tabs[i].innerText.includes('Preliminary Feasibility')) {{
+                if (tabs[i].innerText.includes('예타 종합평가(AHP) 분석') || tabs[i].innerText.includes('Preliminary Feasibility')) {{
                     tabs[i].click();
                     window.parent.scrollTo(0, 0);
                     return;
@@ -2385,7 +2385,7 @@ def run():
     # 7. Navigation Tabs
     if st.session_state.user_id:
         tab_analysis, tab_excel, tab_survey_create, tab_guide, tab_pricing = st.tabs([
-            _("예타 종합평가 분석기", "Preliminary Feasibility Analysis"),
+            _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
             _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 설문지 배포", "Create Yeta Survey"),
             _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
@@ -2393,7 +2393,7 @@ def run():
         ])
     else:
         tab_analysis, tab_excel, tab_survey_create, tab_guide, tab_pricing, tab_signup = st.tabs([
-            _("예타 종합평가 분석기", "Preliminary Feasibility Analysis"),
+            _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
             _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 설문지 배포", "Create Yeta Survey"),
             _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
