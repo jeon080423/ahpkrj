@@ -2595,8 +2595,13 @@ def run():
             st.markdown("""
             <div style='background-color: #f9fafb; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px;'>
                 <strong>[양식 구조 안내]</strong><br>
-                ✔️ <b>동일한 부분</b>: 2계층 이후 항목들 간의 9점 척도 쌍대비교 입력 방식 및 CR(일관성 비율) 검증 로직은 일반 AHP와 동일합니다.<br>
-                ✔️ <b>달라지는 부분</b>: 예타 지침에 따라 1계층(경제/정책/지역) 가중치는 쌍대비교가 아닌 <b>100점 상수합법(Constant-Sum)</b> 비율로 직접 기입하도록 열(Column) 구조가 특수하게 분리되어 있습니다.
+                ✔️ <b>동일한 부분</b>: 2계층 이후 항목들 간의 쌍대비교 입력 방식 및 CR 검증 로직은 일반 AHP와 동일합니다.<br>
+                ✔️ <b>달라지는 부분</b>: 예타 지침에 따라 1계층(경제/정책/지역) 가중치는 쌍대비교가 아닌 <b>100점 상수합법</b> 비율로 기입합니다.<br><br>
+                <strong>[📝 데이터 입력 가이드]</strong><br>
+                다운로드하시는 엑셀 폼에 데이터를 기입하실 때 아래 규칙을 따르세요.<br>
+                ✔️ 왼쪽(시행) 항목이 더 중요하면: <b>음수</b> 입력 (예: -3)<br>
+                ✔️ 오른쪽(미시행) 항목이 더 중요하면: <b>양수</b> 입력 (예: 3)<br>
+                ✔️ 두 항목이 동등하게 중요하면: <b>1</b> 입력
             </div>
             """, unsafe_allow_html=True)
             
