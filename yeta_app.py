@@ -2405,159 +2405,159 @@ def run():
     with tab_analysis:
         st.write("### " + _("예비타당성조사 AHP 종합평가 연산", "Preliminary Feasibility AHP Synthesis"))
         
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         # ==========================================
         # SECTION 1: 분석 환경 설정 (Settings)
         # ==========================================
-        st.markdown(f"### {_('환경 설정 및 기초 데이터 입력', 'Settings & Base Data')}")
-        
-        col_proj_type, col_proj_limits = st.columns([1.5, 2.5], gap="large")
-        with col_proj_type:
-            project_type = st.selectbox(
-                _("사업 유형 선택", "Select Project Type"),
-                options=[
-                    ("construction_non_capital", _("건설사업 (비수도권 유형)", "Construction (Non-capital)")),
-                    ("construction_capital", _("건설사업 (수도권 유형)", "Construction (Capital)")),
-                    ("rnd_bc", _("R&D / 연구개발사업 (B/C 분석)", "R&D (B/C Analysis)")),
-                    ("rnd_ec", _("R&D / 연구개발사업 (E/C 분석)", "R&D (E/C Analysis)")),
-                    ("other_bc", _("기타 재정사업 (B/C 분석)", "Other Fiscal (B/C Analysis)")),
-                    ("other_ec", _("기타 재정사업 (E/C 분석)", "Other Fiscal (E/C Analysis)"))
-                ],
-                format_func=lambda x: x[1],
-                key="yeta_project_type_select"
-            )
-            p_type = project_type[0]
+        with st.container(border=True):
+            st.markdown(f"<h3 style='color: #1e3a8a; margin-bottom: 20px;'><i class='fas fa-cogs'></i> {_('1. 분석 환경 및 모델 설정', '1. Analysis Settings & Model')}</h3>", unsafe_allow_html=True)
             
-        with col_proj_limits:
-            st.markdown(f"**{_('지침 가중치 허용 범위', 'Guideline Weight Limits')}**")
-            if p_type == "construction_non_capital":
-                st.info(_("경제성: 30~45% | 정책성: 25~40% | 지역균형발전: 30~40%", "Economics: 30~45% | Policy: 25~40% | Regional Balance: 30~40%"))
-            elif p_type == "construction_capital":
-                st.info(_("경제성: 60~70% | 정책성: 30~40% | 지역균형발전: 0% (제외)", "Economics: 60~70% | Policy: 30~40% | Regional Balance: 0% (Excluded)"))
-            elif p_type == "rnd_bc" or p_type == "rnd_ec":
-                st.info(_("경제성: 10~40% | 과학기술적 타당성: 40~50% | 정책적 타당성: 20~40%", "Economics: 10~40% | Science/Tech: 40~50% | Policy: 20~40%"))
-            elif p_type == "other_bc":
-                st.info(_("경제성: 25~50% | 정책성: 50~75%", "Economics: 25~50% | Policy: 50~75%"))
-            elif p_type == "other_ec":
-                st.info(_("경제성: 20~40% | 정책성: 60~80%", "Economics: 20~40% | Policy: 60~80%"))
-        
-        st.markdown("---")
-        
-        col_inputs1, col_inputs2 = st.columns(2, gap="large")
-        
-        with col_inputs1:
-            st.markdown(f"#### 1. {_('기초 정량 데이터 입력', 'Input Quantitative Data')}")
-            bc_ratio = st.number_input(_("경제성 분석 결과 (B/C 비율)", "B/C Ratio"), min_value=0.0, max_value=10.0, value=1.05, step=0.05)
+            col_proj_type, col_proj_limits = st.columns([1.5, 2.5], gap="large")
+            with col_proj_type:
+                project_type = st.selectbox(
+                    _("사업 유형(모델) 선택", "Select Project Type (Model)"),
+                    options=[
+                        ("construction_non_capital", _("건설사업 (비수도권 유형)", "Construction (Non-capital)")),
+                        ("construction_capital", _("건설사업 (수도권 유형)", "Construction (Capital)")),
+                        ("rnd_bc", _("R&D / 연구개발사업 (B/C 분석)", "R&D (B/C Analysis)")),
+                        ("rnd_ec", _("R&D / 연구개발사업 (E/C 분석)", "R&D (E/C Analysis)")),
+                        ("other_bc", _("기타 재정사업 (B/C 분석)", "Other Fiscal (B/C Analysis)")),
+                        ("other_ec", _("기타 재정사업 (E/C 분석)", "Other Fiscal (E/C Analysis)"))
+                    ],
+                    format_func=lambda x: x[1],
+                    key="yeta_project_type_select"
+                )
+                p_type = project_type[0]
+                
+            with col_proj_limits:
+                st.markdown(f"<div style='font-weight: 600; margin-bottom: 8px;'>{_('KDI 지침 가중치 허용 범위', 'KDI Guideline Weight Limits')}</div>", unsafe_allow_html=True)
+                if p_type == "construction_non_capital":
+                    st.info(_("경제성: 30~45% | 정책성: 25~40% | 지역균형발전: 30~40%", "Economics: 30~45% | Policy: 25~40% | Regional Balance: 30~40%"))
+                elif p_type == "construction_capital":
+                    st.info(_("경제성: 60~70% | 정책성: 30~40% | 지역균형발전: 0% (제외)", "Economics: 60~70% | Policy: 30~40% | Regional Balance: 0% (Excluded)"))
+                elif p_type == "rnd_bc" or p_type == "rnd_ec":
+                    st.info(_("경제성: 10~40% | 과학기술적 타당성: 40~50% | 정책적 타당성: 20~40%", "Economics: 10~40% | Science/Tech: 40~50% | Policy: 20~40%"))
+                elif p_type == "other_bc":
+                    st.info(_("경제성: 25~50% | 정책성: 50~75%", "Economics: 25~50% | Policy: 50~75%"))
+                elif p_type == "other_ec":
+                    st.info(_("경제성: 20~40% | 정책성: 60~80%", "Economics: 20~40% | Policy: 60~80%"))
             
-            has_regional = "non_capital" in p_type or p_type == "other_bc" or p_type == "other_ec"
-            if has_regional:
-                lir_value = st.number_input(_("지역낙후도 표준화지수 (LIR/MIR)", "Regional Backwardness Index (LIR/MIR)"), min_value=-3.0, max_value=3.0, value=0.0, step=0.1, help="KDI 표준화 지표값")
-            else:
-                lir_value = 0.0
-                st.text_input(_("지역낙후도 표준화지수 (LIR/MIR)", "Regional Backwardness Index (LIR/MIR)"), value="수도권/해당없음 (제외)", disabled=True)
-
-        with col_inputs2:
-            st.markdown(f"#### 2. {_('제1계층 상수합 가중치 설정 (%)', 'Set Level 1 Weights (%)')}")
+            st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
             
-            if "rnd" in p_type:
-                econ_w = st.slider(_("경제성 분석 가중치", "Economics Weight"), 0, 100, 30) / 100.0
-                tech_w = st.slider(_("과학기술적 타당성 가중치", "Science/Tech Weight"), 0, 100, 45) / 100.0
-                policy_w = st.slider(_("정책적 타당성 가중치", "Policy Weight"), 0, 100, 25) / 100.0
-                regional_w = 0.0
-            else:
-                tech_w = 0.0
-                econ_w = st.slider(_("경제성 분석 가중치", "Economics Weight"), 0, 100, 35) / 100.0
-                policy_w = st.slider(_("정책적 분석 가중치", "Policy Weight"), 0, 100, 35) / 100.0
+            col_inputs1, col_inputs2 = st.columns(2, gap="large")
+            with col_inputs1:
+                st.markdown(f"<div style='font-weight: 600; margin-bottom: 15px;'>{_('A. 기초 정량 데이터 입력', 'A. Input Quantitative Data')}</div>", unsafe_allow_html=True)
+                bc_ratio = st.number_input(_("경제성 분석 결과 (B/C 비율)", "B/C Ratio"), min_value=0.0, max_value=10.0, value=1.05, step=0.05)
+                
+                has_regional = "non_capital" in p_type or p_type == "other_bc" or p_type == "other_ec"
                 if has_regional:
-                    regional_w = st.slider(_("지역균형발전 분석 가중치", "Regional Balance Weight"), 0, 100, 30) / 100.0
+                    lir_value = st.number_input(_("지역낙후도 표준화지수 (LIR/MIR)", "Regional Backwardness Index (LIR/MIR)"), min_value=-3.0, max_value=3.0, value=0.0, step=0.1, help="KDI 표준화 지표값")
                 else:
+                    lir_value = 0.0
+                    st.text_input(_("지역낙후도 표준화지수 (LIR/MIR)", "Regional Backwardness Index (LIR/MIR)"), value="수도권/해당없음 (제외)", disabled=True)
+
+            with col_inputs2:
+                st.markdown(f"<div style='font-weight: 600; margin-bottom: 15px;'>{_('B. 제1계층 상수합 가중치 설정 (%)', 'B. Set Level 1 Weights (%)')}</div>", unsafe_allow_html=True)
+                if "rnd" in p_type:
+                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 30) / 100.0
+                    tech_w = st.slider(_("과학기술적 타당성 가중치", "Science/Tech Weight"), 0, 100, 45) / 100.0
+                    policy_w = st.slider(_("정책적 타당성 가중치", "Policy Weight"), 0, 100, 25) / 100.0
                     regional_w = 0.0
-                    st.slider(_("지역균형발전 분석 가중치", "Regional Balance Weight"), 0, 100, 0, disabled=True)
+                else:
+                    tech_w = 0.0
+                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 35) / 100.0
+                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 35) / 100.0
+                    if has_regional:
+                        regional_w = st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 30) / 100.0
+                    else:
+                        regional_w = 0.0
+                        st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 0, disabled=True)
 
-            valid_w, w_msg = yeta_utils.validate_yeta_level1_weights(p_type, econ_w, policy_w, regional_w, tech_w)
-            if valid_w:
-                st.success(_("가중치 범위 검증 완료: KDI 지침 부합", "Weights verified within KDI guidelines."))
-            else:
-                st.warning(_("가중치 지침 미부합: ", "Weights Warning: ") + w_msg)
+                valid_w, w_msg = yeta_utils.validate_yeta_level1_weights(p_type, econ_w, policy_w, regional_w, tech_w)
+                if valid_w:
+                    st.success(_("가중치 지침 부합", "Weights OK"))
+                else:
+                    st.warning(w_msg)
 
-        st.markdown("---")
-        
         # ==========================================
-        # SECTION 2: 엑셀 데이터 업로드 및 분석 (Upload & Analyze)
+        # SECTION 2: 엑셀 펀칭 폼 템플릿 생성 (Template Download)
         # ==========================================
-        st.markdown(f"### {_('엑셀 데이터 업로드 및 결과 분석', 'Upload Excel Data & Analyze')}")
-        
-        # User Tier Check
-        is_official = False
-        if st.session_state.get("user_id"):
-            if st.session_state.get("user_role") in ["official", "admin"]:
-                is_official = True
-            else:
+        with st.container(border=True):
+            st.markdown(f"<h3 style='color: #047857; margin-bottom: 15px;'><i class='fas fa-file-excel'></i> {_('2. 조사 펀칭용 엑셀 템플릿 다운로드', '2. Download Survey Excel Template')}</h3>", unsafe_allow_html=True)
+            st.write(_("위에서 설정한 사업 모델(유형)의 평가 구조에 정확히 맞춰진 빈 엑셀 폼을 다운로드합니다. 이 파일에 전문가 응답 데이터를 기입하세요.", "Download an empty Excel punching form tailored to the project model setting above. Fill this file with expert response data."))
+            
+            template_bytes = yeta_utils.generate_yeta_excel_template(p_type)
+            st.download_button(
+                label=_("👉 엑셀 템플릿 폼 다운로드 (.xlsx)", "👉 Download Excel Template Form (.xlsx)"),
+                data=template_bytes,
+                file_name=f"yeta_ahp_template_{p_type}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                type="secondary"
+            )
+
+        # ==========================================
+        # SECTION 3: 엑셀 데이터 업로드 및 분석 (Upload & Analyze)
+        # ==========================================
+        with st.container(border=True):
+            st.markdown(f"<h3 style='color: #b91c1c; margin-bottom: 15px;'><i class='fas fa-chart-line'></i> {_('3. 데이터 업로드 및 종합평가 분석', '3. Upload Data & Run AHP Analysis')}</h3>", unsafe_allow_html=True)
+            
+            # User Tier Check
+            is_official = False
+            if st.session_state.get("user_id"):
+                if st.session_state.get("user_role") in ["official", "admin"]:
+                    is_official = True
+                else:
+                    try:
+                        conn = sqlite3.connect('users.db')
+                        c = conn.cursor()
+                        c.execute("SELECT role FROM users WHERE id=?", (st.session_state.user_id,))
+                        res = c.fetchone()
+                        if res and res[0] in ["official", "admin"]:
+                            is_official = True
+                        conn.close()
+                    except:
+                        pass
+
+            uploaded_file = st.file_uploader(_("응답이 완료된 AHP 엑셀 데이터를 업로드하세요", "Upload the completed AHP Excel data"), type=["xlsx"])
+            
+            if uploaded_file is not None:
                 try:
-                    conn = sqlite3.connect('users.db')
-                    c = conn.cursor()
-                    c.execute("SELECT role FROM users WHERE id=?", (st.session_state.user_id,))
-                    res = c.fetchone()
-                    if res and res[0] in ["official", "admin"]:
-                        is_official = True
-                    conn.close()
-                except:
-                    pass
-
-        uploaded_file = st.file_uploader(_("AHP 코딩 엑셀 데이터 파일 업로드 (.xlsx)", "Upload AHP Coding Excel File (.xlsx)"), type=["xlsx"])
-        
-        if uploaded_file is not None:
-            try:
-                import pandas as pd
-                df = pd.read_excel(uploaded_file)
-                st.success(_("데이터 로드 성공!", "Data loaded successfully!"))
-                
-                max_free_evals = 3
-                if not is_official and len(df) > max_free_evals:
-                    st.warning(f"⚠️ 무료 사용자는 최대 {max_free_evals}명의 설문 데이터만 분석 가능합니다. (정식 결제 시 무제한 분석 가능)")
-                    df = df.head(max_free_evals)
+                    import pandas as pd
+                    df = pd.read_excel(uploaded_file)
+                    st.success(_("데이터 로드 성공! 연산을 시작합니다.", "Data loaded successfully! Starting computation."))
                     
-                # Call independent AHP logic
-                res_df, final_yeta_score = yeta_utils.process_yeta_ahp_data(df, p_type, bc_ratio, lir_value)
-                
-                st.markdown("### " + _("예비타당성조사 AHP 종합평가 결과", "Preliminary Feasibility AHP Results"))
-                
-                is_pass = final_yeta_score >= 0.5
-                card_class = "verdict-pass" if is_pass else "verdict-fail"
-                verdict_text = _("사업 타당성 확보 (시행)", "Project Feasible (Go)") if is_pass else _("사업 타당성 미흡 (미시행)", "Project Not Feasible (Stop)")
-                
-                st.markdown(f"""
-                <div class="verdict-card {card_class}">
-                    <div class="verdict-title">{_("최종 종합 평가 판정", "Final Comprehensive Evaluation Verdict")}</div>
-                    <div class="verdict-score">{final_yeta_score:.3f}</div>
-                    <div style="font-size: 1.3rem; font-weight: bold;">{verdict_text}</div>
-                    <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.85;">
-                        {_("KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보", "MoEF & KDI standard: Feasible when AHP score >= 0.5")}
+                    max_free_evals = 3
+                    if not is_official and len(df) > max_free_evals:
+                        st.warning(f"⚠️ 무료 사용자는 최대 {max_free_evals}명의 설문 데이터만 분석 가능합니다. (정식 결제 시 무제한 분석 가능)")
+                        df = df.head(max_free_evals)
+                        
+                    res_df, final_yeta_score = yeta_utils.process_yeta_ahp_data(df, p_type, bc_ratio, lir_value)
+                    
+                    st.markdown("---")
+                    st.markdown("### " + _("📊 종합평가(AHP) 최종 결과", "📊 Final AHP Evaluation Results"))
+                    
+                    is_pass = final_yeta_score >= 0.5
+                    card_class = "verdict-pass" if is_pass else "verdict-fail"
+                    verdict_text = _("사업 타당성 확보 (시행)", "Project Feasible (Go)") if is_pass else _("사업 타당성 미흡 (미시행)", "Project Not Feasible (Stop)")
+                    
+                    st.markdown(f"""
+                    <div class="verdict-card {card_class}">
+                        <div class="verdict-title">{_("최종 종합 평가 판정", "Final Comprehensive Evaluation Verdict")}</div>
+                        <div class="verdict-score">{final_yeta_score:.3f}</div>
+                        <div style="font-size: 1.3rem; font-weight: bold;">{verdict_text}</div>
+                        <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.85;">
+                            {_("KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보", "MoEF & KDI standard: Feasible when AHP score >= 0.5")}
+                        </div>
                     </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.write("#### " + _("평가자별 점수 분포 및 제외 처리 현황", "Evaluator Score Distribution & Exclusion"))
-                st.dataframe(res_df, use_container_width=True)
-                
-            except Exception as e:
-                st.error(f"엑셀 분석 중 오류가 발생했습니다: {str(e)}")
-
-        st.markdown("---")
-        
-        # ==========================================
-        # SECTION 3: 엑셀 펀칭 폼 템플릿 생성 (Template Download)
-        # ==========================================
-        st.markdown(f"### {_('설문 응답 펀칭 템플릿 다운로드', 'Download Survey Punching Template')}")
-        st.info(_("현재 설정된 사업 모델(유형)에 맞춘 빈 엑셀 펀칭 폼을 다운로드합니다.", "Download an empty Excel punching form tailored to the current project model setting."))
-        
-        template_bytes = yeta_utils.generate_yeta_excel_template(p_type)
-        st.download_button(
-            label=_("엑셀 템플릿 다운로드", "Download Excel Template"),
-            data=template_bytes,
-            file_name=f"yeta_ahp_template_{p_type}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            type="primary"
-        )
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.write("#### " + _("👨‍🔬 평가자별 점수 분포 및 극단값 배제 현황", "👨‍🔬 Evaluator Distribution & Outlier Exclusion"))
+                    st.dataframe(res_df, use_container_width=True)
+                    
+                except Exception as e:
+                    st.error(f"엑셀 분석 중 오류가 발생했습니다: {str(e)}")
 
 
     # =========================================================================
