@@ -320,7 +320,600 @@ ID: {user_email}
         print(f"send_password_recovery_email Error: {e}")
         return False
 # -----------------------------
+def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is_best=False):
+    border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
+    best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
+    
+    if "무료" in plan_name or "0" in plan_name:
+        btn_label = "분석기로 이동"
+    elif "기관" in plan_name:
+        btn_label = "로그인 후 B2B 신청"
+    else:
+        btn_label = "로그인 후 결제"
+        
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            {border_css}
+            height: 500px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .btn {{
+            margin-top: auto;
+            width: 100%;
+            padding: 12px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
+        }}
+        .btn:hover {{ background-color: #555555; }}
+      </style>
+    </head>
+    <body>
+      <div class="pricing-box">
+          {best_badge}
+          <div style="height: 260px; box-sizing: border-box;">{inner_html}</div>
+          <button class="btn" onclick="redirectAction()">{btn_label}</button>
+      </div>
+      <script>
+        function redirectAction() {{
+            if ("{plan_name}".includes("무료 체험판")) {{
+                const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+                for (let i = 0; i < tabs.length; i++) {{
+                    if (tabs[i].innerText.includes('예타 종합평가 분석기') || tabs[i].innerText.includes('Preliminary Feasibility')) {{
+                        tabs[i].click();
+                        window.parent.scrollTo(0, 0);
+                        return;
+                    }}
+                }}
+            }}
+            
+            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+            for (let i = 0; i < tabs.length; i++) {{
+                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
+                    tabs[i].click();
+                    window.parent.scrollTo(0, 0);
+                    return;
+                }}
+            }}
+            alert('로그인 또는 회원가입이 필요합니다. 메인 화면 또는 사이드바에서 로그인을 해주세요.');
+            window.parent.scrollTo(0, 0);
+        }}
+      </script>
+    </body>
+    </html>
+    """
 
+def get_yeta_portone_payment_html(user_id, plan_name="예타 단건 분석권", amount=550000, months=9999, inner_html="", is_best=False):
+    import hashlib
+    import datetime
+    login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+    safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
+    
+    event_cfg = get_event_settings()
+    is_cfg_active = event_cfg["active"]
+    event_title = event_cfg["title"]
+    event_desc = event_cfg["desc"]
+    event_deadline_str = event_cfg["deadline"]
+    event_discount = event_cfg["discount"]
+    
+    kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    try:
+        event_deadline = datetime.datetime.strptime(event_deadline_str, "%Y-%m-%d")
+        event_deadline = event_deadline.replace(hour=23, minute=59, second=59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+    except Exception:
+        event_deadline = datetime.datetime(2026, 7, 30, 23, 59, 59, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+        
+    is_event_active = is_cfg_active and kst_now <= event_deadline and plan_name == "예타 단건 분석권"
+    
+    border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
+    best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
+    
+    event_ui_html = ""
+    if is_event_active:
+        event_ui_html = f"""
+        <div id="event-container" style="margin-top: auto; margin-bottom: 6px; padding: 6px 8px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px dashed #0284c7; border-radius: 6px; font-size: 0.72rem; text-align: left; line-height: 1.2; height: auto; overflow: hidden;">
+            <div style="font-weight: bold; color: #0284c7; margin-bottom: 2px;">
+                <b>{event_title}</b>
+            </div>
+            <div style="font-size: 0.65rem; color: #475569; margin-bottom: 4px;">
+                {event_desc}
+            </div>
+            <label style="display: flex; align-items: center; gap: 4px; font-weight: bold; color: #1e293b; cursor: pointer; user-select: none; font-size: 0.7rem; margin: 0;">
+                <input type="checkbox" id="event-agree" onchange="toggleEvent()" style="accent-color: #0284c7; cursor: pointer; width: 13px; height: 13px; margin: 0;">
+                할인 신청 ({event_discount:,}원 즉시 할인)
+            </label>
+            <div id="event-inputs" style="display: none; flex-direction: column; gap: 4px; background: white; padding: 6px 24px 6px 10px; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">대학명:</span>
+                    <input type="text" id="univ-name" placeholder="예: 한국대 대학원" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">논문명:</span>
+                    <input type="text" id="thesis-title" placeholder="예: AHP 의사결정 연구" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
+                </div>
+            </div>
+        </div>
+        """
+
+    if plan_name == "무료 체험판 (영구)":
+        btn_onclick = "redirectAnalysis()"
+        btn_label = "체험하기"
+    elif plan_name == "기관 연간 라이선스":
+        btn_onclick = "scrollToB2B()"
+        btn_label = "세금계산서/인보이스 신청"
+    else:
+        btn_onclick = "openPaymentWindow()"
+        btn_label = f"결제 {plan_name}"
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            {border_css}
+            height: 500px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .btn {{
+            margin-top: auto;
+            width: 100%;
+            padding: 12px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
+        }}
+        .btn:hover {{ background-color: #555555; }}
+      </style>
+    </head>
+    <body>
+      <div class="pricing-box">
+          {best_badge}
+          <div style="height: 260px; box-sizing: border-box;">{inner_html}</div>
+          {event_ui_html}
+          <button class="btn" onclick="{btn_onclick}">{btn_label}</button>
+      </div>
+      <script>
+        let isEventApplied = false;
+        const originalAmount = {amount};
+        let finalAmount = originalAmount;
+
+        function toggleEvent() {{
+            const agreeCheckbox = document.getElementById("event-agree");
+            const inputDiv = document.getElementById("event-inputs");
+            const priceSpanOuter = window.parent.document.getElementById("yeta-single-price-display-span");
+            
+            if (agreeCheckbox && agreeCheckbox.checked) {{
+                if (inputDiv) inputDiv.style.display = "flex";
+                finalAmount = originalAmount - {event_discount};
+                isEventApplied = true;
+            }} else {{
+                if (inputDiv) inputDiv.style.display = "none";
+                finalAmount = originalAmount;
+                isEventApplied = false;
+                if (document.getElementById("univ-name")) document.getElementById("univ-name").value = "";
+                if (document.getElementById("thesis-title")) document.getElementById("thesis-title").value = "";
+            }}
+            
+            if (priceSpanOuter) {{
+                priceSpanOuter.innerText = finalAmount.toLocaleString();
+            }}
+        }}
+
+        function redirectAnalysis() {{
+            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+            for (let i = 0; i < tabs.length; i++) {{
+                if (tabs[i].innerText.includes('예타 종합평가 분석기') || tabs[i].innerText.includes('Preliminary Feasibility')) {{
+                    tabs[i].click();
+                    window.parent.scrollTo(0, 0);
+                    return;
+                }}
+            }}
+        }}
+
+        function scrollToB2B() {{
+            const b2bEl = window.parent.document.getElementById("b2b-payment-section");
+            if (b2bEl) {{
+                b2bEl.scrollIntoView({{ behavior: 'smooth' }});
+            }} else {{
+                alert('하단의 B2B 세금계산서/인보이스 발행 요청 서식을 작성해 주세요.');
+            }}
+        }}
+
+        function openPaymentWindow() {{
+          let univ = "";
+          let thesis = "";
+          
+          if (isEventApplied) {{
+              const uInput = document.getElementById("univ-name");
+              const tInput = document.getElementById("thesis-title");
+              univ = uInput ? uInput.value.trim() : "";
+              thesis = tInput ? tInput.value.trim() : "";
+              
+              if (!univ) {{
+                  alert("이벤트 혜택 적용을 위해 대학명을 입력해 주세요.");
+                  if (uInput) uInput.focus();
+                  return;
+              }}
+              if (!thesis) {{
+                  alert("이벤트 혜택 적용을 위해 논문명을 입력해 주세요.");
+                  if (tInput) tInput.focus();
+                  return;
+              }}
+          }}
+
+          const win = window.open("", "_blank", "width=850,height=700");
+          if (!win) {{
+             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             return;
+          }}
+          win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>안전 결제 진행</title>
+            </head>
+            <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
+              <h3 id="statusMsg">결제 모듈을 안전하게 불러오는 중입니다...</h3>
+              <p>이 창을 닫지 마세요.</p>
+            </body>
+            </html>
+          `);
+          win.document.close();
+
+          let baseOrigin = window.location.origin;
+          try {{
+             if (window.top && window.top.location && window.top.location.origin && window.top.location.origin !== "null") {{
+                 baseOrigin = window.top.location.origin + window.top.location.pathname;
+             }}
+          }} catch(e) {{}}
+          if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
+          
+          let eventParams = "&event_applied=" + (isEventApplied ? "Y" : "N") + 
+                            "&university=" + encodeURIComponent(univ) + 
+                            "&thesis_title=" + encodeURIComponent(thesis);
+                            
+          const returnUrl = baseOrigin + "/?portone_paid=true&mode=yeta&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}") + eventParams;
+          
+          const script = win.document.createElement("script");
+          script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+          script.onload = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
+            const r = Math.random().toString(36).substring(2, 15);
+            win.PortOne.requestPayment({{
+              storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
+              channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
+              paymentId: "pay-" + r,
+              orderName: "{plan_name} - {safe_email}",
+              totalAmount: finalAmount,
+              currency: "CURRENCY_KRW",
+              payMethod: "CARD",
+              redirectUrl: returnUrl,
+              customer: {{
+                email: "{safe_email}",
+                fullName: "사용자",
+                phoneNumber: "010-0000-0000"
+              }}
+            }}).then(function(response) {{
+              if (response.code != null) {{
+                alert("결제 실패: " + response.message);
+                win.close();
+              }} else {{
+                win.location.href = returnUrl;
+              }}
+            }}).catch(function(error) {{
+              alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+              win.close();
+            }});
+          }};
+          script.onerror = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
+          }};
+          win.document.head.appendChild(script);
+        }}
+      </script>
+    </body>
+    </html>
+    """
+
+def get_yeta_portone_custom_services_html(user_id=None):
+    import hashlib
+    login_token = ""
+    safe_email = "test@ahp.kr"
+    if user_id:
+        login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+        safe_email = user_id.strip() if "@" in user_id else "test@ahp.kr"
+
+    is_logged_in = "true" if user_id else "false"
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 1px solid #ddd;
+            height: 500px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+        }}
+        .title {{ margin-top: 0 !important; margin-bottom: 0; font-size: 1.3rem; font-weight: bold; color: #333; }}
+        .subtitle {{ color: #888; font-size: 1.1rem; }}
+        .price-container {{ margin-top: 15px; margin-bottom: 5px; }}
+        .price {{ color: #ff4b4b; font-size: 2rem; font-weight: bold; margin: 0; }}
+        .period {{ color: #555; margin-top:0; font-size: 1rem; }}
+        .desc {{ font-size: 0.85rem; color: #666; min-height: 40px; margin: 0; }}
+        .divider {{ margin: 10px 0; border: 0; border-top: 1px solid #eee; }}
+        
+        .svc-list {{
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.8;
+            flex-grow: 1;
+        }}
+        .svc-item {{
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }}
+        .svc-item input[type="checkbox"] {{
+            margin-right: 8px;
+            margin-top: 4px;
+            cursor: pointer;
+            accent-color: #ff4b4b;
+        }}
+        .svc-item span {{
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }}
+        
+        .btn {{
+            margin-top: auto;
+            width: 100%;
+            padding: 12px;
+            background-color: #333333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
+        }}
+        .btn:hover {{ background-color: #555555; }}
+      </style>
+    </head>
+    <body>
+      <div class="pricing-box">
+          <h3 class="title">부가 서비스 대행</h3>
+          <span class="subtitle">Custom Services</span>
+          <div class="price-container">
+              <h2 class="price" id="totalPriceDisplay">0원</h2>
+          </div>
+          <p class="period">선택된 서비스 합계 금액</p>
+          <p class="desc" id="statusDesc">필요한 서비스를 선택해 주세요.</p>
+          <hr class="divider">
+          
+          <ul class="svc-list">
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅" onchange="updatePrice()">
+                      <span>AHP 온라인 설문 셋팅 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_2" value="50000" data-name="결과 분석 대행" onchange="updatePrice()">
+                      <span>AHP 결과 분석 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 엑셀 양식 설정 대행" onchange="updatePrice()">
+                      <span>AHP 코딩 엑셀 설정 대행 <span style="color: #666; font-size: 0.75rem;">(30,000원)</span></span>
+                  </label>
+              </li>
+          
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_ext" value="100000" data-name="1개월 이용 연장" onchange="updatePrice()">
+                      <span>1개월 이용 연장 <span style="color: #666; font-size: 0.75rem;">(100,000원)</span></span>
+                  </label>
+              </li>
+          </ul>
+          
+          <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
+              견적서 발급 및 부가서비스 문의: <br>카톡아이디: <b>AHPkr</b>
+          </div>
+          
+          <button class="btn" id="payBtn" onclick="handlePayAction()">결제하기</button>
+      </div>
+      
+      <script>
+        function updatePrice() {{
+            const opt1 = document.getElementById("svc_opt_1");
+            const opt2 = document.getElementById("svc_opt_2");
+            const opt3 = document.getElementById("svc_opt_3");
+            const optExt = document.getElementById("svc_opt_ext");
+            
+            let total = 0;
+            let count = 0;
+            if (opt1.checked) {{ total += parseInt(opt1.value); count++; }}
+            if (opt2.checked) {{ total += parseInt(opt2.value); count++; }}
+            if (opt3.checked) {{ total += parseInt(opt3.value); count++; }}
+            if (optExt && optExt.checked) {{ total += parseInt(optExt.value); count++; }}
+            
+            document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + "원";
+            if (count > 0) {{
+                document.getElementById("statusDesc").innerText = "선택된 대행 서비스 총 " + count + "건";
+                document.getElementById("payBtn").innerText = "결제하기";
+                document.getElementById("payBtn").style.backgroundColor = "#ff4b4b";
+            }} else {{
+                document.getElementById("statusDesc").innerText = "필요한 서비스를 선택해 주세요.";
+                document.getElementById("payBtn").innerText = "옵션을 선택해주세요";
+                document.getElementById("payBtn").style.backgroundColor = "#333333";
+            }}
+        }}
+        
+        updatePrice();
+        
+        function handlePayAction() {{
+            const opt1 = document.getElementById("svc_opt_1");
+            const opt2 = document.getElementById("svc_opt_2");
+            const opt3 = document.getElementById("svc_opt_3");
+            const optExt = document.getElementById("svc_opt_ext");
+            
+            let total = 0;
+            let items = [];
+            let addMonths = 0;
+            if (opt1.checked) {{ total += parseInt(opt1.value); items.push(opt1.getAttribute("data-name")); }}
+            if (opt2.checked) {{ total += parseInt(opt2.value); items.push(opt2.getAttribute("data-name")); }}
+            if (opt3.checked) {{ total += parseInt(opt3.value); items.push(opt3.getAttribute("data-name")); }}
+            if (optExt && optExt.checked) {{ total += parseInt(optExt.value); items.push(optExt.getAttribute("data-name")); addMonths = 1; }}
+            
+            if (total === 0) {{
+                alert("결제하실 부가 서비스 대행 옵션을 하나 이상 선택해주세요.");
+                return;
+            }}
+            
+            if ({is_logged_in}) {{
+                openPaymentWindow(total, items.join(", "), addMonths);
+            }} else {{
+                redirectSignup();
+            }}
+        }}
+        
+        function redirectSignup() {{
+            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+            for (let i = 0; i < tabs.length; i++) {{
+                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
+                    tabs[i].click();
+                    window.parent.scrollTo(0, 0);
+                    return;
+                }}
+            }}
+            alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요.');
+            window.parent.scrollTo(0, 0);
+        }}
+        
+        function openPaymentWindow(amount, planName, addMonths) {{
+          const win = window.open("", "_blank", "width=850,height=700");
+          if (!win) {{
+             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             return;
+          }}
+          win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>안전 결제 진행</title>
+            </head>
+            <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
+              <h3 id="statusMsg">결제 모듈을 안전하게 불러오는 중입니다...</h3>
+              <p>이 창을 닫지 마세요.</p>
+            </body>
+            </html>
+          `);
+          win.document.close();
+          
+          let baseOrigin = window.location.origin;
+          try {{
+             if (window.top && window.top.location && window.top.location.origin && window.top.location.origin !== "null") {{
+                 baseOrigin = window.top.location.origin + window.top.location.pathname;
+             }}
+          }} catch(e) {{}}
+          if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
+          
+          const returnUrl = baseOrigin + "/?portone_paid=true&mode=yeta&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months=" + addMonths + "&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
+          
+          const script = win.document.createElement("script");
+          script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+          script.onload = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
+            const r = Math.random().toString(36).substring(2, 15);
+            win.PortOne.requestPayment({{
+              storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
+              channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
+              paymentId: "pay-" + r,
+              orderName: "부가 서비스: " + planName + " - {safe_email}",
+              totalAmount: amount,
+              currency: "CURRENCY_KRW",
+              payMethod: "CARD",
+              redirectUrl: returnUrl,
+              customer: {{
+                email: "{safe_email}",
+                fullName: "사용자",
+                phoneNumber: "010-0000-0000"
+              }}
+            }}).then(function(response) {{
+              if (response.code != null) {{
+                alert("결제 실패: " + response.message);
+                win.close();
+              }} else {{
+                win.location.href = returnUrl;
+              }}
+            }}).catch(function(error) {{
+              alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+              win.close();
+            }});
+          }};
+          script.onerror = function() {{
+            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
+          }};
+          win.document.head.appendChild(script);
+        }}
+      </script>
+    </body>
+    </html>
+    """
+
+# -----------------------------
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
