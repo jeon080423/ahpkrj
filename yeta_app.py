@@ -2683,7 +2683,51 @@ def run():
             st.text_input("정책성 하위: 사업추진 여건 설명", placeholder="관련 부처의 의지 및 주민 태도 등을 포함합니다.")
             st.text_input("정책성 하위: 정책효과 설명", placeholder="일자리 창출, 환경성, 안전성 등 사회적 가치를 평가합니다.")
 
-        st.markdown("#### 3. 설문 미리보기 (Preview)")
+        st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
+        with st.container(border=True):
+            st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
+            
+            default_type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+            default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
+            
+            if "edit_type_questions" not in st.session_state:
+                st.session_state["edit_type_questions"] = [{"q": default_type_q, "opts": default_type_opts}]
+
+            type_questions_state = st.session_state["edit_type_questions"]
+            num_types = len(type_questions_state)
+            
+            col1, col2, col3 = st.columns([6, 2, 2])
+            with col2:
+                if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 3, key="yeta_add_q"):
+                    st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
+                    st.rerun()
+            with col3:
+                if st.button(_("➖ 문항 삭제", "➖ Remove"), use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q"):
+                    st.session_state["edit_type_questions"].pop()
+                    st.rerun()
+            
+            type_questions = []
+            for i in range(num_types):
+                st.markdown(f"**{i+1}.**")
+                if i == 0:
+                    q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
+                    opts_label = _("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)")
+                else:
+                    q_label = _("추가 설문 문항", "Additional Survey Question")
+                    opts_label = _("추가 문항 보기 옵션 (콤마로 구분)", "Additional Question Options (comma-separated)")
+                    
+                q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i]["q"], key=f"yeta_tq_q_{i}")
+                opts_val = st.text_input(opts_label + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"yeta_tq_opts_{i}")
+                
+                type_questions_state[i]["q"] = q_val
+                type_questions_state[i]["opts"] = opts_val
+                
+                type_questions.append({
+                    "q": q_val,
+                    "opts": [x.strip() for x in opts_val.split(",") if x.strip()]
+                })
+
+        st.markdown("#### 4. 설문 미리보기 (Preview)")
         if st.button("👀 실제 응답 화면 미리보기 (Mock-up)"):
             @st.dialog("설문지 미리보기 샘플")
             def preview_modal():
@@ -2809,7 +2853,7 @@ def run():
                     st.rerun()
             preview_modal()
 
-        st.markdown("#### 4. 구글 시트 연동 및 배포")
+        st.markdown("#### 5. 구글 시트 연동 및 배포")
         st.info(_("모든 설정이 완료되었다면, 응답 데이터를 실시간으로 수집할 구글 시트를 연동하고 배포용 URL을 생성합니다.", "When ready, connect a Google Sheet to collect responses and generate the deployment URL."))
         
         with st.expander(_("❓ 구글 시트 연동 방법 안내", "Google Sheets Integration Guide")):
