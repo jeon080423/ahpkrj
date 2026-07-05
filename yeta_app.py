@@ -342,12 +342,6 @@ def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is
     <head>
       <meta charset="utf-8">
       <style>
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-                color: white !important;
-            }
-            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
-                background-color: white !important;
-            }
 
         @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
         body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
@@ -1405,6 +1399,18 @@ def send_approval_email(user_email):
 
 # --- CORE ROUTING ACTION ---
 def run():
+    # Inject custom CSS for sidebar tabs
+    st.markdown("""
+        <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
     # Initialize session state variables
     if 'user_id' not in st.session_state:
         st.session_state.user_id = None
