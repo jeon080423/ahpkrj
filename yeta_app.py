@@ -2384,15 +2384,17 @@ def run():
                                 
     # 7. Navigation Tabs
     if st.session_state.user_id:
-        tab_analysis, tab_survey_create, tab_guide, tab_pricing = st.tabs([
+        tab_analysis, tab_excel, tab_survey_create, tab_guide, tab_pricing = st.tabs([
             _("예타 종합평가 분석기", "Preliminary Feasibility Analysis"),
+            _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 설문지 배포", "Create Yeta Survey"),
             _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("서비스 요금 및 라이선스", "Pricing & License")
         ])
     else:
-        tab_analysis, tab_survey_create, tab_guide, tab_pricing, tab_signup = st.tabs([
+        tab_analysis, tab_excel, tab_survey_create, tab_guide, tab_pricing, tab_signup = st.tabs([
             _("예타 종합평가 분석기", "Preliminary Feasibility Analysis"),
+            _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
             _("예타 전용 설문지 배포", "Create Yeta Survey"),
             _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
             _("서비스 요금 및 라이선스", "Pricing & License"),
@@ -2469,23 +2471,6 @@ def run():
 
         with main_col:
             # ==========================================
-            # SECTION 2: 엑셀 펀칭 폼 템플릿 생성 (Template Download)
-            # ==========================================
-            with st.container(border=True):
-                st.markdown(f"<h3 style='color: #047857; margin-bottom: 10px; font-size: 1.3rem;'><i class='fas fa-file-excel'></i> {_('1. 조사 펀칭용 엑셀 템플릿 다운로드', '1. Download Survey Excel Template')}</h3>", unsafe_allow_html=True)
-                st.markdown(_("<span style='font-size: 0.95rem; color: #4b5563;'>우측에서 설정한 <b>사업 모델(유형)</b>의 평가 구조에 정확히 맞춰진 빈 엑셀 폼을 다운로드합니다. 이 파일에 전문가 응답 데이터를 기입하세요.</span>", "Download an empty Excel punching form tailored to the project model setting. Fill this file with expert response data."), unsafe_allow_html=True)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                template_bytes = yeta_utils.generate_yeta_excel_template(p_type)
-                st.download_button(
-                    label=_("👉 맞춤형 엑셀 템플릿 다운로드 (.xlsx)", "👉 Download Custom Excel Template (.xlsx)"),
-                    data=template_bytes,
-                    file_name=f"yeta_ahp_template_{p_type}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    type="secondary"
-                )
-
-            # ==========================================
             # SECTION 3: 엑셀 데이터 업로드 및 분석 (Upload & Analyze)
             # ==========================================
             with st.container(border=True):
@@ -2551,6 +2536,70 @@ def run():
                     except Exception as e:
                         st.error(f"엑셀 분석 중 오류가 발생했습니다: {str(e)}")
 
+
+
+
+    # =========================================================================
+    # TAB 1.5: Yeta Excel Template Generator
+    # =========================================================================
+    with tab_excel:
+        st.write("### " + _("예비타당성조사 AHP 코딩 엑셀 양식 다운로드", "Download Yeta AHP Coding Excel Form"))
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        ex_main_col, ex_settings_col = st.columns([3.0, 1.2], gap="large")
+        
+        with ex_settings_col:
+            with st.container(border=True):
+                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {_('분석 모델 설정', 'Analysis Model Settings')}</div>", unsafe_allow_html=True)
+                
+                excel_project_type = st.selectbox(
+                    _("사업 유형(모델) 선택", "Select Project Type (Model)"),
+                    options=[
+                        ("construction_non_capital", _("건설사업 (비수도권)", "Construction (Non-capital)")),
+                        ("construction_capital", _("건설사업 (수도권)", "Construction (Capital)")),
+                        ("rnd_bc", _("R&D사업 (B/C)", "R&D (B/C)")),
+                        ("rnd_ec", _("R&D사업 (E/C)", "R&D (E/C)")),
+                        ("other_bc", _("기타 재정사업 (B/C)", "Other Fiscal (B/C)")),
+                        ("other_ec", _("기타 재정사업 (E/C)", "Other Fiscal (E/C)"))
+                    ],
+                    format_func=lambda x: x[1],
+                    key="yeta_excel_project_type_select"
+                )
+                ex_p_type = excel_project_type[0]
+                
+                st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('모델별 가중치 평가 항목 구성', 'Model Weight Factor Structure')}</div>", unsafe_allow_html=True)
+                
+                if "rnd" in ex_p_type:
+                    st.info("📊 1계층: 경제성, 과학기술적 타당성, 정책적 타당성")
+                elif "capital" in ex_p_type and "non" not in ex_p_type:
+                    st.info("📊 1계층: 경제성, 정책성")
+                else:
+                    st.info("📊 1계층: 경제성, 정책성, 지역균형발전")
+
+        with ex_main_col:
+            with st.container(border=True):
+                st.markdown(f"<h3 style='color: #047857; margin-bottom: 10px; font-size: 1.3rem;'><i class='fas fa-file-excel'></i> {_('맞춤형 예타 AHP 엑셀 폼 생성기', 'Custom Yeta AHP Excel Form Generator')}</h3>", unsafe_allow_html=True)
+                st.markdown(_("<span style='font-size: 0.95rem; color: #4b5563;'>우측에서 선택한 <b>예비타당성조사 분석 모델</b>에 맞춰진 전용 엑셀 펀칭 폼입니다.</span>", "This is a dedicated Excel punching form tailored to the Yeta analysis model selected on the right."), unsafe_allow_html=True)
+                
+                st.markdown("""
+                <div style='background-color: #f9fafb; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #3b82f6;'>
+                    <strong>[양식 구조 안내]</strong><br>
+                    ✔️ <b>동일한 부분</b>: 2계층 이후 항목들 간의 9점 척도 쌍대비교 입력 방식 및 CR(일관성 비율) 검증 로직은 일반 AHP와 동일합니다.<br>
+                    ✔️ <b>달라지는 부분</b>: 예타 지침에 따라 1계층(경제/정책/지역) 가중치는 쌍대비교가 아닌 <b>100점 상수합법(Constant-Sum)</b> 비율로 직접 기입하도록 열(Column) 구조가 특수하게 분리되어 있습니다.
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type)
+                st.download_button(
+                    label=_("👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)", "👉 Download Custom Yeta AHP Excel Template (.xlsx)"),
+                    data=template_bytes,
+                    file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    type="primary",
+                    use_container_width=True
+                )
 
     # =========================================================================
     # TAB 2: Yeta Survey Creator
