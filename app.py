@@ -2,6 +2,8 @@ import streamlit as st
 import importlib
 import sys
 
+st.write("DEBUG: New app.py is running. Current query params:", st.query_params)
+
 # 1. Page Config (Must be called as the very first Streamlit command)
 try:
     from PIL import Image
