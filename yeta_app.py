@@ -2793,14 +2793,45 @@ def run():
                 st.write("**[제2계층 평가: 9점 척도 쌍대비교]**")
                 st.caption("두 항목 중 상대적으로 더 중요한 쪽에 가중치를 부여해주십시오. (CR 검증 가이드 바 활성화 예시 포함)")
                 
-                survey_container = st.container()
+                survey_container = st.container(key="ahp_survey_matrix")
                 survey_container.markdown("<div class='ahp_scrollable_area'></div>", unsafe_allow_html=True)
                 
                 # 쌍대비교 라디오 버튼 가로폭 강제 할당 및 모바일 겹침 방지 CSS
                 mobile_css = """
                 <style>
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stRadio"] > div,
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] {
+                /* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
+                div.st-key-ahp_survey_matrix {
+                    gap: 4px !important;
+                    row-gap: 4px !important;
+                }
+
+                /* 1. 수직 정렬 & 레이아웃 배분 */
+                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
+                    gap: 0px !important;
+                    align-items: center !important;
+                    width: 100% !important;
+                    margin-top: 0px !important;
+                    margin-bottom: 0px !important;
+                    padding-top: 4px !important;
+                    padding-bottom: 4px !important;
+                    border-bottom: 1px solid #e2e8f0 !important;
+                }
+
+                .st-key-ahp_survey_matrix div[data-testid="column"] {
+                    padding: 0px !important;
+                }
+
+                /* 2. 라디오 그룹 전체 100% 분배 강제 및 줄바꿈 원천 차단 */
+                .st-key-ahp_survey_matrix div[data-testid="stElementContainer"],
+                .st-key-ahp_survey_matrix div[data-testid="stRadio"],
+                .st-key-ahp_survey_matrix .stRadio {
+                    width: 100% !important;
+                    margin: 0px !important;
+                    padding: 0px !important;
+                }
+
+                .st-key-ahp_survey_matrix div[data-testid="stRadio"] > div,
+                .st-key-ahp_survey_matrix div[role="radiogroup"] {
                     display: flex !important;
                     flex-direction: row !important;
                     flex-wrap: nowrap !important;
@@ -2811,10 +2842,17 @@ def run():
                     padding: 0px !important; 
                     margin: 0px !important;
                 }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] > div,
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] > label,
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stRadioHorizontalOption"],
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] label {
+
+                /* 2.5. AHP 컨테이너 내부의 수직 요소 간격 초밀착 */
+                .st-key-ahp_survey_matrix div[data-testid="stVerticalBlock"] {
+                    gap: 0px !important;
+                }
+
+                /* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
+                .st-key-ahp_survey_matrix div[role="radiogroup"] > div,
+                .st-key-ahp_survey_matrix div[role="radiogroup"] > label,
+                .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"],
+                .st-key-ahp_survey_matrix div[role="radiogroup"] label {
                     flex: 1 1 0% !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -2825,35 +2863,88 @@ def run():
                     padding: 0px !important;
                     min-width: 0px !important;
                     width: 100% !important;
+                    border-radius: 2px !important;
+                    transition: background-color 0.1s ease-in-out !important;
+                    background-color: transparent !important;
                 }
-                /* 라디오 버튼의 텍스트(숫자)를 숨겨서 동그라미만 남기고 중앙 정렬되도록 함 */
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+
+                /* 3.5. 라디오 그룹 최소 높이 해제 */
+                .st-key-ahp_survey_matrix div[role="radiogroup"] {
+                    min-height: 32px !important;
+                }
+
+                /* 감싸는 div가 있을 경우 그 내부의 실제 label도 100% 채우도록 지시 */
+                .st-key-ahp_survey_matrix div[role="radiogroup"] > div label,
+                .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"] label {
+                    width: 100% !important;
+                    height: 100% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    margin: 0px !important;
+                    padding: 0px !important;
+                }
+
+                /* 4. 기존 텍스트 찌꺼기 완벽 제거 */
+                .st-key-ahp_survey_matrix label[data-testid="stWidgetLabel"],
+                .st-key-ahp_survey_matrix label p {
                     display: none !important;
+                    height: 0px !important;
+                    width: 0px !important;
+                    margin: 0px !important;
+                    padding: 0px !important;
+                    opacity: 0 !important;
+                    overflow: hidden !important;
+                    position: absolute !important;
                 }
-                /* 컨테이너 너비 제약과 무관하게 가로 스크롤 허용 및 겹침 방지 (모달 최적화) */
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) {
+
+                /* stMarkdownContainer의 negative margin 제거하여 컬럼간 수직 평행 맞춤 */
+                .st-key-ahp_survey_matrix div[data-testid="stMarkdownContainer"] {
+                    margin-bottom: 0px !important;
+                    padding-bottom: 0px !important;
+                }
+
+                /* 라디오 항목 내부의 markdown 컨테이너(텍스트용) 완전히 감추기 */
+                .st-key-ahp_survey_matrix div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+                    display: none !important;
+                    height: 0px !important;
+                    width: 0px !important;
+                    margin: 0px !important;
+                    padding: 0px !important;
+                    opacity: 0 !important;
+                    overflow: hidden !important;
+                    position: absolute !important;
+                }
+
+                /* 동그라미 컨테이너 중앙 정렬 및 여백 마진 제거 */
+                .st-key-ahp_survey_matrix label span {
+                    margin: 0px !important;
+                    padding: 0px !important;
+                }
+
+                /* 5. Hover 및 Zebra 효과 */
+                .st-key-ahp_survey_matrix label:hover {
+                    background-color: #f1f5f9 !important;
+                    cursor: pointer !important;
+                }
+                
+                /* 모달 너비 제약을 무시하고 가로 스크롤 허용하기 위한 특정 블록 설정 */
+                div[data-testid="stVerticalBlock"]:has(.st-key-ahp_survey_matrix) {
                     overflow-x: auto !important;
                     padding-bottom: 15px;
                 }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) > div {
+                
+                .st-key-ahp_survey_matrix > div {
                     min-width: 700px !important;
                 }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] {
-                    flex-wrap: nowrap !important;
-                    flex-direction: row !important;
-                    gap: 0px !important;
-                }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1) {
+                
+                /* 각 비율 (15%, 70%, 15%) 설정 */
+                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
+                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
                     width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
                 }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
+                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
                     width: 70% !important; min-width: 70% !important; flex: 1 1 70% !important;
-                }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
-                    width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
-                }
-                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stRadio"] {
-                    width: 100% !important;
                 }
                 </style>
                 """
