@@ -2729,7 +2729,7 @@ def run():
 
         st.markdown("#### 4. 설문 미리보기 (Preview)")
         if st.button("👀 실제 응답 화면 미리보기 (Mock-up)"):
-            @st.dialog("설문지 미리보기 샘플")
+            @st.dialog("설문지 미리보기 샘플", width="large")
             def preview_modal():
                 st.subheader(survey_title)
                 st.info(survey_desc)
@@ -2780,28 +2780,26 @@ def run():
                     justify-content: center;
                     margin-right: 0px !important;
                 }
-                /* 모바일 (768px 이하) 환경에서 가로 스크롤 허용 및 세로 쌓임 방지 */
-                @media (max-width: 768px) {
-                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) {
-                        overflow-x: auto !important;
-                        padding-bottom: 15px;
-                    }
-                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) > div {
-                        min-width: 700px !important;
-                    }
-                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] {
-                        flex-wrap: nowrap !important;
-                        flex-direction: row !important;
-                    }
-                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-                        width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
-                    }
-                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
-                        width: 70% !important; min-width: 70% !important; flex: 1 1 70% !important;
-                    }
-                    div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
-                        width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
-                    }
+                /* 컨테이너 너비 제약과 무관하게 가로 스크롤 허용 및 겹침 방지 (모달 최적화) */
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) {
+                    overflow-x: auto !important;
+                    padding-bottom: 15px;
+                }
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) > div {
+                    min-width: 700px !important;
+                }
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] {
+                    flex-wrap: nowrap !important;
+                    flex-direction: row !important;
+                }
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+                    width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
+                }
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+                    width: 70% !important; min-width: 70% !important; flex: 1 1 70% !important;
+                }
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
+                    width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
                 }
                 </style>
                 """
