@@ -2779,17 +2779,32 @@ def run():
                 # 쌍대비교 라디오 버튼 가로폭 강제 할당 및 모바일 겹침 방지 CSS
                 mobile_css = """
                 <style>
-                div[role="radiogroup"] {
-                    display: flex;
-                    justify-content: space-between;
-                    width: 100%;
-                    margin-top: -8px;
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stRadio"] > div,
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    justify-content: space-between !important;
+                    align-items: center !important;
+                    width: 100% !important;
+                    gap: 0px !important;
+                    padding: 0px !important; 
+                    margin: 0px !important;
                 }
-                div[role="radiogroup"] > label {
-                    flex: 1;
-                    display: flex;
-                    justify-content: center;
-                    margin-right: 0px !important;
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] > div,
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] > label,
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[data-testid="stRadioHorizontalOption"],
+                div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] label {
+                    flex: 1 1 0% !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    height: 32px !important; 
+                    margin: 0px !important;
+                    padding: 0px !important;
+                    min-width: 0px !important;
+                    width: 100% !important;
                 }
                 /* 라디오 버튼의 텍스트(숫자)를 숨겨서 동그라미만 남기고 중앙 정렬되도록 함 */
                 div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
