@@ -2405,7 +2405,7 @@ def run():
     # TAB 1: Analysis Tool
     # =========================================================================
     with tab_analysis:
-        st.write("### " + _("예비타당성조사 AHP 종합평가 연산", "Preliminary Feasibility AHP Synthesis"))
+        st.write("### " + _("예비타당성 종합평가(AHP)", "Preliminary Feasibility AHP Synthesis"))
         st.markdown("<br>", unsafe_allow_html=True)
         
         main_col, settings_col = st.columns([3.0, 1.2], gap="large")
