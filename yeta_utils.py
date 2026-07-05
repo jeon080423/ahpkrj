@@ -388,3 +388,49 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
     res_df["극단값 배제"] = res_df["극단값 배제"].fillna("-")
     
     return res_df, final_score
+
+def export_yeta_result_excel(summary_df, res_df):
+    import io
+    import pandas as pd
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        workbook = writer.book
+        
+        # Formats
+        header_format = workbook.add_format({
+            'bold': True, 'text_wrap': True, 'valign': 'vcenter',
+            'fg_color': '#D9E1F2', 'border': 1, 'align': 'center'
+        })
+        cell_format = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '0.000'})
+        bold_format = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'valign': 'vcenter', 'fg_color': '#FCE4D6', 'num_format': '0.000'})
+        
+        # Sheet 1: 종합평가_결과
+        summary_df.to_excel(writer, sheet_name='종합평가_결과', index=False)
+        worksheet1 = writer.sheets['종합평가_결과']
+        
+        for col_num, value in enumerate(summary_df.columns.values):
+            worksheet1.write(0, col_num, value, header_format)
+            
+        for row_idx in range(len(summary_df)):
+            is_last = (row_idx == len(summary_df) - 1)
+            fmt = bold_format if is_last else cell_format
+            for col_idx in range(len(summary_df.columns)):
+                val = summary_df.iloc[row_idx, col_idx]
+                if pd.isna(val): val = ""
+                # Remove markdown bold asterisks if present
+                if isinstance(val, str): val = val.replace("**", "")
+                worksheet1.write(row_idx + 1, col_idx, val, fmt)
+                
+        worksheet1.set_column(0, 0, 25)
+        worksheet1.set_column(1, 2, 20)
+        worksheet1.set_column(3, 3, 35)
+        
+        # Sheet 2: 로우데이터(Raw_Data)
+        res_df.to_excel(writer, sheet_name='로우데이터(Raw_Data)', index=False)
+        worksheet2 = writer.sheets['로우데이터(Raw_Data)']
+        for col_num, value in enumerate(res_df.columns.values):
+            worksheet2.write(0, col_num, value, header_format)
+        worksheet2.set_column(0, len(res_df.columns)-1, 15)
+        
+    return output.getvalue()
