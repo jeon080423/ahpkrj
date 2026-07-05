@@ -151,6 +151,13 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
     <meta charset="utf-8">
     <title>견적서</title>
     <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+
         body {{ font-family: 'Malgun Gothic', 'Dotum', sans-serif; margin: 10px; color: #000; line-height: 1.5; background: #fff; }}
         .title {{ text-align: center; font-size: 30px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; letter-spacing: 5px; }}
         .meta-list {{ list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 13px; }}
@@ -335,6 +342,13 @@ def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is
     <head>
       <meta charset="utf-8">
       <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+
         @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
         body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
         .pricing-box {{
@@ -466,6 +480,13 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
     <head>
       <meta charset="utf-8">
       <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+
         @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
         body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
         .pricing-box {{
@@ -662,6 +683,13 @@ def get_yeta_portone_custom_services_html(user_id=None):
     <head>
       <meta charset="utf-8">
       <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+
         @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
         body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px 5px 5px 5px; box-sizing: border-box; }}
         .pricing-box {{
@@ -1445,6 +1473,13 @@ def run():
     # 3. Custom CSS Styling (Premium Corporate Theme)
     st.markdown("""
     <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+
     /* =============================================================================
        AHP 마스터 프리미엄 엔터프라이즈 UI 테마 (v3.0) - 예타 모듈용
        ============================================================================= */
@@ -2116,7 +2151,7 @@ def run():
     with st.sidebar:
         # AHP Master Logo
         try:
-            with open("ahp_master_logo.png", "rb") as f:
+            with open("ahp_master_logo_white.png", "rb") as f:
                 encoded_logo = base64.b64encode(f.read()).decode()
             st.markdown(
                 f'<a href="https://jeon080423.github.io/AHPkr" target="_blank">'
@@ -2277,6 +2312,13 @@ def run():
                     button_iframe = f"""
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
                     <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+
                         .btn {{
                             width: 100%;
                             height: 38px;
@@ -2512,14 +2554,85 @@ def run():
                         except:
                             pass
 
-                uploaded_file = st.file_uploader(_("응답이 완료된 AHP 엑셀 파일 첨부", "Upload the completed AHP Excel file"), type=["xlsx"])
+                data_source = st.radio(
+                    _("데이터 소스 선택", "Select Data Source"),
+                    [_("📂 엑셀 파일 직접 업로드", "Upload Excel File"), _("🌐 배포된 온라인 설문 데이터 연동", "Link Online Survey Data")],
+                    horizontal=True
+                )
                 
-                if uploaded_file is not None:
-                    try:
-                        import pandas as pd
-                        df = pd.read_excel(uploaded_file)
-                        st.success(_("데이터 로드 성공! 연산을 시작합니다.", "Data loaded successfully! Starting computation."))
+                df = None
+                if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
+                    uploaded_file = st.file_uploader(_("응답이 완료된 AHP 엑셀 파일 첨부", "Upload the completed AHP Excel file"), type=["xlsx"])
+                    if uploaded_file is not None:
+                        try:
+                            import pandas as pd
+                            df = pd.read_excel(uploaded_file)
+                            st.success(_("데이터 로드 성공! 연산을 시작합니다.", "Data loaded successfully! Starting computation."))
+                        except Exception as e:
+                            st.error(f"엑셀 로드 중 오류가 발생했습니다: {str(e)}")
+                else:
+                    if st.session_state.user_id is None:
+                        st.warning(_("온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", "Online survey integration is available for members. Please log in."))
+                    else:
+                        import sqlite3
+                        try:
+                            from survey_manager import sync_short_codes_from_gs, get_admin_surveys_from_gsheet, load_survey_metadata, get_survey_gspread_client
+                            sync_short_codes_from_gs()
+                        except:
+                            pass
                         
+                        conn = sqlite3.connect('users.db')
+                        cur = conn.cursor()
+                        cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
+                        sqlite_surveys = cur.fetchall()
+                        conn.close()
+                        
+                        gs_surveys = []
+                        try:
+                            from survey_manager import get_admin_surveys_from_gsheet
+                            gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
+                        except:
+                            pass
+                        
+                        merged_surveys = {}
+                        for s in gs_surveys + sqlite_surveys:
+                            if s[0] not in merged_surveys:
+                                merged_surveys[s[0]] = s
+                        admin_surveys = list(merged_surveys.values())
+                        admin_surveys.sort(key=lambda x: x[2], reverse=True)
+                    
+                        if not admin_surveys:
+                            st.warning(_("배포된 온라인 설문이 없습니다.", "No deployed online surveys found."))
+                        else:
+                            survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
+                            selected_survey_label = st.selectbox(
+                                _("분석할 온라인 설문 선택", "Select Online Survey for Analysis"),
+                                list(survey_options.keys())
+                            )
+                            selected_sheet_id = survey_options[selected_survey_label]
+                            
+                            if st.button(_("🔄 구글 시트에서 실시간 응답 가져오기", "🔄 Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
+                                with st.spinner(_("구글 시트에서 설문 데이터를 가져오는 중...", "Fetching survey responses...")):
+                                    from survey_manager import get_survey_gspread_client
+                                    g_client = get_survey_gspread_client()
+                                    if g_client:
+                                        try:
+                                            import pandas as pd
+                                            spreadsheet = g_client.open_by_key(selected_sheet_id)
+                                            raw_sheet = spreadsheet.worksheet("Raw_Data")
+                                            all_rows = raw_sheet.get_all_values()
+                                            if len(all_rows) > 1:
+                                                headers = all_rows[0]
+                                                rows = all_rows[1:]
+                                                df = pd.DataFrame(rows, columns=headers)
+                                                st.success(_("온라인 설문 데이터를 성공적으로 불러왔습니다! 연산을 시작합니다.", "Successfully fetched online survey data! Starting computation."))
+                                            else:
+                                                st.warning(_("아직 수집된 응답 데이터가 없습니다.", "No response data collected yet."))
+                                        except Exception as e:
+                                            st.error(f"구글 시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
+
+                if df is not None:
+                    try:
                         max_free_evals = 3
                         if not is_official and len(df) > max_free_evals:
                             st.warning(f"⚠️ 무료 사용자는 최대 {max_free_evals}명의 설문 데이터만 분석 가능합니다. (정식 결제 시 무제한 분석 가능)")
@@ -2550,7 +2663,7 @@ def run():
                         st.dataframe(res_df, use_container_width=True)
                         
                     except Exception as e:
-                        st.error(f"엑셀 분석 중 오류가 발생했습니다: {str(e)}")
+                        st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
 
 
 
@@ -2798,6 +2911,13 @@ def run():
                 # 쌍대비교 라디오 버튼 가로폭 강제 할당 및 모바일 겹침 방지 CSS
                 mobile_css = """
                 <style>
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+                color: white !important;
+            }
+            [data-testid="stSidebar"] .stTabs [data-baseweb="tab-highlight"] {
+                background-color: white !important;
+            }
+
                 /* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
                 div.st-key-ahp_survey_matrix {
                     gap: 4px !important;
