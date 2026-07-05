@@ -1557,39 +1557,6 @@ def run():
                             finally:
                                 conn.close()
                                 
-        st.markdown("---")
-        st.markdown(f"### {_("예타 분석 설정", "Yeta Analysis Settings")}")
-        
-        project_type = st.selectbox(
-            _("사업 유형", "Project Type"),
-            options=[
-                ("construction_non_capital", _("건설사업 (비수도권 유형)", "Construction (Non-capital)")),
-                ("construction_capital", _("건설사업 (수도권 유형)", "Construction (Capital)")),
-                ("rnd_bc", _("R&D / 연구개발사업 (B/C 분석)", "R&D (B/C Analysis)")),
-                ("rnd_ec", _("R&D / 연구개발사업 (E/C 분석)", "R&D (E/C Analysis)")),
-                ("other_bc", _("기타 재정사업 (B/C 분석)", "Other Fiscal (B/C Analysis)")),
-                ("other_ec", _("기타 재정사업 (E/C 분석)", "Other Fiscal (E/C Analysis)"))
-            ],
-            format_func=lambda x: x[1],
-            key="yeta_project_type_select"
-        )
-        
-        st.markdown("---")
-        st.markdown(f"#### {_("지침 가중치 허용 범위", "Guideline Weight Limits")}")
-        p_type = project_type[0]
-        if p_type == "construction_non_capital":
-            st.info("경제성: 30~45%\n정책성: 25~40%\n지역균형발전: 30~40%")
-        elif p_type == "construction_capital":
-            st.info("경제성: 60~70%\n정책성: 30~40%\n지역균형발전: 0% (제외)")
-        elif p_type == "rnd_bc":
-            st.info("경제성: 10~40%\n과학기술적 타당성: 40~50%\n정책적 타당성: 20~40%")
-        elif p_type == "rnd_ec":
-            st.info("경제성: 10~40%\n과학기술적 타당성: 40~50%\n정책적 타당성: 20~40%")
-        elif p_type == "other_bc":
-            st.info("경제성: 25~50%\n정책성: 50~75%")
-        elif p_type == "other_ec":
-            st.info("경제성: 20~40%\n정책성: 60~80%")
-
     # 7. Navigation Tabs
     if st.session_state.user_id:
         tab_analysis, tab_survey_create, tab_guide, tab_pricing = st.tabs([
@@ -1612,6 +1579,39 @@ def run():
     # =========================================================================
     with tab_analysis:
         st.write("### " + _("예비타당성조사 AHP 종합평가 연산", "Preliminary Feasibility AHP Synthesis"))
+        
+        # 1. Project Type & Guideline Limits Selection
+        col_proj_type, col_proj_limits = st.columns([1.5, 2.5], gap="large")
+        with col_proj_type:
+            project_type = st.selectbox(
+                _("사업 유형 선택", "Select Project Type"),
+                options=[
+                    ("construction_non_capital", _("건설사업 (비수도권 유형)", "Construction (Non-capital)")),
+                    ("construction_capital", _("건설사업 (수도권 유형)", "Construction (Capital)")),
+                    ("rnd_bc", _("R&D / 연구개발사업 (B/C 분석)", "R&D (B/C Analysis)")),
+                    ("rnd_ec", _("R&D / 연구개발사업 (E/C 분석)", "R&D (E/C Analysis)")),
+                    ("other_bc", _("기타 재정사업 (B/C 분석)", "Other Fiscal (B/C Analysis)")),
+                    ("other_ec", _("기타 재정사업 (E/C 분석)", "Other Fiscal (E/C Analysis)"))
+                ],
+                format_func=lambda x: x[1],
+                key="yeta_project_type_select"
+            )
+            p_type = project_type[0]
+            
+        with col_proj_limits:
+            st.markdown(f"**{_('지침 가중치 허용 범위', 'Guideline Weight Limits')}**")
+            if p_type == "construction_non_capital":
+                st.info(_("경제성: 30~45% | 정책성: 25~40% | 지역균형발전: 30~40%", "Economics: 30~45% | Policy: 25~40% | Regional Balance: 30~40%"))
+            elif p_type == "construction_capital":
+                st.info(_("경제성: 60~70% | 정책성: 30~40% | 지역균형발전: 0% (제외)", "Economics: 60~70% | Policy: 30~40% | Regional Balance: 0% (Excluded)"))
+            elif p_type == "rnd_bc" or p_type == "rnd_ec":
+                st.info(_("경제성: 10~40% | 과학기술적 타당성: 40~50% | 정책적 타당성: 20~40%", "Economics: 10~40% | Science/Tech: 40~50% | Policy: 20~40%"))
+            elif p_type == "other_bc":
+                st.info(_("경제성: 25~50% | 정책성: 50~75%", "Economics: 25~50% | Policy: 50~75%"))
+            elif p_type == "other_ec":
+                st.info(_("경제성: 20~40% | 정책성: 60~80%", "Economics: 20~40% | Policy: 60~80%"))
+        
+        st.markdown("---")
         
         # User Tier Check
         is_official = False
