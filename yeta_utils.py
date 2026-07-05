@@ -115,6 +115,8 @@ def aggregate_yeta_group_ahp(evaluator_scores):
     log_sum = sum(math.log(s) for s in filtered_scores if s > 0)
     geom_mean = math.exp(log_sum / len(filtered_scores))
     return geom_mean
+
+
 import pandas as pd
 import numpy as np
 import io
@@ -142,27 +144,27 @@ def calculate_ahp_eigenvector_and_cr(matrix_size, matrix_data):
         return None, None
 
 def generate_yeta_excel_template(project_type):
-    columns = ["?��???ID", "?�속_�??�명", "?�문_??��"]
+    columns = ["평가자_ID", "소속_및_성명", "전문_역할"]
     
     if project_type == "construction_non_capital":
-        columns.extend(["1계층_경제??%)", "1계층_?�책??%)", "1계층_지??��?�발??%)"])
+        columns.extend(["1계층_경제성(%)", "1계층_정책성(%)", "1계층_지역균형발전(%)"])
     elif project_type == "construction_capital":
-        columns.extend(["1계층_경제??%)", "1계층_?�책??%)"])
+        columns.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
     elif "rnd" in project_type:
-        columns.extend(["1계층_경제??%)", "1계층_기술??%)", "1계층_?�책??%)"])
+        columns.extend(["1계층_경제성(%)", "1계층_기술성(%)", "1계층_정책성(%)"])
     else:
-        columns.extend(["1계층_경제??%)", "1계층_?�책??%)"])
+        columns.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
         
     columns.extend([
-        "?��?비교_?�책1_vs_?�책2(?�수??", 
-        "?��?비교_?�책1_vs_?�책3(?�수??", 
-        "?��?비교_?�책2_vs_?�책3(?�수??"
+        "쌍대비교_정책1_vs_정책2(실수형)", 
+        "쌍대비교_정책1_vs_정책3(실수형)", 
+        "쌍대비교_정책2_vs_정책3(실수형)"
     ])
     
     columns.extend([
-        "?�?�평가_?�책1(?�행?�호_1~9_??��)",
-        "?�?�평가_?�책2(?�행?�호_1~9_??��)",
-        "?�?�평가_?�책3(?�행?�호_1~9_??��)"
+        "대안평가_정책1(시행선호_1~9_역수)",
+        "대안평가_정책2(시행선호_1~9_역수)",
+        "대안평가_정책3(시행선호_1~9_역수)"
     ])
     
     df = pd.DataFrame(columns=columns)
@@ -205,20 +207,20 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
         
     for idx, row in df.iterrows():
         try:
-            eval_id = row.get("?��???ID", f"Evaluator_{idx+1}")
+            eval_id = row.get("평가자_ID", f"Evaluator_{idx+1}")
             
-            w_econ = float(row.get("1계층_경제??%)", 0)) / 100.0
-            w_policy = float(row.get("1계층_?�책??%)", 0)) / 100.0
-            w_tech = float(row.get("1계층_기술??%)", 0)) / 100.0 if "rnd" in project_type else 0.0
-            w_reg = float(row.get("1계층_지??��?�발??%)", 0)) / 100.0 if has_regional else 0.0
+            w_econ = float(row.get("1계층_경제성(%)", 0)) / 100.0
+            w_policy = float(row.get("1계층_정책성(%)", 0)) / 100.0
+            w_tech = float(row.get("1계층_기술성(%)", 0)) / 100.0 if "rnd" in project_type else 0.0
+            w_reg = float(row.get("1계층_지역균형발전(%)", 0)) / 100.0 if has_regional else 0.0
             
             total_w = w_econ + w_policy + w_tech + w_reg
             if total_w > 0:
                 w_econ /= total_w; w_policy /= total_w; w_tech /= total_w; w_reg /= total_w
                 
-            v12 = float(row.get("?��?비교_?�책1_vs_?�책2(?�수??", 1.0))
-            v13 = float(row.get("?��?비교_?�책1_vs_?�책3(?�수??", 1.0))
-            v23 = float(row.get("?��?비교_?�책2_vs_?�책3(?�수??", 1.0))
+            v12 = float(row.get("쌍대비교_정책1_vs_정책2(실수형)", 1.0))
+            v13 = float(row.get("쌍대비교_정책1_vs_정책3(실수형)", 1.0))
+            v23 = float(row.get("쌍대비교_정책2_vs_정책3(실수형)", 1.0))
             
             mat = np.array([
                 [1.0, v12, v13],
@@ -229,9 +231,9 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
             policy_weights, cr = calculate_ahp_eigenvector_and_cr(3, mat)
             if cr is None: cr = 0.0
             
-            alt_p1 = float(row.get("?�?�평가_?�책1(?�행?�호_1~9_??��)", 1.0))
-            alt_p2 = float(row.get("?�?�평가_?�책2(?�행?�호_1~9_??��)", 1.0))
-            alt_p3 = float(row.get("?�?�평가_?�책3(?�행?�호_1~9_??��)", 1.0))
+            alt_p1 = float(row.get("대안평가_정책1(시행선호_1~9_역수)", 1.0))
+            alt_p2 = float(row.get("대안평가_정책2(시행선호_1~9_역수)", 1.0))
+            alt_p3 = float(row.get("대안평가_정책3(시행선호_1~9_역수)", 1.0))
             
             w_alt_p1_go = alt_p1 / (alt_p1 + 1.0)
             w_alt_p2_go = alt_p2 / (alt_p2 + 1.0)
@@ -246,38 +248,37 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
             cr_pass = "PASS" if cr <= 0.15 else "FAIL"
             
             results.append({
-                "?��???ID": eval_id,
+                "평가자_ID": eval_id,
                 "CR": cr,
-                "CR?�과": cr_pass,
-                "?�행?�수": final_go,
-                "미시?�점??: 1.0 - final_go
+                "CR통과": cr_pass,
+                "시행점수": final_go,
+                "미시행점수": 1.0 - final_go
             })
             
         except Exception as e:
             results.append({
-                "?��???ID": row.get("?��???ID", f"Row_{idx+1}"),
+                "평가자_ID": row.get("평가자_ID", f"Row_{idx+1}"),
                 "CR": 0.0,
-                "CR?�과": f"ERROR",
-                "?�행?�수": 0.0,
-                "미시?�점??: 1.0
+                "CR통과": f"ERROR",
+                "시행점수": 0.0,
+                "미시행점수": 1.0
             })
             
     res_df = pd.DataFrame(results)
     
-    valid_df = res_df[res_df["CR?�과"] == "PASS"].copy()
-    valid_df["극단값배??] = "?�함"
+    valid_df = res_df[res_df["CR통과"] == "PASS"].copy()
+    valid_df["극단값배제"] = "포함"
     
     if len(valid_df) >= 3:
-        max_idx = valid_df["?�행?�수"].idxmax()
-        min_idx = valid_df["?�행?�수"].idxmin()
-        valid_df.loc[max_idx, "극단값배??] = "배제(Max)"
-        valid_df.loc[min_idx, "극단값배??] = "배제(Min)"
+        max_idx = valid_df["시행점수"].idxmax()
+        min_idx = valid_df["시행점수"].idxmin()
+        valid_df.loc[max_idx, "극단값배제"] = "배제(Max)"
+        valid_df.loc[min_idx, "극단값배제"] = "배제(Min)"
         
-    res_df = res_df.merge(valid_df[["?��???ID", "극단값배??]], on="?��???ID", how="left")
-    res_df["극단값배??] = res_df["극단값배??].fillna("?�외(CR Fail/Error)")
+    res_df = res_df.merge(valid_df[["평가자_ID", "극단값배제"]], on="평가자_ID", how="left")
+    res_df["극단값배제"] = res_df["극단값배제"].fillna("제외(CR Fail/Error)")
     
-    final_scores = valid_df[valid_df["극단값배??] == "?�함"]["?�행?�수"].tolist()
+    final_scores = valid_df[valid_df["극단값배제"] == "포함"]["시행점수"].tolist()
     geom_mean = aggregate_yeta_group_ahp(final_scores) if final_scores else 0.0
     
     return res_df, geom_mean
-
