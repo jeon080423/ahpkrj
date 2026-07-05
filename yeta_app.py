@@ -1958,7 +1958,7 @@ def run():
             st.error(f"결제 데이터 데이터베이스 저장 실패: {str(e)}")
 
     # 5. Page Header Section
-    st.markdown(f"<h1>{_('국가 예비타당성조사 종합평가(AHP) 시스템', 'Preliminary Feasibility Study AHP System')}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='margin-top: 40px;'>{_('국가 예비타당성조사 종합평가(AHP) 시스템', 'Preliminary Feasibility Study AHP System')}</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='color: #666; font-size: 1.05rem; margin-bottom: 30px;'>{_('기획재정부 및 KDI 표준 지침을 준수하는 공공투자사업 AHP 종합 평가 모듈입니다.', 'AHP comprehensive evaluation module for public investment projects in compliance with MoEF & KDI standard guidelines.')}</p>", unsafe_allow_html=True)
 
     # --- ADMIN MODE INTERCEPTOR ---
