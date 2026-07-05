@@ -33,14 +33,23 @@ def _(ko_text, en_text):
     return ko_text
 
 # 3. Handle query parameters and session state for routing
-if "mode" in st.query_params:
-    st.session_state.mode = st.query_params.get("mode")
+raw_mode = st.query_params.get("mode")
+if raw_mode:
+    if isinstance(raw_mode, list):
+        raw_mode = raw_mode[0] if raw_mode else None
+    if isinstance(raw_mode, str):
+        raw_mode = raw_mode.strip().lower()
+    st.session_state.mode = raw_mode
 
 # If the mode is set in session state but not in query params, update query params
 if st.session_state.get("mode") and "mode" not in st.query_params:
     st.query_params["mode"] = st.session_state.mode
 
 mode = st.session_state.get("mode")
+if isinstance(mode, list):
+    mode = mode[0] if mode else None
+if isinstance(mode, str):
+    mode = mode.strip().lower()
 
 # 4. Route to standard_app or yeta_app
 if mode == "yeta":
