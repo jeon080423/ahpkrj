@@ -143,30 +143,39 @@ def calculate_ahp_eigenvector_and_cr(matrix_size, matrix_data):
     except Exception as e:
         return None, None
 
-def generate_yeta_excel_template(project_type):
+def generate_yeta_excel_template(project_type, policy_factors=None, regional_factors=None, tech_factors=None):
+    if not policy_factors: policy_factors = ["정책1", "정책2"]
+    if not regional_factors: regional_factors = ["지역균형1", "지역균형2"]
+    if not tech_factors: tech_factors = ["기술1", "기술2"]
+    
     columns = ["평가자_ID", "소속_및_성명", "전문_역할"]
     
+    factors_map = {}
     if project_type == "construction_non_capital":
         columns.extend(["1계층_경제성(%)", "1계층_정책성(%)", "1계층_지역균형발전(%)"])
+        factors_map = {"정책": policy_factors, "지역균형": regional_factors}
     elif project_type == "construction_capital":
         columns.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
+        factors_map = {"정책": policy_factors}
     elif "rnd" in project_type:
         columns.extend(["1계층_경제성(%)", "1계층_기술성(%)", "1계층_정책성(%)"])
+        factors_map = {"기술": tech_factors, "정책": policy_factors}
     else:
         columns.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
+        factors_map = {"정책": policy_factors}
         
-    columns.extend([
-        "쌍대비교_정책1_vs_정책2(실수형)", 
-        "쌍대비교_정책1_vs_정책3(실수형)", 
-        "쌍대비교_정책2_vs_정책3(실수형)"
-    ])
-    
-    columns.extend([
-        "대안평가_정책1(시행선호_1~9_역수)",
-        "대안평가_정책2(시행선호_1~9_역수)",
-        "대안평가_정책3(시행선호_1~9_역수)"
-    ])
-    
+    for cat, factors in factors_map.items():
+        if len(factors) > 1:
+            for i in range(len(factors)):
+                for j in range(i+1, len(factors)):
+                    columns.append(f"쌍대비교_[{cat}]_{factors[i].strip()}_vs_{factors[j].strip()}(실수형)")
+                    
+    for cat, factors in factors_map.items():
+        for factor in factors:
+            columns.append(f"대안평가_[{cat}]_{factor.strip()}(시행선호_1~9_역수)")
+            
+    import pandas as pd
+    import io
     df = pd.DataFrame(columns=columns)
     for i in range(1, 11):
         row_data = [f"E{i:02d}", "", ""]
@@ -179,8 +188,15 @@ def generate_yeta_excel_template(project_type):
         else:
             row_data.extend([40, 60])
             
-        row_data.extend([1.0, 3.0, 1/3])  # Sample pairwise
-        row_data.extend([5.0, 1.0, 1/5])  # Sample alternatives
+        for cat, factors in factors_map.items():
+            if len(factors) > 1:
+                pairs_count = len(factors) * (len(factors) - 1) // 2
+                row_data.extend([1.0]*pairs_count)
+        
+        for cat, factors in factors_map.items():
+            for factor in factors:
+                row_data.append(5.0)
+                
         df.loc[i-1] = row_data
         
     output = io.BytesIO()
@@ -192,8 +208,8 @@ def generate_yeta_excel_template(project_type):
 def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
     results = []
     
-    # To avoid circular import, we call functions directly if they are in the same module
     from yeta_utils import convert_bc_to_ahp_pairwise, convert_lir_to_ahp_pairwise, aggregate_yeta_group_ahp
+    import numpy as np
     
     bc_pairwise = convert_bc_to_ahp_pairwise(bc_ratio)
     bc_weight_go = bc_pairwise / (bc_pairwise + 1.0)
@@ -205,6 +221,15 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
         lir_pairwise = convert_lir_to_ahp_pairwise(lir_value)
         lir_weight_go = lir_pairwise / (lir_pairwise + 1.0)
         
+    # Pre-parse categories from columns
+    cat_factors = {}
+    for col in df.columns:
+        if col.startswith("대안평가_[") and "]_" in col:
+            cat = col.split("]_")[0].replace("대안평가_[", "")
+            factor = col.split("]_")[1].split("(시행선호")[0]
+            if cat not in cat_factors: cat_factors[cat] = []
+            if factor not in cat_factors[cat]: cat_factors[cat].append(factor)
+            
     for idx, row in df.iterrows():
         try:
             eval_id = row.get("평가자_ID", f"Evaluator_{idx+1}")
@@ -218,67 +243,90 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value):
             if total_w > 0:
                 w_econ /= total_w; w_policy /= total_w; w_tech /= total_w; w_reg /= total_w
                 
-            v12 = float(row.get("쌍대비교_정책1_vs_정책2(실수형)", 1.0))
-            v13 = float(row.get("쌍대비교_정책1_vs_정책3(실수형)", 1.0))
-            v23 = float(row.get("쌍대비교_정책2_vs_정책3(실수형)", 1.0))
+            cat_scores = {}
+            max_cr = 0.0
             
-            mat = np.array([
-                [1.0, v12, v13],
-                [1.0/v12, 1.0, v23],
-                [1.0/v13, 1.0/v23, 1.0]
-            ])
-            
-            policy_weights, cr = calculate_ahp_eigenvector_and_cr(3, mat)
-            if cr is None: cr = 0.0
-            
-            alt_p1 = float(row.get("대안평가_정책1(시행선호_1~9_역수)", 1.0))
-            alt_p2 = float(row.get("대안평가_정책2(시행선호_1~9_역수)", 1.0))
-            alt_p3 = float(row.get("대안평가_정책3(시행선호_1~9_역수)", 1.0))
-            
-            w_alt_p1_go = alt_p1 / (alt_p1 + 1.0)
-            w_alt_p2_go = alt_p2 / (alt_p2 + 1.0)
-            w_alt_p3_go = alt_p3 / (alt_p3 + 1.0)
-            
-            policy_go = policy_weights[0]*w_alt_p1_go + policy_weights[1]*w_alt_p2_go + policy_weights[2]*w_alt_p3_go
+            for cat, factors in cat_factors.items():
+                n = len(factors)
+                if n > 1:
+                    mat = np.ones((n, n))
+                    for i in range(n):
+                        for j in range(i+1, n):
+                            col_name = f"쌍대비교_[{cat}]_{factors[i]}_vs_{factors[j]}(실수형)"
+                            v = float(row.get(col_name, 1.0))
+                            if v < 0: v = abs(v) # basic robust fix
+                            if v == 0: v = 1.0
+                            mat[i, j] = v
+                            mat[j, i] = 1.0 / v
+                            
+                    weights, cr = calculate_ahp_eigenvector_and_cr(n, mat)
+                    if cr is None: cr = 0.0
+                    max_cr = max(max_cr, cr)
+                elif n == 1:
+                    weights = [1.0]
+                else:
+                    weights = []
+                    
+                cat_go = 0.0
+                for i, factor in enumerate(factors):
+                    alt_col = f"대안평가_[{cat}]_{factor}(시행선호_1~9_역수)"
+                    alt_v = float(row.get(alt_col, 1.0))
+                    if alt_v < 0: alt_v = abs(alt_v)
+                    if alt_v == 0: alt_v = 1.0
+                    alt_go = alt_v / (alt_v + 1.0)
+                    cat_go += weights[i] * alt_go
+                    
+                cat_scores[cat] = cat_go
+                
+            policy_go = cat_scores.get("정책", 0.5)
+            tech_go = cat_scores.get("기술", 0.5)
+            reg_go = cat_scores.get("지역균형", 0.5)
             
             final_go = w_econ * bc_weight_go + w_policy * policy_go + w_reg * lir_weight_go
             if "rnd" in project_type:
-                final_go += w_tech * 0.5  # Mock tech score
+                final_go += w_tech * tech_go
                 
-            cr_pass = "PASS" if cr <= 0.15 else "FAIL"
+            cr_pass = "PASS" if max_cr <= 0.15 else "FAIL"
             
             results.append({
-                "평가자_ID": eval_id,
-                "CR": cr,
-                "CR통과": cr_pass,
-                "시행점수": final_go,
-                "미시행점수": 1.0 - final_go
+                "평가자 ID": eval_id,
+                "경제성 점수": bc_weight_go,
+                "정책성 점수": policy_go,
+                "최대 일관성 비율(Max CR)": max_cr,
+                "CR 통과": cr_pass,
+                "최종 시행(Go) 평점": final_go
             })
             
         except Exception as e:
-            results.append({
-                "평가자_ID": row.get("평가자_ID", f"Row_{idx+1}"),
-                "CR": 0.0,
-                "CR통과": f"ERROR",
-                "시행점수": 0.0,
-                "미시행점수": 1.0
-            })
+            print(f"Error processing row {idx}: {e}")
+            pass
             
+    import pandas as pd
     res_df = pd.DataFrame(results)
-    
-    valid_df = res_df[res_df["CR통과"] == "PASS"].copy()
-    valid_df["극단값배제"] = "포함"
-    
-    if len(valid_df) >= 3:
-        max_idx = valid_df["시행점수"].idxmax()
-        min_idx = valid_df["시행점수"].idxmin()
-        valid_df.loc[max_idx, "극단값배제"] = "배제(Max)"
-        valid_df.loc[min_idx, "극단값배제"] = "배제(Min)"
+    if len(res_df) == 0:
+        return res_df, 0.0
         
-    res_df = res_df.merge(valid_df[["평가자_ID", "극단값배제"]], on="평가자_ID", how="left")
-    res_df["극단값배제"] = res_df["극단값배제"].fillna("제외(CR Fail/Error)")
+    passed_df = res_df[res_df["CR 통과"] == "PASS"]
+    if len(passed_df) == 0:
+        return res_df, 0.0
+        
+    scores = passed_df["최종 시행(Go) 평점"].tolist()
+    final_score = aggregate_yeta_group_ahp(scores)
     
-    final_scores = valid_df[valid_df["극단값배제"] == "포함"]["시행점수"].tolist()
-    geom_mean = aggregate_yeta_group_ahp(final_scores) if final_scores else 0.0
+    # Mark excluded
+    n_pass = len(scores)
+    if n_pass >= 3:
+        max_s = max(scores)
+        min_s = min(scores)
+        
+        excluded_ids = []
+        max_idx = passed_df.index[passed_df["최종 시행(Go) 평점"] == max_s].tolist()[0]
+        min_idx = passed_df.index[passed_df["최종 시행(Go) 평점"] == min_s].tolist()[0]
+        
+        passed_df.loc[max_idx, "극단값 배제"] = "O (최고점)"
+        passed_df.loc[min_idx, "극단값 배제"] = "O (최저점)"
+        
+    res_df = res_df.merge(passed_df[["평가자 ID", "극단값 배제"]], on="평가자 ID", how="left")
+    res_df["극단값 배제"] = res_df["극단값 배제"].fillna("-")
     
-    return res_df, geom_mean
+    return res_df, final_score
