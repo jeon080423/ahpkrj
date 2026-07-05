@@ -2654,6 +2654,8 @@ def run():
             "1. (제1계층 평가) 대분류 항목 간의 상대적 중요도를 '총합이 100'이 되도록 배분해 주십시오. (상수합법)\n"
             "2. (제2계층 평가) 세부 항목 간 쌍대비교 시, 두 항목 중 더 중요하다고 판단되는 쪽으로 9점 척도 기준 가중치를 부여해 주십시오.\n"
             "3. 설문 응답의 일관성 비율(CR)이 권고 수준(0.15 미만)을 유지할 수 있도록 논리적인 평가를 당부드립니다.\n\n"
+            "주관기관: OOOO\n"
+            "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
             "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다.",
             "Hello, Expert.\nThis survey is designed to comprehensively evaluate the feasibility of the proposed public investment project using the AHP method based on KDI guidelines..."
         )
