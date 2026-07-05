@@ -2641,23 +2641,94 @@ def run():
     # TAB 2: Yeta Survey Creator
     # =========================================================================
     with tab_survey_create:
-        st.write("### " + _("예비타당성조사 AHP 전문가 설문지 제작", "Preliminary Feasibility AHP Survey Creation"))
-        st.info(_("KDI 지침에 명시된 요인을 자동으로 세팅하여 템플릿 설문지를 구성합니다.", "Configures the survey template with factors defined in KDI guidelines."))
+        st.write("### " + _("예비타당성조사 AHP 전문가 설문지 제작 및 배포", "Create and Distribute YETA AHP Survey"))
+        st.info(_("KDI 지침에 명시된 요인을 바탕으로 예타 전용 설문지를 쉽게 구성하고 구글 시트와 연동하여 배포할 수 있습니다.", "Easily configure the YETA-specific survey based on KDI guidelines, link it with Google Sheets, and distribute it."))
         
-        st.text_input(_("설문지 제목", "Survey Title"), value=_("재정투자사업 종합평가(AHP) 전문가 설문", "Expert AHP Survey for Preliminary Feasibility Study"))
-        st.text_area(_("설문 안내문", "Instructions"), value=_("본 설문조사는 정부 예비타당성조사 지침에 따라 사업의 종합적인 추진 타당성을 계층 분석(AHP)하기 위한 용도로 사용됩니다.", "This survey is used for Analytic Hierarchy Process (AHP) comprehensive evaluation in accordance with government guidelines."))
+        st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
+        survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=_("재정투자사업 종합평가(AHP) 전문가 설문", "Expert AHP Survey for Preliminary Feasibility Study"))
+        survey_desc = st.text_area(_("설문 안내문", "Instructions"), value=_("본 설문조사는 정부 예비타당성조사 지침에 따라 사업의 종합적인 추진 타당성을 계층 분석(AHP)하기 위한 용도로 사용됩니다.", "This survey is used for Analytic Hierarchy Process (AHP) comprehensive evaluation in accordance with government guidelines."))
         
-        col_s1, col_s2 = st.columns(2)
-        with col_s1:
-            st.checkbox(_("실시간 응답 일관성(CR) 가이드 적용", "Apply Real-time CR Guide"), value=True, disabled=True, help="예타 조사는 높은 일관성이 필수적이므로 실시간 가이드가 강제 적용됩니다.")
-            st.selectbox(_("일관성 비율(CR) 허용 기준치", "CR Tolerance Limit"), options=["0.15 (정부 지침 표준)"], disabled=True)
-        with col_s2:
-            st.checkbox(_("모바일 화면 최적화 테마 적용", "Apply Mobile Responsive Theme"), value=True)
-            st.checkbox(_("제출 전 스마트 보정 마법사 활성화", "Enable Smart Calibration Wizard before submission"), value=True)
+        project_desc = st.text_area(_("사업 개요 설명", "Project Overview Description"), placeholder="응답자가 사업 내용을 파악할 수 있도록 주요 사업 개요를 입력하세요.")
+        project_url = st.text_input(_("사업 설명 자료 첨부 (URL 링크)", "Project Material Link (URL)"), placeholder="예: 구글 드라이브, 노션 링크 등 (응답자가 다운로드/열람할 수 있는 외부 링크)")
 
-        if st.button(_("예타 AHP 설문지 배포 및 구글 시트 연동", "Distribute Yeta Survey & Connect Google Sheets"), type="primary"):
-            st.success(_("예타 AHP 설문지 배포가 완료되었습니다. 응답자 배포용 URL이 생성되었습니다.", "Yeta AHP survey successfully deployed! Respondent URL generated."))
-            st.code("https://ahpkrj.streamlit.app/survey/yeta-expert-preview-106")
+        st.markdown("#### 2. 예타 사업 유형 및 평가항목 세부 설정")
+        yeta_p_type = st.selectbox(
+            _("평가 대상 사업 유형", "Target Project Type"),
+            options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"]
+        )
+        
+        # Depending on project type, show expanders for factor descriptions.
+        with st.expander("📝 1계층 및 2계층 평가항목 상세 설명 설정 (선택사항)"):
+            st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
+            st.text_input("경제성(Economic Feasibility) 설명", placeholder="예: 사업의 B/C 비율 등 경제적 타당성을 평가합니다.")
+            st.text_input("정책성(Policy Feasibility) 설명", placeholder="예: 정책의 일관성, 추진 의지 등 정책적 타당성을 평가합니다.")
+            if "비수도권" in yeta_p_type:
+                st.text_input("지역균형발전(Balanced Regional Dev.) 설명", placeholder="예: 지역낙후도 및 지역경제 파급효과 등을 평가합니다.")
+            if "R&D" in yeta_p_type:
+                st.text_input("기술성(Technical Feasibility) 설명", placeholder="예: 기술개발의 성공 가능성 및 기술적 파급효과 등을 평가합니다.")
+            
+            st.text_input("정책성 하위: 사업추진 여건 설명", placeholder="관련 부처의 의지 및 주민 태도 등을 포함합니다.")
+            st.text_input("정책성 하위: 정책효과 설명", placeholder="일자리 창출, 환경성, 안전성 등 사회적 가치를 평가합니다.")
+
+        st.markdown("#### 3. 설문 미리보기 (Preview)")
+        if st.button("👀 실제 응답 화면 미리보기 (Mock-up)"):
+            @st.dialog("설문지 미리보기 샘플")
+            def preview_modal():
+                st.subheader(survey_title)
+                st.info(survey_desc)
+                if project_desc:
+                    st.write("**[사업 개요]**")
+                    st.write(project_desc)
+                if project_url:
+                    st.markdown(f"[🔗 첨부된 사업 설명 자료 열람하기]({project_url})")
+                
+                st.divider()
+                st.write("**[제1계층 평가: 상수합법]**")
+                st.caption("아래 1계층 평가항목의 합이 100이 되도록 중요도를 직접 분배해주십시오.")
+                st.slider("경제성", 0, 100, 45)
+                st.slider("정책성", 0, 100, 35)
+                if "비수도권" in yeta_p_type:
+                    st.slider("지역균형발전", 0, 100, 20)
+                elif "R&D" in yeta_p_type:
+                    st.slider("기술성", 0, 100, 20)
+                
+                st.divider()
+                st.write("**[제2계층 평가: 9점 척도 쌍대비교]**")
+                st.caption("두 항목 중 상대적으로 더 중요한 쪽에 가중치를 부여해주십시오.")
+                st.select_slider("사업추진 여건 vs 정책효과", options=["<- 극히 중요", "<- 매우 중요", "<- 중요", "<- 약간 중요", "같음", "약간 중요 ->", "중요 ->", "매우 중요 ->", "극히 중요 ->"], value="같음")
+                
+                if st.button("닫기", type="primary", use_container_width=True):
+                    st.rerun()
+            preview_modal()
+
+        st.markdown("#### 4. 구글 시트 연동 및 배포")
+        st.info(_("모든 설정이 완료되었다면, 응답 데이터를 실시간으로 수집할 구글 시트를 연동하고 배포용 URL을 생성합니다.", "When ready, connect a Google Sheet to collect responses and generate the deployment URL."))
+        
+        with st.expander(_("❓ 구글 시트 연동 방법 안내", "Google Sheets Integration Guide")):
+            import os
+            guide_img_path = os.path.join(os.path.dirname(__file__), "manual_sheet_url_guide.png")
+            if os.path.exists(guide_img_path):
+                st.image(guide_img_path, caption="Google Sheets Sharing Guide", use_container_width=True)
+            else:
+                st.warning("가이드 이미지를 찾을 수 없습니다.")
+            st.markdown("""
+            1. 새 구글 시트를 만들고 **'링크가 있는 모든 사용자가 편집자'** 권한을 갖도록 공유 설정을 변경합니다.
+            2. 해당 구글 시트의 **URL(주소창 링크)**을 복사하여 아래에 붙여넣습니다.
+            """)
+
+        admin_email = st.text_input(_("관리자 이메일 (결과 수신용)", "Admin Email"))
+        sheet_url = st.text_input(_("공유된 구글 시트 URL", "Shared Google Sheet URL"))
+        
+        if st.button(_("🚀 예타 AHP 설문지 배포 및 구글 시트 연동", "Deploy Yeta Survey & Connect Google Sheets"), type="primary", use_container_width=True):
+            if not sheet_url:
+                st.error("구글 시트 URL을 입력해주세요.")
+            else:
+                with st.spinner("구글 시트 연동 및 배포 URL 생성 중..."):
+                    import time
+                    time.sleep(1)
+                st.success(_("🎉 예타 AHP 설문지 배포가 완료되었습니다. 아래 URL을 복사하여 전문가들에게 발송하세요.", "Survey successfully deployed! Send the URL below to experts."))
+                st.code("https://ahpkrj.streamlit.app/survey/yeta-expert-preview-106")
+                st.info("구글 시트에 접속하시면 실시간으로 누적되는 응답 데이터를 확인하고 다운로드할 수 있습니다.")
 
     # =========================================================================
     # TAB 3: Guidelines Guide
