@@ -85,12 +85,10 @@ if isinstance(mode, str):
 # 4. Route to standard_app or yeta_app
 if mode == "yeta":
     import sys
-    if "yeta_app" in sys.modules:
-        del sys.modules["yeta_app"]
+    sys.modules.pop("yeta_app", None)
     import yeta_app
     yeta_app.run()
 else:
     import sys
-    if "standard_app" in sys.modules:
-        del sys.modules["standard_app"]
+    sys.modules.pop("standard_app", None)
     import standard_app
