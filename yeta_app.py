@@ -973,7 +973,24 @@ def run():
                                 st.error(_(f"신청 중 오류가 발생했습니다: {e}", f"Error during submission: {e}"))
                             finally:
                                 conn.close()
-                                
+
+        # Business Info
+        st.markdown("---")
+        biz_info_html = f"""
+        <div style="font-size: 0.75rem; color: #888; line-height: 1.5; padding: 10px 5px; border-top: 1px solid #eeeeee; margin-top: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px; color: #555;">{_("사업자 정보", "Business Info")}</div>
+            • <b>{_("상호", "Company")}</b>: {_("프레쉬인사이트", "Fresh Insight")}<br>
+            • <b>{_("대표자", "CEO")}</b>: {_("전상현", "Sanghyun Jeon")}<br>
+            • <b>{_("사업자등록번호", "Business Registration No.")}</b>: 683-27-00122<br>
+            • <b>{_("주소", "Address")}</b>: {_("인천시 부평구 원길로 12, 가동 203호", "Room 203, Block A, 12 Wongil-ro, Bupyeong-gu, Incheon")}<br>
+            • <b>{_("전화번호", "Tel")}</b>: 0507-1347-2610<br>
+            • <b>{_("이메일", "Email")}</b>: jeon080423@gmail.com<br>
+            • <b>{_("개인정보관리책임자", "Privacy Officer")}</b>: {_("전상현", "Sanghyun Jeon")}<br>
+            • <b>{_("통신판매업 신고", "Mail Order Business No.")}</b>: {_("간이과세자", "Simplified Taxpayer")}
+        </div>
+        """
+        st.markdown(biz_info_html, unsafe_allow_html=True)
+
     # 7. Navigation Tabs
     # --- ADMIN MODE INTERCEPTOR ---
     if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
@@ -2568,7 +2585,6 @@ def run():
                     <li><b>월 약 233,000원 수준 (22% 절감)</b></li>
                     <li>무제한 전문가 설문 및 아웃라이어 연산</li>
                     <li>B2B 기업용 견적서/세금계산서 발행</li>
-                    <li>연구팀 통합 데이터베이스 제공</li>
                 </ul>
             """
             if user_id:
