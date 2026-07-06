@@ -268,6 +268,113 @@ def generate_yeta_excel_template(project_type, policy_factors=None, regional_fac
         
     return output.getvalue()
 
+def generate_yeta_excel_template_dynamic(project_type, ahp_model):
+    import pandas as pd
+    import io
+    columns = []
+    columns.extend(["평가자_ID", "그룹명(예: 전문가, 공무원 등)", "기타_식별정보"])
+    
+    # 1계층 상수합
+    if "non_capital" in project_type:
+        columns.extend(["1계층_경제성(%)", "1계층_정책성(%)", "1계층_지역균형발전(%)"])
+    elif "capital" in project_type:
+        columns.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
+    elif "rnd" in project_type:
+        columns.extend(["1계층_기술성(%)", "1계층_경제성(%)", "1계층_정책성(%)"])
+    else:
+        columns.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
+        
+    main_criteria = ahp_model.get("main", [])
+    sub_criteria_map = ahp_model.get("subs", {})
+    sub_sub_map = ahp_model.get("sub_subs", {})
+    
+    # 쌍대비교 컬럼 생성 (2계층, 3계층)
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if len(subs) > 1:
+            for i in range(len(subs)):
+                for j in range(i+1, len(subs)):
+                    columns.append(f"쌍대비교_[{main_c}]_{subs[i].strip()}_vs_{subs[j].strip()}(실수형)")
+                    
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) > 1:
+                for i in range(len(sub_subs)):
+                    for j in range(i+1, len(sub_subs)):
+                        columns.append(f"쌍대비교_[{main_c}_{sub_c.strip()}]_{sub_subs[i].strip()}_vs_{sub_subs[j].strip()}(실수형)")
+                        
+    # 대안평가 컬럼 생성 (최하위 요인)
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if not subs:
+            columns.append(f"대안평가_[{main_c}]_{main_c.strip()}(시행선호_1~9_역수)")
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if not sub_subs:
+                columns.append(f"대안평가_[{main_c}]_{sub_c.strip()}(시행선호_1~9_역수)")
+            else:
+                for t3 in sub_subs:
+                    columns.append(f"대안평가_[{main_c}_{sub_c.strip()}]_{t3.strip()}(시행선호_1~9_역수)")
+                    
+    df = pd.DataFrame(columns=columns)
+    
+    # Mock data rows
+    for i in range(1, 11):
+        row_data = [f"E{i:02d}", "", ""]
+        if project_type == "construction_non_capital":
+            row_data.extend([40, 30, 30])
+        elif project_type == "construction_capital":
+            row_data.extend([60, 40])
+        elif "rnd" in project_type:
+            row_data.extend([40, 40, 20])
+        else:
+            row_data.extend([40, 60])
+            
+        for main_c in main_criteria:
+            subs = sub_criteria_map.get(main_c, [])
+            if len(subs) > 1:
+                pairs_count = len(subs) * (len(subs) - 1) // 2
+                row_data.extend([1.0]*pairs_count)
+            for sub_c in subs:
+                sub_subs = sub_sub_map.get(sub_c, [])
+                if len(sub_subs) > 1:
+                    pairs_count = len(sub_subs) * (len(sub_subs) - 1) // 2
+                    row_data.extend([1.0]*pairs_count)
+        
+        for main_c in main_criteria:
+            subs = sub_criteria_map.get(main_c, [])
+            if not subs:
+                row_data.append(5.0)
+            for sub_c in subs:
+                sub_subs = sub_sub_map.get(sub_c, [])
+                if not sub_subs:
+                    row_data.append(5.0)
+                else:
+                    for t3 in sub_subs:
+                        row_data.append(5.0)
+                
+        df.loc[i-1] = row_data
+        
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        guide_data = {
+            "📊 데이터 입력 가이드": [
+                "1. 쌍대비교 및 대안평가 데이터 입력 (음수/양수 활용)",
+                "  - 왼쪽(시행) 항목이 더 중요하면: 음수 입력 (예: -3)",
+                "  - 오른쪽(미시행) 항목이 더 중요하면: 양수 입력 (예: 3)",
+                "  - 두 항목이 동등하게 중요하면: 1 입력",
+                "",
+                "2. 필수 정보 입력",
+                "  - A열(평가자_ID), B/C열에 그룹명 등 식별 정보를 입력합니다.",
+                "  - 모든 쌍대비교 칸에 빈칸 없이 숫자를 입력해 주시기 바랍니다."
+            ]
+        }
+        pd.DataFrame(guide_data).to_excel(writer, index=False, sheet_name='입력_가이드')
+        df.to_excel(writer, index=False, sheet_name='YETA_AHP_Data')
+        
+    return output.getvalue()
+
+
 def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr=True):
     results = []
     
@@ -368,27 +475,30 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
                     return mat_alt_v / (mat_alt_v + 1.0)
                     
             policy_go = 0.5
-            if "정책" in children_map:
+            pol_key = next((k for k in children_map.keys() if "정책" in k), None)
+            if pol_key:
                 policy_go = 0.0
-                for child in children_map["정책"]:
-                    w = local_weights["정책"].get(child, 0)
-                    go = get_go_score("정책", child)
+                for child in children_map[pol_key]:
+                    w = local_weights[pol_key].get(child, 0)
+                    go = get_go_score(pol_key, child)
                     policy_go += w * go
                     
             tech_go = 0.5
-            if "기술" in children_map:
+            tech_key = next((k for k in children_map.keys() if "기술" in k), None)
+            if tech_key:
                 tech_go = 0.0
-                for child in children_map["기술"]:
-                    w = local_weights["기술"].get(child, 0)
-                    go = get_go_score("기술", child)
+                for child in children_map[tech_key]:
+                    w = local_weights[tech_key].get(child, 0)
+                    go = get_go_score(tech_key, child)
                     tech_go += w * go
                     
             reg_go = 0.5
-            if "지역균형" in children_map:
+            reg_key = next((k for k in children_map.keys() if "지역" in k), None)
+            if reg_key:
                 reg_go = 0.0
-                for child in children_map["지역균형"]:
-                    w = local_weights["지역균형"].get(child, 0)
-                    go = get_go_score("지역균형", child)
+                for child in children_map[reg_key]:
+                    w = local_weights[reg_key].get(child, 0)
+                    go = get_go_score(reg_key, child)
                     reg_go += w * go
             
             final_go = w_econ * bc_weight_go + w_policy * policy_go + w_reg * lir_weight_go

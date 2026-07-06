@@ -3144,6 +3144,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
             from survey_manager import increment_survey_visit
             increment_survey_visit(survey_id_param)
             st.session_state[f"visited_survey_{survey_id_param}"] = True
+            
+    # [YETA 전용 라우팅] 예타 모드인 경우 예타 전용 렌더러 호출
+    if survey_meta.get("Is_Yeta") == "True" or survey_meta.get("Is_Yeta") is True:
+        import yeta_survey_renderer
+        yeta_survey_renderer.render_yeta_survey(survey_meta, is_preview_mode=is_preview_mode, survey_id_param=survey_id_param)
+        st.stop()
         
     survey_title = survey_meta.get('Title', 'AHP 온라인 설문조사')
     if survey_title in ['AHP 온라인 설문조사', '제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문']:
