@@ -978,15 +978,15 @@ def run():
         st.markdown("---")
         biz_info_html = f"""
         <div style="font-size: 0.75rem; color: #888; line-height: 1.5; padding: 10px 5px; border-top: 1px solid #eeeeee; margin-top: 15px;">
-            <div style="font-weight: bold; margin-bottom: 5px; color: #555;">{_("사업자 정보", "Business Info")}</div>
-            • <b>{_("상호", "Company")}</b>: {_("프레쉬인사이트", "Fresh Insight")}<br>
-            • <b>{_("대표자", "CEO")}</b>: {_("전상현", "Sanghyun Jeon")}<br>
-            • <b>{_("사업자등록번호", "Business Registration No.")}</b>: 683-27-00122<br>
-            • <b>{_("주소", "Address")}</b>: {_("인천시 부평구 원길로 12, 가동 203호", "Room 203, Block A, 12 Wongil-ro, Bupyeong-gu, Incheon")}<br>
-            • <b>{_("전화번호", "Tel")}</b>: 0507-1347-2610<br>
-            • <b>{_("이메일", "Email")}</b>: jeon080423@gmail.com<br>
-            • <b>{_("개인정보관리책임자", "Privacy Officer")}</b>: {_("전상현", "Sanghyun Jeon")}<br>
-            • <b>{_("통신판매업 신고", "Mail Order Business No.")}</b>: {_("간이과세자", "Simplified Taxpayer")}
+            <div style="font-weight: bold; margin-bottom: 5px; color: #555;">사업자 정보</div>
+            • <b>상호</b>: 프레쉬인사이트<br>
+            • <b>대표자</b>: 전상현<br>
+            • <b>사업자등록번호</b>: 683-27-00122<br>
+            • <b>주소</b>: 인천시 부평구 원길로 12, 가동 203호<br>
+            • <b>전화번호</b>: 0507-1347-2610<br>
+            • <b>이메일</b>: jeon080423@gmail.com<br>
+            • <b>개인정보관리책임자</b>: 전상현<br>
+            • <b>통신판매업 신고번호</b>: 간이과세자
         </div>
         """
         st.markdown(biz_info_html, unsafe_allow_html=True)
@@ -1624,12 +1624,12 @@ def run():
     # TAB 2: Yeta Survey Creator
     # =========================================================================
     with tab_survey_create:
-        st.write("### " + _("예비타당성조사 AHP 전문가 설문지 제작 및 배포", "Create and Distribute YETA AHP Survey"))
-        st.info(_("KDI 지침에 명시된 요인을 바탕으로 예타 전용 설문지를 쉽게 구성하고 구글 시트와 연동하여 배포할 수 있습니다.", "Easily configure the YETA-specific survey based on KDI guidelines, link it with Google Sheets, and distribute it."))
+        st.write("### 예비타당성조사 AHP 전문가 설문지 제작 및 배포")
+        st.info("KDI 지침에 명시된 요인을 바탕으로 예타 전용 설문지를 쉽게 구성하고 구글 시트와 연동하여 배포할 수 있습니다.")
         
         st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
-        survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=_("재정투자사업 종합평가(AHP) 전문가 설문", "Expert AHP Survey for Preliminary Feasibility Study"))
-        default_survey_desc = _(
+        survey_title = st.text_input("설문지 제목", value="재정투자사업 종합평가(AHP) 전문가 설문")
+        default_survey_desc = (
             "안녕하십니까, 전문가님.\n"
             "본 설문은 KDI 예비타당성조사 수행 지침에 의거하여, 해당 재정투자사업의 타당성 및 추진 여부를 최종 판단하기 위한 '종합평가(AHP)' 용도로 기획되었습니다.\n\n"
             "전문가님께서는 제공된 'AHP 자료집' 및 사업 개요를 충분히 숙지하신 후, 각 평가항목(경제성, 정책성, 지역균형발전, 기술성 등) 간의 상대적 중요도를 평가해주시기 바랍니다.\n\n"
@@ -1640,44 +1640,58 @@ def run():
             "3. 설문 응답의 일관성 비율(CR)이 권고 수준(0.15 미만)을 유지할 수 있도록 논리적인 평가를 당부드립니다.\n\n"
             "주관기관: OOOO\n"
             "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
-            "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다.",
-            "Hello, Expert.\nThis survey is designed to comprehensively evaluate the feasibility of the proposed public investment project using the AHP method based on KDI guidelines..."
+            "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."
         )
-        survey_desc = st.text_area(_("설문 안내문", "Instructions"), value=default_survey_desc, height=250)
+        survey_desc = st.text_area("설문 안내문", value=default_survey_desc, height=250)
         
-        project_desc = st.text_area(_("사업 개요 설명", "Project Overview Description"), placeholder="응답자가 사업 내용을 파악할 수 있도록 주요 사업 개요를 입력하세요.")
-        project_url = st.text_input(_("사업 설명 자료 첨부 (URL 링크)", "Project Material Link (URL)"), placeholder="예: 구글 드라이브, 노션 링크 등 (응답자가 다운로드/열람할 수 있는 외부 링크)")
+        project_desc = st.text_area("사업 개요 설명", placeholder="응답자가 사업 내용을 파악할 수 있도록 주요 사업 개요를 입력하세요.")
+        project_url = st.text_input("사업 설명 자료 첨부 (URL 링크)", placeholder="예: 구글 드라이브, 노션 링크 등 (응답자가 다운로드/열람할 수 있는 외부 링크)")
 
         st.markdown("#### 2. 예타 사업 유형 및 평가항목 세부 설정")
         yeta_p_type = st.selectbox(
-            _("평가 대상 사업 유형", "Target Project Type"),
+            "평가 대상 사업 유형",
             options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"]
         )
         
+        with st.container(border=True):
+            st.caption("대상 사업 특성에 맞춰 2계층 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요.")
+            yeta_policy_input = st.text_input("정책성 하위 요인", value="정책의 일관성, 사업추진상의 위험요인", key="yeta_pol")
+            yeta_policy_factors = [x.strip() for x in yeta_policy_input.split(",") if x.strip()]
+            
+            yeta_regional_factors = []
+            if "비수도권" in yeta_p_type or "기타" in yeta_p_type:
+                yeta_reg_input = st.text_input("지역균형발전 하위 요인", value="지역경제 파급효과, 지역개발계획과의 부합성", key="yeta_reg")
+                yeta_regional_factors = [x.strip() for x in yeta_reg_input.split(",") if x.strip()]
+                
+            yeta_tech_factors = []
+            if "R&D" in yeta_p_type or "정보화" in yeta_p_type:
+                yeta_tech_input = st.text_input("기술성 하위 요인", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성", key="yeta_tech")
+                yeta_tech_factors = [x.strip() for x in yeta_tech_input.split(",") if x.strip()]
+
         # Depending on project type, show expanders for factor descriptions.
         with st.expander("📝 1계층 및 2계층 평가항목 상세 설명 설정", expanded=True):
             st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
             st.markdown("<div style='margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 1계층 평가항목</div>", unsafe_allow_html=True)
-            st.text_input("경제성(Economic Feasibility) 설명", placeholder="예: 사업의 B/C 비율 등 경제적 타당성을 평가합니다.")
-            st.text_input("정책성(Policy Feasibility) 설명", placeholder="예: 정책의 일관성, 추진 의지 등 정책적 타당성을 평가합니다.")
-            if "비수도권" in yeta_p_type:
-                st.text_input("지역균형발전(Balanced Regional Dev.) 설명", placeholder="예: 지역낙후도 및 지역경제 파급효과 등을 평가합니다.")
-            if "R&D" in yeta_p_type:
-                st.text_input("기술성(Technical Feasibility) 설명", placeholder="예: 기술개발의 성공 가능성 및 기술적 파급효과 등을 평가합니다.")
+            st.text_input("경제성 설명", placeholder="예: 사업의 B/C 비율 등 경제적 타당성을 평가합니다.")
+            st.text_input("정책성 설명", placeholder="예: 정책의 일관성, 추진 의지 등 정책적 타당성을 평가합니다.")
+            if "비수도권" in yeta_p_type or "기타" in yeta_p_type:
+                st.text_input("지역균형발전 설명", placeholder="예: 지역낙후도 및 지역경제 파급효과 등을 평가합니다.")
+            if "R&D" in yeta_p_type or "정보화" in yeta_p_type:
+                st.text_input("기술성 설명", placeholder="예: 기술개발의 성공 가능성 및 기술적 파급효과 등을 평가합니다.")
             
             st.markdown("<hr style='margin: 15px 0px; border-color: #cbd5e1;'>", unsafe_allow_html=True)
             st.markdown("<div style='margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 2계층 평가항목 (쌍대비교 하위 요인)</div>", unsafe_allow_html=True)
             
-            for f in policy_factors:
+            for f in yeta_policy_factors:
                 st.text_input(f"정책성 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
                 
-            if "비수도권" in yeta_p_type and regional_factors:
-                for f in regional_factors:
+            if ("비수도권" in yeta_p_type or "기타" in yeta_p_type) and yeta_regional_factors:
+                for f in yeta_regional_factors:
                     st.text_input(f"지역균형발전 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
                     
-            if "R&D" in yeta_p_type and tech_factors:
-                for f in tech_factors:
-                    st.text_input(f"과학기술성 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
+            if ("R&D" in yeta_p_type or "정보화" in yeta_p_type) and yeta_tech_factors:
+                for f in yeta_tech_factors:
+                    st.text_input(f"기술성 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
 
         st.markdown("#### 섹션 1.5: 응답자 수집 정보 및 그룹 분류")
         with st.container(border=True):
@@ -1997,11 +2011,11 @@ def run():
                             </div>
                             """, unsafe_allow_html=True)
                 
-                render_preview_group("정책성", policy_factors, "#db2777", "#fce7f3", "#059669", "#dcfce7")
-                if regional_factors:
-                    render_preview_group("지역균형발전", regional_factors, "#2563eb", "#dbeafe", "#ca8a04", "#fef08a")
-                if tech_factors:
-                    render_preview_group("기술성", tech_factors, "#7c3aed", "#ede9fe", "#0891b2", "#cffafe")
+                render_preview_group("정책성", yeta_policy_factors, "#db2777", "#fce7f3", "#059669", "#dcfce7")
+                if yeta_regional_factors:
+                    render_preview_group("지역균형발전", yeta_regional_factors, "#2563eb", "#dbeafe", "#ca8a04", "#fef08a")
+                if yeta_tech_factors:
+                    render_preview_group("기술성", yeta_tech_factors, "#7c3aed", "#ede9fe", "#0891b2", "#cffafe")
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 if st.button("모의 설문 제출 (닫기)", type="primary", use_container_width=True, disabled=(total_sum != 100)):
