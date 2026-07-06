@@ -3,7 +3,7 @@ import json
 import uuid
 import datetime
 import os
-from survey_manager import translate_factor_if_default, translate_definition_if_default, calculate_matrix_cr
+from survey_manager import calculate_matrix_cr
 
 def _(ko_text, en_text):
     if st.session_state.get('lang', 'ko') == 'en':
