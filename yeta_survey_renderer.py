@@ -65,12 +65,14 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     
     if type_questions_data and isinstance(type_questions_data, list):
         for i, tq in enumerate(type_questions_data):
+            sq_idx = i + 1
             tq_q = tq.get("q", "")
             tq_opts = tq.get("opts", [])
             if tq_opts:
                 ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"yeta_survey_resp_type_{i}", horizontal=True)
             else:
-               # 2. 제1계층 가중치 평가 (상수합법)
+                ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"yeta_survey_resp_type_{i}")
+            resp_data["types"].append(ans)
     st.subheader("2. " + _("제1계층 평가: 상수합법 (100점 배분)", "Tier 1 Evaluation: Constant Sum (Allocate 100 points)"))
     st.caption(_("아래 1계층 평가항목의 합이 정확히 100이 되도록 중요도를 직접 분배해주십시오.", "Please distribute the importance so that the sum of the following Tier 1 items is exactly 100."))
     
