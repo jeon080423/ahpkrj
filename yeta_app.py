@@ -1654,22 +1654,44 @@ def run():
         )
         
         with st.container(border=True):
-            st.caption("대상 사업 특성에 맞춰 2계층 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요.")
-            yeta_policy_input = st.text_input("정책성 하위 요인", value="정책의 일관성, 사업추진상의 위험요인", key="yeta_pol")
-            yeta_policy_factors = [x.strip() for x in yeta_policy_input.split(",") if x.strip()]
+            st.caption("대상 사업 특성에 맞춰 2계층 및 3계층 세부 평가 항목을 설정하세요.")
             
-            yeta_regional_factors = []
+            st.markdown("##### 📌 정책성 (3계층 지원)")
+            yeta_policy_tier2_input = st.text_input("정책성 2계층 요인 (쉼표로 구분)", value="사업추진 여건, 정책효과", key="yeta_pol_t2")
+            yeta_policy_tier2 = [x.strip() for x in yeta_policy_tier2_input.split(",") if x.strip()]
+            
+            yeta_policy_factors = {}
+            default_t3 = {
+                "사업추진 여건": "정책일치성 등 내부여건, 지역주민 사업태도 등 외부여건",
+                "정책효과": "사업특화항목, 일자리 효과, 생활여건 영향, 환경성 평가, 안전성 평가"
+            }
+            
+            col1, col2 = st.columns(2)
+            for i, t2 in enumerate(yeta_policy_tier2):
+                with (col1 if i % 2 == 0 else col2):
+                    def_val = default_t3.get(t2, "")
+                    t3_input = st.text_input(f"'{t2}'의 3계층 요인 (없으면 빈칸)", value=def_val, key=f"yeta_pol_t3_{i}")
+                    t3_factors = [x.strip() for x in t3_input.split(",") if x.strip()]
+                    yeta_policy_factors[t2] = t3_factors
+            
+            st.markdown("---")
+            st.markdown("##### 📌 지역균형발전 (2계층)")
+            yeta_regional_factors = {}
             if "비수도권" in yeta_p_type or "기타" in yeta_p_type:
-                yeta_reg_input = st.text_input("지역균형발전 하위 요인", value="지역경제 파급효과, 지역개발계획과의 부합성", key="yeta_reg")
-                yeta_regional_factors = [x.strip() for x in yeta_reg_input.split(",") if x.strip()]
+                yeta_reg_input = st.text_input("지역균형발전 2계층 요인 (쉼표로 구분)", value="지역 낙후도, 지역경제 파급효과", key="yeta_reg_t2")
+                for t2 in [x.strip() for x in yeta_reg_input.split(",") if x.strip()]:
+                    yeta_regional_factors[t2] = []
                 
-            yeta_tech_factors = []
+            yeta_tech_factors = {}
             if "R&D" in yeta_p_type or "정보화" in yeta_p_type:
-                yeta_tech_input = st.text_input("기술성 하위 요인", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성", key="yeta_tech")
-                yeta_tech_factors = [x.strip() for x in yeta_tech_input.split(",") if x.strip()]
+                st.markdown("---")
+                st.markdown("##### 📌 기술성 (2계층)")
+                yeta_tech_input = st.text_input("기술성 2계층 요인 (쉼표로 구분)", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성", key="yeta_tech_t2")
+                for t2 in [x.strip() for x in yeta_tech_input.split(",") if x.strip()]:
+                    yeta_tech_factors[t2] = []
 
         # Depending on project type, show expanders for factor descriptions.
-        with st.expander("📝 1계층 및 2계층 평가항목 상세 설명 설정", expanded=True):
+        with st.expander("📝 1계층, 2계층 및 3계층 평가항목 상세 설명 설정", expanded=True):
             st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
             st.markdown("<div style='margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 1계층 평가항목</div>", unsafe_allow_html=True)
             st.text_input("경제성 설명", placeholder="예: 사업의 B/C 비율 등 경제적 타당성을 평가합니다.")
@@ -1680,18 +1702,22 @@ def run():
                 st.text_input("기술성 설명", placeholder="예: 기술개발의 성공 가능성 및 기술적 파급효과 등을 평가합니다.")
             
             st.markdown("<hr style='margin: 15px 0px; border-color: #cbd5e1;'>", unsafe_allow_html=True)
-            st.markdown("<div style='margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 2계층 평가항목 (쌍대비교 하위 요인)</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 2계층 및 3계층 평가항목 (쌍대비교 하위 요인)</div>", unsafe_allow_html=True)
             
-            for f in yeta_policy_factors:
-                st.text_input(f"정책성 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
+            for t2, t3_list in yeta_policy_factors.items():
+                if not t3_list:
+                    st.text_input(f"정책성 - {t2} 설명", placeholder=f"{t2}에 대한 상세 설명을 입력하세요.")
+                else:
+                    for t3 in t3_list:
+                        st.text_input(f"정책성 - {t2} - {t3} 설명", placeholder=f"{t3}에 대한 상세 설명을 입력하세요.")
                 
             if ("비수도권" in yeta_p_type or "기타" in yeta_p_type) and yeta_regional_factors:
-                for f in yeta_regional_factors:
-                    st.text_input(f"지역균형발전 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
+                for t2 in yeta_regional_factors.keys():
+                    st.text_input(f"지역균형발전 - {t2} 설명", placeholder=f"{t2}에 대한 상세 설명을 입력하세요.")
                     
             if ("R&D" in yeta_p_type or "정보화" in yeta_p_type) and yeta_tech_factors:
-                for f in yeta_tech_factors:
-                    st.text_input(f"기술성 하위: {f} 설명", placeholder=f"{f}에 대한 상세 설명을 입력하세요.")
+                for t2 in yeta_tech_factors.keys():
+                    st.text_input(f"기술성 - {t2} 설명", placeholder=f"{t2}에 대한 상세 설명을 입력하세요.")
 
         st.markdown("#### 섹션 1.5: 응답자 수집 정보 및 그룹 분류")
         with st.container(border=True):
@@ -2011,11 +2037,21 @@ def run():
                             </div>
                             """, unsafe_allow_html=True)
                 
-                render_preview_group("정책성", yeta_policy_factors, "#db2777", "#fce7f3", "#059669", "#dcfce7")
+                render_preview_group("정책성 (2계층)", list(yeta_policy_factors.keys()), "#db2777", "#fce7f3", "#059669", "#dcfce7")
+                for t2, t3_list in yeta_policy_factors.items():
+                    if len(t3_list) > 1:
+                        render_preview_group(f"정책성 - {t2} (3계층)", t3_list, "#db2777", "#fce7f3", "#059669", "#dcfce7")
+                        
                 if yeta_regional_factors:
-                    render_preview_group("지역균형발전", yeta_regional_factors, "#2563eb", "#dbeafe", "#ca8a04", "#fef08a")
+                    render_preview_group("지역균형발전 (2계층)", list(yeta_regional_factors.keys()), "#2563eb", "#dbeafe", "#ca8a04", "#fef08a")
+                    for t2, t3_list in yeta_regional_factors.items():
+                        if len(t3_list) > 1:
+                            render_preview_group(f"지역균형발전 - {t2} (3계층)", t3_list, "#2563eb", "#dbeafe", "#ca8a04", "#fef08a")
                 if yeta_tech_factors:
-                    render_preview_group("기술성", yeta_tech_factors, "#7c3aed", "#ede9fe", "#0891b2", "#cffafe")
+                    render_preview_group("기술성 (2계층)", list(yeta_tech_factors.keys()), "#7c3aed", "#ede9fe", "#0891b2", "#cffafe")
+                    for t2, t3_list in yeta_tech_factors.items():
+                        if len(t3_list) > 1:
+                            render_preview_group(f"기술성 - {t2} (3계층)", t3_list, "#7c3aed", "#ede9fe", "#0891b2", "#cffafe")
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 if st.button("모의 설문 제출 (닫기)", type="primary", use_container_width=True, disabled=(total_sum != 100)):
