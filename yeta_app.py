@@ -1750,81 +1750,83 @@ def run():
 
         st.divider()
 
-        st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
-        survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_yeta_title", "재정투자사업 종합평가(AHP) 전문가 설문"))
-        
-        default_survey_desc = (
-            "안녕하십니까, 전문가님.\n"
-            "본 설문은 KDI 예비타당성조사 수행 지침에 의거하여, 해당 재정투자사업의 타당성 및 추진 여부를 최종 판단하기 위한 '종합평가(AHP)' 용도로 기획되었습니다.\n\n"
-            "전문가님께서는 제공된 'AHP 자료집' 및 사업 개요를 충분히 숙지하신 후, 각 평가항목(경제성, 정책성, 지역균형발전, 기술성 등) 간의 상대적 중요도를 평가해주시기 바랍니다.\n\n"
-            "■ 주요 평가 유의사항\n"
-            "1. (제1계층 평가) 대분류 항목 간의 상대적 중요도를 '총합이 100'이 되도록 배분해 주십시오. (상수합법)\n"
-            "   ※ 단, KDI 예비타당성조사 종합평가 지침에 명시된 사업 유형별 가이드라인에 따라 부문별 입력 가능한 점수 범위(상하한선)가 시스템적으로 제한되어 있으니 이 점 널리 양해 부탁드립니다.\n"
-            "2. (제2계층 평가) 세부 항목 간 쌍대비교 시, 두 항목 중 더 중요하다고 판단되는 쪽으로 9점 척도 기준 가중치를 부여해 주십시오.\n"
-            "3. 설문 응답의 일관성 비율(CR)이 권고 수준(0.15 미만)을 유지할 수 있도록 논리적인 평가를 당부드립니다.\n\n"
-            "주관기관: OOOO\n"
-            "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
-            "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."
-        )
-        survey_desc = st.text_area("설문 안내문", value=st.session_state.get("edit_yeta_desc", default_survey_desc), height=250)
-        
-        st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
-        yeta_p_type = st.selectbox(
-            "평가 대상 사업 유형",
-            options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"],
-            index=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"].index(st.session_state.get("edit_yeta_p_type", "건설사업 (비수도권)"))
-        )
-        
-        tier_level = 3
-        st.info("💡 **예타 모델 동적 설정**: 일반 모드와 동일하게 각 계층을 쉼표(,)로 구분하여 입력하세요. (1계층은 예타 기본 뼈대를 유지합니다)")
+        tab1, tab2, tab3 = st.tabs(["📌 1. 기본 정보 & 모델 설계", "📝 2. 평가 항목 설명", "⚙️ 3. 부가 설정 및 배포"])
 
-        default_yeta_main = "경제성, 정책성, 지역균형발전"
-        if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: default_yeta_main = "경제성, 정책성"
-        elif "R&D" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
-        elif "정보화" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
-        elif "기타" in yeta_p_type: default_yeta_main = "경제성, 정책성, 지역균형발전"
-        
-        main_input = st.text_input("1계층 (대항목)", value=st.session_state.get("edit_yeta_main_input", default_yeta_main), help="이 항목들은 쌍대비교 대신 100점 분배(상수합법)로 평가됩니다.")
-        main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
-
-        model_structure = {"main": main_list, "subs": {}, "sub_subs": {}, "yeta_p_type": yeta_p_type}
-
-        for mc in main_list:
-            if mc == "경제성": 
-                model_structure["subs"][mc] = []
-                st.caption(f"✓ '{mc}' 하위 요인은 일반적으로 편익/비용(B/C)으로 일괄 산출되므로 입력하지 않습니다.")
-                continue
+        with tab1:
+            st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
+            survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_yeta_title", "재정투자사업 종합평가(AHP) 전문가 설문"))
             
-            default_sub_val = ""
-            if mc == "정책성": default_sub_val = "사업추진 여건, 정책효과"
-            elif mc == "지역균형발전": default_sub_val = "지역 낙후도, 지역경제 파급효과"
-            elif mc == "기술성": default_sub_val = "기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성"
+            default_survey_desc = (
+                "안녕하십니까, 전문가님.\n"
+                "본 설문은 KDI 예비타당성조사 수행 지침에 의거하여, 해당 재정투자사업의 타당성 및 추진 여부를 최종 판단하기 위한 '종합평가(AHP)' 용도로 기획되었습니다.\n\n"
+                "전문가님께서는 제공된 'AHP 자료집' 및 사업 개요를 충분히 숙지하신 후, 각 평가항목(경제성, 정책성, 지역균형발전, 기술성 등) 간의 상대적 중요도를 평가해주시기 바랍니다.\n\n"
+                "■ 주요 평가 유의사항\n"
+                "1. (제1계층 평가) 대분류 항목 간의 상대적 중요도를 '총합이 100'이 되도록 배분해 주십시오. (상수합법)\n"
+                "   ※ 단, KDI 예비타당성조사 종합평가 지침에 명시된 사업 유형별 가이드라인에 따라 부문별 입력 가능한 점수 범위(상하한선)가 시스템적으로 제한되어 있으니 이 점 널리 양해 부탁드립니다.\n"
+                "2. (제2계층 평가) 세부 항목 간 쌍대비교 시, 두 항목 중 더 중요하다고 판단되는 쪽으로 9점 척도 기준 가중치를 부여해 주십시오.\n"
+                "3. 설문 응답의 일관성 비율(CR)이 권고 수준(0.15 미만)을 유지할 수 있도록 논리적인 평가를 당부드립니다.\n\n"
+                "주관기관: OOOO\n"
+                "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
+                "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."
+            )
+            survey_desc = st.text_area("설문 안내문", value=st.session_state.get("edit_yeta_desc", default_survey_desc), height=250)
             
-            sub_input = st.text_input(f"'{mc}'의 하위 요인 (2계층)", value=st.session_state.get("edit_yeta_sub_inputs", {}).get(mc, default_sub_val))
-            subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
-            model_structure["subs"][mc] = subs_list
+            st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
+            yeta_p_type = st.selectbox(
+                "평가 대상 사업 유형",
+                options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"],
+                index=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"].index(st.session_state.get("edit_yeta_p_type", "건설사업 (비수도권)"))
+            )
+            
+            tier_level = 3
+            st.info("💡 **예타 모델 동적 설정**: 일반 모드와 동일하게 각 계층을 쉼표(,)로 구분하여 입력하세요. (1계층은 예타 기본 뼈대를 유지합니다)")
 
-            if subs_list:
-                with st.expander(f"↳ '{mc}' 하위의 3계층 (소분류) 입력", expanded=False):
-                    st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
-                    for sub_c in subs_list:
-                        sub_sub_val = ""
-                        if sub_c == "사업추진 여건": sub_sub_val = "정책일치성 등 내부여건, 지역주민 사업태도 등 외부여건"
-                        elif sub_c == "정책효과": sub_sub_val = "사업특화항목, 일자리 효과, 생활여건 영향, 환경성 평가, 안전성 평가"
-                        
-                        sub_sub_input = st.text_input(
-                            f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
-                            value=st.session_state.get("edit_yeta_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
-                            placeholder="예: 항목1, 항목2",
-                            key=f"yeta_sub_sub_{sub_c}"
-                        )
-                        parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
-                        if parsed_sub_subs:
-                            model_structure["sub_subs"][sub_c] = parsed_sub_subs
+            default_yeta_main = "경제성, 정책성, 지역균형발전"
+            if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: default_yeta_main = "경제성, 정책성"
+            elif "R&D" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
+            elif "정보화" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
+            elif "기타" in yeta_p_type: default_yeta_main = "경제성, 정책성, 지역균형발전"
+            
+            main_input = st.text_input("1계층 (대항목)", value=st.session_state.get("edit_yeta_main_input", default_yeta_main), help="이 항목들은 쌍대비교 대신 100점 분배(상수합법)로 평가됩니다.")
+            main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
 
-        # 2.5. 계층별 요인 상세 설명 설정
-        st.markdown("#### 2.5. 평가 요인 정의 및 설명 입력")
-        with st.expander("📝 1계층, 2계층 및 3계층 평가항목 상세 설명 설정", expanded=False):
+            model_structure = {"main": main_list, "subs": {}, "sub_subs": {}, "yeta_p_type": yeta_p_type}
+
+            for mc in main_list:
+                if mc == "경제성": 
+                    model_structure["subs"][mc] = []
+                    st.caption(f"✓ '{mc}' 하위 요인은 일반적으로 편익/비용(B/C)으로 일괄 산출되므로 입력하지 않습니다.")
+                    continue
+                
+                default_sub_val = ""
+                if mc == "정책성": default_sub_val = "사업추진 여건, 정책효과"
+                elif mc == "지역균형발전": default_sub_val = "지역 낙후도, 지역경제 파급효과"
+                elif mc == "기술성": default_sub_val = "기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성"
+                
+                sub_input = st.text_input(f"'{mc}'의 하위 요인 (2계층)", value=st.session_state.get("edit_yeta_sub_inputs", {}).get(mc, default_sub_val))
+                subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
+                model_structure["subs"][mc] = subs_list
+
+                if subs_list:
+                    with st.expander(f"↳ '{mc}' 하위의 3계층 (소분류) 입력", expanded=False):
+                        st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
+                        for sub_c in subs_list:
+                            sub_sub_val = ""
+                            if sub_c == "사업추진 여건": sub_sub_val = "정책일치성 등 내부여건, 지역주민 사업태도 등 외부여건"
+                            elif sub_c == "정책효과": sub_sub_val = "사업특화항목, 일자리 효과, 생활여건 영향, 환경성 평가, 안전성 평가"
+                            
+                            sub_sub_input = st.text_input(
+                                f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
+                                value=st.session_state.get("edit_yeta_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
+                                placeholder="예: 항목1, 항목2",
+                                key=f"yeta_sub_sub_{sub_c}"
+                            )
+                            parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
+                            if parsed_sub_subs:
+                                model_structure["sub_subs"][sub_c] = parsed_sub_subs
+
+        with tab2:
+            st.markdown("#### 2. 평가 항목 상세 설명")
             st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
             
             definitions_map = {}
@@ -1859,270 +1861,274 @@ def run():
                 
                 for mc in main_list:
                     subs = model_structure["subs"].get(mc, [])
-                    for sub_c in subs:
-                        sub_subs = model_structure["sub_subs"].get(sub_c, [])
-                        
-                        default_sub_desc = ""
-                        if sub_c == "사업추진 여건": default_sub_desc = "정부 정책과의 일치성, 추진 의지, 지역 주민 및 지자체의 태도 등을 평가합니다."
-                        elif sub_c == "정책효과": default_sub_desc = "일자리 창출 효과, 주민 생활 여건 향상, 환경성 및 안전성 영향 등을 평가합니다."
-                        elif sub_c == "지역 낙후도": default_sub_desc = "개발 수준 및 낙후 상태를 정량적으로 비교 분석합니다."
-                        elif sub_c == "지역경제 파급효과": default_sub_desc = "지역 내 총생산, 생산 유발, 고용 유발 효과 등을 평가합니다."
-                        
-                        key_cached_sub = f"edit_yeta_desc_{sub_c}"
-                        sub_desc_val = st.text_input(
-                            f"'{mc} ➔ {sub_c}' 요인 설명",
-                            value=st.session_state.get(key_cached_sub, default_sub_desc),
-                            key=f"yeta_desc_input_{sub_c}"
-                        )
-                        definitions_map[sub_c] = sub_desc_val
-                        st.session_state[key_cached_sub] = sub_desc_val
-                        
-                        if sub_subs:
-                            for t3 in sub_subs:
-                                default_t3_desc = ""
-                                if t3 == "정책일치성 등 내부여건": default_t3_desc = "상위 계획과의 부합성 및 추진 체계의 준비 정도를 평가합니다."
-                                elif t3 == "지역주민 사업태도 등 외부여건": default_t3_desc = "사업 대상 지역 주민의 여론 및 지자체의 추진 태도를 평가합니다."
-                                elif t3 == "일자리 효과": default_t3_desc = "건설 단계 및 운영 단계의 신규 고용 창출 능력을 평가합니다."
+                    if subs:
+                        with st.container(border=True):
+                            st.markdown(f"##### 💡 [{mc}] 하위 요인 설명")
+                            for sub_c in subs:
+                                sub_subs = model_structure["sub_subs"].get(sub_c, [])
                                 
-                                key_cached_t3 = f"edit_yeta_desc_{t3}"
-                                t3_desc_val = st.text_input(
-                                    f"↳ '{sub_c} ➔ {t3}' 요인 설명",
-                                    value=st.session_state.get(key_cached_t3, default_t3_desc),
-                                    key=f"yeta_desc_input_{t3}"
+                                default_sub_desc = ""
+                                if sub_c == "사업추진 여건": default_sub_desc = "정부 정책과의 일치성, 추진 의지, 지역 주민 및 지자체의 태도 등을 평가합니다."
+                                elif sub_c == "정책효과": default_sub_desc = "일자리 창출 효과, 주민 생활 여건 향상, 환경성 및 안전성 영향 등을 평가합니다."
+                                elif sub_c == "지역 낙후도": default_sub_desc = "개발 수준 및 낙후 상태를 정량적으로 비교 분석합니다."
+                                elif sub_c == "지역경제 파급효과": default_sub_desc = "지역 내 총생산, 생산 유발, 고용 유발 효과 등을 평가합니다."
+                                
+                                key_cached_sub = f"edit_yeta_desc_{sub_c}"
+                                sub_desc_val = st.text_input(
+                                    f"'{mc} ➔ {sub_c}' 요인 설명",
+                                    value=st.session_state.get(key_cached_sub, default_sub_desc),
+                                    key=f"yeta_desc_input_{sub_c}"
                                 )
-                                definitions_map[t3] = t3_desc_val
-                                st.session_state[key_cached_t3] = t3_desc_val
-
-        st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
-        with st.container(border=True):
-            st.markdown("**그룹 분류 문항 설정**")
-            default_type_q = "귀하의 소속은 어떻게 되십니까?"
-            default_type_opts = "전문가, 일반, 공무원, 기타"
-            
-            if "edit_yeta_type_questions" not in st.session_state:
-                st.session_state["edit_yeta_type_questions"] = [{"q": default_type_q, "opts": default_type_opts}]
-
-            type_questions_state = st.session_state["edit_yeta_type_questions"]
-            num_types = len(type_questions_state)
-            
-            col1, col2, col3 = st.columns([6, 2, 2])
-            with col2:
-                if st.button("+ 문항 추가", use_container_width=True, disabled=num_types >= 3, key="yeta_add_q_dyn"):
-                    st.session_state["edit_yeta_type_questions"].append({"q": "", "opts": ""})
-                    st.rerun()
-            with col3:
-                if st.button("- 문항 삭제", use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q_dyn"):
-                    st.session_state["edit_yeta_type_questions"].pop()
-                    st.rerun()
-            
-            type_questions = []
-            for i in range(num_types):
-                st.markdown(f"**{i+1}.**")
-                q_label = "그룹 분류 질문 제목" if i == 0 else "추가 설문 문항"
-                opts_label = "보기 옵션 (콤마로 구분)"
-                
-                q_val = st.text_input(f"{q_label} ({i+1})", value=type_questions_state[i]["q"], key=f"yeta_dyn_tq_q_{i}")
-                opts_val = st.text_input(f"{opts_label} ({i+1})", value=type_questions_state[i]["opts"], key=f"yeta_dyn_tq_opts_{i}")
-                
-                type_questions_state[i]["q"] = q_val
-                type_questions_state[i]["opts"] = opts_val
-                type_questions.append({"q": q_val, "opts": [x.strip() for x in opts_val.split(",") if x.strip()]})
-
-        st.markdown("#### 4. 동적 예타 AHP 엑셀 템플릿 다운로드")
-        st.info("입력하신 계층 구조에 맞추어 즉시 분석 가능한 엑셀 파일(템플릿)을 다운로드할 수 있습니다.")
-        ex_p_type = "construction_non_capital"
-        if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: ex_p_type = "construction_capital"
-        elif "R&D" in yeta_p_type: ex_p_type = "rnd_bc" if "B/C" in yeta_p_type else "rnd_ec"
-        elif "기타" in yeta_p_type: ex_p_type = "other_bc" if "B/C" in yeta_p_type else "other_ec"
-        
-        try:
-            from yeta_utils import generate_yeta_excel_template_dynamic
-            template_bytes = generate_yeta_excel_template_dynamic(ex_p_type, model_structure)
-            st.download_button(
-                label="👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)",
-                data=template_bytes,
-                file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                type="primary",
-                use_container_width=True,
-                key="yeta_dynamic_excel_download_btn"
-            )
-        except Exception as e:
-            st.error(f"엑셀 템플릿 생성 오류: {e}")
-
-        st.markdown("#### 5. 온라인 배포 및 구글 시트 연동 설정")
-        if st.session_state.user_id is None:
-            st.warning("온라인 배포 및 구글 시트 연동은 회원 전용 기능입니다. 로그인해 주세요.")
-        else:
-            survey_admin_email = st.text_input("설문 담당자 이메일 (구글 드라이브 소유자 권한 부여용)", value=st.session_state.get("edit_yeta_admin_email", st.session_state.user_id))
-            st.session_state.edit_yeta_admin_email = survey_admin_email
-            
-            existing_id = st.session_state.yeta_editing_survey_id
-            
-            if existing_id:
-                st.info(f"현재 **기존 설문 수정 모드**입니다. 수정한 설정은 기존 연동 시트에 반영됩니다.\n\n**연동된 시트 ID:** {existing_id}")
-                existing_sheet_id_input = existing_id
-            else:
-                past_surveys = []
-                try:
-                    import sqlite3
-                    conn = sqlite3.connect('users.db')
-                    c = conn.cursor()
-                    c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
-                    past_surveys = c.fetchall()
-                    conn.close()
-                except Exception:
-                    pass
-                
-                existing_sheet_id_input = ""
-                show_manual_input = True
-                
-                if len(past_surveys) > 0:
-                    deploy_option = st.radio(
-                        "배포 방식을 선택해 주세요.",
-                        options=[
-                            "새로운 구글 시트 URL 연동 (신규 발급)",
-                            "기존 배포했던 설문 URL 재사용 (덮어쓰기)"
-                        ],
-                        index=0,
-                        key="yeta_deploy_option_radio_new"
-                    )
-                    st.write("")
-                    
-                    if "재사용" in deploy_option:
-                        show_manual_input = False
-                        st.markdown("##### ⚙️ 재사용할 기존 설문 선택")
-                        survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
-                        selected_survey_label = st.selectbox(
-                            "과거에 배포했던 설문 목록",
-                            options=list(survey_options.keys()),
-                            key="yeta_past_survey_select"
-                        )
-                        existing_sheet_id_input = survey_options[selected_survey_label]
-                        st.info("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.")
-                
-                if show_manual_input:
-                    st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
-                    st.info("""
-                    **💡 연동 방법:**
-                    1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다.
-                    2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
-                       * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-                    3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
-                    """)
-                    if os.path.exists("manual_sheet_url_guide.png"):
-                        st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
-                    existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
-
-            # Save state for preview
-            preview_id = f"preview_yeta_{st.session_state.user_id}"
-            preview_data = {
-                "Title": survey_title,
-                "Description": survey_desc,
-                "Admin_Email": survey_admin_email,
-                "AHP_Model_JSON": model_structure,
-                "Tier_Level": 3,
-                "Demographics": {"type_questions": type_questions},
-                "Is_Yeta": True,
-                "Definitions": definitions_map
-            }
-            
-            import json
-            os.makedirs("temp_previews", exist_ok=True)
-            with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as f:
-                json.dump(preview_data, f, ensure_ascii=False)
-                
-            col_p1, col_p2 = st.columns(2)
-            with col_p1:
-                # Preview Link
-                preview_link_html = f"""
-                <a href="/?preview_id={preview_id}" target="_blank" style="text-decoration: none;">
-                    <div style="
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        width: 100%;
-                        padding: 0.375rem 0.75rem;
-                        border: 1px solid rgba(49, 51, 63, 0.2);
-                        border-radius: 4px;
-                        background-color: #ffffff;
-                        color: #31333f;
-                        font-size: 14px;
-                        font-weight: 400;
-                        line-height: 1.6;
-                        cursor: pointer;
-                        text-align: center;
-                        box-sizing: border-box;
-                        transition: border-color 0.2s, color 0.2s, background-color 0.2s;
-                    "
-                    onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
-                    onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
-                    >
-                        👁️ 설문지 응답 화면 미리보기
-                    </div>
-                </a>
-                """
-                st.markdown(preview_link_html, unsafe_allow_html=True)
-                
-            with col_p2:
-                deploy_btn_label = "🚀 배포 및 구글 시트 연동 (수정 내용 적용)" if existing_id else "🚀 배포 및 구글 시트 연동"
-                if st.button(deploy_btn_label, type="primary", use_container_width=True, key="yeta_deploy_btn"):
-                    target_sheet_id = existing_sheet_id_input.strip()
-                    if "docs.google.com/spreadsheets" in target_sheet_id:
-                        parts = target_sheet_id.split("/d/")
-                        if len(parts) > 1:
-                            target_sheet_id = parts[1].split("/")[0]
-                            
-                    if not target_sheet_id:
-                        st.error("연동할 구글 스프레드시트 URL 또는 ID를 입력해 주세요.")
-                    else:
-                        with st.spinner("구글 스프레드시트 생성 및 설문지 연동 중..."):
-                            try:
-                                from survey_manager_v3 import create_yeta_survey_sheet_v3
-                                import sqlite3
+                                definitions_map[sub_c] = sub_desc_val
+                                st.session_state[key_cached_sub] = sub_desc_val
                                 
-                                new_sheet_id = create_yeta_survey_sheet_v3(
-                                    title=survey_title,
-                                    admin_email=survey_admin_email,
-                                    ahp_model=model_structure,
-                                    demographics={"type_questions": type_questions},
-                                    definitions_map=definitions_map,
-                                    description=survey_desc,
-                                    existing_sheet_id=target_sheet_id,
-                                    user_id=st.session_state.user_id
-                                )
-                                
-                                if new_sheet_id:
-                                    conn = sqlite3.connect('users.db')
-                                    cur = conn.cursor()
-                                    if existing_id:
-                                        cur.execute("UPDATE admin_surveys SET title = ? WHERE survey_id = ?", (f"[예타] {survey_title}", existing_id))
-                                    else:
-                                        cur.execute("INSERT OR IGNORE INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
-                                                    (new_sheet_id, f"[예타] {survey_title}", st.session_state.user_id))
-                                    conn.commit()
-                                    conn.close()
-                                    
-                                    st.session_state.yeta_editing_survey_id = new_sheet_id
-                                    st.session_state._survey_cache_dirty_yeta = True
-                                    
-                                    base_url = "https://ahpkrj.streamlit.app/"
-                                    try:
-                                        base_url = st.query_params.get("base_url", "https://ahpkrj.streamlit.app/")
-                                        if isinstance(base_url, list): base_url = base_url[0]
-                                    except:
-                                        pass
-                                    if not base_url.endswith("/"):
-                                        base_url += "/"
+                                if sub_subs:
+                                    for t3 in sub_subs:
+                                        default_t3_desc = ""
+                                        if t3 == "정책일치성 등 내부여건": default_t3_desc = "상위 계획과의 부합성 및 추진 체계의 준비 정도를 평가합니다."
+                                        elif t3 == "지역주민 사업태도 등 외부여건": default_t3_desc = "사업 대상 지역 주민의 여론 및 지자체의 추진 태도를 평가합니다."
+                                        elif t3 == "일자리 효과": default_t3_desc = "건설 단계 및 운영 단계의 신규 고용 창출 능력을 평가합니다."
                                         
-                                    link = f"{base_url}?survey_id={new_sheet_id}"
-                                    st.success("🎉 예타 AHP 설문지 배포가 성공적으로 완료되었습니다!")
-                                    st.markdown(f"**🔗 응답자 배포용 설문조사 링크:** [{link}]({link})")
-                                    st.code(link)
-                                else:
-                                    st.error("구글 시트 연동에 실패했습니다. 구글 계정 권한 또는 서비스 계정 설정을 확인해 주세요.")
-                            except Exception as e:
-                                st.error(f"오류 발생: {e}")
+                                        key_cached_t3 = f"edit_yeta_desc_{t3}"
+                                        t3_desc_val = st.text_input(
+                                            f"↳ '{sub_c} ➔ {t3}' 요인 설명",
+                                            value=st.session_state.get(key_cached_t3, default_t3_desc),
+                                            key=f"yeta_desc_input_{t3}"
+                                        )
+                                        definitions_map[t3] = t3_desc_val
+                                        st.session_state[key_cached_t3] = t3_desc_val
+
+        with tab3:
+            st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
+            with st.container(border=True):
+                st.markdown("**그룹 분류 문항 설정**")
+                default_type_q = "귀하의 소속은 어떻게 되십니까?"
+                default_type_opts = "전문가, 일반, 공무원, 기타"
+
+                if "edit_yeta_type_questions" not in st.session_state:
+                    st.session_state["edit_yeta_type_questions"] = [{"q": default_type_q, "opts": default_type_opts}]
+
+                type_questions_state = st.session_state["edit_yeta_type_questions"]
+                num_types = len(type_questions_state)
+
+                col1, col2, col3 = st.columns([6, 2, 2])
+                with col2:
+                    if st.button("+ 문항 추가", use_container_width=True, disabled=num_types >= 3, key="yeta_add_q_dyn"):
+                        st.session_state["edit_yeta_type_questions"].append({"q": "", "opts": ""})
+                        st.rerun()
+                with col3:
+                    if st.button("- 문항 삭제", use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q_dyn"):
+                        st.session_state["edit_yeta_type_questions"].pop()
+                        st.rerun()
+
+                type_questions = []
+                for i in range(num_types):
+                    st.markdown(f"**{i+1}.**")
+                    q_label = "그룹 분류 질문 제목" if i == 0 else "추가 설문 문항"
+                    opts_label = "보기 옵션 (콤마로 구분)"
+
+                    q_val = st.text_input(f"{q_label} ({i+1})", value=type_questions_state[i]["q"], key=f"yeta_dyn_tq_q_{i}")
+                    opts_val = st.text_input(f"{opts_label} ({i+1})", value=type_questions_state[i]["opts"], key=f"yeta_dyn_tq_opts_{i}")
+
+                    type_questions_state[i]["q"] = q_val
+                    type_questions_state[i]["opts"] = opts_val
+                    type_questions.append({"q": q_val, "opts": [x.strip() for x in opts_val.split(",") if x.strip()]})
+
+            st.markdown("#### 4. 동적 예타 AHP 엑셀 템플릿 다운로드")
+            st.info("입력하신 계층 구조에 맞추어 즉시 분석 가능한 엑셀 파일(템플릿)을 다운로드할 수 있습니다.")
+            ex_p_type = "construction_non_capital"
+            if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: ex_p_type = "construction_capital"
+            elif "R&D" in yeta_p_type: ex_p_type = "rnd_bc" if "B/C" in yeta_p_type else "rnd_ec"
+            elif "기타" in yeta_p_type: ex_p_type = "other_bc" if "B/C" in yeta_p_type else "other_ec"
+
+            try:
+                from yeta_utils import generate_yeta_excel_template_dynamic
+                template_bytes = generate_yeta_excel_template_dynamic(ex_p_type, model_structure)
+                st.download_button(
+                    label="👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)",
+                    data=template_bytes,
+                    file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    type="primary",
+                    use_container_width=True,
+                    key="yeta_dynamic_excel_download_btn"
+                )
+            except Exception as e:
+                st.error(f"엑셀 템플릿 생성 오류: {e}")
+
+            st.markdown("#### 5. 온라인 배포 및 구글 시트 연동 설정")
+            if st.session_state.user_id is None:
+                st.warning("온라인 배포 및 구글 시트 연동은 회원 전용 기능입니다. 로그인해 주세요.")
+            else:
+                survey_admin_email = st.text_input("설문 담당자 이메일 (구글 드라이브 소유자 권한 부여용)", value=st.session_state.get("edit_yeta_admin_email", st.session_state.user_id))
+                st.session_state.edit_yeta_admin_email = survey_admin_email
+
+                existing_id = st.session_state.yeta_editing_survey_id
+
+                if existing_id:
+                    st.info(f"현재 **기존 설문 수정 모드**입니다. 수정한 설정은 기존 연동 시트에 반영됩니다.\n\n**연동된 시트 ID:** {existing_id}")
+                    existing_sheet_id_input = existing_id
+                else:
+                    past_surveys = []
+                    try:
+                        import sqlite3
+                        conn = sqlite3.connect('users.db')
+                        c = conn.cursor()
+                        c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
+                        past_surveys = c.fetchall()
+                        conn.close()
+                    except Exception:
+                        pass
+
+                    existing_sheet_id_input = ""
+                    show_manual_input = True
+
+                    if len(past_surveys) > 0:
+                        deploy_option = st.radio(
+                            "배포 방식을 선택해 주세요.",
+                            options=[
+                                "새로운 구글 시트 URL 연동 (신규 발급)",
+                                "기존 배포했던 설문 URL 재사용 (덮어쓰기)"
+                            ],
+                            index=0,
+                            key="yeta_deploy_option_radio_new"
+                        )
+                        st.write("")
+
+                        if "재사용" in deploy_option:
+                            show_manual_input = False
+                            st.markdown("##### ⚙️ 재사용할 기존 설문 선택")
+                            survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
+                            selected_survey_label = st.selectbox(
+                                "과거에 배포했던 설문 목록",
+                                options=list(survey_options.keys()),
+                                key="yeta_past_survey_select"
+                            )
+                            existing_sheet_id_input = survey_options[selected_survey_label]
+                            st.info("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.")
+
+                    if show_manual_input:
+                        st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
+                        st.info("""
+                        **💡 연동 방법:**
+                        1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다.
+                        2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
+                           * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                        3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
+                        """)
+                        if os.path.exists("manual_sheet_url_guide.png"):
+                            st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
+                        existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
+
+                # Save state for preview
+                preview_id = f"preview_yeta_{st.session_state.user_id}"
+                preview_data = {
+                    "Title": survey_title,
+                    "Description": survey_desc,
+                    "Admin_Email": survey_admin_email,
+                    "AHP_Model_JSON": model_structure,
+                    "Tier_Level": 3,
+                    "Demographics": {"type_questions": type_questions},
+                    "Is_Yeta": True,
+                    "Definitions": definitions_map
+                }
+
+                import json
+                os.makedirs("temp_previews", exist_ok=True)
+                with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as f:
+                    json.dump(preview_data, f, ensure_ascii=False)
+
+                col_p1, col_p2 = st.columns(2)
+                with col_p1:
+                    # Preview Link
+                    preview_link_html = f"""
+                    <a href="/?preview_id={preview_id}" target="_blank" style="text-decoration: none;">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 100%;
+                            padding: 0.375rem 0.75rem;
+                            border: 1px solid rgba(49, 51, 63, 0.2);
+                            border-radius: 4px;
+                            background-color: #ffffff;
+                            color: #31333f;
+                            font-size: 14px;
+                            font-weight: 400;
+                            line-height: 1.6;
+                            cursor: pointer;
+                            text-align: center;
+                            box-sizing: border-box;
+                            transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+                        "
+                        onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
+                        onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
+                        >
+                            👁️ 설문지 응답 화면 미리보기
+                        </div>
+                    </a>
+                    """
+                    st.markdown(preview_link_html, unsafe_allow_html=True)
+
+                with col_p2:
+                    deploy_btn_label = "🚀 배포 및 구글 시트 연동 (수정 내용 적용)" if existing_id else "🚀 배포 및 구글 시트 연동"
+                    if st.button(deploy_btn_label, type="primary", use_container_width=True, key="yeta_deploy_btn"):
+                        target_sheet_id = existing_sheet_id_input.strip()
+                        if "docs.google.com/spreadsheets" in target_sheet_id:
+                            parts = target_sheet_id.split("/d/")
+                            if len(parts) > 1:
+                                target_sheet_id = parts[1].split("/")[0]
+
+                        if not target_sheet_id:
+                            st.error("연동할 구글 스프레드시트 URL 또는 ID를 입력해 주세요.")
+                        else:
+                            with st.spinner("구글 스프레드시트 생성 및 설문지 연동 중..."):
+                                try:
+                                    from survey_manager_v3 import create_yeta_survey_sheet_v3
+                                    import sqlite3
+
+                                    new_sheet_id = create_yeta_survey_sheet_v3(
+                                        title=survey_title,
+                                        admin_email=survey_admin_email,
+                                        ahp_model=model_structure,
+                                        demographics={"type_questions": type_questions},
+                                        definitions_map=definitions_map,
+                                        description=survey_desc,
+                                        existing_sheet_id=target_sheet_id,
+                                        user_id=st.session_state.user_id
+                                    )
+
+                                    if new_sheet_id:
+                                        conn = sqlite3.connect('users.db')
+                                        cur = conn.cursor()
+                                        if existing_id:
+                                            cur.execute("UPDATE admin_surveys SET title = ? WHERE survey_id = ?", (f"[예타] {survey_title}", existing_id))
+                                        else:
+                                            cur.execute("INSERT OR IGNORE INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
+                                                        (new_sheet_id, f"[예타] {survey_title}", st.session_state.user_id))
+                                        conn.commit()
+                                        conn.close()
+
+                                        st.session_state.yeta_editing_survey_id = new_sheet_id
+                                        st.session_state._survey_cache_dirty_yeta = True
+
+                                        base_url = "https://ahpkrj.streamlit.app/"
+                                        try:
+                                            base_url = st.query_params.get("base_url", "https://ahpkrj.streamlit.app/")
+                                            if isinstance(base_url, list): base_url = base_url[0]
+                                        except:
+                                            pass
+                                        if not base_url.endswith("/"):
+                                            base_url += "/"
+
+                                        link = f"{base_url}?survey_id={new_sheet_id}"
+                                        st.success("🎉 예타 AHP 설문지 배포가 성공적으로 완료되었습니다!")
+                                        st.markdown(f"**🔗 응답자 배포용 설문조사 링크:** [{link}]({link})")
+                                        st.code(link)
+                                    else:
+                                        st.error("구글 시트 연동에 실패했습니다. 구글 계정 권한 또는 서비스 계정 설정을 확인해 주세요.")
+                                except Exception as e:
+                                    st.error(f"오류 발생: {e}")
 
     # =========================================================================
     # 실시간 응답 현황 탭
