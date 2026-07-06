@@ -96,7 +96,7 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
             </div>
         </div>
         """
-        st.markdown(card_html, unsafe_allow_html=True)
+        st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
 
     # KDI 가이드라인에 따른 가중치 제약조건 설정
     if "비수도권" in yeta_p_type and "건설" in yeta_p_type:
