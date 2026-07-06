@@ -405,3 +405,295 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
         return True
     except Exception as e:
         return False
+
+
+def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, description="", existing_sheet_id=None, user_id=None):
+    client = get_survey_gspread_client()
+    if not client:
+        return None
+
+    spreadsheet = None
+    if existing_sheet_id:
+        try:
+            spreadsheet = client.open_by_key(existing_sheet_id)
+        except Exception as e:
+            st.error(f"연동 실패: 입력하신 시트 ID를 찾을 수 없거나 권한이 없습니다. 오류 내용: {e}")
+            return None
+            
+        try:
+            meta_sheet = spreadsheet.worksheet("Survey_Metadata")
+            meta_sheet.clear()
+        except gspread.WorksheetNotFound:
+            try:
+                meta_sheet = spreadsheet.sheet1
+                meta_sheet.update_title("Survey_Metadata")
+                meta_sheet.clear()
+            except:
+                meta_sheet = spreadsheet.add_worksheet(title="Survey_Metadata", rows="100", cols="20")
+                
+        try:
+            raw_sheet = spreadsheet.worksheet("Raw_Data")
+        except gspread.WorksheetNotFound:
+            raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")
+
+        try:
+            demo_sheet = spreadsheet.worksheet("Demographic_Data")
+        except gspread.WorksheetNotFound:
+            demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
+            
+    else:
+        try:
+            from googleapiclient.discovery import build
+            drive_service = build('drive', 'v3', credentials=client.auth)
+            drive_service.files().emptyTrash().execute()
+        except Exception:
+            pass
+     
+        spreadsheet = client.create(f"[예타] {title}")
+        
+        if admin_email and "@" in admin_email:
+            try:
+                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=False)
+            except Exception as e:
+                st.warning(f"설문조사 담당자 이메일 공유 중 문제 발생: {e}")
+     
+        meta_sheet = spreadsheet.sheet1
+        meta_sheet.update_title("Survey_Metadata")
+        raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")
+        demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
+        
+    metadata = [
+        ["Field", "Value"],
+        ["Title", title],
+        ["Description", description],
+        ["Admin_Email", admin_email],
+        ["AHP_Model_JSON", json.dumps(ahp_model, ensure_ascii=False)],
+        ["Tier_Level", "3"], 
+        ["Demographics", json.dumps(demographics, ensure_ascii=False)],
+        ["Is_Yeta", "True"],
+        ["Visit_Count", "0"]
+    ]
+    meta_sheet.update(range_name="A1:B9", values=metadata)
+    
+    # Raw Data 헤더 생성
+    type_headers = []
+    if demographics and demographics.get("type_questions"):
+        tq_count = len(demographics["type_questions"])
+        for i in range(tq_count):
+            type_headers.append(f"Type {i+1}")
+            
+    raw_headers = ["ID"] + type_headers
+    
+    # 1계층 상수합 컬럼 추가
+    yeta_p_type = ahp_model.get("yeta_p_type", "건설사업 (비수도권)")
+    if "non_capital" in yeta_p_type or "비수도권" in yeta_p_type:
+        raw_headers.extend(["1계층_경제성(%)", "1계층_정책성(%)", "1계층_지역균형발전(%)"])
+    elif "capital" in yeta_p_type or "수도권" in yeta_p_type:
+        raw_headers.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
+    elif "rnd" in yeta_p_type or "R&D" in yeta_p_type:
+        raw_headers.extend(["1계층_기술성(%)", "1계층_경제성(%)", "1계층_정책성(%)"])
+    else:
+        raw_headers.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
+        
+    main_criteria = ahp_model.get("main", [])
+    sub_criteria_map = ahp_model.get("subs", {})
+    sub_sub_map = ahp_model.get("sub_subs", {})
+    
+    # 2계층 및 3계층 쌍대비교 컬럼
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if len(subs) > 1:
+            for i in range(len(subs)):
+                for j in range(i+1, len(subs)):
+                    raw_headers.append(f"쌍대비교_[{main_c}]_{subs[i].strip()}_vs_{subs[j].strip()}(실수형)")
+                    
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) > 1:
+                for i in range(len(sub_subs)):
+                    for j in range(i+1, len(sub_subs)):
+                        raw_headers.append(f"쌍대비교_[{main_c}_{sub_c.strip()}]_{sub_subs[i].strip()}_vs_{sub_subs[j].strip()}(실수형)")
+                        
+    # 대안평가 컬럼
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if not subs:
+            raw_headers.append(f"대안평가_[{main_c}]_{main_c.strip()}(시행선호_1~9_역수)")
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if not sub_subs:
+                raw_headers.append(f"대안평가_[{main_c}]_{sub_c.strip()}(시행선호_1~9_역수)")
+            else:
+                for t3 in sub_subs:
+                    raw_headers.append(f"대안평가_[{main_c}_{sub_c.strip()}]_{t3.strip()}(시행선호_1~9_역수)")
+                    
+    raw_headers.append("제출시간")
+    
+    raw_sheet.clear()
+    raw_sheet.append_row(raw_headers)
+    
+    # Demographic Data 헤더 생성
+    demo_headers = ["ID"] + type_headers
+    demo_headers.append("제출시간")
+    
+    demo_sheet.clear()
+    demo_sheet.append_row(demo_headers)
+    
+    # 로컬 캐시 백업
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS survey_metadata_cache
+                      (survey_id TEXT PRIMARY KEY, metadata_json TEXT, updated_at TEXT)''')
+        meta_dict = {
+            "Title": title,
+            "Description": description,
+            "Admin_Email": admin_email,
+            "AHP_Model_JSON": ahp_model,
+            "Tier_Level": 3,
+            "Demographics": demographics,
+            "Is_Yeta": True
+        }
+        c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
+                  (spreadsheet.id, json.dumps(meta_dict, ensure_ascii=False)))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+        
+    return spreadsheet.id
+
+
+def save_yeta_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, model, level1_answers):
+    import datetime
+    import sqlite3
+    import uuid
+    import json
+    
+    kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+    resp_id = respondent_info.get("id", str(uuid.uuid4())[:8])
+    resp_types = respondent_info.get("types", [])
+    
+    raw_row_data = [resp_id] + resp_types
+    
+    # 1. 1계층 상수합 답변
+    yeta_p_type = model.get("yeta_p_type", "건설사업 (비수도권)")
+    if "non_capital" in yeta_p_type or "비수도권" in yeta_p_type:
+        raw_row_data.extend([
+            level1_answers.get("경제성", 0),
+            level1_answers.get("정책성", 0),
+            level1_answers.get("지역균형발전", 0)
+        ])
+    elif "capital" in yeta_p_type or "수도권" in yeta_p_type:
+        raw_row_data.extend([
+            level1_answers.get("경제성", 0),
+            level1_answers.get("정책성", 0)
+        ])
+    elif "rnd" in yeta_p_type or "R&D" in yeta_p_type:
+        raw_row_data.extend([
+            level1_answers.get("기술성", 0),
+            level1_answers.get("경제성", 0),
+            level1_answers.get("정책성", 0)
+        ])
+    else:
+        raw_row_data.extend([
+            level1_answers.get("경제성", 0),
+            level1_answers.get("정책성", 0)
+        ])
+        
+    main_criteria = model.get("main", [])
+    sub_criteria_map = model.get("subs", {})
+    sub_sub_map = model.get("sub_subs", {})
+    
+    # 2. 쌍대비교 답변
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if len(subs) > 1:
+            for i in range(len(subs)):
+                for j in range(i+1, len(subs)):
+                    pair_key = f"{main_c}_{subs[i]}_{subs[j]}"
+                    raw_row_data.append(ahp_answers.get(pair_key, 1))
+                    
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if len(sub_subs) > 1:
+                for i in range(len(sub_subs)):
+                    for j in range(i+1, len(sub_subs)):
+                        pair_key = f"{sub_c}_{sub_subs[i]}_{sub_subs[j]}"
+                        raw_row_data.append(ahp_answers.get(pair_key, 1))
+                        
+    # 3. 대안평가 답변
+    for main_c in main_criteria:
+        subs = sub_criteria_map.get(main_c, [])
+        if not subs:
+            alt_key = f"alt_{main_c}_{main_c}"
+            raw_row_data.append(ahp_answers.get(alt_key, 5))
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, [])
+            if not sub_subs:
+                alt_key = f"alt_{main_c}_{sub_c}"
+                raw_row_data.append(ahp_answers.get(alt_key, 5))
+            else:
+                for t3 in sub_subs:
+                    alt_key = f"alt_{sub_c}_{t3}"
+                    raw_row_data.append(ahp_answers.get(alt_key, 5))
+                    
+    raw_row_data.append(kst_now)
+    
+    demo_row_data = [resp_id] + resp_types + [kst_now]
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS survey_backup_responses
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       survey_id TEXT, 
+                       respondent_id TEXT, 
+                       response_json TEXT, 
+                       saved_to_sheet INTEGER, 
+                       created_at TEXT)''')
+        complete_payload = {
+            "raw_row_data": raw_row_data,
+            "demo_row_data": demo_row_data,
+            "ahp_answers": ahp_answers,
+            "level1_answers": level1_answers,
+            "respondent_info": respondent_info
+        }
+        c.execute("INSERT INTO survey_backup_responses (survey_id, respondent_id, response_json, saved_to_sheet, created_at) VALUES (?, ?, ?, 0, datetime('now'))",
+                  (spreadsheet_id, resp_id, json.dumps(complete_payload, ensure_ascii=False)))
+        conn.commit()
+        db_id = c.lastrowid
+        conn.close()
+    except Exception:
+        db_id = None
+        
+    try:
+        client = get_survey_gspread_client()
+        if not client: return False
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
+        
+        try:
+            raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+            run_gspread_with_retry(raw_sheet.append_row, raw_row_data)
+        except Exception:
+            pass
+            
+        try:
+            demo_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Demographic_Data")
+            run_gspread_with_retry(demo_sheet.append_row, demo_row_data)
+        except Exception:
+            pass
+            
+        if db_id is not None:
+            try:
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                c.execute("UPDATE survey_backup_responses SET saved_to_sheet = 1 WHERE id = ?", (db_id,))
+                conn.commit()
+                conn.close()
+            except Exception:
+                pass
+        return True
+    except Exception:
+        return False
+

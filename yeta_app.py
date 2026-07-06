@@ -1627,8 +1627,128 @@ def run():
         st.write("### 예비타당성조사 AHP 전문가 설문지 제작 및 배포")
         st.info("KDI 지침에 명시된 요인을 바탕으로 예타 전용 설문지를 쉽게 구성하고 구글 시트와 연동하여 배포할 수 있습니다.")
         
+        # ------------------------------------------------------------
+        # 0. 설문 관리 (1인 1설문 모드)
+        # ------------------------------------------------------------
+        st.subheader(_("섹션 0: 내 설문 관리", "Section 0: My Survey Management"))
+
+        # Initialize states
+        if 'yeta_editing_survey_id' not in st.session_state:
+            st.session_state.yeta_editing_survey_id = None
+        if 'yeta_survey_auto_loaded' not in st.session_state:
+            st.session_state.yeta_survey_auto_loaded = False
+
+        if '_cached_user_surveys_yeta' not in st.session_state or st.session_state.get('_survey_cache_dirty_yeta'):
+            sqlite_surveys = []
+            try:
+                import sqlite3
+                conn = sqlite3.connect('users.db')
+                cur = conn.cursor()
+                cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
+                sqlite_surveys = cur.fetchall()
+                conn.close()
+            except Exception:
+                pass
+
+            gs_surveys = []
+            try:
+                from survey_manager import get_admin_surveys_from_gsheet
+                gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
+                gs_surveys = [s for s in gs_surveys if str(s[1]).startswith("[예타]")]
+            except Exception:
+                pass
+            
+            merged_surveys = {}
+            for s in gs_surveys + sqlite_surveys:
+                if s[0] not in merged_surveys:
+                    merged_surveys[s[0]] = s
+            user_surveys = list(merged_surveys.values())
+            user_surveys.sort(key=lambda x: x[2], reverse=True)
+            st.session_state._cached_user_surveys_yeta = user_surveys
+            st.session_state._survey_cache_dirty_yeta = False
+        else:
+            user_surveys = st.session_state._cached_user_surveys_yeta
+        
+        has_survey = len(user_surveys) > 0
+
+        # Auto-load logic
+        if has_survey and not st.session_state.yeta_survey_auto_loaded:
+            sel_id = user_surveys[0][0]
+            from survey_manager import load_survey_metadata
+            meta = load_survey_metadata(sel_id)
+            if meta:
+                st.session_state.yeta_editing_survey_id = sel_id
+                st.session_state.edit_yeta_title = meta.get("Title", "").replace("[예타] ", "")
+                st.session_state.edit_yeta_desc = meta.get("Description", "")
+                st.session_state.edit_yeta_admin_email = meta.get("Admin_Email", "")
+
+                demo = meta.get("Demographics", {})
+                st.session_state.edit_yeta_type_question = demo.get("type_question", "")
+                st.session_state.edit_yeta_type_options = ", ".join(demo.get("type_options", []))
+                if "type_questions" in demo:
+                    tqs = []
+                    for tq in demo["type_questions"]:
+                        tqs.append({"q": tq["q"], "opts": ", ".join(tq["opts"])})
+                    st.session_state.edit_yeta_type_questions = tqs
+            
+                ahp_model = meta.get("AHP_Model_JSON", {})
+                st.session_state.edit_yeta_main_input = ", ".join(ahp_model.get("main", []))
+                st.session_state.edit_yeta_sub_inputs = {}
+                for mc, subs in ahp_model.get("subs", {}).items():
+                    st.session_state.edit_yeta_sub_inputs[mc] = ", ".join(subs)
+                    
+                st.session_state.edit_yeta_sub_sub_inputs = {}
+                for mc, subs in ahp_model.get("sub_subs", {}).items():
+                    st.session_state.edit_yeta_sub_sub_inputs[mc] = ", ".join(subs)
+                
+                st.session_state.edit_yeta_p_type = ahp_model.get("yeta_p_type", "건설사업 (비수도권)")
+                
+            st.session_state.yeta_survey_auto_loaded = True
+            st.rerun()
+
+        @st.dialog(_("🚨 [경고] 기존 설문 영구 삭제 안내", "🚨 [Warning] Permanent Deletion of Existing Survey"))
+        def confirm_new_survey_yeta():
+            st.error(_("새로운 예타 설문을 작성하시면 기존 연동된 모든 데이터가 삭제됩니다.", "If you create a new survey, all data will be deleted."))
+            agree = st.checkbox(_("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.", "Yes, I agree to delete all data."))
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True):
+                    st.rerun()
+            with col2:
+                if st.button(_("✅ 동의 및 초기화", "✅ Agree & Initialize"), type="primary", use_container_width=True, disabled=not agree):
+                    with st.spinner(_("기존 데이터를 삭제하는 중입니다...", "Deleting existing data...")):
+                        from survey_manager import delete_admin_survey
+                        if user_surveys:
+                            delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
+                        st.session_state.yeta_editing_survey_id = None
+                        keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_yeta_')]
+                        for k in keys_to_clear:
+                            del st.session_state[k]
+                        st.session_state.yeta_survey_auto_loaded = False
+                        st.session_state._survey_cache_dirty_yeta = True
+                    st.success(_("완료되었습니다. 화면이 새로고침됩니다.", "Completed. The screen will be refreshed."))
+                    import time
+                    time.sleep(1.5)
+                    st.rerun()
+
+        if has_survey:
+            st.success(_(f" 현재 배포된 예타 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f" A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
+            if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary"):
+                 confirm_new_survey_yeta()
+        else:
+            st.info(_(" 작성 중인 새 예타 설문입니다.", " This is a new survey in progress."))
+            if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
+                st.session_state.yeta_editing_survey_id = None
+                keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_yeta_')]
+                for k in keys_to_clear:
+                    del st.session_state[k]
+                st.rerun()
+
+        st.divider()
+
         st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
-        survey_title = st.text_input("설문지 제목", value="재정투자사업 종합평가(AHP) 전문가 설문")
+        survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_yeta_title", "재정투자사업 종합평가(AHP) 전문가 설문"))
+        
         default_survey_desc = (
             "안녕하십니까, 전문가님.\n"
             "본 설문은 KDI 예비타당성조사 수행 지침에 의거하여, 해당 재정투자사업의 타당성 및 추진 여부를 최종 판단하기 위한 '종합평가(AHP)' 용도로 기획되었습니다.\n\n"
@@ -1642,452 +1762,179 @@ def run():
             "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
             "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."
         )
-        survey_desc = st.text_area("설문 안내문", value=default_survey_desc, height=250)
+        survey_desc = st.text_area("설문 안내문", value=st.session_state.get("edit_yeta_desc", default_survey_desc), height=250)
         
-        project_desc = st.text_area("사업 개요 설명", placeholder="응답자가 사업 내용을 파악할 수 있도록 주요 사업 개요를 입력하세요.")
-        project_url = st.text_input("사업 설명 자료 첨부 (URL 링크)", placeholder="예: 구글 드라이브, 노션 링크 등 (응답자가 다운로드/열람할 수 있는 외부 링크)")
-
-        st.markdown("#### 2. 예타 사업 유형 및 평가항목 세부 설정")
+        st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
         yeta_p_type = st.selectbox(
             "평가 대상 사업 유형",
-            options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"]
+            options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"],
+            index=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"].index(st.session_state.get("edit_yeta_p_type", "건설사업 (비수도권)"))
         )
         
+        tier_level = 3
+        st.info("💡 **예타 모델 동적 설정**: 일반 모드와 동일하게 각 계층을 쉼표(,)로 구분하여 입력하세요. (1계층은 예타 기본 뼈대를 유지합니다)")
+
+        default_yeta_main = "경제성, 정책성, 지역균형발전"
+        if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: default_yeta_main = "경제성, 정책성"
+        elif "R&D" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
+        elif "정보화" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
+        elif "기타" in yeta_p_type: default_yeta_main = "경제성, 정책성, 지역균형발전"
+        
+        main_input = st.text_input("1계층 (대항목)", value=st.session_state.get("edit_yeta_main_input", default_yeta_main), help="이 항목들은 쌍대비교 대신 100점 분배(상수합법)로 평가됩니다.")
+        main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
+
+        model_structure = {"main": main_list, "subs": {}, "sub_subs": {}, "yeta_p_type": yeta_p_type}
+
+        for mc in main_list:
+            if mc == "경제성": 
+                model_structure["subs"][mc] = []
+                st.caption(f"✓ '{mc}' 하위 요인은 일반적으로 편익/비용(B/C)으로 일괄 산출되므로 입력하지 않습니다.")
+                continue
+            
+            default_sub_val = ""
+            if mc == "정책성": default_sub_val = "사업추진 여건, 정책효과"
+            elif mc == "지역균형발전": default_sub_val = "지역 낙후도, 지역경제 파급효과"
+            elif mc == "기술성": default_sub_val = "기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성"
+            
+            sub_input = st.text_input(f"'{mc}'의 하위 요인 (2계층)", value=st.session_state.get("edit_yeta_sub_inputs", {}).get(mc, default_sub_val))
+            subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
+            model_structure["subs"][mc] = subs_list
+
+            if subs_list:
+                with st.expander(f"↳ '{mc}' 하위의 3계층 (소분류) 입력", expanded=False):
+                    st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
+                    for sub_c in subs_list:
+                        sub_sub_val = ""
+                        if sub_c == "사업추진 여건": sub_sub_val = "정책일치성 등 내부여건, 지역주민 사업태도 등 외부여건"
+                        elif sub_c == "정책효과": sub_sub_val = "사업특화항목, 일자리 효과, 생활여건 영향, 환경성 평가, 안전성 평가"
+                        
+                        sub_sub_input = st.text_input(
+                            f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
+                            value=st.session_state.get("edit_yeta_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
+                            placeholder="예: 항목1, 항목2",
+                            key=f"yeta_sub_sub_{sub_c}"
+                        )
+                        parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
+                        if parsed_sub_subs:
+                            model_structure["sub_subs"][sub_c] = parsed_sub_subs
+
+        st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
         with st.container(border=True):
-            st.caption("대상 사업 특성에 맞춰 2계층 및 3계층 세부 평가 항목을 설정하세요.")
+            st.markdown("**그룹 분류 문항 설정**")
+            default_type_q = "귀하의 소속은 어떻게 되십니까?"
+            default_type_opts = "전문가, 일반, 공무원, 기타"
             
-            st.markdown("##### 📌 정책성 (3계층 지원)")
-            yeta_policy_tier2_input = st.text_input("정책성 2계층 요인 (쉼표로 구분)", value="사업추진 여건, 정책효과", key="yeta_pol_t2")
-            yeta_policy_tier2 = [x.strip() for x in yeta_policy_tier2_input.split(",") if x.strip()]
-            
-            yeta_policy_factors = {}
-            default_t3 = {
-                "사업추진 여건": "정책일치성 등 내부여건, 지역주민 사업태도 등 외부여건",
-                "정책효과": "사업특화항목, 일자리 효과, 생활여건 영향, 환경성 평가, 안전성 평가"
-            }
-            
-            col1, col2 = st.columns(2)
-            for i, t2 in enumerate(yeta_policy_tier2):
-                with (col1 if i % 2 == 0 else col2):
-                    def_val = default_t3.get(t2, "")
-                    t3_input = st.text_input(f"'{t2}'의 3계층 요인 (없으면 빈칸)", value=def_val, key=f"yeta_pol_t3_{i}")
-                    t3_factors = [x.strip() for x in t3_input.split(",") if x.strip()]
-                    yeta_policy_factors[t2] = t3_factors
-            
-            st.markdown("---")
-            st.markdown("##### 📌 지역균형발전 (2계층)")
-            yeta_regional_factors = {}
-            if "비수도권" in yeta_p_type or "기타" in yeta_p_type:
-                yeta_reg_input = st.text_input("지역균형발전 2계층 요인 (쉼표로 구분)", value="지역 낙후도, 지역경제 파급효과", key="yeta_reg_t2")
-                for t2 in [x.strip() for x in yeta_reg_input.split(",") if x.strip()]:
-                    yeta_regional_factors[t2] = []
-                
-            yeta_tech_factors = {}
-            if "R&D" in yeta_p_type or "정보화" in yeta_p_type:
-                st.markdown("---")
-                st.markdown("##### 📌 기술성 (2계층)")
-                yeta_tech_input = st.text_input("기술성 2계층 요인 (쉼표로 구분)", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성", key="yeta_tech_t2")
-                for t2 in [x.strip() for x in yeta_tech_input.split(",") if x.strip()]:
-                    yeta_tech_factors[t2] = []
+            if "edit_yeta_type_questions" not in st.session_state:
+                st.session_state["edit_yeta_type_questions"] = [{"q": default_type_q, "opts": default_type_opts}]
 
-        # Depending on project type, show expanders for factor descriptions.
-        with st.expander("📝 1계층, 2계층 및 3계층 평가항목 상세 설명 설정", expanded=True):
-            st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
-            st.markdown("<div style='margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 1계층 평가항목</div>", unsafe_allow_html=True)
-            st.text_input("경제성 설명", placeholder="예: 사업의 B/C 비율 등 경제적 타당성을 평가합니다.")
-            st.text_input("정책성 설명", placeholder="예: 정책의 일관성, 추진 의지 등 정책적 타당성을 평가합니다.")
-            if "비수도권" in yeta_p_type or "기타" in yeta_p_type:
-                st.text_input("지역균형발전 설명", placeholder="예: 지역낙후도 및 지역경제 파급효과 등을 평가합니다.")
-            if "R&D" in yeta_p_type or "정보화" in yeta_p_type:
-                st.text_input("기술성 설명", placeholder="예: 기술개발의 성공 가능성 및 기술적 파급효과 등을 평가합니다.")
-            
-            st.markdown("<hr style='margin: 15px 0px; border-color: #cbd5e1;'>", unsafe_allow_html=True)
-            st.markdown("<div style='margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 15px;'>📌 2계층 및 3계층 평가항목 (쌍대비교 하위 요인)</div>", unsafe_allow_html=True)
-            
-            for t2, t3_list in yeta_policy_factors.items():
-                if not t3_list:
-                    st.text_input(f"정책성 - {t2} 설명", placeholder=f"{t2}에 대한 상세 설명을 입력하세요.")
-                else:
-                    for t3 in t3_list:
-                        st.text_input(f"정책성 - {t2} - {t3} 설명", placeholder=f"{t3}에 대한 상세 설명을 입력하세요.")
-                
-            if ("비수도권" in yeta_p_type or "기타" in yeta_p_type) and yeta_regional_factors:
-                for t2 in yeta_regional_factors.keys():
-                    st.text_input(f"지역균형발전 - {t2} 설명", placeholder=f"{t2}에 대한 상세 설명을 입력하세요.")
-                    
-            if ("R&D" in yeta_p_type or "정보화" in yeta_p_type) and yeta_tech_factors:
-                for t2 in yeta_tech_factors.keys():
-                    st.text_input(f"기술성 - {t2} 설명", placeholder=f"{t2}에 대한 상세 설명을 입력하세요.")
-
-        st.markdown("#### 섹션 1.5: 응답자 수집 정보 및 그룹 분류")
-        with st.container(border=True):
-            st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
-            
-            default_type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
-            default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
-            
-            if "edit_type_questions" not in st.session_state:
-                st.session_state["edit_type_questions"] = [{"q": default_type_q, "opts": default_type_opts}]
-
-            type_questions_state = st.session_state["edit_type_questions"]
+            type_questions_state = st.session_state["edit_yeta_type_questions"]
             num_types = len(type_questions_state)
             
             col1, col2, col3 = st.columns([6, 2, 2])
             with col2:
-                if st.button(_("+ 문항 추가", "+ Add Question"), use_container_width=True, disabled=num_types >= 3, key="yeta_add_q"):
-                    st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
+                if st.button("+ 문항 추가", use_container_width=True, disabled=num_types >= 3, key="yeta_add_q_dyn"):
+                    st.session_state["edit_yeta_type_questions"].append({"q": "", "opts": ""})
                     st.rerun()
             with col3:
-                if st.button(_("- 문항 삭제", "- Remove"), use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q"):
-                    st.session_state["edit_type_questions"].pop()
+                if st.button("- 문항 삭제", use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q_dyn"):
+                    st.session_state["edit_yeta_type_questions"].pop()
                     st.rerun()
             
             type_questions = []
             for i in range(num_types):
                 st.markdown(f"**{i+1}.**")
-                if i == 0:
-                    q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
-                    opts_label = _("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)")
-                else:
-                    q_label = _("추가 설문 문항", "Additional Survey Question")
-                    opts_label = _("추가 문항 보기 옵션 (콤마로 구분)", "Additional Question Options (comma-separated)")
-                    
-                q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i]["q"], key=f"yeta_tq_q_{i}")
-                opts_val = st.text_input(opts_label + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"yeta_tq_opts_{i}")
+                q_label = "그룹 분류 질문 제목" if i == 0 else "추가 설문 문항"
+                opts_label = "보기 옵션 (콤마로 구분)"
+                
+                q_val = st.text_input(f"{q_label} ({i+1})", value=type_questions_state[i]["q"], key=f"yeta_dyn_tq_q_{i}")
+                opts_val = st.text_input(f"{opts_label} ({i+1})", value=type_questions_state[i]["opts"], key=f"yeta_dyn_tq_opts_{i}")
                 
                 type_questions_state[i]["q"] = q_val
                 type_questions_state[i]["opts"] = opts_val
-                
-                type_questions.append({
-                    "q": q_val,
-                    "opts": [x.strip() for x in opts_val.split(",") if x.strip()]
-                })
+                type_questions.append({"q": q_val, "opts": [x.strip() for x in opts_val.split(",") if x.strip()]})
 
-        st.markdown("#### 4. 설문 미리보기 (Preview)")
-        if st.button("👀 실제 응답 화면 미리보기 (Mock-up)"):
-            @st.dialog("설문지 미리보기 샘플", width="large")
-            def preview_modal():
-                st.subheader(survey_title)
-                st.info(survey_desc)
-                if project_desc:
-                    st.write("**[사업 개요]**")
-                    st.write(project_desc)
-                if project_url:
-                    st.markdown(f"[🔗 첨부된 사업 설명 자료 열람하기]({project_url})")
-                
-                st.divider()
-                st.write("**[제1계층 평가: 상수합법]**")
-                st.caption("아래 1계층 평가항목의 합이 100이 되도록 중요도를 직접 분배해주십시오.")
-                
-                if "비수도권" in yeta_p_type and "건설" in yeta_p_type:
-                    b_eco, b_pol, b_reg = (30, 45, 35), (25, 40, 30), (30, 40, 35)
-                    reg_label = "지역균형발전"
-                elif "수도권" in yeta_p_type and "건설" in yeta_p_type:
-                    b_eco, b_pol, b_reg = (60, 70, 65), (30, 40, 35), None
-                elif "R&D" in yeta_p_type:
-                    b_eco, b_pol, b_reg = (40, 50, 45), (20, 30, 25), (30, 40, 30)
-                    reg_label = "기술성"
-                else:
-                    b_eco, b_pol, b_reg = (0, 100, 40), (0, 100, 30), (0, 100, 30)
-                    reg_label = "지역균형발전"
-                
-                def enforce_slider_bounds(key, min_val, max_val, label):
-                    val = st.session_state[key]
-                    if val < min_val or val > max_val:
-                        st.session_state[key] = max(min_val, min(max_val, val))
-                        st.toast(f"⚠️ {label} 허용범위는 {min_val}% ~ {max_val}% 입니다.")
-                
-                v1 = st.slider(f"경제성 (허용범위: {b_eco[0]}~{b_eco[1]})", 0, 100, b_eco[2], key="prev_v1", on_change=enforce_slider_bounds, args=("prev_v1", b_eco[0], b_eco[1], "경제성"))
-                v2 = st.slider(f"정책성 (허용범위: {b_pol[0]}~{b_pol[1]})", 0, 100, b_pol[2], key="prev_v2", on_change=enforce_slider_bounds, args=("prev_v2", b_pol[0], b_pol[1], "정책성"))
-                v3 = 0
-                if b_reg:
-                    v3 = st.slider(f"{reg_label} (허용범위: {b_reg[0]}~{b_reg[1]})", 0, 100, b_reg[2], key="prev_v3", on_change=enforce_slider_bounds, args=("prev_v3", b_reg[0], b_reg[1], reg_label))
-                
-                total_sum = v1 + v2 + v3
-                all_valid = (total_sum == 100)
-                
-                color = "#16a34a" if all_valid else "#dc2626"
-                st.markdown(f"<div style='text-align: right; font-size: 1.1em; font-weight: bold;'>합계: <span style='color: {color};'>{total_sum}</span> / 100</div>", unsafe_allow_html=True)
-                
-                if total_sum != 100:
-                    st.warning("⚠️ 1계층 평가항목의 가중치 합계가 정확히 100이 되어야 제출할 수 있습니다.")
-                
-                st.divider()
-                st.write("**[제2계층 평가: 9점 척도 쌍대비교]**")
-                st.caption("두 항목 중 상대적으로 더 중요한 쪽에 가중치를 부여해주십시오. (CR 검증 가이드 바 활성화 예시 포함)")
-                
-                survey_container = st.container(key="ahp_survey_matrix")
-                survey_container.markdown("<div class='ahp_scrollable_area'></div>", unsafe_allow_html=True)
-                
-                # 쌍대비교 라디오 버튼 가로폭 강제 할당 및 모바일 겹침 방지 CSS
-                mobile_css = """
-                <style>
-
-                /* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
-                div.st-key-ahp_survey_matrix {
-                    gap: 4px !important;
-                    row-gap: 4px !important;
-                }
-
-                /* 1. 수직 정렬 & 레이아웃 배분 */
-                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
-                    gap: 0px !important;
-                    align-items: center !important;
-                    width: 100% !important;
-                    margin-top: 0px !important;
-                    margin-bottom: 0px !important;
-                    padding-top: 4px !important;
-                    padding-bottom: 4px !important;
-                    border-bottom: 1px solid #e2e8f0 !important;
-                }
-
-                .st-key-ahp_survey_matrix div[data-testid="column"] {
-                    padding: 0px !important;
-                }
-
-                /* 2. 라디오 그룹 전체 100% 분배 강제 및 줄바꿈 원천 차단 */
-                .st-key-ahp_survey_matrix div[data-testid="stElementContainer"],
-                .st-key-ahp_survey_matrix div[data-testid="stRadio"],
-                .st-key-ahp_survey_matrix .stRadio {
-                    width: 100% !important;
-                    margin: 0px !important;
-                    padding: 0px !important;
-                }
-
-                .st-key-ahp_survey_matrix div[data-testid="stRadio"] > div,
-                .st-key-ahp_survey_matrix div[role="radiogroup"] {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    flex-wrap: nowrap !important;
-                    justify-content: space-between !important;
-                    align-items: center !important;
-                    width: 100% !important;
-                    gap: 0px !important;
-                    padding: 0px !important; 
-                    margin: 0px !important;
-                }
-
-                /* 2.5. AHP 컨테이너 내부의 수직 요소 간격 초밀착 */
-                .st-key-ahp_survey_matrix div[data-testid="stVerticalBlock"] {
-                    gap: 0px !important;
-                }
-
-                /* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
-                .st-key-ahp_survey_matrix div[role="radiogroup"] > div,
-                .st-key-ahp_survey_matrix div[role="radiogroup"] > label,
-                .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"],
-                .st-key-ahp_survey_matrix div[role="radiogroup"] label {
-                    flex: 1 1 0% !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    height: 32px !important; 
-                    margin: 0px !important;
-                    padding: 0px !important;
-                    min-width: 0px !important;
-                    width: 100% !important;
-                    border-radius: 2px !important;
-                    transition: background-color 0.1s ease-in-out !important;
-                    background-color: transparent !important;
-                }
-
-                /* 3.5. 라디오 그룹 최소 높이 해제 */
-                .st-key-ahp_survey_matrix div[role="radiogroup"] {
-                    min-height: 32px !important;
-                }
-
-                /* 감싸는 div가 있을 경우 그 내부의 실제 label도 100% 채우도록 지시 */
-                .st-key-ahp_survey_matrix div[role="radiogroup"] > div label,
-                .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"] label {
-                    width: 100% !important;
-                    height: 100% !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    margin: 0px !important;
-                    padding: 0px !important;
-                }
-
-                /* 4. 기존 텍스트 찌꺼기 완벽 제거 */
-                .st-key-ahp_survey_matrix label[data-testid="stWidgetLabel"],
-                .st-key-ahp_survey_matrix label p {
-                    display: none !important;
-                    height: 0px !important;
-                    width: 0px !important;
-                    margin: 0px !important;
-                    padding: 0px !important;
-                    opacity: 0 !important;
-                    overflow: hidden !important;
-                    position: absolute !important;
-                }
-
-                /* stMarkdownContainer의 negative margin 제거하여 컬럼간 수직 평행 맞춤 */
-                .st-key-ahp_survey_matrix div[data-testid="stMarkdownContainer"] {
-                    margin-bottom: 0px !important;
-                    padding-bottom: 0px !important;
-                }
-
-                /* 라디오 항목 내부의 markdown 컨테이너(텍스트용) 완전히 감추기 */
-                .st-key-ahp_survey_matrix div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
-                    display: none !important;
-                    height: 0px !important;
-                    width: 0px !important;
-                    margin: 0px !important;
-                    padding: 0px !important;
-                    opacity: 0 !important;
-                    overflow: hidden !important;
-                    position: absolute !important;
-                }
-
-                /* 동그라미 컨테이너 중앙 정렬 및 여백 마진 제거 */
-                .st-key-ahp_survey_matrix label span {
-                    margin: 0px !important;
-                    padding: 0px !important;
-                }
-
-                /* 5. Hover 및 Zebra 효과 */
-                .st-key-ahp_survey_matrix label:hover {
-                    background-color: #f1f5f9 !important;
-                    cursor: pointer !important;
-                }
-                
-                /* 모달 너비 제약을 무시하고 가로 스크롤 허용하기 위한 특정 블록 설정 */
-                div[data-testid="stVerticalBlock"]:has(.st-key-ahp_survey_matrix) {
-                    overflow-x: auto !important;
-                    padding-bottom: 15px;
-                }
-                
-                .st-key-ahp_survey_matrix > div {
-                    min-width: 700px !important;
-                }
-                
-                /* 각 비율 (15%, 70%, 15%) 설정 */
-                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
-                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
-                    width: 15% !important; min-width: 15% !important; flex: 1 1 15% !important;
-                }
-                .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
-                    width: 70% !important; min-width: 70% !important; flex: 1 1 70% !important;
-                }
-                </style>
-                """
-                survey_container.markdown(mobile_css, unsafe_allow_html=True)
-                
-                import itertools
-                
-                def render_preview_group(title, factors, color_left, bg_left, color_right, bg_right):
-                    if len(factors) < 2: return
-                    survey_container.markdown(f"<div style='margin-top: 20px; margin-bottom: 5px; font-weight: bold; color: #1e293b; font-size: 14px;'>📌 {title} 부문 내 쌍대비교</div>", unsafe_allow_html=True)
-                    header_html = f"""
-                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px; margin-bottom: 5px;">
-                        <colgroup>
-                            <col style="width: 15%;" />
-                            {"".join(['<col style="width: 4.11%;" />' for _ in range(8)])}
-                            <col style="width: 4.11%;" />
-                            {"".join(['<col style="width: 4.11%;" />' for _ in range(8)])}
-                            <col style="width: 15%;" />
-                        </colgroup>
-                        <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                            <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
-                            <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="8">← 좌측 요인 중요도</th>
-                            <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">동등<br>(1)</th>
-                            <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="8">우측 요인 중요도 →</th>
-                            <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
-                        </tr>
-                        <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                            {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in range(9, 1, -1)])}
-                            {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in range(2, 10)])}
-                        </tr>
-                    </table>
-                    """
-                    survey_container.markdown(header_html, unsafe_allow_html=True)
-                    
-                    pairs = list(itertools.combinations(factors, 2))
-                    options = [-9, -8, -7, -6, -5, -4, -3, -2, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-                    
-                    for i, (left_f, right_f) in enumerate(pairs):
-                        row_cols = survey_container.columns([15, 70, 15])
-                        with row_cols[0]:
-                            st.markdown(f"""
-                            <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
-                                        padding: 0px 8px; background-color: {bg_left}; color: {color_left}; 
-                                        border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
-                                        justify-content: center; font-size: 12px; margin: 0px;'>
-                                    {left_f}
-                            </div>
-                            """, unsafe_allow_html=True)
-                        with row_cols[1]:
-                            st.radio(
-                                label=f"preview_pair_{title}_{i}",
-                                options=options,
-                                index=8,
-                                format_func=lambda x: str(abs(x)) + "\u200B" if x < 0 else str(x),
-                                horizontal=True,
-                                label_visibility="collapsed"
-                            )
-                                
-                        with row_cols[2]:
-                            st.markdown(f"""
-                            <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
-                                        padding: 0px 8px; background-color: {bg_right}; color: {color_right}; 
-                                        border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
-                                        justify-content: center; font-size: 12px; margin: 0px;'>
-                                    {right_f}
-                            </div>
-                            """, unsafe_allow_html=True)
-                
-                render_preview_group("정책성 (2계층)", list(yeta_policy_factors.keys()), "#db2777", "#fce7f3", "#059669", "#dcfce7")
-                for t2, t3_list in yeta_policy_factors.items():
-                    if len(t3_list) > 1:
-                        render_preview_group(f"정책성 - {t2} (3계층)", t3_list, "#db2777", "#fce7f3", "#059669", "#dcfce7")
-                        
-                if yeta_regional_factors:
-                    render_preview_group("지역균형발전 (2계층)", list(yeta_regional_factors.keys()), "#2563eb", "#dbeafe", "#ca8a04", "#fef08a")
-                    for t2, t3_list in yeta_regional_factors.items():
-                        if len(t3_list) > 1:
-                            render_preview_group(f"지역균형발전 - {t2} (3계층)", t3_list, "#2563eb", "#dbeafe", "#ca8a04", "#fef08a")
-                if yeta_tech_factors:
-                    render_preview_group("기술성 (2계층)", list(yeta_tech_factors.keys()), "#7c3aed", "#ede9fe", "#0891b2", "#cffafe")
-                    for t2, t3_list in yeta_tech_factors.items():
-                        if len(t3_list) > 1:
-                            render_preview_group(f"기술성 - {t2} (3계층)", t3_list, "#7c3aed", "#ede9fe", "#0891b2", "#cffafe")
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                if st.button("모의 설문 제출 (닫기)", type="primary", use_container_width=True, disabled=(total_sum != 100)):
-                    st.rerun()
-            preview_modal()
-
-        st.markdown("#### 5. 구글 시트 연동 및 배포")
-        st.info(_("모든 설정이 완료되었다면, 응답 데이터를 실시간으로 수집할 구글 시트를 연동하고 배포용 URL을 생성합니다.", "When ready, connect a Google Sheet to collect responses and generate the deployment URL."))
+        st.markdown("#### 4. 동적 예타 AHP 엑셀 템플릿 다운로드")
+        st.info("입력하신 계층 구조에 맞추어 즉시 분석 가능한 엑셀 파일(템플릿)을 다운로드할 수 있습니다.")
+        ex_p_type = "construction_non_capital"
+        if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: ex_p_type = "construction_capital"
+        elif "R&D" in yeta_p_type: ex_p_type = "rnd_bc" if "B/C" in yeta_p_type else "rnd_ec"
+        elif "기타" in yeta_p_type: ex_p_type = "other_bc" if "B/C" in yeta_p_type else "other_ec"
         
-        with st.expander(_("❓ 구글 시트 연동 방법 안내", "Google Sheets Integration Guide"), expanded=True):
-            st.markdown("""
-            **💡 연동 방법:**
+        try:
+            from yeta_utils import generate_yeta_excel_template_dynamic
+            template_bytes = generate_yeta_excel_template_dynamic(ex_p_type, model_structure)
+            st.download_button(
+                label="👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)",
+                data=template_bytes,
+                file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                type="primary",
+                use_container_width=True
+            )
+        except Exception as e:
+            st.error(f"엑셀 템플릿 생성 오류: {e}")
+
+        st.markdown("#### 5. 온라인 배포")
+        if st.session_state.user_id is None:
+            st.warning("온라인 배포는 회원 전용 기능입니다. 로그인해 주세요.")
+        else:
+            admin_email = st.text_input("설문 담당자 이메일 (구글 드라이브 소유자 권한 부여용)", value=st.session_state.get("edit_yeta_admin_email", st.session_state.user_id))
+            st.session_state.edit_yeta_admin_email = admin_email
             
-            1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
-            2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
-               * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-            3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 **'공유된 구글 시트 URL' 칸에 붙여넣어 주세요.** (예시 이미지 참고)
-            """)
-            guide_img_path = os.path.join(os.path.dirname(__file__), "manual_sheet_url_guide.png")
-            if os.path.exists(guide_img_path):
-                st.image(guide_img_path, caption="구글 스프레드시트 URL 주소창 복사 예시", use_container_width=True)
-            else:
-                st.warning("가이드 이미지를 찾을 수 없습니다.")
-
-        
-        sheet_url = st.text_input(_("공유된 구글 시트 URL", "Shared Google Sheet URL"))
-        
-        if st.button(_("🚀 예타 AHP 설문지 배포 및 구글 시트 연동", "Deploy Yeta Survey & Connect Google Sheets"), type="primary", use_container_width=True):
-            if not sheet_url:
-                st.error("구글 시트 URL을 입력해주세요.")
-            else:
-                with st.spinner("구글 시트 연동 및 배포 URL 생성 중..."):
-                    time.sleep(1)
-                st.success(_("🎉 예타 AHP 설문지 배포가 완료되었습니다. 아래 URL을 복사하여 전문가들에게 발송하세요.", "Survey successfully deployed! Send the URL below to experts."))
-                st.code("https://ahpkrj.streamlit.app/survey/yeta-expert-preview-106")
-                st.info("구글 시트에 접속하시면 실시간으로 누적되는 응답 데이터를 확인하고 다운로드할 수 있습니다.")
+            existing_id = st.session_state.yeta_editing_survey_id
+            
+            deploy_btn_label = "🚀 예타 AHP 설문지 구글 시트 재생성 및 배포" if existing_id else "🚀 예타 AHP 설문지 배포 및 구글 시트 연동"
+            if st.button(deploy_btn_label, type="primary", use_container_width=True):
+                if not admin_email or "@" not in admin_email:
+                    st.error("올바른 이메일 주소를 입력해주세요.")
+                else:
+                    with st.spinner("구글 스프레드시트 생성 및 설문지 연동 중..."):
+                        try:
+                            from survey_manager_v3 import create_yeta_survey_sheet_v3
+                            import sqlite3
+                            
+                            new_sheet_id = create_yeta_survey_sheet_v3(
+                                title=survey_title,
+                                admin_email=admin_email,
+                                ahp_model=model_structure,
+                                demographics={"type_questions": type_questions},
+                                description=survey_desc,
+                                existing_sheet_id=existing_id,
+                                user_id=st.session_state.user_id
+                            )
+                            
+                            if new_sheet_id:
+                                # Save to DB
+                                conn = sqlite3.connect('users.db')
+                                cur = conn.cursor()
+                                if existing_id:
+                                    cur.execute("UPDATE admin_surveys SET title = ? WHERE survey_id = ?", (f"[예타] {survey_title}", existing_id))
+                                else:
+                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
+                                                (new_sheet_id, f"[예타] {survey_title}", st.session_state.user_id))
+                                conn.commit()
+                                conn.close()
+                                
+                                st.session_state.yeta_editing_survey_id = new_sheet_id
+                                st.session_state._survey_cache_dirty_yeta = True
+                                
+                                base_url = "https://ahpkrj.streamlit.app/"
+                                try:
+                                    base_url = st.query_params.get("base_url", "https://ahpkrj.streamlit.app/")
+                                    if isinstance(base_url, list): base_url = base_url[0]
+                                except:
+                                    pass
+                                if not base_url.endswith("/"):
+                                    base_url += "/"
+                                    
+                                link = f"{base_url}?survey_id={new_sheet_id}"
+                                st.success("🎉 예타 AHP 설문지 배포가 성공적으로 완료되었습니다!")
+                                st.markdown(f"**🔗 응답자 배포용 설문조사 링크:** [{link}]({link})")
+                                st.code(link)
+                            else:
+                                st.error("구글 시트 생성에 실패했습니다. 구글 계정 권한 또는 서비스 계정 설정을 확인해 주세요.")
+                        except Exception as e:
+                            st.error(f"오류 발생: {e}")
 
     # =========================================================================
     # 실시간 응답 현황 탭
