@@ -14,7 +14,7 @@ def _(ko_text, en_text):
 def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, ahp_answers):
     st.markdown(f"#### {title}")
     
-    with st.container(key="ahp_survey_matrix"):
+    with st.container(key=f"ahp_survey_matrix_{uuid.uuid4().hex[:8]}"):
         left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
         right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
         scale_width = 70 / 17
@@ -171,7 +171,7 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     # --- 쌍대비교 라디오 버튼 CSS 주입 ---
     st.markdown('''
     <style>
-    .st-key-ahp_survey_matrix div[role="radiogroup"] {
+    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -181,21 +181,21 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
         width: 100%;
         margin: 0;
     }
-    .st-key-ahp_survey_matrix div[role="radiogroup"] > div,
-    .st-key-ahp_survey_matrix div[role="radiogroup"] > label,
-    .st-key-ahp_survey_matrix div[role="radiogroup"] label {
+    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > div,
+    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > label,
+    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] label {
         margin: 0 !important;
         padding: 0 !important;
         flex: 1;
         text-align: center;
     }
-    .st-key-ahp_survey_matrix div[role="radiogroup"] > div label {
+    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > div label {
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
     }
-    .st-key-ahp_survey_matrix div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
         font-size: 11px;
         color: #475569;
         white-space: nowrap;
@@ -389,64 +389,157 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
         if not subs:
             alt_key = f"alt_{main_c}_{main_c}"
             st.markdown(f"##### 요인: **{main_c}**")
-            col_l, col_m, col_r = st.columns([3, 6, 3])
-            with col_l:
-                st.markdown("<div style='text-align:right; font-weight:bold; color:#1e40af;'>사업 시행 (Implementation)</div>", unsafe_allow_html=True)
-            with col_m:
-                ans_val = st.radio(
-                    label=alt_key,
-                    options=list(range(-9, 0)) + list(range(1, 10)),
-                    index=8,
-                    format_func=lambda x: f"← {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"{x} →"),
-                    key=f"yeta_alt_{alt_key}",
-                    horizontal=True,
-                    label_visibility="collapsed"
-                )
-            with col_r:
-                st.markdown("<div style='text-align:left; font-weight:bold; color:#b91c1c;'>사업 미시행 (No Project)</div>", unsafe_allow_html=True)
-            ahp_answers[alt_key] = ans_val
+            with st.container(key=f"ahp_survey_matrix_{uuid.uuid4().hex[:8]}"):
+                left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
+                right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
+                scale_width = 70 / 17
+                colgroup_html = "".join([
+                    '<col style="width: 15%;" />',
+                    "".join([f'<col style="width: {scale_width}%;" />' for _ in left_cols]),
+                    f'<col style="width: {scale_width}%;" />',
+                    "".join([f'<col style="width: {scale_width}%;" />' for _ in right_cols]),
+                    f'<col style="width: 15%;" />'
+                ])
+                header_html = f'''
+                <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px 0px 10px 0px; padding: 0px;">
+                    <colgroup>{colgroup_html}</colgroup>
+                    <thead>
+                        <tr style="background-color: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+                            <th style="border-right: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">시행 선호</th>
+                            {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in left_cols])}
+                            <th style="padding: 4px; font-weight: 600; color: #3b82f6; border-right: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; background-color: #e0f2fe;">1</th>
+                            {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in right_cols])}
+                            <th style="border-left: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">미시행 선호</th>
+                        </tr>
+                    </thead>
+                </table>
+                '''
+                st.markdown(header_html, unsafe_allow_html=True)
+                
+                row_cols = st.columns([1.5, 7, 1.5])
+                with row_cols[0]:
+                    st.markdown(f'''
+                    <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #1e40af; border-radius: 4px; padding: 4px 8px; min-height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px;'>사업 시행</div>
+                    ''', unsafe_allow_html=True)
+                with row_cols[1]:
+                    ans_val = st.radio(
+                        label=alt_key,
+                        options=list(range(-9, 0)) + list(range(1, 10)),
+                        index=8,
+                        format_func=lambda x: str(abs(x)) + "​" if x < 0 else str(x),
+                        key=f"yeta_alt_{alt_key}",
+                        horizontal=True,
+                        label_visibility="collapsed"
+                    )
+                with row_cols[2]:
+                    st.markdown(f'''
+                    <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #b91c1c; border-radius: 4px; padding: 4px 8px; min-height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px;'>사업 미시행</div>
+                    ''', unsafe_allow_html=True)
+                ahp_answers[alt_key] = ans_val
             
         for sub_c in subs:
             sub_subs = sub_sub_map.get(sub_c, [])
             if not sub_subs:
                 alt_key = f"alt_{main_c}_{sub_c}"
                 st.markdown(f"##### 요인: **{main_c} ➔ {sub_c}**")
-                col_l, col_m, col_r = st.columns([3, 6, 3])
-                with col_l:
-                    st.markdown("<div style='text-align:right; font-weight:bold; color:#1e40af;'>사업 시행 (Implementation)</div>", unsafe_allow_html=True)
-                with col_m:
-                    ans_val = st.radio(
-                        label=alt_key,
-                        options=list(range(-9, 0)) + list(range(1, 10)),
-                        index=8,
-                        format_func=lambda x: f"← {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"{x} →"),
-                        key=f"yeta_alt_{alt_key}",
-                        horizontal=True,
-                        label_visibility="collapsed"
-                    )
-                with col_r:
-                    st.markdown("<div style='text-align:left; font-weight:bold; color:#b91c1c;'>사업 미시행 (No Project)</div>", unsafe_allow_html=True)
-                ahp_answers[alt_key] = ans_val
-            else:
-                for t3 in sub_subs:
-                    alt_key = f"alt_{sub_c}_{t3}"
-                    st.markdown(f"##### 요인: **{main_c} ➔ {sub_c} ➔ {t3}**")
-                    col_l, col_m, col_r = st.columns([3, 6, 3])
-                    with col_l:
-                        st.markdown("<div style='text-align:right; font-weight:bold; color:#1e40af;'>사업 시행 (Implementation)</div>", unsafe_allow_html=True)
-                    with col_m:
+                with st.container(key=f"ahp_survey_matrix_{uuid.uuid4().hex[:8]}"):
+                    left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
+                    right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
+                    scale_width = 70 / 17
+                    colgroup_html = "".join([
+                        '<col style="width: 15%;" />',
+                        "".join([f'<col style="width: {scale_width}%;" />' for _ in left_cols]),
+                        f'<col style="width: {scale_width}%;" />',
+                        "".join([f'<col style="width: {scale_width}%;" />' for _ in right_cols]),
+                        f'<col style="width: 15%;" />'
+                    ])
+                    header_html = f'''
+                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px 0px 10px 0px; padding: 0px;">
+                        <colgroup>{colgroup_html}</colgroup>
+                        <thead>
+                            <tr style="background-color: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+                                <th style="border-right: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">시행 선호</th>
+                                {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in left_cols])}
+                                <th style="padding: 4px; font-weight: 600; color: #3b82f6; border-right: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; background-color: #e0f2fe;">1</th>
+                                {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in right_cols])}
+                                <th style="border-left: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">미시행 선호</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    '''
+                    st.markdown(header_html, unsafe_allow_html=True)
+                    
+                    row_cols = st.columns([1.5, 7, 1.5])
+                    with row_cols[0]:
+                        st.markdown(f'''
+                        <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #1e40af; border-radius: 4px; padding: 4px 8px; min-height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px;'>사업 시행</div>
+                        ''', unsafe_allow_html=True)
+                    with row_cols[1]:
                         ans_val = st.radio(
                             label=alt_key,
                             options=list(range(-9, 0)) + list(range(1, 10)),
                             index=8,
-                            format_func=lambda x: f"← {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"{x} →"),
+                            format_func=lambda x: str(abs(x)) + "​" if x < 0 else str(x),
                             key=f"yeta_alt_{alt_key}",
                             horizontal=True,
                             label_visibility="collapsed"
                         )
-                    with col_r:
-                        st.markdown("<div style='text-align:left; font-weight:bold; color:#b91c1c;'>사업 미시행 (No Project)</div>", unsafe_allow_html=True)
+                    with row_cols[2]:
+                        st.markdown(f'''
+                        <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #b91c1c; border-radius: 4px; padding: 4px 8px; min-height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px;'>사업 미시행</div>
+                        ''', unsafe_allow_html=True)
                     ahp_answers[alt_key] = ans_val
+            else:
+                for t3 in sub_subs:
+                    alt_key = f"alt_{sub_c}_{t3}"
+                    st.markdown(f"##### 요인: **{main_c} ➔ {sub_c} ➔ {t3}**")
+                    with st.container(key=f"ahp_survey_matrix_{uuid.uuid4().hex[:8]}"):
+                        left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
+                        right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
+                        scale_width = 70 / 17
+                        colgroup_html = "".join([
+                            '<col style="width: 15%;" />',
+                            "".join([f'<col style="width: {scale_width}%;" />' for _ in left_cols]),
+                            f'<col style="width: {scale_width}%;" />',
+                            "".join([f'<col style="width: {scale_width}%;" />' for _ in right_cols]),
+                            f'<col style="width: 15%;" />'
+                        ])
+                        header_html = f'''
+                        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px 0px 10px 0px; padding: 0px;">
+                            <colgroup>{colgroup_html}</colgroup>
+                            <thead>
+                                <tr style="background-color: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+                                    <th style="border-right: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">시행 선호</th>
+                                    {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in left_cols])}
+                                    <th style="padding: 4px; font-weight: 600; color: #3b82f6; border-right: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; background-color: #e0f2fe;">1</th>
+                                    {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in right_cols])}
+                                    <th style="border-left: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">미시행 선호</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        '''
+                        st.markdown(header_html, unsafe_allow_html=True)
+                        
+                        row_cols = st.columns([1.5, 7, 1.5])
+                        with row_cols[0]:
+                            st.markdown(f'''
+                            <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #1e40af; border-radius: 4px; padding: 4px 8px; min-height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px;'>사업 시행</div>
+                            ''', unsafe_allow_html=True)
+                        with row_cols[1]:
+                            ans_val = st.radio(
+                                label=alt_key,
+                                options=list(range(-9, 0)) + list(range(1, 10)),
+                                index=8,
+                                format_func=lambda x: str(abs(x)) + "​" if x < 0 else str(x),
+                                key=f"yeta_alt_{alt_key}",
+                                horizontal=True,
+                                label_visibility="collapsed"
+                            )
+                        with row_cols[2]:
+                            st.markdown(f'''
+                            <div style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #b91c1c; border-radius: 4px; padding: 4px 8px; min-height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px;'>사업 미시행</div>
+                            ''', unsafe_allow_html=True)
+                        ahp_answers[alt_key] = ans_val
                     
     st.divider()
     
