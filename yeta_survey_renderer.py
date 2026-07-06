@@ -10,6 +10,140 @@ def _(ko_text, en_text):
         return en_text
     return ko_text
 
+
+def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, ahp_answers):
+    st.markdown(f"#### {title}")
+    
+    with st.container(key="ahp_survey_matrix"):
+        left_cols = ["9", "8", "7", "6", "5", "4", "3", "2"]
+        right_cols = ["2", "3", "4", "5", "6", "7", "8", "9"]
+        scale_width = 70 / 17
+        colgroup_html = "".join([
+            '<col style="width: 15%;" />',
+            "".join([f'<col style="width: {scale_width}%;" />' for _ in left_cols]),
+            f'<col style="width: {scale_width}%;" />',
+            "".join([f'<col style="width: {scale_width}%;" />' for _ in right_cols]),
+            f'<col style="width: 15%;" />'
+        ])
+        
+        header_html = f'''
+        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px 0px 10px 0px; padding: 0px;">
+            <colgroup>
+                {colgroup_html}
+            </colgroup>
+            <tr style="background-color: #f8fafc; color: #1e293b; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                <th style="border: 1px solid #cbd5e1; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+                <th style="border: 1px solid #cbd5e1; padding: 4px; color: #3b82f6; font-size: 12px;" colspan="{len(left_cols)}">← 좌측 요인 중요도</th>
+                <th style="border: 1px solid #cbd5e1; padding: 4px; background-color: #eff6ff; color: #1e3a8a; font-size: 12px;" rowspan="2">동등<br>(1)</th>
+                <th style="border: 1px solid #cbd5e1; padding: 4px; color: #3b82f6; font-size: 12px;" colspan="{len(right_cols)}">우측 요인 중요도 →</th>
+                <th style="border: 1px solid #cbd5e1; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+            </tr>
+            <tr style="background-color: #f1f5f9; color: #475569; font-weight: normal; border-bottom: 1px solid #cbd5e1;">
+                {"".join([f"<td style='border: 1px solid #cbd5e1; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in left_cols])}
+                {"".join([f"<td style='border: 1px solid #cbd5e1; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in right_cols])}
+            </tr>
+        </table>
+        '''
+        st.markdown(header_html, unsafe_allow_html=True)
+
+        options = list(range(-9, 0)) + list(range(1, 10))
+        clean_options = [x for x in options if x != -1]
+        
+        for left_f, right_f in pairs:
+            pair_key = f"{prefix_key}_{left_f}_{right_f}"
+            row_cols = st.columns([15, 70, 15])
+            
+            with row_cols[0]:
+                left_desc = definitions.get(left_f, "")
+                left_desc_esc = left_desc.replace('"', '&quot;')
+                st.markdown(f'''
+                <div title="{left_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
+                            background-color: #f8fafc; color: #334155; 
+                            border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
+                            justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
+                        {left_f}
+                </div>
+                ''', unsafe_allow_html=True)
+                
+            with row_cols[1]:
+                # 일관성 응답 가이드 산출
+                valid_options = set()
+                min_cr_opt = 1
+                min_cr_val = float('inf')
+                other_missing = False
+                group_answers = {}
+                
+                for p_left, p_right in pairs:
+                    k = f"{prefix_key}_{p_left}_{p_right}"
+                    val = st.session_state.get(f"yeta_pair_{k}", None)
+                    group_answers[f"{p_left}_{p_right}"] = val
+                    if k != pair_key and val is None:
+                        other_missing = True
+                        
+                if len(factors) > 2 and not other_missing:
+                    for opt in clean_options:
+                        test_answers = group_answers.copy()
+                        test_answers[f"{left_f}_{right_f}"] = opt
+                        try:
+                            test_cr = calculate_matrix_cr(factors, test_answers)
+                            if test_cr <= 0.15:
+                                valid_options.add(opt)
+                            if test_cr < min_cr_val:
+                                min_cr_val = test_cr
+                                min_cr_opt = opt
+                        except: pass
+                
+                bar_html = ""
+                if len(factors) > 2 and not other_missing:
+                    valid_sorted = [x for x in clean_options if x in valid_options]
+                    if valid_sorted:
+                        start_idx = clean_options.index(valid_sorted[0])
+                        end_idx = clean_options.index(valid_sorted[-1])
+                    else:
+                        start_idx = end_idx = clean_options.index(min_cr_opt)
+                    
+                    bar_html = '<div style="display: flex; width: 100%; height: 32px; margin-top: -32px; z-index: 10; position: relative; pointer-events: none;">'
+                    for j, opt in enumerate(clean_options):
+                        is_valid = start_idx <= j <= end_idx
+                        bg_color = "rgba(59, 130, 246, 0.25)" if is_valid else "transparent"
+                        radius = ""
+                        if j == start_idx: radius += "border-top-left-radius: 6px; border-bottom-left-radius: 6px; "
+                        if j == end_idx: radius += "border-top-right-radius: 6px; border-bottom-right-radius: 6px; "
+                        bar_html += f'<div style="flex: 1 1 0%; background-color: {bg_color}; {radius}"></div>'
+                    bar_html += '</div>'
+                
+                def format_option(opt):
+                    return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
+
+                current_val = st.session_state.get(f"yeta_pair_{pair_key}", None)
+                current_idx = clean_options.index(current_val) if current_val in clean_options else clean_options.index(1)
+
+                ans_val = st.radio(
+                    label=pair_key,
+                    options=clean_options,
+                    index=current_idx,
+                    format_func=format_option,
+                    key=f"yeta_pair_{pair_key}",
+                    horizontal=True,
+                    label_visibility="collapsed"
+                )
+                if len(factors) > 2 and not other_missing:
+                    st.markdown(bar_html, unsafe_allow_html=True)
+                    
+            with row_cols[2]:
+                right_desc = definitions.get(right_f, "")
+                right_desc_esc = right_desc.replace('"', '&quot;')
+                st.markdown(f'''
+                <div title="{right_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
+                            background-color: #f8fafc; color: #334155; 
+                            border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
+                            justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
+                        {right_f}
+                </div>
+                ''', unsafe_allow_html=True)
+                
+            ahp_answers[pair_key] = ans_val
+
 def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     survey_title = survey_meta.get('Title', '예타 AHP 온라인 설문조사')
     st.title(survey_title)
@@ -32,6 +166,42 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
         )
         box_html = f'<div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{survey_desc}\n{email_html}\n{mobile_hint_html}</div>'
         st.markdown(box_html, unsafe_allow_html=True)
+
+
+    # --- 쌍대비교 라디오 버튼 CSS 주입 ---
+    st.markdown('''
+    <style>
+    .st-key-ahp_survey_matrix div[role="radiogroup"] {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 0px;
+        padding: 8px 0;
+        align-items: center;
+        width: 100%;
+        margin: 0;
+    }
+    .st-key-ahp_survey_matrix div[role="radiogroup"] > div,
+    .st-key-ahp_survey_matrix div[role="radiogroup"] > label,
+    .st-key-ahp_survey_matrix div[role="radiogroup"] label {
+        margin: 0 !important;
+        padding: 0 !important;
+        flex: 1;
+        text-align: center;
+    }
+    .st-key-ahp_survey_matrix div[role="radiogroup"] > div label {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+    .st-key-ahp_survey_matrix div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+        font-size: 11px;
+        color: #475569;
+        white-space: nowrap;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
 
     ahp_model = survey_meta["AHP_Model_JSON"]
     demographics = survey_meta["Demographics"]
@@ -167,26 +337,12 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
                 """
                 st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
 
-            st.markdown(f"#### [{main_c}] 하위 요인 비교")
+            pairs = []
             for i in range(len(subs)):
                 for j in range(i+1, len(subs)):
-                    pair_key = f"{main_c}_{subs[i]}_{subs[j]}"
-                    col_l, col_m, col_r = st.columns([3, 6, 3])
-                    with col_l:
-                        st.markdown(f"<div style='text-align:right; font-weight:bold;'>{subs[i]}</div>", unsafe_allow_html=True)
-                    with col_m:
-                        ans_val = st.radio(
-                            label=pair_key,
-                            options=list(range(-9, 0)) + list(range(1, 10)),
-                            index=8, # Default to 1 (equal)
-                            format_func=lambda x: f"← {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"{x} →"),
-                            key=f"yeta_pair_{pair_key}",
-                            horizontal=True,
-                            label_visibility="collapsed"
-                        )
-                    with col_r:
-                        st.markdown(f"<div style='text-align:left; font-weight:bold;'>{subs[j]}</div>", unsafe_allow_html=True)
-                    ahp_answers[pair_key] = ans_val
+                    pairs.append((subs[i], subs[j]))
+            if pairs:
+                render_yeta_pairwise_matrix(f"[{main_c}] 하위 요인 비교", subs, pairs, definitions, main_c, ahp_answers)
                     
         for sub_c in subs:
             sub_subs = sub_sub_map.get(sub_c, [])
@@ -215,26 +371,12 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
                     """
                     st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
 
-                st.markdown(f"#### [{main_c} ➔ {sub_c}] 하위 요인 비교")
+                pairs = []
                 for i in range(len(sub_subs)):
                     for j in range(i+1, len(sub_subs)):
-                        pair_key = f"{sub_c}_{sub_subs[i]}_{sub_subs[j]}"
-                        col_l, col_m, col_r = st.columns([3, 6, 3])
-                        with col_l:
-                            st.markdown(f"<div style='text-align:right; font-weight:bold;'>{sub_subs[i]}</div>", unsafe_allow_html=True)
-                        with col_m:
-                            ans_val = st.radio(
-                                label=pair_key,
-                                options=list(range(-9, 0)) + list(range(1, 10)),
-                                index=8,
-                                format_func=lambda x: f"← {abs(x)}" if x < 0 else ("동등 (1)" if x == 1 else f"{x} →"),
-                                key=f"yeta_pair_{pair_key}",
-                                horizontal=True,
-                                label_visibility="collapsed"
-                            )
-                        with col_r:
-                            st.markdown(f"<div style='text-align:left; font-weight:bold;'>{sub_subs[j]}</div>", unsafe_allow_html=True)
-                        ahp_answers[pair_key] = ans_val
+                        pairs.append((sub_subs[i], sub_subs[j]))
+                if pairs:
+                    render_yeta_pairwise_matrix(f"[{main_c} ➔ {sub_c}] 하위 요인 비교", sub_subs, pairs, definitions, sub_c, ahp_answers)
                         
     st.divider()
     
