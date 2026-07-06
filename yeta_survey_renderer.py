@@ -12,6 +12,22 @@ def _(ko_text, en_text):
 
 
 def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, ahp_answers):
+
+    PASTEL_PALETTES = [
+        {"bg": "#eff6ff", "text": "#1e40af", "border": "#bfdbfe"}, # Soft Blue
+        {"bg": "#f0fdf4", "text": "#166534", "border": "#bbf7d0"}, # Soft Green
+        {"bg": "#fff7ed", "text": "#c2410c", "border": "#fed7aa"}, # Soft Orange
+        {"bg": "#faf5ff", "text": "#6b21a8", "border": "#e9d5ff"}, # Soft Purple
+        {"bg": "#fdf2f8", "text": "#be185d", "border": "#fbcfe8"}, # Soft Pink
+        {"bg": "#f0fdfa", "text": "#0f766e", "border": "#ccfbf1"}, # Soft Teal
+        {"bg": "#fffbeb", "text": "#b45309", "border": "#fef3c7"}, # Soft Amber
+        {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"}, # Soft Slate/Gray
+    ]
+    
+    factor_colors = {}
+    if len(factors) >= 3:
+        for i, f_name in enumerate(factors):
+            factor_colors[f_name] = PASTEL_PALETTES[i % len(PASTEL_PALETTES)]
     st.markdown(f"#### {title}")
     
     with st.container(key=f"ahp_survey_matrix_{uuid.uuid4().hex[:8]}"):
@@ -56,9 +72,10 @@ def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, 
             with row_cols[0]:
                 left_desc = definitions.get(left_f, "")
                 left_desc_esc = left_desc.replace('"', '&quot;')
+                left_style = factor_colors.get(left_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
                 st.markdown(f'''
-                <div title="{left_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
-                            background-color: #f8fafc; color: #334155; 
+                <div title="{left_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
+                            background-color: {left_style["bg"]}; color: {left_style["text"]}; 
                             border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
                             justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
                         {left_f}
@@ -133,9 +150,10 @@ def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, 
             with row_cols[2]:
                 right_desc = definitions.get(right_f, "")
                 right_desc_esc = right_desc.replace('"', '&quot;')
+                right_style = factor_colors.get(right_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
                 st.markdown(f'''
-                <div title="{right_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid #cbd5e1; 
-                            background-color: #f8fafc; color: #334155; 
+                <div title="{right_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
+                            background-color: {right_style["bg"]}; color: {right_style["text"]}; 
                             border-radius: 4px; min-height: 28px; height: auto; padding: 4px 8px; display: flex; align-items: center; 
                             justify-content: center; font-size: 12px; margin: 0px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); cursor: help;'>
                         {right_f}
