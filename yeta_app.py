@@ -1875,67 +1875,177 @@ def run():
         except Exception as e:
             st.error(f"엑셀 템플릿 생성 오류: {e}")
 
-        st.markdown("#### 5. 온라인 배포")
+        st.markdown("#### 5. 온라인 배포 및 구글 시트 연동 설정")
         if st.session_state.user_id is None:
-            st.warning("온라인 배포는 회원 전용 기능입니다. 로그인해 주세요.")
+            st.warning("온라인 배포 및 구글 시트 연동은 회원 전용 기능입니다. 로그인해 주세요.")
         else:
-            admin_email = st.text_input("설문 담당자 이메일 (구글 드라이브 소유자 권한 부여용)", value=st.session_state.get("edit_yeta_admin_email", st.session_state.user_id))
-            st.session_state.edit_yeta_admin_email = admin_email
+            survey_admin_email = st.text_input("설문 담당자 이메일 (구글 드라이브 소유자 권한 부여용)", value=st.session_state.get("edit_yeta_admin_email", st.session_state.user_id))
+            st.session_state.edit_yeta_admin_email = survey_admin_email
             
             existing_id = st.session_state.yeta_editing_survey_id
             
-            deploy_btn_label = "🚀 예타 AHP 설문지 구글 시트 재생성 및 배포" if existing_id else "🚀 예타 AHP 설문지 배포 및 구글 시트 연동"
-            if st.button(deploy_btn_label, type="primary", use_container_width=True):
-                if not admin_email or "@" not in admin_email:
-                    st.error("올바른 이메일 주소를 입력해주세요.")
-                else:
-                    with st.spinner("구글 스프레드시트 생성 및 설문지 연동 중..."):
-                        try:
-                            from survey_manager_v3 import create_yeta_survey_sheet_v3
-                            import sqlite3
+            if existing_id:
+                st.info(f"현재 **기존 설문 수정 모드**입니다. 수정한 설정은 기존 연동 시트에 반영됩니다.\n\n**연동된 시트 ID:** {existing_id}")
+                existing_sheet_id_input = existing_id
+            else:
+                past_surveys = []
+                try:
+                    import sqlite3
+                    conn = sqlite3.connect('users.db')
+                    c = conn.cursor()
+                    c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
+                    past_surveys = c.fetchall()
+                    conn.close()
+                except Exception:
+                    pass
+                
+                existing_sheet_id_input = ""
+                show_manual_input = True
+                
+                if len(past_surveys) > 0:
+                    deploy_option = st.radio(
+                        "배포 방식을 선택해 주세요.",
+                        options=[
+                            "새로운 구글 시트 URL 연동 (신규 발급)",
+                            "기존 배포했던 설문 URL 재사용 (덮어쓰기)"
+                        ],
+                        index=0,
+                        key="yeta_deploy_option_radio_new"
+                    )
+                    st.write("")
+                    
+                    if "재사용" in deploy_option:
+                        show_manual_input = False
+                        st.markdown("##### ⚙️ 재사용할 기존 설문 선택")
+                        survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
+                        selected_survey_label = st.selectbox(
+                            "과거에 배포했던 설문 목록",
+                            options=list(survey_options.keys()),
+                            key="yeta_past_survey_select"
+                        )
+                        existing_sheet_id_input = survey_options[selected_survey_label]
+                        st.info("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.")
+                
+                if show_manual_input:
+                    st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
+                    st.info("""
+                    **💡 연동 방법:**
+                    1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다.
+                    2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
+                       * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                    3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
+                    """)
+                    if os.path.exists("manual_sheet_url_guide.png"):
+                        st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
+                    existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
+
+            # Save state for preview
+            preview_id = f"preview_yeta_{st.session_state.user_id}"
+            preview_data = {
+                "Title": survey_title,
+                "Description": survey_desc,
+                "Admin_Email": survey_admin_email,
+                "AHP_Model_JSON": model_structure,
+                "Tier_Level": 3,
+                "Demographics": {"type_questions": type_questions},
+                "Is_Yeta": True
+            }
+            
+            import json, os
+            os.makedirs("temp_previews", exist_ok=True)
+            with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as f:
+                json.dump(preview_data, f, ensure_ascii=False)
+                
+            col_p1, col_p2 = st.columns(2)
+            with col_p1:
+                # Preview Link
+                preview_link_html = f"""
+                <a href="/?preview_id={preview_id}" target="_blank" style="text-decoration: none;">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 100%;
+                        padding: 0.375rem 0.75rem;
+                        border: 1px solid rgba(49, 51, 63, 0.2);
+                        border-radius: 4px;
+                        background-color: #ffffff;
+                        color: #31333f;
+                        font-size: 14px;
+                        font-weight: 400;
+                        line-height: 1.6;
+                        cursor: pointer;
+                        text-align: center;
+                        box-sizing: border-box;
+                        transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+                    "
+                    onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
+                    onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
+                    >
+                        👁️ 설문지 응답 화면 미리보기
+                    </div>
+                </a>
+                """
+                st.markdown(preview_link_html, unsafe_allow_html=True)
+                
+            with col_p2:
+                deploy_btn_label = "🚀 배포 및 구글 시트 연동 (수정 내용 적용)" if existing_id else "🚀 배포 및 구글 시트 연동"
+                if st.button(deploy_btn_label, type="primary", use_container_width=True, key="yeta_deploy_btn"):
+                    target_sheet_id = existing_sheet_id_input.strip()
+                    if "docs.google.com/spreadsheets" in target_sheet_id:
+                        parts = target_sheet_id.split("/d/")
+                        if len(parts) > 1:
+                            target_sheet_id = parts[1].split("/")[0]
                             
-                            new_sheet_id = create_yeta_survey_sheet_v3(
-                                title=survey_title,
-                                admin_email=admin_email,
-                                ahp_model=model_structure,
-                                demographics={"type_questions": type_questions},
-                                description=survey_desc,
-                                existing_sheet_id=existing_id,
-                                user_id=st.session_state.user_id
-                            )
-                            
-                            if new_sheet_id:
-                                # Save to DB
-                                conn = sqlite3.connect('users.db')
-                                cur = conn.cursor()
-                                if existing_id:
-                                    cur.execute("UPDATE admin_surveys SET title = ? WHERE survey_id = ?", (f"[예타] {survey_title}", existing_id))
-                                else:
-                                    cur.execute("INSERT INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
-                                                (new_sheet_id, f"[예타] {survey_title}", st.session_state.user_id))
-                                conn.commit()
-                                conn.close()
+                    if not target_sheet_id:
+                        st.error("연동할 구글 스프레드시트 URL 또는 ID를 입력해 주세요.")
+                    else:
+                        with st.spinner("구글 스프레드시트 생성 및 설문지 연동 중..."):
+                            try:
+                                from survey_manager_v3 import create_yeta_survey_sheet_v3
+                                import sqlite3
                                 
-                                st.session_state.yeta_editing_survey_id = new_sheet_id
-                                st.session_state._survey_cache_dirty_yeta = True
+                                new_sheet_id = create_yeta_survey_sheet_v3(
+                                    title=survey_title,
+                                    admin_email=survey_admin_email,
+                                    ahp_model=model_structure,
+                                    demographics={"type_questions": type_questions},
+                                    description=survey_desc,
+                                    existing_sheet_id=target_sheet_id,
+                                    user_id=st.session_state.user_id
+                                )
                                 
-                                base_url = "https://ahpkrj.streamlit.app/"
-                                try:
-                                    base_url = st.query_params.get("base_url", "https://ahpkrj.streamlit.app/")
-                                    if isinstance(base_url, list): base_url = base_url[0]
-                                except:
-                                    pass
-                                if not base_url.endswith("/"):
-                                    base_url += "/"
+                                if new_sheet_id:
+                                    conn = sqlite3.connect('users.db')
+                                    cur = conn.cursor()
+                                    if existing_id:
+                                        cur.execute("UPDATE admin_surveys SET title = ? WHERE survey_id = ?", (f"[예타] {survey_title}", existing_id))
+                                    else:
+                                        cur.execute("INSERT OR IGNORE INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
+                                                    (new_sheet_id, f"[예타] {survey_title}", st.session_state.user_id))
+                                    conn.commit()
+                                    conn.close()
                                     
-                                link = f"{base_url}?survey_id={new_sheet_id}"
-                                st.success("🎉 예타 AHP 설문지 배포가 성공적으로 완료되었습니다!")
-                                st.markdown(f"**🔗 응답자 배포용 설문조사 링크:** [{link}]({link})")
-                                st.code(link)
-                            else:
-                                st.error("구글 시트 생성에 실패했습니다. 구글 계정 권한 또는 서비스 계정 설정을 확인해 주세요.")
-                        except Exception as e:
-                            st.error(f"오류 발생: {e}")
+                                    st.session_state.yeta_editing_survey_id = new_sheet_id
+                                    st.session_state._survey_cache_dirty_yeta = True
+                                    
+                                    base_url = "https://ahpkrj.streamlit.app/"
+                                    try:
+                                        base_url = st.query_params.get("base_url", "https://ahpkrj.streamlit.app/")
+                                        if isinstance(base_url, list): base_url = base_url[0]
+                                    except:
+                                        pass
+                                    if not base_url.endswith("/"):
+                                        base_url += "/"
+                                        
+                                    link = f"{base_url}?survey_id={new_sheet_id}"
+                                    st.success("🎉 예타 AHP 설문지 배포가 성공적으로 완료되었습니다!")
+                                    st.markdown(f"**🔗 응답자 배포용 설문조사 링크:** [{link}]({link})")
+                                    st.code(link)
+                                else:
+                                    st.error("구글 시트 연동에 실패했습니다. 구글 계정 권한 또는 서비스 계정 설정을 확인해 주세요.")
+                            except Exception as e:
+                                st.error(f"오류 발생: {e}")
 
     # =========================================================================
     # 실시간 응답 현황 탭
