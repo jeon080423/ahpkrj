@@ -171,35 +171,161 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     # --- 쌍대비교 라디오 버튼 CSS 주입 ---
     st.markdown('''
     <style>
-    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        gap: 0px;
-        padding: 8px 0;
-        align-items: center;
-        width: 100%;
-        margin: 0;
+/* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
+divdiv[class*="st-key-ahp_survey_matrix"] {
+    gap: 4px !important;
+    row-gap: 4px !important;
+}
+
+/* 1. 수직 정렬 & 레이아웃 배분 */
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stHorizontalBlock"] {
+    gap: 0px !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="column"] {
+    padding: 0px !important;
+}
+
+/* 2. 라디오 그룹 전체 100% 분배 강제 및 줄바꿈 원천 차단 */
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stElementContainer"],
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stRadio"],
+div[class*="st-key-ahp_survey_matrix"] .stRadio {
+    width: 100% !important;
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stRadio"] > div,
+div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0px !important;
+    padding: 0px !important; 
+    margin: 0px !important;
+}
+
+/* 2.5. AHP 컨테이너 내부의 수직 요소 간격 초밀착 */
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stVerticalBlock"] {
+    gap: 0px !important;
+}
+
+/* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
+div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > div,
+div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > label,
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stRadioHorizontalOption"],
+div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] label {
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 32px !important; 
+    margin: 0px !important;
+    padding: 0px !important;
+    min-width: 0px !important;
+    width: 100% !important;
+    border-radius: 2px !important;
+    transition: background-color 0.1s ease-in-out !important;
+    background-color: transparent !important;
+}
+
+/* 3.5. 라디오 그룹 최소 높이 해제 */
+div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] {
+    min-height: 32px !important;
+}
+
+/* 감싸는 div가 있을 경우 그 내부의 실제 label도 100% 채우도록 지시 */
+div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > div label,
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stRadioHorizontalOption"] label {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+/* 4. 기존 텍스트 찌꺼기 완벽 제거 */
+div[class*="st-key-ahp_survey_matrix"] label[data-testid="stWidgetLabel"],
+div[class*="st-key-ahp_survey_matrix"] label p {
+    display: none !important;
+    height: 0px !important;
+    width: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+}
+
+/* stMarkdownContainer의 negative margin 제거하여 컬럼간 수직 평행 맞춤 */
+div[class*="st-key-ahp_survey_matrix"] div[data-testid="stMarkdownContainer"] {
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+/* 라디오 항목 내부의 markdown 컨테이너(텍스트용) 완전히 감추기 */
+div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
+    display: none !important;
+    height: 0px !important;
+    width: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+}
+
+/* 동그라미 컨테이너 중앙 정렬 및 여백 마진 제거 */
+div[class*="st-key-ahp_survey_matrix"] label span {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+/* 5. Hover 및 Zebra 효과 */
+div[class*="st-key-ahp_survey_matrix"] label:hover {
+    background-color: #f1f5f9 !important;
+    cursor: pointer !important;
+}
+
+/* 6. 모바일 가로 스크롤 허용 및 붕괴 방지 */
+@media (max-width: 768px) {
+    .stApp > header + div, 
+    .block-container,
+    div[data-testid="stDialog"] {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
     }
-    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > div,
-    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > label,
-    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] label {
-        margin: 0 !important;
-        padding: 0 !important;
-        flex: 1;
-        text-align: center;
+    div[class*="st-key-ahp_survey_matrix"] div[data-testid="stHorizontalBlock"] {
+        flex-wrap: nowrap !important;
+        min-width: 100% !important;
     }
-    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] > div label {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
+    div[class*="st-key-ahp_survey_matrix"] div[data-testid="column"] {
+        flex: 0 0 auto !important;
     }
-    div[class*="st-key-ahp_survey_matrix"] div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
-        font-size: 11px;
-        color: #475569;
-        white-space: nowrap;
+    div[class*="st-key-ahp_survey_matrix"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
+    div[class*="st-key-ahp_survey_matrix"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
+        width: 25% !important; 
+        white-space: normal !important;
+        word-break: break-all !important;
+        font-size: 0.9em !important;
     }
+    div[class*="st-key-ahp_survey_matrix"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
+        width: 50% !important;
+    }
+
     </style>
     ''', unsafe_allow_html=True)
 
