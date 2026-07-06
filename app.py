@@ -87,5 +87,6 @@ if mode == "yeta":
     import yeta_app
     yeta_app.run()
 else:
+    import sys
+    sys.modules.pop("standard_app", None)
     import standard_app
-    standard_app.run()
