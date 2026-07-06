@@ -43,20 +43,20 @@ def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, 
         ])
         
         header_html = f'''
-        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px 0px 10px 0px; padding: 0px;">
+        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px;">
             <colgroup>
                 {colgroup_html}
             </colgroup>
-            <tr style="background-color: #f8fafc; color: #1e293b; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                <th style="border: 1px solid #cbd5e1; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
-                <th style="border: 1px solid #cbd5e1; padding: 4px; color: #3b82f6; font-size: 12px;" colspan="{len(left_cols)}">← 좌측 요인 중요도</th>
-                <th style="border: 1px solid #cbd5e1; padding: 4px; background-color: #eff6ff; color: #1e3a8a; font-size: 12px;" rowspan="2">동등<br>(1)</th>
-                <th style="border: 1px solid #cbd5e1; padding: 4px; color: #3b82f6; font-size: 12px;" colspan="{len(right_cols)}">우측 요인 중요도 →</th>
-                <th style="border: 1px solid #cbd5e1; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+            <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
+                <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(left_cols)}">← 좌측 요인 중요도</th>
+                <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">동등<br>(1)</th>
+                <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(right_cols)}">우측 요인 중요도 →</th>
+                <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">비교 요인</th>
             </tr>
-            <tr style="background-color: #f1f5f9; color: #475569; font-weight: normal; border-bottom: 1px solid #cbd5e1;">
-                {"".join([f"<td style='border: 1px solid #cbd5e1; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in left_cols])}
-                {"".join([f"<td style='border: 1px solid #cbd5e1; padding: 4px 0; font-size: 11px;'>{val}</td>" for val in right_cols])}
+            <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in left_cols])}
+                {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in right_cols])}
             </tr>
         </table>
         '''
@@ -190,7 +190,7 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     st.markdown('''
     <style>
 /* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
-divdiv[class*="st-key-ahp_survey_matrix"] {
+div[class*="st-key-ahp_survey_matrix"] {
     gap: 4px !important;
     row-gap: 4px !important;
 }
@@ -598,17 +598,21 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
                         f'<col style="width: 15%;" />'
                     ])
                     header_html = f'''
-                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px 0px 10px 0px; padding: 0px;">
-                        <colgroup>{colgroup_html}</colgroup>
-                        <thead>
-                            <tr style="background-color: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
-                                <th style="border-right: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">시행 선호</th>
-                                {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in left_cols])}
-                                <th style="padding: 4px; font-weight: 600; color: #3b82f6; border-right: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; background-color: #e0f2fe;">1</th>
-                                {"".join([f'<th style="padding: 4px; font-weight: normal; color: #64748b; border-right: 1px solid #e2e8f0;">{c}</th>' for c in right_cols])}
-                                <th style="border-left: 1px solid #cbd5e1; padding: 4px; font-weight: 600; color: #1e293b; vertical-align: middle;">미시행 선호</th>
-                            </tr>
-                        </thead>
+                    <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 12px; font-family: sans-serif; border: 1px solid #cbd5e1; table-layout: fixed; margin: 0px; padding: 0px;">
+                        <colgroup>
+                            {colgroup_html}
+                        </colgroup>
+                        <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                            <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">대안</th>
+                            <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(left_cols)}">← 사업 시행 선호</th>
+                            <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">동등<br>(1)</th>
+                            <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(right_cols)}">사업 미시행 선호 →</th>
+                            <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">대안</th>
+                        </tr>
+                        <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
+                            {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in left_cols])}
+                            {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in right_cols])}
+                        </tr>
                     </table>
                     '''
                     st.markdown(header_html, unsafe_allow_html=True)
