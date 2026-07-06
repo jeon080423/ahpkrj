@@ -171,9 +171,12 @@ def improve_yeta_consistency(matrix_data, threshold=0.15, max_iter=500, learning
     return weights, cr
 
 def generate_yeta_excel_template(project_type, policy_factors=None, regional_factors=None, tech_factors=None):
-    if not policy_factors: policy_factors = ["정책1", "정책2"]
-    if not regional_factors: regional_factors = ["지역균형1", "지역균형2"]
-    if not tech_factors: tech_factors = ["기술1", "기술2"]
+    if not policy_factors: policy_factors = {"정책1": [], "정책2": []}
+    elif isinstance(policy_factors, list): policy_factors = {f: [] for f in policy_factors}
+    if not regional_factors: regional_factors = {"지역균형1": [], "지역균형2": []}
+    elif isinstance(regional_factors, list): regional_factors = {f: [] for f in regional_factors}
+    if not tech_factors: tech_factors = {"기술1": [], "기술2": []}
+    elif isinstance(tech_factors, list): tech_factors = {f: [] for f in tech_factors}
     
     columns = ["평가자_ID", "소속_및_성명", "전문_역할"]
     
@@ -191,16 +194,27 @@ def generate_yeta_excel_template(project_type, policy_factors=None, regional_fac
         columns.extend(["1계층_경제성(%)", "1계층_정책성(%)"])
         factors_map = {"정책": policy_factors}
         
-    for cat, factors in factors_map.items():
-        if len(factors) > 1:
-            for i in range(len(factors)):
-                for j in range(i+1, len(factors)):
-                    columns.append(f"쌍대비교_[{cat}]_{factors[i].strip()}_vs_{factors[j].strip()}(실수형)")
+    for cat, factor_dict in factors_map.items():
+        t2_list = list(factor_dict.keys())
+        if len(t2_list) > 1:
+            for i in range(len(t2_list)):
+                for j in range(i+1, len(t2_list)):
+                    columns.append(f"쌍대비교_[{cat}]_{t2_list[i].strip()}_vs_{t2_list[j].strip()}(실수형)")
                     
-    for cat, factors in factors_map.items():
-        for factor in factors:
-            columns.append(f"대안평가_[{cat}]_{factor.strip()}(시행선호_1~9_역수)")
-            
+        for t2, t3_list in factor_dict.items():
+            if len(t3_list) > 1:
+                for i in range(len(t3_list)):
+                    for j in range(i+1, len(t3_list)):
+                        columns.append(f"쌍대비교_[{cat}_{t2.strip()}]_{t3_list[i].strip()}_vs_{t3_list[j].strip()}(실수형)")
+                        
+    for cat, factor_dict in factors_map.items():
+        for t2, t3_list in factor_dict.items():
+            if not t3_list:
+                columns.append(f"대안평가_[{cat}]_{t2.strip()}(시행선호_1~9_역수)")
+            else:
+                for t3 in t3_list:
+                    columns.append(f"대안평가_[{cat}_{t2.strip()}]_{t3.strip()}(시행선호_1~9_역수)")
+                    
     import pandas as pd
     import io
     df = pd.DataFrame(columns=columns)
@@ -215,14 +229,23 @@ def generate_yeta_excel_template(project_type, policy_factors=None, regional_fac
         else:
             row_data.extend([40, 60])
             
-        for cat, factors in factors_map.items():
-            if len(factors) > 1:
-                pairs_count = len(factors) * (len(factors) - 1) // 2
+        for cat, factor_dict in factors_map.items():
+            t2_list = list(factor_dict.keys())
+            if len(t2_list) > 1:
+                pairs_count = len(t2_list) * (len(t2_list) - 1) // 2
                 row_data.extend([1.0]*pairs_count)
+            for t2, t3_list in factor_dict.items():
+                if len(t3_list) > 1:
+                    pairs_count = len(t3_list) * (len(t3_list) - 1) // 2
+                    row_data.extend([1.0]*pairs_count)
         
-        for cat, factors in factors_map.items():
-            for factor in factors:
-                row_data.append(5.0)
+        for cat, factor_dict in factors_map.items():
+            for t2, t3_list in factor_dict.items():
+                if not t3_list:
+                    row_data.append(5.0)
+                else:
+                    for t3 in t3_list:
+                        row_data.append(5.0)
                 
         df.loc[i-1] = row_data
         
@@ -261,14 +284,23 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
         lir_pairwise = convert_lir_to_ahp_pairwise(lir_value)
         lir_weight_go = lir_pairwise / (lir_pairwise + 1.0)
         
-    # Pre-parse categories from columns
-    cat_factors = {}
+    # Build hierarchical tree from columns
+    children_map = {}
+    for col in df.columns:
+        if col.startswith("쌍대비교_[") and "]_" in col:
+            path = col.split("]_")[0].replace("쌍대비교_[", "")
+            factors_str = col.split("]_")[1].split("(실수형")[0]
+            f1, f2 = factors_str.split("_vs_")
+            if path not in children_map: children_map[path] = []
+            if f1 not in children_map[path]: children_map[path].append(f1)
+            if f2 not in children_map[path]: children_map[path].append(f2)
+            
     for col in df.columns:
         if col.startswith("대안평가_[") and "]_" in col:
-            cat = col.split("]_")[0].replace("대안평가_[", "")
+            path = col.split("]_")[0].replace("대안평가_[", "")
             factor = col.split("]_")[1].split("(시행선호")[0]
-            if cat not in cat_factors: cat_factors[cat] = []
-            if factor not in cat_factors[cat]: cat_factors[cat].append(factor)
+            if path not in children_map: children_map[path] = []
+            if factor not in children_map[path]: children_map[path].append(factor)
             
     for idx, row in df.iterrows():
         try:
@@ -283,16 +315,16 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
             if total_w > 0:
                 w_econ /= total_w; w_policy /= total_w; w_tech /= total_w; w_reg /= total_w
                 
-            cat_scores = {}
             max_cr = 0.0
+            local_weights = {}
             
-            for cat, factors in cat_factors.items():
+            for path, factors in children_map.items():
                 n = len(factors)
                 if n > 1:
                     mat = np.ones((n, n))
                     for i in range(n):
                         for j in range(i+1, n):
-                            col_name = f"쌍대비교_[{cat}]_{factors[i]}_vs_{factors[j]}(실수형)"
+                            col_name = f"쌍대비교_[{path}]_{factors[i]}_vs_{factors[j]}(실수형)"
                             v = float(row.get(col_name, 1.0))
                             if v == 0 or v == 1: 
                                 mat_v = 1.0
@@ -313,24 +345,51 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
                 else:
                     weights = []
                     
-                cat_go = 0.0
-                for i, factor in enumerate(factors):
-                    alt_col = f"대안평가_[{cat}]_{factor}(시행선호_1~9_역수)"
+                local_weights[path] = dict(zip(factors, weights))
+                
+            def get_go_score(path, factor_name):
+                next_path = f"{path}_{factor_name}"
+                if next_path in children_map:
+                    child_go_sum = 0.0
+                    for child_name in children_map[next_path]:
+                        child_local_w = local_weights[next_path].get(child_name, 0)
+                        child_go_score = get_go_score(next_path, child_name)
+                        child_go_sum += child_local_w * child_go_score
+                    return child_go_sum
+                else:
+                    alt_col = f"대안평가_[{path}]_{factor_name}(시행선호_1~9_역수)"
                     alt_v = float(row.get(alt_col, 1.0))
                     if alt_v == 0 or alt_v == 1:
                         mat_alt_v = 1.0
                     elif alt_v < 0:
-                        mat_alt_v = abs(alt_v) # Left (Implementation) preferred
+                        mat_alt_v = abs(alt_v)
                     else:
-                        mat_alt_v = 1.0 / alt_v # Right (Non-implementation) preferred
-                    alt_go = mat_alt_v / (mat_alt_v + 1.0)
-                    cat_go += weights[i] * alt_go
+                        mat_alt_v = 1.0 / alt_v
+                    return mat_alt_v / (mat_alt_v + 1.0)
                     
-                cat_scores[cat] = cat_go
-                
-            policy_go = cat_scores.get("정책", 0.5)
-            tech_go = cat_scores.get("기술", 0.5)
-            reg_go = cat_scores.get("지역균형", 0.5)
+            policy_go = 0.5
+            if "정책" in children_map:
+                policy_go = 0.0
+                for child in children_map["정책"]:
+                    w = local_weights["정책"].get(child, 0)
+                    go = get_go_score("정책", child)
+                    policy_go += w * go
+                    
+            tech_go = 0.5
+            if "기술" in children_map:
+                tech_go = 0.0
+                for child in children_map["기술"]:
+                    w = local_weights["기술"].get(child, 0)
+                    go = get_go_score("기술", child)
+                    tech_go += w * go
+                    
+            reg_go = 0.5
+            if "지역균형" in children_map:
+                reg_go = 0.0
+                for child in children_map["지역균형"]:
+                    w = local_weights["지역균형"].get(child, 0)
+                    go = get_go_score("지역균형", child)
+                    reg_go += w * go
             
             final_go = w_econ * bc_weight_go + w_policy * policy_go + w_reg * lir_weight_go
             if "rnd" in project_type:
@@ -338,7 +397,7 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
                 
             cr_pass = "PASS" if max_cr <= 0.15 else "FAIL"
             
-            results.append({
+            res_row = {
                 "평가자 ID": eval_id,
                 "경제성 가중치": w_econ,
                 "정책성 가중치": w_policy,
@@ -351,7 +410,12 @@ def process_yeta_ahp_data(df, project_type, bc_ratio, lir_value, auto_correct_cr
                 "최대 일관성 비율(Max CR)": max_cr,
                 "CR 통과": cr_pass,
                 "최종 시행(Go) 평점": final_go
-            })
+            }
+            for path, lw_dict in local_weights.items():
+                for factor, w in lw_dict.items():
+                    res_row[f"가중치_[{path}]_{factor}"] = w
+            
+            results.append(res_row)
             
         except Exception as e:
             print(f"Error processing row {idx}: {e}")
