@@ -1703,6 +1703,10 @@ def run():
                 
                 st.session_state.edit_yeta_p_type = ahp_model.get("yeta_p_type", "건설사업 (비수도권)")
                 
+                definitions = meta.get("Definitions", {})
+                for k, v in definitions.items():
+                    st.session_state[f"edit_yeta_desc_{k}"] = v
+                
             st.session_state.yeta_survey_auto_loaded = True
             st.rerun()
 
@@ -1817,6 +1821,77 @@ def run():
                         parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
                         if parsed_sub_subs:
                             model_structure["sub_subs"][sub_c] = parsed_sub_subs
+
+        # 2.5. 계층별 요인 상세 설명 설정
+        st.markdown("#### 2.5. 평가 요인 정의 및 설명 입력")
+        with st.expander("📝 1계층, 2계층 및 3계층 평가항목 상세 설명 설정", expanded=False):
+            st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
+            
+            definitions_map = {}
+            
+            st.markdown("**📌 1계층 (대항목) 설명**")
+            for mc in main_list:
+                default_desc = ""
+                if mc == "경제성": default_desc = "편익/비용(B/C) 비율 등을 바탕으로 사업의 경제적 타당성을 평가합니다."
+                elif mc == "정책성": default_desc = "사업의 정책일치성, 추진여건, 정책효과 등 정책적 타당성을 평가합니다."
+                elif mc == "지역균형발전": default_desc = "지역낙후도 및 지역경제 파급효과 등을 바탕으로 지역 균형 발전에 미치는 영향을 평가합니다."
+                elif mc == "기술성": default_desc = "기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성 등을 평가합니다."
+                
+                key_cached = f"edit_yeta_desc_{mc}"
+                desc_val = st.text_input(
+                    f"'{mc}' 요인 설명",
+                    value=st.session_state.get(key_cached, default_desc),
+                    key=f"yeta_desc_input_{mc}"
+                )
+                definitions_map[mc] = desc_val
+                st.session_state[key_cached] = desc_val
+                
+            has_sub_desc = False
+            for mc in main_list:
+                subs = model_structure["subs"].get(mc, [])
+                if subs:
+                    has_sub_desc = True
+                    break
+            
+            if has_sub_desc:
+                st.markdown("---")
+                st.markdown("**📌 2계층 및 3계층 하위 요인 설명**")
+                
+                for mc in main_list:
+                    subs = model_structure["subs"].get(mc, [])
+                    for sub_c in subs:
+                        sub_subs = model_structure["sub_subs"].get(sub_c, [])
+                        
+                        default_sub_desc = ""
+                        if sub_c == "사업추진 여건": default_sub_desc = "정부 정책과의 일치성, 추진 의지, 지역 주민 및 지자체의 태도 등을 평가합니다."
+                        elif sub_c == "정책효과": default_sub_desc = "일자리 창출 효과, 주민 생활 여건 향상, 환경성 및 안전성 영향 등을 평가합니다."
+                        elif sub_c == "지역 낙후도": default_sub_desc = "개발 수준 및 낙후 상태를 정량적으로 비교 분석합니다."
+                        elif sub_c == "지역경제 파급효과": default_sub_desc = "지역 내 총생산, 생산 유발, 고용 유발 효과 등을 평가합니다."
+                        
+                        key_cached_sub = f"edit_yeta_desc_{sub_c}"
+                        sub_desc_val = st.text_input(
+                            f"'{mc} ➔ {sub_c}' 요인 설명",
+                            value=st.session_state.get(key_cached_sub, default_sub_desc),
+                            key=f"yeta_desc_input_{sub_c}"
+                        )
+                        definitions_map[sub_c] = sub_desc_val
+                        st.session_state[key_cached_sub] = sub_desc_val
+                        
+                        if sub_subs:
+                            for t3 in sub_subs:
+                                default_t3_desc = ""
+                                if t3 == "정책일치성 등 내부여건": default_t3_desc = "상위 계획과의 부합성 및 추진 체계의 준비 정도를 평가합니다."
+                                elif t3 == "지역주민 사업태도 등 외부여건": default_t3_desc = "사업 대상 지역 주민의 여론 및 지자체의 추진 태도를 평가합니다."
+                                elif t3 == "일자리 효과": default_t3_desc = "건설 단계 및 운영 단계의 신규 고용 창출 능력을 평가합니다."
+                                
+                                key_cached_t3 = f"edit_yeta_desc_{t3}"
+                                t3_desc_val = st.text_input(
+                                    f"↳ '{sub_c} ➔ {t3}' 요인 설명",
+                                    value=st.session_state.get(key_cached_t3, default_t3_desc),
+                                    key=f"yeta_desc_input_{t3}"
+                                )
+                                definitions_map[t3] = t3_desc_val
+                                st.session_state[key_cached_t3] = t3_desc_val
 
         st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
         with st.container(border=True):
@@ -1948,10 +2023,11 @@ def run():
                 "AHP_Model_JSON": model_structure,
                 "Tier_Level": 3,
                 "Demographics": {"type_questions": type_questions},
-                "Is_Yeta": True
+                "Is_Yeta": True,
+                "Definitions": definitions_map
             }
             
-            import json, os
+            import json
             os.makedirs("temp_previews", exist_ok=True)
             with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as f:
                 json.dump(preview_data, f, ensure_ascii=False)
@@ -2010,6 +2086,7 @@ def run():
                                     admin_email=survey_admin_email,
                                     ahp_model=model_structure,
                                     demographics={"type_questions": type_questions},
+                                    definitions_map=definitions_map,
                                     description=survey_desc,
                                     existing_sheet_id=target_sheet_id,
                                     user_id=st.session_state.user_id

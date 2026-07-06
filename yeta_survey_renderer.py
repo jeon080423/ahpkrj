@@ -70,16 +70,32 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
             if tq_opts:
                 ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"yeta_survey_resp_type_{i}", horizontal=True)
             else:
-                ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"yeta_survey_resp_type_{i}")
-            resp_data["types"].append(ans)
-            sq_idx += 1
-            
-    st.divider()
-    
-    # 2. 제1계층 가중치 평가 (상수합법)
+               # 2. 제1계층 가중치 평가 (상수합법)
     st.subheader("2. " + _("제1계층 평가: 상수합법 (100점 배분)", "Tier 1 Evaluation: Constant Sum (Allocate 100 points)"))
     st.caption(_("아래 1계층 평가항목의 합이 정확히 100이 되도록 중요도를 직접 분배해주십시오.", "Please distribute the importance so that the sum of the following Tier 1 items is exactly 100."))
     
+    definitions = survey_meta.get("Definitions", {})
+    main_rows_html = ""
+    for mc in main_criteria:
+        mc_desc = definitions.get(mc, "")
+        if mc_desc:
+            main_rows_html += f"""
+            <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px dashed #f1f5f9;">
+                <span style="color: #334155; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid #cbd5e1; padding-right: 8px; display: inline-block;">{mc}</span>
+                <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{mc_desc}</span>
+            </div>
+            """
+    if main_rows_html:
+        card_html = f"""
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 15px;">
+            <h5 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">대분류 요인 정의</h5>
+            <div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                {main_rows_html}
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
+
     # KDI 가이드라인에 따른 가중치 제약조건 설정
     if "비수도권" in yeta_p_type and "건설" in yeta_p_type:
         b_eco, b_pol, b_reg = (30, 45, 35), (25, 40, 30), (30, 40, 35)
@@ -125,6 +141,30 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     for main_c in main_criteria:
         subs = sub_criteria_map.get(main_c, [])
         if len(subs) > 1:
+            main_desc = definitions.get(main_c, "")
+            sub_rows_html = ""
+            for sub_c in subs:
+                sub_desc = definitions.get(sub_c, "")
+                if sub_desc:
+                    sub_rows_html += f"""
+                    <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
+                        <span style="color: #1e40af; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid #bfdbfe; padding-right: 8px; display: inline-block;">{sub_c}</span>
+                        <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{sub_desc}</span>
+                    </div>
+                    """
+            if main_desc or sub_rows_html:
+                main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
+                sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
+                
+                card_html = f"""
+                <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-left: 6px solid #1e40af; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 8px 0; color: #1e40af; font-size: 1.1rem; font-weight: bold;">{main_c}</h4>
+                    {main_desc_html}
+                    {sub_container_html}
+                </div>
+                """
+                st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
+
             st.markdown(f"#### [{main_c}] 하위 요인 비교")
             for i in range(len(subs)):
                 for j in range(i+1, len(subs)):
@@ -149,6 +189,30 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
         for sub_c in subs:
             sub_subs = sub_sub_map.get(sub_c, [])
             if len(sub_subs) > 1:
+                sub_desc = definitions.get(sub_c, "")
+                t3_rows_html = ""
+                for t3 in sub_subs:
+                    t3_desc = definitions.get(t3, "")
+                    if t3_desc:
+                        t3_rows_html += f"""
+                        <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
+                            <span style="color: #166534; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid #bbf7d0; padding-right: 8px; display: inline-block;">{t3}</span>
+                            <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{t3_desc}</span>
+                        </div>
+                        """
+                if sub_desc or t3_rows_html:
+                    sub_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{sub_desc}</p>' if sub_desc else ""
+                    t3_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{t3_rows_html}</div>' if t3_rows_html else ""
+                    
+                    card_html = f"""
+                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 6px solid #166534; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 1.1rem; font-weight: bold;">{main_c} ➔ {sub_c}</h4>
+                        {sub_desc_html}
+                        {t3_container_html}
+                    </div>
+                    """
+                    st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
+
                 st.markdown(f"#### [{main_c} ➔ {sub_c}] 하위 요인 비교")
                 for i in range(len(sub_subs)):
                     for j in range(i+1, len(sub_subs)):

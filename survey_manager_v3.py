@@ -407,7 +407,7 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
         return False
 
 
-def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, description="", existing_sheet_id=None, user_id=None):
+def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, definitions_map, description="", existing_sheet_id=None, user_id=None):
     client = get_survey_gspread_client()
     if not client:
         return None
@@ -471,9 +471,10 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, des
         ["Tier_Level", "3"], 
         ["Demographics", json.dumps(demographics, ensure_ascii=False)],
         ["Is_Yeta", "True"],
-        ["Visit_Count", "0"]
+        ["Visit_Count", "0"],
+        ["Definitions", json.dumps(definitions_map, ensure_ascii=False)]
     ]
-    meta_sheet.update(range_name="A1:B9", values=metadata)
+    meta_sheet.update(range_name="A1:B10", values=metadata)
     
     # Raw Data 헤더 생성
     type_headers = []
@@ -552,7 +553,8 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, des
             "AHP_Model_JSON": ahp_model,
             "Tier_Level": 3,
             "Demographics": demographics,
-            "Is_Yeta": True
+            "Is_Yeta": True,
+            "Definitions": definitions_map
         }
         c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
                   (spreadsheet.id, json.dumps(meta_dict, ensure_ascii=False)))
