@@ -1869,7 +1869,8 @@ def run():
                 file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 type="primary",
-                use_container_width=True
+                use_container_width=True,
+                key="yeta_dynamic_excel_download_btn"
             )
         except Exception as e:
             st.error(f"엑셀 템플릿 생성 오류: {e}")
