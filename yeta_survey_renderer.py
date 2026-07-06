@@ -116,7 +116,7 @@ def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, 
                     return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
                 current_val = st.session_state.get(f"yeta_pair_{pair_key}", None)
-                current_idx = clean_options.index(current_val) if current_val in clean_options else clean_options.index(1)
+                current_idx = clean_options.index(current_val) if current_val in clean_options else None
 
                 ans_val = st.radio(
                     label=pair_key,
@@ -551,7 +551,7 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
                     ans_val = st.radio(
                         label=alt_key,
                         options=list(range(-9, 0)) + list(range(1, 10)),
-                        index=8,
+                        index=None,
                         format_func=lambda x: str(abs(x)) + "​" if x < 0 else str(x),
                         key=f"yeta_alt_{alt_key}",
                         horizontal=True,
@@ -604,7 +604,7 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
                         ans_val = st.radio(
                             label=alt_key,
                             options=list(range(-9, 0)) + list(range(1, 10)),
-                            index=8,
+                            index=None,
                             format_func=lambda x: str(abs(x)) + "​" if x < 0 else str(x),
                             key=f"yeta_alt_{alt_key}",
                             horizontal=True,
@@ -655,7 +655,7 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
                             ans_val = st.radio(
                                 label=alt_key,
                                 options=list(range(-9, 0)) + list(range(1, 10)),
-                                index=8,
+                                index=None,
                                 format_func=lambda x: str(abs(x)) + "​" if x < 0 else str(x),
                                 key=f"yeta_alt_{alt_key}",
                                 horizontal=True,
