@@ -34,6 +34,36 @@
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='#e2e8f0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
     </style>
+    
+    <!-- 📄 구글 구조화 데이터 (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "AHP Master",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "300000",
+        "priceCurrency": "KRW"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "142"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://www.ahpmaster.com/",
+      "name": "예비타당성조사 AHP 마스터",
+      "description": "AHP 의사결정 분석 및 예비타당성 종합평가 대행 솔루션"
+    }
+    </script>
 </head>
 <body class="text-gray-800 antialiased hero-bg flex flex-col min-h-screen">
 
@@ -44,9 +74,13 @@
                 <div class="text-2xl font-extrabold tracking-tight text-gray-900">
                     AHP <span class="text-indigo-600">Master</span>
                 </div>
-                <div>
+                <div class="flex items-center gap-4">
+                    <!-- 📖 사용 가이드 정적 링크 추가 (SEO 최적화) -->
+                    <a href="./ahp-online-survey-guide.html" class="text-gray-600 hover:text-indigo-600 font-semibold transition px-3 py-2 text-sm">
+                        사용 가이드
+                    </a>
                     <!-- 🔥 블로그로 연결 -->
-                    <a href="https://morison.tistory.com/" target="_blank" class="bg-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold hover:bg-indigo-700 transition shadow-lg hover:shadow-indigo-500/30">
+                    <a href="https://morison.tistory.com/" target="_blank" class="bg-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold hover:bg-indigo-700 transition shadow-lg hover:shadow-indigo-500/30 text-sm">
                         Blog
                     </a>
                 </div>
@@ -75,7 +109,19 @@
                     예비타당성 종합평가(AHP) 분석
                 </a>
             </div>
-            <p class="text-sm text-gray-400 mt-6">별도의 설치 없이 웹 브라우저에서 바로 실행됩니다.</p>
+            <p class="text-sm text-gray-400 mt-6 mb-12">별도의 설치 없이 웹 브라우저에서 바로 실행됩니다.</p>
+
+            <!-- 📖 SEO 유입용 가이드북 배너 카드 삽입 -->
+            <div class="mt-8 p-8 bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200/80 max-w-2xl mx-auto shadow-md text-left transition hover:shadow-lg">
+                <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">NEW GUIDE 📖</span>
+                <h4 class="text-xl font-bold text-gray-900 mb-2">AHP 쌍대비교 온라인 설문 작성 및 무료 배포 가이드</h4>
+                <p class="text-sm text-gray-600 leading-relaxed mb-4">
+                    AHP 연구 설계에서 가장 까다로운 쌍대비교 척도 구성부터 실시간 응답 동기화, CR값 관리 노하우까지 총망라한 실무 매뉴얼을 무료로 공개합니다.
+                </p>
+                <a href="./ahp-online-survey-guide.html" class="inline-flex items-center text-indigo-600 font-bold hover:text-indigo-800 transition gap-1 group">
+                    가이드북 전체 보기 <span class="transition-transform group-hover:translate-x-1 text-sm">→</span>
+                </a>
+            </div>
         </div>
     </section>
 
