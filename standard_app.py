@@ -5259,7 +5259,7 @@ with st.sidebar:
             q_tier = st.selectbox(
                 _("서비스 구분 (요금제)", "Pricing Plan Tier"),
                 options=[
-                    (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), 350000, "Basic"),
+                    (_("Basic 요금제 (300,000원)", "Basic Plan (300,000 KRW)"), 300000, "Basic"),
                     (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), 500000, "Standard"),
                     (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), 950000, "Pro")
                 ],
@@ -5336,7 +5336,7 @@ with st.sidebar:
             t_tier = st.selectbox(
                 _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
                 options=[
-                    (_("Basic 요금제 (350,000원)", "Basic Plan (350,000 KRW)"), "Basic"),
+                    (_("Basic 요금제 (300,000원)", "Basic Plan (300,000 KRW)"), "Basic"),
                     (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), "Standard"),
                     (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), "Pro")
                 ],
@@ -6189,6 +6189,12 @@ with col_main:
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
                     df_main = preprocess_uploaded_df(df_main)
                     
+                    # [신규] Basic 요금제 표본수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
+                    if st.session_state.get('plan_type') == 'Basic' and len(df_main) > 10:
+                        df_main = df_main.head(10)
+                        st.warning(_("⚠️ 베이직 요금제는 엑셀 업로드 시 최대 10표본까지만 분석할 수 있습니다. 처음 10개 표본만 분석에 사용됩니다.",
+                                     "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 samples will be analyzed."))
+                    
                     if "Type" not in df_main.columns and len(df_main.columns) > 1:
                         col1 = df_main.columns[1]
                         if "_" not in col1 and col1 not in ["ID", "제출시간"]:
@@ -6210,12 +6216,18 @@ with col_main:
                         sn_lower = sn.lower().strip()
                         if sn_lower in ignore_sheets:
                             if "demographic" in sn_lower:
-                                st.session_state["demo_df"] = pd.read_excel(uploaded_file, sheet_name=sn)
-                                st.session_state["demo_df"] = preprocess_uploaded_df(st.session_state["demo_df"])
+                                demo_df = pd.read_excel(uploaded_file, sheet_name=sn)
+                                demo_df = preprocess_uploaded_df(demo_df)
+                                if st.session_state.get('plan_type') == 'Basic' and len(demo_df) > 10:
+                                    demo_df = demo_df.head(10)
+                                st.session_state["demo_df"] = demo_df
                             continue
                             
                         df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
                         df_sheet = preprocess_uploaded_df(df_sheet)
+                        if st.session_state.get('plan_type') == 'Basic' and len(df_sheet) > 10:
+                            df_sheet = df_sheet.head(10)
+                            
                         if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
                             col1 = df_sheet.columns[1]
                             if "_" not in col1 and col1 not in ["ID", "제출시간"]:
@@ -6311,6 +6323,12 @@ with col_main:
                                             raw_df = raw_df.head(5)
                                             st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 5표본까지만 분석할 수 있습니다. 처음 접수된 5명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 5 samples. Only the first 5 responses will be analyzed."))
                                     
+                                        # [신규] Basic 요금제 표본 수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
+                                        if st.session_state.get('plan_type') == 'Basic' and len(raw_df) > 10:
+                                            raw_df = raw_df.head(10)
+                                            st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
+                                                         "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
+                                    
                                         for col in raw_df.columns:
                                             if col not in ["ID", "Type", "제출시간", "답례품_연락처"]:
                                                 raw_df[col] = pd.to_numeric(raw_df[col], errors='coerce')
@@ -6391,6 +6409,8 @@ with col_main:
                         if today_chk > expiry_chk:
                             permission_granted = False
                             message = _("⛔ 이용 기간이 만료되었습니다.", "⛔ Your subscription period has expired.")
+                        
+
                 else: 
                     rows_ok = True
                     if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
@@ -6465,6 +6485,9 @@ with col_main:
                                 save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
 
                             st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
+                            if st.session_state.get('plan_type') == 'Basic':
+                                st.info(_("💡 **Basic 요금제 제한 안내**: 서비스 등급에 따라 데이터의 상위 10개 표본에 대해서만 분석이 완료되었습니다. 무제한 분석을 원하실 경우 Standard 이상 요금제로 업그레이드해 주세요.",
+                                          "💡 **Basic Plan Notice**: Only the first 10 samples were analyzed according to your pricing plan constraints. Please upgrade to Standard or Pro Tier for unlimited samples."))
                             st.markdown(_('<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;"> 주의: 새로고침하거나 브라우저를 닫으면 결과가 리셋됩니다.  결과 다운로드 탭에서 반드시 저장하세요.</p>',
                                           '<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;">⚠️ Warning: Results reset on refresh. Download via 📑 Download Results tab.</p>'), unsafe_allow_html=True)
 
@@ -7714,6 +7737,9 @@ with col_main:
                                             cr_row_idx += 1
     
                         st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
+                        if st.session_state.get('plan_type') == 'Basic':
+                            st.info(_("💡 **Basic 요금제 제한 안내**: 서비스 등급에 따라 데이터의 상위 10개 표본에 대해서만 분석이 완료되었습니다. 무제한 분석을 원하실 경우 Standard 이상 요금제로 업그레이드해 주세요.",
+                                      "💡 **Basic Plan Notice**: Only the first 10 samples were analyzed according to your pricing plan constraints. Please upgrade to Standard or Pro Tier for unlimited samples."))
                         if st.session_state.user_role == 'official':
                             if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
                                 save_data = uploaded_file.getvalue()
@@ -9619,18 +9645,18 @@ with col_main:
                 inner_1 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$185 USD</h2>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$160 USD</h2>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for small-scale projects aiming for reliable results using standard AHP methodology.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>Standard AHP features</b></li>
-                        <li><b>Unlimited sample size</b></li>
+                        <li><b>Max 10 samples limit</b></li>
                         <li>Unlimited project creation</li>
                         <li>Standard email support</li>
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Basic (2 Months)", 185.0, 2, inner_html=inner_1, is_best=False), height=520)
+                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Basic (2 Months)", 160.0, 2, inner_html=inner_1, is_best=False), height=520)
                 else:
                     st.components.v1.html(get_login_redirect_html("Basic (2 Months)", inner_html=inner_1, is_best=False, lang="en"), height=520)
 
@@ -9684,18 +9710,18 @@ with col_main:
                 inner_1 = """
                     <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                     <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>350,000</span>원</h2>
+                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>300,000</span>원</h2>
                     <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>일반 AHP 기능 제공</b></li>
-                        <li><b>표본수 무제한</b></li>
+                        <li><b>10표본 이하 제한</b></li>
                         <li>프로젝트 생성 무제한</li>
                         <li>일반 이메일 지원</li>
                     </ul>
                 """
                 if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 350000, 2, inner_html=inner_1, is_best=False), height=520)
+                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 300000, 2, inner_html=inner_1, is_best=False), height=520)
                 else:
                     st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
 
