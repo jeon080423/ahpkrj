@@ -9715,7 +9715,7 @@ with col_main:
                     <hr style='margin: 10px 0;'>
                     <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
                         <li><b>일반 AHP 기능 제공</b></li>
-                        <li><b>10표본 이하 제한</b></li>
+                        <li><b>표본 수: 10표본 이하</b></li>
                         <li>프로젝트 생성 무제한</li>
                         <li>일반 이메일 지원</li>
                     </ul>
