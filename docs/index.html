@@ -82,9 +82,9 @@
                     AHP <span class="text-indigo-600">Master</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <!-- 📖 사용 가이드 정적 링크 추가 (SEO 최적화) -->
-                    <a href="./ahp-online-survey-guide.html" class="text-gray-600 hover:text-indigo-600 font-semibold transition px-3 py-2 text-sm">
-                        사용 가이드
+                    <!-- 🌐 English 변경 기능으로 수정 -->
+                    <a href="#" id="lang-toggle" class="text-gray-600 hover:text-indigo-600 font-semibold transition px-3 py-2 text-sm">
+                        English
                     </a>
                     <!-- 🔥 블로그로 연결 -->
                     <a href="https://morison.tistory.com/" target="_blank" class="bg-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold hover:bg-indigo-700 transition shadow-lg hover:shadow-indigo-500/30 text-sm">
@@ -98,34 +98,34 @@
     <!-- 메인 히어로 섹션 -->
     <section class="pt-32 pb-20 px-4 flex-grow">
         <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-5xl sm:text-6xl font-extrabold mb-8 tracking-tight leading-tight mt-8">
+            <h1 id="hero-title" class="text-5xl sm:text-6xl font-extrabold mb-8 tracking-tight leading-tight mt-8">
                 신뢰할 수 있는 <span class="gradient-text">AHP 분석 및 AHP 프로그램</span>,<br/>
                 AHP 마스터로 시작해 보세요.
             </h1>
-            <p class="text-xl text-gray-600 mb-10 leading-relaxed">
+            <p id="hero-desc" class="text-xl text-gray-600 mb-10 leading-relaxed">
                 복잡한 엑셀 수식 없이 웹 브라우저에서 바로 끝내는 AHP 분석.<br>
                 일반 학술 연구부터 예비타당성 종합평가까지 최고의 신뢰도를 보장합니다.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
                 <!-- 🔥 일반 AHP 앱 주소로 연결 -->
-                <a href="https://ahpkrj.streamlit.app/?mode=standard" target="_blank" class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition shadow-xl hover:shadow-indigo-500/40 transform hover:-translate-y-1">
+                <a id="btn-start-standard" href="https://ahpkrj.streamlit.app/?mode=standard" target="_blank" class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition shadow-xl hover:shadow-indigo-500/40 transform hover:-translate-y-1">
                     일반/학술 분석 시작하기
                 </a>
                 <!-- 🔥 예타 전용 앱 주소로 연결 -->
-                <a href="https://ahpkrj.streamlit.app/?mode=yeta" target="_blank" class="bg-slate-800 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-900 transition shadow-xl hover:shadow-slate-500/40 transform hover:-translate-y-1">
+                <a id="btn-start-yeta" href="https://ahpkrj.streamlit.app/?mode=yeta" target="_blank" class="bg-slate-800 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-900 transition shadow-xl hover:shadow-slate-500/40 transform hover:-translate-y-1">
                     예비타당성 종합평가(AHP) 분석
                 </a>
             </div>
-            <p class="text-sm text-gray-400 mt-6 mb-12">별도의 설치 없이 웹 브라우저에서 바로 실행됩니다.</p>
+            <p id="note-install" class="text-sm text-gray-400 mt-6 mb-12">별도의 설치 없이 웹 브라우저에서 바로 실행됩니다.</p>
 
             <!-- 📖 SEO 유입용 가이드북 배너 카드 삽입 -->
             <div class="mt-8 p-8 bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200/80 max-w-2xl mx-auto shadow-md text-left transition hover:shadow-lg">
                 <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">NEW GUIDE 📖</span>
-                <h4 class="text-xl font-bold text-gray-900 mb-2">AHP 쌍대비교 온라인 설문 작성 및 무료 배포 가이드</h4>
-                <p class="text-sm text-gray-600 leading-relaxed mb-4">
+                <h4 id="guide-title" class="text-xl font-bold text-gray-900 mb-2">AHP 쌍대비교 온라인 설문 작성 및 무료 배포 가이드</h4>
+                <p id="guide-desc" class="text-sm text-gray-600 leading-relaxed mb-4">
                     AHP 연구 설계에서 가장 까다로운 쌍대비교 척도 구성부터 실시간 응답 동기화, CR값 관리 노하우까지 총망라한 실무 매뉴얼을 무료로 공개합니다.
                 </p>
-                <a href="./ahp-online-survey-guide.html" class="inline-flex items-center text-indigo-600 font-bold hover:text-indigo-800 transition gap-1 group">
+                <a id="guide-link-text" href="./ahp-online-survey-guide.html" class="inline-flex items-center text-indigo-600 font-bold hover:text-indigo-800 transition gap-1 group">
                     가이드북 전체 보기 <span class="transition-transform group-hover:translate-x-1 text-sm">→</span>
                 </a>
             </div>
@@ -135,22 +135,22 @@
     <!-- 주요 기능 섹션 -->
     <section id="features" class="py-20 bg-white border-t border-gray-100">
         <div class="max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-extrabold text-center mb-16">연구 수준을 높이는 핵심 기능</h2>
+            <h2 id="features-title" class="text-3xl font-extrabold text-center mb-16">연구 수준을 높이는 핵심 기능</h2>
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="p-8 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-lg transition">
                     <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-2xl mb-6">🏛️</div>
-                    <h3 class="text-xl font-bold mb-3">KDI 표준 예비타당성 분석</h3>
-                    <p class="text-gray-500 leading-relaxed">극단값 배제(최고/최저점), 기하평균 산출, 정량데이터(B/C 비율)의 쌍대비교 척도 변환 등 KDI 예타 지침을 완벽하게 자동화하여 극강의 편리함을 제공합니다.</p>
+                    <h3 id="feat1-title" class="text-xl font-bold mb-3">KDI 표준 예비타당성 분석</h3>
+                    <p id="feat1-desc" class="text-gray-500 leading-relaxed">극단값 배제(최고/최저점), 기하평균 산출, 정량데이터(B/C 비율)의 쌍대비교 척도 변환 등 KDI 예타 지침을 완벽하게 자동화하여 극강의 편리함을 제공합니다.</p>
                 </div>
                 <div class="p-8 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-lg transition">
                     <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl mb-6">📊</div>
-                    <h3 class="text-xl font-bold mb-3">퍼지 AHP 및 학술적 전문성</h3>
-                    <p class="text-gray-500 leading-relaxed">전통적인 쌍대비교 분석은 물론, 불확실성을 고려한 퍼지(Fuzzy) AHP까지 원클릭으로 완벽하게 처리하여 학술 논문 수준의 전문적인 통계를 산출합니다.</p>
+                    <h3 id="feat2-title" class="text-xl font-bold mb-3">퍼지 AHP 및 학술적 전문성</h3>
+                    <p id="feat2-desc" class="text-gray-500 leading-relaxed">전통적인 쌍대비교 분석은 물론, 불확실성을 고려한 퍼지(Fuzzy) AHP까지 원클릭으로 완벽하게 처리하여 학술 논문 수준의 전문적인 통계를 산출합니다.</p>
                 </div>
                 <div class="p-8 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-lg transition">
                     <div class="w-14 h-14 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-2xl mb-6">📈</div>
-                    <h3 class="text-xl font-bold mb-3">논문용 고급 시각화</h3>
-                    <p class="text-gray-500 leading-relaxed">바이올린 플롯(Violin Plot), 방사형 차트, CR(일관성 비율) 분포 등 학위 및 학술지 논문에 즉시 삽입 가능한 고품질 차트를 실시간으로 제공합니다.</p>
+                    <h3 id="feat3-title" class="text-xl font-bold mb-3">논문용 고급 시각화</h3>
+                    <p id="feat3-desc" class="text-gray-500 leading-relaxed">바이올린 플롯(Violin Plot), 방사형 차트, CR(일관성 비율) 분포 등 학위 및 학술지 논문에 즉시 삽입 가능한 고품질 차트를 실시간으로 제공합니다.</p>
                 </div>
             </div>
         </div>
@@ -162,5 +162,81 @@
         <p class="text-sm">Copyright © 2026. All rights reserved.</p>
     </footer>
 
+    <!-- 다국어 번역 스크립트 -->
+    <script>
+        const translations = {
+            ko: {
+                langToggle: "English",
+                heroTitle: '신뢰할 수 있는 <span class="gradient-text">AHP 분석 및 AHP 프로그램</span>,<br/>AHP 마스터로 시작해 보세요.',
+                heroDesc: '복잡한 엑셀 수식 없이 웹 브라우저에서 바로 끝내는 AHP 분석.<br>일반 학술 연구부터 예비타당성 종합평가까지 최고의 신뢰도를 보장합니다.',
+                btnStartStandard: '일반/학술 분석 시작하기',
+                btnStartYeta: '예비타당성 종합평가(AHP) 분석',
+                noteInstall: '별도의 설치 없이 웹 브라우저에서 바로 실행됩니다.',
+                guideTitle: 'AHP 쌍대비교 온라인 설문 작성 및 무료 배포 가이드',
+                guideDesc: 'AHP 연구 설계에서 가장 까다로운 쌍대비교 척도 구성부터 실시간 응답 동기화, CR값 관리 노하우까지 총망라한 실무 매뉴얼을 무료로 공개합니다.',
+                guideLinkText: '가이드북 전체 보기 <span class="transition-transform group-hover:translate-x-1 text-sm">→</span>',
+                featuresTitle: '연구 수준을 높이는 핵심 기능',
+                feat1Title: 'KDI 표준 예비타당성 분석',
+                feat1Desc: '극단값 배제(최고/최저점), 기하평균 산출, 정량데이터(B/C 비율)의 쌍대비교 척도 변환 등 KDI 예타 지침을 완벽하게 자동화하여 극강의 편리함을 제공합니다.',
+                feat2Title: '퍼지 AHP 및 학술적 전문성',
+                feat2Desc: '전통적인 쌍대비교 분석은 물론, 불확실성을 고려한 퍼지(Fuzzy) AHP까지 원클릭으로 완벽하게 처리하여 학술 논문 수준의 전문적인 통계를 산출합니다.',
+                feat3Title: '논문용 고급 시각화',
+                feat3Desc: '바이올린 플롯(Violin Plot), 방사형 차트, CR(일관성 비율) 분포 등 학위 및 학술지 논문에 즉시 삽입 가능한 고품질 차트를 실시간으로 제공합니다.'
+            },
+            en: {
+                langToggle: "한국어",
+                heroTitle: 'Reliable <span class="gradient-text">AHP Analysis & Software</span>,<br/>Start with AHP Master.',
+                heroDesc: 'AHP analysis completed directly in your web browser without complex Excel formulas.<br>Guarantees the highest reliability from academic research to preliminary feasibility studies.',
+                btnStartStandard: 'Start General/Academic Analysis',
+                btnStartYeta: 'Preliminary Feasibility Study (AHP) Analysis',
+                noteInstall: 'Runs directly in your web browser without any installation.',
+                guideTitle: 'AHP Pairwise Comparison Online Survey Creation & Free Distribution Guide',
+                guideDesc: 'We release a free practical manual covering everything from the most challenging pairwise comparison scale design in AHP study setups to real-time response synchronization and CR value management know-how.',
+                guideLinkText: 'View Full Guidebook <span class="transition-transform group-hover:translate-x-1 text-sm">→</span>',
+                featuresTitle: 'Key Features to Elevate Your Research',
+                feat1Title: 'KDI Standard Preliminary Feasibility Analysis',
+                feat1Desc: 'Fully automates KDI preliminary feasibility guidelines, including extreme value exclusion (highest/lowest scores), geometric mean calculation, and pairwise scale conversion of quantitative data (B/C ratio).',
+                feat2Title: 'Fuzzy AHP & Academic Expertise',
+                feat2Desc: 'Processes both traditional pairwise comparisons and uncertainty-aware Fuzzy AHP in a single click, producing professional-grade statistics suitable for academic journals.',
+                feat3Title: 'Advanced Visualizations for Thesis',
+                feat3Desc: 'Provides high-quality, real-time charts ready for inclusion in dissertations and journals, such as Violin Plots, Radar Charts, and CR (Consistency Ratio) distributions.'
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'ko';
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = lang;
+
+            const t = translations[lang];
+            document.getElementById('lang-toggle').innerText = t.langToggle;
+            document.getElementById('hero-title').innerHTML = t.heroTitle;
+            document.getElementById('hero-desc').innerHTML = t.heroDesc;
+            document.getElementById('btn-start-standard').innerText = t.btnStartStandard;
+            document.getElementById('btn-start-yeta').innerText = t.btnStartYeta;
+            document.getElementById('note-install').innerText = t.noteInstall;
+            document.getElementById('guide-title').innerText = t.guideTitle;
+            document.getElementById('guide-desc').innerText = t.guideDesc;
+            document.getElementById('guide-link-text').innerHTML = t.guideLinkText;
+            document.getElementById('features-title').innerText = t.featuresTitle;
+            document.getElementById('feat1-title').innerText = t.feat1Title;
+            document.getElementById('feat1-desc').innerText = t.feat1Desc;
+            document.getElementById('feat2-title').innerText = t.feat2Title;
+            document.getElementById('feat2-desc').innerText = t.feat2Desc;
+            document.getElementById('feat3-title').innerText = t.feat3Title;
+            document.getElementById('feat3-desc').innerText = t.feat3Desc;
+        }
+
+        document.getElementById('lang-toggle').addEventListener('click', function(e) {
+            e.preventDefault();
+            const nextLang = currentLang === 'ko' ? 'en' : 'ko';
+            updateLanguage(nextLang);
+        });
+
+        // Initialize language setting
+        updateLanguage(currentLang);
+    </script>
 </body>
 </html>
