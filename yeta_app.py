@@ -38,11 +38,6 @@ from yeta_payment import (
 )
 
 # Helper function for Korean translation fallback
-def _(ko_text, en_text):
-    if st.session_state.get('lang', 'ko') == 'en':
-        return en_text
-    return ko_text
-
 # --- AUTH & DB UTILITIES ---
 
 
@@ -178,7 +173,7 @@ def run():
                     st.session_state.expiry_date = None
                     st.session_state.admin_mode = False
                     st.query_params.clear()
-                    st.toast(_(" 30분간 활동이 없어 보안을 위해 자동 로그아웃되었습니다.", " Logged out automatically due to 30 minutes of inactivity."))
+                    st.toast(" 30분간 활동이 없어 보안을 위해 자동 로그아웃되었습니다.")
                     st.rerun()
                 else:
                     st.query_params["last_activity"] = str(current_time)
@@ -701,8 +696,8 @@ def run():
     # 5. Page Header Section
     st.markdown(f"""
     <div style='margin-top: 55px;'>
-        <h1>{_('국가 예비타당성조사 종합평가(AHP) 솔루션', 'Preliminary Feasibility Study AHP Solution')}</h1>
-        <p style='color: #666; font-size: 1.05rem; margin-bottom: 30px;'>{_('기획재정부 및 KDI 표준 지침을 준수하는 공공투자사업 AHP 종합 평가 모듈입니다.', 'AHP comprehensive evaluation module for public investment projects in compliance with MoEF & KDI standard guidelines.')}</p>
+        <h1>{'국가 예비타당성조사 종합평가(AHP) 솔루션'}</h1>
+        <p style='color: #666; font-size: 1.05rem; margin-bottom: 30px;'>{'기획재정부 및 KDI 표준 지침을 준수하는 공공투자사업 AHP 종합 평가 모듈입니다.'}</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -721,19 +716,19 @@ def run():
         except:
             st.markdown(
                 f'<a href="https://www.ahpmaster.com/" target="_blank" style="text-decoration: none; color: inherit;">'
-                f'<h3 style="margin-top: -5px; margin-bottom: 10px;">{_(" AHP 마스터", " AHP Master")}</h3>'
+                f'<h3 style="margin-top: -5px; margin-bottom: 10px;">{" AHP 마스터"}</h3>'
                 f'</a>',
                 unsafe_allow_html=True
             )
 
         # Login / Session panel
         if st.session_state.user_id is None:
-            tab_login, tab_find_pw = st.tabs([_("로그인", "Login"), _("비밀번호 찾기", "Find Password")])
+            tab_login, tab_find_pw = st.tabs(["로그인", "비밀번호 찾기"])
             
             with tab_login:
-                l_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="l_id")
-                l_pw = st.text_input(_("비밀번호 (PW)", "Password (PW)"), type="password", key="l_pw")
-                if st.button(_("로그인 실행", "Login"), key="btn_login_yeta"):
+                l_id = st.text_input("아이디 (이메일 주소)", key="l_id")
+                l_pw = st.text_input("비밀번호 (PW)", type="password", key="l_pw")
+                if st.button("로그인 실행", key="btn_login_yeta"):
                     result = check_login(l_id.strip(), l_pw)
                     if result:
                         today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
@@ -748,12 +743,12 @@ def run():
                                     st.query_params["login_user"] = l_id.strip()
                                     st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                                     st.query_params["last_activity"] = str(int(time.time()))
-                                    st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Downgraded to Free User."))
+                                    st.toast("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.")
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(_(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}", f"Error during automatic expiry downgrade: {e}"))
+                                    st.error(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}")
                             else:
-                                st.error(_(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})", f"❌ Subscription expired. (Expiry date: {result[1]})"))
+                                st.error(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})")
                         else:
                             st.session_state.user_id = l_id.strip()
                             st.session_state.user_role = result[0]
@@ -762,18 +757,17 @@ def run():
                             st.query_params["login_user"] = l_id.strip()
                             st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                             st.query_params["last_activity"] = str(int(time.time()))
-                            st.success(_(f"환영합니다, {l_id}님!", f"Welcome, {l_id}!"))
+                            st.success(f"환영합니다, {l_id}님!")
                             st.rerun()
                     else:
-                        st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
+                        st.error("아이디 또는 비밀번호가 일치하지 않습니다.")
             
             with tab_find_pw:
-                st.write(_("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.",
-                           "Please enter the email address used at registration. A new temporary password will be sent to your email."))
-                f_id = st.text_input(_("가입한 아이디 (이메일)", "Registered ID (Email)"), key="f_id")
-                if st.button(_("임시 비밀번호 전송", "Send Temporary Password"), key="btn_find_pw_yeta"):
+                st.write("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.")
+                f_id = st.text_input("가입한 아이디 (이메일)", key="f_id")
+                if st.button("임시 비밀번호 전송", key="btn_find_pw_yeta"):
                     if not f_id:
-                        st.warning(_("이메일 주소를 입력해주세요.", "Please enter your email address."))
+                        st.warning("이메일 주소를 입력해주세요.")
                     else:
                         conn = get_db_connection('users.db')
                         c = conn.cursor()
@@ -786,23 +780,23 @@ def run():
                             change_user_password(f_id.strip(), temp_pw)
                             
                             if send_password_recovery_email(f_id.strip(), temp_pw):
-                                st.success(_(f"'{f_id}'로 임시 비밀번호를 전송했습니다.\n이메일을 확인해주세요.", f"Temporary password sent to '{f_id}'.\nPlease check your email."))
+                                st.success(f"'{f_id}'로 임시 비밀번호를 전송했습니다.\n이메일을 확인해주세요.")
                             else:
-                                st.error(_("이메일 전송 중 오류가 발생했습니다.", "Error sending email."))
+                                st.error("이메일 전송 중 오류가 발생했습니다.")
                         else:
-                            st.error(_("등록되지 않은 아이디입니다.", "ID is not registered."))
+                            st.error("등록되지 않은 아이디입니다.")
         else:
             if st.session_state.user_role == 'admin':
-                role_disp = _("관리자", "Admin")
+                role_disp = "관리자"
             elif st.session_state.user_role == 'official':
                 pt = st.session_state.get('plan_type')
-                role_disp = f"{_('정식 사용자', 'Official User')} ({pt})" if pt else _("정식 사용자", "Official User")
+                role_disp = f"{'정식 사용자'} ({pt})" if pt else "정식 사용자"
             else:
-                role_disp = _("무료사용자", "Free User")
+                role_disp = "무료사용자"
             
             expiry_info = ""
             if st.session_state.expiry_date:
-                expiry_label = _("만료일: ", "Expiry: ")
+                expiry_label = "만료일: "
                 expiry_info = f' | {expiry_label}{st.session_state.expiry_date}'
                 
             info_html = f"""<div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.85rem; padding: 8px 10px; text-align: center; margin-bottom: 8px;">
@@ -811,30 +805,30 @@ def run():
             st.markdown(info_html, unsafe_allow_html=True)
             
             if st.session_state.user_role == 'admin':
-                btn_label = _("🔧 관리자 화면 닫기", "🔧 Exit Admin Panel") if st.session_state.get('admin_mode', False) else _("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")
+                btn_label = "🔧 관리자 화면 닫기" if st.session_state.get('admin_mode', False) else "🔧 관리자 화면 접속"
                 if st.button(btn_label):
                     st.session_state.admin_mode = not st.session_state.admin_mode
                     st.rerun()
 
-            with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
-                cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_yeta")
-                new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_yeta")
-                confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_yeta")
+            with st.expander("🔐 비밀번호 변경"):
+                cur_pw = st.text_input("현재 비밀번호", type="password", key="chg_cur_yeta")
+                new_pw_val = st.text_input("새 비밀번호", type="password", key="chg_new_yeta")
+                confirm_pw = st.text_input("새 비밀번호 확인", type="password", key="chg_conf_yeta")
                 
-                if st.button(_("비밀번호 변경", "Change Password"), key="btn_chg_pw_yeta"):
+                if st.button("비밀번호 변경", key="btn_chg_pw_yeta"):
                     if new_pw_val != confirm_pw:
-                        st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
+                        st.error("새 비밀번호가 일치하지 않습니다.")
                     elif not validate_password(new_pw_val):
-                        st.error(_("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.", "Password must be at least 4 characters and contain letters and special characters."))
+                        st.error("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.")
                     else:
                         chk_res = check_login(st.session_state.user_id, cur_pw)
                         if chk_res:
                             change_user_password(st.session_state.user_id, new_pw_val)
-                            st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
+                            st.success("비밀번호가 변경되었습니다.")
                         else:
-                            st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
+                            st.error("현재 비밀번호가 올바르지 않습니다.")
 
-            if st.button(_("로그아웃", "Log Out"), key="btn_logout_yeta"):
+            if st.button("로그아웃", key="btn_logout_yeta"):
                 st.session_state.user_id = None
                 st.session_state.user_role = None
                 st.session_state.expiry_date = None
@@ -844,15 +838,15 @@ def run():
                 st.query_params.pop("login_token", None)
                 st.rerun()
 
-            with st.expander(_("📄 견적서 출력", "📄 Print Estimate")):
-                q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: (주)에이치피테크", "e.g., HP Tech Co., Ltd."), key="q_client_yeta")
-                q_project = st.text_input(_("과제명 (프로젝트명)", "Project / Task Name"), placeholder=_("예: 예타 가중치 평가 분석", "e.g., Yeta Weight Assessment Analysis"), key="q_project_yeta")
+            with st.expander("📄 견적서 출력"):
+                q_client = st.text_input("의뢰기관명 (수신)", placeholder="예: (주)에이치피테크", key="q_client_yeta")
+                q_project = st.text_input("과제명 (프로젝트명)", placeholder="예: 예타 가중치 평가 분석", key="q_project_yeta")
                 
                 q_tier = st.selectbox(
-                    _("서비스 구분 (요금제)", "Pricing Plan Tier"),
+                    "서비스 구분 (요금제)",
                     options=[
-                        (_("월간 이용권 (300,000원)", "Monthly Plan (300,000 KRW)"), 300000, "월간 이용권"),
-                        (_("연간 이용권 (2,800,000원)", "Annual Plan (2,800,000 KRW)"), 2800000, "연간 이용권")
+                        ("월간 이용권 (300,000원)", 300000, "월간 이용권"),
+                        ("연간 이용권 (2,800,000원)", 2800000, "연간 이용권")
                     ],
                     format_func=lambda x: x[0],
                     key="q_tier_select_yeta"
@@ -913,40 +907,39 @@ def run():
                     """
                     st.components.v1.html(button_iframe, height=45)
                 else:
-                    st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.", 
-                                 "Please enter the Client Institution and Project Name to enable download."))
+                    st.warning("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.")
 
-            with st.expander(_("📄 계산서 발행 신청", "📄 Request Invoice")):
-                t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_yeta")
-                t_biz_name = st.text_input(_("상호 (회사명)", "Company Name"), key="t_biz_name_yeta")
-                t_rep_name = st.text_input(_("대표자명", "CEO Name"), key="t_rep_name_yeta")
-                t_address = st.text_input(_("사업장 주소", "Business Address"), key="t_address_yeta")
-                t_biz_type = st.text_input(_("업태 / 업종", "Business Category / Type"), key="t_biz_type_yeta")
-                t_email = st.text_input(_("계산서 수신 이메일", "Invoice Email"), key="t_email_yeta")
+            with st.expander("📄 계산서 발행 신청"):
+                t_biz_num = st.text_input("사업자 등록번호", placeholder="000-00-00000", key="t_biz_num_yeta")
+                t_biz_name = st.text_input("상호 (회사명)", key="t_biz_name_yeta")
+                t_rep_name = st.text_input("대표자명", key="t_rep_name_yeta")
+                t_address = st.text_input("사업장 주소", key="t_address_yeta")
+                t_biz_type = st.text_input("업태 / 업종", key="t_biz_type_yeta")
+                t_email = st.text_input("계산서 수신 이메일", key="t_email_yeta")
                 
                 t_tier = st.selectbox(
-                    _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
+                    "신청 서비스 (요금제)",
                     options=[
-                        (_("월간 이용권 (300,000원)", "Monthly Plan (300,000 KRW)"), "월간 이용권"),
-                        (_("연간 이용권 (2,800,000원)", "Annual Plan (2,800,000 KRW)"), "연간 이용권")
+                        ("월간 이용권 (300,000원)", "월간 이용권"),
+                        ("연간 이용권 (2,800,000원)", "연간 이용권")
                     ],
                     format_func=lambda x: x[0],
                     key="t_tier_select_yeta"
                 )
                 
-                if st.button(_("계산서 발행 신청하기", "Submit Invoice Request"), use_container_width=True, key="btn_request_tax_yeta"):
+                if st.button("계산서 발행 신청하기", use_container_width=True, key="btn_request_tax_yeta"):
                     if not t_biz_num.strip():
-                        st.error(_("사업자 등록번호를 입력해 주세요.", "Please enter the Business Registration Number."))
+                        st.error("사업자 등록번호를 입력해 주세요.")
                     elif not t_biz_name.strip():
-                        st.error(_("상호를 입력해 주세요.", "Please enter the Company Name."))
+                        st.error("상호를 입력해 주세요.")
                     elif not t_rep_name.strip():
-                        st.error(_("대표자명을 입력해 주세요.", "Please enter the CEO Name."))
+                        st.error("대표자명을 입력해 주세요.")
                     elif not t_email.strip():
-                        st.error(_("이메일을 입력해 주세요.", "Please enter the Email."))
+                        st.error("이메일을 입력해 주세요.")
                     elif not validate_email(t_email.strip()):
-                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                        st.error("올바른 이메일 형식이 아닙니다.")
                     else:
-                        with st.spinner(_("신청서를 제출하는 중...", "Submitting request...")):
+                        with st.spinner("신청서를 제출하는 중..."):
                             conn = get_db_connection('users.db')
                             c = conn.cursor()
                             try:
@@ -964,13 +957,11 @@ def run():
                                 )
                                 
                                 if mail_success:
-                                    st.success(_("계산서 신청이 접수되었습니다! 관리자 확인 후 계산서가 발행됩니다.", 
-                                                 "Request submitted! The invoice will be issued after review."))
+                                    st.success("계산서 신청이 접수되었습니다! 관리자 확인 후 계산서가 발행됩니다.")
                                 else:
-                                    st.warning(_("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.", 
-                                                 "Saved to DB, but email alert failed. The admin will review it soon."))
+                                    st.warning("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.")
                             except Exception as e:
-                                st.error(_(f"신청 중 오류가 발생했습니다: {e}", f"Error during submission: {e}"))
+                                st.error(f"신청 중 오류가 발생했습니다: {e}")
                             finally:
                                 conn.close()
 
@@ -994,7 +985,7 @@ def run():
     # 7. Navigation Tabs
     # --- ADMIN MODE INTERCEPTOR ---
     if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
-        st.subheader(_("👥 가입자 현황 및 관리 (예타 전용 뷰)", "Registered Users & Admin Control (YETA View)"))
+        st.subheader("👥 가입자 현황 및 관리 (예타 전용 뷰)")
         
         col_sync1, col_sync2 = st.columns([2, 8])
         with col_sync1:
@@ -1144,29 +1135,29 @@ def run():
 
     if st.session_state.user_id:
         tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
-            _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
-            _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
-            _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
-            _("예타 전용 AHP 설문 작성 및 배포", "Create Yeta Survey"),
-            _("실시간 응답 현황", "Live Response Status"),
-            _("서비스 요금", "Pricing & License")
+            "예타 AHP 지침 안내",
+            "예타 종합평가(AHP) 분석",
+            "예타 코딩 엑셀 양식",
+            "예타 전용 AHP 설문 작성 및 배포",
+            "실시간 응답 현황",
+            "서비스 요금"
         ])
     else:
         tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing, tab_signup = st.tabs([
-            _("예타 AHP 지침 안내", "AHP Guidelines Guide"),
-            _("예타 종합평가(AHP) 분석", "Preliminary Feasibility Analysis"),
-            _("예타 코딩 엑셀 양식", "Yeta Coding Excel Form"),
-            _("예타 전용 AHP 설문 작성 및 배포", "Create Yeta Survey"),
-            _("실시간 응답 현황", "Live Response Status"),
-            _("서비스 요금", "Pricing & License"),
-            _("회원가입", "Sign Up")
+            "예타 AHP 지침 안내",
+            "예타 종합평가(AHP) 분석",
+            "예타 코딩 엑셀 양식",
+            "예타 전용 AHP 설문 작성 및 배포",
+            "실시간 응답 현황",
+            "서비스 요금",
+            "회원가입"
         ])
 
     # =========================================================================
     # TAB 1: Analysis Tool
     # =========================================================================
     with tab_analysis:
-        st.write("### " + _("예비타당성 종합평가(AHP)", "Preliminary Feasibility AHP Synthesis"))
+        st.write("### " + "예비타당성 종합평가(AHP)")
         st.markdown("<br>", unsafe_allow_html=True)
         
         main_col, settings_col = st.columns([3.0, 1.2], gap="large")
@@ -1176,17 +1167,17 @@ def run():
             # SECTION 1: 분석 환경 설정 (Settings)
             # ==========================================
             with st.container(border=True):
-                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {_('예타 종합평가(AHP) 가중치 설정', 'Yeta AHP Weights Settings')}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {'예타 종합평가(AHP) 가중치 설정'}</div>", unsafe_allow_html=True)
                 
                 project_type = st.selectbox(
-                    _("사업 유형(모델) 선택", "Select Project Type (Model)"),
+                    "사업 유형(모델) 선택",
                     options=[
-                        ("construction_non_capital", _("건설사업 (비수도권)", "Construction (Non-capital)")),
-                        ("construction_capital", _("건설사업 (수도권)", "Construction (Capital)")),
-                        ("rnd_bc", _("R&D사업 (B/C)", "R&D (B/C)")),
-                        ("rnd_ec", _("R&D사업 (E/C)", "R&D (E/C)")),
-                        ("other_bc", _("기타 재정사업 (B/C)", "Other Fiscal (B/C)")),
-                        ("other_ec", _("기타 재정사업 (E/C)", "Other Fiscal (E/C)"))
+                        ("construction_non_capital", "건설사업 (비수도권)"),
+                        ("construction_capital", "건설사업 (수도권)"),
+                        ("rnd_bc", "R&D사업 (B/C)"),
+                        ("rnd_ec", "R&D사업 (E/C)"),
+                        ("other_bc", "기타 재정사업 (B/C)"),
+                        ("other_ec", "기타 재정사업 (E/C)")
                     ],
                     format_func=lambda x: x[1],
                     key="yeta_project_type_select"
@@ -1195,54 +1186,54 @@ def run():
                 
                 st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
                 
-                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('A. 정량 데이터 (B/C, 지역낙후도)', 'A. Quantitative Data')}</div>", unsafe_allow_html=True)
-                bc_ratio = st.number_input(_("경제성 분석 결과 (B/C 비율)", "B/C Ratio"), min_value=0.0, max_value=10.0, value=1.05, step=0.05)
+                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{'A. 정량 데이터 (B/C, 지역낙후도)'}</div>", unsafe_allow_html=True)
+                bc_ratio = st.number_input("경제성 분석 결과 (B/C 비율)", min_value=0.0, max_value=10.0, value=1.05, step=0.05)
                 
                 has_regional = "non_capital" in p_type or p_type == "other_bc" or p_type == "other_ec"
                 if has_regional:
-                    lir_value = st.number_input(_("지역낙후도 지수 (LIR/MIR)", "Regional Backwardness (LIR)"), min_value=-3.0, max_value=3.0, value=0.0, step=0.1)
+                    lir_value = st.number_input("지역낙후도 지수 (LIR/MIR)", min_value=-3.0, max_value=3.0, value=0.0, step=0.1)
                 else:
                     lir_value = 0.0
-                    st.text_input(_("지역낙후도 지수 (LIR/MIR)", "Regional Backwardness (LIR)"), value="수도권/해당없음", disabled=True)
+                    st.text_input("지역낙후도 지수 (LIR/MIR)", value="수도권/해당없음", disabled=True)
                 
                 st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
                 
-                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{_('B. 1계층 상수합 가중치 (%)', 'B. Level 1 Weights (%)')}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{'B. 1계층 상수합 가중치 (%)'}</div>", unsafe_allow_html=True)
                 if p_type == "rnd_bc":
-                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 45) / 100.0
-                    tech_w = st.slider(_("과학기술적 타당성", "Science/Tech Weight"), 0, 100, 35) / 100.0
-                    policy_w = st.slider(_("정책적 타당성", "Policy Weight"), 0, 100, 20) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 45) / 100.0
+                    tech_w = st.slider("과학기술적 타당성", 0, 100, 35) / 100.0
+                    policy_w = st.slider("정책적 타당성", 0, 100, 20) / 100.0
                     regional_w = 0.0
                 elif p_type == "rnd_ec":
-                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 35) / 100.0
-                    tech_w = st.slider(_("과학기술적 타당성", "Science/Tech Weight"), 0, 100, 45) / 100.0
-                    policy_w = st.slider(_("정책적 타당성", "Policy Weight"), 0, 100, 20) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 35) / 100.0
+                    tech_w = st.slider("과학기술적 타당성", 0, 100, 45) / 100.0
+                    policy_w = st.slider("정책적 타당성", 0, 100, 20) / 100.0
                     regional_w = 0.0
                 elif p_type == "construction_capital":
                     tech_w = 0.0
-                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 65) / 100.0
-                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 35) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 65) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 35) / 100.0
                     regional_w = 0.0
-                    st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 0, disabled=True)
+                    st.slider("지역균형발전 가중치", 0, 100, 0, disabled=True)
                 elif p_type == "other_bc":
                     tech_w = 0.0
-                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 40) / 100.0
-                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 60) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 40) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 60) / 100.0
                     regional_w = 0.0
                 elif p_type == "other_ec":
                     tech_w = 0.0
-                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 30) / 100.0
-                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 70) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 30) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 70) / 100.0
                     regional_w = 0.0
                 else: # construction_non_capital
                     tech_w = 0.0
-                    econ_w = st.slider(_("경제성 가중치", "Economics Weight"), 0, 100, 40) / 100.0
-                    policy_w = st.slider(_("정책적 가중치", "Policy Weight"), 0, 100, 30) / 100.0
-                    regional_w = st.slider(_("지역균형발전 가중치", "Regional Balance Weight"), 0, 100, 30) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 40) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 30) / 100.0
+                    regional_w = st.slider("지역균형발전 가중치", 0, 100, 30) / 100.0
 
                 valid_w, w_msg = yeta_utils.validate_yeta_level1_weights(p_type, econ_w, policy_w, regional_w, tech_w)
                 if valid_w:
-                    st.markdown(f"<div style='color: green; font-size: 0.8rem; margin-top: -10px;'>✔️ {_('KDI 지침 가중치 범위 부합', 'Weights OK')}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='color: green; font-size: 0.8rem; margin-top: -10px;'>✔️ {'KDI 지침 가중치 범위 부합'}</div>", unsafe_allow_html=True)
                 else:
                     st.markdown(f"<div style='color: red; font-size: 0.8rem; margin-top: -10px;'>⚠️ {w_msg}</div>", unsafe_allow_html=True)
 
@@ -1252,8 +1243,8 @@ def run():
             # SECTION 3: 엑셀 데이터 업로드 및 분석 (Upload & Analyze)
             # ==========================================
             with st.container(border=True):
-                st.markdown(f"<h3 style='color: #b91c1c; margin-bottom: 10px; font-size: 1.3rem;'><i class='fas fa-chart-line'></i> {_('2. 데이터 업로드 및 종합평가 분석', '2. Upload Data & Run AHP Analysis')}</h3>", unsafe_allow_html=True)
-                st.markdown(_("<span style='font-size: 0.95rem; color: #4b5563;'>템플릿에 작성이 완료된 AHP 엑셀 데이터를 업로드하면 즉시 예비타당성조사 종합평가 결과가 산출됩니다.</span>", "Upload the completed AHP Excel data to instantly calculate the preliminary feasibility study comprehensive evaluation result."), unsafe_allow_html=True)
+                st.markdown(f"<h3 style='color: #b91c1c; margin-bottom: 10px; font-size: 1.3rem;'><i class='fas fa-chart-line'></i> {'2. 데이터 업로드 및 종합평가 분석'}</h3>", unsafe_allow_html=True)
+                st.markdown("<span style='font-size: 0.95rem; color: #4b5563;'>템플릿에 작성이 완료된 AHP 엑셀 데이터를 업로드하면 즉시 예비타당성조사 종합평가 결과가 산출됩니다.</span>", unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
@@ -1274,17 +1265,17 @@ def run():
                         except:
                             pass
 
-                auto_correct_cr = st.checkbox(_("CR 0.15 초과 시 행렬 자동 보정", "Auto-correct matrix if CR > 0.15"), value=True, help=_("평가자의 일관성 비율(CR)이 0.15를 초과하는 경우, AHP 보정 알고리즘을 통해 일관성 있는 행렬로 자동 조정합니다.", "If the Consistency Ratio (CR) exceeds 0.15, the AHP correction algorithm automatically adjusts it to a consistent matrix."))
+                auto_correct_cr = st.checkbox("CR 0.15 초과 시 행렬 자동 보정", value=True, help="평가자의 일관성 비율(CR)이 0.15를 초과하는 경우, AHP 보정 알고리즘을 통해 일관성 있는 행렬로 자동 조정합니다.")
                 
                 data_source = st.radio(
-                    _("데이터 소스 선택", "Select Data Source"),
-                    [_("📂 엑셀 파일 직접 업로드", "Upload Excel File"), _("🌐 배포된 온라인 설문 데이터 연동", "Link Online Survey Data")],
+                    "데이터 소스 선택",
+                    ["📂 엑셀 파일 직접 업로드", "🌐 배포된 온라인 설문 데이터 연동"],
                     horizontal=True
                 )
                 
                 df = None
-                if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
-                    uploaded_file = st.file_uploader(_("응답이 완료된 AHP 엑셀 파일 첨부", "Upload the completed AHP Excel file"), type=["xlsx"])
+                if data_source == "📂 엑셀 파일 직접 업로드":
+                    uploaded_file = st.file_uploader("응답이 완료된 AHP 엑셀 파일 첨부", type=["xlsx"])
                     if uploaded_file is not None:
                         try:
                             df = pd.read_excel(uploaded_file)
@@ -1314,7 +1305,7 @@ def run():
                                 
                             p_type_ko = "R&D 사업" if inferred_p_type == "rnd" else ("비수도권 사업 (지역균형발전 포함)" if inferred_p_type == "construction_non_capital" else "수도권 사업 (경제성/정책성 위주)")
                             
-                            st.success(_(f"데이터 로드 성공! 엑셀 데이터를 통해 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}", f"Data loaded! Auto-detected model: {p_type_ko}"))
+                            st.success(f"데이터 로드 성공! 엑셀 데이터를 통해 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}")
                             with st.expander("인식된 하위 계층 구조 보기"):
                                 for msg in factor_msg:
                                     st.markdown("- " + msg)
@@ -1327,7 +1318,7 @@ def run():
                             st.error(f"엑셀 로드 중 오류가 발생했습니다: {str(e)}")
                 else:
                     if st.session_state.user_id is None:
-                        st.warning(_("온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", "Online survey integration is available for members. Please log in."))
+                        st.warning("온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.")
                     else:
                         try:
                             from survey_manager import sync_short_codes_from_gs, get_admin_surveys_from_gsheet, load_survey_metadata, get_survey_gspread_client
@@ -1356,17 +1347,17 @@ def run():
                         admin_surveys.sort(key=lambda x: x[2], reverse=True)
                     
                         if not admin_surveys:
-                            st.warning(_("배포된 온라인 설문이 없습니다.", "No deployed online surveys found."))
+                            st.warning("배포된 온라인 설문이 없습니다.")
                         else:
                             survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
                             selected_survey_label = st.selectbox(
-                                _("분석할 온라인 설문 선택", "Select Online Survey for Analysis"),
+                                "분석할 온라인 설문 선택",
                                 list(survey_options.keys())
                             )
                             selected_sheet_id = survey_options[selected_survey_label]
                             
-                            if st.button(_("🔄 구글 시트에서 실시간 응답 가져오기", "🔄 Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
-                                with st.spinner(_("구글 시트에서 설문 데이터를 가져오는 중...", "Fetching survey responses...")):
+                            if st.button("🔄 구글 시트에서 실시간 응답 가져오기", type="primary", use_container_width=True):
+                                with st.spinner("구글 시트에서 설문 데이터를 가져오는 중..."):
                                     from survey_manager import get_survey_gspread_client
                                     g_client = get_survey_gspread_client()
                                     if g_client:
@@ -1403,7 +1394,7 @@ def run():
                                                     
                                                 p_type_ko = "R&D 사업" if inferred_p_type == "rnd" else ("비수도권 사업 (지역균형발전 포함)" if inferred_p_type == "construction_non_capital" else "수도권 사업 (경제성/정책성 위주)")
                                                 
-                                                st.success(_(f"온라인 설문 데이터를 성공적으로 불러왔습니다! 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}", f"Successfully fetched online data! Auto-detected model: {p_type_ko}"))
+                                                st.success(f"온라인 설문 데이터를 성공적으로 불러왔습니다! 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}")
                                                 with st.expander("인식된 하위 계층 구조 보기"):
                                                     for msg in factor_msg:
                                                         st.markdown("- " + msg)
@@ -1412,7 +1403,7 @@ def run():
                                                 # -----------------------------------------------------
                                                 
                                             else:
-                                                st.warning(_("아직 수집된 응답 데이터가 없습니다.", "No response data collected yet."))
+                                                st.warning("아직 수집된 응답 데이터가 없습니다.")
                                         except Exception as e:
                                             st.error(f"구글 시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
 
@@ -1427,7 +1418,7 @@ def run():
                         
                         # 웹 출력용으로만 소수점 포맷팅 적용 (데이터 원본 보존)
                         st.markdown("---")
-                        st.markdown("### " + _("📊 종합평가(AHP) 최종 결과", "📊 Final AHP Evaluation Results"))
+                        st.markdown("### " + "📊 종합평가(AHP) 최종 결과")
                         
                         # --- Create standard AHP summary table ---
                         passed_evals = res_df[res_df["CR 통과"] == "PASS"]
@@ -1453,7 +1444,7 @@ def run():
                                 
                             summary_data.append({"평가항목": "**종합평가 (AHP)**", "가중치": 1.000, "평가 결과 (점수)": final_yeta_score, "비고": "**최종 결과값**"})
                             
-                            st.write("#### " + _("[표] AHP를 이용한 종합평가 결과", "[Table] Comprehensive AHP Evaluation Results"))
+                            st.write("#### " + "[표] AHP를 이용한 종합평가 결과")
                             summary_df_for_excel = pd.DataFrame(summary_data)
                             
                             # 웹 출력 시 소수점 3자리 고정
@@ -1469,7 +1460,7 @@ def run():
                                 excel_data = export_yeta_result_excel(summary_df_for_excel, res_df, final_score=final_yeta_score, is_pass=is_pass)
                                 
                                 st.download_button(
-                                    label=_("📥 종합평가(AHP) 엑셀 결과 다운로드", "📥 Download AHP Excel Results"),
+                                    label="📥 종합평가(AHP) 엑셀 결과 다운로드",
                                     data=excel_data,
                                     file_name="예비타당성조사_AHP_최종결과.xlsx",
                                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1484,15 +1475,15 @@ def run():
                         
                         is_pass = final_yeta_score >= 0.5
                         card_class = "verdict-pass" if is_pass else "verdict-fail"
-                        verdict_text = _("사업 타당성 확보 (시행)", "Project Feasible (Go)") if is_pass else _("사업 타당성 미흡 (미시행)", "Project Not Feasible (Stop)")
+                        verdict_text = "사업 타당성 확보 (시행)" if is_pass else "사업 타당성 미흡 (미시행)"
                         
                         st.markdown(f"""
                         <div class="verdict-card {card_class}">
-                            <div class="verdict-title">{_("최종 종합 평가 판정", "Final Comprehensive Evaluation Verdict")}</div>
+                            <div class="verdict-title">{"최종 종합 평가 판정"}</div>
                             <div class="verdict-score">{final_yeta_score:.3f}</div>
                             <div style="font-size: 1.3rem; font-weight: bold;">{verdict_text}</div>
                             <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.85;">
-                                {_("KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보", "MoEF & KDI standard: Feasible when AHP score >= 0.5")}
+                                {"KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보"}
                             </div>
                         </div>
                         <br>
@@ -1500,8 +1491,8 @@ def run():
                         
                         st.info(f"💡 **조사 결과 해석**: 본 예비타당성조사는 응답자 {len(res_df)}명의 설문 결과를 바탕으로, 극단값(최고점 1명, 최저점 1명)을 제외한 {max(1, len(res_df)-2 if len(res_df) >= 3 else len(res_df))}명의 점수를 종합하여 도출되었습니다. 최종 AHP 종합점수가 {final_yeta_score:.3f}으로 0.5를 {'넘어 사업 타당성을 확보했습니다' if is_pass else '넘지 못해 사업 타당성이 미흡한 것으로 분석되었습니다'}.")
                         
-                        with st.expander(_("📚 AHP 산출식 및 변환 공식 안내", "📚 AHP Formula Guide")):
-                            st.markdown(_("""
+                        with st.expander("📚 AHP 산출식 및 변환 공식 안내"):
+                            st.markdown("""
                             #### 1. 정량 데이터 쌍대비교 척도 변환
                             경제성 등 정량적 수치를 설문조사의 9점 척도와 동등하게 맞추기 위해 KDI 표준 공식을 사용합니다.
                             - **B/C 비율 변환**: `표준점수 = 8.592933 × ln(B/C비율) ± 1`
@@ -1515,22 +1506,10 @@ def run():
                             #### 3. 개인별 점수 합산 및 최종 종합점수 산출
                             각 평가자의 항목별 가중치와 위에서 구한 각 항목별 점수를 곱해 개인별 최종 점수를 계산합니다. 
                             이후 응답자가 3명 이상일 경우, 가장 높은 점수 1명과 가장 낮은 점수 1명을 집계에서 배제(극단값 배제)한 뒤 남은 인원들의 점수를 **기하평균(Geometric Mean)**하여 최종 AHP 평점을 산출합니다.
-                            """, """
-                            #### 1. Conversion of Quantitative Data to Pairwise Scale
-                            Quantitative figures like the B/C ratio are converted into a 9-point scale using standard KDI formulas.
-                            - **B/C Ratio Conversion**: `Score = 8.592933 × ln(B/C) ± 1`
-                            - **LIR Conversion**: `Score = 2.0 × LIR + 1.0`
-                            
-                            #### 2. AHP Score Conversion
-                            The standard `Score` derived above is used to calculate the evaluation score for the 'Go' alternative.
-                            - **Go Weight** = `Score / (Score + 1.0)`
-                            
-                            #### 3. Final Score Aggregation
-                            Individual final scores are calculated by multiplying the weights by the respective scores. Then, extreme outliers (the highest and lowest scores) are excluded, and the **Geometric Mean** of the remaining scores is computed to derive the final AHP score.
-                            """))
+                            """)
                         
                         st.markdown("<br>", unsafe_allow_html=True)
-                        st.write("#### " + _("👨‍🔬 평가자별 점수 분포 및 극단값 배제 현황", "👨‍🔬 Evaluator Distribution & Outlier Exclusion"))
+                        st.write("#### " + "👨‍🔬 평가자별 점수 분포 및 극단값 배제 현황")
                         st.dataframe(res_df, use_container_width=True)
                         
                     except Exception as e:
@@ -1544,20 +1523,20 @@ def run():
     # TAB 1.5: Yeta Excel Template Generator
     # =========================================================================
     with tab_excel:
-        st.write("### " + _("예비타당성조사 AHP 코딩 엑셀 양식 설정 및 다운로드", "Setup & Download Yeta AHP Coding Excel Form"))
+        st.write("### " + "예비타당성조사 AHP 코딩 엑셀 양식 설정 및 다운로드")
         st.markdown("<br>", unsafe_allow_html=True)
         
         st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 10px;'><i class='fas fa-check-circle'></i> 1단계: 분석 모델(사업 유형) 선택</h4>", unsafe_allow_html=True)
         with st.container(border=True):
             excel_project_type = st.selectbox(
-                _("대상 사업 유형", "Select Project Type"),
+                "대상 사업 유형",
                 options=[
-                    ("construction_non_capital", _("건설사업 (비수도권)", "Construction (Non-capital)")),
-                    ("construction_capital", _("건설사업 (수도권)", "Construction (Capital)")),
-                    ("rnd_bc", _("R&D사업 (B/C)", "R&D (B/C)")),
-                    ("rnd_ec", _("R&D사업 (E/C)", "R&D (E/C)")),
-                    ("other_bc", _("기타 재정사업 (B/C)", "Other Fiscal (B/C)")),
-                    ("other_ec", _("기타 재정사업 (E/C)", "Other Fiscal (E/C)"))
+                    ("construction_non_capital", "건설사업 (비수도권)"),
+                    ("construction_capital", "건설사업 (수도권)"),
+                    ("rnd_bc", "R&D사업 (B/C)"),
+                    ("rnd_ec", "R&D사업 (E/C)"),
+                    ("other_bc", "기타 재정사업 (B/C)"),
+                    ("other_ec", "기타 재정사업 (E/C)")
                 ],
                 format_func=lambda x: x[1],
                 key="yeta_excel_project_type_select"
@@ -1565,32 +1544,32 @@ def run():
             ex_p_type = excel_project_type[0]
             
             if "rnd" in ex_p_type:
-                st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 과학기술성", "📊 Fixed Level 1: Economics, Policy, Science/Tech"))
+                st.info("📊 1계층 고정 항목: 경제성, 정책성, 과학기술성")
             elif "capital" in ex_p_type and "non" not in ex_p_type:
-                st.info(_("📊 1계층 고정 항목: 경제성, 정책성", "📊 Fixed Level 1: Economics, Policy"))
+                st.info("📊 1계층 고정 항목: 경제성, 정책성")
             else:
-                st.info(_("📊 1계층 고정 항목: 경제성, 정책성, 지역균형발전", "📊 Fixed Level 1: Economics, Policy, Regional Balance"))
+                st.info("📊 1계층 고정 항목: 경제성, 정책성, 지역균형발전")
         
         st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 25px;'><i class='fas fa-list'></i> 2단계: 2계층 평가 요인 커스터마이징</h4>", unsafe_allow_html=True)
         with st.container(border=True):
-            st.caption(_("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요. 입력한 요인 개수에 맞춰 쌍대비교 폼이 자동 계산됩니다.", "Enter sub-factors separated by commas according to the project characteristics. Pairwise forms are auto-calculated."))
+            st.caption("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요. 입력한 요인 개수에 맞춰 쌍대비교 폼이 자동 계산됩니다.")
             
-            policy_input = st.text_input(_("정책성 하위 요인", "Policy Factors"), value="정책의 일관성, 사업추진상의 위험요인")
+            policy_input = st.text_input("정책성 하위 요인", value="정책의 일관성, 사업추진상의 위험요인")
             policy_factors = [x.strip() for x in policy_input.split(",") if x.strip()]
             
             regional_factors = []
             if "non_capital" in ex_p_type or "other" in ex_p_type:
-                reg_input = st.text_input(_("지역균형발전 하위 요인", "Regional Factors"), value="지역경제 파급효과, 지역개발계획과의 부합성")
+                reg_input = st.text_input("지역균형발전 하위 요인", value="지역경제 파급효과, 지역개발계획과의 부합성")
                 regional_factors = [x.strip() for x in reg_input.split(",") if x.strip()]
                 
             tech_factors = []
             if "rnd" in ex_p_type:
-                tech_input = st.text_input(_("과학기술성 하위 요인", "Tech Factors"), value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성")
+                tech_input = st.text_input("과학기술성 하위 요인", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성")
                 tech_factors = [x.strip() for x in tech_input.split(",") if x.strip()]
 
         st.markdown(f"<h4 style='color: #047857; margin-top: 25px;'><i class='fas fa-file-excel'></i> 3단계: 맞춤형 엑셀 폼 생성 및 다운로드</h4>", unsafe_allow_html=True)
         with st.container(border=True):
-            st.markdown(_("<span style='font-size: 0.95rem; color: #4b5563;'>위 1단계와 2단계에서 설정한 <b>예비타당성조사 분석 모델 및 요인</b>에 맞춰진 전용 엑셀 펀칭 폼입니다.</span>", "This is a dedicated Excel punching form tailored to the Yeta analysis model and factors set above."), unsafe_allow_html=True)
+            st.markdown("<span style='font-size: 0.95rem; color: #4b5563;'>위 1단계와 2단계에서 설정한 <b>예비타당성조사 분석 모델 및 요인</b>에 맞춰진 전용 엑셀 펀칭 폼입니다.</span>", unsafe_allow_html=True)
             
             st.markdown("""
             <div style='background-color: #f9fafb; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px;'>
@@ -1605,14 +1584,14 @@ def run():
             </div>
             """, unsafe_allow_html=True)
             
-            img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
-            caption_text = _("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel")
+            img_file = "ahp_input_guide.png"
+            caption_text = "[참고] 설문 응답을 엑셀에 입력하는 방법"
             if os.path.exists(img_file):
                 st.image(img_file, caption=caption_text)
             
             template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type, policy_factors, regional_factors, tech_factors)
             st.download_button(
-                label=_("👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)", "👉 Download Custom Yeta AHP Excel Template (.xlsx)"),
+                label="👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)",
                 data=template_bytes,
                 file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1630,7 +1609,7 @@ def run():
         # ------------------------------------------------------------
         # 0. 설문 관리 (1인 1설문 모드)
         # ------------------------------------------------------------
-        st.subheader(_("섹션 0: 내 설문 관리", "Section 0: My Survey Management"))
+        st.subheader("섹션 0: 내 설문 관리")
 
         # Initialize states
         if 'yeta_editing_survey_id' not in st.session_state:
@@ -1710,17 +1689,17 @@ def run():
             st.session_state.yeta_survey_auto_loaded = True
             st.rerun()
 
-        @st.dialog(_("🚨 [경고] 기존 설문 영구 삭제 안내", "🚨 [Warning] Permanent Deletion of Existing Survey"))
+        @st.dialog("🚨 [경고] 기존 설문 영구 삭제 안내")
         def confirm_new_survey_yeta():
-            st.error(_("새로운 예타 설문을 작성하시면 기존 연동된 모든 데이터가 삭제됩니다.", "If you create a new survey, all data will be deleted."))
-            agree = st.checkbox(_("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.", "Yes, I agree to delete all data."))
+            st.error("새로운 예타 설문을 작성하시면 기존 연동된 모든 데이터가 삭제됩니다.")
+            agree = st.checkbox("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.")
             col1, col2 = st.columns(2)
             with col1:
-                if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True):
+                if st.button("❌ 취소", use_container_width=True):
                     st.rerun()
             with col2:
-                if st.button(_("✅ 동의 및 초기화", "✅ Agree & Initialize"), type="primary", use_container_width=True, disabled=not agree):
-                    with st.spinner(_("기존 데이터를 삭제하는 중입니다...", "Deleting existing data...")):
+                if st.button("✅ 동의 및 초기화", type="primary", use_container_width=True, disabled=not agree):
+                    with st.spinner("기존 데이터를 삭제하는 중입니다..."):
                         from survey_manager import delete_admin_survey
                         if user_surveys:
                             delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
@@ -1730,18 +1709,18 @@ def run():
                             del st.session_state[k]
                         st.session_state.yeta_survey_auto_loaded = False
                         st.session_state._survey_cache_dirty_yeta = True
-                    st.success(_("완료되었습니다. 화면이 새로고침됩니다.", "Completed. The screen will be refreshed."))
+                    st.success("완료되었습니다. 화면이 새로고침됩니다.")
                     import time
                     time.sleep(1.5)
                     st.rerun()
 
         if has_survey:
-            st.success(_(f" 현재 배포된 예타 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f" A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
-            if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary"):
+            st.success(f" 현재 배포된 예타 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**")
+            if st.button("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", type="secondary"):
                  confirm_new_survey_yeta()
         else:
-            st.info(_(" 작성 중인 새 예타 설문입니다.", " This is a new survey in progress."))
-            if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
+            st.info(" 작성 중인 새 예타 설문입니다.")
+            if st.button("✨ 폼 내용 모두 지우기 (초기화)", type="secondary"):
                 st.session_state.yeta_editing_survey_id = None
                 keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_yeta_')]
                 for k in keys_to_clear:
@@ -2134,11 +2113,11 @@ def run():
     # 실시간 응답 현황 탭
     # =========================================================================
     with tab_live_response:
-        st.header(_("실시간 응답 현황", "Real-time Response Status"))
+        st.header("실시간 응답 현황")
         selected_sheet_id = None
         
         if st.session_state.user_id is None:
-            st.warning(_(" **실시간 응답 현황 기능은 회원 전용 서비스입니다.**", " **Real-time response status is a member-only service.**"))
+            st.warning(" **실시간 응답 현황 기능은 회원 전용 서비스입니다.**")
             st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
         else:
             # DB에서 해당 관리자가 생성한 설문 목록 조회
@@ -2241,13 +2220,13 @@ def run():
                 stats = st.session_state["survey_stats"]
                 col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                 with col_stat1:
-                    st.metric(_("총 접속자 수 (Visits)", "Total Visits"), f"{stats['visits']}" + _("명", ""))
+                    st.metric("총 접속자 수 (Visits)", f"{stats['visits']}" + "명")
                 with col_stat2:
-                    st.metric(_("완료 응답자 수 (Completed)", "Completed Responses"), f"{stats['completed']}" + _("명", ""))
+                    st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}" + "명")
                 with col_stat3:
-                    st.metric(_("일관성 초과 중단자 (CR Fail)", "CR Fail Abandonments"), f"{stats['abandoned_cr']}" + _("회", " times"))
+                    st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}" + "회")
                 with col_stat4:
-                    st.metric(_("단순 이탈 중단자 (Bounce)", "Bounced Visitors"), f"{stats['abandoned_bounce']}" + _("명", ""))
+                    st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}" + "명")
 
                 # 시각화 차트 추가
 
@@ -2277,12 +2256,12 @@ def run():
                 demo_df = st.session_state.get("demo_df", None)
 
                 # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
-                with st.expander(_("📥 실시간 구글 시트 응답 데이터 다운로드 센터", "📥 Real-time Google Sheet Response Data Download Center"), expanded=True):
+                with st.expander("📥 실시간 구글 시트 응답 데이터 다운로드 센터", expanded=True):
                     if not live_df.empty:
                         st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
                         
                         # 📊 AHP 분석 연동 단축 버튼 추가
-                        if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
+                        if st.button("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", type="primary", use_container_width=True):
                             st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                             from survey_manager import load_survey_metadata
                             survey_meta = load_survey_metadata(selected_sheet_id)
@@ -2317,7 +2296,7 @@ def run():
                                                 st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
                                                 
                                 st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                st.info(_("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.", "📊 Data analysis preparation is complete! Select the **'📊 AHP Analysis Tool' tab at the top** and choose the **'🌐 Link Distributed Online Survey Data'** radio button to view the results instantly."))
+                                st.info("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.")
 
                         tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
                         with tab_raw:
@@ -2617,7 +2596,7 @@ def run():
     # TAB 4: B2B Pricing & Payment (Hybrid Pricing Applied)
     # =========================================================================
     with tab_pricing:
-        st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
+        st.markdown("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", unsafe_allow_html=True)
 
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         user_id = st.session_state.get("user_id")
@@ -2693,7 +2672,7 @@ def run():
         st.markdown("<br>", unsafe_allow_html=True)
 
         if not user_id:
-            st.warning(_("⚠️ 결제 및 세금계산서 신청을 위해서는 로그인이 필요합니다. 메인 포털 또는 사이드바에서 로그인 후 이용해 주세요.", "⚠️ Login required for payment and invoice requests. Please login in main portal or sidebar first."))
+            st.warning("⚠️ 결제 및 세금계산서 신청을 위해서는 로그인이 필요합니다. 메인 포털 또는 사이드바에서 로그인 후 이용해 주세요.")
         else:
             st.info(f"접속 계정: {user_id} | 라이선스 권한: {'정식 회원' if is_official else '무료 체험 회원'}")
             
@@ -2741,27 +2720,27 @@ def run():
     # =========================================================================
     if not st.session_state.user_id:
         with tab_signup:
-            st.write("### " + _("AHP 마스터 예타 분석 솔루션 회원가입", "AHP Master YETA Sign Up"))
+            st.write("### " + "AHP 마스터 예타 분석 솔루션 회원가입")
             
             agreements = signup_agreement.show_agreement_ui()
             
-            s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id_yeta")
-            s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw_yeta")
+            s_id = st.text_input("아이디 (이메일 주소)", key="main_s_id_yeta")
+            s_pw = st.text_input("비밀번호", type="password", key="main_s_pw_yeta")
             
             s_cust_type = "yeta"
             
-            if st.button(_("가입신청", "Register"), key="main_btn_signup_yeta", type="primary"):
+            if st.button("가입신청", key="main_btn_signup_yeta", type="primary"):
                 if not agreements.get("agree_personal_info"):
-                    st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
+                    st.error("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.")
                 elif not validate_email(s_id):
-                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                    st.error("올바른 이메일 형식이 아닙니다.")
                 elif not validate_password(s_pw):
-                    st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                    st.error("비밀번호는 문자+특수문자여야 합니다.")
                 else:
                     restore_from_deleted_sheet(s_id.strip())
                     if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
-                        st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
+                        st.success("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.")
                         time.sleep(2)
                         st.rerun()
                     else:
-                        st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+                        st.error("이미 존재하는 아이디입니다.")
