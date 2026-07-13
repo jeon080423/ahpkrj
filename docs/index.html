@@ -82,7 +82,7 @@
                     AHP <span class="text-indigo-600">Master</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <!-- 🌐 English 변경 기능으로 수정 -->
+                    <!-- 🌐 English 변경 기능 -->
                     <a href="#" id="lang-toggle" class="text-gray-600 hover:text-indigo-600 font-semibold transition px-3 py-2 text-sm">
                         English
                     </a>
@@ -97,7 +97,7 @@
 
     <!-- 메인 히어로 섹션 -->
     <section class="pt-32 pb-20 px-4 flex-grow">
-        <div class="max-w-4xl mx-auto text-center">
+        <div class="max-w-5xl mx-auto text-center">
             <h1 id="hero-title" class="text-5xl sm:text-6xl font-extrabold mb-8 tracking-tight leading-tight mt-8">
                 신뢰할 수 있는 <span class="gradient-text">AHP 분석 및 AHP 프로그램</span>,<br/>
                 AHP 마스터로 시작해 보세요.
@@ -118,16 +118,45 @@
             </div>
             <p id="note-install" class="text-sm text-gray-400 mt-6 mb-12">별도의 설치 없이 웹 브라우저에서 바로 실행됩니다.</p>
 
-            <!-- 📖 SEO 유입용 가이드북 배너 카드 삽입 -->
-            <div class="mt-8 p-8 bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200/80 max-w-2xl mx-auto shadow-md text-left transition hover:shadow-lg">
-                <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">NEW GUIDE 📖</span>
-                <h4 id="guide-title" class="text-xl font-bold text-gray-900 mb-2">AHP 쌍대비교 온라인 설문 작성 및 무료 배포 가이드</h4>
-                <p id="guide-desc" class="text-sm text-gray-600 leading-relaxed mb-4">
-                    AHP 연구 설계에서 가장 까다로운 쌍대비교 척도 구성부터 실시간 응답 동기화, CR값 관리 노하우까지 총망라한 실무 매뉴얼을 무료로 공개합니다.
-                </p>
-                <a id="guide-link-text" href="./ahp-online-survey-guide.html" class="inline-flex items-center text-indigo-600 font-bold hover:text-indigo-800 transition gap-1 group">
-                    가이드북 전체 보기 <span class="transition-transform group-hover:translate-x-1 text-sm">→</span>
-                </a>
+            <!-- 2칼럼 격자 컨테이너: 가입 현황 + 가이드 배너 -->
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-12 text-left">
+                <!-- 🟢 실시간 가입 현황 카드 -->
+                <div class="p-8 bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200/80 shadow-md flex flex-col justify-between hover:shadow-lg transition h-[300px]">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span id="ticker-badge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide flex items-center gap-1.5 animate-pulse">
+                                LIVE 🟢
+                            </span>
+                            <span id="ticker-title" class="text-xs font-semibold text-gray-400 uppercase tracking-wider">실시간 가입 현황</span>
+                        </div>
+                        <h4 id="ticker-heading" class="text-lg font-bold text-gray-900 mb-3">정식 사용자 최근 가입 현황</h4>
+                        
+                        <!-- 스크롤 영역 -->
+                        <div class="relative overflow-hidden h-[150px]" id="ticker-container">
+                            <ul class="transition-transform duration-500 ease-in-out" id="ticker-list" style="transform: translateY(0px);">
+                                <!-- JS 가상 데이터 렌더링 -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 📖 SEO 유입용 가이드북 배너 카드 -->
+                <div class="p-8 bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200/80 shadow-md flex flex-col justify-between hover:shadow-lg transition h-[300px]">
+                    <div class="flex flex-col h-full justify-between">
+                        <div>
+                            <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">NEW GUIDE 📖</span>
+                            <h4 id="guide-title" class="text-lg font-bold text-gray-900 mb-2">AHP 쌍대비교 온라인 설문 작성 및 무료 배포 가이드</h4>
+                            <p id="guide-desc" class="text-xs text-gray-500 leading-relaxed mb-4">
+                                AHP 연구 설계에서 가장 까다로운 쌍대비교 척도 구성부터 실시간 응답 동기화, CR값 관리 노하우까지 총망라한 실무 매뉴얼을 무료로 공개합니다.
+                            </p>
+                        </div>
+                        <div>
+                            <a id="guide-link-text" href="./ahp-online-survey-guide.html" class="inline-flex items-center text-indigo-600 font-bold hover:text-indigo-800 transition gap-1 group text-sm">
+                                가이드북 전체 보기 <span class="transition-transform group-hover:translate-x-1 text-sm">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -162,7 +191,7 @@
         <p class="text-sm">Copyright © 2026. All rights reserved.</p>
     </footer>
 
-    <!-- 다국어 번역 스크립트 -->
+    <!-- 다국어 번역 및 가입 현황 스크롤 스크립트 -->
     <script>
         const translations = {
             ko: {
@@ -181,7 +210,10 @@
                 feat2Title: '퍼지 AHP 및 학술적 전문성',
                 feat2Desc: '전통적인 쌍대비교 분석은 물론, 불확실성을 고려한 퍼지(Fuzzy) AHP까지 원클릭으로 완벽하게 처리하여 학술 논문 수준의 전문적인 통계를 산출합니다.',
                 feat3Title: '논문용 고급 시각화',
-                feat3Desc: '바이올린 플롯(Violin Plot), 방사형 차트, CR(일관성 비율) 분포 등 학위 및 학술지 논문에 즉시 삽입 가능한 고품질 차트를 실시간으로 제공합니다.'
+                feat3Desc: '바이올린 플롯(Violin Plot), 방사형 차트, CR(일관성 비율) 분포 등 학위 및 학술지 논문에 즉시 삽입 가능한 고품질 차트를 실시간으로 제공합니다.',
+                tickerTitle: "실시간 가입 현황",
+                tickerHeading: "정식 사용자 최근 가입 현황",
+                planSuffix: "개월"
             },
             en: {
                 langToggle: "한국어",
@@ -199,7 +231,10 @@
                 feat2Title: 'Fuzzy AHP & Academic Expertise',
                 feat2Desc: 'Processes both traditional pairwise comparisons and uncertainty-aware Fuzzy AHP in a single click, producing professional-grade statistics suitable for academic journals.',
                 feat3Title: 'Advanced Visualizations for Thesis',
-                feat3Desc: 'Provides high-quality, real-time charts ready for inclusion in dissertations and journals, such as Violin Plots, Radar Charts, and CR (Consistency Ratio) distributions.'
+                feat3Desc: 'Provides high-quality, real-time charts ready for inclusion in dissertations and journals, such as Violin Plots, Radar Charts, and CR (Consistency Ratio) distributions.',
+                tickerTitle: "Live Registrations",
+                tickerHeading: "Recent Official Registrations",
+                planSuffix: " Months"
             }
         };
 
@@ -227,6 +262,19 @@
             document.getElementById('feat2-desc').innerText = t.feat2Desc;
             document.getElementById('feat3-title').innerText = t.feat3Title;
             document.getElementById('feat3-desc').innerText = t.feat3Desc;
+            
+            document.getElementById('ticker-title').innerText = t.tickerTitle;
+            document.getElementById('ticker-heading').innerText = t.tickerHeading;
+
+            // Update plan periods dynamically
+            const listItems = document.querySelectorAll('#ticker-list li');
+            listItems.forEach(item => {
+                const periodSpan = item.querySelector('.period-text');
+                if (periodSpan) {
+                    const months = periodSpan.getAttribute('data-months');
+                    periodSpan.innerText = months + t.planSuffix;
+                }
+            });
         }
 
         document.getElementById('lang-toggle').addEventListener('click', function(e) {
@@ -235,7 +283,69 @@
             updateLanguage(nextLang);
         });
 
-        // Initialize language setting
+        // ==========================================
+        // 🟢 실시간 정식 가입자 가상 데이터 100개 생성
+        // ==========================================
+        const surnames = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서", "신", "권", "황", "안", "송", "전", "홍", "유", "고", "문", "양", "손", "배", "백", "허"];
+        const plans = ["Standard", "Basic", "Premium"];
+        const periods = [1, 2, 3, 6, 12];
+
+        const tickerList = document.getElementById('ticker-list');
+        const mockData = [];
+
+        // 100개 가상 가입 데이터 생성
+        for (let i = 0; i < 100; i++) {
+            const surname = surnames[i % surnames.length] + "**";
+            const plan = plans[(i * 7 + 3) % plans.length];
+            const period = periods[(i * 13 + 5) % periods.length];
+            mockData.push({ surname, plan, period });
+        }
+
+        // Ticker 가입 현황 리스트 렌더링
+        function renderTicker() {
+            tickerList.innerHTML = '';
+            mockData.forEach(item => {
+                const li = document.createElement('li');
+                li.className = "h-[37px] border-b border-gray-100/50 flex items-center justify-between text-xs text-gray-500 px-1";
+                
+                let badgeClass = "bg-indigo-50 text-indigo-600 border-indigo-100";
+                if (item.plan === "Premium") {
+                    badgeClass = "bg-purple-50 text-purple-600 border-purple-100";
+                } else if (item.plan === "Basic") {
+                    badgeClass = "bg-slate-50 text-slate-600 border-slate-100";
+                }
+                
+                li.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-gray-800">${item.surname}</span>
+                        <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded border ${badgeClass}">${item.plan}</span>
+                    </div>
+                    <span class="text-[11px] text-gray-400 font-medium period-text" data-months="${item.period}">${item.period}${currentLang === 'ko' ? '개월' : ' Months'}</span>
+                `;
+                tickerList.appendChild(li);
+            });
+        }
+
+        // Ticker 스크롤 실행 (무한 로테이션)
+        const itemHeight = 37; // h-[37px] 매칭
+        function startTicker() {
+            setInterval(() => {
+                tickerList.style.transition = "transform 0.5s ease-in-out";
+                tickerList.style.transform = `translateY(-${itemHeight}px)`;
+                
+                setTimeout(() => {
+                    tickerList.style.transition = "none";
+                    tickerList.appendChild(tickerList.firstElementChild);
+                    tickerList.style.transform = "translateY(0px)";
+                }, 500);
+            }, 2000); // 2초 간격 회전
+        }
+
+        // 가입 현황 초기화 및 실행
+        renderTicker();
+        startTicker();
+
+        // 초기 언어 설정 적용
         updateLanguage(currentLang);
     </script>
 </body>
