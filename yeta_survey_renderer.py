@@ -347,6 +347,88 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
     </style>
     ''', unsafe_allow_html=True)
 
+    # 모바일 가로 모드 강제 전환 오버레이
+    import streamlit.components.v1 as components
+    
+    title_text = _("가로 모드 최적화", "Landscape Mode Optimized")
+    desc_text = _("이 설문(AHP 쌍대비교)은 가로 화면에서<br>가장 편하게 응답하실 수 있습니다.", 
+                  "This survey (AHP Pairwise Comparison) is best experienced<br>in landscape mode.")
+    btn_text = _("🔄 화면을 가로로 돌리고 설문 계속하기", "🔄 Rotate to Landscape & Continue")
+    note_text = _("""※ <b>아이폰(iOS) 사용자 안내</b><br>
+                    위 버튼이 작동하지 않을 수 있습니다.<br>
+                    기기의 <b>'자동 회전'을 켜고</b> 스마트폰을 눕혀주시면 안내창이 사라집니다.""",
+                  """※ <b>iPhone (iOS) User Guide</b><br>
+                    The above button may not work.<br>
+                    Please enable <b>'Auto-Rotate'</b> and turn your phone sideways.""")
+
+    mobile_landscape_overlay_html = f"""
+    <script>
+    try {{
+        const parent = window.parent.document;
+        if (!parent.getElementById('mobile-landscape-overlay')) {{
+            const overlay = parent.createElement('div');
+            overlay.id = 'mobile-landscape-overlay';
+            
+            const style = parent.createElement('style');
+            style.innerHTML = `
+                #mobile-landscape-overlay {{
+                    display: none;
+                    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                    background-color: rgba(255,255,255,0.98);
+                    z-index: 999999; flex-direction: column;
+                    justify-content: center; align-items: center; text-align: center;
+                    padding: 20px; box-sizing: border-box;
+                }}
+                @media (orientation: portrait) and (max-width: 768px) {{
+                    #mobile-landscape-overlay {{ display: flex; }}
+                }}
+                .landscape-btn {{
+                    background-color: #ff4b4b; color: white; border: none; border-radius: 8px;
+                    padding: 15px 25px; font-size: 18px; font-weight: bold; margin-top: 20px;
+                    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 320px;
+                }}
+                .landscape-note {{
+                    font-size: 13.5px; color: #555; margin-top: 20px; line-height: 1.5; word-break: keep-all; background: #f8f9fa; padding: 15px; border-radius: 8px; max-width: 320px; text-align: left;
+                }}
+            `;
+            parent.head.appendChild(style);
+
+            overlay.innerHTML = `
+                <div style="font-size: 50px; margin-bottom: 15px;">📱🔄</div>
+                <h2 style="color: #333; margin-bottom: 10px; font-size: 22px;">{title_text}</h2>
+                <p style="color: #444; font-size: 15px; margin-bottom: 5px;">{desc_text}</p>
+                <button class="landscape-btn" id="btn-force-landscape">{btn_text}</button>
+                <div class="landscape-note">
+                    {note_text}
+                </div>
+            `;
+            parent.body.appendChild(overlay);
+
+            parent.getElementById('btn-force-landscape').addEventListener('click', function() {{
+                const docElm = parent.documentElement;
+                if (docElm.requestFullscreen) {{
+                    docElm.requestFullscreen().then(() => {{
+                        if (window.screen.orientation && window.screen.orientation.lock) {{
+                            window.screen.orientation.lock('landscape').catch(e => console.log(e));
+                        }} else if (parent.screen.orientation && parent.screen.orientation.lock) {{
+                            parent.screen.orientation.lock('landscape').catch(e => console.log(e));
+                        }}
+                    }}).catch(e => console.log(e));
+                }} else if (docElm.webkitRequestFullscreen) {{
+                    docElm.webkitRequestFullscreen();
+                    if (parent.screen.orientation && parent.screen.orientation.lock) {{
+                        parent.screen.orientation.lock('landscape').catch(e => console.log(e));
+                    }}
+                }}
+            }});
+        }}
+    }} catch(e) {{
+        console.log("Error injecting overlay:", e);
+    }}
+    </script>
+    """
+    components.html(mobile_landscape_overlay_html, height=0)
+
     ahp_model = survey_meta["AHP_Model_JSON"]
     demographics = survey_meta["Demographics"]
     
