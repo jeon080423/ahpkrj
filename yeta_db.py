@@ -9,6 +9,9 @@ import gspread
 import time
 import json
 import os
+import re
+import base64
+from google.oauth2.service_account import Credentials
 
 def get_db_connection(db_name='users.db', timeout=15):
     return sqlite3.connect(db_name, timeout=timeout)
