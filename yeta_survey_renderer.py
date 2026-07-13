@@ -5,12 +5,6 @@ import datetime
 import os
 from survey_manager import calculate_matrix_cr
 
-def _(ko_text, en_text):
-    if st.session_state.get('lang', 'ko') == 'en':
-        return en_text
-    return ko_text
-
-
 def render_yeta_pairwise_matrix(title, factors, pairs, definitions, prefix_key, ahp_answers):
 
     PASTEL_PALETTES = [
@@ -172,14 +166,14 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     if survey_desc or survey_email:
         email_html = (
             f"<div style='margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-weight: bold;'>"
-            f"📧 " + _("설문 담당자 문의:", "Contact Survey Administrator:") + " "
+            f"📧 " + "설문 담당자 문의:" + " "
             f"<a href='mailto:{survey_email}' style='color: #2563eb; text-decoration: none;'>{survey_email}</a>"
             f"</div>"
         ) if survey_email else ""
         
         mobile_hint_html = (
             f"<div style='margin-top: 16px; padding: 12px; background-color: #f1f5f9; border-radius: 6px; font-size: 0.9rem; color: #334155; display: flex; gap: 8px; align-items: center;'>"
-            f"<span style='font-size: 1.2rem;'>📱</span> <span>" + _("스마트폰으로 접속하신 경우, <b>기기를 가로로 회전</b>하시면 더욱 편리하게 설문에 응답하실 수 있습니다.", "If you are using a smartphone, you can respond to the survey more conveniently by <b>rotating the screen horizontally</b>.") + "</span>"
+            f"<span style='font-size: 1.2rem;'>📱</span> <span>" + "스마트폰으로 접속하신 경우, <b>기기를 가로로 회전</b>하시면 더욱 편리하게 설문에 응답하실 수 있습니다." + "</span>"
             f"</div>"
         )
         box_html = f'<div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{survey_desc}\n{email_html}\n{mobile_hint_html}</div>'
@@ -350,16 +344,12 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
     # 모바일 가로 모드 강제 전환 오버레이
     import streamlit.components.v1 as components
     
-    title_text = _("가로 모드 최적화", "Landscape Mode Optimized")
-    desc_text = _("이 설문(AHP 쌍대비교)은 가로 화면에서<br>가장 편하게 응답하실 수 있습니다.", 
-                  "This survey (AHP Pairwise Comparison) is best experienced<br>in landscape mode.")
-    btn_text = _("🔄 화면을 가로로 돌리고 설문 계속하기", "🔄 Rotate to Landscape & Continue")
-    note_text = _("""※ <b>아이폰(iOS) 사용자 안내</b><br>
+    title_text = "가로 모드 최적화"
+    desc_text = "이 설문(AHP 쌍대비교)은 가로 화면에서<br>가장 편하게 응답하실 수 있습니다."
+    btn_text = "🔄 화면을 가로로 돌리고 설문 계속하기"
+    note_text = """※ <b>아이폰(iOS) 사용자 안내</b><br>
                     위 버튼이 작동하지 않을 수 있습니다.<br>
-                    기기의 <b>'자동 회전'을 켜고</b> 스마트폰을 눕혀주시면 안내창이 사라집니다.""",
-                  """※ <b>iPhone (iOS) User Guide</b><br>
-                    The above button may not work.<br>
-                    Please enable <b>'Auto-Rotate'</b> and turn your phone sideways.""")
+                    기기의 <b>'자동 회전'을 켜고</b> 스마트폰을 눕혀주시면 안내창이 사라집니다."""
 
     mobile_landscape_overlay_html = f"""
     <script>
@@ -438,7 +428,7 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
     sub_sub_map = ahp_model.get("sub_subs", {})
     
     # 1. 응답자 기본 정보
-    st.subheader("1. " + _("응답자 기본 정보", "Respondent Demographic Information"))
+    st.subheader("1. " + "응답자 기본 정보")
     resp_data = {}
     
     if "survey_resp_uuid" not in st.session_state:
@@ -449,7 +439,7 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
     
     # 성명
     if demographics.get("name"):
-        name_label = f"SQ{sq_idx}. " + _("성명 *", "Name *")
+        name_label = f"SQ{sq_idx}. " + "성명 *"
         sq_idx += 1
         col1, col2 = st.columns([1, 3])
         with col1:
@@ -469,8 +459,8 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
             else:
                 ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"yeta_survey_resp_type_{i}")
             resp_data["types"].append(ans)
-    st.subheader("2. " + _("제1계층 평가: 상수합법 (100점 배분)", "Tier 1 Evaluation: Constant Sum (Allocate 100 points)"))
-    st.caption(_("아래 1계층 평가항목의 합이 정확히 100이 되도록 중요도를 직접 분배해주십시오.", "Please distribute the importance so that the sum of the following Tier 1 items is exactly 100."))
+    st.subheader("2. " + "제1계층 평가: 상수합법 (100점 배분)")
+    st.caption("아래 1계층 평가항목의 합이 정확히 100이 되도록 중요도를 직접 분배해주십시오.")
     
     definitions = survey_meta.get("Definitions", {})
     main_rows_html = ""
@@ -530,8 +520,8 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
     st.divider()
     
     # 3. 요인 간 상대적 중요도 평가 (쌍대비교)
-    st.subheader("3. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Relative Importance Evaluation (Pairwise Comparison)"))
-    st.caption(_("왼쪽 요인과 오른쪽 요인 중 더 중요하다고 생각하는 쪽으로 중요도를 평가해 주십시오. (1=동등, 숫자가 클수록 해당 방향이 더 중요함)", "Please evaluate which factor is more important. (1=Equal, higher number means more important in that direction)"))
+    st.subheader("3. " + "요인 간 상대적 중요도 평가 (쌍대비교)")
+    st.caption("왼쪽 요인과 오른쪽 요인 중 더 중요하다고 생각하는 쪽으로 중요도를 평가해 주십시오. (1=동등, 숫자가 클수록 해당 방향이 더 중요함)")
     
     ahp_answers = {}
     
@@ -607,8 +597,8 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
     st.divider()
     
     # 4. 대안평가 (시행 vs 미시행 선호도)
-    st.subheader("4. " + _("최종 대안평가 (시행선호도 평가)", "Final Alternative Evaluation (Preference for Implementation)"))
-    st.caption(_("각 최하위 평가요인에 대해 '사업 시행(Left)'과 '사업 미시행(Right)' 중 어느 쪽이 더 타당한지 비교해주십시오.", "For each bottom-level factor, please compare whether 'Project Implementation (Left)' or 'No Project (Right)' is more appropriate."))
+    st.subheader("4. " + "최종 대안평가 (시행선호도 평가)")
+    st.caption("각 최하위 평가요인에 대해 '사업 시행(Left)'과 '사업 미시행(Right)' 중 어느 쪽이 더 타당한지 비교해주십시오.")
     
     for main_c in main_criteria:
         subs = sub_criteria_map.get(main_c, [])
@@ -774,17 +764,17 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
     st.divider()
     
     # 5. 제출하기
-    submit_btn = st.button(_("설문지 제출하기", "Submit Survey"), type="primary", use_container_width=True)
+    submit_btn = st.button("설문지 제출하기", type="primary", use_container_width=True)
     if submit_btn:
         if current_sum != 100:
-            st.error(_("1계층 가중치 합계가 100%가 아닙니다. 조정 후 다시 시도해 주세요.", "The sum of Tier 1 weights is not 100%. Please adjust it and try again."))
+            st.error("1계층 가중치 합계가 100%가 아닙니다. 조정 후 다시 시도해 주세요.")
             st.stop()
             
         if demographics.get("name") and not resp_data.get("name"):
-            st.error(_("성명을 입력해 주십시오.", "Please enter your name."))
+            st.error("성명을 입력해 주십시오.")
             st.stop()
             
-        with st.spinner(_("응답을 전송 중입니다...", "Submitting response...")):
+        with st.spinner("응답을 전송 중입니다..."):
             if is_preview_mode:
                 import time
                 time.sleep(1.0)
@@ -799,4 +789,4 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
                     st.session_state[f"survey_submitted_{survey_id_param}"] = True
                     st.rerun()
                 else:
-                    st.error(_("저장 중 오류가 발생했습니다. 다시 시도해 주세요.", "Error saving response. Please try again."))
+                    st.error("저장 중 오류가 발생했습니다. 다시 시도해 주세요.")
