@@ -5238,11 +5238,11 @@ def get_fee_info_text():
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       정식 회원으로 전환하시면 모든 분석 한도가 즉시 해제되며 아래 혜택을 제공합니다:
     </span>
-    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
-      <li>분석 표본수 제한 완전 해제 (무제한 분석)</li>
-      <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
-      <li>퍼지(Fuzzy) AHP 분석 기능 지원 (Pro)</li>
-      <li>논문용 고해상도 시각화 보고서 다운로드</li>
+    <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+      <li><span style="font-size: 0.85rem;">분석 표본수 제한 완전 해제 (무제한 분석)</span></li>
+      <li><span style="font-size: 0.85rem;">집단간 차이 분석 (T-Test, ANOVA) 제공</span></li>
+      <li><span style="font-size: 0.85rem;">퍼지(Fuzzy) AHP 분석 기능 지원 (Pro)</span></li>
+      <li><span style="font-size: 0.85rem;">논문용 고해상도 시각화 보고서 다운로드</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
@@ -5265,11 +5265,11 @@ def get_fee_info_text():
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       Upgrade to a paid license to unlock all limits and enjoy the following benefits:
     </span>
-    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
-      <li>Unlimited sample analysis (no limit)</li>
-      <li>Cross-statistical analysis (T-Test, ANOVA)</li>
-      <li>Fuzzy AHP analysis support (Pro plan)</li>
-      <li>Download advanced charts & thesis reports</li>
+    <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+      <li><span style="font-size: 0.85rem;">Unlimited sample analysis (no limit)</span></li>
+      <li><span style="font-size: 0.85rem;">Cross-statistical analysis (T-Test, ANOVA)</span></li>
+      <li><span style="font-size: 0.85rem;">Fuzzy AHP analysis support (Pro plan)</span></li>
+      <li><span style="font-size: 0.85rem;">Download advanced charts & thesis reports</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
@@ -5295,12 +5295,12 @@ def get_fee_info_text():
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       상단의 <strong>'회원가입'</strong> 탭에서 <strong>무료 회원가입</strong>이 가능합니다. 무료 회원에게는 아래 혜택이 제공됩니다:
     </span>
-    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
-      <li>AHP 코딩 엑셀 양식 다운로드</li>
-      <li>온라인 AHP 설문지 제작 및 배포 (무료)</li>
-      <li>실시간 설문 데이터 구글 시트 연동</li>
-      <li>설문 응답 모니터링 & 결과 다운로드</li>
-      <li>AHP 분석 도구 무료 체험 (최대 5표본)</li>
+    <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+      <li><span style="font-size: 0.85rem;">AHP 코딩 엑셀 양식 다운로드</span></li>
+      <li><span style="font-size: 0.85rem;">온라인 AHP 설문지 제작 및 배포 (무료)</span></li>
+      <li><span style="font-size: 0.85rem;">실시간 설문 데이터 구글 시트 연동</span></li>
+      <li><span style="font-size: 0.85rem;">설문 응답 모니터링 & 결과 다운로드</span></li>
+      <li><span style="font-size: 0.85rem;">AHP 분석 도구 무료 체험 (최대 5표본)</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
@@ -5323,12 +5323,12 @@ def get_fee_info_text():
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       You can sign up for a <strong>free account</strong> via the <strong>'Sign Up'</strong> tab at the top. Free members enjoy:
     </span>
-    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
-      <li>Download AHP coding Excel templates</li>
-      <li>Create and deploy online AHP surveys (Free)</li>
-      <li>Real-time data integration with Google Sheets</li>
-      <li>Monitor responses & download raw data</li>
-      <li>Free trial of AHP analysis tools (up to 5 samples)</li>
+    <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+      <li><span style="font-size: 0.85rem;">Download AHP coding Excel templates</span></li>
+      <li><span style="font-size: 0.85rem;">Create and deploy online AHP surveys (Free)</span></li>
+      <li><span style="font-size: 0.85rem;">Real-time data integration with Google Sheets</span></li>
+      <li><span style="font-size: 0.85rem;">Monitor responses & download raw data</span></li>
+      <li><span style="font-size: 0.85rem;">Free trial of AHP analysis tools (up to 5 samples)</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
