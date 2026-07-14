@@ -1915,29 +1915,7 @@ def run():
                     type_questions_state[i]["opts"] = opts_val
                     type_questions.append({"q": q_val, "opts": [x.strip() for x in opts_val.split(",") if x.strip()]})
 
-            st.markdown("#### 4. 동적 예타 AHP 엑셀 템플릿 다운로드")
-            st.info("입력하신 계층 구조에 맞추어 즉시 분석 가능한 엑셀 파일(템플릿)을 다운로드할 수 있습니다.")
-            ex_p_type = "construction_non_capital"
-            if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: ex_p_type = "construction_capital"
-            elif "R&D" in yeta_p_type: ex_p_type = "rnd_bc" if "B/C" in yeta_p_type else "rnd_ec"
-            elif "기타" in yeta_p_type: ex_p_type = "other_bc" if "B/C" in yeta_p_type else "other_ec"
-
-            try:
-                from yeta_utils import generate_yeta_excel_template_dynamic
-                template_bytes = generate_yeta_excel_template_dynamic(ex_p_type, model_structure)
-                st.download_button(
-                    label="👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)",
-                    data=template_bytes,
-                    file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    type="primary",
-                    use_container_width=True,
-                    key="yeta_dynamic_excel_download_btn"
-                )
-            except Exception as e:
-                st.error(f"엑셀 템플릿 생성 오류: {e}")
-
-            st.markdown("#### 5. 온라인 배포 및 구글 시트 연동 설정")
+            st.markdown("#### 4. 온라인 배포 및 구글 시트 연동 설정")
             if st.session_state.user_id is None:
                 st.warning("온라인 배포 및 구글 시트 연동은 회원 전용 기능입니다. 로그인해 주세요.")
             else:
