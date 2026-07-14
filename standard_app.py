@@ -5181,8 +5181,72 @@ def get_paypal_custom_services_html(user_id=None):
 
 
 def get_fee_info_text():
-    return _(
-        """<div style="line-height: 1.4; font-size: 0.95rem;">
+    is_free_user = False
+    try:
+        is_free_user = (st.session_state.get('user_id') is not None and st.session_state.get('user_role') == 'temp')
+    except:
+        pass
+
+    if is_free_user:
+        return _(
+            """<div style="line-height: 1.4; font-size: 0.95rem;">
+  <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
+  <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">👑 정식(유료) 회원 전환 혜택</span>
+    <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
+      정식 회원으로 전환하시면 모든 분석 한도가 즉시 해제되며 아래 혜택을 제공합니다:
+    </span>
+    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+      <li>분석 표본수 제한 완전 해제 (무제한 분석)</li>
+      <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
+      <li>퍼지(Fuzzy) AHP 분석 기능 지원 (Pro)</li>
+      <li>논문용 고해상도 시각화 보고서 다운로드</li>
+    </ul>
+  </div>
+  <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서 발급 가능</span>
+  </div>
+  <h3 style="margin-top: -5px; margin-bottom: 8px;">환불 및 취소 규정</h3>
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
+      <div>불만족 100% 환불</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
+      <div>30분 이내 취소 신청</div>
+    </div>
+  </div>
+</div>""",
+            """<div style="line-height: 1.4; font-size: 0.95rem;">
+  <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
+  <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">👑 Upgrade to Paid License</span>
+    <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
+      Upgrade to a paid license to unlock all limits and enjoy the following benefits:
+    </span>
+    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+      <li>Unlimited sample analysis (no limit)</li>
+      <li>Cross-statistical analysis (T-Test, ANOVA)</li>
+      <li>Fuzzy AHP analysis support (Pro plan)</li>
+      <li>Download advanced charts & thesis reports</li>
+    </ul>
+  </div>
+  <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice Available</span>
+  </div>
+  <h3 style="margin-top: -5px; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
+  <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
+    <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
+      <div>100% Refund if unsatisfied</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
+      <div>Cancellation within 30 minutes</div>
+    </div>
+  </div>
+</div>"""
+        )
+    else:
+        return _(
+            """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 무료 회원가입 안내</span>
@@ -5210,7 +5274,7 @@ def get_fee_info_text():
     </div>
   </div>
 </div>""",
-        """<div style="line-height: 1.4; font-size: 0.95rem;">
+            """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 Free Account Benefits</span>
@@ -5238,7 +5302,7 @@ def get_fee_info_text():
     </div>
   </div>
 </div>"""
-    )
+        )
 
 with st.sidebar:
 
@@ -5535,29 +5599,19 @@ with st.sidebar:
         show_refund_dialog()
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
-        st.markdown(_(
-            """<div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid #d97706; padding: 12px; margin-top: 10px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-              <span style="font-size: 0.9rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 4px;">👑 정식(유료) 회원 전환 혜택</span>
-              <span style="font-size: 0.8rem; color: #4b5563; line-height: 1.5; display: block;">
-                • <strong>분석 표본수 제한 해제</strong> (무제한 분석)<br>
-                • <strong>집단간 차이 분석</strong> (T-Test, ANOVA) 제공<br>
-                • <strong>퍼지(Fuzzy) AHP 분석</strong> 지원 (Pro)<br>
-                • 논문용 고급 시각화 보고서 다운로드
-              </span>
-            </div>""",
-            """<div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid #d97706; padding: 12px; margin-top: 10px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-              <span style="font-size: 0.9rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 4px;">👑 Upgrade to Paid License</span>
-              <span style="font-size: 0.8rem; color: #4b5563; line-height: 1.5; display: block;">
-                • <strong>Remove sample limits</strong> (unlimited analysis)<br>
-                • <strong>Demographic T-Test / ANOVA</strong> analysis<br>
-                • <strong>Fuzzy AHP analysis</strong> supported (Pro)<br>
-                • Download advanced charts & thesis reports
-              </span>
-            </div>"""
-        ), unsafe_allow_html=True)
-        
         if st.button(_("⭐ 정식 사용자로 전환하기", "⭐ Upgrade to Paid License Now"), key="sidebar_upgrade_btn", use_container_width=True):
-            show_upgrade_dialog()
+            st.components.v1.html("""
+                <script>
+                    const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+                    for (let i = 0; i < tabs.length; i++) {
+                        if (tabs[i].innerText.includes('서비스 요금') || tabs[i].innerText.includes('Pricing')) {
+                            tabs[i].click();
+                            window.parent.scrollTo(0, 0);
+                            break;
+                        }
+                    }
+                </script>
+            """, height=0, width=0)
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
