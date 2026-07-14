@@ -112,19 +112,23 @@ STATSMODELS_AVAILABLE = True
 # -----------------------------------------------------------------------------
 # 다국어(English/Korean) 번역 헬퍼 함수
 # -----------------------------------------------------------------------------
-if 'lang' not in st.session_state:
-    try:
-        _init_lang = st.query_params.get("lang", "ko")
-        if isinstance(_init_lang, list): _init_lang = _init_lang[0]
-        st.session_state.lang = _init_lang.lower()
-    except:
-        st.session_state.lang = 'ko'
-
-        st.session_state.lang = 'ko'
+try:
+    if 'lang' not in st.session_state:
+        try:
+            _init_lang = st.query_params.get("lang", "ko")
+            if isinstance(_init_lang, list): _init_lang = _init_lang[0]
+            st.session_state.lang = _init_lang.lower()
+        except:
+            st.session_state.lang = 'ko'
+except:
+    pass
 
 def _(ko_text, en_text):
-    if st.session_state.get('lang', 'ko') == 'en':
-        return en_text
+    try:
+        if st.session_state.get('lang', 'ko') == 'en':
+            return en_text
+    except:
+        pass
     return ko_text
 
 DEFAULT_SURVEY_DESC_KO = """[조사 목적 및 안내문]
