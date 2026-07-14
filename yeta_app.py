@@ -1748,7 +1748,9 @@ def run():
                 "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
                 "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."
             )
-            survey_desc = st.text_area("설문 안내문", value=st.session_state.get("edit_yeta_desc", default_survey_desc), height=250)
+            from streamlit_quill import st_quill
+            st.markdown("**설문 안내문**")
+            survey_desc = st_quill(value=st.session_state.get("edit_yeta_desc", default_survey_desc), html=True, key="quill_yeta_desc")
             
             st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
             yeta_p_type = st.selectbox(

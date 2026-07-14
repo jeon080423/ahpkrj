@@ -245,12 +245,17 @@ def translate_definition_if_default(factor_name, def_text):
     if st.session_state.get('lang', 'ko') != 'en' or not def_text:
         return def_text
         
+    # Strip HTML tags for checking (in case of Quill editor)
+    import re
+    plain_text = re.sub(r'<[^>]+>', '', def_text).strip()
+    
     # [FIX] Handle multi-line survey description explicitly
-    if def_text.strip() == DEFAULT_SURVEY_DESC_KO.strip():
+    if plain_text == re.sub(r'<[^>]+>', '', DEFAULT_SURVEY_DESC_KO).strip():
+        # If the original text is the default, return the English default (wrapped in HTML paragraph if needed, but st.markdown handles raw text fine)
         return DEFAULT_SURVEY_DESC_EN
     
     # Clean up whitespace for other definitions
-    clean_def = re.sub(r'\s+', ' ', def_text).strip()
+    clean_def = re.sub(r'\s+', ' ', plain_text).strip()
     
     # 1. Direct match in dictionary
     if clean_def in DEFAULT_TRANSLATED_DEFS:
@@ -8898,7 +8903,9 @@ with col_main:
     - Lead Researcher : [Enter Name]
     - Contact : [Enter Phone or Email]"""
 
-            survey_desc = st.text_area(_("조사 목적 및 안내문", "Survey Purpose & Instructions"), value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), height=350)
+            from streamlit_quill import st_quill
+            st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
+            survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc")
             if st.session_state.user_id:
                 if "@" in st.session_state.user_id:
                     default_admin_email = st.session_state.user_id
