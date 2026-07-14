@@ -5073,7 +5073,7 @@ def get_fee_info_text():
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       상단의 <strong>'회원가입'</strong> 탭에서 <strong>무료 회원가입</strong>이 가능합니다. 무료 회원에게는 아래 혜택이 제공됩니다:
     </span>
-    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 18px; line-height: 1.45;">
+    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li>AHP 코딩 엑셀 양식 다운로드</li>
       <li>온라인 AHP 설문지 제작 및 배포 (무료)</li>
       <li>실시간 설문 데이터 구글 시트 연동</li>
@@ -5101,7 +5101,7 @@ def get_fee_info_text():
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       You can sign up for a <strong>free account</strong> via the <strong>'Sign Up'</strong> tab at the top. Free members enjoy:
     </span>
-    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 18px; line-height: 1.45;">
+    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li>Download AHP coding Excel templates</li>
       <li>Create and deploy online AHP surveys (Free)</li>
       <li>Real-time data integration with Google Sheets</li>
