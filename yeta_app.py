@@ -2612,10 +2612,10 @@ def run():
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>예타 분석 솔루션의 핵심 연산과 결과물 구성을 사전에 시뮬레이션할 수 있는 무료 버전입니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li style='font-size: 0.85rem;'><b>B/C 표준점수 로그 변환 연산</b></li>
-                    <li style='font-size: 0.85rem;'><b>지역낙후도 표준화지수(LIR) 변환</b></li>
-                    <li style='font-size: 0.85rem;'>설문 데이터 입력 (최대 3명 제한)</li>
-                    <li style='font-size: 0.85rem;'>화면 결과 리포트 출력</li>
+                    <li><span style='font-size: 0.85rem;'><b>B/C 표준점수 로그 변환 연산</b></span></li>
+                    <li><span style='font-size: 0.85rem;'><b>지역낙후도 표준화지수(LIR) 변환</b></span></li>
+                    <li><span style='font-size: 0.85rem;'>설문 데이터 입력 (최대 3명 제한)</span></li>
+                    <li><span style='font-size: 0.85rem;'>화면 결과 리포트 출력</span></li>
                 </ul>
             """
             if user_id:
@@ -2632,11 +2632,11 @@ def run():
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>1개월 동안 평가자 수·분석 횟수 제한 없이 예타 AHP 전체 기능을 자유롭게 이용할 수 있습니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li style='font-size: 0.85rem;'><b>1개월간 분석 횟수 무제한</b></li>
-                    <li style='font-size: 0.85rem;'>평가자 수 제한 없음 (무제한)</li>
-                    <li style='font-size: 0.85rem;'>최대/최소 아웃라이어 제외 자동 연산</li>
-                    <li style='font-size: 0.85rem;'>보고서 제출용 Excel 원본 내보내기</li>
-                    <li style='font-size: 0.85rem;'>세금계산서 및 영수증 발행 지원</li>
+                    <li><span style='font-size: 0.85rem;'><b>1개월간 분석 횟수 무제한</b></span></li>
+                    <li><span style='font-size: 0.85rem;'>평가자 수 제한 없음 (무제한)</span></li>
+                    <li><span style='font-size: 0.85rem;'>최대/최소 아웃라이어 제외 자동 연산</span></li>
+                    <li><span style='font-size: 0.85rem;'>보고서 제출용 Excel 원본 내보내기</span></li>
+                    <li><span style='font-size: 0.85rem;'>세금계산서 및 영수증 발행 지원</span></li>
                 </ul>
             """
             if user_id:
@@ -2653,10 +2653,10 @@ def run():
                 <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>월간 대비 22% 절감된 비용으로 1년간 횟수 제한 없이 예타 AHP 분석과 설문 배포를 수행합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li style='font-size: 0.85rem;'><b>1년간 분석 횟수 무제한</b></li>
-                    <li style='font-size: 0.85rem;'><b>월 약 233,000원 수준 (22% 절감)</b></li>
-                    <li style='font-size: 0.85rem;'>무제한 전문가 설문 및 아웃라이어 연산</li>
-                    <li style='font-size: 0.85rem;'>B2B 기업용 견적서/세금계산서 발행</li>
+                    <li><span style='font-size: 0.85rem;'><b>1년간 분석 횟수 무제한</b></span></li>
+                    <li><span style='font-size: 0.85rem;'><b>월 약 233,000원 수준 (22% 절감)</b></span></li>
+                    <li><span style='font-size: 0.85rem;'>무제한 전문가 설문 및 아웃라이어 연산</span></li>
+                    <li><span style='font-size: 0.85rem;'>B2B 기업용 견적서/세금계산서 발행</span></li>
                 </ul>
             """
             if user_id:
