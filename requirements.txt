@@ -20,3 +20,4 @@ requests
 python-dateutil
 Pillow
 deep-translator
+streamlit-quill
