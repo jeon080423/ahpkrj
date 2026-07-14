@@ -302,7 +302,11 @@
         for (let i = 0; i < 100; i++) {
             const surname = surnames[i % surnames.length] + "**";
             const plan = plans[(i * 7 + 3) % plans.length];
-            const period = periods[(i * 13 + 5) % periods.length];
+            let period = 2;
+            if (plan === "Premium") {
+                const premiumPeriods = [2, 4, 6];
+                period = premiumPeriods[(i * 13 + 5) % premiumPeriods.length];
+            }
             
             // 오늘 포함 최근 1개월 (0~30일 전) 랜덤 날짜
             const randomOffsetDays = (i * 19 + 7) % 31;
@@ -326,7 +330,11 @@
                     const seed = (d * 5 + j) * 13;
                     const surname = surnames[seed % surnames.length] + "**";
                     const plan = plans[(seed * 3 + 1) % plans.length];
-                    const period = periods[(seed * 7 + 2) % periods.length];
+                    let period = 2;
+                    if (plan === "Premium") {
+                        const premiumPeriods = [2, 4, 6];
+                        period = premiumPeriods[(seed * 7 + 2) % premiumPeriods.length];
+                    }
                     // 배열 가장 앞에 추가 (최신 날짜)
                     mockData.unshift({ surname, plan, period, regDate: targetDate });
                 }
