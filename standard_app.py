@@ -10188,7 +10188,7 @@ with col_main:
                         else:
                             st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
-                st.info(_("🔒 **개인정보 보호 안내**\nAHP 마스터는 사용자의 **이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다.** 또한 입력하신 **비밀번호는 강력하게 암호화**되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\nAHP Master does **not collect unnecessary personal information such as names or phone numbers.** Furthermore, your **password is strongly encrypted** and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
+                st.info(_("🔒 **개인정보 보호 안내**\n\nAHP 마스터는 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
 
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
