@@ -19,3 +19,4 @@ streamlit-javascript
 requests
 python-dateutil
 Pillow
+deep-translator
