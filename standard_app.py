@@ -131,6 +131,25 @@ def _(ko_text, en_text):
         pass
     return ko_text
 
+@st.cache_data(show_spinner=False)
+def translate_dynamic_text(text, target_lang='en'):
+    if not text or not str(text).strip():
+        return text
+    try:
+        from deep_translator import GoogleTranslator
+        translator = GoogleTranslator(source='ko', target=target_lang)
+        return translator.translate(str(text))
+    except Exception:
+        return text
+
+def _t(text):
+    """Dynamically translates user-provided text if the current language is English."""
+    try:
+        if st.session_state.get('lang', 'ko') == 'en':
+            return translate_dynamic_text(text, 'en')
+    except:
+        pass
+    return text
 DEFAULT_SURVEY_DESC_KO = """[조사 목적 및 안내문]
 
 안녕하십니까?
@@ -238,7 +257,7 @@ def translate_definition_if_default(factor_name, def_text):
         return DEFAULT_TRANSLATED_DEFS[clean_def]
         
     # Translate the factor_name in pattern matching to match Korean if it's saved in Korean
-    trans_factor = DEFAULT_TRANSLATED_DEFS.get(factor_name, factor_name)
+    trans_factor = DEFAULT_TRANSLATED_DEFS.get(factor_name, _t(factor_name))
     
     # 2. Pattern matches for "{factor}에 대한 정의입니다." or "{factor}에 대한 정의 입니다."
     pattern1 = rf"^(?:{re.escape(factor_name)}|{re.escape(trans_factor)})\s*에\s*대한\s*정의\s*입니다\.?$"
@@ -249,12 +268,12 @@ def translate_definition_if_default(factor_name, def_text):
     if re.match(pattern2, clean_def):
         return f"Overall description for {trans_factor}."
         
-    return def_text
+    return _t(def_text)
 
 def translate_factor_if_default(factor_name):
     if st.session_state.get('lang', 'ko') != 'en' or not factor_name:
         return factor_name
-    return DEFAULT_TRANSLATED_DEFS.get(factor_name, factor_name)
+    return DEFAULT_TRANSLATED_DEFS.get(factor_name, _t(factor_name))
 
 # =============================================================================
 # 0. 시스템 설정 및 유틸리티
@@ -3279,6 +3298,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
     survey_title = survey_meta.get('Title', 'AHP 온라인 설문조사')
     if survey_title in ['AHP 온라인 설문조사', '제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문']:
         survey_title = _(survey_title, 'Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots')
+    else:
+        survey_title = _t(survey_title)
         
     # --- Survey Language Switcher ---
     lang_col1, lang_col2 = st.columns([8, 2])
@@ -3428,6 +3449,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
             tq_opts = tq.get("opts", [])
             if not tq_q or tq_q == "귀하의 소속은 어떻게 되십니까?":
                 tq_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+            else:
+                tq_q = _t(tq_q)
             
             if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["전문가", "일반", "공무원", "기타"]:
                 if "opts" not in tq: # it was added via UI as short answer text
@@ -3447,6 +3470,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
         type_q = demographics.get("type_question", "")
         if not type_q or type_q == "귀하의 소속은 어떻게 되십니까?":
             type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+        else:
+            type_q = _t(type_q)
         
         type_opts = demographics.get("type_options", [])
         if not isinstance(type_opts, list) or not type_opts or type_opts == ["전문가", "일반", "공무원", "기타"]:
