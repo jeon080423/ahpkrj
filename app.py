@@ -50,17 +50,23 @@ except Exception as e:
     st.error(f"DB 마이그레이션 오류: {e}")
 
 # 2. Re-resolve language settings
-if 'lang' not in st.session_state:
-    try:
-        _init_lang = st.query_params.get("lang", "ko")
-        if isinstance(_init_lang, list): _init_lang = _init_lang[0]
-        st.session_state.lang = _init_lang.lower()
-    except:
-        st.session_state.lang = 'ko'
+try:
+    if 'lang' not in st.session_state:
+        try:
+            _init_lang = st.query_params.get("lang", "ko")
+            if isinstance(_init_lang, list): _init_lang = _init_lang[0]
+            st.session_state.lang = _init_lang.lower()
+        except:
+            st.session_state.lang = 'ko'
+except:
+    pass
 
 def _(ko_text, en_text):
-    if st.session_state.get('lang', 'ko') == 'en':
-        return en_text
+    try:
+        if st.session_state.get('lang', 'ko') == 'en':
+            return en_text
+    except:
+        pass
     return ko_text
 
 # 3. Handle query parameters and session state for routing
