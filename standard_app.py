@@ -1674,6 +1674,118 @@ def send_consulting_email(name, company, email, phone, inquiry_type, details, up
 def show_refund_dialog():
     render_refund_form(is_standalone=False, show_header=False)
 
+@st.dialog(_("정식(유료) 라이선스 업그레이드", "Upgrade to Official/Paid License"), width="large")
+def show_upgrade_dialog():
+    st.write(_("사용 목적에 맞는 요금제를 선택해 주세요. 결제 완료 즉시 정식 라이선스로 전환됩니다.", 
+               "Please choose a plan that fits your research. Your account will be upgraded instantly after payment."))
+    
+    col1, col2, col3 = st.columns(3)
+    user_id = st.session_state.user_id
+    lang = st.session_state.lang
+    
+    if lang == 'en':
+        with col1:
+            st.markdown("""
+                <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; background: white; text-align: center; height: 260px;">
+                    <h3 style="margin: 0; color: #334155; font-size: 1.2rem;">Basic</h3>
+                    <span style="color: #888; font-size: 0.85rem;">2 Months</span>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">$160 USD</h2>
+                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">For small projects with standard AHP methodology.</p>
+                    <hr style="margin: 8px 0;">
+                    <ul style="font-size: 0.75rem; text-align: left; color: #334155; padding-left: 15px; line-height: 1.4; margin: 0;">
+                        <li>Max 10 samples limit</li>
+                        <li>Standard AHP features</li>
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            st.components.v1.html(get_paypal_payment_html(user_id, "Basic (2 Months)", 160.0, 2, inner_html="", is_best=False), height=70)
+            
+        with col2:
+            st.markdown("""
+                <div style="border: 2px solid #22c55e; padding: 15px; border-radius: 8px; background: #f0fdf4; text-align: center; position: relative; height: 260px;">
+                    <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold;">BEST</span>
+                    <h3 style="margin: 0; color: #15803d; font-size: 1.2rem;">Standard</h3>
+                    <span style="color: #16a34a; font-size: 0.85rem;">2 Months</span>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">$330 USD</h2>
+                    <p style="font-size: 0.8rem; color: #166534; min-height: 45px; line-height: 1.3;">For cross-statistical analysis (T-Test, ANOVA).</p>
+                    <hr style="margin: 8px 0; border-color: #bbf7d0;">
+                    <ul style="font-size: 0.75rem; text-align: left; color: #166534; padding-left: 15px; line-height: 1.4; margin: 0;">
+                        <li>Unlimited samples</li>
+                        <li>Group difference tests</li>
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            st.components.v1.html(get_paypal_payment_html(user_id, "Standard (2 Months)", 330.0, 2, inner_html="", is_best=True), height=70)
+            
+        with col3:
+            st.markdown("""
+                <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; background: white; text-align: center; height: 260px;">
+                    <h3 style="margin: 0; color: #334155; font-size: 1.2rem;">Pro</h3>
+                    <span style="color: #888; font-size: 0.85rem;">2 Months</span>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">$700 USD</h2>
+                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">For Fuzzy AHP analysis & priority support.</p>
+                    <hr style="margin: 8px 0;">
+                    <ul style="font-size: 0.75rem; text-align: left; color: #334155; padding-left: 15px; line-height: 1.4; margin: 0;">
+                        <li>Fuzzy AHP analysis</li>
+                        <li>Priority tech support</li>
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            st.components.v1.html(get_paypal_payment_html(user_id, "Pro (2 Months)", 700.0, 2, inner_html="", is_best=False), height=70)
+    else:
+        with col1:
+            st.markdown("""
+                <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; background: white; text-align: center; height: 260px;">
+                    <h3 style="margin: 0; color: #334155; font-size: 1.2rem;">Basic</h3>
+                    <span style="color: #888; font-size: 0.85rem;">2개월</span>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">300,000원</h2>
+                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">표준 AHP 방법론을 활용한 소규모 프로젝트에 적합</p>
+                    <hr style="margin: 8px 0;">
+                    <ul style="font-size: 0.75rem; text-align: left; color: #334155; padding-left: 15px; line-height: 1.4; margin: 0;">
+                        <li>최대 10표본 분석</li>
+                        <li>일반 AHP 분석 제공</li>
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            st.components.v1.html(get_portone_payment_html(user_id, "Basic (2개월)", 300000, 2, inner_html="", is_best=False), height=70)
+            
+        with col2:
+            st.markdown("""
+                <div style="border: 2px solid #22c55e; padding: 15px; border-radius: 8px; background: #f0fdf4; text-align: center; position: relative; height: 260px;">
+                    <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold;">BEST</span>
+                    <h3 style="margin: 0; color: #15803d; font-size: 1.2rem;">Standard</h3>
+                    <span style="color: #16a34a; font-size: 0.85rem;">2개월</span>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">500,000원</h2>
+                    <p style="font-size: 0.8rem; color: #166534; min-height: 45px; line-height: 1.3;">응답자 그룹별 차이 분석(T-Test, ANOVA) 리서치</p>
+                    <hr style="margin: 8px 0; border-color: #bbf7d0;">
+                    <ul style="font-size: 0.75rem; text-align: left; color: #166534; padding-left: 15px; line-height: 1.4; margin: 0;">
+                        <li>표본수 제한 없이 무제한</li>
+                        <li>집단간 차이 검정</li>
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            st.components.v1.html(get_portone_payment_html(user_id, "Standard (2개월)", 500000, 2, inner_html="", is_best=True), height=70)
+            
+        with col3:
+            st.markdown("""
+                <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; background: white; text-align: center; height: 260px;">
+                    <h3 style="margin: 0; color: #334155; font-size: 1.2rem;">Pro</h3>
+                    <span style="color: #888; font-size: 0.85rem;">2개월</span>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">950,000원</h2>
+                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">Fuzzy AHP 분석과 최우선 기술 지원 필요시</p>
+                    <hr style="margin: 8px 0;">
+                    <ul style="font-size: 0.75rem; text-align: left; color: #334155; padding-left: 15px; line-height: 1.4; margin: 0;">
+                        <li>퍼지 AHP 분석 포함</li>
+                        <li>설문 셋팅 1회 무료 대행</li>
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            st.components.v1.html(get_portone_payment_html(user_id, "Pro (2개월)", 950000, 2, inner_html="", is_best=False), height=70)
+            
+    st.markdown("---")
+    st.info(_("💳 연구비/법인카드 결제 및 견적서/세금계산서 발행(사이드바의 발행 탭 이용) 모두 100% 지원됩니다.", 
+              "💳 Corporate cards, PayPal, Invoices, and Quotations are 100% supported."))
+
 def render_refund_form(is_standalone=False, show_header=True):
     if is_standalone:
         if st.button(_("← 메인 화면으로 돌아가기", "← Back to Main Menu"), key="back_to_main_refund_standalone", use_container_width=True):
@@ -5419,8 +5531,29 @@ with st.sidebar:
         show_refund_dialog()
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
-        import streamlit.components.v1 as components
-        components.html(get_portone_payment_html(st.session_state.user_id), height=60)
+        st.markdown(_(
+            """<div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid #d97706; padding: 12px; margin-top: 10px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <span style="font-size: 0.9rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 4px;">👑 정식(유료) 회원 전환 혜택</span>
+              <span style="font-size: 0.8rem; color: #4b5563; line-height: 1.5; display: block;">
+                • <strong>분석 표본수 제한 해제</strong> (무제한 분석)<br>
+                • <strong>집단간 차이 분석</strong> (T-Test, ANOVA) 제공<br>
+                • <strong>퍼지(Fuzzy) AHP 분석</strong> 지원 (Pro)<br>
+                • 논문용 고급 시각화 보고서 다운로드
+              </span>
+            </div>""",
+            """<div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid #d97706; padding: 12px; margin-top: 10px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <span style="font-size: 0.9rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 4px;">👑 Upgrade to Paid License</span>
+              <span style="font-size: 0.8rem; color: #4b5563; line-height: 1.5; display: block;">
+                • <strong>Remove sample limits</strong> (unlimited analysis)<br>
+                • <strong>Demographic T-Test / ANOVA</strong> analysis<br>
+                • <strong>Fuzzy AHP analysis</strong> supported (Pro)<br>
+                • Download advanced charts & thesis reports
+              </span>
+            </div>"""
+        ), unsafe_allow_html=True)
+        
+        if st.button(_("⭐ 정식 사용자로 전환하기", "⭐ Upgrade to Paid License Now"), key="sidebar_upgrade_btn", use_container_width=True):
+            show_upgrade_dialog()
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
