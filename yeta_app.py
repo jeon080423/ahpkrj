@@ -1554,18 +1554,42 @@ def run():
         with st.container(border=True):
             st.caption("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요. 입력한 요인 개수에 맞춰 쌍대비교 폼이 자동 계산됩니다.")
             
-            policy_input = st.text_input("정책성 하위 요인", value="정책의 일관성, 사업추진상의 위험요인")
-            policy_factors = [x.strip() for x in policy_input.split(",") if x.strip()]
+            policy_input = st.text_input("정책성 하위 요인 (2계층)", value="정책의 일관성, 사업추진상의 위험요인")
+            policy_2nd = [x.strip() for x in policy_input.split(",") if x.strip()]
+            policy_factors = {k: [] for k in policy_2nd}
+            if policy_2nd:
+                with st.expander("↳ '정책성' 3계층 (소분류) 입력", expanded=False):
+                    st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
+                    for t2 in policy_2nd:
+                        t3_val = st.text_input(f"'{t2}'의 하위 요인 (3계층)", key=f"ex_policy_t3_{t2}")
+                        if t3_val.strip():
+                            policy_factors[t2] = [x.strip() for x in t3_val.split(",") if x.strip()]
             
-            regional_factors = []
+            regional_factors = {}
             if "non_capital" in ex_p_type or "other" in ex_p_type:
-                reg_input = st.text_input("지역균형발전 하위 요인", value="지역경제 파급효과, 지역개발계획과의 부합성")
-                regional_factors = [x.strip() for x in reg_input.split(",") if x.strip()]
+                reg_input = st.text_input("지역균형발전 하위 요인 (2계층)", value="지역경제 파급효과, 지역개발계획과의 부합성")
+                reg_2nd = [x.strip() for x in reg_input.split(",") if x.strip()]
+                regional_factors = {k: [] for k in reg_2nd}
+                if reg_2nd:
+                    with st.expander("↳ '지역균형발전' 3계층 (소분류) 입력", expanded=False):
+                        st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
+                        for t2 in reg_2nd:
+                            t3_val = st.text_input(f"'{t2}'의 하위 요인 (3계층)", key=f"ex_reg_t3_{t2}")
+                            if t3_val.strip():
+                                regional_factors[t2] = [x.strip() for x in t3_val.split(",") if x.strip()]
                 
-            tech_factors = []
+            tech_factors = {}
             if "rnd" in ex_p_type:
-                tech_input = st.text_input("과학기술성 하위 요인", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성")
-                tech_factors = [x.strip() for x in tech_input.split(",") if x.strip()]
+                tech_input = st.text_input("과학기술성 하위 요인 (2계층)", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성")
+                tech_2nd = [x.strip() for x in tech_input.split(",") if x.strip()]
+                tech_factors = {k: [] for k in tech_2nd}
+                if tech_2nd:
+                    with st.expander("↳ '과학기술성' 3계층 (소분류) 입력", expanded=False):
+                        st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
+                        for t2 in tech_2nd:
+                            t3_val = st.text_input(f"'{t2}'의 하위 요인 (3계층)", key=f"ex_tech_t3_{t2}")
+                            if t3_val.strip():
+                                tech_factors[t2] = [x.strip() for x in t3_val.split(",") if x.strip()]
 
         st.markdown(f"<h4 style='color: #047857; margin-top: 25px;'><i class='fas fa-file-excel'></i> 3단계: 맞춤형 엑셀 폼 생성 및 다운로드</h4>", unsafe_allow_html=True)
         with st.container(border=True):
