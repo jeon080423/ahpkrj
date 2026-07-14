@@ -3933,7 +3933,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
             st.subheader(_("응답자 성명 확인", "Respondent Name Verification"))
             col1, col2 = st.columns([1, 3])
             with col1:
-                resp_data["name"] = st.text_input(_("성명 *", "Name *"), key="survey_resp_name", value="", placeholder=_("예: 홍길동 (또는 홍*동)", "e.g. John Doe (or J. Doe)"))
+                name_verify = st.text_input(_("성명 *", "Name *"), key="survey_resp_name_verify", value="", placeholder=_("예: 홍길동 (또는 홍*동)", "e.g. John Doe (or J. Doe)"))
+                if name_verify:
+                    resp_data["name"] = name_verify
                 st.caption(_("중복 응답 확인을 위해 입력을 요청드립니다. 전체 이름 공개가 불편하신 경우 성씨 또는 성씨와 이름 끝자만 입력하셔도 됩니다.", "Requested to check for duplicate responses. If uncomfortable disclosing your full name, you may enter just your last name or initials."))
             st.divider()
 
