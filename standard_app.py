@@ -1440,9 +1440,12 @@ def track_visitor():
         pass
 
 # 방문자 추적 실행부
-if 'visited' not in st.session_state:
-    st.session_state.visited = False
-track_visitor()
+try:
+    if 'visited' not in st.session_state:
+        st.session_state.visited = False
+    track_visitor()
+except Exception:
+    pass
 
 def verify_paypal_payment(order_id):
     """Verify PayPal order status on the backend using credentials from secrets."""
@@ -3042,22 +3045,28 @@ if not st.session_state.get('_db_initialized'):
 # CSS 최적화
 
 
-if 'user_id' not in st.session_state: st.session_state.user_id = None
-if 'user_role' not in st.session_state: st.session_state.user_role = None
-if 'expiry_date' not in st.session_state: st.session_state.expiry_date = None
-if 'admin_mode' not in st.session_state: st.session_state.admin_mode = False
-if 'model_structure' not in st.session_state: st.session_state.model_structure = {}
-if 'page' not in st.session_state: st.session_state.page = "main"
-if 'signup_paypal_user' not in st.session_state: st.session_state.signup_paypal_user = None
-if 'signup_portone_user' not in st.session_state: st.session_state.signup_portone_user = None
+try:
+    if 'user_id' not in st.session_state: st.session_state.user_id = None
+    if 'user_role' not in st.session_state: st.session_state.user_role = None
+    if 'expiry_date' not in st.session_state: st.session_state.expiry_date = None
+    if 'admin_mode' not in st.session_state: st.session_state.admin_mode = False
+    if 'model_structure' not in st.session_state: st.session_state.model_structure = {}
+    if 'page' not in st.session_state: st.session_state.page = "main"
+    if 'signup_paypal_user' not in st.session_state: st.session_state.signup_paypal_user = None
+    if 'signup_portone_user' not in st.session_state: st.session_state.signup_portone_user = None
 
-# 로그인 상태일 경우 가입 결제 대기 상태 초기화
-if st.session_state.user_id is not None:
-    st.session_state.signup_paypal_user = None
-    st.session_state.signup_portone_user = None
+    # 로그인 상태일 경우 가입 결제 대기 상태 초기화
+    if st.session_state.user_id is not None:
+        st.session_state.signup_paypal_user = None
+        st.session_state.signup_portone_user = None
+except Exception:
+    pass
 
 # Check for foreign access once per session
-check_foreign_access()
+try:
+    check_foreign_access()
+except Exception:
+    pass
 
 # -----------------------------------------------------------------------------
 # 쿼리 매개변수 확인 (다국어 선택 및 결제 완료 처리)
