@@ -3106,7 +3106,7 @@ except AttributeError:
 # -----------------------------------------------------------------------------
 # 구글 OAuth 2.0 콜백 처리
 # -----------------------------------------------------------------------------
-if "code" in q_params and st.session_state.user_id:
+if "code" in q_params and st.session_state.get('user_id'):
     import os
     if os.name == 'nt':
         redirect_uri = "http://localhost:8501/"
@@ -4172,7 +4172,7 @@ import time
 TIMEOUT_LIMIT = 1800 # 30분 (초 단위)
 current_time = int(time.time())
 
-if st.session_state.user_id is not None:
+if st.session_state.get('user_id') is not None:
     last_act = q_params.get("last_activity")
     if isinstance(last_act, list): last_act = last_act[0]
     
@@ -4344,7 +4344,7 @@ if "paypal_order_id" in q_params:
     st.rerun()
 
 # 정식 회원 자동 만료 체크 (로그인 상태)
-if st.session_state.user_id is not None and st.session_state.user_role == 'official':
+if st.session_state.get('user_id') is not None and st.session_state.get('user_role') == 'official':
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
     try:
         expiry_date_val_temp = datetime.datetime.strptime(st.session_state.expiry_date, "%Y-%m-%d").date()
@@ -10187,6 +10187,8 @@ with col_main:
                             st.rerun()
                         else:
                             st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+
+                st.info(_("🔒 **개인정보 보호 안내**\nAHP 마스터는 사용자의 **이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다.** 또한 입력하신 **비밀번호는 강력하게 암호화**되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\nAHP Master does **not collect unnecessary personal information such as names or phone numbers.** Furthermore, your **password is strongly encrypted** and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
 
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
