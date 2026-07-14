@@ -286,7 +286,7 @@
         // ==========================================
         // 🟢 실시간 정식 가입자 가상 데이터 100개 및 가입일 생성
         // ==========================================
-        const surnames = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서", "신", "권", "황", "안", "송", "전", "홍", "유", "고", "문", "양", "손", "배", "백", "허"];
+        const fakeIds = ["ahp", "kdi", "jh", "sm", "lee", "par", "cho", "use", "dat", "res", "tes", "app", "sky", "blu", "sta", "sun", "moo", "qwe", "asd", "zxc", "lio", "tig", "bea", "jin", "kim", "abc", "xyz", "pro", "edu", "uni"];
         const plans = ["Standard", "Basic", "Premium"];
         const periods = [1, 2, 3, 6, 12];
 
@@ -300,7 +300,9 @@
 
         // 100개 초기 가상 데이터 생성 (오늘 포함 최근 1개월 이전 날짜로 랜덤 생성)
         for (let i = 0; i < 100; i++) {
-            const surname = surnames[i % surnames.length] + "**";
+            const prefix = fakeIds[i % fakeIds.length];
+            const randomNum = (i * 17) % 100;
+            const surname = prefix + randomNum + "***";
             const plan = plans[(i * 7 + 3) % plans.length];
             let period = 2;
             if (plan === "Premium") {
@@ -328,7 +330,9 @@
                 const targetDate = new Date(startBaseDate.getTime() + d * 24 * 60 * 60 * 1000);
                 for (let j = 0; j < 5; j++) {
                     const seed = (d * 5 + j) * 13;
-                    const surname = surnames[seed % surnames.length] + "**";
+                    const prefix = fakeIds[seed % fakeIds.length];
+                    const randomNum = (seed * 19) % 100;
+                    const surname = prefix + randomNum + "***";
                     const plan = plans[(seed * 3 + 1) % plans.length];
                     let period = 2;
                     if (plan === "Premium") {
