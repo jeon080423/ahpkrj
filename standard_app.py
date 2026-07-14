@@ -5233,12 +5233,12 @@ def get_fee_info_text():
         return _(
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+  <div style="background-color: #fffbeb; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">👑 정식(유료) 회원 전환 혜택</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       정식 회원으로 전환하시면 모든 분석 한도가 즉시 해제되며 아래 혜택을 제공합니다:
     </span>
-    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li>분석 표본수 제한 완전 해제 (무제한 분석)</li>
       <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
       <li>퍼지(Fuzzy) AHP 분석 기능 지원 (Pro)</li>
@@ -5260,12 +5260,12 @@ def get_fee_info_text():
 </div>""",
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+  <div style="background-color: #fffbeb; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">👑 Upgrade to Paid License</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       Upgrade to a paid license to unlock all limits and enjoy the following benefits:
     </span>
-    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li>Unlimited sample analysis (no limit)</li>
       <li>Cross-statistical analysis (T-Test, ANOVA)</li>
       <li>Fuzzy AHP analysis support (Pro plan)</li>
@@ -5290,12 +5290,12 @@ def get_fee_info_text():
         return _(
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+  <div style="background-color: #f0fdf4; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 무료 회원가입 안내</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       상단의 <strong>'회원가입'</strong> 탭에서 <strong>무료 회원가입</strong>이 가능합니다. 무료 회원에게는 아래 혜택이 제공됩니다:
     </span>
-    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li>AHP 코딩 엑셀 양식 다운로드</li>
       <li>온라인 AHP 설문지 제작 및 배포 (무료)</li>
       <li>실시간 설문 데이터 구글 시트 연동</li>
@@ -5318,12 +5318,12 @@ def get_fee_info_text():
 </div>""",
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+  <div style="background-color: #f0fdf4; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 Free Account Benefits</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       You can sign up for a <strong>free account</strong> via the <strong>'Sign Up'</strong> tab at the top. Free members enjoy:
     </span>
-    <ul style="font-size: 0.8rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
+    <ul style="font-size: 0.85rem; color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li>Download AHP coding Excel templates</li>
       <li>Create and deploy online AHP surveys (Free)</li>
       <li>Real-time data integration with Google Sheets</li>
