@@ -161,6 +161,9 @@ def render_yeta_survey(survey_meta, is_preview_mode=False, survey_id_param=""):
     st.title(survey_title)
     
     survey_desc = survey_meta.get("Description", "")
+    import re
+    survey_desc = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', survey_desc)
+    survey_desc = re.sub(r'__(.*?)__', r'<u>\1</u>', survey_desc)
     survey_email = survey_meta.get("Admin_Email", "temp@ahpmaster.com")
     
     if survey_desc or survey_email:

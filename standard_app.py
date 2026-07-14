@@ -3326,9 +3326,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
     survey_desc = survey_meta.get("Description", "")
     survey_desc = translate_definition_if_default("Description", survey_desc)
     
-    # 마침표(.)를 기준으로 강제 줄내림 적용하여 긴 문장 가독성 향상 (사용자 입력 레이아웃 유지를 위해 비활성화)
-    # if survey_desc:
-    #     survey_desc = survey_desc.replace(". ", ".\n\n")
+    # 텍스트 내의 특정 단어 볼드(**단어**) 및 밑줄(__단어__) 처리 지원
+    import re
+    survey_desc = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', survey_desc)
+    survey_desc = re.sub(r'__(.*?)__', r'<u>\1</u>', survey_desc)
     
     survey_email = survey_meta.get("Admin_Email", "temp@ahpmaster.com")
     if not survey_email or str(survey_email).strip() == "":
