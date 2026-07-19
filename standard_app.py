@@ -4984,35 +4984,41 @@ def get_paypal_payment_html(user_id, plan_name="Official User", amount_usd=162.0
           <div>{inner_html}</div>
           <div class="paypal-btn-container" id="paypal-button-container"></div>
       </div>
-      <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
       <script>
-        paypal.Buttons({{
-          style: {{
-            layout: 'vertical',
-            color:  'gold',
-            shape:  'rect',
-            label:  'paypal',
-            height: 40
-          }},
-          createOrder: function(data, actions) {{
-            return actions.order.create({{
-              purchase_units: [{{
-                amount: {{
-                  value: '{amount_usd:.2f}'
-                }},
-                description: '{plan_name}'
-              }}]
-            }});
-          }},
-          onApprove: function(data, actions) {{
-            return actions.order.capture().then(function(details) {{
-              window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}");
-            }});
-          }},
-          onError: function(err) {{
-            alert('PayPal payment failed or was cancelled.');
-          }}
-        }}).render('#paypal-button-container');
+        window.addEventListener('load', function() {{
+            var script = document.createElement('script');
+            script.src = "https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US";
+            script.onload = function() {{
+                paypal.Buttons({{
+                  style: {{
+                    layout: 'vertical',
+                    color:  'gold',
+                    shape:  'rect',
+                    label:  'paypal',
+                    height: 40
+                  }},
+                  createOrder: function(data, actions) {{
+                    return actions.order.create({{
+                      purchase_units: [{{
+                        amount: {{
+                          value: '{amount_usd:.2f}'
+                        }},
+                        description: '{plan_name}'
+                      }}]
+                    }});
+                  }},
+                  onApprove: function(data, actions) {{
+                    return actions.order.capture().then(function(details) {{
+                      window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}");
+                    }});
+                  }},
+                  onError: function(err) {{
+                    alert('PayPal payment failed or was cancelled.');
+                  }}
+                }}).render('#paypal-button-container');
+            }};
+            document.head.appendChild(script);
+        }});
       </script>
     </body>
     </html>
@@ -5135,8 +5141,18 @@ def get_paypal_custom_services_html(user_id=None):
           <div class="paypal-btn-container" id="paypal-button-container"></div>
       </div>
       
-      <script src="https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US"></script>
       <script>
+        let paypalLoaded = false;
+        window.addEventListener('load', function() {{
+            var script = document.createElement('script');
+            script.src = "https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US";
+            script.onload = function() {{
+                paypalLoaded = true;
+                updatePrice();
+            }};
+            document.head.appendChild(script);
+        }});
+
         function updatePrice() {{
             const opt1 = document.getElementById("svc_opt_1");
             const opt2 = document.getElementById("svc_opt_2");
@@ -5168,6 +5184,8 @@ def get_paypal_custom_services_html(user_id=None):
                 container.innerHTML = '<div style="text-align: center; padding: 10px; background: #eee; font-size: 0.85rem; border-radius: 5px; color: #777; font-weight: bold;">Select an option above</div>';
                 return;
             }}
+            
+            if (!paypalLoaded) return;
             
             paypal.Buttons({{
               style: {{
