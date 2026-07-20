@@ -4946,6 +4946,312 @@ def get_portone_custom_services_html(user_id=None):
     </html>
     """
 
+
+def get_unified_english_pricing_html(user_id):
+    is_logged_in = "true" if user_id else "false"
+    paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
+    
+    # We will pass the user_id via query params exactly as done in get_paypal_payment_html
+    # window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months={months}&plan_name=" + encodeURIComponent("{plan_name}");
+    
+    return f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        body {{ font-family: 'Pretendard', sans-serif; margin:0; padding: 15px; box-sizing: border-box; background: transparent; }}
+        
+        .pricing-grid {{
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 100%;
+        }}
+        
+        @media (max-width: 900px) {{
+            .pricing-grid {{
+                grid-template-columns: repeat(2, 1fr);
+            }}
+        }}
+        @media (max-width: 600px) {{
+            .pricing-grid {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+
+        .pricing-box {{
+            padding: 15px; 
+            border-radius: 10px; 
+            height: 520px; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: white;
+            border: 1px solid #ddd;
+        }}
+        .pricing-box.best {{
+            border: 2px solid #ff4b4b;
+        }}
+        
+        .best-badge {{
+            position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;
+        }}
+
+        h3 {{ margin-top: 0 !important; margin-bottom: 0; }}
+        .subtitle {{ color: #888; font-size: 1.1rem; }}
+        h2.price {{ margin-top: 15px; margin-bottom: 5px; color: #ff4b4b; font-size: 2rem; font-weight: bold; }}
+        p.desc {{ font-size: 0.85rem; color: #666; min-height: 40px; margin-top:0; }}
+        hr {{ margin: 10px 0; border: 0; border-top: 1px solid #eee; }}
+        
+        ul.features {{ font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6; margin-top: 0; flex-grow: 1; }}
+        
+        .svc-list {{ list-style: none; padding-left: 0; margin: 0; font-size: 0.9rem; color: #333; line-height: 1.8; flex-grow: 1; }}
+        .svc-item {{ display: flex; align-items: flex-start; margin-bottom: 8px; cursor: pointer; }}
+        .svc-item input[type="checkbox"] {{ margin-right: 8px; margin-top: 4px; cursor: pointer; accent-color: #ff4b4b; }}
+        .svc-item span {{ font-size: 0.85rem; line-height: 1.4; }}
+
+        .btn-container {{ margin-top: auto; width: 100%; min-height: 40px; }}
+        
+        .login-btn {{
+            width: 100%; padding: 12px; font-weight: bold; font-size: 1rem; border-radius: 5px; cursor: pointer; border: none; transition: 0.3s;
+            background-color: #f1f5f9; color: #475569;
+        }}
+        .login-btn:hover {{ background-color: #e2e8f0; }}
+        .login-btn.primary {{ background-color: #ff4b4b; color: white; }}
+        .login-btn.primary:hover {{ background-color: #e63946; }}
+      </style>
+    </head>
+    <body>
+      <div class="pricing-grid">
+          <!-- Basic Plan -->
+          <div class="pricing-box">
+              <h3>Basic</h3>
+              <span class="subtitle">2 Months</span>
+              <h2 class="price">$160 USD</h2>
+              <p class="desc">Suitable for small-scale projects aiming for reliable results using standard AHP methodology.</p>
+              <hr>
+              <ul class="features">
+                  <li><b>Standard AHP features</b></li>
+                  <li><b>Max 10 samples limit</b></li>
+                  <li>Unlimited project creation</li>
+                  <li>Standard email support</li>
+              </ul>
+              <div class="btn-container" id="paypal-btn-basic"></div>
+          </div>
+
+          <!-- Standard Plan -->
+          <div class="pricing-box best">
+              <div class="best-badge">BEST</div>
+              <h3>Standard</h3>
+              <span class="subtitle">2 Months</span>
+              <h2 class="price">$330 USD</h2>
+              <p class="desc">Suitable for professional research requiring precise conclusions through demographic group-difference analysis.</p>
+              <hr>
+              <ul class="features">
+                  <li><b>Includes Advanced Cross-Statistical Analysis (T-Test, ANOVA)</b></li>
+                  <li><b>Unlimited sample size</b></li>
+                  <li>Unlimited project creation</li>
+                  <li>Standard email support</li>
+              </ul>
+              <div class="btn-container" id="paypal-btn-standard"></div>
+          </div>
+
+          <!-- Pro Plan -->
+          <div class="pricing-box">
+              <h3>Pro</h3>
+              <span class="subtitle">2 Months</span>
+              <h2 class="price">$700 USD</h2>
+              <p class="desc">Suitable for research institutions and top-tier academic journals requiring advanced Fuzzy AHP analysis and priority support.</p>
+              <hr>
+              <ul class="features">
+                  <li><b>Includes Fuzzy AHP</b></li>
+                  <li>Advanced cross-statistical analysis (T-Test, ANOVA)</li>
+                  <li>Unlimited sample size & projects</li>
+                  <li>Priority tech/bug support</li>
+                  <li><b>1 Free survey setup proxy</b></li>
+              </ul>
+              <div class="btn-container" id="paypal-btn-pro"></div>
+          </div>
+
+          <!-- Custom Services -->
+          <div class="pricing-box">
+              <h3>Proxy Services</h3>
+              <span class="subtitle">Custom Services</span>
+              <h2 class="price" id="totalPriceDisplay">$0 USD</h2>
+              <p class="desc" id="statusDesc" style="margin-bottom:0;">Please select the proxy services you need.</p>
+              <hr>
+              <ul class="svc-list">
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_1" value="33" data-name="Online Survey Setup" onchange="updatePrice()">
+                          <span>AHP Online Survey Setup<br><span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
+                      </label>
+                  </li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_2" value="33" data-name="Result Analysis Proxy" onchange="updatePrice()">
+                          <span>AHP Result Analysis Proxy <span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
+                      </label>
+                  </li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_3" value="20" data-name="Coding Excel Sheet Setup" onchange="updatePrice()">
+                          <span>AHP Coding Excel Sheet Setup<br><span style="color: #666; font-size: 0.75rem;">($20 USD)</span></span>
+                      </label>
+                  </li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_ext" value="74" data-name="1 Month Extension" onchange="updatePrice()">
+                          <span>1 Month Extension <span style="color: #666; font-size: 0.75rem;">($74 USD)</span></span>
+                      </label>
+                  </li>
+              </ul>
+              <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
+                  Proxy Request/Inquiry : <br>Email: <b>jeon080423@gmail.com</b>
+              </div>
+              <div class="btn-container" id="paypal-btn-custom"></div>
+          </div>
+      </div>
+      
+      <script>
+        const isLoggedIn = {is_logged_in};
+        let paypalLoaded = false;
+        
+        function redirectLogin() {{
+            window.top.location.hash = "";
+            const formContainer = window.top.document.querySelector('[data-testid="stSidebar"]');
+            if(formContainer) {{
+                const inputs = formContainer.querySelectorAll('input');
+                if(inputs.length > 0) inputs[0].focus();
+            }}
+            alert("Please log in from the left sidebar to purchase.");
+        }}
+
+        function setupLoginButtons() {{
+            document.getElementById('paypal-btn-basic').innerHTML = '<button class="login-btn" onclick="redirectLogin()">Log in to Purchase</button>';
+            document.getElementById('paypal-btn-standard').innerHTML = '<button class="login-btn primary" onclick="redirectLogin()">Log in to Purchase</button>';
+            document.getElementById('paypal-btn-pro').innerHTML = '<button class="login-btn" onclick="redirectLogin()">Log in to Purchase</button>';
+            document.getElementById('paypal-btn-custom').innerHTML = '<button class="login-btn" onclick="redirectLogin()">Log in to Purchase</button>';
+        }}
+
+        function createOrderData(amountStr, planNameStr) {{
+            return function(data, actions) {{
+                return actions.order.create({{
+                    purchase_units: [{{ amount: {{ value: amountStr }}, description: planNameStr }}]
+                }});
+            }};
+        }}
+
+        function createOnApprove(months, planNameStr) {{
+            return function(data, actions) {{
+                return actions.order.capture().then(function(details) {{
+                    window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months=" + months + "&plan_name=" + encodeURIComponent(planNameStr);
+                }});
+            }};
+        }}
+        
+        function onError(err) {{ alert('PayPal payment failed or was cancelled.'); }}
+
+        function renderPaypalButton(containerId, amount, planName, months) {{
+            paypal.Buttons({{
+                style: {{ layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 40 }},
+                createOrder: createOrderData(amount.toString(), planName),
+                onApprove: createOnApprove(months, planName),
+                onError: onError
+            }}).render('#' + containerId);
+        }}
+
+        // Global variables for custom button
+        let customButtonsInstance = null;
+
+        window.addEventListener('load', function() {{
+            if (!isLoggedIn) {{
+                setupLoginButtons();
+                updatePrice();
+                return;
+            }}
+            
+            var script = document.createElement('script');
+            script.src = "https://www.paypal.com/sdk/js?client-id={paypal_client_id}&currency=USD&locale=en_US";
+            script.onload = function() {{
+                paypalLoaded = true;
+                
+                // Render static buttons
+                renderPaypalButton('paypal-btn-basic', 160.0, "Basic (2 Months)", 2);
+                renderPaypalButton('paypal-btn-standard', 330.0, "Standard (2 Months)", 2);
+                renderPaypalButton('paypal-btn-pro', 700.0, "Pro (2 Months)", 2);
+                
+                // Initial custom button render
+                updatePrice();
+            }};
+            document.head.appendChild(script);
+        }});
+
+        function updatePrice() {{
+            const opt1 = document.getElementById("svc_opt_1");
+            const opt2 = document.getElementById("svc_opt_2");
+            const opt3 = document.getElementById("svc_opt_3");
+            const optExt = document.getElementById("svc_opt_ext");
+            
+            let total = 0;
+            let count = 0;
+            let items = [];
+            if (opt1 && opt1.checked) {{ total += parseInt(opt1.value); count++; items.push(opt1.getAttribute("data-name")); }}
+            if (opt2 && opt2.checked) {{ total += parseInt(opt2.value); count++; items.push(opt2.getAttribute("data-name")); }}
+            if (opt3 && opt3.checked) {{ total += parseInt(opt3.value); count++; items.push(opt3.getAttribute("data-name")); }}
+            if (optExt && optExt.checked) {{ total += parseInt(optExt.value); count++; items.push(optExt.getAttribute("data-name")); }}
+            
+            document.getElementById("totalPriceDisplay").innerText = "$" + total.toLocaleString() + " USD";
+            
+            if (count > 0) {{
+                document.getElementById("statusDesc").innerText = "Selected services: " + count + " item(s)";
+            }} else {{
+                document.getElementById("statusDesc").innerText = "Please select the proxy services you need.";
+            }}
+            
+            if (isLoggedIn) {{
+                renderCustomPaypalButton(total, items.join(", "));
+            }}
+        }}
+
+        function renderCustomPaypalButton(amount, planName) {{
+            const container = document.getElementById("paypal-btn-custom");
+            
+            if (amount === 0) {{
+                if (customButtonsInstance) {{
+                    customButtonsInstance.close();
+                    customButtonsInstance = null;
+                }}
+                container.innerHTML = '<div style="text-align: center; padding: 10px; background: #eee; font-size: 0.85rem; border-radius: 5px; color: #777; font-weight: bold;">Select an option above</div>';
+                return;
+            }}
+            
+            if (!paypalLoaded) return;
+            
+            if (customButtonsInstance) {{
+                customButtonsInstance.close();
+                customButtonsInstance = null;
+            }}
+            container.innerHTML = "";
+            
+            customButtonsInstance = paypal.Buttons({{
+                style: {{ layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 40 }},
+                createOrder: createOrderData(amount.toString(), planName),
+                onApprove: createOnApprove(0, planName), // months 0 for custom
+                onError: onError
+            }});
+            
+            customButtonsInstance.render('#paypal-btn-custom');
+        }}
+      </script>
+    </body>
+    </html>
+    '''
+
+
 def get_paypal_payment_html(user_id, plan_name="Official User", amount_usd=162.00, months=1, inner_html="", is_best=False):
 
 
@@ -9916,74 +10222,10 @@ with col_main:
     with main_tab_pricing:
         st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
 
-        col_p1, col_p2, col_p3, col_p4 = st.columns(4)
-        
         if st.session_state.lang == 'en':
-            # 1 Month
-            with col_p1:
-                inner_1 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$160 USD</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for small-scale projects aiming for reliable results using standard AHP methodology.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>Standard AHP features</b></li>
-                        <li><b>Max 10 samples limit</b></li>
-                        <li>Unlimited project creation</li>
-                        <li>Standard email support</li>
-                    </ul>
-                """
-                if st.session_state.user_id:
-                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Basic (2 Months)", 160.0, 2, inner_html=inner_1, is_best=False), height=520)
-                else:
-                    st.components.v1.html(get_login_redirect_html("Basic (2 Months)", inner_html=inner_1, is_best=False, lang="en"), height=520)
-
-            # 3 Months
-            with col_p2:
-                inner_3 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$330 USD</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for professional research requiring precise conclusions through demographic group-difference analysis.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>Includes Advanced Cross-Statistical Analysis (T-Test, ANOVA)</b></li>
-                        <li><b>Unlimited sample size</b></li>
-                        <li>Unlimited project creation</li>
-                        <li>Standard email support</li>
-                    </ul>
-                """
-                if st.session_state.user_id:
-                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Standard (2 Months)", 330.0, 2, inner_html=inner_3, is_best=True), height=520)
-                else:
-                    st.components.v1.html(get_login_redirect_html("Standard (2 Months)", inner_html=inner_3, is_best=True, lang="en"), height=520)
-
-            # 6 Months
-            with col_p3:
-                inner_6 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>2 Months</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>$700 USD</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>Suitable for research institutions and top-tier academic journals requiring advanced Fuzzy AHP analysis and priority support.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>Includes Fuzzy AHP</b></li>
-                        <li>Advanced cross-statistical analysis (T-Test, ANOVA)</li>
-                        <li>Unlimited sample size & projects</li>
-                        <li>Priority tech/bug support</li>
-                        <li><b>1 Free survey setup proxy</b></li>
-                    </ul>
-                """
-                if st.session_state.user_id:
-                    st.components.v1.html(get_paypal_payment_html(st.session_state.user_id, "Pro (2 Months)", 700.0, 2, inner_html=inner_6, is_best=False), height=520)
-                else:
-                    st.components.v1.html(get_login_redirect_html("Pro (2 Months)", inner_html=inner_6, is_best=False, lang="en"), height=520)
-
-            # Proxy Services (PayPal)
-            with col_p4:
-                st.components.v1.html(get_paypal_custom_services_html(st.session_state.user_id), height=520)
+            st.components.v1.html(get_unified_english_pricing_html(st.session_state.user_id), height=560)
         else:
+            col_p1, col_p2, col_p3, col_p4 = st.columns(4)
             # 1개월
             with col_p1:
                 inner_1 = """
