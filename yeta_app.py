@@ -2638,7 +2638,7 @@ def run():
                     <li><span style='font-size: 0.85rem;'>평가자 수 제한 없음 (무제한)</span></li>
                     <li><span style='font-size: 0.85rem;'>최대/최소 아웃라이어 제외 자동 연산</span></li>
                     <li><span style='font-size: 0.85rem;'>보고서 제출용 Excel 원본 내보내기</span></li>
-                    <li><span style='font-size: 0.85rem;'>세금계산서 및 영수증 발행 지원</span></li>
+                    <li><span style='font-size: 0.85rem;'>계산서(간이과세자) 및 영수증 발행 지원</span></li>
                 </ul>
             """
             if user_id:
@@ -2658,7 +2658,7 @@ def run():
                     <li><span style='font-size: 0.85rem;'><b>1년간 분석 횟수 무제한</b></span></li>
                     <li><span style='font-size: 0.85rem;'><b>월 약 233,000원 수준 (22% 절감)</b></span></li>
                     <li><span style='font-size: 0.85rem;'>무제한 전문가 설문 및 아웃라이어 연산</span></li>
-                    <li><span style='font-size: 0.85rem;'>B2B 기업용 견적서/세금계산서 발행</span></li>
+                    <li><span style='font-size: 0.85rem;'>B2B 기업용 견적서/계산서(간이과세자) 발행</span></li>
                 </ul>
             """
             if user_id:
@@ -2676,7 +2676,7 @@ def run():
         st.markdown("<br>", unsafe_allow_html=True)
 
         if not user_id:
-            st.warning("⚠️ 결제 및 세금계산서 신청을 위해서는 로그인이 필요합니다. 메인 포털 또는 사이드바에서 로그인 후 이용해 주세요.")
+            st.warning("⚠️ 결제 및 계산서(간이과세자) 신청을 위해서는 로그인이 필요합니다. 메인 포털 또는 사이드바에서 로그인 후 이용해 주세요.")
         else:
             st.info(f"접속 계정: {user_id} | 라이선스 권한: {'정식 회원' if is_official else '무료 체험 회원'}")
             
@@ -2684,17 +2684,17 @@ def run():
             st.write("---")
             
             with st.form("yeta_tax_form"):
-                st.write("**B2B 기업/연구소 전용 지불 처리 (계좌이체 및 세금계산서 신청)**")
-                st.write("세금계산서 발행 및 기관 계좌이체 승인에 필요한 정보를 입력해 주세요.")
+                st.write("**B2B 기업/연구소 전용 지불 처리 (계좌이체 및 계산서(간이과세자) 신청)**")
+                st.write("계산서(간이과세자) 발행 및 기관 계좌이체 승인에 필요한 정보를 입력해 주세요.")
                 biz_name = st.text_input("상호 / 법인명", key="tax_biz_name")
                 biz_num = st.text_input("사업자등록번호 (숫자만 입력)", key="tax_biz_num")
                 rep_name = st.text_input("대표자명", key="tax_rep_name")
                 address = st.text_input("사업장 주소", key="tax_address")
                 biz_type = st.text_input("업태 및 종목", key="tax_biz_type")
-                email = st.text_input("세금계산서 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
+                email = st.text_input("계산서(간이과세자) 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
                 plan_choice = st.selectbox("선택 요금제 플랜", ["월간 이용권 (300,000원)", "연간 이용권 (2,800,000원)"])
                 
-                submit_tax = st.form_submit_button("세금계산서/인보이스 발행 요청", use_container_width=True)
+                submit_tax = st.form_submit_button("계산서(간이과세자)/인보이스 발행 요청", use_container_width=True)
                 if submit_tax:
                     if not biz_name or not biz_num or not email:
                         st.error("상호명, 사업자번호, 이메일은 필수 입력 사항입니다.")
@@ -2713,7 +2713,7 @@ def run():
                             # Send tax invoice email
                             send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_choice)
                             
-                            st.success("✓ 세금계산서 및 결제 요청이 접수되었습니다! 입력하신 이메일로 24시간 이내에 인보이스/견적서 발송 및 입금 계좌를 안내해 드립니다.")
+                            st.success("✓ 계산서(간이과세자) 및 결제 요청이 접수되었습니다! 입력하신 이메일로 24시간 이내에 인보이스/견적서 발송 및 입금 계좌를 안내해 드립니다.")
                         except Exception as e:
                             st.error(f"요청 접수 실패: {str(e)}")
                         finally:
