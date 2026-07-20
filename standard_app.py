@@ -1814,8 +1814,8 @@ def show_upgrade_dialog():
             st.components.v1.html(get_portone_payment_html(user_id, "Pro (2개월)", 950000, 2, inner_html="", is_best=False), height=70)
             
     st.markdown("---")
-    st.info(_("💳 연구비/법인카드 결제 및 견적서/세금계산서 발행(사이드바의 발행 탭 이용) 모두 100% 지원됩니다.", 
-              "💳 Corporate cards, PayPal, Invoices, and Quotations are 100% supported."))
+    st.info(_("💳 연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행(사이드바의 발행 탭 이용) 모두 100% 지원됩니다.", 
+              "💳 Corporate cards, PayPal, and Quotations are 100% supported."))
 
 def render_refund_form(is_standalone=False, show_header=True):
     if is_standalone:
@@ -10417,11 +10417,11 @@ with col_main:
                     "💡 **정식(유료) 라이선스 이용 안내**\n\n"
                     "1. 먼저 **'무료 회원가입'**을 선택하여 계정을 생성해 주세요.\n"
                     "2. 생성한 계정으로 로그인한 후, 왼쪽 사이드바의 **결제 연동** 또는 상단의 **'서비스 요금'** 탭을 통해 결제를 완료하시면 즉시 정식 라이선스로 업그레이드됩니다.\n\n"
-                    "💳 *연구비/법인카드 결제 및 견적서/세금계산서 발행이 100% 지원됩니다.*",
+                    "💳 *연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.*",
                     "💡 **Official (Paid) License Info**\n\n"
                     "1. Please first select **'Free Registration'** to create your account.\n"
                     "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
-                    "💳 *Supports Research/Corporate Cards, Invoices, and Quotations (100% supported).*"
+                    "💳 *Supports Research/Corporate Cards, and Quotations (100% supported).*"
                 ))
             else:
                 agreements = show_agreement_ui()

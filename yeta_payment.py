@@ -274,7 +274,7 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
         btn_label = "체험하기"
     elif plan_name == "연간 라이선스":
         btn_onclick = "scrollToB2B()"
-        btn_label = "세금계산서/인보이스 신청"
+        btn_label = "계산서(간이과세자)/인보이스 신청"
     else:
         btn_onclick = "openPaymentWindow()"
         btn_label = f"결제 {plan_name}"
@@ -365,7 +365,7 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
             if (b2bEl) {{
                 b2bEl.scrollIntoView({{ behavior: 'smooth' }});
             }} else {{
-                alert('하단의 B2B 세금계산서/인보이스 발행 요청 서식을 작성해 주세요.');
+                alert('하단의 B2B 계산서(간이과세자)/인보이스 발행 요청 서식을 작성해 주세요.');
             }}
         }}
 
