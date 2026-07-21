@@ -81,6 +81,11 @@ if saved_user and not st.session_state.get('user_id'):
         st.session_state.user_role = db_user[0]
         st.session_state.expiry_date = db_user[1]
         st.session_state.plan_type = db_user[2] if len(db_user) > 2 else None
+        try:
+            import survey_manager
+            survey_manager.log_user_action(saved_user, "자동 로그인 (쿠키)")
+        except:
+            pass
     else:
         cookie_manager.delete("ahp_user_id")
 

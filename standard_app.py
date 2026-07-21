@@ -1462,6 +1462,12 @@ def track_visitor():
             except Exception:
                 pass
         st.session_state.visited = True
+        try:
+            import survey_manager
+            guest_id = st.session_state.get('user_id') or "Guest"
+            survey_manager.log_user_action(guest_id, "사이트 방문")
+        except:
+            pass
     except Exception:
         pass
 
@@ -4160,6 +4166,11 @@ if "login_user" in q_params and "login_token" in q_params:
             st.session_state.user_id = login_user_val
             st.session_state.user_role = db_user[0]
             st.session_state.expiry_date = db_user[1]
+            try:
+                import survey_manager
+                survey_manager.log_user_action(login_user_val, "로그인 (URL 파라미터)")
+            except:
+                pass
             
             # URL 파라미터를 정리하여 불필요한 반복 쿼리 및 노출 방지
             st.query_params.pop("login_user", None)
@@ -5715,6 +5726,11 @@ with st.sidebar:
                                 st.session_state.user_id = l_id.strip()
                                 st.session_state.user_role = "temp"
                                 st.session_state.expiry_date = "9999-12-31"
+                                try:
+                                    import survey_manager
+                                    survey_manager.log_user_action(l_id.strip(), "로그인 (임시 발급)")
+                                except:
+                                    pass
                                 st.query_params["login_user"] = l_id.strip()
                                 st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                                 st.query_params["last_activity"] = str(int(time.time()))
@@ -5730,6 +5746,11 @@ with st.sidebar:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
                         st.session_state.expiry_date = result[1]
+                        try:
+                            import survey_manager
+                            survey_manager.log_user_action(l_id.strip(), "로그인")
+                        except:
+                            pass
                         st.session_state.plan_type = result[2] if len(result) > 2 else None
                         st.query_params["login_user"] = l_id.strip()
                         st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
