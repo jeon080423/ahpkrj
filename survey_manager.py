@@ -1089,6 +1089,10 @@ def log_user_action(user_id, action_name):
     
     try:
         target_sheet_id = st.secrets.get("LOG_SPREADSHEET_ID", '1jmOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFvU')
+        if target_sheet_id.startswith("http"):
+            parts = target_sheet_id.split("/d/")
+            if len(parts) > 1:
+                target_sheet_id = parts[1].split("/")[0]
     except:
         target_sheet_id = '1jmOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFvU'
 
