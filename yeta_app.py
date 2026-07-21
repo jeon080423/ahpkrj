@@ -1463,6 +1463,7 @@ def run():
                             selected_sheet_id = survey_options[selected_survey_label]
                             
                             if st.button("🔄 구글 시트에서 실시간 응답 가져오기", type="primary", use_container_width=True):
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "실시간 응답 가져오기")
                                 with st.spinner("구글 시트에서 설문 데이터를 가져오는 중..."):
                                     from survey_manager import get_survey_gspread_client
                                     g_client = get_survey_gspread_client()
@@ -2188,6 +2189,7 @@ def run():
                 with col_p2:
                     deploy_btn_label = "🚀 배포 및 구글 시트 연동 (수정 내용 적용)" if existing_id else "🚀 배포 및 구글 시트 연동"
                     if st.button(deploy_btn_label, type="primary", use_container_width=True, key="yeta_deploy_btn"):
+                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
                         target_sheet_id = existing_sheet_id_input.strip()
                         if "docs.google.com/spreadsheets" in target_sheet_id:
                             parts = target_sheet_id.split("/d/")
@@ -2445,6 +2447,7 @@ def run():
                         
                             # 📊 AHP 분석 연동 단축 버튼 추가
                             if st.button("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", type="primary", use_container_width=True):
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "온라인 설문 데이터 연동")
                                 st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                                 from survey_manager import load_survey_metadata
                                 survey_meta = load_survey_metadata(selected_sheet_id)
