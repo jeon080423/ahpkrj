@@ -6356,6 +6356,7 @@ with col_settings:
         # 1. CR 보정 결과 왜곡 검증
         with st.expander(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), expanded=False):
             if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
+                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "AHP 검증 실행")
                 if "uploaded_matrix" not in st.session_state:
                     show_warning_dialog()
                 else:
@@ -6904,6 +6905,7 @@ with col_main:
                     filename_base = f"Survey_{selected_sheet_id[:6]}"
                 
                     if st.button(_("🔄 구글 시트에서 실시간 응답 가져오기", "🔄 Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
+                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "실시간 응답 가져오기")
                         st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                         from survey_manager import load_survey_metadata, get_survey_gspread_client
                         with st.spinner(_("구글 시트에서 설문 데이터 및 구조를 가져오는 중...", "Fetching survey structure and responses...")):
@@ -8709,7 +8711,7 @@ with col_main:
                         with tab5:
                             st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;"> 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
                                           '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
-                            st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary")
+                            st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary", on_click=lambda: __import__("survey_manager").log_user_action(st.session_state.get("user_id") or "Guest", "결과 엑셀 다운로드"))
                             if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
                                 disp_radar_df = radar_indiv_df.copy()
                                 if is_english:
@@ -8945,6 +8947,8 @@ with col_main:
             col1, col2 = st.columns(2)
             with col1:
                 generate_clicked = st.button(_("1️⃣ 설정한 모델로 AHP 코딩 엑셀 양식 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
+                if generate_clicked:
+                    import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "AHP 엑셀 양식 생성")
             
             if generate_clicked:
                 if st.session_state.user_id is None:
@@ -9733,6 +9737,7 @@ with col_main:
                 if st.session_state.user_id is None:
                     btn_label = _(" 무료 회원가입 후 배포하기", " Deploy after Free Sign Up")
                     if st.button(btn_label, type="primary", use_container_width=True):
+                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
                         st.warning(_(" 배포 및 DB 연동은 회원가입 후 가능합니다. (무료 사용자도 제한 없이 배포 및 연동 가능함)", " Deployment and DB integration are available after sign-up. (Free users can also deploy and link DB)"))
                         st.info(_("💡 안심하세요. 현재 작성하신 내용은 창을 닫지 않고 왼쪽 사이드바에서 회원가입/로그인을 완료하시면 날아가지 않고 그대로 유지되어 즉시 배포하실 수 있습니다.", "💡 Rest assured. The contents you have written will be maintained if you sign up and log in from the left sidebar without closing the window, allowing you to deploy immediately."))
                     
@@ -9740,6 +9745,7 @@ with col_main:
                 else:
                     btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
                     if st.button(btn_label, type="primary", use_container_width=True):
+                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
                         if not existing_sheet_id_input.strip():
                             st.error(_("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.", "You must enter the Google Spreadsheet URL or ID to link."))
                             import streamlit.components.v1 as components
@@ -10036,6 +10042,7 @@ with col_main:
                         
                             # 📊 AHP 분석 연동 단축 버튼 추가
                             if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "온라인 설문 데이터 연동")
                                 st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                                 from survey_manager import load_survey_metadata
                                 survey_meta = load_survey_metadata(selected_sheet_id)
