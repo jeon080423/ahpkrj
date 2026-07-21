@@ -64,11 +64,7 @@ except:
 import extra_streamlit_components as stx
 import sqlite3
 
-@st.cache_resource
-def get_cookie_manager():
-    return stx.CookieManager(key="global_cookie_manager")
-
-cookie_manager = get_cookie_manager()
+cookie_manager = stx.CookieManager(key="global_cookie_manager")
 st.session_state.cookie_manager = cookie_manager
 
 # auto-login based on cookie
