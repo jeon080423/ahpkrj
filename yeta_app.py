@@ -1155,6 +1155,8 @@ def run():
                 "실시간 응답 현황",
                 "서비스 요금"
             ])
+            tab_coupon_dispatch = None
+            tab_coupon_admin = None
     else:
         tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing, tab_signup = st.tabs([
             "예타 AHP 지침 안내",
