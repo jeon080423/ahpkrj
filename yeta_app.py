@@ -1,4 +1,5 @@
 import sqlite3
+import coupon_manager
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -1134,14 +1135,26 @@ def run():
         st.stop()
 
     if st.session_state.user_id:
-        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
-            "예타 AHP 지침 안내",
-            "예타 종합평가(AHP) 분석",
-            "예타 코딩 엑셀 양식",
-            "예타 전용 AHP 설문 작성 및 배포",
-            "실시간 응답 현황",
-            "서비스 요금"
-        ])
+        if st.session_state.user_id == 'shjeon':
+            tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_coupon_dispatch, tab_coupon_admin, tab_pricing = st.tabs([
+                "예타 AHP 지침 안내",
+                "예타 종합평가(AHP) 분석",
+                "예타 코딩 엑셀 양식",
+                "예타 전용 AHP 설문 작성 및 배포",
+                "실시간 응답 현황",
+                "🎁 답례품 발송 관리",
+                "⚙️ 답례품 설정(Admin)",
+                "서비스 요금"
+            ])
+        else:
+            tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
+                "예타 AHP 지침 안내",
+                "예타 종합평가(AHP) 분석",
+                "예타 코딩 엑셀 양식",
+                "예타 전용 AHP 설문 작성 및 배포",
+                "실시간 응답 현황",
+                "서비스 요금"
+            ])
     else:
         tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing, tab_signup = st.tabs([
             "예타 AHP 지침 안내",
@@ -1152,6 +1165,97 @@ def run():
             "서비스 요금",
             "회원가입"
         ])
+        tab_coupon_dispatch = None
+        tab_coupon_admin = None
+
+
+    # =========================================================================
+    # TAB: Coupon Admin
+    # =========================================================================
+    if tab_coupon_admin is not None:
+        with tab_coupon_admin:
+            st.write("### ⚙️ 답례품 상품 관리 (관리자 전용)")
+            st.info("설문 의뢰자에게 제공할 답례품(기프티콘) 목록을 관리합니다. (테스트 모드 활성화 중)")
+            
+            # 신규 등록 폼
+            with st.expander("➕ 신규 답례품 등록", expanded=False):
+                with st.form("new_coupon_form"):
+                    c_name = st.text_input("상품명 (예: 스타벅스 아메리카노)")
+                    c_brand = st.text_input("브랜드 (예: 스타벅스)")
+                    c_orig = st.number_input("정가 (고객에게 청구될 금액)", min_value=0, step=100)
+                    c_cost = st.number_input("원가 (기프티쇼 차감 금액 - 마진 계산용)", min_value=0, step=100)
+                    if st.form_submit_button("등록하기"):
+                        if c_name:
+                            coupon_manager.add_coupon_product(c_name, c_brand, c_orig, c_cost)
+                            st.success(f"'{c_name}' 등록 완료!")
+                            st.rerun()
+                        else:
+                            st.error("상품명을 입력해주세요.")
+            
+            # 기존 상품 리스트 및 관리
+            st.write("#### 📋 등록된 답례품 리스트")
+            all_coupons = coupon_manager.get_all_coupons()
+            if not all_coupons:
+                st.write("등록된 상품이 없습니다.")
+            else:
+                for cp in all_coupons:
+                    with st.container(border=True):
+                        cols = st.columns([3, 2, 2, 2, 2])
+                        cols[0].write(f"**{cp['name']}**")
+                        cols[1].write(f"{cp['brand']}")
+                        cols[2].write(f"정가: {cp['original_price']:,}원")
+                        cols[3].write(f"원가: {cp['cost_price']:,}원")
+                        
+                        is_active = cp['is_active'] == 1
+                        
+                        if is_active:
+                            if cols[4].button("비활성화", key=f"deact_{cp['id']}"):
+                                coupon_manager.update_coupon_status(cp['id'], 0)
+                                st.rerun()
+                        else:
+                            if cols[4].button("활성화", key=f"act_{cp['id']}"):
+                                coupon_manager.update_coupon_status(cp['id'], 1)
+                                st.rerun()
+
+
+    # =========================================================================
+    # TAB: Coupon Dispatch
+    # =========================================================================
+    if tab_coupon_dispatch is not None:
+        with tab_coupon_dispatch:
+            st.write("### 🎁 답례품 발송 관리")
+            st.info("종료된 설문의 응답자 중 폰번호를 남긴 대상에게 답례품을 발송합니다.")
+            
+            pending = coupon_manager.get_pending_dispatches(st.session_state.user_id)
+            completed = coupon_manager.get_completed_dispatches(st.session_state.user_id)
+            
+            st.write("#### ⏳ 발송 대기 목록")
+            if not pending:
+                st.write("발송 대기 중인 내역이 없습니다.")
+            else:
+                with st.form("dispatch_form"):
+                    selected_ids = []
+                    st.write("발송할 대상을 선택하세요:")
+                    for p in pending:
+                        is_sel = st.checkbox(f"{p['phone']} - {p['coupon_name']} (설문 ID: {p['survey_id'][:8]}...)", key=f"chk_{p['id']}")
+                        if is_sel:
+                            selected_ids.append(p['id'])
+                            
+                    if st.form_submit_button("선택된 대상 발송하기", type="primary"):
+                        if selected_ids:
+                            coupon_manager.dispatch_coupons(selected_ids)
+                            st.success(f"{len(selected_ids)}건 발송이 완료되었습니다!")
+                            st.rerun()
+                        else:
+                            st.warning("발송할 대상을 1명 이상 선택해주세요.")
+                            
+            st.write("---")
+            st.write("#### ✅ 발송 완료 목록")
+            if not completed:
+                st.write("완료된 내역이 없습니다.")
+            else:
+                for c in completed:
+                    st.write(f"- {c['phone']} / {c['coupon_name']} / 발송일시: {c['dispatch_time']}")
 
     # =========================================================================
     # TAB 1: Analysis Tool
@@ -1645,6 +1749,7 @@ def run():
             sqlite_surveys = []
             try:
                 import sqlite3
+import coupon_manager
                 conn = sqlite3.connect('users.db')
                 cur = conn.cursor()
                 cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
@@ -1955,6 +2060,7 @@ def run():
                     past_surveys = []
                     try:
                         import sqlite3
+import coupon_manager
                         conn = sqlite3.connect('users.db')
                         c = conn.cursor()
                         c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
@@ -2003,6 +2109,31 @@ def run():
                             st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
                         existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
 
+                # ==================== 답례품 설정 ====================
+                coupon_config = None
+                if st.session_state.user_id == 'shjeon':
+                    st.markdown("#### 5. 답례품 발송 설정 (옵션)")
+                    use_coupon = st.checkbox("설문 응답자에게 기프티콘 등 답례품을 제공합니다.", key="yeta_use_coupon")
+                    if use_coupon:
+                        active_coupons = coupon_manager.get_active_coupons()
+                        if not active_coupons:
+                            st.warning("현재 등록된 답례품이 없습니다. 관리자에게 문의하세요.")
+                        else:
+                            coupon_options = {f"{c['name']} ({c['original_price']:,}원)": c['id'] for c in active_coupons}
+                            sel_coupon_label = st.selectbox("제공할 답례품 선택", list(coupon_options.keys()))
+                            sel_coupon_id = coupon_options[sel_coupon_label]
+                            
+                            coupon_limit = st.number_input("선착순 제공 인원", min_value=1, value=100, step=10)
+                            st.info(f"선택한 답례품은 설문 제출 완료 시 수동으로 발송 대상자를 선택할 수 있습니다. (예상 비용 합계: **{int(sel_coupon_label.split('(')[1].replace('원)','').replace(',','')) * coupon_limit:,}원**)")
+                            
+                            coupon_config = {
+                                "enabled": True,
+                                "coupon_id": sel_coupon_id,
+                                "coupon_name": sel_coupon_label,
+                                "limit": coupon_limit
+                            }
+                # ====================================================
+
                 # Save state for preview
                 preview_id = f"preview_yeta_{st.session_state.user_id}"
                 preview_data = {
@@ -2013,7 +2144,8 @@ def run():
                     "Tier_Level": 3,
                     "Demographics": {"type_questions": type_questions},
                     "Is_Yeta": True,
-                    "Definitions": definitions_map
+                    "Definitions": definitions_map,
+                    "Coupon_Config": coupon_config
                 }
 
                 import json
@@ -2069,6 +2201,7 @@ def run():
                                 try:
                                     from survey_manager_v3 import create_yeta_survey_sheet_v3
                                     import sqlite3
+import coupon_manager
 
                                     new_sheet_id = create_yeta_survey_sheet_v3(
                                         title=survey_title,

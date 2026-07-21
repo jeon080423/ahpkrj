@@ -293,6 +293,11 @@
         const tickerList = document.getElementById('ticker-list');
         const mockData = [];
 
+          // --- REAL USERS FROM DB ---
+          mockData.push({ surname: 'basic***', plan: 'Basic', period: 53, regDate: new Date('2026-07-07') });
+          // ---------------------------
+
+
         // 기준일 (오늘: 2026년 7월 14일)
         const startBaseDate = new Date(2026, 6, 14); // 7월은 Month index 6
         const today = new Date();

@@ -1434,6 +1434,8 @@ def track_visitor():
                         city = data.get("city", "")
                         lat = data.get("lat", "")
                         lon = data.get("lon", "")
+                        
+                        st.session_state.user_region = region
             except:
                 pass
 
@@ -2465,8 +2467,9 @@ def delete_user(user_id):
             
             if target_row_index != -1:
                 kst_now_ts = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
-                row_data.append(str(kst_now_ts))
-                del_sheet.append_row(row_data)
+                # Extract only necessary columns: ID, Role, SignupDate, PW, agree_info, DeletedDate
+                clean_row = [row_data[0], row_data[1], row_data[2], row_data[3], row_data[5] if len(row_data) > 5 else '', str(kst_now_ts)]
+                del_sheet.append_row(clean_row)
                 sheet.delete_rows(target_row_index)
     except Exception:
         pass
@@ -9488,16 +9491,19 @@ with col_main:
             st.divider()
 
             # 섹션 5: 답례품 및 개인정보 수집 동의 설정
-            st.subheader(_("섹션 5: 답례품 및 동의 양식 설정", "Section 5: Reward & Consent Form Setup"))
-            reward_enabled = st.toggle(_("답례품(기프티콘 등) 제공 활성화", "Enable Rewards (e.g., Gifticons)"))
-            reward_desc = ""
-            if reward_enabled:
-                reward_desc = st.text_area(_("답례품 설명", "Reward Description"), value=st.session_state.get("edit_reward_desc", "모든 설문 응답을 마친 분들에게 스타벅스 아메리카노 기프티콘을 발송해 드립니다."))
-
-            rewards_info = {
-                "enabled": reward_enabled,
-                "desc": reward_desc
-            }
+            if st.session_state.get("user_id") == "shjeon":
+                st.subheader(_("섹션 5: 답례품 및 동의 양식 설정", "Section 5: Reward & Consent Form Setup"))
+                reward_enabled = st.toggle(_("답례품(기프티콘 등) 제공 활성화", "Enable Rewards (e.g., Gifticons)"))
+                reward_desc = ""
+                if reward_enabled:
+                    reward_desc = st.text_area(_("답례품 설명", "Reward Description"), value=st.session_state.get("edit_reward_desc", "모든 설문 응답을 마친 분들에게 스타벅스 아메리카노 기프티콘을 발송해 드립니다."))
+                
+                rewards_info = {
+                    "enabled": reward_enabled,
+                    "desc": reward_desc
+                }
+            else:
+                rewards_info = {"enabled": False}
 
             st.divider()
 
