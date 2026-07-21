@@ -6610,15 +6610,30 @@ with col_main:
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
-        _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
-        _("AHP 분석 도구", "AHP Analysis Tool"), 
-        _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
-        _("온라인 AHP 설문/배포(:red[**무료**])", "Online AHP Survey/Deployment (:red[**Free**])"), 
-        _("실시간 응답 현황", "Live Response Status"),
-        _("서비스 요금", "Service Pricing"),
-        _("회원가입", "Sign Up")
-    ], default=_("AHP 분석 도구", "AHP Analysis Tool"))
+    if st.session_state.get('user_id') == 'shjeon':
+        main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, tab_coupon_dispatch, tab_coupon_admin, main_tab_pricing, main_tab_signup = st.tabs([
+            _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
+            _("AHP 분석 도구", "AHP Analysis Tool"), 
+            _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
+            _("온라인 AHP 설문/배포(:red[**무료**])", "Online AHP Survey/Deployment (:red[**Free**])"), 
+            _("실시간 응답 현황", "Live Response Status"),
+            "🎁 답례품 발송 관리",
+            "⚙️ 답례품 설정(Admin)",
+            _("서비스 요금", "Service Pricing"),
+            _("회원가입", "Sign Up")
+        ])
+    else:
+        main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
+            _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
+            _("AHP 분석 도구", "AHP Analysis Tool"), 
+            _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
+            _("온라인 AHP 설문/배포(:red[**무료**])", "Online AHP Survey/Deployment (:red[**Free**])"), 
+            _("실시간 응답 현황", "Live Response Status"),
+            _("서비스 요금", "Service Pricing"),
+            _("회원가입", "Sign Up")
+        ])
+        tab_coupon_dispatch = None
+        tab_coupon_admin = None
         
     with main_tab1:
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
@@ -10224,6 +10239,16 @@ with col_main:
                     st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
             except Exception as err:
                 st.caption(f"로컬 백업 조회 불가: {err}")
+
+    if tab_coupon_dispatch is not None:
+        with tab_coupon_dispatch:
+            import coupon_manager
+            coupon_manager.render_dispatch_tab()
+
+    if tab_coupon_admin is not None:
+        with tab_coupon_admin:
+            import coupon_manager
+            coupon_manager.render_admin_tab()
 
     with main_tab_pricing:
         st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices 100% Supported</span>"), unsafe_allow_html=True)
