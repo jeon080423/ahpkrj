@@ -2250,6 +2250,40 @@ def run():
     # =========================================================================
     with tab_live_response:
         if st.session_state.get('user_id') == 'shjeon':
+            # Sub-tabs UI: 알약(Pill) 형태로 렌더링되도록 CSS 주입
+            st.markdown("""
+            <style>
+            div[data-testid="stTabs"] div[data-testid="stTabs"] > div[role="tablist"] {
+                border-bottom: none !important;
+                gap: 0 !important;
+                padding-bottom: 15px !important;
+                margin-top: -10px !important;
+            }
+            div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"] {
+                border-radius: 25px !important;
+                background-color: #f1f5f9 !important;
+                border: 1px solid #e2e8f0 !important;
+                margin-right: 8px !important;
+                padding: 6px 18px !important;
+                height: auto !important;
+                transition: all 0.2s ease !important;
+            }
+            div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
+                background-color: #e2e8f0 !important;
+            }
+            div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+                background-color: #0f172a !important;
+                color: white !important;
+                border: 1px solid #0f172a !important;
+                font-weight: 600 !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+            }
+            div[data-testid="stTabs"] div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
+                display: none !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
             sub_tabs = st.tabs(["📊 진행 현황", "🎁 답례품 발송 관리", "⚙️ 답례품 설정(Admin)"])
             tab_live_content = sub_tabs[0]
             with sub_tabs[1]:
