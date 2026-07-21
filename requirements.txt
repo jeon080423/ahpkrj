@@ -1,3 +1,4 @@
+extra-streamlit-components>=0.1.71
 streamlit>=1.30.0
 pandas
 numpy
@@ -13,7 +14,7 @@ google-auth-oauthlib==1.1.0
 google-auth-httplib2==0.1.1
 openpyxl
 folium
-streamlit_folium
+streamlit-folium
 google-api-python-client
 streamlit-javascript
 requests
@@ -21,4 +22,3 @@ python-dateutil
 Pillow
 deep-translator
 streamlit-quill
-extra-streamlit-components
