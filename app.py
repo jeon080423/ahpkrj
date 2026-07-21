@@ -61,6 +61,40 @@ try:
 except:
     pass
 
+import extra_streamlit_components as stx
+import sqlite3
+
+@st.cache_resource
+def get_cookie_manager():
+    return stx.CookieManager(key="global_cookie_manager")
+
+cookie_manager = get_cookie_manager()
+st.session_state.cookie_manager = cookie_manager
+
+# auto-login based on cookie
+saved_user = cookie_manager.get(cookie="ahp_user_id")
+
+if saved_user and not st.session_state.get('user_id'):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT role, expiry_date, plan_type FROM users WHERE id=?", (saved_user,))
+    db_user = c.fetchone()
+    conn.close()
+    if db_user:
+        st.session_state.user_id = saved_user
+        st.session_state.user_role = db_user[0]
+        st.session_state.expiry_date = db_user[1]
+        st.session_state.plan_type = db_user[2] if len(db_user) > 2 else None
+    else:
+        cookie_manager.delete("ahp_user_id")
+
+# Sync state to cookie
+current_user = st.session_state.get('user_id')
+if current_user and current_user != saved_user:
+    cookie_manager.set("ahp_user_id", current_user, max_age=86400 * 30)
+elif not current_user and saved_user:
+    cookie_manager.delete("ahp_user_id")
+
 def _(ko_text, en_text):
     try:
         if st.session_state.get('lang', 'ko') == 'en':
