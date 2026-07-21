@@ -21,3 +21,4 @@ python-dateutil
 Pillow
 deep-translator
 streamlit-quill
+extra-streamlit-components
