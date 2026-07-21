@@ -1064,8 +1064,8 @@ def log_user_action(user_id, action_name):
     import streamlit as st
     import threading
 
-    is_guest = not user_id
-    if is_guest:
+    is_guest = not user_id or str(user_id).lower() == "guest"
+    if is_guest and not user_id:
         user_id = "Guest"
 
     if 'action_log_history' not in st.session_state:
