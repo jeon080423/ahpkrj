@@ -1033,7 +1033,7 @@ def get_admin_surveys_from_gsheet(admin_id):
 
 
 # --- User Activity Logging ---
-def _bg_log_worker(user_id, is_guest, region, actions_str, action_log_row_idx):
+def _bg_log_worker(user_id, is_guest, region, actions_str, action_log_row_idx, target_sheet_id):
     import datetime
     import gspread
     try:
@@ -1041,12 +1041,6 @@ def _bg_log_worker(user_id, is_guest, region, actions_str, action_log_row_idx):
         client = get_survey_gspread_client()
         if not client:
             return
-
-        import streamlit as st
-        try:
-            target_sheet_id = st.secrets.get("LOG_SPREADSHEET_ID", '1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA')
-        except:
-            target_sheet_id = '1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA'
 
         master_sheet = run_gspread_with_retry(client.open_by_key, target_sheet_id)
         sheet_name = 'Guest_Activity_Logs' if is_guest else 'User_Activity_Logs'
@@ -1063,7 +1057,8 @@ def _bg_log_worker(user_id, is_guest, region, actions_str, action_log_row_idx):
         else:
             run_gspread_with_retry(ws.update_cell, action_log_row_idx, 4, actions_str)
     except Exception as e:
-        pass
+        with open('log_worker_err.txt', 'a', encoding='utf-8') as f:
+            f.write(f"Error: {str(e)}\n")
 
 def log_user_action(user_id, action_name):
     import streamlit as st
@@ -1092,6 +1087,16 @@ def log_user_action(user_id, action_name):
     actions_str = ", ".join(st.session_state.action_log_history)
     region = st.session_state.get('user_region', '')
     
-    t = threading.Thread(target=_bg_log_worker, args=(user_id, is_guest, region, actions_str, None))
+    try:
+        target_sheet_id = st.secrets.get("LOG_SPREADSHEET_ID", '1jmOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFvU')
+    except:
+        target_sheet_id = '1jmOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFvU'
+
+    t = threading.Thread(target=_bg_log_worker, args=(user_id, is_guest, region, actions_str, None, target_sheet_id))
+    try:
+        from streamlit.runtime.scriptrunner import add_script_run_ctx
+        add_script_run_ctx(t)
+    except Exception as e:
+        pass
     t.start()
 
