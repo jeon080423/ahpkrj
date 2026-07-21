@@ -1088,13 +1088,13 @@ def log_user_action(user_id, action_name):
     region = st.session_state.get('user_region', '')
     
     try:
-        target_sheet_id = st.secrets.get("LOG_SPREADSHEET_ID", '1jmOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFvU')
+        target_sheet_id = st.secrets.get("LOG_SPREADSHEET_ID", '1jrnOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFVU')
         if target_sheet_id.startswith("http"):
             parts = target_sheet_id.split("/d/")
             if len(parts) > 1:
                 target_sheet_id = parts[1].split("/")[0]
     except:
-        target_sheet_id = '1jmOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFvU'
+        target_sheet_id = '1jrnOMiqNwfoqMsK9mB4NxhUSI32UUmelfBDtWz9QFVU'
 
     t = threading.Thread(target=_bg_log_worker, args=(user_id, is_guest, region, actions_str, None, target_sheet_id))
     try:
