@@ -1749,7 +1749,6 @@ def run():
             sqlite_surveys = []
             try:
                 import sqlite3
-import coupon_manager
                 conn = sqlite3.connect('users.db')
                 cur = conn.cursor()
                 cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
@@ -2060,7 +2059,6 @@ import coupon_manager
                     past_surveys = []
                     try:
                         import sqlite3
-import coupon_manager
                         conn = sqlite3.connect('users.db')
                         c = conn.cursor()
                         c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
@@ -2201,7 +2199,6 @@ import coupon_manager
                                 try:
                                     from survey_manager_v3 import create_yeta_survey_sheet_v3
                                     import sqlite3
-import coupon_manager
 
                                     new_sheet_id = create_yeta_survey_sheet_v3(
                                         title=survey_title,
