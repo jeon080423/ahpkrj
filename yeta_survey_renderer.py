@@ -766,6 +766,23 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
                     
     st.divider()
     
+    # 4.5. 경품 안내 (있는 경우)
+    rewards_info = survey_meta.get("Rewards_Info", {})
+    if isinstance(rewards_info, str):
+        import json
+        try:
+            rewards_info = json.loads(rewards_info)
+        except:
+            rewards_info = {}
+            
+    has_rewards = rewards_info.get("enabled", False)
+    if has_rewards:
+        st.markdown("### 🎁 답례품 안내")
+        st.info(f"**답례품 안내**: {rewards_info.get('desc', '설문 완료 시 답례품이 제공됩니다.')}")
+        reward_contact = st.text_input("경품 지급용 연락처 (휴대폰번호 또는 이메일) *", key="yeta_reward_contact")
+        resp_data["reward_contact"] = reward_contact
+        st.divider()
+    
     # 5. 제출하기
     submit_btn = st.button("설문지 제출하기", type="primary", use_container_width=True)
     if submit_btn:
@@ -777,6 +794,10 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
             st.error("성명을 입력해 주십시오.")
             st.stop()
             
+        if has_rewards and not resp_data.get("reward_contact"):
+            st.error("경품 지급을 위한 연락처를 입력해 주세요.")
+            st.stop()
+            
         with st.spinner("응답을 전송 중입니다..."):
             if is_preview_mode:
                 import time
@@ -786,7 +807,7 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
             else:
                 from survey_manager_v3 import save_yeta_response_to_sheet_v3
                 success = save_yeta_response_to_sheet_v3(
-                    survey_id_param, resp_data, ahp_answers, ahp_model, level1_answers
+                    survey_id_param, resp_data, ahp_answers, ahp_model, level1_answers, rewards_info
                 )
                 if success:
                     st.session_state[f"survey_submitted_{survey_id_param}"] = True

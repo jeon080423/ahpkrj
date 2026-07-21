@@ -1458,8 +1458,9 @@ def delete_user(user_id):
             
             if target_row_index != -1:
                 kst_now_ts = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
-                row_data.append(str(kst_now_ts))
-                del_sheet.append_row(row_data)
+                # Extract only necessary columns: ID, Role, SignupDate, PW, agree_info, DeletedDate
+                clean_row = [row_data[0], row_data[1], row_data[2], row_data[3], row_data[5] if len(row_data) > 5 else '', str(kst_now_ts)]
+                del_sheet.append_row(clean_row)
                 sheet.delete_rows(target_row_index)
     except Exception:
         pass

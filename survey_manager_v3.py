@@ -407,7 +407,7 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
         return False
 
 
-def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, definitions_map, description="", existing_sheet_id=None, user_id=None):
+def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, definitions_map, description="", existing_sheet_id=None, user_id=None, coupon_config=None):
     client = get_survey_gspread_client()
     if not client:
         return None
@@ -472,9 +472,10 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
         ["Demographics", json.dumps(demographics, ensure_ascii=False)],
         ["Is_Yeta", "True"],
         ["Visit_Count", "0"],
-        ["Definitions", json.dumps(definitions_map, ensure_ascii=False)]
+        ["Definitions", json.dumps(definitions_map, ensure_ascii=False)],
+        ["Rewards_Info", json.dumps(coupon_config if coupon_config else {"enabled": False}, ensure_ascii=False)]
     ]
-    meta_sheet.update(range_name="A1:B10", values=metadata)
+    meta_sheet.update(range_name="A1:B11", values=metadata)
     
     # Raw Data 헤더 생성
     type_headers = []
@@ -535,6 +536,8 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
     
     # Demographic Data 헤더 생성
     demo_headers = ["ID"] + type_headers
+    if coupon_config and coupon_config.get("enabled"):
+        demo_headers.append("경품연락처")
     demo_headers.append("제출시간")
     
     demo_sheet.clear()
@@ -554,7 +557,8 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
             "Tier_Level": 3,
             "Demographics": demographics,
             "Is_Yeta": True,
-            "Definitions": definitions_map
+            "Definitions": definitions_map,
+            "Rewards_Info": coupon_config if coupon_config else {"enabled": False}
         }
         c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
                   (spreadsheet.id, json.dumps(meta_dict, ensure_ascii=False)))
@@ -566,7 +570,7 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
     return spreadsheet.id
 
 
-def save_yeta_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, model, level1_answers):
+def save_yeta_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, model, level1_answers, rewards_info=None):
     import datetime
     import sqlite3
     import uuid
@@ -642,7 +646,10 @@ def save_yeta_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers,
                     
     raw_row_data.append(kst_now)
     
-    demo_row_data = [resp_id] + resp_types + [kst_now]
+    demo_row_data = [resp_id] + resp_types
+    if rewards_info and rewards_info.get("enabled"):
+        demo_row_data.append(respondent_info.get("reward_contact", ""))
+    demo_row_data.append(kst_now)
     
     try:
         conn = sqlite3.connect('users.db')

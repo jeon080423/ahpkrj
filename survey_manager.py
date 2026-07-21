@@ -1030,3 +1030,68 @@ def get_admin_surveys_from_gsheet(admin_id):
     except Exception as e:
         print("get_admin_surveys_from_gsheet error:", e)
         return []
+
+
+# --- User Activity Logging ---
+def _bg_log_worker(user_id, is_guest, region, actions_str, action_log_row_idx):
+    import datetime
+    import gspread
+    try:
+        from survey_manager import get_survey_gspread_client, run_gspread_with_retry
+        client = get_survey_gspread_client()
+        if not client:
+            return
+
+        import streamlit as st
+        try:
+            target_sheet_id = st.secrets.get("LOG_SPREADSHEET_ID", '1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA')
+        except:
+            target_sheet_id = '1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA'
+
+        master_sheet = run_gspread_with_retry(client.open_by_key, target_sheet_id)
+        sheet_name = 'Guest_Activity_Logs' if is_guest else 'User_Activity_Logs'
+
+        try:
+            ws = run_gspread_with_retry(master_sheet.worksheet, sheet_name)
+        except gspread.exceptions.WorksheetNotFound:
+            ws = run_gspread_with_retry(master_sheet.add_worksheet, title=sheet_name, rows=1000, cols=10)
+            run_gspread_with_retry(ws.append_row, ["Timestamp", "User ID", "Region", "Action Sequence"])
+
+        if action_log_row_idx is None:
+            now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+            run_gspread_with_retry(ws.append_row, [now_str, user_id, region, actions_str])
+        else:
+            run_gspread_with_retry(ws.update_cell, action_log_row_idx, 4, actions_str)
+    except Exception as e:
+        pass
+
+def log_user_action(user_id, action_name):
+    import streamlit as st
+    import threading
+
+    is_guest = not user_id
+    if is_guest:
+        user_id = "Guest"
+
+    if 'action_log_history' not in st.session_state:
+        st.session_state.action_log_history = []
+    if 'action_log_counts' not in st.session_state:
+        st.session_state.action_log_counts = {}
+    if 'action_log_row_idx' not in st.session_state:
+        st.session_state.action_log_row_idx = None
+
+    counts = st.session_state.action_log_counts
+    counts[action_name] = counts.get(action_name, 0) + 1
+
+    if counts[action_name] > 1:
+        display_name = f"{action_name}({counts[action_name]})"
+    else:
+        display_name = action_name
+
+    st.session_state.action_log_history.append(display_name)
+    actions_str = ", ".join(st.session_state.action_log_history)
+    region = st.session_state.get('user_region', '')
+    
+    t = threading.Thread(target=_bg_log_worker, args=(user_id, is_guest, region, actions_str, None))
+    t.start()
+
