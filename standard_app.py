@@ -6749,14 +6749,20 @@ with col_main:
             
             working_df = demo_df.copy()
             
+            def _clean_id(x):
+                s = str(x).strip()
+                if s.endswith(".0"):
+                    s = s[:-2]
+                return s
+            
             # 1. 최종 완료 응답자(ID)만 필터링 (미완료/이탈자 제외)
             completed_ids = set()
             if "ahp_df_main" in st.session_state and st.session_state["ahp_df_main"] is not None:
                 if "ID" in st.session_state["ahp_df_main"].columns:
-                    completed_ids = set(st.session_state["ahp_df_main"]["ID"].astype(str).str.strip())
+                    completed_ids = set(st.session_state["ahp_df_main"]["ID"].apply(_clean_id))
             elif "live_df" in st.session_state and st.session_state["live_df"] is not None:
                 if "ID" in st.session_state["live_df"].columns:
-                    completed_ids = set(st.session_state["live_df"]["ID"].astype(str).str.strip())
+                    completed_ids = set(st.session_state["live_df"]["ID"].apply(_clean_id))
             
             id_col = None
             for c in working_df.columns:
@@ -6765,7 +6771,7 @@ with col_main:
                     break
 
             if completed_ids and id_col:
-                working_df = working_df[working_df[id_col].astype(str).str.strip().isin(completed_ids)].copy()
+                working_df = working_df[working_df[id_col].apply(_clean_id).isin(completed_ids)].copy()
 
             if working_df.empty:
                 return None
