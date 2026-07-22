@@ -6747,10 +6747,33 @@ with col_main:
             if demo_df is None or demo_df.empty:
                 return None
             
+            working_df = demo_df.copy()
+            
+            # 1. 최종 완료 응답자(ID)만 필터링 (미완료/이탈자 제외)
+            completed_ids = set()
+            if "ahp_df_main" in st.session_state and st.session_state["ahp_df_main"] is not None:
+                if "ID" in st.session_state["ahp_df_main"].columns:
+                    completed_ids = set(st.session_state["ahp_df_main"]["ID"].astype(str).str.strip())
+            elif "live_df" in st.session_state and st.session_state["live_df"] is not None:
+                if "ID" in st.session_state["live_df"].columns:
+                    completed_ids = set(st.session_state["live_df"]["ID"].astype(str).str.strip())
+            
+            id_col = None
+            for c in working_df.columns:
+                if str(c).strip().lower() == "id":
+                    id_col = c
+                    break
+
+            if completed_ids and id_col:
+                working_df = working_df[working_df[id_col].astype(str).str.strip().isin(completed_ids)].copy()
+
+            if working_df.empty:
+                return None
+
             # 불필요한 시스템용 컬럼 제외
             exclude_keywords = ["id", "type", "사전순위", "답례품", "연락처", "제출시간"]
             target_cols = []
-            for col in demo_df.columns:
+            for col in working_df.columns:
                 col_lower = str(col).lower()
                 if not any(ex in col_lower for ex in exclude_keywords):
                     target_cols.append(col)
@@ -6760,13 +6783,33 @@ with col_main:
                 
             summary_rows = []
             for col in target_cols:
-                counts = demo_df[col].value_counts(dropna=False)
-                total = len(demo_df)
+                col_str = str(col).strip()
+                col_data = working_df[col]
+                
+                # 2. 질문 문구가 응답 보기로 들어가거나 빈 값인 항목 제거 (유효 응답만 필터링)
+                valid_items = []
+                for val in col_data:
+                    if pd.isna(val):
+                        continue
+                    val_str = str(val).strip()
+                    if not val_str or val_str == "미응답(N/A)":
+                        continue
+                    # 질문 헤더 텍스트와 동일하거나 일부 포함된 기본값 텍스트 제외
+                    if val_str == col_str or (len(val_str) >= 8 and (val_str in col_str or col_str in val_str)):
+                        continue
+                    valid_items.append(val_str)
+                
+                if not valid_items:
+                    continue
+                
+                series_valid = pd.Series(valid_items)
+                counts = series_valid.value_counts()
+                total = len(valid_items)
                 for val, count in counts.items():
                     pct = (count / total) * 100 if total > 0 else 0
                     summary_rows.append({
                         "인구통계 항목 (Demographic Field)": col,
-                        "응답 보기 (Value)": str(val) if pd.notna(val) else "미응답(N/A)",
+                        "응답 보기 (Value)": val,
                         "빈도수 (Frequency)": count,
                         "비율 (Percentage, %)": round(pct, 1)
                     })
