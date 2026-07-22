@@ -68,8 +68,13 @@ cookie_manager = stx.CookieManager(key="global_cookie_manager")
 st.session_state.cookie_manager = cookie_manager
 
 # auto-login based on cookie
-saved_user = cookie_manager.get(cookie="ahp_user_id")
+saved_user = None
+try:
+    saved_user = cookie_manager.get(cookie="ahp_user_id")
+except Exception:
+    pass
 
+need_delete_cookie = False
 if saved_user and not st.session_state.get('user_id'):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -87,14 +92,20 @@ if saved_user and not st.session_state.get('user_id'):
         except:
             pass
     else:
-        cookie_manager.delete("ahp_user_id")
+        need_delete_cookie = True
 
 # Sync state to cookie
 current_user = st.session_state.get('user_id')
 if current_user and current_user != saved_user:
-    cookie_manager.set("ahp_user_id", current_user, max_age=86400 * 30)
-elif not current_user and saved_user:
-    cookie_manager.delete("ahp_user_id")
+    try:
+        cookie_manager.set("ahp_user_id", current_user, max_age=86400 * 30, key="set_ahp_user_cookie")
+    except Exception:
+        pass
+elif (not current_user and saved_user) or need_delete_cookie:
+    try:
+        cookie_manager.delete("ahp_user_id", key="del_ahp_user_cookie")
+    except Exception:
+        pass
 
 def _(ko_text, en_text):
     try:
