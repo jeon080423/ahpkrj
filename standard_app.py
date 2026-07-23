@@ -9297,14 +9297,28 @@ with col_main:
             - Lead Researcher : [Enter Name]
             - Contact : [Enter Phone or Email]"""
     
+                from quill_editor import st_quill
+                
+                @st.dialog(_("📝 서식 에디터로 안내문 편집", "📝 Edit Instructions with Rich Text Editor"), width="large")
+                def edit_desc_dialog():
+                    st.info(_("안내문 내용을 자유롭게 편집하세요. 툴바를 이용해 굵기, 색상 등을 변경할 수 있습니다.", "Edit the instructions freely. You can change boldness, color, etc. using the toolbar."))
+                    new_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_modal_v1")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅ " + _("저장 및 닫기", "Save & Close"), type="primary", use_container_width=True):
+                            st.session_state["edit_desc"] = new_desc
+                            st.rerun()
+                    with col2:
+                        if st.button("❌ " + _("취소", "Cancel"), use_container_width=True):
+                            st.rerun()
+
                 st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
-                survey_desc = st.text_area(
-                    label="조사 목적 및 안내문",
-                    value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)),
-                    height=400,
-                    key="quill_standard_desc_text_area",
-                    label_visibility="collapsed"
-                )
+                survey_desc = st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en))
+                with st.container(border=True):
+                    st.markdown(survey_desc, unsafe_allow_html=True)
+                
+                if st.button(_("📝 서식 에디터 열기 (안내문 수정)", "📝 Open Rich Text Editor (Edit Instructions)"), use_container_width=True):
+                    edit_desc_dialog()
                 
                 if st.session_state.user_id:
                     if "@" in st.session_state.user_id:
