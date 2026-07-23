@@ -9297,7 +9297,7 @@ with col_main:
             - Lead Researcher : [Enter Name]
             - Contact : [Enter Phone or Email]"""
     
-                from streamlit_quill import st_quill
+                from quill_editor import st_quill
                 st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
                 
                 # 강제로 iframe 및 컨테이너 높이를 확보하는 CSS 주입
