@@ -1879,32 +1879,23 @@ def run():
                 "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
                 "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."
             )
-            from streamlit_quill import st_quill
-            
             st.markdown("**설문 안내문**")
             
-            survey_desc = st.session_state.get("edit_yeta_desc", default_survey_desc)
-            if st.session_state.get("show_yeta_inline_editor", False):
-                st.info("안내문 내용을 자유롭게 편집하세요. 툴바를 이용해 굵기, 색상 등을 변경할 수 있습니다.")
-                new_desc = st_quill(value=survey_desc, html=True, key="quill_yeta_desc_inline_v1")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("✅ 저장 및 닫기", type="primary", use_container_width=True):
-                        st.session_state["edit_yeta_desc"] = new_desc
-                        st.session_state["show_yeta_inline_editor"] = False
-                        st.rerun()
-                with col2:
-                    if st.button("❌ 취소", use_container_width=True):
-                        st.session_state["show_yeta_inline_editor"] = False
-                        st.rerun()
-            else:
-                with st.container(border=True):
+            md_col1, md_col2 = st.columns(2)
+            with md_col1:
+                st.markdown("📝 **내용 입력 (마크다운 지원)**", help="마크다운 문법 안내\n- **굵게**: `**텍스트**`\n- 제목: `# 제목`\n- 목록: `- 항목`")
+                survey_desc = st.text_area(
+                    label="설문 안내문 입력",
+                    value=st.session_state.get("edit_yeta_desc", default_survey_desc),
+                    height=400,
+                    key="quill_yeta_desc_text_area",
+                    label_visibility="collapsed"
+                )
+                st.session_state["edit_yeta_desc"] = survey_desc
+            with md_col2:
+                st.markdown("👀 **실시간 미리보기**")
+                with st.container(border=True, height=400):
                     st.markdown(survey_desc, unsafe_allow_html=True)
-                
-                if st.button("📝 서식 에디터 열기 (안내문 수정)", use_container_width=True):
-                    st.session_state["show_yeta_inline_editor"] = True
-                    st.rerun()
             
             st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
             yeta_p_type = st.selectbox(
