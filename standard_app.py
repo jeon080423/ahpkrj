@@ -9297,32 +9297,23 @@ with col_main:
             - Lead Researcher : [Enter Name]
             - Contact : [Enter Phone or Email]"""
     
-                from streamlit_quill import st_quill
-                
                 st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
                 
-                survey_desc = st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en))
-                if st.session_state.get("show_inline_editor", False):
-                    st.info(_("안내문 내용을 자유롭게 편집하세요. 툴바를 이용해 굵기, 색상 등을 변경할 수 있습니다.", "Edit the instructions freely. You can change boldness, color, etc. using the toolbar."))
-                    new_desc = st_quill(value=survey_desc, html=True, key="quill_standard_desc_inline_v1")
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        if st.button("✅ " + _("저장 및 닫기", "Save & Close"), type="primary", use_container_width=True):
-                            st.session_state["edit_desc"] = new_desc
-                            st.session_state["show_inline_editor"] = False
-                            st.rerun()
-                    with col2:
-                        if st.button("❌ " + _("취소", "Cancel"), use_container_width=True):
-                            st.session_state["show_inline_editor"] = False
-                            st.rerun()
-                else:
-                    with st.container(border=True):
+                md_col1, md_col2 = st.columns(2)
+                with md_col1:
+                    st.markdown("📝 **" + _("내용 입력 (마크다운 지원)", "Input (Markdown Supported)") + "**", help=_("마크다운 문법 안내\n- **굵게**: `**텍스트**`\n- 제목: `# 제목`\n- 목록: `- 항목`", "Markdown Syntax\n- **Bold**: `**text**`\n- Header: `# Header`\n- List: `- Item`"))
+                    survey_desc = st.text_area(
+                        label="조사 목적 및 안내문 입력",
+                        value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)),
+                        height=400,
+                        key="quill_standard_desc_text_area",
+                        label_visibility="collapsed"
+                    )
+                    st.session_state["edit_desc"] = survey_desc
+                with md_col2:
+                    st.markdown("👀 **" + _("실시간 미리보기", "Real-time Preview") + "**")
+                    with st.container(border=True, height=400):
                         st.markdown(survey_desc, unsafe_allow_html=True)
-                    
-                    if st.button(_("📝 서식 에디터 열기 (안내문 수정)", "📝 Open Rich Text Editor (Edit Instructions)"), use_container_width=True):
-                        st.session_state["show_inline_editor"] = True
-                        st.rerun()
                 
                 if st.session_state.user_id:
                     if "@" in st.session_state.user_id:
