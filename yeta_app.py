@@ -2051,7 +2051,7 @@ def run():
                 for i in range(num_types):
                     st.markdown(f"**{i+1}.**")
                     q_label = "그룹 분류 질문 제목" if i == 0 else "추가 설문 문항"
-                    opts_label = "보기 옵션 (콤마로 구분)"
+                    opts_label = "보기 옵션 (쉼표로 구분)"
 
                     q_val = st.text_input(f"{q_label} ({i+1})", value=type_questions_state[i]["q"], key=f"yeta_dyn_tq_q_{i}")
                     opts_val = st.text_input(f"{opts_label} ({i+1})", value=type_questions_state[i]["opts"], key=f"yeta_dyn_tq_opts_{i}")

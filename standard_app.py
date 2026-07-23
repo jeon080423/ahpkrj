@@ -8965,7 +8965,7 @@ with col_main:
                     default_main = saved_main
                     default_subs = saved_model.get('subs', default_subs)
                     
-            main_criteria_input = st.text_input(_("대항목 (Main Criteria, 콤마 구분)", "Main Criteria (comma-separated)"), value=default_main)
+            main_criteria_input = st.text_input(_("대항목 (Main Criteria, 쉼표 구분)", "Main Criteria (comma-separated)"), value=default_main)
             main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
             
             model_structure = {}
@@ -8983,7 +8983,7 @@ with col_main:
                             st.info(_("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.", "💡 **Mixed-Tier Guide**: If a sub-criterion has no sub-sub-criteria, **leave it blank to automatically calculate as a 2-tier weight**."))
                             for sub_c in sub_list:
                                 sub_sub_input = st.text_input(
-                                    f"▶ '{sub_c}'의 소분류 (콤마 구분)", 
+                                    f"▶ '{sub_c}'의 소분류 (쉼표 구분)", 
                                     value=default_sub_subs.get(sub_c, ""),
                                     placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
                                     help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
@@ -9365,10 +9365,10 @@ Thank you deeply for your valuable participation.
                         st.markdown(f"**{i+1}.**")
                         if i == 0:
                             q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
-                            opts_label = _("그룹 분류 보기 옵션 (콤마로 구분)", "Group Classification Options (comma-separated)")
+                            opts_label = _("그룹 분류 보기 옵션 (쉼표로 구분)", "Group Classification Options (comma-separated)")
                         else:
                             q_label = _("추가 설문 문항", "Additional Survey Question")
-                            opts_label = _("추가 문항 보기 옵션 (콤마로 구분)", "Additional Question Options (comma-separated)")
+                            opts_label = _("추가 문항 보기 옵션 (쉼표로 구분)", "Additional Question Options (comma-separated)")
                         
                         q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i]["q"], key=f"tq_q_{i}")
                         opts_val = st.text_input(opts_label + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"tq_opts_{i}")
