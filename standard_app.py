@@ -9311,8 +9311,7 @@ with col_main:
         - Lead Researcher : [Enter Name]
         - Contact : [Enter Phone or Email]"""
 
-                st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
-                survey_desc = st.text_area(_("조사 목적 및 안내문", "Survey Purpose & Instructions"), value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), height=350, label_visibility="collapsed")
+                survey_desc = st.text_area(_("조사 목적 및 안내문", "Survey Purpose & Instructions"), value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), height=350, key="survey_desc_textarea")
                 if st.session_state.user_id:
                     if "@" in st.session_state.user_id:
                         default_admin_email = st.session_state.user_id
