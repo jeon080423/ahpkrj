@@ -9262,28 +9262,45 @@ with col_main:
                 default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
                 survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", default_survey_title))
             
-                default_survey_desc_ko = """[조사 목적 및 안내문]\n안녕하십니까?
-본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다. 
+                default_survey_desc_ko = """[조사 목적 및 안내문]
+
+**안녕하십니까?**
+본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 
+전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다.
+
 바쁘시더라도 잠시 시간을 내어 귀하의 귀중한 의견을 응답해 주시면 연구에 큰 도움이 될 것입니다.
+
 ■ 조사 목적 : [연구/프로젝트 목적 기재]
 ■ 조사 내용 : [조사 대상 요인] 간의 AHP(쌍대비교) 평가
 ■ 조사 기간 : 202X년 X월 X일 ~ 202X년 X월 X일
-■ 개인정보 보호 : 
-본 조사를 통해 수집된 모든 자료는 통계법 제33조(비밀의 보호)에 의거하여 철저히 보호되며, 오직 연구 및 통계 분석 목적으로만 활용됩니다.
-응답해주신 개인 정보 및 개별 응답 결과는 절대 외부로 유출되지 않음을 약속드립니다.
+■ 개인정보 보호 :
+  - 본 조사를 통해 수집된 모든 자료는 통계법 제33조(비밀의 보호)에 의거하여 철저히 보호되며, 
+    오직 연구 및 통계 분석 목적으로만 활용됩니다.
+  - 응답해주신 개인 정보 및 개별 응답 결과는 절대 외부로 유출되지 않음을 약속드립니다.
+
 귀하의 소중한 참여에 깊은 감사를 드립니다.
+
 - 연구 책임자 : [이름 기재]
 - 문의처 : [연락처 또는 이메일 기재]"""
     
-                default_survey_desc_en = """[Survey Purpose & Instructions]\nGreetings,
-This survey is designed to collect the valuable opinions of experts (or practitioners) to derive the relative importance of key factors regarding [Research/Project Topic].
-Your participation will be of great help to our research, and we would deeply appreciate it if you could take a moment out of your busy schedule to respond.
+                default_survey_desc_en = """[Survey Purpose & Instructions]
+
+**Greetings,**
+This survey is designed to gather the opinions of experts (or practitioners) to derive the relative importance 
+of major factors regarding [Research/Project Topic].
+
+Even if you are busy, taking a moment to provide your valuable input will be of great help to our research.
+
 ■ Purpose : [Enter Research/Project Purpose]
-■ Content : AHP (Pairwise Comparison) evaluation among [Target Factors]
-■ Period : 202X-XX-XX ~ 202X-XX-XX
-■ Privacy Policy : 
-All data collected through this survey will be strictly protected in accordance with privacy laws and used solely for research and statistical analysis purposes. We promise that your personal information and individual responses will never be leaked externally.
-Thank you very much for your valuable participation.
+■ Content : AHP (Pairwise Comparison) evaluation among [Factors to be Surveyed]
+■ Period : [Start Date] ~ [End Date]
+■ Privacy :
+  - All data collected through this survey is strictly protected under Article 33 (Protection of Secrets) 
+    of the Statistics Act and will be used solely for research and statistical analysis purposes.
+  - We promise that your personal information and individual responses will never be leaked externally.
+
+Thank you deeply for your valuable participation.
+
 - Lead Researcher : [Enter Name]
 - Contact : [Enter Phone or Email]"""
     
