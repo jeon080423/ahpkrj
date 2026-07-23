@@ -9301,9 +9301,10 @@ with col_main:
                 
                 st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
                 
+                survey_desc = st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en))
                 if st.session_state.get("show_inline_editor", False):
                     st.info(_("안내문 내용을 자유롭게 편집하세요. 툴바를 이용해 굵기, 색상 등을 변경할 수 있습니다.", "Edit the instructions freely. You can change boldness, color, etc. using the toolbar."))
-                    new_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_inline_v1")
+                    new_desc = st_quill(value=survey_desc, html=True, key="quill_standard_desc_inline_v1")
                     
                     col1, col2 = st.columns(2)
                     with col1:
@@ -9316,7 +9317,6 @@ with col_main:
                             st.session_state["show_inline_editor"] = False
                             st.rerun()
                 else:
-                    survey_desc = st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en))
                     with st.container(border=True):
                         st.markdown(survey_desc, unsafe_allow_html=True)
                     
