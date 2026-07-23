@@ -9132,10 +9132,11 @@ with col_main:
             st.divider()
         
             # ------------------------------------------------------------
-            setup_tab1, setup_tab2, setup_tab3 = st.tabs([
-                _("📌 1. 기본 정보 및 모델 설계", "📌 1. Basic Info & Model Design"), 
-                _("📝 2. 요인 상세 설명 (조작적 정의)", "📝 2. Operational Definitions"), 
-                _("⚙️ 3. 부가 설정 및 배포", "⚙️ 3. Additional Settings & Deployment")
+            setup_tab1, setup_tab2, setup_tab3, setup_tab4 = st.tabs([
+                _("📌 1. 기본 정보", "📌 1. Basic Info"), 
+                _("🏗️ 2. 모델 설계", "🏗️ 2. Model Design"),
+                _("📝 3. 요인 상세 설명 (조작적 정의)", "📝 3. Operational Definitions"), 
+                _("⚙️ 4. 부가 설정 및 배포", "⚙️ 4. Additional Settings & Deployment")
             ])
             with setup_tab1:
                 # 0. 설문 관리 (1인 1설문 모드)
@@ -9422,6 +9423,7 @@ with col_main:
 
                 st.markdown("<hr style='margin: 0.5rem 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
+            with setup_tab2:
                 # 섹션 2: AHP 모델 계층구조 입력 폼
                 st.subheader(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
 
@@ -9500,7 +9502,7 @@ with col_main:
                 st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
 
-            with setup_tab2:
+            with setup_tab3:
                 # 섹션 3: 요인 조작적 정의 설정
                 st.subheader(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
                 st.info(_("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.", "Please provide detailed descriptions so respondents can intuitively understand each criteria concept."))
@@ -9558,7 +9560,7 @@ with col_main:
                     st.write("") # 섹션 간 시각적 여백 추가
 
 
-            with setup_tab3:
+            with setup_tab4:
                 # 섹션 4: 척도 인터페이스 설정
                 st.subheader(_("섹션 4: 쌍대비교 응답 척도 설정", "Section 4: Pairwise Comparison Scale Setup"))
                 scale_options = [
