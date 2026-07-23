@@ -9289,21 +9289,14 @@ Thank you very much for your valuable participation.
     
                 st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
                 
-                md_col1, md_col2 = st.columns(2)
-                with md_col1:
-                    st.markdown("📝 **" + _("내용 입력 (마크다운 지원)", "Input (Markdown Supported)") + "**", help=_("마크다운 문법 안내\n- **굵게**: `**텍스트**`\n- 제목: `# 제목`\n- 목록: `- 항목`", "Markdown Syntax\n- **Bold**: `**text**`\n- Header: `# Header`\n- List: `- Item`"))
-                    survey_desc = st.text_area(
-                        label="조사 목적 및 안내문 입력",
-                        value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)),
-                        height=400,
-                        key="quill_standard_desc_text_area",
-                        label_visibility="collapsed"
-                    )
-                    st.session_state["edit_desc"] = survey_desc
-                with md_col2:
-                    st.markdown("👀 **" + _("실시간 미리보기", "Real-time Preview") + "**")
-                    with st.container(border=True, height=400):
-                        st.markdown(survey_desc, unsafe_allow_html=True)
+                survey_desc = st.text_area(
+                    label=_("조사 목적 및 안내문 입력", "Survey Purpose & Instructions Input"),
+                    value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)),
+                    height=400,
+                    key="quill_standard_desc_text_area",
+                    label_visibility="collapsed"
+                )
+                st.session_state["edit_desc"] = survey_desc
                 
                 if st.session_state.user_id:
                     if "@" in st.session_state.user_id:

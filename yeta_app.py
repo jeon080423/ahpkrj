@@ -1881,21 +1881,14 @@ def run():
             )
             st.markdown("**설문 안내문**")
             
-            md_col1, md_col2 = st.columns(2)
-            with md_col1:
-                st.markdown("📝 **내용 입력 (마크다운 지원)**", help="마크다운 문법 안내\n- **굵게**: `**텍스트**`\n- 제목: `# 제목`\n- 목록: `- 항목`")
-                survey_desc = st.text_area(
-                    label="설문 안내문 입력",
-                    value=st.session_state.get("edit_yeta_desc", default_survey_desc),
-                    height=400,
-                    key="quill_yeta_desc_text_area",
-                    label_visibility="collapsed"
-                )
-                st.session_state["edit_yeta_desc"] = survey_desc
-            with md_col2:
-                st.markdown("👀 **실시간 미리보기**")
-                with st.container(border=True, height=400):
-                    st.markdown(survey_desc, unsafe_allow_html=True)
+            survey_desc = st.text_area(
+                label="설문 안내문 입력",
+                value=st.session_state.get("edit_yeta_desc", default_survey_desc),
+                height=400,
+                key="quill_yeta_desc_text_area",
+                label_visibility="collapsed"
+            )
+            st.session_state["edit_yeta_desc"] = survey_desc
             
             st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
             yeta_p_type = st.selectbox(
