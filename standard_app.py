@@ -9113,23 +9113,10 @@ with col_main:
                 )
             st.markdown(f"{box_style}{msg}</div>", unsafe_allow_html=True)
 
-            # [가이드 삽입]
-            with st.expander(_("📖 온라인 설문 자동 생성 및 배포 이용 가이드 (클릭하여 펼치기)", "📖 Online Survey Auto-Generation & Deployment Guide (Click to expand)"), expanded=False):
-                try:
-                    import os
-                    guide_file = "guide_en.html" if st.session_state.lang == "en" else "guide.html"
-                    with open(os.path.join("static", guide_file), "r", encoding="utf-8") as f:
-                        guide_html = f.read()
-                    import streamlit.components.v1 as components
-                    components.html(guide_html, height=720, scrolling=True)
-                except Exception as e:
-                    st.error("가이드 파일을 불러올 수 없습니다.")
-
             # (Dashboard moved to main_tab3 below)
             pass
-
-            st.divider()
         
+
             # ------------------------------------------------------------
             # 0. 설문 관리 (1인 1설문 모드)
             # ------------------------------------------------------------
