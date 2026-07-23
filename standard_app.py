@@ -9249,73 +9249,84 @@ with col_main:
 
             from survey_manager import create_survey_sheet
 
-            # 7개 섹션 설문지 생성 폼 구성
-            # 섹션 1: 기본 정보
-            st.subheader(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
-            default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
-            survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", default_survey_title))
-        
-            default_survey_desc_ko = """[조사 목적 및 안내문]
-
-        안녕하십니까?
-        본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다. 
-        바쁘시더라도 잠시 시간을 내어 귀하의 귀중한 의견을 응답해 주시면 연구에 큰 도움이 될 것입니다.
-
-        ■ 조사 목적 : [연구/프로젝트 목적 기재]
-        ■ 조사 내용 : [조사 대상 요인] 간의 AHP(쌍대비교) 평가
-        ■ 조사 기간 : 202X년 X월 X일 ~ 202X년 X월 X일
-        ■ 개인정보 보호 : 
-        본 조사를 통해 수집된 모든 자료는 통계법 제33조(비밀의 보호)에 의거하여 철저히 보호되며, 오직 연구 및 통계 분석 목적으로만 활용됩니다.
-    응답해주신 개인 정보 및 개별 응답 결과는 절대 외부로 유출되지 않음을 약속드립니다.
-
-        귀하의 소중한 참여에 깊은 감사를 드립니다.
-
-        - 연구 책임자 : [이름 기재]
-        - 문의처 : [연락처 또는 이메일 기재]"""
-
-            default_survey_desc_en = """[Survey Purpose & Instructions]
-
-        Greetings,
-        This survey is designed to collect the valuable opinions of experts (or practitioners) to derive the relative importance of key factors regarding [Research/Project Topic].
-        Your participation will be of great help to our research, and we would deeply appreciate it if you could take a moment out of your busy schedule to respond.
-
-        ■ Purpose : [Enter Research/Project Purpose]
-        ■ Content : AHP (Pairwise Comparison) evaluation among [Target Factors]
-        ■ Period : 202X-XX-XX ~ 202X-XX-XX
-        ■ Privacy Policy : 
-        All data collected through this survey will be strictly protected in accordance with privacy laws and used solely for research and statistical analysis purposes. We promise that your personal information and individual responses will never be leaked externally.
-
-        Thank you very much for your valuable participation.
-
-        - Lead Researcher : [Enter Name]
-        - Contact : [Enter Phone or Email]"""
-
-            from streamlit_quill import st_quill
-            st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
-            survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_v5")
-            if st.session_state.user_id:
-                if "@" in st.session_state.user_id:
-                    default_admin_email = st.session_state.user_id
-                elif st.session_state.user_id == "shjeon":
-                    default_admin_email = "jeon080423@gmail.com"
-                else:
-                    default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
-            else:
-                default_admin_email = "temp@ahpmaster.com"
-            survey_admin_email = default_admin_email
-
-            st.divider()
-
             setup_tab1, setup_tab2, setup_tab3, setup_tab4 = st.tabs([
-                _("📌 1. 응답자 및 그룹 분류", "📌 1. Respondent Info"), 
+                _("📌 1. 기본 정보 및 응답자 설정", "📌 1. Basic Info & Respondent Setup"), 
                 _("🏗️ 2. 모델 설계", "🏗️ 2. Model Design"),
                 _("📝 3. 요인 상세 설명 (조작적 정의)", "📝 3. Operational Definitions"), 
                 _("⚙️ 4. 부가 설정 및 배포", "⚙️ 4. Additional Settings & Deployment")
             ])
             with setup_tab1:
+                # 7개 섹션 설문지 생성 폼 구성
+                # 섹션 1: 기본 정보
+                st.subheader(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
+                default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
+                survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", default_survey_title))
+            
+                default_survey_desc_ko = """[조사 목적 및 안내문]
+    
+            안녕하십니까?
+            본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다. 
+            바쁘시더라도 잠시 시간을 내어 귀하의 귀중한 의견을 응답해 주시면 연구에 큰 도움이 될 것입니다.
+    
+            ■ 조사 목적 : [연구/프로젝트 목적 기재]
+            ■ 조사 내용 : [조사 대상 요인] 간의 AHP(쌍대비교) 평가
+            ■ 조사 기간 : 202X년 X월 X일 ~ 202X년 X월 X일
+            ■ 개인정보 보호 : 
+            본 조사를 통해 수집된 모든 자료는 통계법 제33조(비밀의 보호)에 의거하여 철저히 보호되며, 오직 연구 및 통계 분석 목적으로만 활용됩니다.
+        응답해주신 개인 정보 및 개별 응답 결과는 절대 외부로 유출되지 않음을 약속드립니다.
+    
+            귀하의 소중한 참여에 깊은 감사를 드립니다.
+    
+            - 연구 책임자 : [이름 기재]
+            - 문의처 : [연락처 또는 이메일 기재]"""
+    
+                default_survey_desc_en = """[Survey Purpose & Instructions]
+    
+            Greetings,
+            This survey is designed to collect the valuable opinions of experts (or practitioners) to derive the relative importance of key factors regarding [Research/Project Topic].
+            Your participation will be of great help to our research, and we would deeply appreciate it if you could take a moment out of your busy schedule to respond.
+    
+            ■ Purpose : [Enter Research/Project Purpose]
+            ■ Content : AHP (Pairwise Comparison) evaluation among [Target Factors]
+            ■ Period : 202X-XX-XX ~ 202X-XX-XX
+            ■ Privacy Policy : 
+            All data collected through this survey will be strictly protected in accordance with privacy laws and used solely for research and statistical analysis purposes. We promise that your personal information and individual responses will never be leaked externally.
+    
+            Thank you very much for your valuable participation.
+    
+            - Lead Researcher : [Enter Name]
+            - Contact : [Enter Phone or Email]"""
+    
+                from streamlit_quill import st_quill
+                st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
+                
+                # 강제로 iframe 및 컨테이너 높이를 확보하는 CSS 주입
+                st.markdown("""
+                <style>
+                    iframe[title="streamlit_quill.st_quill"] {
+                        min-height: 400px !important;
+                    }
+                </style>
+                """, unsafe_allow_html=True)
+                
+                survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_v8")
+                
+                if st.session_state.user_id:
+                    if "@" in st.session_state.user_id:
+                        default_admin_email = st.session_state.user_id
+                    elif st.session_state.user_id == "shjeon":
+                        default_admin_email = "jeon080423@gmail.com"
+                    else:
+                        default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
+                else:
+                    default_admin_email = "temp@ahpmaster.com"
+                survey_admin_email = default_admin_email
+    
+                st.divider()
+    
                 # 섹션 1.5: 응답자 수집 정보 및 그룹 분류 설정
                 st.subheader(_("섹션 1.5: 응답자 수집 정보 및 그룹 분류", "Section 1.5: Respondent Info & Grouping"))
-
+    
                 # 그룹 분류 문항 설정
                 with st.container(border=True):
                     st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
