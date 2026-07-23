@@ -9085,6 +9085,7 @@ with col_main:
     
 
     with main_tab2:
+        @st.fragment
         def _survey_setup_fragment():
             st.header(_("AHP 온라인 설문 자동 생성 및 배포", "AHP Online Survey Auto-Generator & Deployer"))
             box_style = """
@@ -9304,8 +9305,7 @@ with col_main:
 
             from streamlit_quill import st_quill
             st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
-            st.markdown("""<style> iframe[title="streamlit_quill.st_quill"] { min-height: 400px !important; } </style>""", unsafe_allow_html=True)
-            survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_v3")
+            survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_v5")
             if st.session_state.user_id:
                 if "@" in st.session_state.user_id:
                     default_admin_email = st.session_state.user_id
