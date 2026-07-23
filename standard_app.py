@@ -9264,7 +9264,7 @@ with col_main:
             
                 default_survey_desc_ko = """[조사 목적 및 안내문]
 
-**안녕하십니까?**
+안녕하십니까?
 본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 
 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다.
 
@@ -9285,7 +9285,7 @@ with col_main:
     
                 default_survey_desc_en = """[Survey Purpose & Instructions]
 
-**Greetings,**
+Greetings,
 This survey is designed to gather the opinions of experts (or practitioners) to derive the relative importance 
 of major factors regarding [Research/Project Topic].
 
@@ -9585,10 +9585,9 @@ Thank you deeply for your valuable participation.
                         "enabled": reward_enabled,
                         "desc": reward_desc
                     }
+                    st.divider()
                 else:
                     rewards_info = {"enabled": False}
-
-                st.divider()
 
                 # 섹션 6: 실시간 CR 검증 레벨 설정
                 st.subheader(_("섹션 6: 제출 전 일관성 비율 (CR) 검증 레벨", "Section 6: Pre-submission Consistency Ratio (CR) Validation Level"))
