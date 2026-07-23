@@ -1879,7 +1879,7 @@ def run():
                 "문의처: OOO, sample@test.co.kr, 00)000-0000\n\n"
                 "바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."
             )
-            from streamlit_quill import st_quill
+            from quill_editor import st_quill
             st.markdown("**설문 안내문**")
             survey_desc = st_quill(value=st.session_state.get("edit_yeta_desc", default_survey_desc), html=True, key="quill_yeta_desc")
             
