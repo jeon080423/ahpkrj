@@ -2796,7 +2796,7 @@ def run():
         # TAB 4: B2B Pricing & Payment (Hybrid Pricing Applied)
         # =========================================================================
     with tab_pricing:
-        st.markdown("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 100% 지원</span>", unsafe_allow_html=True)
+        st.markdown("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 지원</span>", unsafe_allow_html=True)
 
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         user_id = st.session_state.get("user_id")
