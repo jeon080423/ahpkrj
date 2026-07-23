@@ -1883,9 +1883,10 @@ def run():
             
             st.markdown("**설문 안내문**")
             
+            survey_desc = st.session_state.get("edit_yeta_desc", default_survey_desc)
             if st.session_state.get("show_yeta_inline_editor", False):
                 st.info("안내문 내용을 자유롭게 편집하세요. 툴바를 이용해 굵기, 색상 등을 변경할 수 있습니다.")
-                new_desc = st_quill(value=st.session_state.get("edit_yeta_desc", default_survey_desc), html=True, key="quill_yeta_desc_inline_v1")
+                new_desc = st_quill(value=survey_desc, html=True, key="quill_yeta_desc_inline_v1")
                 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -1898,7 +1899,6 @@ def run():
                         st.session_state["show_yeta_inline_editor"] = False
                         st.rerun()
             else:
-                survey_desc = st.session_state.get("edit_yeta_desc", default_survey_desc)
                 with st.container(border=True):
                     st.markdown(survey_desc, unsafe_allow_html=True)
                 
