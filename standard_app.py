@@ -5635,7 +5635,7 @@ def get_fee_info_text():
     </span>
     <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li><span style="font-size: 0.85rem;">AHP 코딩 엑셀 양식 다운로드</span></li>
-      <li><span style="font-size: 0.85rem;">온라인 AHP 설문지 제작 및 배포 (무료)</span></li>
+      <li><span style="font-size: 0.85rem;">온라인 AHP 설문지 제작/배포 (무료)</span></li>
       <li><span style="font-size: 0.85rem;">실시간 설문 데이터 구글 시트 연동</span></li>
       <li><span style="font-size: 0.85rem;">설문 응답 모니터링 & 결과 다운로드</span></li>
       <li><span style="font-size: 0.85rem;">AHP 분석 도구 무료 체험 (최대 5표본)</span></li>
