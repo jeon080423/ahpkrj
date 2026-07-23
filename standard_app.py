@@ -9085,8 +9085,6 @@ with col_main:
     
 
     with main_tab2:
-        # @st.fragment: 위젯 변경 시 이 영역만 재실행 (성능 최적화)
-        @st.fragment
         def _survey_setup_fragment():
             st.header(_("AHP 온라인 설문 자동 생성 및 배포", "AHP Online Survey Auto-Generator & Deployer"))
             box_style = """
@@ -9311,7 +9309,9 @@ with col_main:
         - Lead Researcher : [Enter Name]
         - Contact : [Enter Phone or Email]"""
 
-                survey_desc = st.text_area(_("조사 목적 및 안내문", "Survey Purpose & Instructions"), value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), height=350, key="survey_desc_textarea")
+                from streamlit_quill import st_quill
+                st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
+                survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc")
                 if st.session_state.user_id:
                     if "@" in st.session_state.user_id:
                         default_admin_email = st.session_state.user_id
