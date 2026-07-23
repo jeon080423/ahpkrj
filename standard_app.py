@@ -9130,151 +9130,144 @@ with col_main:
             st.divider()
         
             # ------------------------------------------------------------
-            setup_tab1, setup_tab2, setup_tab3, setup_tab4 = st.tabs([
-                _("📌 1. 기본 정보", "📌 1. Basic Info"), 
-                _("🏗️ 2. 모델 설계", "🏗️ 2. Model Design"),
-                _("📝 3. 요인 상세 설명 (조작적 정의)", "📝 3. Operational Definitions"), 
-                _("⚙️ 4. 부가 설정 및 배포", "⚙️ 4. Additional Settings & Deployment")
-            ])
-            with setup_tab1:
-                # 0. 설문 관리 (1인 1설문 모드)
-                # ------------------------------------------------------------
-                st.subheader(_("섹션 0: 내 설문 관리", "Section 0: My Survey Management"))
+            # 0. 설문 관리 (1인 1설문 모드)
+            # ------------------------------------------------------------
+            st.subheader(_("섹션 0: 내 설문 관리", "Section 0: My Survey Management"))
 
-                # Initialize states
-                if 'editing_survey_id' not in st.session_state:
-                    st.session_state.editing_survey_id = None
-                if 'survey_auto_loaded' not in st.session_state:
-                    st.session_state.survey_auto_loaded = False
+            # Initialize states
+            if 'editing_survey_id' not in st.session_state:
+                st.session_state.editing_survey_id = None
+            if 'survey_auto_loaded' not in st.session_state:
+                st.session_state.survey_auto_loaded = False
 
-                # Check existing surveys (SQLite와 구글 시트 모두 조회하여 병합) — 세션 캐싱
-                if '_cached_user_surveys' not in st.session_state or st.session_state.get('_survey_cache_dirty'):
-                    sqlite_surveys = []
-                    try:
-                        import sqlite3
-                        conn = sqlite3.connect('users.db')
-                        cur = conn.cursor()
-                        cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
-                        sqlite_surveys = cur.fetchall()
-                        conn.close()
-                    except Exception:
-                        pass
+            # Check existing surveys (SQLite와 구글 시트 모두 조회하여 병합) — 세션 캐싱
+            if '_cached_user_surveys' not in st.session_state or st.session_state.get('_survey_cache_dirty'):
+                sqlite_surveys = []
+                try:
+                    import sqlite3
+                    conn = sqlite3.connect('users.db')
+                    cur = conn.cursor()
+                    cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.user_id,))
+                    sqlite_surveys = cur.fetchall()
+                    conn.close()
+                except Exception:
+                    pass
 
-                    gs_surveys = []
-                    try:
-                        from survey_manager import get_admin_surveys_from_gsheet
-                        gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
-                    except Exception:
-                        pass
-                
-                    merged_surveys = {}
-                    for s in gs_surveys + sqlite_surveys:
-                        if s[0] not in merged_surveys:
-                            merged_surveys[s[0]] = s
-                    user_surveys = list(merged_surveys.values())
-                    user_surveys.sort(key=lambda x: x[2], reverse=True)
-                    st.session_state._cached_user_surveys = user_surveys
-                    st.session_state._survey_cache_dirty = False
-                else:
-                    user_surveys = st.session_state._cached_user_surveys
+                gs_surveys = []
+                try:
+                    from survey_manager import get_admin_surveys_from_gsheet
+                    gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
+                except Exception:
+                    pass
             
-                has_survey = len(user_surveys) > 0
+                merged_surveys = {}
+                for s in gs_surveys + sqlite_surveys:
+                    if s[0] not in merged_surveys:
+                        merged_surveys[s[0]] = s
+                user_surveys = list(merged_surveys.values())
+                user_surveys.sort(key=lambda x: x[2], reverse=True)
+                st.session_state._cached_user_surveys = user_surveys
+                st.session_state._survey_cache_dirty = False
+            else:
+                user_surveys = st.session_state._cached_user_surveys
+            
+            has_survey = len(user_surveys) > 0
 
-                # Auto-load logic
-                if has_survey and not st.session_state.survey_auto_loaded:
-                    sel_id = user_surveys[0][0] # Load the most recent one
-                    from survey_manager import load_survey_metadata
-                    meta = load_survey_metadata(sel_id)
-                    if meta:
-                        st.session_state.editing_survey_id = sel_id
-                        st.session_state.edit_title = meta.get("Title", "")
-                        st.session_state.edit_desc = meta.get("Description", "")
-                        st.session_state.edit_admin_email = meta.get("Admin_Email", "")
+            # Auto-load logic
+            if has_survey and not st.session_state.survey_auto_loaded:
+                sel_id = user_surveys[0][0] # Load the most recent one
+                from survey_manager import load_survey_metadata
+                meta = load_survey_metadata(sel_id)
+                if meta:
+                    st.session_state.editing_survey_id = sel_id
+                    st.session_state.edit_title = meta.get("Title", "")
+                    st.session_state.edit_desc = meta.get("Description", "")
+                    st.session_state.edit_admin_email = meta.get("Admin_Email", "")
 
-                        demo = meta.get("Demographics", {})
-                        st.session_state.edit_type_question = demo.get("type_question", "")
-                        st.session_state.edit_type_options = ", ".join(demo.get("type_options", []))
-                        if "type_questions" in demo:
-                            tqs = []
-                            for tq in demo["type_questions"]:
-                                tqs.append({"q": tq["q"], "opts": ", ".join(tq["opts"])})
-                            st.session_state.edit_type_questions = tqs
-                        st.session_state.edit_demo_gender = demo.get("gender", False)
-                        st.session_state.edit_demo_aff = demo.get("affiliation", False)
-                        st.session_state.edit_demo_email = demo.get("email", False)
-                        st.session_state.edit_demo_name = demo.get("name", False)
-                        st.session_state.edit_demo_age = demo.get("age", False)
-                        st.session_state.edit_demo_exp = demo.get("experience", False)
-                        st.session_state.edit_age_type = demo.get("age_type", "개방형 (숫자 직접 입력)")
-                        st.session_state.edit_exp_type = demo.get("experience_type", "개방형 (숫자 직접 입력)")
+                    demo = meta.get("Demographics", {})
+                    st.session_state.edit_type_question = demo.get("type_question", "")
+                    st.session_state.edit_type_options = ", ".join(demo.get("type_options", []))
+                    if "type_questions" in demo:
+                        tqs = []
+                        for tq in demo["type_questions"]:
+                            tqs.append({"q": tq["q"], "opts": ", ".join(tq["opts"])})
+                        st.session_state.edit_type_questions = tqs
+                    st.session_state.edit_demo_gender = demo.get("gender", False)
+                    st.session_state.edit_demo_aff = demo.get("affiliation", False)
+                    st.session_state.edit_demo_email = demo.get("email", False)
+                    st.session_state.edit_demo_name = demo.get("name", False)
+                    st.session_state.edit_demo_age = demo.get("age", False)
+                    st.session_state.edit_demo_exp = demo.get("experience", False)
+                    st.session_state.edit_age_type = demo.get("age_type", "개방형 (숫자 직접 입력)")
+                    st.session_state.edit_exp_type = demo.get("experience_type", "개방형 (숫자 직접 입력)")
+            
+                    st.session_state.edit_scale_type = meta.get("Scale_Type", "1-9 Continuous")
+                    cr_limit_raw = meta.get("CR_Limit", 0.1)
+                    st.session_state.edit_cr_limit = float(cr_limit_raw) if cr_limit_raw is not None and str(cr_limit_raw).lower() != "none" else None
+                    cr_guide_raw = meta.get("CR_Guide_Method", "realtime" if str(meta.get("CR_Guide_Enabled", "False")).lower() == "true" else "none")
+                    st.session_state.edit_cr_guide_method = cr_guide_raw
+            
+                    ahp_model = meta.get("AHP_Model_JSON", {})
+                    st.session_state.edit_main_input = ", ".join(ahp_model.get("main", []))
+                    st.session_state.edit_sub_inputs = {}
+                    for mc, subs in ahp_model.get("subs", {}).items():
+                        st.session_state.edit_sub_inputs[mc] = ", ".join(subs)
                 
-                        st.session_state.edit_scale_type = meta.get("Scale_Type", "1-9 Continuous")
-                        cr_limit_raw = meta.get("CR_Limit", 0.1)
-                        st.session_state.edit_cr_limit = float(cr_limit_raw) if cr_limit_raw is not None and str(cr_limit_raw).lower() != "none" else None
-                        cr_guide_raw = meta.get("CR_Guide_Method", "realtime" if str(meta.get("CR_Guide_Enabled", "False")).lower() == "true" else "none")
-                        st.session_state.edit_cr_guide_method = cr_guide_raw
-                
-                        ahp_model = meta.get("AHP_Model_JSON", {})
-                        st.session_state.edit_main_input = ", ".join(ahp_model.get("main", []))
-                        st.session_state.edit_sub_inputs = {}
-                        for mc, subs in ahp_model.get("subs", {}).items():
-                            st.session_state.edit_sub_inputs[mc] = ", ".join(subs)
-                    
-                        definitions = meta.get("Definitions", {})
-                        st.session_state.edit_definitions = definitions
-                    st.session_state.survey_auto_loaded = True
-                    st.rerun()
+                    definitions = meta.get("Definitions", {})
+                    st.session_state.edit_definitions = definitions
+                st.session_state.survey_auto_loaded = True
+                st.rerun()
 
-                @st.dialog(_("🚨 [경고] 기존 설문 영구 삭제 안내", "🚨 [Warning] Permanent Deletion of Existing Survey"))
-                def confirm_new_survey():
-                    st.error(_("새로운 설문을 작성하시면 기존 연동된 구글 시트에 저장된 **모든 데이터(설문 구조, 문항, 수집된 전체 응답 결과)가 즉시 삭제되며 절대 복구할 수 없습니다.**", "If you create a new survey, **ALL data saved in the linked Google Sheet (survey structure, questions, collected responses) will be immediately deleted and CANNOT be recovered.**"))
-                    st.info(_("💡 **데이터 보존 안내:** 기존 설문의 응답 결과 보존을 원하신다면, 삭제에 동의하시기 전에 구글 스프레드시트에 접속하여 **[파일] -> [다운로드]** 메뉴를 통해 엑셀(.xlsx) 파일 등으로 백업본을 사용자 컴퓨터에 미리 다운로드해 두시기 바랍니다.", "💡 **Data Preservation Guide:** If you wish to keep the existing responses, please go to the Google Spreadsheet and use the **[File] -> [Download]** menu to download a backup copy (e.g., .xlsx) to your computer before agreeing to delete."))
-                    agree = st.checkbox(_("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.", "Yes, I have backed up or do not need the existing data, and I agree to delete all data."))
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True):
-                            st.rerun()
-                    with col2:
-                        if st.button(_("✅ 동의 및 초기화", "✅ Agree & Initialize"), type="primary", use_container_width=True, disabled=not agree):
-                            with st.spinner(_("기존 데이터를 삭제하는 중입니다...", "Deleting existing data...")):
-                                from survey_manager import delete_admin_survey
-                                if user_surveys:
-                                    delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
-                                st.session_state.editing_survey_id = None
-                                keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
-                                for k in keys_to_clear:
-                                    del st.session_state[k]
-                                st.session_state.survey_auto_loaded = False
-                            st.success(_("완료되었습니다. 화면이 새로고침됩니다.", "Completed. The screen will be refreshed."))
-                            import time
-                            time.sleep(1.5)
-                            st.rerun()
-
-                if has_survey:
-                    st.success(_(f" 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f" A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
-                    st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
-                    if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary"):
-                         confirm_new_survey()
-                else:
-                    st.info(_(" 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", " This is a new survey in progress. Please fill out the contents and deploy."))
-                    if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
-                        st.session_state.editing_survey_id = None
-                        keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
-                        for k in keys_to_clear:
-                            del st.session_state[k]
+            @st.dialog(_("🚨 [경고] 기존 설문 영구 삭제 안내", "🚨 [Warning] Permanent Deletion of Existing Survey"))
+            def confirm_new_survey():
+                st.error(_("새로운 설문을 작성하시면 기존 연동된 구글 시트에 저장된 **모든 데이터(설문 구조, 문항, 수집된 전체 응답 결과)가 즉시 삭제되며 절대 복구할 수 없습니다.**", "If you create a new survey, **ALL data saved in the linked Google Sheet (survey structure, questions, collected responses) will be immediately deleted and CANNOT be recovered.**"))
+                st.info(_("💡 **데이터 보존 안내:** 기존 설문의 응답 결과 보존을 원하신다면, 삭제에 동의하시기 전에 구글 스프레드시트에 접속하여 **[파일] -> [다운로드]** 메뉴를 통해 엑셀(.xlsx) 파일 등으로 백업본을 사용자 컴퓨터에 미리 다운로드해 두시기 바랍니다.", "💡 **Data Preservation Guide:** If you wish to keep the existing responses, please go to the Google Spreadsheet and use the **[File] -> [Download]** menu to download a backup copy (e.g., .xlsx) to your computer before agreeing to delete."))
+                agree = st.checkbox(_("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.", "Yes, I have backed up or do not need the existing data, and I agree to delete all data."))
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True):
+                        st.rerun()
+                with col2:
+                    if st.button(_("✅ 동의 및 초기화", "✅ Agree & Initialize"), type="primary", use_container_width=True, disabled=not agree):
+                        with st.spinner(_("기존 데이터를 삭제하는 중입니다...", "Deleting existing data...")):
+                            from survey_manager import delete_admin_survey
+                            if user_surveys:
+                                delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
+                            st.session_state.editing_survey_id = None
+                            keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
+                            for k in keys_to_clear:
+                                del st.session_state[k]
+                            st.session_state.survey_auto_loaded = False
+                        st.success(_("완료되었습니다. 화면이 새로고침됩니다.", "Completed. The screen will be refreshed."))
+                        import time
+                        time.sleep(1.5)
                         st.rerun()
 
-                st.divider()
+            if has_survey:
+                st.success(_(f" 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f" A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
+                st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
+                if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary"):
+                     confirm_new_survey()
+            else:
+                st.info(_(" 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", " This is a new survey in progress. Please fill out the contents and deploy."))
+                if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
+                    st.session_state.editing_survey_id = None
+                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
+                    for k in keys_to_clear:
+                        del st.session_state[k]
+                    st.rerun()
 
-                from survey_manager import create_survey_sheet
+            st.divider()
 
-                # 7개 섹션 설문지 생성 폼 구성
-                # 섹션 1: 기본 정보
-                st.subheader(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
-                default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
-                survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", default_survey_title))
+            from survey_manager import create_survey_sheet
+
+            # 7개 섹션 설문지 생성 폼 구성
+            # 섹션 1: 기본 정보
+            st.subheader(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
+            default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
+            survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", default_survey_title))
         
-                default_survey_desc_ko = """[조사 목적 및 안내문]
+            default_survey_desc_ko = """[조사 목적 및 안내문]
 
         안녕하십니까?
         본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다. 
@@ -9292,7 +9285,7 @@ with col_main:
         - 연구 책임자 : [이름 기재]
         - 문의처 : [연락처 또는 이메일 기재]"""
 
-                default_survey_desc_en = """[Survey Purpose & Instructions]
+            default_survey_desc_en = """[Survey Purpose & Instructions]
 
         Greetings,
         This survey is designed to collect the valuable opinions of experts (or practitioners) to derive the relative importance of key factors regarding [Research/Project Topic].
@@ -9309,23 +9302,30 @@ with col_main:
         - Lead Researcher : [Enter Name]
         - Contact : [Enter Phone or Email]"""
 
-                from streamlit_quill import st_quill
-                st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
-                st.markdown("""<style> iframe[title="streamlit_quill.st_quill"] { min-height: 400px !important; } </style>""", unsafe_allow_html=True)
-                survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_v3")
-                if st.session_state.user_id:
-                    if "@" in st.session_state.user_id:
-                        default_admin_email = st.session_state.user_id
-                    elif st.session_state.user_id == "shjeon":
-                        default_admin_email = "jeon080423@gmail.com"
-                    else:
-                        default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
+            from streamlit_quill import st_quill
+            st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
+            st.markdown("""<style> iframe[title="streamlit_quill.st_quill"] { min-height: 400px !important; } </style>""", unsafe_allow_html=True)
+            survey_desc = st_quill(value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)), html=True, key="quill_standard_desc_v3")
+            if st.session_state.user_id:
+                if "@" in st.session_state.user_id:
+                    default_admin_email = st.session_state.user_id
+                elif st.session_state.user_id == "shjeon":
+                    default_admin_email = "jeon080423@gmail.com"
                 else:
-                    default_admin_email = "temp@ahpmaster.com"
-                survey_admin_email = default_admin_email
+                    default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
+            else:
+                default_admin_email = "temp@ahpmaster.com"
+            survey_admin_email = default_admin_email
 
-                st.divider()
+            st.divider()
 
+            setup_tab1, setup_tab2, setup_tab3, setup_tab4 = st.tabs([
+                _("📌 1. 응답자 및 그룹 분류", "📌 1. Respondent Info"), 
+                _("🏗️ 2. 모델 설계", "🏗️ 2. Model Design"),
+                _("📝 3. 요인 상세 설명 (조작적 정의)", "📝 3. Operational Definitions"), 
+                _("⚙️ 4. 부가 설정 및 배포", "⚙️ 4. Additional Settings & Deployment")
+            ])
+            with setup_tab1:
                 # 섹션 1.5: 응답자 수집 정보 및 그룹 분류 설정
                 st.subheader(_("섹션 1.5: 응답자 수집 정보 및 그룹 분류", "Section 1.5: Respondent Info & Grouping"))
 
