@@ -953,9 +953,10 @@
 
 /* --- END INLINED CSS --- */
       body { margin: 0; padding: 0; background: white; font-family: sans-serif; overflow: hidden; }
-      #editor-container { height: 320px; border: 1px solid #ccc; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; }
-      .ql-editor { font-size: 14px; min-height: 250px; }
-      .ql-toolbar { border-top-left-radius: 4px; border-top-right-radius: 4px; background: #f8f9fa; border-color: #ccc !important; }
+      #editor-container { min-height: 260px !important; height: 260px !important; width: 100% !important; border: 1px solid #ccc !important; border-bottom-left-radius: 4px !important; border-bottom-right-radius: 4px !important; display: block !important; visibility: visible !important; background: white !important; }
+      .ql-container { min-height: 260px !important; height: 260px !important; width: 100% !important; display: block !important; visibility: visible !important; }
+      .ql-editor { min-height: 210px !important; height: 100% !important; width: 100% !important; font-size: 14px !important; display: block !important; visibility: visible !important; overflow-y: auto !important; }
+      .ql-toolbar { min-height: 42px !important; width: 100% !important; border-top-left-radius: 4px !important; border-top-right-radius: 4px !important; background: #f8f9fa !important; border: 1px solid #ccc !important; display: block !important; visibility: visible !important; }
     </style>
   </head>
   <body>
@@ -974,27 +975,6 @@
 /* --- END INLINED JS --- */
     </script>
     <script>
-      try {
-        // Initialize Quill editor
-        var quill = new Quill('#editor-container', {
-          theme: 'snow',
-          modules: {
-              toolbar: [
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                  [{ 'indent': '-1'}, { 'indent': '+1' }],
-                  [{ 'size': ['small', false, 'large', 'huge'] }],
-                  [{ 'color': [] }, { 'background': [] }],
-                  [{ 'align': [] }],
-                  ['clean']
-              ]
-          }
-        });
-      } catch (err) {
-        document.getElementById('editor-container').innerHTML = '<div style="padding: 15px; color: #dc2626; font-family: sans-serif;">편집기 로드 중 오류가 발생했습니다: ' + err.message + '</div>';
-        console.error("Quill initialization failed:", err);
-      }
-
       // Boilerplate for Streamlit component communication
       function sendMessageToStreamlit(type, data) {
         var outData = Object.assign({
@@ -1013,27 +993,55 @@
         sendMessageToStreamlit("setComponentValue", { value: value });
       }
 
-      // Send updates to Streamlit when text changes
-      quill.on('text-change', function(delta, oldDelta, source) {
-        if (source === 'user') {
-            sendValue(quill.root.innerHTML);
+      function initQuill() {
+        if (window.quill) return window.quill;
+        try {
+          window.quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    ['clean']
+                ]
+            }
+          });
+
+          window.quill.on('text-change', function(delta, oldDelta, source) {
+            if (source === 'user') {
+                sendValue(window.quill.root.innerHTML);
+            }
+          });
+          return window.quill;
+        } catch (err) {
+          document.getElementById('editor-container').innerHTML = '<div style="padding: 15px; color: #dc2626; font-family: sans-serif;">편집기 로드 중 오류가 발생했습니다: ' + err.message + '</div>';
+          console.error("Quill initialization failed:", err);
+          return null;
         }
-      });
+      }
 
       // Handle data coming from Streamlit
       function onMessageFromStreamlit(event) {
         if (event.data.type !== "streamlit:render") return;
         window.rendered = true;
         
+        // Initialize Quill upon receiving the first render event from Streamlit React (when DOM has dimensions)
+        var q = initQuill();
+        if (!q) return;
+
         let val = event.data.args.value || "";
-        // Only update content if it's the first render OR if Python sent a new value different from editor content
-        if (!window.initialized || (val !== window.lastSentValue && val !== quill.root.innerHTML && val !== window.lastReceivedValue)) {
+        // Only load initial value once to prevent cursor resets and React re-render loops during user typing
+        if (!window.initialized) {
             window.lastReceivedValue = val;
             if (val) {
                 if (!/<[a-z][\s\S]*>/i.test(val)) {
                     val = val.split('\n').map(line => `<p>${line || '<br>'}</p>`).join('');
                 }
-                quill.clipboard.dangerouslyPasteHTML(val);
+                q.clipboard.dangerouslyPasteHTML(val);
             }
             window.initialized = true;
         }
@@ -1047,7 +1055,13 @@
       // Tell Streamlit we are ready to receive data
       sendMessageToStreamlit("streamlit:componentReady", {apiVersion: 1});
       
-      setFrameHeight(380);
+      // Attempt fallback initialization in case render event is delayed
+      setTimeout(function() {
+        if (!window.rendered) {
+          initQuill();
+          setFrameHeight(380);
+        }
+      }, 500);
     </script>
   </body>
 </html>
