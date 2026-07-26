@@ -125,6 +125,11 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                 if len(parts) > 1:
                     existing_sheet_id = parts[1].split("/")[0]
             spreadsheet = client.open_by_key(existing_sheet_id)
+            # 링크가 있는 모든 사용자에게 편집자(writer) 권한 부여 (권한 요청 팝업 100% 방지)
+            try:
+                spreadsheet.share(None, perm_type='anyone', role='writer')
+            except Exception:
+                pass
         except Exception as e:
             raise Exception(f"기존 구글 시트를 열 수 없습니다. ID와 서비스 계정 공유 설정을 확인해 주세요. (에러: {e})")
             
@@ -168,12 +173,16 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         # 1. 스프레드시트 신규 생성
         spreadsheet = client.create(f"[AHP 설문] {title}")
         
-        # 2. 담당자 이메일에 편집자 권한 부여 (소유권은 서비스 계정에 유지)
+        # 2. 담당자 이메일에 편집자 권한 부여 및 링크 전체 공개 편집자 설정
         if admin_email and "@" in admin_email:
             try:
                 spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
             except Exception as e:
                 st.warning(f"설문조사 담당자 이메일 공유 설정 중 문제 발생: {e}")
+        try:
+            spreadsheet.share(None, perm_type='anyone', role='writer')
+        except Exception:
+            pass
      
         # 3. Sheet 1: Survey_Metadata 생성 및 설정
         meta_sheet = spreadsheet.sheet1

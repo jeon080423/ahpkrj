@@ -19,6 +19,10 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
     if existing_sheet_id:
         try:
             spreadsheet = client.open_by_key(existing_sheet_id)
+            try:
+                spreadsheet.share(None, perm_type='anyone', role='writer')
+            except Exception:
+                pass
         except Exception as e:
             st.error(f"연동 실패: 입력하신 시트 ID를 찾을 수 없거나 권한이 없습니다. 오류 내용: {e}")
             return None
@@ -402,6 +406,10 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
     if existing_sheet_id:
         try:
             spreadsheet = client.open_by_key(existing_sheet_id)
+            try:
+                spreadsheet.share(None, perm_type='anyone', role='writer')
+            except Exception:
+                pass
         except Exception as e:
             st.error(f"연동 실패: 입력하신 시트 ID를 찾을 수 없거나 권한이 없습니다. 오류 내용: {e}")
             return None
@@ -442,6 +450,10 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
                 spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
             except Exception as e:
                 st.warning(f"설문조사 담당자 이메일 공유 중 문제 발생: {e}")
+        try:
+            spreadsheet.share(None, perm_type='anyone', role='writer')
+        except Exception:
+            pass
      
         meta_sheet = spreadsheet.sheet1
         meta_sheet.update_title("Survey_Metadata")
