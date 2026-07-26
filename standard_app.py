@@ -927,8 +927,10 @@ def set_font_config():
 
 set_font_config()
 
-# [중요 수정] 구글 시트 연결 헬퍼 함수 - 인증 정보 로드 로직 전면 재검토 및 수정
-# TOML(Dict), JSON String, Base64 Encoded String 등 다양한 포맷에 대응하도록 강화
+# [중요 수정] 구글 시트 ID 및 연결 헬퍼 함수
+def get_main_spreadsheet_id():
+    return st.secrets.get("SPREADSHEET_ID") or st.secrets.get("LOG_SPREADSHEET_ID") or "1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA"
+
 @st.cache_resource
 def get_gspread_client():
     from google.oauth2.service_account import Credentials
@@ -940,7 +942,7 @@ def get_gspread_client():
         st.error("Secrets에 'gcp_service_account' 설정이 없습니다.")
         return None
 
-    raw_auth = st.secrets["gcp_service_account"]
+    raw_auth = st.secrets.get("gcp_service_account", {})
     auth_info = {}
 
     # Case 1: 이미 딕셔너리 형태인 경우 (TOML 포맷) - 가장 일반적인 경우
@@ -1060,8 +1062,8 @@ def get_cached_visit_logs(spreadsheet_id):
 def save_short_code_to_gs(short_code, survey_id, title, admin_id):
     try:
         client = get_gspread_client()
-        if client and "SPREADSHEET_ID" in st.secrets:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             try:
                 sheet = spreadsheet.worksheet("Short_Urls")
             except gspread.exceptions.WorksheetNotFound:
@@ -1077,8 +1079,8 @@ def save_short_code_to_gs(short_code, survey_id, title, admin_id):
 def sync_short_codes_from_gs():
     try:
         client = get_gspread_client()
-        if client and "SPREADSHEET_ID" in st.secrets:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             try:
                 sheet = spreadsheet.worksheet("Short_Urls")
                 records = sheet.get_all_records()
@@ -1210,8 +1212,8 @@ def init_db():
         if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
             try:
                 client = get_gspread_client()
-                if client:
-                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+                if client and get_main_spreadsheet_id():
+                    spreadsheet = client.open_by_key(get_main_spreadsheet_id())
                     sheet = spreadsheet.sheet1
                     # 헤더 보정
                     all_values = sheet.get_all_values()
@@ -1277,14 +1279,15 @@ def sync_db_from_sheets(silent=False):
         st.write("🔍 **Secrets 디버깅**")
         st.write("사용 가능한 최상위 키:", list(st.secrets.keys()))
         
-        if "SPREADSHEET_ID" in st.secrets:
+        sid = get_main_spreadsheet_id()
+        if sid:
             st.success(f"✅ SPREADSHEET_ID 발견!")
-            st.write(f"값: {st.secrets['SPREADSHEET_ID']}")
+            st.write(f"값: {sid}")
         else:
             st.error(" SPREADSHEET_ID가 없습니다!")
             
         if "gcp_service_account" in st.secrets:
-            st.write("gcp_service_account 내부 키:", list(st.secrets["gcp_service_account"].keys()))
+            st.write("gcp_service_account 내부 키:", list(st.secrets.get("gcp_service_account", {}).keys()))
         
         st.write("---")
     # ★★★ 디버깅 끝 ★★★
@@ -1292,11 +1295,11 @@ def sync_db_from_sheets(silent=False):
     conn = None
     try:
         client = get_gspread_client()
-        if not client: 
-            if not silent: st.error(" 구글 시트 인증(gspread client)에 실패했습니다.")
+        if not client or not get_main_spreadsheet_id(): 
+            if not silent: st.error(" 구글 시트 인증(gspread client) 또는 시트 ID 획득에 실패했습니다.")
             return -1
         
-        spreadsheet = run_gspread_with_retry(client.open_by_key, st.secrets["SPREADSHEET_ID"])
+        spreadsheet = run_gspread_with_retry(client.open_by_key, get_main_spreadsheet_id())
         sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
         all_values = run_gspread_with_retry(sheet.get_all_values)
         
@@ -1449,8 +1452,8 @@ def track_visitor():
         if not _is_survey_or_preview:
             try:
                 client = get_gspread_client()
-                if client:
-                    spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+                if client and get_main_spreadsheet_id():
+                    spreadsheet = client.open_by_key(get_main_spreadsheet_id())
                     try:
                         visit_sheet = spreadsheet.worksheet("Visit_Logs")
                     except gspread.exceptions.WorksheetNotFound:
@@ -2152,8 +2155,8 @@ ID: {user_email}
 def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9999-12-31", survey_count=0, last_survey_link="", event_applied="", thesis_title="", university="", customer_type="standard"):
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             sheet = spreadsheet.sheet1
             
             # --- 구글 시트 헤더 체크 및 자동 확장 ---
@@ -2219,8 +2222,8 @@ def update_user_survey_distribution(user_id, survey_link):
         
         # 2. 관리자 구글 시트 업데이트
         client = get_gspread_client()
-        if client:
-            spreadsheet = run_gspread_with_retry(client.open_by_key, st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = run_gspread_with_retry(client.open_by_key, get_main_spreadsheet_id())
             sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
             
             # 헤더 확인 및 컬럼 추가 보정
@@ -2258,8 +2261,8 @@ def upgrade_user_password_to_hash(user_id, pw):
     
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             sheet = spreadsheet.sheet1
             cell = sheet.find(user_id)
             if cell:
@@ -2318,8 +2321,8 @@ def change_user_password(user_id, new_pw):
  
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             sheet = spreadsheet.sheet1
             cell = sheet.find(user_id)
             if cell:
@@ -2380,8 +2383,8 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
     
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             sheet = spreadsheet.sheet1
             
             # --- 구글 시트 헤더 체크 및 자동 확장 ---
@@ -2452,8 +2455,8 @@ def delete_user(user_id):
 
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             sheet = spreadsheet.sheet1
             
             try:
@@ -2484,8 +2487,8 @@ def delete_user(user_id):
 def restore_from_deleted_sheet(user_id):
     try:
         client = get_gspread_client()
-        if client:
-            spreadsheet = client.open_by_key(st.secrets["SPREADSHEET_ID"])
+        if client and get_main_spreadsheet_id():
+            spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             try:
                 del_sheet = spreadsheet.worksheet("Deleted_Users")
                 cell = del_sheet.find(user_id)
@@ -6438,7 +6441,7 @@ with contextlib.nullcontext():
         
         try:
             # [최적화] 구글 시트 API 분당 호출 제한(429)을 피하기 위해 5분 캐시 처리된 함수를 사용합니다.
-            visit_data_gs = get_cached_visit_logs(st.secrets["SPREADSHEET_ID"])
+            visit_data_gs = get_cached_visit_logs(get_main_spreadsheet_id()) if get_main_spreadsheet_id() else []
             if not visit_data_gs:
                 try:
                     conn = sqlite3.connect('users.db')
