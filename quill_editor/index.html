@@ -46,6 +46,7 @@
       }
 
       function sendValue(value) {
+        window.lastSentValue = value;
         sendMessageToStreamlit("setComponentValue", { value: value });
       }
 
@@ -59,15 +60,19 @@
       // Handle data coming from Streamlit
       function onMessageFromStreamlit(event) {
         if (event.data.type !== "streamlit:render") return;
+        window.rendered = true;
         
-        // Initialize value only once on first render
-        if (!window.rendered) {
-            const value = event.data.args.value || "";
-            if (value) {
-                // dangerouslyPasteHTML replaces contents without triggering 'user' text-change
-                quill.clipboard.dangerouslyPasteHTML(value);
+        let val = event.data.args.value || "";
+        // Only update content if it's the first render OR if Python sent a new value different from editor content
+        if (!window.initialized || (val !== window.lastSentValue && val !== quill.root.innerHTML && val !== window.lastReceivedValue)) {
+            window.lastReceivedValue = val;
+            if (val) {
+                if (!/<[a-z][\s\S]*>/i.test(val)) {
+                    val = val.split('\n').map(line => `<p>${line || '<br>'}</p>`).join('');
+                }
+                quill.clipboard.dangerouslyPasteHTML(val);
             }
-            window.rendered = true;
+            window.initialized = true;
         }
         
         // Force the iframe to be 420px tall
@@ -77,8 +82,20 @@
       // Hook up message listener
       window.addEventListener("message", onMessageFromStreamlit);
 
-      // Tell Streamlit we are ready to receive data
+      // Immediately request height so iframe is never 0px
+      setFrameHeight(420);
+      window.addEventListener("load", function() { setFrameHeight(420); });
+
+      // Tell Streamlit we are ready to receive data, repeating every 50ms until render message is received
       sendMessageToStreamlit("streamlit:componentReady", {apiVersion: 1});
+      var readyInterval = setInterval(function() {
+        if (window.rendered) {
+          clearInterval(readyInterval);
+        } else {
+          sendMessageToStreamlit("streamlit:componentReady", {apiVersion: 1});
+          setFrameHeight(420);
+        }
+      }, 50);
     </script>
   </body>
 </html>
