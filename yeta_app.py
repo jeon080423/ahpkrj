@@ -1860,9 +1860,8 @@ def run():
 
         st.divider()
 
-        tab1, tab2, tab3 = st.tabs(["📌 1. 기본 정보 & 모델 설계", "📝 2. 평가 항목 설명", "⚙️ 3. 부가 설정 및 배포"])
-
-        with tab1:
+        # 하위 탭을 나누지 않고 하나의 연결된 페이지로 구성
+        with st.container():
             st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
             survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_yeta_title", "재정투자사업 종합평가(AHP) 전문가 설문"))
             
@@ -1951,7 +1950,8 @@ def run():
                             if parsed_sub_subs:
                                 model_structure["sub_subs"][sub_c] = parsed_sub_subs
 
-        with tab2:
+        st.divider()
+        with st.container():
             st.markdown("#### 2. 평가 항목 상세 설명")
             st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
             
@@ -2024,7 +2024,8 @@ def run():
                                         definitions_map[t3] = t3_desc_val
                                         st.session_state[key_cached_t3] = t3_desc_val
 
-        with tab3:
+        st.divider()
+        with st.container():
             st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
             with st.container(border=True):
                 st.markdown("**그룹 분류 문항 설정**")
