@@ -9320,12 +9320,10 @@ Thank you deeply for your valuable participation.
                 else:
                     default_admin_email = "temp@ahpmaster.com"
                 survey_admin_email = default_admin_email
-    
-                st.divider()
-    
-                # 섹션 1.5: 응답자 수집 정보 및 그룹 분류 설정
-                st.subheader(_("섹션 1.5: 응답자 수집 정보 및 그룹 분류", "Section 1.5: Respondent Info & Grouping"))
-    
+
+                st.write("")
+                # 응답자 수집 정보 및 그룹 분류 설정 (섹션 1로 통합)
+
                 # 그룹 분류 문항 설정
                 with st.container(border=True):
                     st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
