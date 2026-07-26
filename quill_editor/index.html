@@ -985,12 +985,12 @@
       }
 
       function setFrameHeight(height) {
-        sendMessageToStreamlit("setFrameHeight", { height: height });
+        sendMessageToStreamlit("streamlit:setFrameHeight", { height: height });
       }
 
       function sendValue(value) {
         window.lastSentValue = value;
-        sendMessageToStreamlit("setComponentValue", { value: value });
+        sendMessageToStreamlit("streamlit:setComponentValue", { value: value });
       }
 
       function initQuill() {
@@ -1024,12 +1024,21 @@
         }
       }
 
+      // 즉시 초기화하여 Streamlit 이벤트 전이라도 툴바가 항상 표시되도록 보장
+      initQuill();
+
+      function updateHeight() {
+        var h = document.body.scrollHeight || 380;
+        setFrameHeight(Math.max(h, 320));
+      }
+      updateHeight();
+      window.addEventListener("resize", updateHeight);
+
       // Handle data coming from Streamlit
       function onMessageFromStreamlit(event) {
-        if (event.data.type !== "streamlit:render") return;
+        if (!event.data || event.data.type !== "streamlit:render") return;
         window.rendered = true;
         
-        // Initialize Quill upon receiving the first render event from Streamlit React (when DOM has dimensions)
         var q = initQuill();
         if (!q) return;
 
@@ -1046,7 +1055,7 @@
             window.initialized = true;
         }
         
-        setFrameHeight(380);
+        updateHeight();
       }
       
       // Hook up message listener
@@ -1055,13 +1064,8 @@
       // Tell Streamlit we are ready to receive data
       sendMessageToStreamlit("streamlit:componentReady", {apiVersion: 1});
       
-      // Attempt fallback initialization in case render event is delayed
-      setTimeout(function() {
-        if (!window.rendered) {
-          initQuill();
-          setFrameHeight(380);
-        }
-      }, 500);
+      // 500ms 주기적으로 높이 재계산하여 레이아웃 축소 방지
+      setInterval(updateHeight, 500);
     </script>
   </body>
 </html>
