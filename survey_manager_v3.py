@@ -20,7 +20,7 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         try:
             spreadsheet = client.open_by_key(existing_sheet_id)
             try:
-                spreadsheet.share(None, perm_type='anyone', role='writer')
+                spreadsheet.share(None, perm_type='anyone', role='reader')
             except Exception:
                 pass
         except Exception as e:
@@ -407,7 +407,7 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
         try:
             spreadsheet = client.open_by_key(existing_sheet_id)
             try:
-                spreadsheet.share(None, perm_type='anyone', role='writer')
+                spreadsheet.share(None, perm_type='anyone', role='reader')
             except Exception:
                 pass
         except Exception as e:
@@ -451,7 +451,7 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
             except Exception as e:
                 st.warning(f"설문조사 담당자 이메일 공유 중 문제 발생: {e}")
         try:
-            spreadsheet.share(None, perm_type='anyone', role='writer')
+            spreadsheet.share(None, perm_type='anyone', role='reader')
         except Exception:
             pass
      
