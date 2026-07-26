@@ -9268,15 +9268,11 @@ with contextlib.nullcontext():
                             gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
                             btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
                             st.markdown(f'''
-                            <style>
-                            .gs-btn-link, .gs-btn-link:link, .gs-btn-link:visited, .gs-btn-link:hover, .gs-btn-link:active {{
-                                color: #ffffff !important;
-                                text-decoration: none !important;
-                            }}
-                            </style>
-                            <a href="{gs_link}" target="_blank" class="gs-btn-link" style="display: block; width: 100%; text-align: center; background-color: #2349a2 !important; color: #ffffff !important; padding: 11px 16px; border-radius: 6px; text-decoration: none !important; box-shadow: 0 2px 4px rgba(0,0,0,0.15); margin-bottom: 12px;">
-                                <span style="color: #ffffff !important; font-weight: 600; font-size: 0.95rem; text-decoration: none !important; font-family: sans-serif;">{btn_label}</span>
-                            </a>
+                            <div style="background-color: #2349a2; border-radius: 6px; padding: 12px 16px; text-align: center; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+                                <a href="{gs_link}" target="_blank" style="color: #ffffff !important; text-decoration: none !important; font-weight: 600; font-size: 0.95rem; font-family: sans-serif; display: block; width: 100%;">
+                                    {btn_label}
+                                </a>
+                            </div>
                             ''', unsafe_allow_html=True)
 
                         if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
@@ -9942,9 +9938,11 @@ Thank you deeply for your valuable participation.
                                             sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
                                             st.write("")
                                             st.markdown(f'''
-                                            <a href="{sheet_url}" target="_blank" class="gs-btn-link" style="display: block; width: 100%; text-align: center; background-color: #2349a2 !important; color: #ffffff !important; padding: 11px 16px; border-radius: 6px; text-decoration: none !important; box-shadow: 0 2px 4px rgba(0,0,0,0.15); margin-bottom: 12px;">
-                                                <span style="color: #ffffff !important; font-weight: 600; font-size: 0.98rem; text-decoration: none !important; font-family: sans-serif;">연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)</span>
-                                            </a>
+                                            <div style="background-color: #2349a2; border-radius: 6px; padding: 12px 16px; text-align: center; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+                                                <a href="{sheet_url}" target="_blank" style="color: #ffffff !important; text-decoration: none !important; font-weight: 600; font-size: 0.98rem; font-family: sans-serif; display: block; width: 100%;">
+                                                    연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)
+                                                </a>
+                                            </div>
                                             ''', unsafe_allow_html=True)
                                             
                                             st.info(f"""**💡 구글 시트 및 데이터 확인 안내:**
