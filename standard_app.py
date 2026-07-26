@@ -5587,7 +5587,7 @@ def get_fee_info_text():
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서 발급 가능</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서/현금영수증 발급</span>
   </div>
   <h3 style="margin-top: -5px; margin-bottom: 8px;">환불 및 취소 규정</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
@@ -5614,7 +5614,7 @@ def get_fee_info_text():
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice Available</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice & Cash Receipt Available</span>
   </div>
   <h3 style="margin-top: -5px; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
@@ -5645,7 +5645,7 @@ def get_fee_info_text():
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서 발급 가능</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서/현금영수증 발급</span>
   </div>
   <h3 style="margin-top: -5px; margin-bottom: 8px;">환불 및 취소 규정</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
