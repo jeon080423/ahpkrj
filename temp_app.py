@@ -6395,8 +6395,8 @@ with col_main:
                     gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
                     btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
                     st.markdown(f'''
-                    <a href="{gs_link}" target="_blank" style="display: block; width: 100%; text-align: center; background-color: #1b2a4a; padding: 12px 16px; border-radius: 8px; text-decoration: none !important; box-shadow: 0 2px 4px rgba(0,0,0,0.15); margin-bottom: 12px;">
-                        <span style="color: #ffffff !important; font-weight: 700; font-size: 0.95rem; text-decoration: none !important;">{btn_label}</span>
+                    <a href="{gs_link}" target="_blank" style="display: block; width: 100%; text-align: center; background-color: #2349a2 !important; padding: 11px 16px; border-radius: 6px; text-decoration: none !important; box-shadow: 0 2px 4px rgba(0,0,0,0.15); margin-bottom: 12px;">
+                        <span style="color: #ffffff !important; font-weight: 600; font-size: 0.95rem; text-decoration: none !important; font-family: sans-serif;">{btn_label}</span>
                     </a>
                     ''', unsafe_allow_html=True)
 
