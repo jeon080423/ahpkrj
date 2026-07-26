@@ -6388,7 +6388,15 @@ with col_main:
             if has_survey:
                 st.success(_(f"📌 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f"📌 A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
                 st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
-                if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary"):
+                
+                # [신규] 연동된 구글 스프레드시트 바로가기 버튼 추가
+                linked_sheet_id = st.session_state.get("editing_survey_id") or (user_surveys[0][0] if user_surveys else None)
+                if linked_sheet_id:
+                    gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
+                    st.link_button(_("📊 연동된 구글 스프레드시트 바로가기", "📊 Open Linked Google Sheet"), gs_link, type="primary", use_container_width=True)
+                    st.write("")
+
+                if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
                      confirm_new_survey()
             else:
                 st.info(_("📌 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", "📌 This is a new survey in progress. Please fill out the contents and deploy."))
