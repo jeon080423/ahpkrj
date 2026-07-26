@@ -56,21 +56,7 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         
         if admin_email and "@" in admin_email:
             try:
-                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=False)
-                try:
-                    file_id = spreadsheet.id
-                    permissions = drive_service.permissions().list(fileId=file_id).execute()
-                    for perm in permissions.get('permissions', []):
-                        if perm.get('emailAddress') == admin_email:
-                            drive_service.permissions().update(
-                                fileId=file_id,
-                                permissionId=perm['id'],
-                                body={'role': 'owner'},
-                                transferOwnership=True
-                            ).execute()
-                            break
-                except Exception as owner_err:
-                    pass
+                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
             except Exception as e:
                 st.warning(f"설문조사 담당자 이메일 공유 중 문제 발생: {e}")
      
@@ -453,7 +439,7 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
         
         if admin_email and "@" in admin_email:
             try:
-                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=False)
+                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
             except Exception as e:
                 st.warning(f"설문조사 담당자 이메일 공유 중 문제 발생: {e}")
      
