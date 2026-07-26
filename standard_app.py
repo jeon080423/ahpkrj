@@ -4010,7 +4010,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         wizard_state = st.session_state.get(wizard_state_key, {"active": False})
         
         if wizard_state.get("active"):
-            st.warning(_("⚠️ 제출 전 일관성 비율(CR) 점검", "⚠️ Pre-submission Consistency Ratio (CR) Check"))
+            st.warning(_("⚠️ 일관성 비율(CR) 점검", "⚠️ Consistency Ratio (CR) Check"))
             st.error(_(f"분석 결과, **[{wizard_state['failed_group']}]** 문항들의 응답 일관성이 부족합니다. (현재 CR: {wizard_state['cr']:.3f} > 기준치: {cr_limit})", f"Analysis shows inconsistent responses for **[{wizard_state['failed_group']}]**. (Current CR: {wizard_state['cr']:.3f} > Limit: {cr_limit})"))
             
             w_pair = wizard_state['worst_pair']
@@ -9609,7 +9609,7 @@ Thank you deeply for your valuable participation.
                         rewards_info = {"enabled": False}
 
                     # 일관성 비율 (CR) 검증 레벨 설정
-                    st.markdown(_("**제출 전 일관성 비율 (CR) 검증 레벨 설정**", "**Pre-submission Consistency Ratio (CR) Validation Level Setup**"))
+                    st.markdown(_("**일관성 비율 (CR) 검증 레벨 설정**", "**Consistency Ratio (CR) Validation Level Setup**"))
                     # Get default index from edit state if editing, otherwise default to index 3 (0.2 이하)
                     default_cr_idx = 3
                     if st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is not None:
