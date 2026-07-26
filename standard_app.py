@@ -9169,7 +9169,7 @@ with contextlib.nullcontext():
                             gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
                         except Exception:
                             pass
-                        
+
                         merged_surveys = {}
                         for s in gs_surveys + sqlite_surveys:
                             if s[0] not in merged_surveys:
@@ -9714,7 +9714,7 @@ Thank you deeply for your valuable participation.
                             deploy_option = st.radio(
                                 _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
                                 options=[
-                                    _("새로운 구글 스프레드시트 자동 생성 (신규 발급)", "Auto-generate New Google Spreadsheet (Issue New)"),
+                                    _("새로운 구글 시트 URL 연동 (신규 발급)", "Link New Google Sheet URL (Issue New)"),
                                     _("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)")
                                 ],
                                 index=0,
@@ -9735,19 +9735,22 @@ Thank you deeply for your valuable participation.
                                 st.info(_("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.", "The new content will be overwritten on the Google Spreadsheet of the selected survey. The existing response URL will be maintained."))
                 
                         if show_manual_input:
-                            existing_sheet_id_input = ""
-                            st.markdown(_("##### 🚀 구글 스프레드시트 자동 생성 및 연동 안내", "##### 🚀 Auto-Generation & Linking Guide"))
-                            st.success(_("""
-**✨ 복잡한 설정 없이 하단의 버튼 한 번으로 배포가 완료됩니다!**
-1. **자동 생성:** 하단의 **[🚀 배포 및 DB 연동]** 버튼을 누르면, 시스템이 안전한 구글 스프레드시트를 **자동으로 생성**합니다.
-2. **권한 자동 공유:** 설문 작성 시 입력하신 담당자 이메일(`""" + str(survey_admin_email) + """`)로 **편집자(Editor) 권한이 즉시 자동 공유**되며 초대 메일이 발송됩니다.
-3. **간편한 데이터 확인:** 배포 완료 즉시 생성되는 바로가기 링크 버튼을 클릭하거나, 본인의 구글 드라이브 **[공유 문서함(Shared with me)]**에서 응답 데이터를 실시간으로 확인하고 다운로드할 수 있습니다.
+                            st.markdown(_("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *", "##### ⚙️ Setup Your Google Spreadsheet to Link *"))
+                            st.info(_("""
+                            **💡 연동 방법:**
+                            1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 시 발생하지 않습니다.)
+                            2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
+                               * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                            3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
                             """, """
-**✨ No complex setup required! Deploy with a single click!**
-1. **Auto-Generation:** When you click the deploy button below, the system will **automatically create** a secure Google Spreadsheet.
-2. **Auto-Sharing:** Editor access will be automatically shared with your admin email (`""" + str(survey_admin_email) + """`), and an invitation email will be sent.
-3. **Easy Access:** You can check and download real-time response data via the direct link provided immediately after deployment or in your Google Drive's **[Shared with me]** folder.
+                            **💡 How to link:**
+                            1. Create a **New Google Spreadsheet** in your Google Drive. (This uses your account storage, so there will be no quota errors on our side.)
+                            2. Click the 'Share' button on the top right and add the following service account email as an **Editor**.
+                               * Service Account Email: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                            3. Copy the **URL** or **Sheet ID** of the created spreadsheet and paste it below. (See the example image below)
                             """))
+                            st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Example of copying Google Spreadsheet URL"), width=650)
+                            existing_sheet_id_input = st.text_input(_("연동할 구글 스프레드시트 URL 또는 ID *", "Google Spreadsheet URL or ID to link *"), placeholder="https://docs.google.com/spreadsheets/d/...")
 
 
 
@@ -9819,8 +9822,11 @@ Thank you deeply for your valuable participation.
                             btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
                             if st.button(btn_label, type="primary", use_container_width=True):
                                 import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
-                                if not existing_sheet_id_input.strip() and not show_manual_input:
-                                    st.error(_("연동할 구글 스프레드시트 ID가 선택되지 않았습니다. 목록에서 기존 설문을 선택해 주세요.", "No spreadsheet ID selected. Please select an existing survey from the list."))
+                                if not existing_sheet_id_input.strip():
+                                    st.error(_("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.", "You must enter the Google Spreadsheet URL or ID to link."))
+                                    import streamlit.components.v1 as components
+                                    alert_msg = _("연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.", "Deployment and linking will fail without a Google Spreadsheet URL.\\nPlease make sure to enter your Google Spreadsheet URL or ID.")
+                                    components.html(f"<script>alert('{alert_msg}');</script>", height=0, width=0)
                                 else:
                                     with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
                                         try:
