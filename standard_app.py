@@ -9301,13 +9301,13 @@ Thank you deeply for your valuable participation.
     
                 st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
                 
-                survey_desc = st.text_area(
-                    label=_("조사 목적 및 안내문 입력", "Survey Purpose & Instructions Input"),
+                from quill_editor import st_quill
+                survey_desc = st_quill(
                     value=st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en)),
-                    height=400,
-                    key="quill_standard_desc_text_area",
-                    label_visibility="collapsed"
+                    key="quill_standard_desc_editor"
                 )
+                if survey_desc is None:
+                    survey_desc = st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en))
                 st.session_state["edit_desc"] = survey_desc
                 
                 if st.session_state.user_id:

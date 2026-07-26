@@ -1887,13 +1887,13 @@ def run():
 바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."""
             st.markdown("**설문 안내문**")
             
-            survey_desc = st.text_area(
-                label="설문 안내문 입력",
+            from quill_editor import st_quill
+            survey_desc = st_quill(
                 value=st.session_state.get("edit_yeta_desc", default_survey_desc),
-                height=400,
-                key="quill_yeta_desc_text_area",
-                label_visibility="collapsed"
+                key="quill_yeta_desc_editor"
             )
+            if survey_desc is None:
+                survey_desc = st.session_state.get("edit_yeta_desc", default_survey_desc)
             st.session_state["edit_yeta_desc"] = survey_desc
             
             st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
