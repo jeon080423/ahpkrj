@@ -9275,7 +9275,8 @@ with contextlib.nullcontext():
                 # 섹션 1: 기본 정보
                 render_section_header(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
                 default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
-                survey_title = st.text_input(_("설문지 제목", "Survey Title"), value=st.session_state.get("edit_title", default_survey_title))
+                st.markdown(f"**{_('설문지 제목', 'Survey Title')}**")
+                survey_title = st.text_input(_('설문지 제목', 'Survey Title'), value=st.session_state.get("edit_title", default_survey_title), label_visibility="collapsed")
             
                 default_survey_desc_ko = """[조사 목적 및 안내문]
 
@@ -9345,57 +9346,56 @@ Thank you deeply for your valuable participation.
                 # 응답자 수집 정보 및 그룹 분류 설정 (섹션 1로 통합)
 
                 # 그룹 분류 문항 설정
-                with st.container(border=True):
-                    st.markdown(_("** 그룹 분류 문항 설정**", "** Group Classification Setup**"))
+                st.markdown(f"**{_('그룹 분류 문항 설정', 'Group Classification Setup')}**")
                 
-                    default_type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
-                    default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
+                default_type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+                default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
                 
-                    if "edit_type_questions" not in st.session_state:
-                        legacy_q = st.session_state.get("edit_type_question")
-                        legacy_opts = st.session_state.get("edit_type_options")
-                    
-                        init_q = legacy_q if legacy_q and legacy_q != "귀하의 소속은 어떻게 되십니까?" else default_type_q
-                        init_opts = legacy_opts if legacy_opts and legacy_opts != "전문가, 일반, 공무원, 기타" else default_type_opts
-                        st.session_state["edit_type_questions"] = [{"q": init_q, "opts": init_opts}]
+                if "edit_type_questions" not in st.session_state:
+                    legacy_q = st.session_state.get("edit_type_question")
+                    legacy_opts = st.session_state.get("edit_type_options")
+                
+                    init_q = legacy_q if legacy_q and legacy_q != "귀하의 소속은 어떻게 되십니까?" else default_type_q
+                    init_opts = legacy_opts if legacy_opts and legacy_opts != "전문가, 일반, 공무원, 기타" else default_type_opts
+                    st.session_state["edit_type_questions"] = [{"q": init_q, "opts": init_opts}]
 
-                    type_questions_state = st.session_state["edit_type_questions"]
-                    num_types = len(type_questions_state)
+                type_questions_state = st.session_state["edit_type_questions"]
+                num_types = len(type_questions_state)
                 
-                    col1, col2, col3 = st.columns([6, 2, 2])
-                    with col2:
-                        if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 3):
-                            st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
-                            st.rerun()
-                    with col3:
-                        if st.button(_("➖ 문항 삭제", "➖ Remove"), use_container_width=True, disabled=num_types <= 1):
-                            st.session_state["edit_type_questions"].pop()
-                            st.rerun()
+                col1, col2, col3 = st.columns([6, 2, 2])
+                with col2:
+                    if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 3):
+                        st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
+                        st.rerun()
+                with col3:
+                    if st.button(_("➖ 문항 삭제", "➖ Remove"), use_container_width=True, disabled=num_types <= 1):
+                        st.session_state["edit_type_questions"].pop()
+                        st.rerun()
                 
                 
-                    type_questions = []
-                    for i in range(num_types):
-                        st.markdown(f"**{i+1}.**")
-                        if i == 0:
-                            q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
-                            opts_label = _("그룹 분류 보기 옵션 (쉼표로 구분)", "Group Classification Options (comma-separated)")
-                        else:
-                            q_label = _("추가 설문 문항", "Additional Survey Question")
-                            opts_label = _("추가 문항 보기 옵션 (쉼표로 구분)", "Additional Question Options (comma-separated)")
-                        
-                        q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i]["q"], key=f"tq_q_{i}")
-                        opts_val = st.text_input(opts_label + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"tq_opts_{i}")
+                type_questions = []
+                for i in range(num_types):
+                    st.markdown(f"**{i+1}.**")
+                    if i == 0:
+                        q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
+                        opts_label = _("그룹 분류 보기 옵션 (쉼표로 구분)", "Group Classification Options (comma-separated)")
+                    else:
+                        q_label = _("추가 설문 문항", "Additional Survey Question")
+                        opts_label = _("추가 문항 보기 옵션 (쉼표로 구분)", "Additional Question Options (comma-separated)")
                     
-                        type_questions_state[i]["q"] = q_val
-                        type_questions_state[i]["opts"] = opts_val
-                    
-                        type_questions.append({
-                            "q": q_val,
-                            "opts": [x.strip() for x in opts_val.split(",") if x.strip()]
-                        })
+                    q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i]["q"], key=f"tq_q_{i}")
+                    opts_val = st.text_input(opts_label + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"tq_opts_{i}")
                 
-                    type_question = type_questions[0]["q"] if type_questions else ""
-                    type_options = ", ".join(type_questions[0]["opts"]) if type_questions else ""
+                    type_questions_state[i]["q"] = q_val
+                    type_questions_state[i]["opts"] = opts_val
+                
+                    type_questions.append({
+                        "q": q_val,
+                        "opts": [x.strip() for x in opts_val.split(",") if x.strip()]
+                    })
+                
+                type_question = type_questions[0]["q"] if type_questions else ""
+                type_options = ", ".join(type_questions[0]["opts"]) if type_questions else ""
 
 
                 # 인구통계학 정보 설정
@@ -9585,7 +9585,8 @@ Thank you deeply for your valuable participation.
                         _("1-3-7-9 Discrete (이산형 척도)", "1-3-7-9 Discrete Scale"),
                         _("1-3-5 Discrete (이산형 척도)", "1-3-5 Discrete Scale")
                     ]
-                    scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=0)
+                    st.markdown(f"**{_('응답 척도 타입', 'Response Scale Type')}**")
+                    scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=0, label_visibility="collapsed")
 
                     st.divider()
 
