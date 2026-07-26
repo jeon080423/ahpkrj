@@ -171,7 +171,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         # 2. 담당자 이메일에 편집자 권한 부여 (소유권은 서비스 계정에 유지)
         if admin_email and "@" in admin_email:
             try:
-                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=False)
+                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
             except Exception as e:
                 st.warning(f"설문조사 담당자 이메일 공유 설정 중 문제 발생: {e}")
      

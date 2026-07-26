@@ -9902,7 +9902,15 @@ Thank you deeply for your valuable participation.
                                             st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))
 
                                             st.code(short_url, language="text")
-                                            st.info(f"**위 배포 URL을 카카오톡이나 이메일 등으로 응답 대상자에게 발송하십시오.**  \n구글 시트 링크 또는 구글 드라이브(계정: {survey_admin_email})에 접속하시면 실시간으로 누적되는 응답자 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하고 즉시 다운로드하여 분석하실 수 있습니다.")
+                                            
+                                            sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
+                                            st.write("")
+                                            st.link_button("📊 연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)", sheet_url, type="primary", use_container_width=True)
+                                            
+                                            st.info(f"""**💡 구글 시트 및 데이터 확인 안내:**
+1. **즉시 확인:** 위의 **[📊 연동된 구글 스프레드시트 바로가기]** 버튼을 클릭하면 생성된 시트로 바로 이동합니다.
+2. **이메일 알림:** 귀하의 구글 계정({survey_admin_email})으로 '편집자 권한 공유' 초대 메일이 발송되었습니다. 메일의 링크를 통해서도 언제든 접속할 수 있습니다.
+3. **구글 드라이브:** 본인의 구글 드라이브 좌측 메뉴 중 **[공유 문서함 (Shared with me)]**에서 언제든 해당 설문 시트를 찾고 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하거나 다운로드할 수 있습니다.""")
                                         except Exception as ex:
                                             st.error(f"구글 시트 연동 실패: {ex}")
                                             import streamlit.components.v1 as components
