@@ -9406,7 +9406,7 @@ Thank you deeply for your valuable participation.
 
 
 
-                demo_age = st.checkbox(_("연령 수집", "Collect Age"), value=st.session_state.get("edit_demo_age", True))
+                demo_age = st.checkbox(_("연령 수집", "Collect Age"), value=st.session_state.get("edit_demo_age", False))
                 age_type = "개방형 (숫자 직접 입력)"
                 if demo_age:
                     age_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("10세 단위 선택형", "Multiple Choice (10-year intervals)")]
@@ -9414,7 +9414,7 @@ Thank you deeply for your valuable participation.
 
 
 
-                demo_exp = st.checkbox(_("경력년수 수집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", True))
+                demo_exp = st.checkbox(_("경력년수 수집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", False))
                 exp_type = "개방형 (숫자 직접 입력)"
                 if demo_exp:
                     exp_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("5년 단위 선택형", "Multiple Choice (5-year intervals)")]
