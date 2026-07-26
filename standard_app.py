@@ -9404,7 +9404,7 @@ Thank you deeply for your valuable participation.
                 demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
                 demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
-                st.markdown("<hr style='margin: 0.5rem 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+
 
                 demo_age = st.checkbox(_("연령 수집", "Collect Age"), value=st.session_state.get("edit_demo_age", True))
                 age_type = "개방형 (숫자 직접 입력)"
@@ -9412,7 +9412,7 @@ Thank you deeply for your valuable participation.
                     age_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("10세 단위 선택형", "Multiple Choice (10-year intervals)")]
                     age_type = st.radio(_("연령 수집 방식", "Age Collection Method"), age_type_options, index=0 if st.session_state.get("edit_age_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_age_type_setup")
 
-                st.markdown("<hr style='margin: 0.5rem 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+
 
                 demo_exp = st.checkbox(_("경력년수 수집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", True))
                 exp_type = "개방형 (숫자 직접 입력)"
@@ -9434,16 +9434,16 @@ Thank you deeply for your valuable participation.
                     "type_questions": type_questions
                 }
 
-                st.markdown("<hr style='margin: 0.5rem 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+
 
-                st.divider()
+
                 with st.container():
                     # 섹션 2: AHP 모델 계층구조 입력 폼
                     render_section_header(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
 
                     # 계층 구조 선택 (2계층 기준과 동일하게 전체 공개)
                     tier_level = 2
-                    st.markdown("---")
+
                     st.markdown(_("#####  계층 구조 레벨 선택", "#####  Select Hierarchy Level"))
                     tier_choice_tab2 = st.radio(
                         _("설문 모델의 계층 깊이를 선택하세요.", "Select the hierarchy depth for your survey model."),
@@ -9455,7 +9455,7 @@ Thank you deeply for your valuable participation.
                     )
                     if _("3계층", "3-Tier") in tier_choice_tab2:
                         tier_level = 3
-                    st.markdown("---")
+
 
                     st.info(_(
                         "💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n\n"
@@ -9516,7 +9516,7 @@ Thank you deeply for your valuable participation.
                     st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
 
-                st.divider()
+
                 with st.container():
                     # 섹션 3: 요인 조작적 정의 설정
                     render_section_header(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
@@ -9575,7 +9575,7 @@ Thank you deeply for your valuable participation.
                         st.write("") # 섹션 간 시각적 여백 추가
 
 
-                st.divider()
+
                 with st.container():
                     # 섹션 4: 척도 인터페이스 설정
                     render_section_header(_("섹션 4: 쌍대비교 응답 척도 및 일관성(CR) 검증 레벨 설정", "Section 4: Scale Type & CR Validation Level Setup"))
@@ -9587,7 +9587,7 @@ Thank you deeply for your valuable participation.
                     st.markdown(f"**{_('응답 척도 타입', 'Response Scale Type')}**")
                     scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=0, label_visibility="collapsed")
 
-                    st.divider()
+
 
                     # 섹션 5: 답례품 및 개인정보 수집 동의 설정
                     if st.session_state.get("user_id") == "shjeon":
@@ -9601,7 +9601,7 @@ Thank you deeply for your valuable participation.
                             "enabled": reward_enabled,
                             "desc": reward_desc
                         }
-                        st.divider()
+
                     else:
                         rewards_info = {"enabled": False}
 
@@ -9680,7 +9680,7 @@ Thank you deeply for your valuable participation.
                     else:
                         cr_guide_method = "none"
 
-                    st.divider()
+
 
                     # 섹션 7: 최종 미리보기 및 배포
                     render_section_header(_("섹션 5: 저장 전 최종 미리보기 및 배포", "Section 5: Final Preview & Deployment Before Saving"))
