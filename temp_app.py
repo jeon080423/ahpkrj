@@ -6773,7 +6773,7 @@ with col_main:
             # [추가] 구글 스프레드시트 연동 설정
             if st.session_state.get('editing_survey_id'):
                 st.markdown(_("##### ⚙️ 기존 구글 스프레드시트 연동 (수정 모드)", "##### ⚙️ Existing Google Spreadsheet Integration (Edit Mode)"))
-                st.info(_("현재 **기존 설문 수정 모드**로 진입했습니다. 수정한 설정 내용은 기존 연동된 구글 스프레드시트에 안전하게 덮어씌워집니다.\n\n**연동된 시트 ID:** ", "You have entered **Existing Survey Edit Mode**. The modified settings will be safely overwritten to the existing linked Google Spreadsheet.\n\n**Linked Sheet ID:** ") + st.session_state.editing_survey_id)
+                st.info(_("현재 **기존 설문 수정 모드**로 진입했습니다. 수정한 설정 내용은 기존 연동된 구글 스프레드시트에 안전하게 덮어씌워집니다.", "You have entered **Existing Survey Edit Mode**. The modified settings will be safely overwritten to the existing linked Google Spreadsheet."))
                 existing_sheet_id_input = st.session_state.editing_survey_id
             else:
                 st.markdown(_("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *", "##### ⚙️ Setup Your Google Spreadsheet to Link *"))

@@ -2071,7 +2071,7 @@ def run():
                 existing_id = st.session_state.yeta_editing_survey_id
 
                 if existing_id:
-                    st.info(f"현재 **기존 설문 수정 모드**입니다. 수정한 설정은 기존 연동 시트에 반영됩니다.\n\n**연동된 시트 ID:** {existing_id}")
+                    st.info("현재 **기존 설문 수정 모드**입니다. 수정한 설정은 기존 연동 시트에 반영됩니다.")
                     existing_sheet_id_input = existing_id
                 else:
                     past_surveys = []
