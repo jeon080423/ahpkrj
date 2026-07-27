@@ -170,8 +170,12 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         except Exception as e_trash:
             pass
      
-        # 1. 스프레드시트 신규 생성
-        spreadsheet = client.create(f"[AHP 설문] {title}")
+        # 1. 스프레드시트 신규 생성 (파일명: [사용자ID_배포날짜] 설문제목)
+        import datetime
+        now_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        user_tag = user_id or admin_email or "User"
+        sheet_title = f"[{user_tag}_{now_date}] {title}" if title else f"[{user_tag}_{now_date}] AHP 설문"
+        spreadsheet = client.create(sheet_title)
         
         # 2. 담당자 이메일에 편집자 권한 부여 및 링크 전체 공개 편집자 설정
         if admin_email and "@" in admin_email:
