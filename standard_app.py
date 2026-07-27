@@ -5757,6 +5757,9 @@ with st.sidebar:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
                         st.session_state.expiry_date = result[1]
+                        st.session_state._survey_cache_dirty = True
+                        st.session_state.pop('_cached_user_surveys', None)
+                        st.session_state.survey_auto_loaded = False
                         try:
                             import survey_manager
                             survey_manager.log_user_action(l_id.strip(), "로그인")
@@ -5854,6 +5857,9 @@ with st.sidebar:
             st.session_state.admin_mode = False
             st.session_state.signup_paypal_user = None
             st.session_state.signup_portone_user = None
+            st.session_state._survey_cache_dirty = True
+            st.session_state.pop('_cached_user_surveys', None)
+            st.session_state.survey_auto_loaded = False
             if "login_user" in st.query_params:
                 try:
                     del st.query_params["login_user"]

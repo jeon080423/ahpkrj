@@ -1010,7 +1010,9 @@ def get_admin_surveys_from_gsheet(admin_id):
             all_records = []
         surveys = []
         for r in all_records:
-            if str(r.get('admin_id')) == str(admin_id):
+            r_admin = str(r.get('admin_id') or '').strip().lower()
+            target_admin = str(admin_id or '').strip().lower()
+            if r_admin and r_admin == target_admin:
                 surveys.append((str(r.get('survey_id')), str(r.get('title')), str(r.get('created_at'))))
         surveys.sort(key=lambda x: x[2], reverse=True)
         return surveys
