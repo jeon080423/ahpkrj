@@ -421,7 +421,6 @@ def load_survey_metadata(spreadsheet_id):
             row = c.fetchone()
             conn.close()
             if row:
-                st.warning("⚠️ 구글 API 호출 제한(Quota Limit)으로 인해 서버에 보관되어 있던 로컬 백업 설문지 스키마 정보를 로드했습니다. 설문 제출 및 답변은 안전하게 동작합니다.")
                 return json.loads(row[0])
         except Exception as db_e:
             pass

@@ -10188,7 +10188,6 @@ Thank you deeply for your valuable participation.
             # 대시보드 렌더링
             if selected_sheet_id:
 
-                st.info(" 구글 API 일일 호출 할당량 초과(Quota Exceeded 429 에러)를 방지하기 위해, 데이터는 자동으로 불러오지 않습니다. 아래 버튼을 눌러 최신 데이터를 갱신하세요.")
                 if st.button("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", type="primary"):
                     from survey_manager import get_survey_stats, get_survey_gspread_client
                     with st.spinner("실시간 설문 현황 로딩 중..."):
