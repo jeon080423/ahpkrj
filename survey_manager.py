@@ -45,7 +45,7 @@ def get_survey_gspread_client(user_id=None):
         st.error("Secrets에 'gcp_service_account' 설정이 없습니다.")
         return None
 
-    raw_auth = st.secrets["gcp_service_account"]
+    raw_auth = st.secrets.get("gcp_service_account", {})
     auth_info = {}
 
     # Case 1: 이미 딕셔너리 형태인 경우 (TOML 포맷) - 가장 일반적인 경우
