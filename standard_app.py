@@ -6369,6 +6369,11 @@ A composite index representing the overall distortion level.
 
 
 def render_ahp_analysis_settings():
+    ahp_method = 'traditional'
+    mean_method = 'geometric'
+    cr_threshold = 0.1
+    max_iter_val = 500
+    learning_rate = 0.6
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         pass
     else:
@@ -6399,7 +6404,10 @@ def render_ahp_analysis_settings():
                 cr_threshold = 999.0
                 learning_rate = 0.0
             else:
-                cr_threshold = float(cr_threshold_label)
+                try:
+                    cr_threshold = float(cr_threshold_label)
+                except ValueError:
+                    cr_threshold = 0.1
             if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
                 max_iter_val = 0
                 st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=0, max_value=500, value=0, step=50, disabled=True, key="max_iter_disabled")
@@ -6410,52 +6418,6 @@ def render_ahp_analysis_settings():
                 st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.0, max_value=0.9, value=0.0, step=0.1, disabled=True, key="learning_rate_disabled")
             else:
                 learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1, key="learning_rate_enabled")
-
-
-        # 1. CR 보정 결과 왜곡 검증
-        with st.expander(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), expanded=False):
-            if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
-                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "AHP 검증 실행")
-                if "uploaded_matrix" not in st.session_state:
-                    show_warning_dialog()
-                else:
-                    show_cr_distortion_dialog()
-
-        # 2. 일관성 보정 기준
-        with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
-            st.markdown(_(r"""
-            **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
-            가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
-        
-            **현재 방법의 특징:**
-            1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
-            2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
-            3. **과도한 보정 방지**: 임계값 설정(0.1, 0.15 또는 0.2)은 CR 값을 정확히 맞추는 것이 아니라 임계값 '이하'로 만드는 것을 목표로 합니다. 이미 임계값 이하인 응답은 보정을 수행하지 않아 원본 판단을 최대한 보존합니다.
-        
-            """, r"""
-            **Correction Method: Iterative Adjustment**
-            If the judgment matrix is inconsistent (CR > threshold) based on Saaty's weight algorithm, it repeatedly adjusts the weights by mixing the original matrix with a mathematically consistent matrix.
-        
-            **Key Features:**
-            1. **Minimal Distortion of Judgments**: Preserves the trends of the original survey responses while securing mathematical consistency.
-            2. **Automatic Convergence**: Automatically improves the CR value to be below the threshold within the maximum number of iterations. ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
-            3. **Prevention of Excessive Correction**: The threshold setting (0.1, 0.15 or 0.2) targets bringing the CR 'below or equal to' the threshold, rather than matching it exactly. Responses already below the threshold are left uncorrected to preserve the original judgments as much as possible.
-        
-            """))
-
-        # 3. 이용자 가이드
-        with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
-            st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
-            if st.session_state.get('lang', 'ko') == 'en':
-                if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
-                    st.session_state.page = "guide"
-                    st.rerun()
-            else:
-                st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
-
-        with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
-            st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
-                      "When describing AHP analysis results in your thesis or research report, you can refer to and cite the example below."))
             st.markdown(_("""
             > **[논문 기재 예시문]**
             > 
@@ -6466,6 +6428,8 @@ def render_ahp_analysis_settings():
             > 
             > "The survey data collected in this study was analyzed using 'AHP Master', a web-based dedicated AHP analysis solution. Pairwise comparison matrices were constructed in accordance with Saaty's (1980) Analytic Hierarchy Process to calculate local and global weights, and the validity of the results was secured through the system's consistency ratio (CR) adjustment function to ensure CR was below 0.1."
             """))
+
+    return ahp_method, mean_method, cr_threshold, max_iter_val, learning_rate
 
 
 
@@ -6704,7 +6668,7 @@ with contextlib.nullcontext():
     with main_tab1:
         tab1_main_col, tab1_settings_col = st.columns([3.0, 1.1], gap="large")
         with tab1_settings_col:
-            render_ahp_analysis_settings()
+            ahp_method, mean_method, cr_threshold, max_iter_val, learning_rate = render_ahp_analysis_settings()
         tab1_main_col.__enter__()
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
 
