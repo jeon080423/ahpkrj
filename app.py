@@ -139,6 +139,5 @@ if mode == "yeta":
     import yeta_app
     yeta_app.run()
 else:
-    import standard_app
-    import importlib
-    importlib.reload(standard_app)
+    with open("standard_app.py", encoding="utf-8") as f:
+        exec(f.read(), globals())
