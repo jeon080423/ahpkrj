@@ -75,7 +75,11 @@ except Exception:
     pass
 
 need_delete_cookie = False
-if saved_user and not st.session_state.get('user_id'):
+if st.session_state.get("logout_requested"):
+    saved_user = None
+    need_delete_cookie = True
+
+if saved_user and not st.session_state.get('user_id') and not st.session_state.get('logout_requested'):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("SELECT role, expiry_date, plan_type FROM users WHERE id=?", (saved_user,))
@@ -96,12 +100,12 @@ if saved_user and not st.session_state.get('user_id'):
 
 # Sync state to cookie
 current_user = st.session_state.get('user_id')
-if current_user and current_user != saved_user:
+if current_user and current_user != saved_user and not st.session_state.get('logout_requested'):
     try:
         cookie_manager.set("ahp_user_id", current_user, max_age=86400 * 30, key="set_ahp_user_cookie")
     except Exception:
         pass
-elif (not current_user and saved_user) or need_delete_cookie:
+elif (not current_user and saved_user) or need_delete_cookie or st.session_state.get('logout_requested'):
     try:
         cookie_manager.delete("ahp_user_id", key="del_ahp_user_cookie")
     except Exception:
