@@ -9262,15 +9262,44 @@ with contextlib.nullcontext():
                         st.success(_(f" 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f" A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
                         st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
                         
-                        # [신규] 연동된 구글 스프레드시트 바로가기 버튼 (남색 배경, 흰색 텍스트, 아이콘 없음)
+                        # [신규] 연동된 구글 스프레드시트 바로가기 및 온라인 설문 링크 제시
                         linked_sheet_id = st.session_state.get("editing_survey_id") or (user_surveys[0][0] if user_surveys else None)
                         if linked_sheet_id:
+                            base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
+                            if "localhost" in base_url or "127.0.0.1" in base_url:
+                                active_survey_url = f"{base_url}?survey_id={linked_sheet_id}"
+                            else:
+                                active_survey_url = f"https://ahpkrj.streamlit.app/?survey_id={linked_sheet_id}"
+
+                            st.markdown(_("##### 🌐 온라인 설문지 링크 (응답자 배포용)", "##### 🌐 Online Survey Link (For Distribution)"))
+                            st.code(active_survey_url, language="text")
+                            st.caption(_("💡 위 설문 링크를 복사하여 이메일이나 메신저로 응답 대상자에게 전달하세요.", "💡 Copy the survey link above and send it to respondents via email or messenger."))
+
                             gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
                             btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
                             st.markdown(f'''
-                            <div style="background-color: #2349a2; border-radius: 6px; padding: 12px 16px; text-align: center; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
-                                <a href="{gs_link}" target="_blank" style="color: #ffffff !important; text-decoration: none !important; font-weight: 600; font-size: 0.95rem; font-family: sans-serif; display: block; width: 100%;">
-                                    {btn_label}
+                            <style>
+                            .gs-nav-btn-box {{
+                                background-color: #1e40af !important;
+                                border-radius: 6px !important;
+                                padding: 12px 16px !important;
+                                text-align: center !important;
+                                margin-bottom: 12px !important;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+                            }}
+                            .gs-nav-btn-box a, .gs-nav-btn-box a:link, .gs-nav-btn-box a:visited, .gs-nav-btn-box a:hover, .gs-nav-btn-box a:active {{
+                                color: #ffffff !important;
+                                text-decoration: none !important;
+                                font-weight: 700 !important;
+                                font-size: 0.95rem !important;
+                                font-family: sans-serif !important;
+                                display: block !important;
+                                width: 100% !important;
+                            }}
+                            </style>
+                            <div class="gs-nav-btn-box">
+                                <a href="{gs_link}" target="_blank">
+                                    📊 {btn_label}
                                 </a>
                             </div>
                             ''', unsafe_allow_html=True)
@@ -9733,7 +9762,7 @@ Thank you deeply for your valuable participation.
                             deploy_option = st.radio(
                                 _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
                                 options=[
-                                    _("새로운 구글 시트 URL 연동 (신규 발급)", "Link New Google Sheet URL (Issue New)"),
+                                    _("새로운 구글 스프레드시트 자동 생성 (신규 발급)", "Auto-generate New Google Spreadsheet (Issue New)"),
                                     _("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)")
                                 ],
                                 index=0,
@@ -9754,22 +9783,19 @@ Thank you deeply for your valuable participation.
                                 st.info(_("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.", "The new content will be overwritten on the Google Spreadsheet of the selected survey. The existing response URL will be maintained."))
                 
                         if show_manual_input:
-                            st.markdown(_("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *", "##### ⚙️ Setup Your Google Spreadsheet to Link *"))
-                            st.info(_("""
-                            **💡 연동 방법:**
-                            1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 시 발생하지 않습니다.)
-                            2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
-                               * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-                            3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
+                            existing_sheet_id_input = ""
+                            st.markdown(_("##### 🚀 구글 스프레드시트 자동 생성 및 연동 안내", "##### 🚀 Auto-Generation & Linking Guide"))
+                            st.success(_("""
+**✨ 복잡한 설정 없이 하단의 버튼 한 번으로 배포가 완료됩니다!**
+1. **자동 생성:** 하단의 **[🚀 배포 및 DB 연동]** 버튼을 누르면, 시스템이 안전한 구글 스프레드시트를 **자동으로 생성**합니다.
+2. **권한 자동 공유:** 설문 작성 시 입력하신 담당자 이메일(`""" + str(survey_admin_email) + """`)로 **편집자(Editor) 권한이 즉시 자동 공유**되며 초대 메일이 발송됩니다.
+3. **간편한 데이터 확인:** 배포 완료 즉시 생성되는 바로가기 링크 버튼을 클릭하거나, 본인의 구글 드라이브 **[공유 문서함(Shared with me)]**에서 응답 데이터를 실시간으로 확인하고 다운로드할 수 있습니다.
                             """, """
-                            **💡 How to link:**
-                            1. Create a **New Google Spreadsheet** in your Google Drive. (This uses your account storage, so there will be no quota errors on our side.)
-                            2. Click the 'Share' button on the top right and add the following service account email as an **Editor**.
-                               * Service Account Email: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-                            3. Copy the **URL** or **Sheet ID** of the created spreadsheet and paste it below. (See the example image below)
+**✨ No complex setup required! Deploy with a single click!**
+1. **Auto-Generation:** When you click the deploy button below, the system will **automatically create** a secure Google Spreadsheet.
+2. **Auto-Sharing:** Editor access will be automatically shared with your admin email (`""" + str(survey_admin_email) + """`), and an invitation email will be sent.
+3. **Easy Access:** You can check and download real-time response data via the direct link provided immediately after deployment or in your Google Drive's **[Shared with me]** folder.
                             """))
-                            st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Example of copying Google Spreadsheet URL"), width=650)
-                            existing_sheet_id_input = st.text_input(_("연동할 구글 스프레드시트 URL 또는 ID *", "Google Spreadsheet URL or ID to link *"), placeholder="https://docs.google.com/spreadsheets/d/...")
                             st.warning(_(
                                 "📢 **[RAW 데이터 보관 및 백업 의무 안내]**\n\n"
                                 "• 구글 스프레드시트에 저장되는 RAW 데이터는 **생성일로부터 6개월간 유지된 후 자동 삭제**됩니다.\n"
@@ -9851,11 +9877,8 @@ Thank you deeply for your valuable participation.
                             btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
                             if st.button(btn_label, type="primary", use_container_width=True):
                                 import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
-                                if not existing_sheet_id_input.strip():
-                                    st.error(_("연동할 구글 스프레드시트 URL 또는 ID를 반드시 입력해야 합니다.", "You must enter the Google Spreadsheet URL or ID to link."))
-                                    import streamlit.components.v1 as components
-                                    alert_msg = _("연동할 구글 스프레드시트 URL을 입력하지 않으면 배포 및 연동이 되지 않습니다.\\n본인의 구글 스프레드시트 URL 또는 ID를 반드시 입력해 주세요.", "Deployment and linking will fail without a Google Spreadsheet URL.\\nPlease make sure to enter your Google Spreadsheet URL or ID.")
-                                    components.html(f"<script>alert('{alert_msg}');</script>", height=0, width=0)
+                                if not existing_sheet_id_input.strip() and not show_manual_input:
+                                    st.error(_("연동할 구글 스프레드시트 ID가 선택되지 않았습니다. 목록에서 기존 설문을 선택해 주세요.", "No spreadsheet ID selected. Please select an existing survey from the list."))
                                 else:
                                     with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
                                         try:
@@ -9934,13 +9957,33 @@ Thank you deeply for your valuable participation.
                                             st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))
 
                                             st.code(short_url, language="text")
+                                            st.info(_("💡 **설문 전달 안내:** 생성된 설문조사 링크를 복사하여 이메일이나 메신저(카카오톡 등)로 응답 대상자에게 전달해 주세요.", "💡 **Survey Sharing Guide:** Please copy the generated survey link and send it to respondents via email or messenger."))
                                             
                                             sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
                                             st.write("")
                                             st.markdown(f'''
-                                            <div style="background-color: #2349a2; border-radius: 6px; padding: 12px 16px; text-align: center; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
-                                                <a href="{sheet_url}" target="_blank" style="color: #ffffff !important; text-decoration: none !important; font-weight: 600; font-size: 0.98rem; font-family: sans-serif; display: block; width: 100%;">
-                                                    연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)
+                                            <style>
+                                            .gs-nav-btn-box2 {{
+                                                background-color: #1e40af !important;
+                                                border-radius: 6px !important;
+                                                padding: 12px 16px !important;
+                                                text-align: center !important;
+                                                margin-bottom: 12px !important;
+                                                box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+                                            }}
+                                            .gs-nav-btn-box2 a, .gs-nav-btn-box2 a:link, .gs-nav-btn-box2 a:visited, .gs-nav-btn-box2 a:hover, .gs-nav-btn-box2 a:active {{
+                                                color: #ffffff !important;
+                                                text-decoration: none !important;
+                                                font-weight: 700 !important;
+                                                font-size: 0.98rem !important;
+                                                font-family: sans-serif !important;
+                                                display: block !important;
+                                                width: 100% !important;
+                                            }}
+                                            </style>
+                                            <div class="gs-nav-btn-box2">
+                                                <a href="{sheet_url}" target="_blank">
+                                                    📊 연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)
                                                 </a>
                                             </div>
                                             ''', unsafe_allow_html=True)
