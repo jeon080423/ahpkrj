@@ -221,7 +221,13 @@ def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is
 def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=300000, months=2, inner_html="", is_best=False):
     import hashlib
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
-    safe_email = user_id.strip() if user_id and "@" in user_id else "test@ahp.kr"
+    if user_id and str(user_id).strip():
+        u_str = str(user_id).strip()
+        safe_email = u_str if "@" in u_str else f"{u_str}@ahp.kr"
+        order_name = f"{plan_name} ({u_str})"
+    else:
+        safe_email = "customer@ahp.kr"
+        order_name = f"{plan_name}"
     
     event_cfg = get_event_settings()
     is_cfg_active = event_cfg["active"]
@@ -434,7 +440,7 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
               paymentId: "pay-" + r,
-              orderName: "{plan_name} - {safe_email}",
+              orderName: "{order_name}",
               totalAmount: finalAmount,
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
@@ -468,11 +474,11 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
 
 def get_yeta_portone_custom_services_html(user_id=None):
     import hashlib
-    login_token = ""
-    safe_email = "test@ahp.kr"
-    if user_id:
-        login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
-        safe_email = user_id.strip() if "@" in user_id else "test@ahp.kr"
+    safe_email = "customer@ahp.kr"
+    if user_id and str(user_id).strip():
+        u_str = str(user_id).strip()
+        login_token = hashlib.sha256(f"{u_str}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+        safe_email = u_str if "@" in u_str else f"{u_str}@ahp.kr"
 
     is_logged_in = "true" if user_id else "false"
 
