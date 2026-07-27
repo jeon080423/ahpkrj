@@ -4176,8 +4176,16 @@ if "login_user" in q_params and "login_token" in q_params:
                 pass
             
             # URL 파라미터를 정리하여 불필요한 반복 쿼리 및 노출 방지
-            st.query_params.pop("login_user", None)
-            st.query_params.pop("login_token", None)
+            if "login_user" in st.query_params:
+                try:
+                    del st.query_params["login_user"]
+                except Exception:
+                    pass
+            if "login_token" in st.query_params:
+                try:
+                    del st.query_params["login_token"]
+                except Exception:
+                    pass
             
             if role_changed:
                 st.toast("🎉 Account status updated!")
@@ -5846,8 +5854,16 @@ with st.sidebar:
             st.session_state.admin_mode = False
             st.session_state.signup_paypal_user = None
             st.session_state.signup_portone_user = None
-            st.query_params.pop("login_user", None)
-            st.query_params.pop("login_token", None)
+            if "login_user" in st.query_params:
+                try:
+                    del st.query_params["login_user"]
+                except Exception:
+                    pass
+            if "login_token" in st.query_params:
+                try:
+                    del st.query_params["login_token"]
+                except Exception:
+                    pass
             st.rerun()
 
         # [신규 분리 & 로그아웃 하단 배치] 3. 견적서 출력 expander
