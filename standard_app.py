@@ -3736,10 +3736,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 comp_idx += 1
             
                 # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
-                if scale_type == "1-3-5 Discrete":
+                if "1-3-5 Discrete" in scale_type:
                     options = [-5, -3, 1, 3, 5]
                     format_func = lambda x: _("왼쪽 요인이 훨씬 중요 (-5)", "Left factor is much more important (-5)") if x == -5 else (_("왼쪽 요인이 약간 중요 (-3)", "Left factor is slightly more important (-3)") if x == -3 else (_("양측이 동등함 (1)", "Equal importance (1)") if x == 1 else (_("오른쪽 요인이 약간 중요 (3)", "Right factor is slightly more important (3)") if x == 3 else _("오른쪽 요인이 훨씬 중요 (5)", "Right factor is much more important (5)"))))
-                elif scale_type == "1-3-7-9 Discrete":
+                elif "1-5 Continuous" in scale_type or ("1-5" in scale_type and "Discrete" not in scale_type):
+                    options = [-5, -4, -3, -2, 1, 2, 3, 4, 5]
+                    format_func = lambda x: _(f"왼쪽 중요도 {abs(x)}", f"Left importance {abs(x)}") if x < 0 else (_("동등 (1)", "Equal (1)") if x == 1 else _(f"오른쪽 중요도 {x}", f"Right importance {x}"))
+                elif "1-3-7-9 Discrete" in scale_type:
                     options = [-9, -7, -3, 1, 3, 7, 9]
                     format_func = lambda x: _("왼쪽 절대적 중요 (-9)", "Left is absolutely more important (-9)") if x == -9 else (_("왼쪽 대단히 중요 (-7)", "Left is strongly more important (-7)") if x == -7 else (_("왼쪽 약간 중요 (-3)", "Left is slightly more important (-3)") if x == -3 else (_("동등함 (1)", "Equal (1)") if x == 1 else (_("오른쪽 약간 중요 (3)", "Right is slightly more important (3)") if x == 3 else (_("오른쪽 대단히 중요 (7)", "Right is strongly more important (7)") if x == 7 else _("오른쪽 절대적 중요 (9)", "Right is absolutely more important (9)"))))))
                 else: # 1-9 Continuous (Default)
@@ -3784,12 +3787,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 
                 # PDF 설문지와 유사한 헤더 스타일 표 생성
                 # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
-                if scale_type == "1-3-5 Discrete":
+                if "1-3-5 Discrete" in scale_type:
                     left_cols = ["5", "3"]
                     right_cols = ["3", "5"]
                     options = [-5, -3, 1, 3, 5]
                     col_headers = ["5", "3", "1", "3", "5"]
-                elif scale_type == "1-3-7-9 Discrete":
+                elif "1-5 Continuous" in scale_type or ("1-5" in scale_type and "Discrete" not in scale_type):
+                    left_cols = ["5", "4", "3", "2"]
+                    right_cols = ["2", "3", "4", "5"]
+                    options = [-5, -4, -3, -2, 1, 2, 3, 4, 5]
+                    col_headers = ["5", "4", "3", "2", "1", "2", "3", "4", "5"]
+                elif "1-3-7-9 Discrete" in scale_type:
                     left_cols = ["9", "7", "3"]
                     right_cols = ["3", "7", "9"]
                     options = [-9, -7, -3, 1, 3, 7, 9]
@@ -9670,11 +9678,21 @@ Thank you deeply for your valuable participation.
                     render_section_header(_("섹션 4: 쌍대비교 응답 척도 및 일관성(CR) 검증 레벨 설정", "Section 4: Scale Type & CR Validation Level Setup"))
                     scale_options = [
                         _("1-9 Continuous (1부터 9까지 연속형 스케일)", "1-9 Continuous Scale"),
+                        _("1-5 Continuous (1부터 5까지 연속형 스케일)", "1-5 Continuous Scale"),
                         _("1-3-7-9 Discrete (이산형 척도)", "1-3-7-9 Discrete Scale"),
                         _("1-3-5 Discrete (이산형 척도)", "1-3-5 Discrete Scale")
                     ]
                     st.markdown(f"**{_('응답 척도 타입', 'Response Scale Type')}**")
-                    scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=0, label_visibility="collapsed")
+                    default_scale = st.session_state.get("edit_scale_type", "1-9 Continuous")
+                    scale_idx = 0
+                    if "1-5" in default_scale and "Discrete" not in default_scale:
+                        scale_idx = 1
+                    elif "1-3-7-9" in default_scale:
+                        scale_idx = 2
+                    elif "1-3-5" in default_scale:
+                        scale_idx = 3
+
+                    scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=scale_idx, label_visibility="collapsed")
 
 
 
