@@ -2738,9 +2738,14 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
     factors, n = infer_factors_from_columns(comp_cols)
     
     # 시트 전체 데이터의 로우데이터 최대값/최솟값 계산
-    all_comp_values = df[comp_cols].values.flatten()
-    sheet_min = int(np.min(all_comp_values))
-    sheet_max = int(np.max(all_comp_values))
+    all_comp_values = pd.to_numeric(df[comp_cols].values.flatten(), errors='coerce')
+    valid_comp_values = all_comp_values[~np.isnan(all_comp_values)]
+    if len(valid_comp_values) > 0:
+        sheet_min = int(np.min(valid_comp_values))
+        sheet_max = int(np.max(valid_comp_values))
+    else:
+        sheet_min = -9
+        sheet_max = 9
     
     results_list = []
     excluded_list = []
