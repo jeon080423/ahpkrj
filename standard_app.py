@@ -5782,6 +5782,7 @@ with st.sidebar:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
                         st.session_state.expiry_date = result[1]
+                        st.session_state.logout_requested = False
                         st.session_state._survey_cache_dirty = True
                         st.session_state.pop('_cached_user_surveys', None)
                         st.session_state.survey_auto_loaded = False
@@ -5882,9 +5883,15 @@ with st.sidebar:
             st.session_state.admin_mode = False
             st.session_state.signup_paypal_user = None
             st.session_state.signup_portone_user = None
+            st.session_state.logout_requested = True
             st.session_state._survey_cache_dirty = True
             st.session_state.pop('_cached_user_surveys', None)
             st.session_state.survey_auto_loaded = False
+            if 'cookie_manager' in st.session_state and st.session_state.cookie_manager:
+                try:
+                    st.session_state.cookie_manager.delete("ahp_user_id", key="del_ahp_user_cookie_manual")
+                except Exception:
+                    pass
             if "login_user" in st.query_params:
                 try:
                     del st.query_params["login_user"]

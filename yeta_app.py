@@ -835,8 +835,22 @@ def run():
                 st.session_state.expiry_date = None
                 st.session_state.plan_type = None
                 st.session_state.admin_mode = False
-                st.query_params.pop("login_user", None)
-                st.query_params.pop("login_token", None)
+                st.session_state.logout_requested = True
+                if 'cookie_manager' in st.session_state and st.session_state.cookie_manager:
+                    try:
+                        st.session_state.cookie_manager.delete("ahp_user_id", key="del_ahp_user_cookie_yeta")
+                    except Exception:
+                        pass
+                if "login_user" in st.query_params:
+                    try:
+                        del st.query_params["login_user"]
+                    except Exception:
+                        pass
+                if "login_token" in st.query_params:
+                    try:
+                        del st.query_params["login_token"]
+                    except Exception:
+                        pass
                 st.rerun()
 
             with st.expander("📄 견적서 출력"):
