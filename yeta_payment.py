@@ -221,6 +221,7 @@ def get_yeta_login_redirect_html(plan_name="무료 체험판", inner_html="", is
 def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=300000, months=2, inner_html="", is_best=False):
     import hashlib
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+    is_logged_in_js = "true" if user_id and str(user_id).strip() else "false"
     if user_id and str(user_id).strip():
         u_str = str(user_id).strip()
         safe_email = u_str if "@" in u_str else f"{u_str}@ahp.kr"
@@ -376,6 +377,11 @@ def get_yeta_portone_payment_html(user_id, plan_name="단건 분석권", amount=
         }}
 
         function openPaymentWindow() {{
+          if (!{is_logged_in_js}) {{
+              alert("회원 전용 결제 서비스입니다. 회원가입 또는 로그인 후 이용해 주세요.");
+              redirectSignup();
+              return;
+          }}
           let univ = "";
           let thesis = "";
           
@@ -666,6 +672,11 @@ def get_yeta_portone_custom_services_html(user_id=None):
         }}
         
         function openPaymentWindow(amount, planName, addMonths) {{
+          if (!{is_logged_in}) {{
+              alert("회원 전용 결제 서비스입니다. 회원가입 또는 로그인 후 이용해 주세요.");
+              redirectSignup();
+              return;
+          }}
           const win = window.open("", "_blank", "width=850,height=700");
           if (!win) {{
              alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
