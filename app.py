@@ -140,3 +140,5 @@ if mode == "yeta":
     yeta_app.run()
 else:
     import standard_app
+    import importlib
+    importlib.reload(standard_app)
