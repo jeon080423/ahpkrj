@@ -4733,6 +4733,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
 
 def get_portone_custom_services_html(user_id=None):
     import hashlib
+    login_token = ""
     safe_email = "customer@ahp.kr"
     if user_id and str(user_id).strip():
         u_str = str(user_id).strip()
