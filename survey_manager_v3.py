@@ -56,7 +56,11 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         except Exception as e_trash:
             pass
      
-        spreadsheet = client.create(f"[AHP 설문_V3] {title}")
+        import datetime
+        now_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        user_tag = user_id or admin_email or "User"
+        sheet_title = f"[{user_tag}_{now_date}] {title}" if title else f"[{user_tag}_{now_date}] AHP 설문_V3"
+        spreadsheet = client.create(sheet_title)
         
         if admin_email and "@" in admin_email:
             try:
@@ -443,7 +447,11 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
         except Exception:
             pass
      
-        spreadsheet = client.create(f"[예타] {title}")
+        import datetime
+        now_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        user_tag = user_id or admin_email or "User"
+        sheet_title = f"[{user_tag}_{now_date}] [예타] {title}" if title else f"[{user_tag}_{now_date}] 예타 설문"
+        spreadsheet = client.create(sheet_title)
         
         if admin_email and "@" in admin_email:
             try:
