@@ -9788,21 +9788,24 @@ Thank you deeply for your valuable participation.
                                 pass
                         
                         existing_sheet_id_input = ""
-                        st.markdown("##### 🔗 배포 방식 선택 (Deployment Method)")
                         deploy_opts = [
                             _("새 구글 스프레드시트 연동 (직접 URL 입력)", "Link New Google Spreadsheet (Manual URL Input)")
                         ]
                         if len(past_surveys) > 0:
                             deploy_opts.append(_("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)"))
                         
-                        deploy_option = st.radio(
-                            _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
-                            options=deploy_opts,
-                            index=0,
-                            key="deploy_option_radio",
-                            label_visibility="collapsed"
-                        )
-                        st.write("")
+                        if len(deploy_opts) > 1:
+                            st.markdown("##### 🔗 배포 방식 선택 (Deployment Method)")
+                            deploy_option = st.radio(
+                                _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
+                                options=deploy_opts,
+                                index=0,
+                                key="deploy_option_radio",
+                                label_visibility="collapsed"
+                            )
+                            st.write("")
+                        else:
+                            deploy_option = deploy_opts[0]
                 
                         if "재사용" in deploy_option or "Reuse" in deploy_option:
                             st.markdown(_("##### ⚙️ 재사용할 기존 설문 선택", "##### ⚙️ Select Existing Survey to Reuse"))
