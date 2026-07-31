@@ -9831,6 +9831,9 @@ Thank you deeply for your valuable participation.
                                 f"2. Click [Share] and add `{st.secrets.get('gcp_service_account', {}).get('client_email', 'service_account')}` as an **Editor**.\n"
                                 "3. Copy and paste the spreadsheet URL below."
                             ))
+                            import os
+                            if os.path.exists("manual_sheet_url_guide.png"):
+                                st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), width=650)
                             manual_url = st.text_input(_("스프레드시트 URL 입력", "Input Spreadsheet URL"), placeholder="https://docs.google.com/spreadsheets/d/...")
                             if manual_url:
                                 existing_sheet_id_input = manual_url.strip()
