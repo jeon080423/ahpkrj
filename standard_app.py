@@ -9788,15 +9788,12 @@ Thank you deeply for your valuable participation.
                                 pass
                         
                         existing_sheet_id_input = ""
-                        show_manual_input = True
-                
                         st.markdown("##### 🔗 배포 방식 선택 (Deployment Method)")
                         deploy_opts = [
-                            _("새로운 구글 스프레드시트 자동 생성 (신규 발급)", "Auto-generate New Google Spreadsheet (Issue New)"),
-                            _("직접 빈 구글 스프레드시트 URL 입력 (자동생성 에러시)", "Manually input blank Google Spreadsheet URL")
+                            _("새 구글 스프레드시트 연동 (직접 URL 입력)", "Link New Google Spreadsheet (Manual URL Input)")
                         ]
                         if len(past_surveys) > 0:
-                            deploy_opts.insert(1, _("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)"))
+                            deploy_opts.append(_("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)"))
                         
                         deploy_option = st.radio(
                             _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
@@ -9808,7 +9805,6 @@ Thank you deeply for your valuable participation.
                         st.write("")
                 
                         if "재사용" in deploy_option or "Reuse" in deploy_option:
-                            show_manual_input = False
                             st.markdown(_("##### ⚙️ 재사용할 기존 설문 선택", "##### ⚙️ Select Existing Survey to Reuse"))
                             survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
                             selected_survey_label = st.selectbox(
@@ -9818,15 +9814,12 @@ Thank you deeply for your valuable participation.
                             existing_sheet_id_input = survey_options[selected_survey_label]
                             st.info(_("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.", "The new content will be overwritten on the Google Spreadsheet of the selected survey. The existing response URL will be maintained."))
                             
-                        elif "직접 빈" in deploy_option or "Manually input" in deploy_option:
-                            show_manual_input = False
+                        else:
                             st.markdown(_("##### 📝 구글 스프레드시트 직접 연동", "##### 📝 Link Google Spreadsheet Manually"))
                             st.warning(_(
-                                "구글 서비스 계정 용량 초과 에러가 날 때 이 방법을 사용하세요.\n"
                                 "1. 본인 구글 드라이브에서 '빈 스프레드시트'를 새로 만듭니다.\n"
                                 f"2. 우측 상단 [공유] 버튼을 눌러 `{st.secrets.get('gcp_service_account', {}).get('client_email', '서비스계정')}` 계정을 **편집자**로 추가합니다.\n"
                                 "3. 해당 스프레드시트의 주소(URL)를 복사하여 아래에 붙여넣습니다.",
-                                "Use this method when you encounter Google Service Account quota errors.\n"
                                 "1. Create a 'Blank Spreadsheet' in your Google Drive.\n"
                                 f"2. Click [Share] and add `{st.secrets.get('gcp_service_account', {}).get('client_email', 'service_account')}` as an **Editor**.\n"
                                 "3. Copy and paste the spreadsheet URL below."
@@ -9839,21 +9832,6 @@ Thank you deeply for your valuable participation.
                                 existing_sheet_id_input = manual_url.strip()
                             else:
                                 existing_sheet_id_input = ""
-                
-                        if show_manual_input:
-                            existing_sheet_id_input = ""
-                            st.markdown(_("##### 🚀 구글 스프레드시트 자동 생성 및 연동 안내", "##### 🚀 Auto-Generation & Linking Guide"))
-                            st.success(_("""
-**✨ 복잡한 설정 없이 하단의 버튼 한 번으로 배포가 완료됩니다!**
-1. **자동 생성:** 하단의 **[🚀 배포 및 DB 연동]** 버튼을 누르면, 시스템이 안전한 구글 스프레드시트를 **자동으로 생성**합니다.
-2. **권한 자동 공유:** 설문 작성 시 입력하신 담당자 이메일(`""" + str(survey_admin_email) + """`)로 **편집자(Editor) 권한이 즉시 자동 공유**되며 초대 메일이 발송됩니다.
-3. **간편한 데이터 확인:** 배포 완료 즉시 생성되는 바로가기 링크 버튼을 클릭하거나, 본인의 구글 드라이브 **[공유 문서함(Shared with me)]**에서 응답 데이터를 실시간으로 확인하고 다운로드할 수 있습니다.
-                            """, """
-**✨ No complex setup required! Deploy with a single click!**
-1. **Auto-Generation:** When you click the deploy button below, the system will **automatically create** a secure Google Spreadsheet.
-2. **Auto-Sharing:** Editor access will be automatically shared with your admin email (`""" + str(survey_admin_email) + """`), and an invitation email will be sent.
-3. **Easy Access:** You can check and download real-time response data via the direct link provided immediately after deployment or in your Google Drive's **[Shared with me]** folder.
-                            """))
 
 
 
@@ -9925,8 +9903,8 @@ Thank you deeply for your valuable participation.
                             btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
                             if st.button(btn_label, type="primary", use_container_width=True):
                                 import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
-                                if not existing_sheet_id_input.strip() and not show_manual_input:
-                                    st.error(_("연동할 구글 스프레드시트 ID가 선택되지 않았습니다. 목록에서 기존 설문을 선택해 주세요.", "No spreadsheet ID selected. Please select an existing survey from the list."))
+                                if not existing_sheet_id_input.strip():
+                                    st.error(_("연동할 구글 스프레드시트 URL 주소를 입력하거나, 재사용할 기존 설문을 선택해 주세요.", "Please enter a valid Spreadsheet URL or select an existing survey to reuse."))
                                 else:
                                     with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
                                         try:
