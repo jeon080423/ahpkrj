@@ -9851,16 +9851,7 @@ Thank you deeply for your valuable participation.
 2. **Auto-Sharing:** Editor access will be automatically shared with your admin email (`""" + str(survey_admin_email) + """`), and an invitation email will be sent.
 3. **Easy Access:** You can check and download real-time response data via the direct link provided immediately after deployment or in your Google Drive's **[Shared with me]** folder.
                             """))
-                            st.warning(_(
-                                "📢 **[RAW 데이터 보관 및 백업 의무 안내]**\n\n"
-                                "• 구글 스프레드시트에 저장되는 RAW 데이터는 **생성일로부터 6개월간 유지된 후 자동 삭제**됩니다.\n"
-                                "• 조사가 완료되면 반드시 본인의 컴퓨터에 엑셀(.xlsx) 또는 CSV 파일로 데이터를 다운로드하여 **백업**해 주시기 바랍니다.\n"
-                                "• 생성 후 6개월이 지난 시점에 가입하신 이메일(ID)로 사전 삭제 및 백업 안내 메일이 발송되며, 메일 발송 10일 후 구글 시트가 자동 삭제됩니다.",
-                                "📢 **[RAW Data Retention & Mandatory Backup Notice]**\n\n"
-                                "• RAW data stored in Google Spreadsheets is **retained for 6 months from creation and then automatically deleted**.\n"
-                                "• When your survey is completed, you MUST download and **backup** the data to your computer as an Excel (.xlsx) or CSV file.\n"
-                                "• At 6 months post-creation, a deletion and backup notification email will be sent to your registered email (ID), and the Google Sheet will be deleted 10 days after the email notification."
-                            ))
+                            """))
 
 
 
@@ -10047,16 +10038,6 @@ Thank you deeply for your valuable participation.
 1. **즉시 확인:** 위의 **[📊 연동된 구글 스프레드시트 바로가기]** 버튼을 클릭하면 생성된 시트로 바로 이동합니다.
 2. **이메일 알림:** 귀하의 구글 계정({survey_admin_email})으로 '편집자 권한 공유' 초대 메일이 발송되었습니다. 메일의 링크를 통해서도 언제든 접속할 수 있습니다.
 3. **구글 드라이브:** 본인의 구글 드라이브 좌측 메뉴 중 **[공유 문서함 (Shared with me)]**에서 언제든 해당 설문 시트를 찾고 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하거나 다운로드할 수 있습니다.""")
-                                            st.warning(_(
-                                                "📢 **[RAW 데이터 보관 및 백업 의무 안내]**\n\n"
-                                                "• 구글 스프레드시트에 저장되는 RAW 데이터는 **생성일로부터 6개월간 유지된 후 자동 삭제**됩니다.\n"
-                                                "• 조사가 완료되면 반드시 본인의 컴퓨터에 엑셀(.xlsx) 또는 CSV 파일로 데이터를 다운로드하여 **백업**해 주시기 바랍니다.\n"
-                                                "• 생성 후 6개월이 지난 시점에 가입하신 이메일(ID)로 사전 삭제 및 백업 안내 메일이 발송되며, 메일 발송 10일 후 구글 시트가 자동 삭제됩니다.",
-                                                "📢 **[RAW Data Retention & Mandatory Backup Notice]**\n\n"
-                                                "• RAW data stored in Google Spreadsheets is **retained for 6 months from creation and then automatically deleted**.\n"
-                                                "• When your survey is completed, you MUST download and **backup** the data to your computer as an Excel (.xlsx) or CSV file.\n"
-                                                "• At 6 months post-creation, a deletion and backup notification email will be sent to your registered email (ID), and the Google Sheet will be deleted 10 days after the email notification."
-                                            ))
                                         except Exception as ex:
                                             st.error(f"구글 시트 연동 실패: {ex}")
                                             import streamlit.components.v1 as components
