@@ -9790,30 +9790,52 @@ Thank you deeply for your valuable participation.
                         existing_sheet_id_input = ""
                         show_manual_input = True
                 
+                        st.markdown("##### 🔗 배포 방식 선택 (Deployment Method)")
+                        deploy_opts = [
+                            _("새로운 구글 스프레드시트 자동 생성 (신규 발급)", "Auto-generate New Google Spreadsheet (Issue New)"),
+                            _("직접 빈 구글 스프레드시트 URL 입력 (자동생성 에러시)", "Manually input blank Google Spreadsheet URL")
+                        ]
                         if len(past_surveys) > 0:
-                            st.markdown("##### 🔗 배포 방식 선택 (Deployment Method)")
-                            deploy_option = st.radio(
-                                _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
-                                options=[
-                                    _("새로운 구글 스프레드시트 자동 생성 (신규 발급)", "Auto-generate New Google Spreadsheet (Issue New)"),
-                                    _("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)")
-                                ],
-                                index=0,
-                                key="deploy_option_radio",
-                                label_visibility="collapsed"
+                            deploy_opts.insert(1, _("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)"))
+                        
+                        deploy_option = st.radio(
+                            _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
+                            options=deploy_opts,
+                            index=0,
+                            key="deploy_option_radio",
+                            label_visibility="collapsed"
+                        )
+                        st.write("")
+                
+                        if "재사용" in deploy_option or "Reuse" in deploy_option:
+                            show_manual_input = False
+                            st.markdown(_("##### ⚙️ 재사용할 기존 설문 선택", "##### ⚙️ Select Existing Survey to Reuse"))
+                            survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
+                            selected_survey_label = st.selectbox(
+                                _("과거에 배포했던 설문 목록", "List of previously deployed surveys"),
+                                options=list(survey_options.keys())
                             )
-                            st.write("")
-                    
-                            if "재사용" in deploy_option or "Reuse" in deploy_option:
-                                show_manual_input = False
-                                st.markdown(_("##### ⚙️ 재사용할 기존 설문 선택", "##### ⚙️ Select Existing Survey to Reuse"))
-                                survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
-                                selected_survey_label = st.selectbox(
-                                    _("과거에 배포했던 설문 목록", "List of previously deployed surveys"),
-                                    options=list(survey_options.keys())
-                                )
-                                existing_sheet_id_input = survey_options[selected_survey_label]
-                                st.info(_("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.", "The new content will be overwritten on the Google Spreadsheet of the selected survey. The existing response URL will be maintained."))
+                            existing_sheet_id_input = survey_options[selected_survey_label]
+                            st.info(_("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.", "The new content will be overwritten on the Google Spreadsheet of the selected survey. The existing response URL will be maintained."))
+                            
+                        elif "직접 빈" in deploy_option or "Manually input" in deploy_option:
+                            show_manual_input = False
+                            st.markdown(_("##### 📝 구글 스프레드시트 직접 연동", "##### 📝 Link Google Spreadsheet Manually"))
+                            st.warning(_(
+                                "구글 서비스 계정 용량 초과 에러가 날 때 이 방법을 사용하세요.\n"
+                                "1. 본인 구글 드라이브에서 '빈 스프레드시트'를 새로 만듭니다.\n"
+                                f"2. 우측 상단 [공유] 버튼을 눌러 `{st.secrets.get('gcp_service_account', {}).get('client_email', '서비스계정')}` 계정을 **편집자**로 추가합니다.\n"
+                                "3. 해당 스프레드시트의 주소(URL)를 복사하여 아래에 붙여넣습니다.",
+                                "Use this method when you encounter Google Service Account quota errors.\n"
+                                "1. Create a 'Blank Spreadsheet' in your Google Drive.\n"
+                                f"2. Click [Share] and add `{st.secrets.get('gcp_service_account', {}).get('client_email', 'service_account')}` as an **Editor**.\n"
+                                "3. Copy and paste the spreadsheet URL below."
+                            ))
+                            manual_url = st.text_input(_("스프레드시트 URL 입력", "Input Spreadsheet URL"), placeholder="https://docs.google.com/spreadsheets/d/...")
+                            if manual_url:
+                                existing_sheet_id_input = manual_url.strip()
+                            else:
+                                existing_sheet_id_input = ""
                 
                         if show_manual_input:
                             existing_sheet_id_input = ""
