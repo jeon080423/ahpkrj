@@ -9851,7 +9851,6 @@ Thank you deeply for your valuable participation.
 2. **Auto-Sharing:** Editor access will be automatically shared with your admin email (`""" + str(survey_admin_email) + """`), and an invitation email will be sent.
 3. **Easy Access:** You can check and download real-time response data via the direct link provided immediately after deployment or in your Google Drive's **[Shared with me]** folder.
                             """))
-                            """))
 
 
 
