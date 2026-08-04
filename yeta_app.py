@@ -924,13 +924,13 @@ def run():
                 else:
                     st.warning("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.")
 
-            with st.expander("📄 계산서 발행 신청"):
+            with st.expander("📄 계산서/현금영수증 신청"):
                 t_biz_num = st.text_input("사업자 등록번호", placeholder="000-00-00000", key="t_biz_num_yeta")
                 t_biz_name = st.text_input("상호 (회사명)", key="t_biz_name_yeta")
                 t_rep_name = st.text_input("대표자명", key="t_rep_name_yeta")
                 t_address = st.text_input("사업장 주소", key="t_address_yeta")
                 t_biz_type = st.text_input("업태 / 업종", key="t_biz_type_yeta")
-                t_email = st.text_input("계산서 수신 이메일", key="t_email_yeta")
+                t_email = st.text_input("계산서/현금영수증 수신 이메일", key="t_email_yeta")
                 
                 t_tier = st.selectbox(
                     "신청 서비스 (요금제)",
@@ -942,7 +942,7 @@ def run():
                     key="t_tier_select_yeta"
                 )
                 
-                if st.button("계산서 발행 신청하기", use_container_width=True, key="btn_request_tax_yeta"):
+                if st.button("계산서/현금영수증 신청하기", use_container_width=True, key="btn_request_tax_yeta"):
                     if not t_biz_num.strip():
                         st.error("사업자 등록번호를 입력해 주세요.")
                     elif not t_biz_name.strip():
@@ -972,7 +972,7 @@ def run():
                                 )
                                 
                                 if mail_success:
-                                    st.success("계산서 신청이 접수되었습니다! 관리자 확인 후 계산서가 발행됩니다.")
+                                    st.success("계산서/현금영수증 신청이 접수되었습니다! 관리자 확인 후 발행됩니다.")
                                 else:
                                     st.warning("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.")
                             except Exception as e:

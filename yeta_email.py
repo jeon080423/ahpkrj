@@ -7,9 +7,9 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] 계산서 발행 신청 접수 ({biz_name})"
+    subject = f"[AHP 마스터] 계산서/현금영수증 신청 접수 ({biz_name})"
     body = f"""
-[AHP 마스터 계산서 신청 알림]
+[AHP 마스터 계산서/현금영수증 신청 알림]
 
 - 신청 ID: {user_id}
 - 사업자 등록번호: {biz_num}

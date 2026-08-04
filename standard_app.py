@@ -2099,9 +2099,9 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] 계산서 발행 신청 접수 ({biz_name})"
+    subject = f"[AHP 마스터] 계산서/현금영수증 신청 접수 ({biz_name})"
     body = f"""
-[AHP 마스터 계산서 신청 알림]
+[AHP 마스터 계산서/현금영수증 신청 알림]
 
 - 신청 ID: {user_id}
 - 사업자 등록번호: {biz_num}
@@ -5982,14 +5982,14 @@ with st.sidebar:
                 st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.", 
                              "Please enter the Client Institution and Project Name to enable download."))
 
-        # [신규 분리 & 로그아웃 하단 배치] 4. 계산서 발행 신청 expander
-        with st.expander(_("📄 계산서 발행 신청", "📄 Request Invoice")):
+        # [신규 분리 & 로그아웃 하단 배치] 4. 계산서/현금영수증 신청 expander
+        with st.expander(_("📄 계산서/현금영수증 신청", "📄 Request Invoice/Cash Receipt")):
             t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
             t_biz_name = st.text_input(_("상호 (회사명)", "Company Name"), key="t_biz_name_input")
             t_rep_name = st.text_input(_("대표자명", "CEO Name"), key="t_rep_name_input")
             t_address = st.text_input(_("사업장 주소", "Business Address"), key="t_address_input")
             t_biz_type = st.text_input(_("업태 / 업종", "Business Category / Type"), key="t_biz_type_input")
-            t_email = st.text_input(_("계산서 수신 이메일", "Invoice Email"), key="t_email_input")
+            t_email = st.text_input(_("계산서/현금영수증 수신 이메일", "Invoice/Cash Receipt Email"), key="t_email_input")
             
             t_tier = st.selectbox(
                 _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
@@ -6002,7 +6002,7 @@ with st.sidebar:
                 key="t_tier_select"
             )
             
-            if st.button(_("계산서 발행 신청하기", "Submit Invoice Request"), use_container_width=True, key="btn_request_tax"):
+            if st.button(_("계산서/현금영수증 신청하기", "Submit Invoice/Cash Receipt Request"), use_container_width=True, key="btn_request_tax"):
                 if not t_biz_num.strip():
                     st.error(_("사업자 등록번호를 입력해 주세요.", "Please enter the Business Registration Number."))
                 elif not t_biz_name.strip():
@@ -6034,7 +6034,7 @@ with st.sidebar:
                             )
                             
                             if mail_success:
-                                st.success(_("계산서 신청이 접수되었습니다! 관리자 확인 후 계산서가 발행됩니다.", 
+                                st.success(_("계산서/현금영수증 신청이 접수되었습니다! 관리자 확인 후 발행됩니다.", 
                                              "Request submitted! The invoice will be issued after review."))
                             else:
                                 st.warning(_("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.", 
