@@ -2134,20 +2134,22 @@ def run():
 
                     if show_manual_input:
                         st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
-                        st.info("""
-                        **💡 연동 방법:**
-                        1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다.
-                        2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
-                           * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
-                        3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
-                        """)
-                        col1, col2 = st.columns([1, 2])
-                        with col1:
-                            if os.path.exists("google_sheets_menu_guide.png"):
-                                st.image("google_sheets_menu_guide.png", caption="구글 스프레드시트 메뉴 접근 방법", use_container_width=True)
-                        with col2:
-                            if os.path.exists("manual_sheet_url_guide.png"):
-                                st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", use_container_width=True)
+                        # 사이드바 가이드 렌더링
+                        st.sidebar.markdown("### 📘 초보자용 구글 시트 연동 가이드")
+                        st.sidebar.info(
+                            "1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다.\n"
+                            "2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다."
+                        )
+                        st.sidebar.code("ahp2-75@ahp2-486703.iam.gserviceaccount.com")
+                        st.sidebar.info("3. 생성한 스프레드시트의 주소(URL)를 복사하여 메인 화면에 붙여넣습니다.")
+                        
+                        import os
+                        if os.path.exists("google_sheets_menu_guide.png"):
+                            st.sidebar.image("google_sheets_menu_guide.png", caption="구글 스프레드시트 메뉴 접근 방법", use_container_width=True)
+                        if os.path.exists("manual_sheet_url_guide.png"):
+                            st.sidebar.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", use_container_width=True)
+                            
+                        st.warning("👈 **좌측 사이드바 메뉴(또는 ≡ 아이콘)를 열어 가이드를 확인**하신 후, 아래에 스프레드시트 URL을 붙여넣어 주세요.")
                         existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
 
                 # ==================== 답례품 설정 ====================
