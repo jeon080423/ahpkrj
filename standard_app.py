@@ -3563,19 +3563,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
         ahp_section_prefix = f"{section_num}"
         section_num += 1
         
-        st.info(_("""
-        **응답 방법**: 왼쪽 요인과 오른쪽 요인 중 **더 중요하다고 생각하는 방향**으로 숫자를 선택해 주세요. 숫자가 클수록 해당 요인이 더 중요함을 의미합니다.
-
-        - **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
-        - **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
-        - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
-        """ + ("""\n        💡 :blue[**파란색 배경 가이드: 앞선 응답들과의 논리적 일관성(CR)을 최적으로 유지할 수 있는**] :red[**권장 선택 구간**]:blue[**입니다.**]""" if cr_guide_method == "realtime" else ""), """
-        **Response Method**: Please select the number in the direction of **the factor you think is more important** between the left factor and the right factor. A larger number means that factor is more important.
-
-        - **Equal (1)**: Choose the middle **1** when both factors are equally important.
-        - **When the left factor is more important**: Choose a number on the left side (←). A larger number indicates the left factor is much more important.
-        - **When the right factor is more important**: Choose a number on the right side (→). A larger number indicates the right factor is much more important.
-        """ + ("""\n        💡 :blue[**Blue Background Guide: Indicates the**] :red[**recommended selection range**] :blue[**to optimally maintain logical consistency (CR) with your previous answers.**]""" if cr_guide_method == "realtime" else "")))
+        st.info(_("더 중요한 방향으로 숫자를 선택하세요. **1**=동등, 숫자가 클수록 해당 방향의 요인이 더 중요합니다.",
+                  "Select the number toward the more important factor. **1**=Equal, larger number = more important."))
+        if cr_guide_method == "realtime":
+            st.markdown(_(":blue[**파란색 배경**]: 일관성(CR)을 최적으로 유지하는 :red[**권장 선택 구간**]입니다.",
+                          ":blue[**Blue background**]: :red[**recommended range**] to maintain optimal consistency (CR)."))
+        with st.expander(_("상세 응답 가이드", "Detailed Response Guide"), expanded=False):
+            st.markdown(_("""
+- **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
+- **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
+- **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
+            """, """
+- **Equal (1)**: Choose the middle **1** when both factors are equally important.
+- **Left factor more important**: Choose a number on the left (←). Larger = much more important.
+- **Right factor more important**: Choose a number on the right (→). Larger = much more important.
+            """))
         
         # 모바일 가로 모드 강제 전환 오버레이
         import streamlit.components.v1 as components
@@ -5861,7 +5863,7 @@ with st.sidebar:
                 st.rerun()
 
         # [위치 이동] 1. 비밀번호 변경 expander
-        with st.expander(_("🔐 비밀번호 변경", "🔐 Change Password")):
+        with st.expander(_("비밀번호 변경", "Change Password")):
             cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
             new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_new")
             confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_new")
@@ -6424,7 +6426,7 @@ def render_ahp_analysis_settings():
             else:
                 learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1, key="learning_rate_enabled")
         # 1. CR 보정 결과 왜곡 검증
-        with st.expander(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), expanded=False):
+        with st.expander(_("CR 보정 결과 왜곡 검증", "CR Consistency Distortion Verification"), expanded=False):
             if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
                 if "uploaded_matrix" not in st.session_state:
                     show_warning_dialog()
@@ -6432,7 +6434,7 @@ def render_ahp_analysis_settings():
                     show_cr_distortion_dialog()
 
         # 2. 일관성 보정 기준
-        with st.expander(_("ℹ️ 일관성 보정 기준", "ℹ️ Consistency Correction Standard"), expanded=False):
+        with st.expander(_("일관성 보정 기준", "Consistency Correction Standard"), expanded=False):
             st.markdown(_(r"""
             **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
             가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
@@ -6454,7 +6456,7 @@ def render_ahp_analysis_settings():
             """))
 
         # 3. 이용자 가이드
-        with st.expander(_("📖 이용자 가이드", "📖 User Guide"), expanded=False):
+        with st.expander(_("이용자 가이드", "User Guide"), expanded=False):
             st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
             if st.session_state.get('lang', 'ko') == 'en':
                 if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
@@ -6463,7 +6465,7 @@ def render_ahp_analysis_settings():
             else:
                 st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
 
-        with st.expander(_("🎓 학술 논문 및 연구 보고서 기재 방법 예시", "🎓 Example of citation in academic papers/reports"), expanded=False):
+        with st.expander(_("학술 논문 및 연구 보고서 기재 방법 예시", "Example of citation in academic papers/reports"), expanded=False):
             st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
                       "When describing AHP analysis results in your thesis or research report, you can refer to and cite the example below."))
             st.markdown(_("""
@@ -6731,8 +6733,8 @@ with contextlib.nullcontext():
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
 
         st.header(_("빠른 시작 (도시재생 사업 모델)", "Quick Start (Urban Regeneration Project Model)"))
-        st.info(_("Saaty(1980)의 Analytic Hierarchy Process (AHP) 분석 및 일관성 자동 보정 도구입니다.  \n일반 및 :blue[**퍼지 AHP**] 분석을 모두 지원하며, 엑셀 업로드만으로 개인별 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계 결과를 제공합니다.",
-                  "Saaty's (1980) Analytic Hierarchy Process (AHP) analysis and automatic consistency correction tool.  \nIt supports both traditional and :blue[**Fuzzy AHP**] analysis, providing individual weights, automatic consistency ratio (CR) correction, and group aggregation results upon Excel upload."))
+        st.info(_("일반 AHP 및 :blue[**퍼지 AHP**] 분석을 지원합니다. 엑셀 업로드 → 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계까지 한 번에 완료됩니다.",
+                  "Supports both Traditional and :blue[**Fuzzy AHP**] analysis. Upload Excel → individual weights, automatic CR correction, and group aggregation in one step."))
             
         sample_excel = create_sample_excel()
             
@@ -7229,10 +7231,10 @@ with contextlib.nullcontext():
 
                             st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
                             if st.session_state.get('plan_type') == 'Basic':
-                                st.info(_("💡 **Basic 요금제 제한 안내**: 서비스 등급에 따라 데이터의 상위 10개 표본에 대해서만 분석이 완료되었습니다. 무제한 분석을 원하실 경우 Standard 이상 요금제로 업그레이드해 주세요.",
-                                          "💡 **Basic Plan Notice**: Only the first 10 samples were analyzed according to your pricing plan constraints. Please upgrade to Standard or Pro Tier for unlimited samples."))
-                            st.markdown(_('<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;"> 주의: 새로고침하거나 브라우저를 닫으면 결과가 리셋됩니다.  결과 다운로드 탭에서 반드시 저장하세요.</p>',
-                                          '<p style="color:red;font-weight:bold;font-size:0.95rem;margin:5px 0 10px;">⚠️ Warning: Results reset on refresh. Download via 📑 Download Results tab.</p>'), unsafe_allow_html=True)
+                                st.info(_("💡 **Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
+                                          "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
+                            st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
+                                         "⚠️ Results reset on refresh. Download via the Results tab."))
 
                             # --- 3계층 전용 5개 탭 UI ---
                             v3_unique_groups = ui_data_v3.get("unique_groups", [])
@@ -7243,11 +7245,11 @@ with contextlib.nullcontext():
                             v3_main_factors   = ui_data_v3.get("main_factors", [])
 
                             tab3v1, tab3v2, tab3v3, tab3v4, tab3v5 = st.tabs([
-                                _("🌐 종합 분석 (Global)", "🌐 Global Comprehensive Analysis"),
-                                _("👨\u200d👩\u200d👧\u200d👦 그룹별 분석", "👨\u200d👩\u200d👧\u200d👦 Group Analysis"),
-                                _("🧪 통계 검정 (ANOVA)", "🧪 Statistical Test (ANOVA)"),
-                                _("📊 시각화 센터", "📊 Visualization Center"),
-                                _("📑 결과 다운로드", "📑 Download Results")
+                                _("종합 분석 (Global)", "Global Comprehensive Analysis"),
+                                _("그룹별 분석", "Group Analysis"),
+                                _("통계 검정 (ANOVA)", "Statistical Test (ANOVA)"),
+                                _("시각화 센터", "Visualization Center"),
+                                _("결과 다운로드", "Download Results")
                             ])
 
                             # ─── Tab 1: 종합 분석 ────────────────────────────────────────────
@@ -8481,8 +8483,8 @@ with contextlib.nullcontext():
     
                         st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
                         if st.session_state.get('plan_type') == 'Basic':
-                            st.info(_("💡 **Basic 요금제 제한 안내**: 서비스 등급에 따라 데이터의 상위 10개 표본에 대해서만 분석이 완료되었습니다. 무제한 분석을 원하실 경우 Standard 이상 요금제로 업그레이드해 주세요.",
-                                      "💡 **Basic Plan Notice**: Only the first 10 samples were analyzed according to your pricing plan constraints. Please upgrade to Standard or Pro Tier for unlimited samples."))
+                            st.info(_("💡 **Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
+                                      "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
                         if st.session_state.user_role == 'official':
                             if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
                                 save_data = uploaded_file.getvalue()
@@ -8501,16 +8503,15 @@ with contextlib.nullcontext():
                                 save_filename = f"{filename_base}_Raw.xlsx"
                             save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
     
-                        # 결과 휘발성 주의 안내
-                        st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;"> 주의: 페이지를 새로고침하거나 브라우저를 닫으면 분석 결과가 저장되지 않고 리셋되므로, 결과물 엑셀 파일( 결과 다운로드 탭)을 반드시 다운로드하여 저장해 주세요.</p>',
-                                      '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-top: 5px; margin-bottom: 10px;">⚠️ Warning: Analysis results are not stored and will be reset if you refresh the page or close the browser. Please make sure to download and save the results Excel file (📑 Download Results tab).</p>'), unsafe_allow_html=True)
+                        st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
+                                     "⚠️ Results reset on refresh. Download via the Results tab."))
     
                         tab1, tab2, tab3, tab4, tab5 = st.tabs([
-                            _("🌐 종합 분석 (Global)", "🌐 Global Comprehensive Analysis"),
-                            _("👨‍👩‍👧‍👦 그룹별 분석", "👨‍👩‍👧‍👦 Group Analysis"),
-                            _("🧪 통계 검정 (ANOVA)", "🧪 Statistical Test (ANOVA)"),
-                            _("📊 시각화 센터", "📊 Visualization Center"),
-                            _("📑 결과 다운로드", "📑 Download Results")
+                            _("종합 분석 (Global)", "Global Comprehensive Analysis"),
+                            _("그룹별 분석", "Group Analysis"),
+                            _("통계 검정 (ANOVA)", "Statistical Test (ANOVA)"),
+                            _("시각화 센터", "Visualization Center"),
+                            _("결과 다운로드", "Download Results")
                         ])
                         with tab1:
                             st.subheader(_(" 종합 중요도 및 순위", " Global Weights & Rankings"))
@@ -8926,7 +8927,7 @@ with contextlib.nullcontext():
         st.markdown("---")
     
         if st.session_state.user_role == 'official':
-            with st.expander(_("📂 나의 분석 보관함 (!중요) 반드시 컴퓨터에 백업해 주세요", "📂 My Analysis Storage (!Important: Please backup to your computer)")):
+            with st.expander(_("나의 분석 보관함 (중요: 반드시 컴퓨터에 백업해 주세요)", "My Analysis Storage (Important: Please backup to your computer)")):
                 my_analyses = get_user_analyses(st.session_state.user_id)
                 if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
                 else:
@@ -8958,8 +8959,8 @@ with contextlib.nullcontext():
         
         saved_model = None
         if st.session_state.user_id is None:
-            st.info(_(" **로그인 후** '나만의 분석 모델'을 만들 수 있습니다. (비로그인 상태에서도 샘플 데이터로 최종 분석 결과를 미리볼 수 있습니다)",
-                      " **Log in** to create your own custom AHP models. (Even without logging in, you can preview results using sample data.)"))
+            st.info(_("로그인 후 나만의 분석 모델을 저장할 수 있습니다. (비로그인에서도 샘플 데이터로 미리보기 가능)",
+                      "Log in to save your custom models. (Preview with sample data available without login)"))
         else:
             saved_model = load_user_model(st.session_state.user_id)
             is_en = st.session_state.get('lang', 'ko') == 'en'
@@ -9011,9 +9012,9 @@ with contextlib.nullcontext():
         }
     
     
-        with st.expander(_(" 나의 분석 모델 만들기", " Create Custom AHP Model"), expanded=True):
-            st.info(_("대항목과 세부항목을 입력하여 나만의 코딩 엑셀 양식을 생성하세요. 본 템플릿은 일반 AHP 및 퍼지 AHP(Fuzzy AHP) 분석에 공통으로 사용됩니다.\n\n현재 입력되어 있는 내용은 샘플 모델입니다. 이용자님의 AHP 모델로 수정할 수 있습니다.",
-                      "Enter main criteria and sub-criteria to generate your custom Excel template. This template is used for both traditional AHP and Fuzzy AHP analysis.\n\nThe content below is a sample model. You can modify it with your own AHP model."))
+        with st.expander(_("나의 분석 모델 만들기", "Create Custom AHP Model"), expanded=True):
+            st.info(_("대항목과 세부항목을 입력하여 코딩 엑셀 양식을 생성하세요. (일반 AHP / 퍼지 AHP 공용)",
+                      "Enter criteria to generate your coding Excel template. (For both Traditional and Fuzzy AHP)"))
             
             # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
             tier_level = 2
@@ -9065,7 +9066,7 @@ with contextlib.nullcontext():
                     
                     if tier_level == 3 and sub_list:
                         with st.expander(_(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", f"▶ Enter Sub-sub-criteria for '{mc}'"), expanded=True):
-                            st.info(_("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.", "💡 **Mixed-Tier Guide**: If a sub-criterion has no sub-sub-criteria, **leave it blank to automatically calculate as a 2-tier weight**."))
+
                             for sub_c in sub_list:
                                 sub_sub_input = st.text_input(
                                     f"▶ '{sub_c}'의 소분류 (쉼표 구분)", 
@@ -9624,7 +9625,7 @@ Thank you deeply for your valuable participation.
                         # [신규] 3계층 선택 시 소분류 입력 필드 동적 생성
                         if tier_level == 3 and subs_list:
                             with st.expander(_(f"↳ '{mc}' 하위의 소분류 (Sub-sub-criteria) 입력", f"↳ Enter Sub-sub-criteria under '{mc}'"), expanded=True):
-                                st.info(_("💡 **혼합 계층 안내**: 소분류(3계층)가 없는 항목은 **비워두시면 자동으로 2계층 가중치로 계산**됩니다.", "💡 **Mixed-Tier Guide**: If a sub-criterion has no sub-sub-criteria, **leave it blank to automatically calculate as a 2-tier weight**."))
+
                                 for sub_c in subs_list:
                                     sub_sub_val = "" # 3계층 기본값은 빈칸
                                     if sub_c in ["하드웨어", "Hardware"]: sub_sub_val = _("카메라, 배터리, 프로세서", "Camera, Battery, Processor")
@@ -10132,7 +10133,7 @@ Thank you deeply for your valuable participation.
             </style>
             """, unsafe_allow_html=True)
             
-            sub_tabs = st.tabs(["📊 진행 현황", "🎁 답례품 발송 관리", "⚙️ 답례품 설정(Admin)"])
+            sub_tabs = st.tabs(["진행 현황", "답례품 발송 관리", "답례품 설정(Admin)"])
             tab_live_content = sub_tabs[0]
             with sub_tabs[1]:
                 import coupon_manager
@@ -10148,8 +10149,8 @@ Thank you deeply for your valuable participation.
             selected_sheet_id = None
         
             if st.session_state.user_id is None:
-                st.warning(_(" **실시간 응답 현황 기능은 회원 전용 서비스입니다.**", " **Real-time response status is a member-only service.**"))
-                st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
+                st.warning(_("로그인 후 이용 가능한 회원 전용 서비스입니다. (무료 회원도 모든 기능 사용 가능)",
+                             "Member-only service. Log in to monitor responses. (Free members can use all features)"))
             else:
                 # DB에서 해당 관리자가 생성한 설문 목록 조회
                 import sqlite3
