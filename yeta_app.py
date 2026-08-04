@@ -2135,6 +2135,8 @@ def run():
                            * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
                         3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
                         """)
+                        if os.path.exists("google_sheets_menu_guide.png"):
+                            st.image("google_sheets_menu_guide.png", caption="구글 스프레드시트 메뉴 접근 방법", width=650)
                         if os.path.exists("manual_sheet_url_guide.png"):
                             st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", width=650)
                         existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
