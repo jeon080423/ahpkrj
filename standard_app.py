@@ -9079,6 +9079,37 @@ with contextlib.nullcontext():
                                 if parsed_sub_subs:
                                     sub_sub_structure[sub_c] = parsed_sub_subs
             
+            # ── 계층 구조 트리 시각화 ──────────────────────────────────────
+            if main_criteria_list:
+                st.markdown("---")
+                st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
+                tree_lines = []
+                for mi, mc in enumerate(main_criteria_list):
+                    is_last_main = (mi == len(main_criteria_list) - 1)
+                    prefix_main = "└── " if is_last_main else "├── "
+                    tree_lines.append(f"{prefix_main}**{mc}**")
+                    
+                    subs = model_structure.get(mc, [])
+                    for si, sc in enumerate(subs):
+                        is_last_sub = (si == len(subs) - 1)
+                        branch_main = "    " if is_last_main else "│   "
+                        prefix_sub = "└── " if is_last_sub else "├── "
+                        
+                        sub_subs = sub_sub_structure.get(sc, []) if tier_level == 3 else []
+                        if sub_subs:
+                            tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
+                            for ssi, ssc in enumerate(sub_subs):
+                                is_last_ss = (ssi == len(sub_subs) - 1)
+                                branch_sub = "    " if is_last_sub else "│   "
+                                prefix_ss = "└── " if is_last_ss else "├── "
+                                tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{ssc}")
+                        else:
+                            tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
+                
+                tree_text = "\n".join(tree_lines)
+                st.code(tree_text, language=None)
+            # ─────────────────────────────────────────────────────────────
+
             col1, col2 = st.columns(2)
             with col1:
                 generate_clicked = st.button(_("1️⃣ 설정한 모델로 AHP 코딩 엑셀 양식 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
@@ -9645,6 +9676,38 @@ Thank you deeply for your valuable participation.
                                     parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
                                     if parsed_sub_subs:
                                         model_structure["sub_subs"][sub_c] = parsed_sub_subs
+
+                    # ── 계층 구조 트리 시각화 ──────────────────────────────
+                    if main_list:
+                        st.markdown("---")
+                        st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
+                        tree_lines = []
+                        for mi, mc in enumerate(main_list):
+                            is_last_main = (mi == len(main_list) - 1)
+                            prefix_main = "└── " if is_last_main else "├── "
+                            tree_lines.append(f"{prefix_main}**{mc}**")
+                            
+                            subs = model_structure.get("subs", {}).get(mc, [])
+                            sub_subs_map = model_structure.get("sub_subs", {})
+                            for si, sc in enumerate(subs):
+                                is_last_sub = (si == len(subs) - 1)
+                                branch_main = "    " if is_last_main else "│   "
+                                prefix_sub = "└── " if is_last_sub else "├── "
+                                
+                                sub_subs = sub_subs_map.get(sc, []) if tier_level == 3 else []
+                                if sub_subs:
+                                    tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
+                                    for ssi, ssc in enumerate(sub_subs):
+                                        is_last_ss = (ssi == len(sub_subs) - 1)
+                                        branch_sub = "    " if is_last_sub else "│   "
+                                        prefix_ss = "└── " if is_last_ss else "├── "
+                                        tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{ssc}")
+                                else:
+                                    tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
+                        
+                        tree_text = "\n".join(tree_lines)
+                        st.code(tree_text, language=None)
+                    # ──────────────────────────────────────────────────────
 
                     st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
