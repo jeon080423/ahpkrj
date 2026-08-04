@@ -9275,60 +9275,65 @@ with contextlib.nullcontext():
                                     keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
                                     for k in keys_to_clear:
                                         del st.session_state[k]
-                                    st.session_state.survey_auto_loaded = False
+                                    st.session_state.survey_auto_loaded = True
+                                    st.session_state._survey_cache_dirty = True
                                 st.success(_("완료되었습니다. 화면이 새로고침됩니다.", "Completed. The screen will be refreshed."))
                                 import time
                                 time.sleep(1.5)
                                 st.rerun()
 
-                    if has_survey:
-                        st.success(_(f" 현재 배포된 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**", f" A deployed survey exists. Automatically loaded: **{user_surveys[0][1]}**"))
+                    linked_sheet_id = st.session_state.get("editing_survey_id")
+                    if linked_sheet_id:
+                        survey_title_display = st.session_state.get("edit_title", "")
+                        for s in user_surveys:
+                            if s[0] == linked_sheet_id:
+                                survey_title_display = s[1]
+                                break
+                        st.success(_(f" 현재 배포된 설문을 불러왔습니다: **{survey_title_display}**", f" Loaded deployed survey: **{survey_title_display}**"))
                         st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
                         
                         # [신규] 연동된 구글 스프레드시트 바로가기 및 온라인 설문 링크 제시
-                        linked_sheet_id = st.session_state.get("editing_survey_id") or (user_surveys[0][0] if user_surveys else None)
-                        if linked_sheet_id:
-                            base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
-                            if "localhost" in base_url or "127.0.0.1" in base_url:
-                                active_survey_url = f"{base_url}?survey_id={linked_sheet_id}"
-                            else:
-                                active_survey_url = f"https://ahpkrj.streamlit.app/?survey_id={linked_sheet_id}"
+                        base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
+                        if "localhost" in base_url or "127.0.0.1" in base_url:
+                            active_survey_url = f"{base_url}?survey_id={linked_sheet_id}"
+                        else:
+                            active_survey_url = f"https://ahpkrj.streamlit.app/?survey_id={linked_sheet_id}"
 
-                            st.markdown(_("##### 🌐 온라인 설문지 링크 (응답자 배포용)", "##### 🌐 Online Survey Link (For Distribution)"))
-                            st.code(active_survey_url, language="text")
-                            st.caption(_("💡 위 설문 링크를 복사하여 이메일이나 메신저로 응답 대상자에게 전달하세요.", "💡 Copy the survey link above and send it to respondents via email or messenger."))
+                        st.markdown(_("##### 🌐 온라인 설문지 링크 (응답자 배포용)", "##### 🌐 Online Survey Link (For Distribution)"))
+                        st.code(active_survey_url, language="text")
+                        st.caption(_("💡 위 설문 링크를 복사하여 이메일이나 메신저로 응답 대상자에게 전달하세요.", "💡 Copy the survey link above and send it to respondents via email or messenger."))
 
-                            gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
-                            btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
-                            st.markdown(f'''
-                            <style>
-                            .gs-nav-btn-box {{
-                                background-color: #1e40af !important;
-                                border-radius: 6px !important;
-                                padding: 12px 16px !important;
-                                text-align: center !important;
-                                margin-bottom: 12px !important;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
-                            }}
-                            .gs-nav-btn-box a, .gs-nav-btn-box a:link, .gs-nav-btn-box a:visited, .gs-nav-btn-box a:hover, .gs-nav-btn-box a:active {{
-                                color: #ffffff !important;
-                                text-decoration: none !important;
-                                font-weight: 700 !important;
-                                font-size: 0.95rem !important;
-                                font-family: sans-serif !important;
-                                display: block !important;
-                                width: 100% !important;
-                            }}
-                            </style>
-                            <div class="gs-nav-btn-box">
-                                <a href="{gs_link}" target="_blank">
-                                    📊 {btn_label}
-                                </a>
-                            </div>
-                            ''', unsafe_allow_html=True)
+                        gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
+                        btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
+                        st.markdown(f'''
+                        <style>
+                        .gs-nav-btn-box {{
+                            background-color: #1e40af !important;
+                            border-radius: 6px !important;
+                            padding: 12px 16px !important;
+                            text-align: center !important;
+                            margin-bottom: 12px !important;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+                        }}
+                        .gs-nav-btn-box a, .gs-nav-btn-box a:link, .gs-nav-btn-box a:visited, .gs-nav-btn-box a:hover, .gs-nav-btn-box a:active {{
+                            color: #ffffff !important;
+                            text-decoration: none !important;
+                            font-weight: 700 !important;
+                            font-size: 0.95rem !important;
+                            font-family: sans-serif !important;
+                            display: block !important;
+                            width: 100% !important;
+                        }}
+                        </style>
+                        <div class="gs-nav-btn-box">
+                            <a href="{gs_link}" target="_blank">
+                                📊 {btn_label}
+                            </a>
+                        </div>
+                        ''', unsafe_allow_html=True)
 
-                        if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
-                             confirm_new_survey()
+                    if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
+                         confirm_new_survey()
                     else:
                         st.info(_(" 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", " This is a new survey in progress. Please fill out the contents and deploy."))
                         if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):

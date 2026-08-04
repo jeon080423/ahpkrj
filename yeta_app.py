@@ -1852,15 +1852,21 @@ def run():
                         keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_yeta_')]
                         for k in keys_to_clear:
                             del st.session_state[k]
-                        st.session_state.yeta_survey_auto_loaded = False
+                        st.session_state.yeta_survey_auto_loaded = True
                         st.session_state._survey_cache_dirty_yeta = True
                     st.success("완료되었습니다. 화면이 새로고침됩니다.")
                     import time
                     time.sleep(1.5)
                     st.rerun()
 
-        if has_survey:
-            st.success(f" 현재 배포된 예타 설문이 있습니다. 자동으로 불러왔습니다: **{user_surveys[0][1]}**")
+        linked_sheet_id = st.session_state.get("yeta_editing_survey_id")
+        if linked_sheet_id:
+            survey_title_display = st.session_state.get("edit_yeta_title", "")
+            for s in user_surveys:
+                if s[0] == linked_sheet_id:
+                    survey_title_display = s[1]
+                    break
+            st.success(f" 현재 배포된 예타 설문을 불러왔습니다: **{survey_title_display}**")
             if st.button("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", type="secondary"):
                  confirm_new_survey_yeta()
         else:
