@@ -9824,27 +9824,22 @@ Thank you deeply for your valuable participation.
                             
                         else:
                             st.markdown(_("##### 📝 구글 스프레드시트 직접 연동", "##### 📝 Link Google Spreadsheet Manually"))
-                            
-                            # 사이드바 가이드 렌더링
-                            st.sidebar.markdown(_("### 📘 초보자용 구글 시트 연동 가이드", "### 📘 Beginner's Google Sheets Linking Guide"))
-                            st.sidebar.info(_(
-                                "1. 구글 드라이브에서 '빈 스프레드시트'를 새로 만듭니다.\n"
-                                "2. 우측 상단 [공유] 버튼을 눌러 아래 계정을 **편집자**로 추가합니다.",
-                                "1. Create a 'Blank Spreadsheet' in your Google Drive.\n"
-                                "2. Click [Share] and add the account below as an **Editor**."
-                            ))
-                            st.sidebar.code(st.secrets.get('gcp_service_account', {}).get('client_email', 'service_account'))
-                            st.sidebar.info(_("3. 아래 메뉴 접근 방법 및 주소 복사 예시를 참고하여 주소를 복사합니다.", "3. Refer to the menu access and URL copy examples below to copy the address."))
-                            import os
-                            if os.path.exists("google_sheets_menu_guide.png"):
-                                st.sidebar.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), use_container_width=True)
-                            if os.path.exists("manual_sheet_url_guide.png"):
-                                st.sidebar.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), use_container_width=True)
-                            
                             st.warning(_(
-                                "👈 **좌측 사이드바 메뉴(또는 ≡ 아이콘)를 열어 가이드를 확인**하신 후, 아래에 스프레드시트 URL을 붙여넣어 주세요.",
-                                "👈 **Open the left sidebar menu (or ≡ icon) to check the guide**, and then paste the spreadsheet URL below."
+                                "1. 본인 구글 드라이브에서 '빈 스프레드시트'를 새로 만듭니다.\n"
+                                f"2. 우측 상단 [공유] 버튼을 눌러 `{st.secrets.get('gcp_service_account', {}).get('client_email', '서비스계정')}` 계정을 **편집자**로 추가합니다.\n"
+                                "3. 해당 스프레드시트의 주소(URL)를 복사하여 아래에 붙여넣습니다.",
+                                "1. Create a 'Blank Spreadsheet' in your Google Drive.\n"
+                                f"2. Click [Share] and add `{st.secrets.get('gcp_service_account', {}).get('client_email', 'service_account')}` as an **Editor**.\n"
+                                "3. Copy and paste the spreadsheet URL below."
                             ))
+                            import os
+                            col1, col2 = st.columns([1, 2])
+                            with col1:
+                                if os.path.exists("google_sheets_menu_guide.png"):
+                                    st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), use_container_width=True)
+                            with col2:
+                                if os.path.exists("manual_sheet_url_guide.png"):
+                                    st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), use_container_width=True)
                             manual_url = st.text_input(_("스프레드시트 URL 입력", "Input Spreadsheet URL"), placeholder="https://docs.google.com/spreadsheets/d/...")
                             if manual_url:
                                 existing_sheet_id_input = manual_url.strip()
