@@ -6802,9 +6802,12 @@ with col_main:
                    * Service Account Email: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
                 3. Copy the **URL** or **Sheet ID** of the created spreadsheet and paste it below. (See the example image below)
                 """))
-                if os.path.exists("google_sheets_menu_guide.png"):
-                    st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), width=300)
-                st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Example of copying Google Spreadsheet URL"), width=650)
+                col1, col2 = st.columns([1, 2])
+                with col1:
+                    if os.path.exists("google_sheets_menu_guide.png"):
+                        st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), use_container_width=True)
+                with col2:
+                    st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Example of copying Google Spreadsheet URL"), use_container_width=True)
                 existing_sheet_id_input = st.text_input(_("연동할 구글 스프레드시트 URL 또는 ID *", "Google Spreadsheet URL or ID to link *"), placeholder="https://docs.google.com/spreadsheets/d/...")
                 st.warning(_(
                     "📢 **[RAW 데이터 보관 및 백업 의무 안내]**\n\n"
