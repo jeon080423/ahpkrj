@@ -6798,7 +6798,7 @@ with col_main:
                 3. Copy the **URL** or **Sheet ID** of the created spreadsheet and paste it below. (See the example image below)
                 """))
                 if os.path.exists("google_sheets_menu_guide.png"):
-                    st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), width=650)
+                    st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), width=300)
                 st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Example of copying Google Spreadsheet URL"), width=650)
                 existing_sheet_id_input = st.text_input(_("연동할 구글 스프레드시트 URL 또는 ID *", "Google Spreadsheet URL or ID to link *"), placeholder="https://docs.google.com/spreadsheets/d/...")
                 st.warning(_(

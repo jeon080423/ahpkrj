@@ -9829,7 +9829,7 @@ Thank you deeply for your valuable participation.
                             ))
                             import os
                             if os.path.exists("google_sheets_menu_guide.png"):
-                                st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), width=650)
+                                st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), width=300)
                             if os.path.exists("manual_sheet_url_guide.png"):
                                 st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), width=650)
                             manual_url = st.text_input(_("스프레드시트 URL 입력", "Input Spreadsheet URL"), placeholder="https://docs.google.com/spreadsheets/d/...")
