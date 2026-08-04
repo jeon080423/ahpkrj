@@ -1881,8 +1881,25 @@ def run():
         st.divider()
 
         # 하위 탭을 나누지 않고 하나의 연결된 페이지로 구성
+        def render_section_header(title):
+            style = (
+                'background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);'
+                'color: #ffffff;'
+                'padding: 12px 20px;'
+                'border-radius: 6px;'
+                'font-weight: bold;'
+                'font-size: 1.1rem;'
+                'text-align: center;'
+                'letter-spacing: 0.5px;'
+                'margin-top: 25px;'
+                'margin-bottom: 15px;'
+                'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);'
+                'border: 1px solid #334155;'
+            )
+            st.markdown(f'<div style="{style}">{title}</div>', unsafe_allow_html=True)
+
         with st.container():
-            st.markdown("#### 1. 사업 기본 정보 및 자료 첨부")
+            render_section_header("섹션 1: 사업 기본 정보 및 자료 첨부")
             survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_yeta_title", "재정투자사업 종합평가(AHP) 전문가 설문"))
             
             default_survey_desc = """안녕하십니까, 전문가님.
@@ -1916,12 +1933,13 @@ def run():
                 survey_desc = st.session_state.get("edit_yeta_desc", default_survey_desc)
             st.session_state["edit_yeta_desc"] = survey_desc
             
-            st.markdown("#### 2. 예타 사업 유형 및 계층구조 모델 설정")
-            yeta_p_type = st.selectbox(
-                "평가 대상 사업 유형",
-                options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"],
-                index=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"].index(st.session_state.get("edit_yeta_p_type", "건설사업 (비수도권)"))
-            )
+            with st.container():
+                render_section_header("섹션 2: 예타 사업 유형 및 계층구조 모델 설정")
+                yeta_p_type = st.selectbox(
+                    "평가 대상 사업 유형",
+                    options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"],
+                    index=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"].index(st.session_state.get("edit_yeta_p_type", "건설사업 (비수도권)"))
+                )
             
             tier_level = 3
             st.info("💡 **예타 모델 동적 설정**: 일반 모드와 동일하게 각 계층을 쉼표(,)로 구분하여 입력하세요. (1계층은 예타 기본 뼈대를 유지합니다)")
@@ -1972,7 +1990,7 @@ def run():
 
         st.divider()
         with st.container():
-            st.markdown("#### 2. 평가 항목 상세 설명")
+            render_section_header("섹션 3: 평가 항목 상세 설명")
             st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
             
             definitions_map = {}
@@ -2046,7 +2064,7 @@ def run():
 
         st.divider()
         with st.container():
-            st.markdown("#### 3. 응답자 수집 정보 및 그룹 분류")
+            render_section_header("섹션 4: 응답자 수집 정보 및 그룹 분류")
             with st.container(border=True):
                 st.markdown("**그룹 분류 문항 설정**")
                 default_type_q = "귀하의 소속은 어떻게 되십니까?"
@@ -2080,8 +2098,8 @@ def run():
                     type_questions_state[i]["q"] = q_val
                     type_questions_state[i]["opts"] = opts_val
                     type_questions.append({"q": q_val, "opts": [x.strip() for x in opts_val.split(",") if x.strip()]})
-
-            st.markdown("#### 4. 온라인 배포 및 구글 시트 연동 설정")
+        with st.container():
+            render_section_header("섹션 5: 온라인 배포 및 구글 시트 연동 설정")
             if st.session_state.user_id is None:
                 st.warning("온라인 배포 및 구글 시트 연동은 회원 전용 기능입니다. 로그인해 주세요.")
             else:
@@ -2089,7 +2107,6 @@ def run():
                 st.session_state.edit_yeta_admin_email = survey_admin_email
 
                 existing_id = st.session_state.yeta_editing_survey_id
-
                 if existing_id:
                     st.info("현재 **기존 설문 수정 모드**입니다. 수정한 설정은 기존 연동 시트에 반영됩니다.")
                     existing_sheet_id_input = existing_id
@@ -2153,7 +2170,7 @@ def run():
                 # ==================== 답례품 설정 ====================
                 coupon_config = None
                 if st.session_state.user_id == 'shjeon':
-                    st.markdown("#### 5. 답례품 발송 설정 (옵션)")
+                    render_section_header("섹션 6: 답례품 발송 설정 (옵션)")
                     use_coupon = st.checkbox("설문 응답자에게 기프티콘 등 답례품을 제공합니다.", key="yeta_use_coupon")
                     if use_coupon:
                         active_coupons = coupon_manager.get_active_coupons()
