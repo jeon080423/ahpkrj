@@ -9833,10 +9833,13 @@ Thank you deeply for your valuable participation.
                                 "3. Copy and paste the spreadsheet URL below."
                             ))
                             import os
-                            if os.path.exists("google_sheets_menu_guide.png"):
-                                st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), width=300)
-                            if os.path.exists("manual_sheet_url_guide.png"):
-                                st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), width=650)
+                            col1, col2 = st.columns([1, 2])
+                            with col1:
+                                if os.path.exists("google_sheets_menu_guide.png"):
+                                    st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), use_container_width=True)
+                            with col2:
+                                if os.path.exists("manual_sheet_url_guide.png"):
+                                    st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), use_container_width=True)
                             manual_url = st.text_input(_("스프레드시트 URL 입력", "Input Spreadsheet URL"), placeholder="https://docs.google.com/spreadsheets/d/...")
                             if manual_url:
                                 existing_sheet_id_input = manual_url.strip()
