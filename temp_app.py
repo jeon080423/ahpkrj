@@ -6789,27 +6789,25 @@ with col_main:
                 existing_sheet_id_input = st.session_state.editing_survey_id
             else:
                 st.markdown(_("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *", "##### ⚙️ Setup Your Google Spreadsheet to Link *"))
-                # 사이드바 가이드 렌더링
-                st.sidebar.markdown(_("### 📘 초보자용 구글 시트 연동 가이드", "### 📘 Beginner's Google Sheets Linking Guide"))
-                st.sidebar.info(_(
-                    "1. 구글 드라이브에서 '빈 스프레드시트'를 새로 만듭니다.\n"
-                    "2. 우측 상단 [공유] 버튼을 눌러 아래 계정을 **편집자**로 추가합니다.",
-                    "1. Create a 'Blank Spreadsheet' in your Google Drive.\n"
-                    "2. Click [Share] and add the account below as an **Editor**."
-                ))
-                st.sidebar.code("ahp2-75@ahp2-486703.iam.gserviceaccount.com")
-                st.sidebar.info(_("3. 아래 메뉴 접근 방법 및 주소 복사 예시를 참고하여 주소를 복사합니다.", "3. Refer to the menu access and URL copy examples below to copy the address."))
-                
-                import os
-                if os.path.exists("google_sheets_menu_guide.png"):
-                    st.sidebar.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), use_container_width=True)
-                if os.path.exists("manual_sheet_url_guide.png"):
-                    st.sidebar.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), use_container_width=True)
-                
-                st.warning(_(
-                    "👈 **좌측 사이드바 메뉴(또는 ≡ 아이콘)를 열어 가이드를 확인**하신 후, 아래에 스프레드시트 URL을 붙여넣어 주세요.",
-                    "👈 **Open the left sidebar menu (or ≡ icon) to check the guide**, and then paste the spreadsheet URL below."
-                ))
+                st.info(_("""
+                **💡 연동 방법:**
+                1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다. (본인 계정 용량 내에서 생성되므로 용량 초과 오류가 발생하지 않습니다.)
+                2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
+                   * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요. (아래 예시 이미지 참고)
+                """, """
+                **💡 How to link:**
+                1. Create a **New Google Spreadsheet** in your Google Drive. (This uses your account storage, so there will be no quota errors on our side.)
+                2. Click the 'Share' button on the top right and add the following service account email as an **Editor**.
+                   * Service Account Email: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                3. Copy the **URL** or **Sheet ID** of the created spreadsheet and paste it below. (See the example image below)
+                """))
+                col1, col2 = st.columns([1, 2])
+                with col1:
+                    if os.path.exists("google_sheets_menu_guide.png"):
+                        st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), use_container_width=True)
+                with col2:
+                    st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Example of copying Google Spreadsheet URL"), use_container_width=True)
                 existing_sheet_id_input = st.text_input(_("연동할 구글 스프레드시트 URL 또는 ID *", "Google Spreadsheet URL or ID to link *"), placeholder="https://docs.google.com/spreadsheets/d/...")
                 st.warning(_(
                     "📢 **[RAW 데이터 보관 및 백업 의무 안내]**\n\n"
