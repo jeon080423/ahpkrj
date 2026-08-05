@@ -895,6 +895,56 @@ div[data-testid="stTextInput"] button,
     box-shadow: none !important;
     color: #475569 !important; /* 아이콘 색상 조정 */
 }
+
+/* ── Google Sheet 네비게이션 버튼 (통합) ── */
+.gs-nav-btn-box, .gs-nav-btn-box2 {
+    background-color: #1e40af !important;
+    border-radius: 6px !important;
+    padding: 12px 16px !important;
+    text-align: center !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+}
+.gs-nav-btn-box a, .gs-nav-btn-box a:link, .gs-nav-btn-box a:visited, .gs-nav-btn-box a:hover, .gs-nav-btn-box a:active,
+.gs-nav-btn-box2 a, .gs-nav-btn-box2 a:link, .gs-nav-btn-box2 a:visited, .gs-nav-btn-box2 a:hover, .gs-nav-btn-box2 a:active {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    font-family: sans-serif !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* ── Pill-style 서브탭 (통합) ── */
+div[data-testid="stTabs"] div[data-testid="stTabs"] > div[role="tablist"] {
+    border-bottom: none !important;
+    gap: 0 !important;
+    padding-bottom: 15px !important;
+    margin-top: -10px !important;
+}
+div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"] {
+    border-radius: 25px !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    margin-right: 8px !important;
+    padding: 6px 18px !important;
+    height: auto !important;
+    transition: all 0.2s ease !important;
+}
+div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
+    background-color: #e2e8f0 !important;
+}
+div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+    background-color: #0f172a !important;
+    color: white !important;
+    border: 1px solid #0f172a !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+div[data-testid="stTabs"] div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
+    display: none !important;
+}
 </style>
 """
 st.markdown(global_ahp_css, unsafe_allow_html=True)
@@ -6715,14 +6765,12 @@ with contextlib.nullcontext():
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    main_tab_consulting, main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_pricing, main_tab_signup = st.tabs([
-        _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
+    main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_service = st.tabs([
         _("AHP 분석 도구", "AHP Analysis Tool"), 
         _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
         _("온라인 AHP 설문/배포(:red[**무료**])", "Online AHP Survey/Deployment (:red[**Free**])"), 
         _("실시간 응답 현황", "Live Response Status"),
-        _("서비스 요금", "Service Pricing"),
-        _("회원가입", "Sign Up")
+        _("서비스 안내", "Service Info")
     ], default=_("AHP 분석 도구", "AHP Analysis Tool"))
         
     with main_tab1:
@@ -6820,7 +6868,7 @@ with contextlib.nullcontext():
         st.subheader(_("1. 데이터 업로드 및 분석", "1. Data Upload & Analysis"))
         
         if st.session_state.get('user_role') == 'admin':
-            st.info(_("💡 **혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 코딩 엑셀 양식을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "💡 **Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
+            st.info(_("**혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 코딩 엑셀 양식을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "**Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
 
         # 데이터 소스 선택 추가
         data_source = st.radio(
@@ -7134,7 +7182,7 @@ with contextlib.nullcontext():
                         df_main = st.session_state["ahp_df_main"]
                         sub_dfs = st.session_state["ahp_sub_dfs"]
                         sheet_names = st.session_state["ahp_sheet_names"]
-                        st.info(_("💡 구글 시트에서 로드된 실시간 데이터 분석 모드입니다. (새 데이터를 가져오려면 위 버튼을 클릭해 주세요)", "💡 Live data analysis mode. Click the button above to refresh data."))
+                        st.info(_("구글 시트에서 로드된 실시간 데이터 분석 모드입니다. (새 데이터를 가져오려면 위 버튼을 클릭해 주세요)", "Live data analysis mode. Click the button above to refresh data."))
 
         if df_main is not None:
             try:
@@ -7231,7 +7279,7 @@ with contextlib.nullcontext():
 
                             st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
                             if st.session_state.get('plan_type') == 'Basic':
-                                st.info(_("💡 **Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
+                                st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
                                           "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
                             st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
                                          "⚠️ Results reset on refresh. Download via the Results tab."))
@@ -8483,7 +8531,7 @@ with contextlib.nullcontext():
     
                         st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
                         if st.session_state.get('plan_type') == 'Basic':
-                            st.info(_("💡 **Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
+                            st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
                                       "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
                         if st.session_state.user_role == 'official':
                             if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
@@ -9202,7 +9250,7 @@ with contextlib.nullcontext():
                             type="primary"
                         )
                     
-                    st.info(_("💡 **안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 코딩 엑셀 양식 파일을 저장하세요.", 
+                    st.info(_("**안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 코딩 엑셀 양식 파일을 저장하세요.", 
                               "💡 **Info:** The model has been generated and saved. Click the 2nd button on the right to download the Excel template file to your computer."))
     
                     st.markdown(_("""
@@ -9374,7 +9422,7 @@ with contextlib.nullcontext():
                     @st.dialog(_("🚨 [경고] 기존 설문 영구 삭제 안내", "🚨 [Warning] Permanent Deletion of Existing Survey"))
                     def confirm_new_survey():
                         st.error(_("새로운 설문을 작성하시면 기존 연동된 구글 시트에 저장된 **모든 데이터(설문 구조, 문항, 수집된 전체 응답 결과)가 즉시 삭제되며 절대 복구할 수 없습니다.**", "If you create a new survey, **ALL data saved in the linked Google Sheet (survey structure, questions, collected responses) will be immediately deleted and CANNOT be recovered.**"))
-                        st.info(_("💡 **데이터 보존 안내:** 기존 설문의 응답 결과 보존을 원하신다면, 삭제에 동의하시기 전에 구글 스프레드시트에 접속하여 **[파일] -> [다운로드]** 메뉴를 통해 엑셀(.xlsx) 파일 등으로 백업본을 사용자 컴퓨터에 미리 다운로드해 두시기 바랍니다.", "💡 **Data Preservation Guide:** If you wish to keep the existing responses, please go to the Google Spreadsheet and use the **[File] -> [Download]** menu to download a backup copy (e.g., .xlsx) to your computer before agreeing to delete."))
+                        st.info(_("**데이터 보존 안내:** 기존 설문의 응답 결과 보존을 원하신다면, 삭제에 동의하시기 전에 구글 스프레드시트에 접속하여 **[파일] -> [다운로드]** 메뉴를 통해 엑셀(.xlsx) 파일 등으로 백업본을 사용자 컴퓨터에 미리 다운로드해 두시기 바랍니다.", "**Data Preservation Guide:** If you wish to keep the existing responses, please go to the Google Spreadsheet and use the **[File] -> [Download]** menu to download a backup copy (e.g., .xlsx) to your computer before agreeing to delete."))
                         agree = st.checkbox(_("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.", "Yes, I have backed up or do not need the existing data, and I agree to delete all data."))
                         col1, col2 = st.columns(2)
                         with col1:
@@ -9421,25 +9469,7 @@ with contextlib.nullcontext():
                         gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
                         btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
                         st.markdown(f'''
-                        <style>
-                        .gs-nav-btn-box {{
-                            background-color: #1e40af !important;
-                            border-radius: 6px !important;
-                            padding: 12px 16px !important;
-                            text-align: center !important;
-                            margin-bottom: 12px !important;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
-                        }}
-                        .gs-nav-btn-box a, .gs-nav-btn-box a:link, .gs-nav-btn-box a:visited, .gs-nav-btn-box a:hover, .gs-nav-btn-box a:active {{
-                            color: #ffffff !important;
-                            text-decoration: none !important;
-                            font-weight: 700 !important;
-                            font-size: 0.95rem !important;
-                            font-family: sans-serif !important;
-                            display: block !important;
-                            width: 100% !important;
-                        }}
-                        </style>
+
                         <div class="gs-nav-btn-box">
                             <a href="{gs_link}" target="_blank">
                                 📊 {btn_label}
@@ -9598,7 +9628,8 @@ Thank you deeply for your valuable participation.
                 demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
                 demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
-
+
+
 
                 demo_age = st.checkbox(_("연령 수집", "Collect Age"), value=st.session_state.get("edit_demo_age", False))
                 age_type = "개방형 (숫자 직접 입력)"
@@ -9606,7 +9637,8 @@ Thank you deeply for your valuable participation.
                     age_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("10세 단위 선택형", "Multiple Choice (10-year intervals)")]
                     age_type = st.radio(_("연령 수집 방식", "Age Collection Method"), age_type_options, index=0 if st.session_state.get("edit_age_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_age_type_setup")
 
-
+
+
 
                 demo_exp = st.checkbox(_("경력년수 수집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", False))
                 exp_type = "개방형 (숫자 직접 입력)"
@@ -9628,16 +9660,19 @@ Thank you deeply for your valuable participation.
                     "type_questions": type_questions
                 }
 
-
 
-
+
+
+
+
                 with st.container():
                     # 섹션 2: AHP 모델 계층구조 입력 폼
                     render_section_header(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
 
                     # 계층 구조 선택 (2계층 기준과 동일하게 전체 공개)
                     tier_level = 2
-
+
+
                     st.markdown(_("#####  계층 구조 레벨 선택", "#####  Select Hierarchy Level"))
                     tier_choice_tab2 = st.radio(
                         _("설문 모델의 계층 깊이를 선택하세요.", "Select the hierarchy depth for your survey model."),
@@ -9649,7 +9684,8 @@ Thank you deeply for your valuable participation.
                     )
                     if _("3계층", "3-Tier") in tier_choice_tab2:
                         tier_level = 3
-
+
+
 
                     st.info(_(
                         "💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n\n"
@@ -9742,7 +9778,8 @@ Thank you deeply for your valuable participation.
                     st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
 
-
+
+
                 with st.container():
                     # 섹션 3: 요인 조작적 정의 설정
                     render_section_header(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
@@ -9801,7 +9838,8 @@ Thank you deeply for your valuable participation.
                         st.write("") # 섹션 간 시각적 여백 추가
 
 
-
+
+
                 with st.container():
                     # 섹션 4: 척도 인터페이스 설정
                     render_section_header(_("섹션 4: 쌍대비교 응답 척도 및 일관성(CR) 검증 레벨 설정", "Section 4: Scale Type & CR Validation Level Setup"))
@@ -9823,7 +9861,8 @@ Thank you deeply for your valuable participation.
 
                     scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=scale_idx, label_visibility="collapsed")
 
-
+
+
 
                     # 섹션 5: 답례품 및 개인정보 수집 동의 설정
                     if st.session_state.get("user_id") == "shjeon":
@@ -9837,7 +9876,8 @@ Thank you deeply for your valuable participation.
                             "enabled": reward_enabled,
                             "desc": reward_desc
                         }
-
+
+
                     else:
                         rewards_info = {"enabled": False}
 
@@ -9908,15 +9948,16 @@ Thank you deeply for your valuable participation.
                         cr_guide_method = list(options_kr.keys())[selected_idx]
             
                         if cr_guide_method == "realtime":
-                            st.info(_("💡 **실시간 안내**: 응답자가 설문 중 일관성을 유지할 수 있도록 파란색 배경으로 권장되는 허용 범위를 안내합니다. 편의성이 높고 이탈률을 크게 낮출 수 있습니다.", "💡 **Real-time Guide**: Highlights the recommended range with a blue background to help respondents maintain consistency. Highly convenient and reduces dropouts."))
+                            st.info(_("**실시간 안내**: 응답자가 설문 중 일관성을 유지할 수 있도록 파란색 배경으로 권장되는 허용 범위를 안내합니다. 편의성이 높고 이탈률을 크게 낮출 수 있습니다.", "**Real-time Guide**: Highlights the recommended range with a blue background to help respondents maintain consistency. Highly convenient and reduces dropouts."))
                         elif cr_guide_method == "post_wizard":
                             st.success(_("💡 **지능형 수정 제안 (추천)**: 응답 중에는 아무런 가이드를 주지 않아 응답자의 진짜 생각을 편향 없이 수집합니다. 제출 버튼을 눌렀을 때 CR이 초과하면, 가장 모순이 큰 딱 1개 문항을 찾아내어 수정을 권고하는 마법사를 띄웁니다.", "💡 **Smart Fix Wizard (Recommended)**: Collects true thoughts without bias by providing no guide during response. If CR exceeds the limit upon submission, a wizard will appear to suggest fixing the single most contradictory question."))
                         else:
-                            st.warning(_("💡 **안내 없음**: 응답자에게 어떤 힌트도 주지 않으며, 제출 시 CR을 초과하면 에러 메시지와 함께 전체 재검토를 요구합니다. 이탈률이 높아질 수 있습니다.", "💡 **No Guide**: Gives no hints. If CR is exceeded upon submission, an error message is shown requiring a full review. Dropouts may increase."))
+                            st.warning(_("**안내 없음**: 응답자에게 어떤 힌트도 주지 않으며, 제출 시 CR을 초과하면 에러 메시지와 함께 전체 재검토를 요구합니다. 이탈률이 높아질 수 있습니다.", "**No Guide**: Gives no hints. If CR is exceeded upon submission, an error message is shown requiring a full review. Dropouts may increase."))
                     else:
                         cr_guide_method = "none"
 
-
+
+
 
                     # 섹션 7: 최종 미리보기 및 배포
                     render_section_header(_("섹션 5: 저장 전 최종 미리보기 및 배포", "Section 5: Final Preview & Deployment Before Saving"))
@@ -10056,7 +10097,7 @@ Thank you deeply for your valuable participation.
                             if st.button(btn_label, type="primary", use_container_width=True):
                                 import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
                                 st.warning(_(" 배포 및 DB 연동은 회원가입 후 가능합니다. (무료 사용자도 제한 없이 배포 및 연동 가능함)", " Deployment and DB integration are available after sign-up. (Free users can also deploy and link DB)"))
-                                st.info(_("💡 안심하세요. 현재 작성하신 내용은 창을 닫지 않고 왼쪽 사이드바에서 회원가입/로그인을 완료하시면 날아가지 않고 그대로 유지되어 즉시 배포하실 수 있습니다.", "💡 Rest assured. The contents you have written will be maintained if you sign up and log in from the left sidebar without closing the window, allowing you to deploy immediately."))
+                                st.info(_("안심하세요. 현재 작성하신 내용은 창을 닫지 않고 왼쪽 사이드바에서 회원가입/로그인을 완료하시면 날아가지 않고 그대로 유지되어 즉시 배포하실 수 있습니다.", "Rest assured. The contents you have written will be maintained if you sign up and log in from the left sidebar without closing the window, allowing you to deploy immediately."))
                     
                                 pass
                         else:
@@ -10143,30 +10184,12 @@ Thank you deeply for your valuable participation.
                                             st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))
 
                                             st.code(short_url, language="text")
-                                            st.info(_("💡 **설문 전달 안내:** 생성된 설문조사 링크를 복사하여 이메일이나 메신저(카카오톡 등)로 응답 대상자에게 전달해 주세요.", "💡 **Survey Sharing Guide:** Please copy the generated survey link and send it to respondents via email or messenger."))
+                                            st.info(_("**설문 전달 안내:** 생성된 설문조사 링크를 복사하여 이메일이나 메신저(카카오톡 등)로 응답 대상자에게 전달해 주세요.", "**Survey Sharing Guide:** Please copy the generated survey link and send it to respondents via email or messenger."))
                                             
                                             sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
                                             st.write("")
                                             st.markdown(f'''
-                                            <style>
-                                            .gs-nav-btn-box2 {{
-                                                background-color: #1e40af !important;
-                                                border-radius: 6px !important;
-                                                padding: 12px 16px !important;
-                                                text-align: center !important;
-                                                margin-bottom: 12px !important;
-                                                box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
-                                            }}
-                                            .gs-nav-btn-box2 a, .gs-nav-btn-box2 a:link, .gs-nav-btn-box2 a:visited, .gs-nav-btn-box2 a:hover, .gs-nav-btn-box2 a:active {{
-                                                color: #ffffff !important;
-                                                text-decoration: none !important;
-                                                font-weight: 700 !important;
-                                                font-size: 0.98rem !important;
-                                                font-family: sans-serif !important;
-                                                display: block !important;
-                                                width: 100% !important;
-                                            }}
-                                            </style>
+
                                             <div class="gs-nav-btn-box2">
                                                 <a href="{sheet_url}" target="_blank">
                                                     📊 연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)
@@ -10174,7 +10197,7 @@ Thank you deeply for your valuable participation.
                                             </div>
                                             ''', unsafe_allow_html=True)
                                             
-                                            st.info(f"""**💡 구글 시트 및 데이터 확인 안내:**
+                                            st.info(f"""**구글 시트 및 데이터 확인 안내:**
 1. **즉시 확인:** 위의 **[📊 연동된 구글 스프레드시트 바로가기]** 버튼을 클릭하면 생성된 시트로 바로 이동합니다.
 2. **이메일 알림:** 귀하의 구글 계정({survey_admin_email})으로 '편집자 권한 공유' 초대 메일이 발송되었습니다. 메일의 링크를 통해서도 언제든 접속할 수 있습니다.
 3. **구글 드라이브:** 본인의 구글 드라이브 좌측 메뉴 중 **[공유 문서함 (Shared with me)]**에서 언제든 해당 설문 시트를 찾고 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하거나 다운로드할 수 있습니다.""")
@@ -10192,39 +10215,7 @@ Thank you deeply for your valuable participation.
     # -------------------------------------------------------------------------
     with main_tab3:
         if st.session_state.get('user_id') == 'shjeon':
-            # Sub-tabs UI: 알약(Pill) 형태로 렌더링되도록 CSS 주입
-            st.markdown("""
-            <style>
-            div[data-testid="stTabs"] div[data-testid="stTabs"] > div[role="tablist"] {
-                border-bottom: none !important;
-                gap: 0 !important;
-                padding-bottom: 15px !important;
-                margin-top: -10px !important;
-            }
-            div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"] {
-                border-radius: 25px !important;
-                background-color: #f1f5f9 !important;
-                border: 1px solid #e2e8f0 !important;
-                margin-right: 8px !important;
-                padding: 6px 18px !important;
-                height: auto !important;
-                transition: all 0.2s ease !important;
-            }
-            div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
-                background-color: #e2e8f0 !important;
-            }
-            div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
-                background-color: #0f172a !important;
-                color: white !important;
-                border: 1px solid #0f172a !important;
-                font-weight: 600 !important;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-            }
-            div[data-testid="stTabs"] div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
-                display: none !important;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+            # Sub-tabs UI: pill CSS는 글로벌 테마(global_ahp_css)에 통합됨
             
             sub_tabs = st.tabs(["진행 현황", "답례품 발송 관리", "답례품 설정(Admin)"])
             tab_live_content = sub_tabs[0]
@@ -10649,236 +10640,245 @@ Thank you deeply for your valuable participation.
 
 
 
-    with main_tab_pricing:
-        st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices Supported</span>"), unsafe_allow_html=True)
+    with main_tab_service:
+        svc_tab_pricing, svc_tab_consulting, svc_tab_signup = st.tabs([
+            _("서비스 요금", "Service Pricing"),
+            _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
+            _("회원가입", "Sign Up")
+        ])
 
-        if st.session_state.lang == 'en':
-            st.components.v1.html(get_unified_english_pricing_html(st.session_state.user_id), height=560)
-        else:
-            col_p1, col_p2, col_p3, col_p4 = st.columns(4)
-            # 1개월
-            with col_p1:
-                inner_1 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>300,000</span>원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>일반 AHP 기능 제공</b></li>
-                        <li><b>표본 수: 10표본 이하</b></li>
-                        <li>프로젝트 생성 무제한</li>
-                        <li>일반 이메일 지원</li>
-                    </ul>
-                """
-                if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 300000, 2, inner_html=inner_1, is_best=False), height=520)
-                else:
-                    st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
+        with svc_tab_pricing:
+            st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices Supported</span>"), unsafe_allow_html=True)
 
-            # 3개월
-            with col_p2:
-                inner_3 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
-                        <li><b>표본수 무제한</b></li>
-                        <li>프로젝트 생성 무제한</li>
-                        <li>일반 이메일 지원</li>
-                    </ul>
-                """
-                if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=520)
-                else:
-                    st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
-
-            # 6개월
-            with col_p3:
-                inner_6 = """
-                    <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
-                    <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                    <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
-                    <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
-                    <hr style='margin: 10px 0;'>
-                    <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                        <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
-                        <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
-                        <li>표본수 무제한 및 프로젝트 무제한</li>
-                        <li>최우선 기술/오류 지원</li>
-                        <li><b>설문 셋팅 1회 무료 대행</b></li>
-                    </ul>
-                """
-                if st.session_state.user_id:
-                    st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (2개월)", 950000, 2, inner_html=inner_6, is_best=False), height=520)
-                else:
-                    st.components.v1.html(get_login_redirect_html("Pro (2개월)", inner_html=inner_6, is_best=False), height=520)
-
-            # 부가 서비스 대행
-            with col_p4:
-                st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
-            
-        st.markdown("<br><br>", unsafe_allow_html=True)
-
-    with main_tab_consulting:
-        st.header(_("분석 문의 및 컨설팅 신청", "Analysis Inquiry & Consulting Application"))
-        
-        # 안내 문구 및 전화번호
-        st.markdown(
-            _("""
-            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                <span>✨</span> 전문 분석 및 AHP/통계 컨설팅 문의
-              </h4>
-              <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
-                학위논문, 연구보고서, 리서치 프로젝트 등 AHP 및 통계 분석에 대한 전문적인 컨설팅을 제공해 드립니다.
-              </p>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <div style="font-weight: 600; color: #1e293b;">📞 전화번호: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
-                <div style="font-weight: 600; color: #1e293b;">💬 카카오톡 ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
-              </div>
-              <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
-                💡 궁금하신 사항은 전화, 카카오톡 또는 아래 문의 폼을 통해 편하게 연락주시면 신속하게 안내해 드리겠습니다.
-              </div>
-            </div>
-            """, """
-            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
-              <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                <span>✨</span> Professional AHP & Statistical Consulting
-              </h4>
-              <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
-                We provide professional consultation on AHP and statistical analysis for academic theses, research reports, and market research.
-              </p>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <div style="font-weight: 600; color: #1e293b;">📞 Phone: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
-                <div style="font-weight: 600; color: #1e293b;">💬 KakaoTalk ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
-              </div>
-              <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
-                💡 Please feel free to call us, find KakaoTalk ID, or submit the form below. We will get back to you shortly.
-              </div>
-            </div>
-            """),
-            unsafe_allow_html=True
-        )
-        
-        with st.form(key="consulting_inquiry_form"):
-            c_name = st.text_input(_("성함 (필수)", "Name (Required)"), key="c_name")
-            c_company = st.text_input(_("소속 기관/회사/학교 (선택)", "Organization/Company/School (Optional)"), key="c_company")
-            c_phone = st.text_input(_("연락처 (선택)", "Contact Number (Optional)"), key="c_phone", placeholder="010-1234-5678")
-            c_email = st.text_input(
-                _("답변 받으실 이메일 (필수)", "Email to Receive Answer (Required)"), 
-                value=st.session_state.get('user_id', '') if st.session_state.get('user_id') else '',
-                key="c_email"
-            )
-            
-            c_type = st.selectbox(
-                _("문의 유형 선택 (필수)", "Select Inquiry Type (Required)"),
-                [
-                    _("AHP 분석 및 컨설팅", "AHP Analysis & Consulting"),
-                    _("Fuzzy AHP 분석 및 컨설팅", "Fuzzy AHP Analysis & Consulting"),
-                    _("AHP 온라인 설문 셋팅 대행", "AHP Online Survey Setup Agency"),
-                    _("일관성(CR) 오류 보정 및 조정", "Consistency Ratio (CR) Error Correction"),
-                    _("기타 분석 및 통계 관련 문의", "Other Statistical / Analysis Inquiries")
-                ],
-                key="c_type"
-            )
-            
-            c_details = st.text_area(
-                _("상세 문의 내용 (필수)", "Detailed Inquiry (Required)"),
-                placeholder=_("분석 목적, 표본 수, 모형의 계층 구조 등 구체적인 내용을 기재해 주시면 더 정확하고 빠른 상담이 가능합니다.",
-                             "Please describe your project details, sample size, or structure for a faster response."),
-                key="c_details"
-            )
-            
-            c_file = st.file_uploader(
-                _("관련 참고 파일 첨부 (선택, 최대 10MB)", "Attach Reference File (Optional, Max 10MB)"), 
-                type=["xlsx", "xls", "pdf", "docx", "zip", "png", "jpg"],
-                key="c_file"
-            )
-            
-            c_submit = st.form_submit_button(_("문의하기", "Submit Inquiry"), use_container_width=True)
-            
-            if c_submit:
-                if not c_name.strip():
-                    st.error(_("성함을 입력해 주세요.", "Please enter your name."))
-                elif not c_email.strip():
-                    st.error(_("이메일 주소를 입력해 주세요.", "Please enter your email address."))
-                elif not validate_email(c_email.strip()):
-                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                elif not c_details.strip():
-                    st.error(_("상세 문의 내용을 입력해 주세요.", "Please enter the detailed inquiry."))
-                else:
-                    with st.spinner(_("문의 내용을 전송하는 중...", "Submitting inquiry...")):
-                        success = send_consulting_email(
-                            name=c_name.strip(),
-                            company=c_company.strip(),
-                            email=c_email.strip(),
-                            phone=c_phone.strip(),
-                            inquiry_type=c_type,
-                            details=c_details.strip(),
-                            uploaded_file=c_file
-                        )
-                        if success:
-                            st.success(_("문의 신청이 성공적으로 접수되었습니다. 담당자가 확인 후 신속하게 연락해 드리겠습니다.", 
-                                         "Your inquiry has been submitted successfully. We will get back to you shortly."))
-                        else:
-                            st.error(_("문의 메일 전송 중 오류가 발생했습니다. 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.", 
-                                       "An error occurred while sending the email. Please contact jeon080423@gmail.com directly."))
-
-    with main_tab_signup:
-        if st.session_state.user_id:
-            st.info(_("이미 로그인되어 있습니다.", "You are already logged in."))
-        else:
-            signup_type = st.radio(
-                _("가입 구분 선택", "Select Registration Type"),
-                options=[
-                    _("무료 회원가입", "Free Registration"),
-                    _("정식(유료) 회원가입", "Official (Paid) Registration")
-                ],
-                horizontal=True,
-                key="main_signup_type"
-            )
-            
-            if signup_type == _("정식(유료) 회원가입", "Official (Paid) Registration"):
-                st.info(_(
-                    "💡 **정식(유료) 라이선스 이용 안내**\n\n"
-                    "1. 먼저 **'무료 회원가입'**을 선택하여 계정을 생성해 주세요.\n"
-                    "2. 생성한 계정으로 로그인한 후, 왼쪽 사이드바의 **결제 연동** 또는 상단의 **'서비스 요금'** 탭을 통해 결제를 완료하시면 즉시 정식 라이선스로 업그레이드됩니다.\n\n"
-                    "💳 *연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.*",
-                    "💡 **Official (Paid) License Info**\n\n"
-                    "1. Please first select **'Free Registration'** to create your account.\n"
-                    "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
-                    "💳 *Supports Research/Corporate Cards, and Quotations (100% supported).*"
-                ))
+            if st.session_state.lang == 'en':
+                st.components.v1.html(get_unified_english_pricing_html(st.session_state.user_id), height=560)
             else:
-                agreements = show_agreement_ui()
-                s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
-                s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
-                
-                s_cust_type = "standard"
-                
-                if st.button(_("가입신청", "Register"), key="main_btn_signup"):
-                    if not agreements.get("agree_personal_info"):
-                        st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
-                    elif not validate_email(s_id):
-                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                    elif not validate_password(s_pw):
-                        st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+                # 1개월
+                with col_p1:
+                    inner_1 = """
+                        <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
+                        <span style='color: #888; font-size: 1.1rem;'>2개월</span>
+                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>300,000</span>원</h2>
+                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
+                        <hr style='margin: 10px 0;'>
+                        <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                            <li><b>일반 AHP 기능 제공</b></li>
+                            <li><b>표본 수: 10표본 이하</b></li>
+                            <li>프로젝트 생성 무제한</li>
+                            <li>일반 이메일 지원</li>
+                        </ul>
+                    """
+                    if st.session_state.user_id:
+                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 300000, 2, inner_html=inner_1, is_best=False), height=520)
                     else:
-                        restore_from_deleted_sheet(s_id.strip())
-                        # 가입 시 무조건 'temp' 권한으로 배정
-                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
-                            st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
-                            import time
-                            time.sleep(2)
-                            st.rerun()
-                        else:
-                            st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+                        st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
 
-                st.info(_("🔒 **개인정보 보호 안내**\n\nAHP 마스터는 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
+                # 3개월
+                with col_p2:
+                    inner_3 = """
+                        <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
+                        <span style='color: #888; font-size: 1.1rem;'>2개월</span>
+                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
+                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
+                        <hr style='margin: 10px 0;'>
+                        <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                            <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
+                            <li><b>표본수 무제한</b></li>
+                            <li>프로젝트 생성 무제한</li>
+                            <li>일반 이메일 지원</li>
+                        </ul>
+                    """
+                    if st.session_state.user_id:
+                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=520)
+                    else:
+                        st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
+
+                # 6개월
+                with col_p3:
+                    inner_6 = """
+                        <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
+                        <span style='color: #888; font-size: 1.1rem;'>2개월</span>
+                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
+                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
+                        <hr style='margin: 10px 0;'>
+                        <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
+                            <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
+                            <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
+                            <li>표본수 무제한 및 프로젝트 무제한</li>
+                            <li>최우선 기술/오류 지원</li>
+                            <li><b>설문 셋팅 1회 무료 대행</b></li>
+                        </ul>
+                    """
+                    if st.session_state.user_id:
+                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (2개월)", 950000, 2, inner_html=inner_6, is_best=False), height=520)
+                    else:
+                        st.components.v1.html(get_login_redirect_html("Pro (2개월)", inner_html=inner_6, is_best=False), height=520)
+
+                # 부가 서비스 대행
+                with col_p4:
+                    st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
+
+            st.markdown("<br><br>", unsafe_allow_html=True)
+
+
+        with svc_tab_consulting:
+            st.header(_("분석 문의 및 컨설팅 신청", "Analysis Inquiry & Consulting Application"))
+
+            # 안내 문구 및 전화번호
+            st.markdown(
+                _("""
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
+                  <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <span>✨</span> 전문 분석 및 AHP/통계 컨설팅 문의
+                  </h4>
+                  <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
+                    학위논문, 연구보고서, 리서치 프로젝트 등 AHP 및 통계 분석에 대한 전문적인 컨설팅을 제공해 드립니다.
+                  </p>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="font-weight: 600; color: #1e293b;">📞 전화번호: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                    <div style="font-weight: 600; color: #1e293b;">💬 카카오톡 ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
+                  </div>
+                  <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
+                    💡 궁금하신 사항은 전화, 카카오톡 또는 아래 문의 폼을 통해 편하게 연락주시면 신속하게 안내해 드리겠습니다.
+                  </div>
+                </div>
+                """, """
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
+                  <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <span>✨</span> Professional AHP & Statistical Consulting
+                  </h4>
+                  <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
+                    We provide professional consultation on AHP and statistical analysis for academic theses, research reports, and market research.
+                  </p>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="font-weight: 600; color: #1e293b;">📞 Phone: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                    <div style="font-weight: 600; color: #1e293b;">💬 KakaoTalk ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
+                  </div>
+                  <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
+                    💡 Please feel free to call us, find KakaoTalk ID, or submit the form below. We will get back to you shortly.
+                  </div>
+                </div>
+                """),
+                unsafe_allow_html=True
+            )
+
+            with st.form(key="consulting_inquiry_form"):
+                c_name = st.text_input(_("성함 (필수)", "Name (Required)"), key="c_name")
+                c_company = st.text_input(_("소속 기관/회사/학교 (선택)", "Organization/Company/School (Optional)"), key="c_company")
+                c_phone = st.text_input(_("연락처 (선택)", "Contact Number (Optional)"), key="c_phone", placeholder="010-1234-5678")
+                c_email = st.text_input(
+                    _("답변 받으실 이메일 (필수)", "Email to Receive Answer (Required)"),
+                    value=st.session_state.get('user_id', '') if st.session_state.get('user_id') else '',
+                    key="c_email"
+                )
+
+                c_type = st.selectbox(
+                    _("문의 유형 선택 (필수)", "Select Inquiry Type (Required)"),
+                    [
+                        _("AHP 분석 및 컨설팅", "AHP Analysis & Consulting"),
+                        _("Fuzzy AHP 분석 및 컨설팅", "Fuzzy AHP Analysis & Consulting"),
+                        _("AHP 온라인 설문 셋팅 대행", "AHP Online Survey Setup Agency"),
+                        _("일관성(CR) 오류 보정 및 조정", "Consistency Ratio (CR) Error Correction"),
+                        _("기타 분석 및 통계 관련 문의", "Other Statistical / Analysis Inquiries")
+                    ],
+                    key="c_type"
+                )
+
+                c_details = st.text_area(
+                    _("상세 문의 내용 (필수)", "Detailed Inquiry (Required)"),
+                    placeholder=_("분석 목적, 표본 수, 모형의 계층 구조 등 구체적인 내용을 기재해 주시면 더 정확하고 빠른 상담이 가능합니다.",
+                                 "Please describe your project details, sample size, or structure for a faster response."),
+                    key="c_details"
+                )
+
+                c_file = st.file_uploader(
+                    _("관련 참고 파일 첨부 (선택, 최대 10MB)", "Attach Reference File (Optional, Max 10MB)"),
+                    type=["xlsx", "xls", "pdf", "docx", "zip", "png", "jpg"],
+                    key="c_file"
+                )
+
+                c_submit = st.form_submit_button(_("문의하기", "Submit Inquiry"), use_container_width=True)
+
+                if c_submit:
+                    if not c_name.strip():
+                        st.error(_("성함을 입력해 주세요.", "Please enter your name."))
+                    elif not c_email.strip():
+                        st.error(_("이메일 주소를 입력해 주세요.", "Please enter your email address."))
+                    elif not validate_email(c_email.strip()):
+                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                    elif not c_details.strip():
+                        st.error(_("상세 문의 내용을 입력해 주세요.", "Please enter the detailed inquiry."))
+                    else:
+                        with st.spinner(_("문의 내용을 전송하는 중...", "Submitting inquiry...")):
+                            success = send_consulting_email(
+                                name=c_name.strip(),
+                                company=c_company.strip(),
+                                email=c_email.strip(),
+                                phone=c_phone.strip(),
+                                inquiry_type=c_type,
+                                details=c_details.strip(),
+                                uploaded_file=c_file
+                            )
+                            if success:
+                                st.success(_("문의 신청이 성공적으로 접수되었습니다. 담당자가 확인 후 신속하게 연락해 드리겠습니다.",
+                                             "Your inquiry has been submitted successfully. We will get back to you shortly."))
+                            else:
+                                st.error(_("문의 메일 전송 중 오류가 발생했습니다. 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.",
+                                           "An error occurred while sending the email. Please contact jeon080423@gmail.com directly."))
+
+
+        with svc_tab_signup:
+            if st.session_state.user_id:
+                st.info(_("이미 로그인되어 있습니다.", "You are already logged in."))
+            else:
+                signup_type = st.radio(
+                    _("가입 구분 선택", "Select Registration Type"),
+                    options=[
+                        _("무료 회원가입", "Free Registration"),
+                        _("정식(유료) 회원가입", "Official (Paid) Registration")
+                    ],
+                    horizontal=True,
+                    key="main_signup_type"
+                )
+
+                if signup_type == _("정식(유료) 회원가입", "Official (Paid) Registration"):
+                    st.info(_(
+                        "💡 **정식(유료) 라이선스 이용 안내**\n\n"
+                        "1. 먼저 **'무료 회원가입'**을 선택하여 계정을 생성해 주세요.\n"
+                        "2. 생성한 계정으로 로그인한 후, 왼쪽 사이드바의 **결제 연동** 또는 상단의 **'서비스 요금'** 탭을 통해 결제를 완료하시면 즉시 정식 라이선스로 업그레이드됩니다.\n\n"
+                        "💳 *연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.*",
+                        "💡 **Official (Paid) License Info**\n\n"
+                        "1. Please first select **'Free Registration'** to create your account.\n"
+                        "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
+                        "💳 *Supports Research/Corporate Cards, and Quotations (100% supported).*"
+                    ))
+                else:
+                    agreements = show_agreement_ui()
+                    s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
+                    s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
+
+                    s_cust_type = "standard"
+
+                    if st.button(_("가입신청", "Register"), key="main_btn_signup"):
+                        if not agreements.get("agree_personal_info"):
+                            st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
+                        elif not validate_email(s_id):
+                            st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                        elif not validate_password(s_pw):
+                            st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                        else:
+                            restore_from_deleted_sheet(s_id.strip())
+                            # 가입 시 무조건 'temp' 권한으로 배정
+                            if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                                st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
+                                import time
+                                time.sleep(2)
+                                st.rerun()
+                            else:
+                                st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+
+                    st.info(_("🔒 **개인정보 보호 안내**\n\nAHP 마스터는 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
 
     st.markdown("---")
     st.caption("© 2026 AHP Master. All rights reserved.")
