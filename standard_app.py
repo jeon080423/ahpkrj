@@ -9087,7 +9087,7 @@ with contextlib.nullcontext():
                 for mi, mc in enumerate(main_criteria_list):
                     is_last_main = (mi == len(main_criteria_list) - 1)
                     prefix_main = "└── " if is_last_main else "├── "
-                    tree_lines.append(f"{prefix_main}**{mc}**")
+                    tree_lines.append(f"{prefix_main}[{mc}]")
                     
                     subs = model_structure.get(mc, [])
                     for si, sc in enumerate(subs):
@@ -9685,7 +9685,7 @@ Thank you deeply for your valuable participation.
                         for mi, mc in enumerate(main_list):
                             is_last_main = (mi == len(main_list) - 1)
                             prefix_main = "└── " if is_last_main else "├── "
-                            tree_lines.append(f"{prefix_main}**{mc}**")
+                            tree_lines.append(f"{prefix_main}[{mc}]")
                             
                             subs = model_structure.get("subs", {}).get(mc, [])
                             sub_subs_map = model_structure.get("sub_subs", {})
