@@ -6766,12 +6766,12 @@ with contextlib.nullcontext():
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_service = st.tabs([
-        _("AHP 분석 도구", "AHP Analysis Tool"), 
-        _("AHP 코딩 엑셀 양식", "AHP Coding Excel Form"), 
-        _("온라인 AHP 설문/배포(:red[**무료**])", "Online AHP Survey/Deployment (:red[**Free**])"), 
-        _("실시간 응답 현황", "Live Response Status"),
+        _("엑셀 업로드 분석", "Upload & Analyze"), 
+        _("양식 만들기", "Create Template"), 
+        _("설문 배포", "Deploy Survey"), 
+        _("응답 현황", "Responses"),
         _("서비스 안내", "Service Info")
-    ], default=_("AHP 분석 도구", "AHP Analysis Tool"))
+    ], default=_("엑셀 업로드 분석", "Upload & Analyze"))
         
     with main_tab1:
         tab1_main_col, tab1_settings_col = st.columns([3.0, 1.1], gap="large")
@@ -10642,8 +10642,8 @@ Thank you deeply for your valuable participation.
 
     with main_tab_service:
         svc_tab_pricing, svc_tab_consulting, svc_tab_signup = st.tabs([
-            _("서비스 요금", "Service Pricing"),
-            _("분석 문의 및 컨설팅", "Analysis Inquiry & Consulting"),
+            _("서비스 요금", "Pricing"),
+            _("컨설팅 문의", "Consulting"),
             _("회원가입", "Sign Up")
         ])
 
