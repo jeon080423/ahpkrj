@@ -9110,6 +9110,36 @@ with contextlib.nullcontext():
                 st.code(tree_text, language=None)
             # ─────────────────────────────────────────────────────────────
 
+            # ── 데이터 입력 가이드 (항상 노출) ────────────────────────────
+            with st.expander(_("📝 다운로드한 엑셀에 데이터를 입력하는 방법", "📝 How to enter data in the downloaded Excel"), expanded=False):
+                st.markdown(_("""
+**① 엑셀 파일 열기**: 아래 버튼으로 다운로드한 엑셀 파일을 실행합니다.
+
+**② 쌍대비교 데이터 입력**:
+- **왼쪽(시행)** 항목이 더 중요하면: **음수** 입력 (예: `-3`)
+- **오른쪽(미시행)** 항목이 더 중요하면: **양수** 입력 (예: `3`)
+- 두 항목이 **동등**하면: `1` 입력
+
+**③ 필수 정보 입력**:
+- A열(`ID`): 응답자 번호 (1, 2, 3, ...)
+- B열(`Type`): 그룹명 (예: 전문가, 주민, 공무원 등)
+                """, """
+**① Open the Excel file**: Run the template downloaded via the button below.
+
+**② Enter pairwise comparison data**:
+- If the **left** item is more important: enter a **negative** value (e.g., `-3`)
+- If the **right** item is more important: enter a **positive** value (e.g., `3`)
+- If they are **equal**: enter `1`
+
+**③ Required information**:
+- Column A (`ID`): Respondent number (1, 2, 3, ...)
+- Column B (`Type`): Group name (e.g., Expert, Public, Official)
+                """))
+                img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
+                if os.path.exists(img_file):
+                    st.image(img_file, caption=_("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel"))
+            # ─────────────────────────────────────────────────────────────
+
             col1, col2 = st.columns(2)
             with col1:
                 generate_clicked = st.button(_("1️⃣ 설정한 모델로 AHP 코딩 엑셀 양식 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
