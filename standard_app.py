@@ -9212,6 +9212,16 @@ with contextlib.nullcontext():
                 with st.container(border=True):
                     st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("내 설문 관리", "My Survey Management")}</h4>', unsafe_allow_html=True)
 
+                    # [신규] URL 단축 및 QR코드 생성 지원 서비스 링크 (상시 노출)
+                    st.markdown(_("###### 🔗 설문 배포 유용한 도구", "###### 🔗 Useful Distribution Tools"))
+                    st.markdown(_(
+                        "• **긴 URL 단축**: [buly.kr 바로가기 ↗️](https://buly.kr/)\n\n"
+                        "• **QR코드 생성**: [qr.naver.com 바로가기 ↗️](https://qr.naver.com/)",
+                        "• **Shorten Long URL**: [buly.kr ↗️](https://buly.kr/)\n\n"
+                        "• **Generate QR Code**: [qr.naver.com ↗️](https://qr.naver.com/)"
+                    ))
+                    st.divider()
+
                     # Initialize states
                     if 'editing_survey_id' not in st.session_state:
                         st.session_state.editing_survey_id = None
@@ -9366,15 +9376,6 @@ with contextlib.nullcontext():
                             st.rerun()
 
                     st.divider()
-
-                    # [신규] URL 단축 및 QR코드 생성 지원 서비스 링크 (상시 노출)
-                    st.markdown(_("###### 🔗 설문 배포 유용한 도구", "###### 🔗 Useful Distribution Tools"))
-                    st.markdown(_(
-                        "• **긴 URL 단축**: [buly.kr 바로가기 ↗️](https://buly.kr/)\n\n"
-                        "• **QR코드 생성**: [qr.naver.com 바로가기 ↗️](https://qr.naver.com/)",
-                        "• **Shorten Long URL**: [buly.kr ↗️](https://buly.kr/)\n\n"
-                        "• **Generate QR Code**: [qr.naver.com ↗️](https://qr.naver.com/)"
-                    ))
 
                     from survey_manager import create_survey_sheet
 
