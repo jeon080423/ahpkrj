@@ -9357,7 +9357,6 @@ with contextlib.nullcontext():
                     if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
                          confirm_new_survey()
                     else:
-                        st.info(_(" 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", " This is a new survey in progress. Please fill out the contents and deploy."))
                         if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
                             st.session_state.editing_survey_id = None
                             keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
