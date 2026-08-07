@@ -9343,15 +9343,6 @@ with contextlib.nullcontext():
                         st.code(active_survey_url, language="text")
                         st.caption(_("💡 위 설문 링크를 복사하여 이메일이나 메신저로 응답 대상자에게 전달하세요.", "💡 Copy the survey link above and send it to respondents via email or messenger."))
 
-                        # [신규] URL 단축 및 QR코드 생성 지원 서비스 링크
-                        st.markdown(_("###### 🔗 설문 배포 도구 지원", "###### 🔗 Useful Distribution Tools"))
-                        st.markdown(_(
-                            "• **긴 URL 단축**: [buly.kr 바로가기 ↗️](https://buly.kr/)\n\n"
-                            "• **QR코드 생성**: [qr.naver.com 바로가기 ↗️](https://qr.naver.com/)",
-                            "• **Shorten Long URL**: [buly.kr ↗️](https://buly.kr/)\n\n"
-                            "• **Generate QR Code**: [qr.naver.com ↗️](https://qr.naver.com/)"
-                        ))
-
                         gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
                         btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
                         st.markdown(f'''
@@ -9375,6 +9366,15 @@ with contextlib.nullcontext():
                             st.rerun()
 
                     st.divider()
+
+                    # [신규] URL 단축 및 QR코드 생성 지원 서비스 링크 (상시 노출)
+                    st.markdown(_("###### 🔗 설문 배포 유용한 도구", "###### 🔗 Useful Distribution Tools"))
+                    st.markdown(_(
+                        "• **긴 URL 단축**: [buly.kr 바로가기 ↗️](https://buly.kr/)\n\n"
+                        "• **QR코드 생성**: [qr.naver.com 바로가기 ↗️](https://qr.naver.com/)",
+                        "• **Shorten Long URL**: [buly.kr ↗️](https://buly.kr/)\n\n"
+                        "• **Generate QR Code**: [qr.naver.com ↗️](https://qr.naver.com/)"
+                    ))
 
                     from survey_manager import create_survey_sheet
 
