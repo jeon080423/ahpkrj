@@ -309,7 +309,7 @@ try:
         favicon_img = "📊"
     
     st.set_page_config(
-        page_title=_("AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템", "AHP Master | Traditional & Fuzzy AHP Decision Analysis System"), 
+        page_title=_("AHP 분석 프로그램 | 온라인 AHP 설문·퍼지 AHP 통계 솔루션 – AHP Master", "AHP Master | Traditional & Fuzzy AHP Decision Analysis System"),
         layout="wide", 
         page_icon=favicon_img,
         menu_items={
@@ -364,7 +364,7 @@ seo_tags = """<div style="display:none;">
 <p>Программное обеспечение и калькулятор для метода анализа иерархий (AHP). Идеально подходит для академических диссертаций.</p>
 <h2>عملية التحليل الهرمي (AHP) و عملية التحليل الهرمي الضبابي</h2>
 <p>برنامج آلي لعملية التحليل الهرمي (AHP) للرسائل الأكاديمية والبحوث.</p>
-<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs'},{name:'description',content:'AHP Master - 학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.'},{name:'keywords',content:'AHP, Fuzzy AHP, AHP calculator, AHP 마스터, AHP 분석, 일관성 비율, 계층분석과정, 퍼지 AHP'},{property:'og:title',content:'AHP 마스터 | 일반 및 퍼지 AHP 의사결정 분석 시스템'},{property:'og:description',content:'학위논문 및 연구를 위한 스마트 일반 및 퍼지 AHP 분석 솔루션'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'학위논문 및 연구용 일반 및 퍼지 AHP 의사결정 분석 시스템. 일관성 비율(CR) 보정, 기하평균, 분산분석(ANOVA) 지원.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs'},{name:'description',content:'AHP 분석과 온라인 설문을 무료로! 논문용 퍼지 AHP, 일관성 비율(CR) 자동 계산, 고급 시각화 차트까지. 별도 설치 없이 웹에서 바로 시작하세요.'},{name:'keywords',content:'AHP 분석, AHP 프로그램, AHP 분석 프로그램, 온라인 AHP 설문, 퍼지 AHP, 논문 통계 솔루션, 예비타당성조사, 예타 AHP, 쌍대비교, 의사결정, 계층화분석법, 일관성비율, CR값 0.1 이하, AHP 가중치 계산'},{property:'og:title',content:'AHP 분석 프로그램 | 온라인 AHP 설문·퍼지 AHP 통계 솔루션 – AHP Master'},{property:'og:description',content:'AHP 분석과 온라인 설문을 무료로! 논문용 퍼지 AHP, 일관성 비율(CR) 자동 계산, 고급 시각화 차트까지.'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'AHP 분석과 온라인 설문을 무료로! 논문용 퍼지 AHP, 일관성 비율(CR) 자동 계산, 고급 시각화 차트까지.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
 </div>"""
 st.markdown(seo_tags, unsafe_allow_html=True)
 
@@ -2980,7 +2980,7 @@ def create_sample_excel_v3():
             subs = {"기능성": ["하드웨어", "소프트웨어"], "디자인": ["외관", "편의성"], "경제성": ["단말기가격", "유지비용"]}
             sub_subs = {"하드웨어": ["카메라", "배터리", "프로세서"], "소프트웨어": ["운영체제", "기본앱"], "외관": ["색상", "재질"], "편의성": [], "단말기가격": ["일시불", "할부"], "유지비용": ["통신요금", "AS비용"]}
             
-        def _get_dummy_data(cols, num_respondents=5):
+        def _get_dummy_data(cols, num_respondents=3):
             # cols contains ["ID", "Type", pair1, pair2...]
             data = []
             for i in range(num_respondents):
@@ -5731,7 +5731,7 @@ def get_fee_info_text():
       <li><span style="font-size: 0.85rem;">온라인 AHP 설문지 제작/배포 (무료)</span></li>
       <li><span style="font-size: 0.85rem;">실시간 설문 데이터 구글 시트 연동</span></li>
       <li><span style="font-size: 0.85rem;">설문 응답 모니터링 & 결과 다운로드</span></li>
-      <li><span style="font-size: 0.85rem;">AHP 분석 도구 무료 체험 (최대 5표본)</span></li>
+      <li><span style="font-size: 0.85rem;">AHP 분석 도구 무료 체험 (최대 3표본)</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
@@ -5759,7 +5759,7 @@ def get_fee_info_text():
       <li><span style="font-size: 0.85rem;">Create and deploy online AHP surveys (Free)</span></li>
       <li><span style="font-size: 0.85rem;">Real-time data integration with Google Sheets</span></li>
       <li><span style="font-size: 0.85rem;">Monitor responses & download raw data</span></li>
-      <li><span style="font-size: 0.85rem;">Free trial of AHP analysis tools (up to 5 samples)</span></li>
+      <li><span style="font-size: 0.85rem;">Free trial of AHP analysis tools (up to 3 samples)</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
@@ -5828,7 +5828,7 @@ with st.sidebar:
                                 st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                                 st.query_params["last_activity"] = str(int(time.time()))
                                 st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Automatically downgraded to Free User."))
-                                st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(5표본 분석 가능) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
+                                st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(3표본 분석 가능) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
                                              f"Welcome, {l_id}! Your subscription expired and you were automatically downgraded to a Free User (5-sample analysis possible). You can extend your subscription anytime in the sidebar!"))
                                 st.rerun()
                             except Exception as e:
@@ -6631,7 +6631,7 @@ with contextlib.nullcontext():
         st.stop()
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_service = st.tabs([
         _("엑셀 업로드 분석", "Upload & Analyze"), 
-        _("양식 만들기", "Create Template"), 
+        _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
         _("설문 배포", "Deploy Survey"), 
         _("응답 현황", "Responses"),
         _("서비스 안내", "Service Info")
@@ -6644,7 +6644,7 @@ with contextlib.nullcontext():
         tab1_main_col.__enter__()
         # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
 
-        st.header(_("빠른 시작 (도시재생 사업 모델)", "Quick Start (Urban Regeneration Project Model)"))
+        st.header(_("빠른 시작", "Quick Start"))
         st.info(_("일반 AHP 및 :blue[**퍼지 AHP**] 분석을 지원합니다. 엑셀 업로드 → 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계까지 한 번에 완료됩니다.",
                   "Supports both Traditional and :blue[**Fuzzy AHP**] analysis. Upload Excel → individual weights, automatic CR correction, and group aggregation in one step."))
             
@@ -6672,7 +6672,7 @@ with contextlib.nullcontext():
     
         # 3계층 샘플 데이터: 권한에 따라 분기
         # - 정식/관리자: Mock_3Tier_Full.xlsx (100행, 실제 분석 가능)
-        # - 무료/비로그인: create_sample_excel_v3() (5행, 5행 제한 통과)
+        # - 무료/비로그인: create_sample_excel_v3() (3행, 3행 제한 통과)
         _role_now = st.session_state.get('user_role', None)
         _is_full_user = (_role_now in ('admin', 'official'))
         if _is_full_user:
@@ -6686,7 +6686,7 @@ with contextlib.nullcontext():
                 _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
                 _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
         else:
-            sample_excel_v3 = create_sample_excel_v3()   # 5행 — 무료 5행 제한 통과
+            sample_excel_v3 = create_sample_excel_v3()   # 3행 — 무료 3행 제한 통과
             _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
             _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
             
@@ -6975,10 +6975,10 @@ with contextlib.nullcontext():
                                             if "_" not in col1 and col1 not in ["ID", "제출시간"]:
                                                 raw_df.rename(columns={col1: "Type"}, inplace=True)
                                                 
-                                        # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 5표본)
-                                        if st.session_state.get('user_role') == 'free' and len(raw_df) > 5:
+                                        # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 3표본)
+                                        if st.session_state.get('user_role') == 'free' and len(raw_df) > 3:
                                             raw_df = raw_df.head(5)
-                                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 5표본까지만 분석할 수 있습니다. 처음 접수된 5명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 5 samples. Only the first 5 responses will be analyzed."))
+                                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 3표본까지만 분석할 수 있습니다. 처음 접수된 3명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 3 samples. Only the first 3 responses will be analyzed."))
                                     
                                         # [신규] Basic 요금제 표본 수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
                                         if st.session_state.get('plan_type') == 'Basic' and len(raw_df) > 10:
@@ -7072,19 +7072,19 @@ with contextlib.nullcontext():
                     rows_ok = True
                     if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
                         for sn in sheet_names:
-                            if len(pd.read_excel(uploaded_file, sheet_name=sn)) > 5:
+                            if len(pd.read_excel(uploaded_file, sheet_name=sn)) > 3:
                                 rows_ok = False
                                 break
                     else:
-                        if len(df_main) > 5:
+                        if len(df_main) > 3:
                             rows_ok = False
                         for sn, sdf in sub_dfs.items():
-                            if len(sdf) > 5:
+                            if len(sdf) > 3:
                                 rows_ok = False
                                 break
                     if rows_ok: permission_granted = True
-                    else: message = _(f"⛔ **무료사용자**는 시트당 최대 5개 표본까지만 분석 가능합니다. (현재: {len(df_main)}개 표본)",
-                                     f"⛔ **Free Users** can only analyze up to 5 samples per sheet. (Current: {len(df_main)} samples)")
+                    else: message = _(f"⛔ **무료사용자**는 시트당 최대 3개 표본까지만 분석 가능합니다. (현재: {len(df_main)}개 표본)",
+                                     f"⛔ **Free Users** can only analyze up to 3 samples per sheet. (Current: {len(df_main)} samples)")
             
                 if permission_granted:
                     tier = get_current_tier()
@@ -8780,13 +8780,13 @@ with contextlib.nullcontext():
                         st.stop()
                 else:
                     st.warning(message)
-                    if role_chk == 'temp' and ("5개 표본" in message or "5 samples" in message):
+                    if role_chk == 'temp' and ("3개 표본" in message or "3 samples" in message):
                         st.markdown("---")
                         with st.container(border=True):
                             is_english = (st.session_state.get('lang', 'ko') == 'en')
                             if is_english:
                                 st.markdown("###  Official User Upgrade & Unlimited Analysis")
-                                st.markdown("Upgrading to an Official User **instantly removes the 5-sample limit** and allows unlimited access to all features.")
+                                st.markdown("Upgrading to an Official User **instantly removes the 3-sample limit** and allows unlimited access to all features.")
                                 st.info("Upgrade to **Official User** to get unlimited access (2 months) for **$350.00 USD** via PayPal.")
                             
                                 paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
@@ -8830,9 +8830,22 @@ with contextlib.nullcontext():
                                 """
                                 st.components.v1.html(paypal_html, height=180)
                             else:
-                                st.markdown(_("### 💳 정식 사용자 승격 및 무제한 분석", "### 💳 Upgrade to Official User for Unlimited Analysis"))
-                                st.markdown("정식 사용자로 승격하시면 **표본 수 제한(5개)이 즉시 해제**되며 모든 기능을 무제한으로 사용하실 수 있습니다.")
-                                st.info("정식 사용자로 즉시 승격하시려면 상단의 **서비스 요금** 탭을 클릭하여 결제를 진행해 주세요.")
+                                st.markdown(_("### 💳 무제한 분석 및 즉시 해제", "### 💳 Upgrade to Official User for Unlimited Analysis"))
+                                st.markdown("정식 사용자로 승격하시면 **표본 수 제한(3개)이 즉시 해제**되며 모든 분석 기능을 무제한으로 사용하실 수 있습니다.")
+                                st.error("⛔ **현재 데이터는 3표본을 초과하여 분석이 차단되었습니다.**\n\n지금 바로 업그레이드하고 끊김 없이 분석을 이어가세요!")
+                                if st.button("🚀 지금 업그레이드하고 무제한 분석하기", type="primary", use_container_width=True):
+                                    st.components.v1.html("""
+                                        <script>
+                                            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+                                            for (let i = 0; i < tabs.length; i++) {
+                                                if (tabs[i].innerText.includes('서비스 안내') || tabs[i].innerText.includes('Service Info')) {
+                                                    tabs[i].click();
+                                                    window.parent.scrollTo(0, 0);
+                                                    break;
+                                                }
+                                            }
+                                        </script>
+                                    """, height=0, width=0)
             except Exception as e:
                 st.error(f"파일 처리 오류 발생: {e}")
             
