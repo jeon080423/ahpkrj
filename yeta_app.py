@@ -724,7 +724,7 @@ def run():
 
         # Login / Session panel
         if st.session_state.user_id is None:
-            tab_login, tab_find_pw = st.tabs(["로그인", "비밀번호 찾기"])
+            tab_login, tab_find_pw, tab_signup_side = st.tabs(["로그인", "비밀번호 찾기", "회원가입"])
             
             with tab_login:
                 l_id = st.text_input("아이디 (이메일 주소)", key="l_id")
@@ -981,6 +981,34 @@ def run():
                                 conn.close()
 
         # Business Info
+            with tab_signup_side:
+                st.write("### " + "AHP 마스터 예타 분석 솔루션 회원가입")
+                
+                agreements = signup_agreement.show_agreement_ui()
+                
+                s_id = st.text_input("아이디 (이메일 주소)", key="main_s_id_yeta")
+                s_pw = st.text_input("비밀번호", type="password", key="main_s_pw_yeta")
+                
+                s_cust_type = "yeta"
+                
+                if st.button("가입신청", key="main_btn_signup_yeta", type="primary"):
+                    if not agreements.get("agree_personal_info"):
+                        st.error("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.")
+                    elif not validate_email(s_id):
+                        st.error("올바른 이메일 형식이 아닙니다.")
+                    elif not validate_password(s_pw):
+                        st.error("비밀번호는 문자+특수문자여야 합니다.")
+                    else:
+                        restore_from_deleted_sheet(s_id.strip())
+                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                            st.success("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.")
+                            time.sleep(2)
+                            st.rerun()
+                        else:
+                            st.error("이미 존재하는 아이디입니다.")
+
+                st.info("🔒 **개인정보 보호 안내**\n\n예타 AHP 시스템은 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.")
+
         st.markdown("---")
         biz_info_html = f"""
         <div style="font-size: 0.75rem; color: #888; line-height: 1.5; padding: 10px 5px; border-top: 1px solid #eeeeee; margin-top: 15px;">
@@ -2960,31 +2988,3 @@ def run():
     # =========================================================================
     # TAB 5: Sign Up (Only shown when not logged in)
     # =========================================================================
-    if not st.session_state.user_id:
-        with tab_signup:
-            st.write("### " + "AHP 마스터 예타 분석 솔루션 회원가입")
-            
-            agreements = signup_agreement.show_agreement_ui()
-            
-            s_id = st.text_input("아이디 (이메일 주소)", key="main_s_id_yeta")
-            s_pw = st.text_input("비밀번호", type="password", key="main_s_pw_yeta")
-            
-            s_cust_type = "yeta"
-            
-            if st.button("가입신청", key="main_btn_signup_yeta", type="primary"):
-                if not agreements.get("agree_personal_info"):
-                    st.error("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.")
-                elif not validate_email(s_id):
-                    st.error("올바른 이메일 형식이 아닙니다.")
-                elif not validate_password(s_pw):
-                    st.error("비밀번호는 문자+특수문자여야 합니다.")
-                else:
-                    restore_from_deleted_sheet(s_id.strip())
-                    if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
-                        st.success("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.")
-                        time.sleep(2)
-                        st.rerun()
-                    else:
-                        st.error("이미 존재하는 아이디입니다.")
-
-            st.info("🔒 **개인정보 보호 안내**\n\n예타 AHP 시스템은 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.")
