@@ -6404,7 +6404,7 @@ with col_main:
                 </div>
                 ''', unsafe_allow_html=True)
 
-                if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
+                if st.button(_("✨ 처음부터 새 설문 작성하기", "✨ Start a new survey from scratch"), type="secondary", use_container_width=True):
                      confirm_new_survey()
             else:
                 st.info(_("📌 작성 중인 새 설문입니다. 내용을 작성한 뒤 배포해 주세요.", "📌 This is a new survey in progress. Please fill out the contents and deploy."))

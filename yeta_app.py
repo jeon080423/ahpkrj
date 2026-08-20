@@ -1895,7 +1895,7 @@ def run():
                     survey_title_display = s[1]
                     break
             st.success(f" 현재 배포된 예타 설문을 불러왔습니다: **{survey_title_display}**")
-            if st.button("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", type="secondary"):
+            if st.button("✨ 처음부터 새 설문 작성하기", type="secondary"):
                  confirm_new_survey_yeta()
         else:
             st.info(" 작성 중인 새 예타 설문입니다.")
