@@ -46,12 +46,12 @@ from yeta_payment import (
 
 # --- MISSING HELPERS ADDED ---
 def num_to_kor(num):
-    units = ["", "??, "?, "?]
-    g_units = ["", "?, "??, "?]
-    digits = ["", "??, "??, "??, "??, "??, "??, "?, "??, "?]
+    units = ["", "십", "백", "천"]
+    g_units = ["", "만", "억", "조"]
+    digits = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"]
     
     if num == 0:
-        return "??
+        return "영"
         
     num_str = str(num)
     length = len(num_str)
@@ -68,9 +68,9 @@ def num_to_kor(num):
                 result.append(g_units[g_idx])
                 
     kor = "".join(result)
-    if kor.startswith("?십"):
+    if kor.startswith("일십"):
         kor = kor[1:]
-    return f"?금 {kor}?정"
+    return f"일금 {kor}원정"
 
 
 
@@ -155,7 +155,7 @@ def run():
                 st.query_params.pop("login_token", None)
                 
                 if role_changed:
-                    st.toast("? Account status updated!")
+                    st.toast("🎉 Account status updated!")
                     st.rerun()
 
     # 2. Inactivity Timeout Check (30 minutes)
@@ -174,7 +174,7 @@ def run():
                     st.session_state.expiry_date = None
                     st.session_state.admin_mode = False
                     st.query_params.clear()
-                    st.toast(" 30분간 ?동???어 보안???해 ?동 로그?웃?었?니??")
+                    st.toast(" 30분간 활동이 없어 보안을 위해 자동 로그아웃되었습니다.")
                     st.rerun()
                 else:
                     st.query_params["last_activity"] = str(current_time)
@@ -186,12 +186,12 @@ def run():
     <style>
 
     /* =============================================================================
-       AHP 마스???리미엄 ?터?라?즈 UI ?마 (v3.0) - ?? 모듈??
+       AHP 마스터 프리미엄 엔터프라이즈 UI 테마 (v3.0) - 예타 모듈용
        ============================================================================= */
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
-    /* --- 글로벌 ?트 & 기본 ?스??--- */
+    /* --- 글로벌 폰트 & 기본 텍스트 --- */
     html, body, [class*="css"], .stMarkdown, .stTextInput label,
     .stSelectbox label, .stRadio label, .stCheckbox label,
     div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
@@ -200,7 +200,7 @@ def run():
         color: #1e293b !important;
     }
 
-    /* --- 메인 배경???색?로 강제 ?정 --- */
+    /* --- 메인 배경색 흰색으로 강제 설정 --- */
     .stApp, 
     .stApp > header,
     .main,
@@ -212,7 +212,7 @@ def run():
         background: #ffffff !important;
     }
 
-    /* --- 메인 ?목 ???링 (?문?이?차분?게) --- */
+    /* --- 메인 제목 스타일링 (전문적이고 차분하게) --- */
     h1 {
         font-weight: 700 !important;
         font-size: 1.6rem !important;
@@ -255,7 +255,7 @@ def run():
         margin-bottom: 0.5rem !important;
     }
 
-    /* --- ?내?Alert/Info Box) ?본문 ?트 ?기 ?????? --- */
+    /* --- 안내창(Alert/Info Box) 및 본문 폰트 크기 일관성 유지 --- */
     div[data-testid="stAlert"] p,
     div[data-testid="stAlert"] div,
     div[data-testid="stMarkdownContainer"] p,
@@ -264,7 +264,7 @@ def run():
         line-height: 1.6 !important;
     }
 
-    /* --- 경고??내?Alert/Info Box) ?널 ???로 ?정?게 ?일 --- */
+    /* --- 경고창/안내창(Alert/Info Box) 패널 스타일로 단정하게 통일 --- */
     div[data-testid="stAlert"] {
         background-color: #ffffff !important; 
         border: 1px solid #e2e8f0 !important; 
@@ -289,7 +289,7 @@ def run():
         display: none !important; 
     }
 
-    /* --- ?트림릿 기본 ?롬 ?기?--- */
+    /* --- 스트림릿 기본 크롬 숨기기 --- */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header[data-testid="stHeader"] {
@@ -304,7 +304,7 @@ def run():
         height: 0 !important;
     }
 
-    /* --- 메인 ?이?웃 ??간격) ??백 최적??--- */
+    /* --- 메인 레이아웃 폭(간격) 및 여백 최적화 --- */
     .block-container {
         padding-top: 1rem !important;
         padding-left: 3rem !important;
@@ -319,7 +319,7 @@ def run():
         }
     }
 
-    /* --- ?이?바 ?리미엄 ????--- */
+    /* --- 사이드바 프리미엄 스타일 --- */
     section[data-testid="stSidebar"] {
         background-color: #2d3436 !important;
         border-right: 1px solid #222829 !important;
@@ -338,7 +338,7 @@ def run():
     section[data-testid="stSidebar"] input {
         color: #0f172a !important;
     }
-    /* ?이?바 ?의 ?반 버튼 */
+    /* 사이드바 내의 일반 버튼 */
     section[data-testid="stSidebar"] div.stButton > button {
         background-color: #2c5282 !important;
         color: #ffffff !important;
@@ -349,7 +349,7 @@ def run():
         border-color: #3182ce !important;
         color: #ffffff !important;
     }
-    /* ?이?바 ?의 Expander */
+    /* 사이드바 내의 Expander */
     section[data-testid="stSidebar"] [data-testid="stExpander"] {
         background-color: rgba(255, 255, 255, 0.05) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -359,7 +359,7 @@ def run():
         color: #ffffff !important;
     }
 
-    /* --- ?리미엄 버튼 (기본) - ?랫/?정 --- */
+    /* --- 프리미엄 버튼 (기본) - 플랫/단정 --- */
     div.stButton > button {
         border-radius: 4px !important; 
         font-weight: 600 !important;
@@ -392,7 +392,7 @@ def run():
         border-color: #172554 !important;
     }
 
-    /* --- ?력 ?드 고급 ???링 --- */
+    /* --- 입력 필드 고급 스타일링 --- */
     div.stTextInput > div > div > input {
         border-radius: 4px !important;
         border: 1px solid #cbd5e1 !important;
@@ -406,7 +406,7 @@ def run():
         box-shadow: 0 0 0 1px #1e3a8a !important;
     }
 
-    /* --- ??트박스 ????--- */
+    /* --- 셀렉트박스 스타일 --- */
     div.stSelectbox > div > div {
         border-radius: 4px !important;
         border: 1px solid #cbd5e1 !important;
@@ -416,7 +416,7 @@ def run():
         border-color: #1e3a8a !important;
     }
 
-    /* --- ??고급 ????--- */
+    /* --- 탭 고급 스타일 --- */
     div[data-baseweb="tab-list"] {
         gap: 0.2rem !important;
     }
@@ -435,7 +435,7 @@ def run():
         color: #0f172a !important;
     }
 
-    /* --- 카드??Expander ????--- */
+    /* --- 카드형 Expander 스타일 --- */
     details[data-testid="stExpander"] {
         border: 1px solid #cbd5e1 !important;
         border-radius: 4px !important;
@@ -454,14 +454,14 @@ def run():
         border-bottom: 1px solid #cbd5e1 !important;
     }
 
-    /* --- ?림 박스 --- */
+    /* --- 알림 박스 --- */
     div[data-testid="stAlert"] {
         border-radius: 4px !important;
         border: 1px solid rgba(0,0,0,0.1) !important;
         box-shadow: none !important;
     }
 
-    /* --- 메트?카드 ????--- */
+    /* --- 메트릭 카드 스타일 --- */
     div[data-testid="stMetric"] {
         background: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
@@ -471,7 +471,7 @@ def run():
         box-shadow: none !important;
     }
 
-    /* --- ?운로드 버튼 --- */
+    /* --- 다운로드 버튼 --- */
     div.stDownloadButton > button {
         border-radius: 4px !important;
         border: 1px solid #cbd5e1 !important;
@@ -493,20 +493,20 @@ def run():
         color: #0f172a !important;
     }
 
-    /* --- ?크롤바 커스? --- */
+    /* --- 스크롤바 커스텀 --- */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* --- ?이?바 구분??--- */
+    /* --- 사이드바 구분선 --- */
     section[data-testid="stSidebar"] hr {
         border: none !important;
         border-top: 1px solid #cbd5e1 !important;
         margin: 1rem 0 !important;
     }
 
-    /* --- 링크 ?상 ?일 --- */
+    /* --- 링크 색상 통일 --- */
     a {
         color: #1e3a8a !important;
         text-decoration: none !important;
@@ -515,7 +515,7 @@ def run():
         text-decoration: underline !important;
     }
 
-    /* ?이?바 ??글???기 축소 & ?백 줄이?& ?상 ?일 */
+    /* 사이드바 탭 글자 크기 축소 & 여백 줄이기 & 색상 통일 */
     section[data-testid="stSidebar"] button[data-baseweb="tab"] {
         flex: 1 !important;
         justify-content: center !important;
@@ -551,7 +551,7 @@ def run():
         padding-bottom: 0.5rem !important;
     }
 
-    /* --- 비?번호 가?성 ?? 버튼 --- */
+    /* --- 비밀번호 가시성 토글 버튼 --- */
     div[data-baseweb="input"] {
         background-color: transparent !important;
         border: none !important;
@@ -565,7 +565,7 @@ def run():
     }
 
     /* =============================================================================
-       ?? ?용 커스? ?래??
+       예타 전용 커스텀 클래스
        ============================================================================= */
     .yeta-body {
         font-family: 'Pretendard', 'Outfit', sans-serif;
@@ -661,7 +661,7 @@ def run():
         align-items: center;
     }
     .price-card-features li::before {
-        content: "??;
+        content: "✓";
         color: #3182CE;
         margin-right: 8px;
         font-weight: bold;
@@ -672,7 +672,7 @@ def run():
     # 4. Handle PortOne Payment Callback inside Yeta
     if "portone_paid" in q_params and "user_id" in q_params:
         user_id_param = q_params.get("user_id")
-        plan_name_param = q_params.get("plan_name", "?건 분석?)
+        plan_name_param = q_params.get("plan_name", "단건 분석권")
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         new_expiry_date = (kst_now + datetime.timedelta(days=365)).strftime("%Y-%m-%d")
         
@@ -684,21 +684,21 @@ def run():
             conn.commit()
             conn.close()
             
-            st.success(f"? {plan_name_param} 결제가 ?료?어 ?식 ?원(?? 기능 ?금?제)?로 ?급?었?니??")
-            if st.button("?? 분석 ?으?가?):
+            st.success(f"🎉 {plan_name_param} 결제가 완료되어 정식 회원(예타 기능 잠금해제)으로 승급되었습니다!")
+            if st.button("예타 분석 홈으로 가기"):
                 st.query_params.pop("portone_paid", None)
                 st.query_params.pop("user_id", None)
                 st.query_params.pop("plan_name", None)
                 st.rerun()
             st.stop()
         except Exception as e:
-            st.error(f"결제 ?이???이?베?스 ????패: {str(e)}")
+            st.error(f"결제 데이터 데이터베이스 저장 실패: {str(e)}")
 
     # 5. Page Header Section
     st.markdown(f"""
     <div style='margin-top: 55px;'>
-        <h1>{'?? ?비??성조사 종합??(AHP) ?루??}</h1>
-        <p style='color: #666; font-size: 1.05rem; margin-bottom: 30px;'>{'기획?정부 ?KDI ?? 지침을 준?하??공공?자?업 AHP 종합 ?? 모듈?니??'}</p>
+        <h1>{'국가 예비타당성조사 종합평가(AHP) 솔루션'}</h1>
+        <p style='color: #666; font-size: 1.05rem; margin-bottom: 30px;'>{'기획재정부 및 KDI 표준 지침을 준수하는 공공투자사업 AHP 종합 평가 모듈입니다.'}</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -717,19 +717,19 @@ def run():
         except:
             st.markdown(
                 f'<a href="https://www.ahpmaster.com/" target="_blank" style="text-decoration: none; color: inherit;">'
-                f'<h3 style="margin-top: -5px; margin-bottom: 10px;">{" AHP 마스??}</h3>'
+                f'<h3 style="margin-top: -5px; margin-bottom: 10px;">{" AHP 마스터"}</h3>'
                 f'</a>',
                 unsafe_allow_html=True
             )
 
         # Login / Session panel
         if st.session_state.user_id is None:
-            tab_login, tab_find_pw = st.tabs(["로그??, "비?번호 찾기"])
+            tab_login, tab_find_pw = st.tabs(["로그인", "비밀번호 찾기"])
             
             with tab_login:
-                l_id = st.text_input("?이??(?메??주소)", key="l_id")
-                l_pw = st.text_input("비?번호 (PW)", type="password", key="l_pw")
-                if st.button("로그???행", key="btn_login_yeta"):
+                l_id = st.text_input("아이디 (이메일 주소)", key="l_id")
+                l_pw = st.text_input("비밀번호 (PW)", type="password", key="l_pw")
+                if st.button("로그인 실행", key="btn_login_yeta"):
                     result = check_login(l_id.strip(), l_pw)
                     if result:
                         today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
@@ -744,12 +744,12 @@ def run():
                                     st.query_params["login_user"] = l_id.strip()
                                     st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                                     st.query_params["last_activity"] = str(int(time.time()))
-                                    st.toast("? ?식 ?용 기간??만료?어 무료?용??권한?로 ?동 ?환?었?니??")
+                                    st.toast("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.")
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(f"만료 ?원 ?동 ?환 처리 ??류가 발생?습?다: {e}")
+                                    st.error(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}")
                             else:
-                                st.error(f"???용 기간??만료?었?니?? (만료?? {result[1]})")
+                                st.error(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})")
                         else:
                             st.session_state.user_id = l_id.strip()
                             st.session_state.user_role = result[0]
@@ -758,17 +758,17 @@ def run():
                             st.query_params["login_user"] = l_id.strip()
                             st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                             st.query_params["last_activity"] = str(int(time.time()))
-                            st.success(f"?영?니?? {l_id}??")
+                            st.success(f"환영합니다, {l_id}님!")
                             st.rerun()
                     else:
-                        st.error("?이???는 비?번호가 ?치?? ?습?다.")
+                        st.error("아이디 또는 비밀번호가 일치하지 않습니다.")
             
             with tab_find_pw:
-                st.write("가?????용???메??주소??력?주?요. ?메?로 ?로???시 비?번호가 발송?니??")
-                f_id = st.text_input("가?한 ?이??(?메??", key="f_id")
-                if st.button("?시 비?번호 ?송", key="btn_find_pw_yeta"):
+                st.write("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.")
+                f_id = st.text_input("가입한 아이디 (이메일)", key="f_id")
+                if st.button("임시 비밀번호 전송", key="btn_find_pw_yeta"):
                     if not f_id:
-                        st.warning("?메??주소??력?주?요.")
+                        st.warning("이메일 주소를 입력해주세요.")
                     else:
                         conn = get_db_connection('users.db')
                         c = conn.cursor()
@@ -781,55 +781,55 @@ def run():
                             change_user_password(f_id.strip(), temp_pw)
                             
                             if send_password_recovery_email(f_id.strip(), temp_pw):
-                                st.success(f"'{f_id}'??시 비?번호??송?습?다.\n?메?을 ?인?주?요.")
+                                st.success(f"'{f_id}'로 임시 비밀번호를 전송했습니다.\n이메일을 확인해주세요.")
                             else:
-                                st.error("?메???송 ??류가 발생?습?다.")
+                                st.error("이메일 전송 중 오류가 발생했습니다.")
                         else:
-                            st.error("?록?? ?? ?이?입?다.")
+                            st.error("등록되지 않은 아이디입니다.")
         else:
             if st.session_state.user_role == 'admin':
                 role_disp = "관리자"
             elif st.session_state.user_role == 'official':
                 pt = st.session_state.get('plan_type')
-                role_disp = f"{'?식 ?용??} ({pt})" if pt else "?식 ?용??
+                role_disp = f"{'정식 사용자'} ({pt})" if pt else "정식 사용자"
             else:
-                role_disp = "무료?용??
+                role_disp = "무료사용자"
             
             expiry_info = ""
             if st.session_state.expiry_date:
-                expiry_label = "만료?? "
+                expiry_label = "만료일: "
                 expiry_info = f' | {expiry_label}{st.session_state.expiry_date}'
                 
             info_html = f"""<div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.85rem; padding: 8px 10px; text-align: center; margin-bottom: 8px;">
-            ? {st.session_state.user_id} ({role_disp}{expiry_info})
+            👤 {st.session_state.user_id} ({role_disp}{expiry_info})
             </div>"""
             st.markdown(info_html, unsafe_allow_html=True)
             
             if st.session_state.user_role == 'admin':
-                btn_label = "? 관리자 ?면 ?기" if st.session_state.get('admin_mode', False) else "? 관리자 ?면 ?속"
+                btn_label = "🔧 관리자 화면 닫기" if st.session_state.get('admin_mode', False) else "🔧 관리자 화면 접속"
                 if st.button(btn_label):
                     st.session_state.admin_mode = not st.session_state.admin_mode
                     st.rerun()
 
-            with st.expander("? 비?번호 변?):
-                cur_pw = st.text_input("?재 비?번호", type="password", key="chg_cur_yeta")
-                new_pw_val = st.text_input("??비?번호", type="password", key="chg_new_yeta")
-                confirm_pw = st.text_input("??비?번호 ?인", type="password", key="chg_conf_yeta")
+            with st.expander("🔐 비밀번호 변경"):
+                cur_pw = st.text_input("현재 비밀번호", type="password", key="chg_cur_yeta")
+                new_pw_val = st.text_input("새 비밀번호", type="password", key="chg_new_yeta")
+                confirm_pw = st.text_input("새 비밀번호 확인", type="password", key="chg_conf_yeta")
                 
-                if st.button("비?번호 변?, key="btn_chg_pw_yeta"):
+                if st.button("비밀번호 변경", key="btn_chg_pw_yeta"):
                     if new_pw_val != confirm_pw:
-                        st.error("??비?번호가 ?치?? ?습?다.")
+                        st.error("새 비밀번호가 일치하지 않습니다.")
                     elif not validate_password(new_pw_val):
-                        st.error("비?번호??4???상, ?문+?수문자??함?야 ?니??")
+                        st.error("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.")
                     else:
                         chk_res = check_login(st.session_state.user_id, cur_pw)
                         if chk_res:
                             change_user_password(st.session_state.user_id, new_pw_val)
-                            st.success("비?번호가 변경되?습?다.")
+                            st.success("비밀번호가 변경되었습니다.")
                         else:
-                            st.error("?재 비?번호가 ?바르? ?습?다.")
+                            st.error("현재 비밀번호가 올바르지 않습니다.")
 
-            if st.button("로그?웃", key="btn_logout_yeta"):
+            if st.button("로그아웃", key="btn_logout_yeta"):
                 st.session_state.user_id = None
                 st.session_state.user_role = None
                 st.session_state.expiry_date = None
@@ -853,15 +853,15 @@ def run():
                         pass
                 st.rerun()
 
-            with st.expander("? 견적??출력"):
-                q_client = st.text_input("?뢰기??(?신)", placeholder="?? (??이치피?크", key="q_client_yeta")
-                q_project = st.text_input("과제?(?로?트?", placeholder="?? ?? 가중치 ?? 분석", key="q_project_yeta")
+            with st.expander("📄 견적서 출력"):
+                q_client = st.text_input("의뢰기관명 (수신)", placeholder="예: (주)에이치피테크", key="q_client_yeta")
+                q_project = st.text_input("과제명 (프로젝트명)", placeholder="예: 예타 가중치 평가 분석", key="q_project_yeta")
                 
                 q_tier = st.selectbox(
-                    "?비??구분 (?금??",
+                    "서비스 구분 (요금제)",
                     options=[
-                        ("?간 ?용?(300,000??", 300000, "?간 ?용?),
-                        ("?간 ?용?(2,800,000??", 2800000, "?간 ?용?)
+                        ("월간 이용권 (300,000원)", 300000, "월간 이용권"),
+                        ("연간 이용권 (2,800,000원)", 2800000, "연간 이용권")
                     ],
                     format_func=lambda x: x[0],
                     key="q_tier_select_yeta"
@@ -897,7 +897,7 @@ def run():
                             font-family: sans-serif;
                         }}
                     </style>
-                    <button class="btn" id="dl-pdf-btn">? 견적???운로드 (PDF)</button>
+                    <button class="btn" id="dl-pdf-btn">📄 견적서 다운로드 (PDF)</button>
                     <div id="hidden-q-container" style="display: none; width: 720px; background: white; padding: 10px;"></div>
                     
                     <script>
@@ -908,7 +908,7 @@ def run():
                             
                             var opt = {{
                                 margin:       [10, 10, 10, 10],
-                                filename:     '견적??{clean_client}.pdf',
+                                filename:     '견적서_{clean_client}.pdf',
                                 image:        {{ type: 'jpeg', quality: 0.98 }},
                                 html2canvas:  {{ scale: 2.2, useCORS: true, logging: false }},
                                 jsPDF:        {{ unit: 'mm', format: 'a4', orientation: 'portrait' }}
@@ -922,39 +922,39 @@ def run():
                     """
                     st.components.v1.html(button_iframe, height=45)
                 else:
-                    st.warning("견적???운로드??해 ?뢰기?명과 과제명을 먼? ?력??주세??")
+                    st.warning("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.")
 
-            with st.expander("? 계산???금?수??청"):
-                t_biz_num = st.text_input("?업???록번호", placeholder="000-00-00000", key="t_biz_num_yeta")
-                t_biz_name = st.text_input("?호 (?사?", key="t_biz_name_yeta")
-                t_rep_name = st.text_input("??자?, key="t_rep_name_yeta")
-                t_address = st.text_input("?업??주소", key="t_address_yeta")
-                t_biz_type = st.text_input("?태 / ?종", key="t_biz_type_yeta")
-                t_email = st.text_input("계산???금?수??신 ?메??, key="t_email_yeta")
+            with st.expander("📄 계산서/현금영수증 신청"):
+                t_biz_num = st.text_input("사업자 등록번호", placeholder="000-00-00000", key="t_biz_num_yeta")
+                t_biz_name = st.text_input("상호 (회사명)", key="t_biz_name_yeta")
+                t_rep_name = st.text_input("대표자명", key="t_rep_name_yeta")
+                t_address = st.text_input("사업장 주소", key="t_address_yeta")
+                t_biz_type = st.text_input("업태 / 업종", key="t_biz_type_yeta")
+                t_email = st.text_input("계산서/현금영수증 수신 이메일", key="t_email_yeta")
                 
                 t_tier = st.selectbox(
-                    "?청 ?비??(?금??",
+                    "신청 서비스 (요금제)",
                     options=[
-                        ("?간 ?용?(300,000??", "?간 ?용?),
-                        ("?간 ?용?(2,800,000??", "?간 ?용?)
+                        ("월간 이용권 (300,000원)", "월간 이용권"),
+                        ("연간 이용권 (2,800,000원)", "연간 이용권")
                     ],
                     format_func=lambda x: x[0],
                     key="t_tier_select_yeta"
                 )
                 
-                if st.button("계산???금?수??청?기", use_container_width=True, key="btn_request_tax_yeta"):
+                if st.button("계산서/현금영수증 신청하기", use_container_width=True, key="btn_request_tax_yeta"):
                     if not t_biz_num.strip():
-                        st.error("?업???록번호??력??주세??")
+                        st.error("사업자 등록번호를 입력해 주세요.")
                     elif not t_biz_name.strip():
-                        st.error("?호??력??주세??")
+                        st.error("상호를 입력해 주세요.")
                     elif not t_rep_name.strip():
-                        st.error("??자명을 ?력??주세??")
+                        st.error("대표자명을 입력해 주세요.")
                     elif not t_email.strip():
-                        st.error("?메?을 ?력??주세??")
+                        st.error("이메일을 입력해 주세요.")
                     elif not validate_email(t_email.strip()):
-                        st.error("?바??메???식???닙?다.")
+                        st.error("올바른 이메일 형식이 아닙니다.")
                     else:
-                        with st.spinner("?청?? ?출?는 ?.."):
+                        with st.spinner("신청서를 제출하는 중..."):
                             conn = get_db_connection('users.db')
                             c = conn.cursor()
                             try:
@@ -972,55 +972,27 @@ def run():
                                 )
                                 
                                 if mail_success:
-                                    st.success("계산???금?수??청???수?었?니?? 관리자 ?인 ??발행?니??")
+                                    st.success("계산서/현금영수증 신청이 접수되었습니다! 관리자 확인 후 발행됩니다.")
                                 else:
-                                    st.warning("DB ??? ?공?으???림 메일 발송???패?습?다. 관리자가 ?인 ???차 처리???리겠습?다.")
+                                    st.warning("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.")
                             except Exception as e:
-                                st.error(f"?청 ??류가 발생?습?다: {e}")
+                                st.error(f"신청 중 오류가 발생했습니다: {e}")
                             finally:
                                 conn.close()
 
         # Business Info
-            with tab_signup_side:
-                st.write("### " + "AHP 마스???? 분석 ?루???원가??)
-                
-                agreements = signup_agreement.show_agreement_ui()
-                
-                s_id = st.text_input("?이??(?메??주소)", key="main_s_id_yeta")
-                s_pw = st.text_input("비?번호", type="password", key="main_s_pw_yeta")
-                
-                s_cust_type = "yeta"
-                
-                if st.button("가?신?, key="main_btn_signup_yeta", type="primary"):
-                    if not agreements.get("agree_personal_info"):
-                        st.error("개인?보 ?집·?용???의?야 가?신? ???습?다.")
-                    elif not validate_email(s_id):
-                        st.error("?바??메???식???닙?다.")
-                    elif not validate_password(s_pw):
-                        st.error("비?번호??문자+?수문자?야 ?니??")
-                    else:
-                        restore_from_deleted_sheet(s_id.strip())
-                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
-                            st.success("?원가?이 ?료?었?니?? ?이?바??'로그?? ????로그?해 주시?바랍?다.")
-                            time.sleep(2)
-                            st.rerun()
-                        else:
-                            st.error("?? 존재?는 ?이?입?다.")
-
-                st.info("? **개인?보 보호 ?내**\n\n?? AHP ?스?? ?용?의 ?름, ?화번호 ??불필?한 개인?보??집?? ?습?다. ?한 ?력?신 비?번호??강력?게 ?호?되????되므?관리자???????습?다. ?심?고 ?용??주세??")
-
         st.markdown("---")
         biz_info_html = f"""
         <div style="font-size: 0.75rem; color: #888; line-height: 1.5; padding: 10px 5px; border-top: 1px solid #eeeeee; margin-top: 15px;">
-            <div style="font-weight: bold; margin-bottom: 5px; color: #555;">?업???보</div>
-            ??<b>?호</b>: ?레?인?이??br>
-            ??<b>??자</b>: ?상??br>
-            ??<b>?업?등록번??/b>: 683-27-00122<br>
-            ??<b>주소</b>: ?천??부?구 ?길?12, 가??203??br>
-            ??<b>?화번호</b>: 0507-1347-2610<br>
-            ??<b>?메??/b>: jeon080423@gmail.com<br>
-            ??<b>개인?보관리책?자</b>: ?상??br>
-            ??<b>?신?매???고번호</b>: 간이과세??
+            <div style="font-weight: bold; margin-bottom: 5px; color: #555;">사업자 정보</div>
+            • <b>상호</b>: 프레쉬인사이트<br>
+            • <b>대표자</b>: 전상현<br>
+            • <b>사업자등록번호</b>: 683-27-00122<br>
+            • <b>주소</b>: 인천시 부평구 원길로 12, 가동 203호<br>
+            • <b>전화번호</b>: 0507-1347-2610<br>
+            • <b>이메일</b>: jeon080423@gmail.com<br>
+            • <b>개인정보관리책임자</b>: 전상현<br>
+            • <b>통신판매업 신고번호</b>: 간이과세자
         </div>
         """
         st.markdown(biz_info_html, unsafe_allow_html=True)
@@ -1028,18 +1000,18 @@ def run():
     # 7. Navigation Tabs
     # --- ADMIN MODE INTERCEPTOR ---
     if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
-        st.subheader("? 가?자 ?황 ?관?(?? ?용 ?")
+        st.subheader("👥 가입자 현황 및 관리 (예타 전용 뷰)")
         
         col_sync1, col_sync2 = st.columns([2, 8])
         with col_sync1:
-            if st.button("? 구? ?트? ?기??):
-                with st.spinner("구? ?트 ?이??불러?는 ?.."):
+            if st.button("🔄 구글 시트와 동기화"):
+                with st.spinner("구글 시트 데이터 불러오는 중..."):
                     sync_count = sync_db_from_sheets()
                 if sync_count >= 0:
-                    st.success(f"? ?기???료! (보정 ?복구???이?? {sync_count}?")
+                    st.success(f"🎉 동기화 완료! (보정 및 복구된 데이터: {sync_count}건)")
                     st.rerun()
                 else:
-                    st.error("?기????류가 발생?습?다. ?면?의 ?러 메시지??인??주세??")
+                    st.error("동기화 중 오류가 발생했습니다. 화면상의 에러 메시지를 확인해 주세요.")
 
         try:
             spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
@@ -1065,20 +1037,20 @@ def run():
                 daily_df_counts = daily_df_logs.groupby('Date_Only').size().reset_index(name='count')
                 total_visits = len(daily_df_logs)
                 
-                st.write(f"**?적 방문??** {total_visits:,}?)
-                st.write("#### ? ?별 방문???황")
+                st.write(f"**누적 방문자:** {total_visits:,}명")
+                st.write("#### 📅 일별 방문자 현황")
                 fig_visit = px.bar(daily_df_counts, x='Date_Only', y='count', text='count',
-                                    labels={'Date_Only': '?짜', 'count': '방문????})
+                                    labels={'Date_Only': '날짜', 'count': '방문자 수'})
                 fig_visit.update_traces(textposition='outside')
-                fig_visit.update_layout(xaxis_title="?짜", yaxis_title="방문????, showlegend=False, xaxis={'type': 'category'})
+                fig_visit.update_layout(xaxis_title="날짜", yaxis_title="방문자 수", showlegend=False, xaxis={'type': 'category'})
                 st.plotly_chart(fig_visit, use_container_width=True)
             else:
-                st.info("방문 기록???습?다.")
+                st.info("방문 기록이 없습니다.")
         except Exception as e:
-            st.error(f"?계 ?류: {e}")
+            st.error(f"통계 오류: {e}")
             
         st.divider()
-        st.write("### ? 가?자 ?황 ?최종 배포 링크")
+        st.write("### 👥 가입자 현황 및 최종 배포 링크")
         
         users_df = get_all_users()
         if 'survey_count' not in users_df.columns:
@@ -1091,24 +1063,24 @@ def run():
         st.dataframe(
             display_df,
             column_config={
-                "id": "?원 ID",
+                "id": "회원 ID",
                 "role": "권한",
-                "signup_date": "가?일",
-                "pw": "비?번호",
-                "survey_count": "배포 ?수",
-                "last_survey_link": st.column_config.LinkColumn("최종 배포 ?문지 링크", display_text="?문지 바로가?),
-                "expiry_date": "만료??,
-                "agree_info": "?의??",
-                "customer_type": "고객?
+                "signup_date": "가입일",
+                "pw": "비밀번호",
+                "survey_count": "배포 횟수",
+                "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
+                "expiry_date": "만료일",
+                "agree_info": "동의여부",
+                "customer_type": "고객군"
             },
             hide_index=True,
             use_container_width=True
         )
 
-        with st.expander("?원 ?보 ?정 (비?번호 초기???함)"):
-            edit_id = st.selectbox("?정???원 ID", users_df['id'].unique())
+        with st.expander("회원 정보 수정 (비밀번호 초기화 포함)"):
+            edit_id = st.selectbox("수정할 회원 ID", users_df['id'].unique())
             selected_user = users_df[users_df['id'] == edit_id].iloc[0]
-            new_role_val = st.selectbox("권한 변?, ['temp', 'official', 'admin'], 
+            new_role_val = st.selectbox("권한 변경", ['temp', 'official', 'admin'], 
                                     index=['temp', 'official', 'admin'].index(selected_user['role']))
             
             if new_role_val == 'official' and selected_user['role'] != 'official':
@@ -1116,61 +1088,61 @@ def run():
             else:
                 new_expiry_val_default = selected_user['expiry_date']
                 
-            new_expiry_val = st.text_input("만료???정/변?(YYYY-MM-DD)", value=new_expiry_val_default)
-            new_pw_edit = st.text_input("??비?번호 (?력 ??변경됨)", type="password", placeholder="변경하지 ?으?면 비워?세??)
+            new_expiry_val = st.text_input("만료일 설정/변경 (YYYY-MM-DD)", value=new_expiry_val_default)
+            new_pw_edit = st.text_input("새 비밀번호 (입력 시 변경됨)", type="password", placeholder="변경하지 않으려면 비워두세요")
             
             col_admin_act1, col_admin_act2 = st.columns(2)
             with col_admin_act1:
-                if st.button("?보 ?정 ?용", use_container_width=True):
+                if st.button("정보 수정 적용", use_container_width=True):
                     update_user_full_info(edit_id, new_pw_edit, new_role_val, new_expiry_val)
                     if new_role_val == 'official' and selected_user['role'] != 'official':
                         send_approval_email(edit_id)
-                    st.success(f"{edit_id} ?원???보가 ?정?었?니??")
+                    st.success(f"{edit_id} 회원의 정보가 수정되었습니다.")
                     st.rerun()
             with col_admin_act2:
-                if st.button("? ??계정?로 로그??, use_container_width=True, type="secondary"):
+                if st.button("🔑 이 계정으로 로그인", use_container_width=True, type="secondary"):
                     st.session_state.user_id = edit_id
                     st.session_state.user_role = selected_user['role']
                     st.session_state.expiry_date = selected_user['expiry_date']
                     st.session_state.admin_mode = False
-                    st.toast(f"? {edit_id} 계정?로 로그?했?니??")
+                    st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
                     st.rerun()
 
-        with st.expander("?원 ??"):
-            del_id = st.selectbox("?????원 ID ?택", users_df['id'].unique(), key='del_user_select')
-            if st.button("?택???원 ??"):
+        with st.expander("회원 삭제"):
+            del_id = st.selectbox("삭제할 회원 ID 선택", users_df['id'].unique(), key='del_user_select')
+            if st.button("선택한 회원 삭제"):
                 if del_id == st.session_state.user_id:
-                    st.error("본인? ???????습?다.")
+                    st.error("본인은 삭제할 수 없습니다.")
                 else:
                     delete_user(del_id)
-                    st.success("?? ?료")
+                    st.success("삭제 완료")
                     st.rerun()
 
-        with st.expander("? ?위?문 ?인 ?벤???정 ??어"):
+        with st.expander("🎁 학위논문 할인 이벤트 설정 및 제어"):
             event_cfg = get_event_settings()
-            new_active = st.checkbox("?벤???성????", value=event_cfg["active"], key="admin_event_active")
-            new_title = st.text_input("?벤???목", value=event_cfg["title"], key="admin_event_title")
-            new_desc = st.text_area("?벤???용/?명", value=event_cfg["desc"], key="admin_event_desc")
+            new_active = st.checkbox("이벤트 활성화 여부", value=event_cfg["active"], key="admin_event_active")
+            new_title = st.text_input("이벤트 제목", value=event_cfg["title"], key="admin_event_title")
+            new_desc = st.text_area("이벤트 내용/설명", value=event_cfg["desc"], key="admin_event_desc")
             
             try:
                 default_deadline_date = datetime.datetime.strptime(event_cfg["deadline"], "%Y-%m-%d").date()
             except Exception:
                 default_deadline_date = datetime.date(2026, 7, 30)
-            new_deadline_date = st.date_input("?벤??종료??, value=default_deadline_date, key="admin_event_deadline")
+            new_deadline_date = st.date_input("이벤트 종료일", value=default_deadline_date, key="admin_event_deadline")
             new_deadline_str = str(new_deadline_date)
-            new_discount = st.number_input("?인 금액 (??", min_value=0, max_value=500000, value=event_cfg["discount"], step=5000, key="admin_event_discount")
+            new_discount = st.number_input("할인 금액 (원)", min_value=0, max_value=500000, value=event_cfg["discount"], step=5000, key="admin_event_discount")
             
-            if st.button("?벤???정 ???, use_container_width=True):
+            if st.button("이벤트 설정 저장", use_container_width=True):
                 conn = get_db_connection('users.db')
                 c = conn.cursor()
                 try:
                     c.execute("UPDATE event_settings SET event_active=?, event_title=?, event_desc=?, event_deadline=?, event_discount=? WHERE id=1",
                               (1 if new_active else 0, new_title, new_desc, new_deadline_str, int(new_discount)))
                     conn.commit()
-                    st.success("? ?벤???정???공?으???되?습?다!")
+                    st.success("🎉 이벤트 설정이 성공적으로 저장되었습니다!")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"?정 ????패: {e}")
+                    st.error(f"설정 저장 실패: {e}")
                 finally:
                     conn.close()
 
@@ -1179,29 +1151,35 @@ def run():
     if st.session_state.user_id:
         if st.session_state.user_id == 'shjeon':
             tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
-                "?? AHP 지??내",
-                "?? 종합??(AHP) 분석",
-                "?? 코딩 ?? ?식",
-                "?? ?용 AHP ?문 ?성 ?배포",
-                "?시??답 ?황",
-                "?비???금"
+                "예타 AHP 지침 안내",
+                "예타 종합평가(AHP) 분석",
+                "예타 코딩 엑셀 양식",
+                "예타 전용 AHP 설문 작성 및 배포",
+                "실시간 응답 현황",
+                "서비스 요금"
             ])
             tab_coupon_dispatch = None
             tab_coupon_admin = None
         else:
             tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
-                "?? AHP 지??내",
-                "?? 종합??(AHP) 분석",
-                "?? 코딩 ?? ?식",
-                "?? ?용 AHP ?문 ?성 ?배포",
-                "?시??답 ?황",
-                "?비???금"
+                "예타 AHP 지침 안내",
+                "예타 종합평가(AHP) 분석",
+                "예타 코딩 엑셀 양식",
+                "예타 전용 AHP 설문 작성 및 배포",
+                "실시간 응답 현황",
+                "서비스 요금"
             ])
             tab_coupon_dispatch = None
             tab_coupon_admin = None
     else:
-        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing = st.tabs([
-            "이용 안내", "1. AHP 분석 (정성/정량)", "2. 엑셀 업로드", "3. 설문 배포", "4. 설문 취합", "서비스 요금"
+        tab_guide, tab_analysis, tab_excel, tab_survey_create, tab_live_response, tab_pricing, tab_signup = st.tabs([
+            "예타 AHP 지침 안내",
+            "예타 종합평가(AHP) 분석",
+            "예타 코딩 엑셀 양식",
+            "예타 전용 AHP 설문 작성 및 배포",
+            "실시간 응답 현황",
+            "서비스 요금",
+            "회원가입"
         ])
         tab_coupon_dispatch = None
         tab_coupon_admin = None
@@ -1212,46 +1190,46 @@ def run():
     # =========================================================================
     if tab_coupon_admin is not None:
         with tab_coupon_admin:
-            st.write("### ?️ ?????품 관?(관리자 ?용)")
-            st.info("?문 ?뢰?에??공??????기프?콘) 목록??관리합?다. (?스??모드 ?성???")
+            st.write("### ⚙️ 답례품 상품 관리 (관리자 전용)")
+            st.info("설문 의뢰자에게 제공할 답례품(기프티콘) 목록을 관리합니다. (테스트 모드 활성화 중)")
             
-            # ?규 ?록 ??
-            with st.expander("???규 ?????록", expanded=False):
+            # 신규 등록 폼
+            with st.expander("➕ 신규 답례품 등록", expanded=False):
                 with st.form("new_coupon_form"):
-                    c_name = st.text_input("?품?(?? ??벅스 ?메리카??")
-                    c_brand = st.text_input("브랜??(?? ??벅스)")
-                    c_orig = st.number_input("?? (고객?게 ???금액)", min_value=0, step=100)
-                    c_cost = st.number_input("?? (기프?쇼 차감 금액 - 마진 계산??", min_value=0, step=100)
-                    if st.form_submit_button("?록?기"):
+                    c_name = st.text_input("상품명 (예: 스타벅스 아메리카노)")
+                    c_brand = st.text_input("브랜드 (예: 스타벅스)")
+                    c_orig = st.number_input("정가 (고객에게 청구될 금액)", min_value=0, step=100)
+                    c_cost = st.number_input("원가 (기프티쇼 차감 금액 - 마진 계산용)", min_value=0, step=100)
+                    if st.form_submit_button("등록하기"):
                         if c_name:
                             coupon_manager.add_coupon_product(c_name, c_brand, c_orig, c_cost)
-                            st.success(f"'{c_name}' ?록 ?료!")
+                            st.success(f"'{c_name}' 등록 완료!")
                             st.rerun()
                         else:
-                            st.error("?품명을 ?력?주?요.")
+                            st.error("상품명을 입력해주세요.")
             
-            # 기존 ?품 리스???관?
-            st.write("#### ? ?록??????리스??)
+            # 기존 상품 리스트 및 관리
+            st.write("#### 📋 등록된 답례품 리스트")
             all_coupons = coupon_manager.get_all_coupons()
             if not all_coupons:
-                st.write("?록???품???습?다.")
+                st.write("등록된 상품이 없습니다.")
             else:
                 for cp in all_coupons:
                     with st.container(border=True):
                         cols = st.columns([3, 2, 2, 2, 2])
                         cols[0].write(f"**{cp['name']}**")
                         cols[1].write(f"{cp['brand']}")
-                        cols[2].write(f"??: {cp['original_price']:,}??)
-                        cols[3].write(f"??: {cp['cost_price']:,}??)
+                        cols[2].write(f"정가: {cp['original_price']:,}원")
+                        cols[3].write(f"원가: {cp['cost_price']:,}원")
                         
                         is_active = cp['is_active'] == 1
                         
                         if is_active:
-                            if cols[4].button("비활?화", key=f"deact_{cp['id']}"):
+                            if cols[4].button("비활성화", key=f"deact_{cp['id']}"):
                                 coupon_manager.update_coupon_status(cp['id'], 0)
                                 st.rerun()
                         else:
-                            if cols[4].button("?성??, key=f"act_{cp['id']}"):
+                            if cols[4].button("활성화", key=f"act_{cp['id']}"):
                                 coupon_manager.update_coupon_status(cp['id'], 1)
                                 st.rerun()
 
@@ -1261,65 +1239,65 @@ def run():
     # =========================================================================
     if tab_coupon_dispatch is not None:
         with tab_coupon_dispatch:
-            st.write("### ? ????발송 관?)
-            st.info("종료???문???답????번?? ?긴 ??에????을 발송?니??")
+            st.write("### 🎁 답례품 발송 관리")
+            st.info("종료된 설문의 응답자 중 폰번호를 남긴 대상에게 답례품을 발송합니다.")
             
             pending = coupon_manager.get_pending_dispatches(st.session_state.user_id)
             completed = coupon_manager.get_completed_dispatches(st.session_state.user_id)
             
-            st.write("#### ??발송 ??목록")
+            st.write("#### ⏳ 발송 대기 목록")
             if not pending:
-                st.write("발송 ??중인 ?역???습?다.")
+                st.write("발송 대기 중인 내역이 없습니다.")
             else:
                 with st.form("dispatch_form"):
                     selected_ids = []
-                    st.write("발송????을 ?택?세??")
+                    st.write("발송할 대상을 선택하세요:")
                     for p in pending:
-                        is_sel = st.checkbox(f"{p['phone']} - {p['coupon_name']} (?문 ID: {p['survey_id'][:8]}...)", key=f"chk_{p['id']}")
+                        is_sel = st.checkbox(f"{p['phone']} - {p['coupon_name']} (설문 ID: {p['survey_id'][:8]}...)", key=f"chk_{p['id']}")
                         if is_sel:
                             selected_ids.append(p['id'])
                             
-                    if st.form_submit_button("?택?????발송?기", type="primary"):
+                    if st.form_submit_button("선택된 대상 발송하기", type="primary"):
                         if selected_ids:
                             coupon_manager.dispatch_coupons(selected_ids)
-                            st.success(f"{len(selected_ids)}?발송???료?었?니??")
+                            st.success(f"{len(selected_ids)}건 발송이 완료되었습니다!")
                             st.rerun()
                         else:
-                            st.warning("발송????을 1??상 ?택?주?요.")
+                            st.warning("발송할 대상을 1명 이상 선택해주세요.")
                             
             st.write("---")
-            st.write("#### ??발송 ?료 목록")
+            st.write("#### ✅ 발송 완료 목록")
             if not completed:
-                st.write("?료???역???습?다.")
+                st.write("완료된 내역이 없습니다.")
             else:
                 for c in completed:
-                    st.write(f"- {c['phone']} / {c['coupon_name']} / 발송?시: {c['dispatch_time']}")
+                    st.write(f"- {c['phone']} / {c['coupon_name']} / 발송일시: {c['dispatch_time']}")
 
     # =========================================================================
     # TAB 1: Analysis Tool
     # =========================================================================
     with tab_analysis:
-        st.write("### " + "?비??성 종합??(AHP)")
+        st.write("### " + "예비타당성 종합평가(AHP)")
         st.markdown("<br>", unsafe_allow_html=True)
         
         main_col, settings_col = st.columns([3.0, 1.2], gap="large")
         
         with settings_col:
             # ==========================================
-            # SECTION 1: 분석 ?경 ?정 (Settings)
+            # SECTION 1: 분석 환경 설정 (Settings)
             # ==========================================
             with st.container(border=True):
-                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {'?? 종합??(AHP) 가중치 ?정'}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 1.1rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;'><i class='fas fa-cogs'></i> {'예타 종합평가(AHP) 가중치 설정'}</div>", unsafe_allow_html=True)
                 
                 project_type = st.selectbox(
-                    "?업 ?형(모델) ?택",
+                    "사업 유형(모델) 선택",
                     options=[
-                        ("construction_non_capital", "건설?업 (비수?권)"),
-                        ("construction_capital", "건설?업 (?도?"),
-                        ("rnd_bc", "R&D?업 (B/C)"),
-                        ("rnd_ec", "R&D?업 (E/C)"),
-                        ("other_bc", "기? ?정?업 (B/C)"),
-                        ("other_ec", "기? ?정?업 (E/C)")
+                        ("construction_non_capital", "건설사업 (비수도권)"),
+                        ("construction_capital", "건설사업 (수도권)"),
+                        ("rnd_bc", "R&D사업 (B/C)"),
+                        ("rnd_ec", "R&D사업 (E/C)"),
+                        ("other_bc", "기타 재정사업 (B/C)"),
+                        ("other_ec", "기타 재정사업 (E/C)")
                     ],
                     format_func=lambda x: x[1],
                     key="yeta_project_type_select"
@@ -1328,65 +1306,65 @@ def run():
                 
                 st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
                 
-                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{'A. ?량 ?이??(B/C, 지???도)'}</div>", unsafe_allow_html=True)
-                bc_ratio = st.number_input("경제??분석 결과 (B/C 비율)", min_value=0.0, max_value=10.0, value=1.05, step=0.05)
+                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{'A. 정량 데이터 (B/C, 지역낙후도)'}</div>", unsafe_allow_html=True)
+                bc_ratio = st.number_input("경제성 분석 결과 (B/C 비율)", min_value=0.0, max_value=10.0, value=1.05, step=0.05)
                 
                 has_regional = "non_capital" in p_type or p_type == "other_bc" or p_type == "other_ec"
                 if has_regional:
-                    lir_value = st.number_input("지???도 지??(LIR/MIR)", min_value=-3.0, max_value=3.0, value=0.0, step=0.1)
+                    lir_value = st.number_input("지역낙후도 지수 (LIR/MIR)", min_value=-3.0, max_value=3.0, value=0.0, step=0.1)
                 else:
                     lir_value = 0.0
-                    st.text_input("지???도 지??(LIR/MIR)", value="?도??당?음", disabled=True)
+                    st.text_input("지역낙후도 지수 (LIR/MIR)", value="수도권/해당없음", disabled=True)
                 
                 st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
                 
-                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{'B. 1계층 ?수??가중치 (%)'}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;'>{'B. 1계층 상수합 가중치 (%)'}</div>", unsafe_allow_html=True)
                 if p_type == "rnd_bc":
-                    econ_w = st.slider("경제??가중치", 0, 100, 45) / 100.0
-                    tech_w = st.slider("과학기술????성", 0, 100, 35) / 100.0
-                    policy_w = st.slider("?책????성", 0, 100, 20) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 45) / 100.0
+                    tech_w = st.slider("과학기술적 타당성", 0, 100, 35) / 100.0
+                    policy_w = st.slider("정책적 타당성", 0, 100, 20) / 100.0
                     regional_w = 0.0
                 elif p_type == "rnd_ec":
-                    econ_w = st.slider("경제??가중치", 0, 100, 35) / 100.0
-                    tech_w = st.slider("과학기술????성", 0, 100, 45) / 100.0
-                    policy_w = st.slider("?책????성", 0, 100, 20) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 35) / 100.0
+                    tech_w = st.slider("과학기술적 타당성", 0, 100, 45) / 100.0
+                    policy_w = st.slider("정책적 타당성", 0, 100, 20) / 100.0
                     regional_w = 0.0
                 elif p_type == "construction_capital":
                     tech_w = 0.0
-                    econ_w = st.slider("경제??가중치", 0, 100, 65) / 100.0
-                    policy_w = st.slider("?책??가중치", 0, 100, 35) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 65) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 35) / 100.0
                     regional_w = 0.0
-                    st.slider("지???발??가중치", 0, 100, 0, disabled=True)
+                    st.slider("지역균형발전 가중치", 0, 100, 0, disabled=True)
                 elif p_type == "other_bc":
                     tech_w = 0.0
-                    econ_w = st.slider("경제??가중치", 0, 100, 40) / 100.0
-                    policy_w = st.slider("?책??가중치", 0, 100, 60) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 40) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 60) / 100.0
                     regional_w = 0.0
                 elif p_type == "other_ec":
                     tech_w = 0.0
-                    econ_w = st.slider("경제??가중치", 0, 100, 30) / 100.0
-                    policy_w = st.slider("?책??가중치", 0, 100, 70) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 30) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 70) / 100.0
                     regional_w = 0.0
                 else: # construction_non_capital
                     tech_w = 0.0
-                    econ_w = st.slider("경제??가중치", 0, 100, 40) / 100.0
-                    policy_w = st.slider("?책??가중치", 0, 100, 30) / 100.0
-                    regional_w = st.slider("지???발??가중치", 0, 100, 30) / 100.0
+                    econ_w = st.slider("경제성 가중치", 0, 100, 40) / 100.0
+                    policy_w = st.slider("정책적 가중치", 0, 100, 30) / 100.0
+                    regional_w = st.slider("지역균형발전 가중치", 0, 100, 30) / 100.0
 
                 valid_w, w_msg = yeta_utils.validate_yeta_level1_weights(p_type, econ_w, policy_w, regional_w, tech_w)
                 if valid_w:
-                    st.markdown(f"<div style='color: green; font-size: 0.8rem; margin-top: -10px;'>?️ {'KDI 지?가중치 범위 부??}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='color: green; font-size: 0.8rem; margin-top: -10px;'>✔️ {'KDI 지침 가중치 범위 부합'}</div>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<div style='color: red; font-size: 0.8rem; margin-top: -10px;'>?️ {w_msg}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='color: red; font-size: 0.8rem; margin-top: -10px;'>⚠️ {w_msg}</div>", unsafe_allow_html=True)
 
 
         with main_col:
             # ==========================================
-            # SECTION 3: ?? ?이???로???분석 (Upload & Analyze)
+            # SECTION 3: 엑셀 데이터 업로드 및 분석 (Upload & Analyze)
             # ==========================================
             with st.container(border=True):
-                st.markdown(f"<h3 style='color: #b91c1c; margin-bottom: 10px; font-size: 1.3rem;'><i class='fas fa-chart-line'></i> {'2. ?이???로???종합?? 분석'}</h3>", unsafe_allow_html=True)
-                st.markdown("<span style='font-size: 0.95rem; color: #4b5563;'>?플릿에 ?성???료??AHP ?? ?이?? ?로?하?즉시 ?비??성조사 종합?? 결과가 ?출?니??</span>", unsafe_allow_html=True)
+                st.markdown(f"<h3 style='color: #b91c1c; margin-bottom: 10px; font-size: 1.3rem;'><i class='fas fa-chart-line'></i> {'2. 데이터 업로드 및 종합평가 분석'}</h3>", unsafe_allow_html=True)
+                st.markdown("<span style='font-size: 0.95rem; color: #4b5563;'>템플릿에 작성이 완료된 AHP 엑셀 데이터를 업로드하면 즉시 예비타당성조사 종합평가 결과가 산출됩니다.</span>", unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
@@ -1407,37 +1385,37 @@ def run():
                         except:
                             pass
 
-                auto_correct_cr = st.checkbox("CR 0.15 초과 ???렬 ?동 보정", value=True, help="???의 ????비율(CR)??0.15?초과?는 경우, AHP 보정 ?고리즘???해 ?????는 ?렬??동 조정?니??")
+                auto_correct_cr = st.checkbox("CR 0.15 초과 시 행렬 자동 보정", value=True, help="평가자의 일관성 비율(CR)이 0.15를 초과하는 경우, AHP 보정 알고리즘을 통해 일관성 있는 행렬로 자동 조정합니다.")
                 
                 data_source = st.radio(
-                    "?이???스 ?택",
-                    ["? ?? ?일 직접 ?로??, "? 배포???라???문 ?이???동"],
+                    "데이터 소스 선택",
+                    ["📂 엑셀 파일 직접 업로드", "🌐 배포된 온라인 설문 데이터 연동"],
                     horizontal=True
                 )
                 
                 df = None
-                if data_source == "? ?? ?일 직접 ?로??:
-                    uploaded_file = st.file_uploader("?답???료??AHP ?? ?일 첨?", type=["xlsx"])
+                if data_source == "📂 엑셀 파일 직접 업로드":
+                    uploaded_file = st.file_uploader("응답이 완료된 AHP 엑셀 파일 첨부", type=["xlsx"])
                     if uploaded_file is not None:
                         try:
                             df = pd.read_excel(uploaded_file)
                             
-                            # --- [?업 모델 ?계층 구조 ?동 ?식 로직 ?작] ---
+                            # --- [사업 모델 및 계층 구조 자동 인식 로직 시작] ---
                             inferred_p_type = "construction_capital"
-                            has_reg = "1계층_지???발??%)" in df.columns
-                            has_tech = "1계층_기술??%)" in df.columns
+                            has_reg = "1계층_지역균형발전(%)" in df.columns
+                            has_tech = "1계층_기술성(%)" in df.columns
                             
                             if has_tech:
                                 inferred_p_type = "rnd"
                             elif has_reg:
                                 inferred_p_type = "construction_non_capital"
                             
-                            # ?위 ?인 추출
+                            # 하위 요인 추출
                             inferred_factors = {}
                             for col in df.columns:
-                                if col.startswith("??평가_[") and "]_" in col:
-                                    cat = col.split("]_")[0].replace("??평가_[", "")
-                                    factor = col.split("]_")[1].split("(?행?호")[0]
+                                if col.startswith("대안평가_[") and "]_" in col:
+                                    cat = col.split("]_")[0].replace("대안평가_[", "")
+                                    factor = col.split("]_")[1].split("(시행선호")[0]
                                     if cat not in inferred_factors: inferred_factors[cat] = set()
                                     inferred_factors[cat].add(factor)
                                     
@@ -1445,10 +1423,10 @@ def run():
                             for cat, factors in inferred_factors.items():
                                 factor_msg.append(f"**{cat}**: {', '.join(list(factors))}")
                                 
-                            p_type_ko = "R&D ?업" if inferred_p_type == "rnd" else ("비수?권 ?업 (지???발???함)" if inferred_p_type == "construction_non_capital" else "?도??업 (경제???책???주)")
+                            p_type_ko = "R&D 사업" if inferred_p_type == "rnd" else ("비수도권 사업 (지역균형발전 포함)" if inferred_p_type == "construction_non_capital" else "수도권 사업 (경제성/정책성 위주)")
                             
-                            st.success(f"?이??로드 ?공! ?? ?이?? ?해 ?업 모델???동?로 ?식?습?다.\n\n* **?식???업 ?형**: {p_type_ko}\n* **분석 ?인**: {', '.join(inferred_factors.keys())}")
-                            with st.expander("?식???위 계층 구조 보기"):
+                            st.success(f"데이터 로드 성공! 엑셀 데이터를 통해 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}")
+                            with st.expander("인식된 하위 계층 구조 보기"):
                                 for msg in factor_msg:
                                     st.markdown("- " + msg)
                             # -----------------------------------------------------
@@ -1457,10 +1435,10 @@ def run():
                             p_type = inferred_p_type
                             
                         except Exception as e:
-                            st.error(f"?? 로드 ??류가 발생?습?다: {str(e)}")
+                            st.error(f"엑셀 로드 중 오류가 발생했습니다: {str(e)}")
                 else:
                     if st.session_state.user_id is None:
-                        st.warning("?라???문 ?이???동 분석? ?원 ?용 기능?니?? 로그?해 주세??")
+                        st.warning("온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.")
                     else:
                         try:
                             from survey_manager import sync_short_codes_from_gs, get_admin_surveys_from_gsheet, load_survey_metadata, get_survey_gspread_client
@@ -1489,18 +1467,18 @@ def run():
                         admin_surveys.sort(key=lambda x: x[2], reverse=True)
                     
                         if not admin_surveys:
-                            st.warning("배포???라???문???습?다.")
+                            st.warning("배포된 온라인 설문이 없습니다.")
                         else:
                             survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
                             selected_survey_label = st.selectbox(
-                                "분석???라???문 ?택",
+                                "분석할 온라인 설문 선택",
                                 list(survey_options.keys())
                             )
                             selected_sheet_id = survey_options[selected_survey_label]
                             
-                            if st.button("? 구? ?트?서 ?시??답 가?오?, type="primary", use_container_width=True):
-                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "?시??답 가?오?)
-                                with st.spinner("구? ?트?서 ?문 ?이?? 가?오???.."):
+                            if st.button("🔄 구글 시트에서 실시간 응답 가져오기", type="primary", use_container_width=True):
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "실시간 응답 가져오기")
+                                with st.spinner("구글 시트에서 설문 데이터를 가져오는 중..."):
                                     from survey_manager import get_survey_gspread_client
                                     g_client = get_survey_gspread_client()
                                     if g_client:
@@ -1513,10 +1491,10 @@ def run():
                                                 rows = all_rows[1:]
                                                 df = pd.DataFrame(rows, columns=headers)
                                                 
-                                                # --- [?업 모델 ?계층 구조 ?동 ?식 로직 ?작] ---
+                                                # --- [사업 모델 및 계층 구조 자동 인식 로직 시작] ---
                                                 inferred_p_type = "construction_capital"
-                                                has_reg = "1계층_지???발??%)" in df.columns
-                                                has_tech = "1계층_기술??%)" in df.columns
+                                                has_reg = "1계층_지역균형발전(%)" in df.columns
+                                                has_tech = "1계층_기술성(%)" in df.columns
                                                 
                                                 if has_tech:
                                                     inferred_p_type = "rnd"
@@ -1525,9 +1503,9 @@ def run():
                                                 
                                                 inferred_factors = {}
                                                 for col in df.columns:
-                                                    if col.startswith("??평가_[") and "]_" in col:
-                                                        cat = col.split("]_")[0].replace("??평가_[", "")
-                                                        factor = col.split("]_")[1].split("(?행?호")[0]
+                                                    if col.startswith("대안평가_[") and "]_" in col:
+                                                        cat = col.split("]_")[0].replace("대안평가_[", "")
+                                                        factor = col.split("]_")[1].split("(시행선호")[0]
                                                         if cat not in inferred_factors: inferred_factors[cat] = set()
                                                         inferred_factors[cat].add(factor)
                                                         
@@ -1535,10 +1513,10 @@ def run():
                                                 for cat, factors in inferred_factors.items():
                                                     factor_msg.append(f"**{cat}**: {', '.join(list(factors))}")
                                                     
-                                                p_type_ko = "R&D ?업" if inferred_p_type == "rnd" else ("비수?권 ?업 (지???발???함)" if inferred_p_type == "construction_non_capital" else "?도??업 (경제???책???주)")
+                                                p_type_ko = "R&D 사업" if inferred_p_type == "rnd" else ("비수도권 사업 (지역균형발전 포함)" if inferred_p_type == "construction_non_capital" else "수도권 사업 (경제성/정책성 위주)")
                                                 
-                                                st.success(f"?라???문 ?이?? ?공?으?불러?습?다! ?업 모델???동?로 ?식?습?다.\n\n* **?식???업 ?형**: {p_type_ko}\n* **분석 ?인**: {', '.join(inferred_factors.keys())}")
-                                                with st.expander("?식???위 계층 구조 보기"):
+                                                st.success(f"온라인 설문 데이터를 성공적으로 불러왔습니다! 사업 모델을 자동으로 인식했습니다.\n\n* **인식된 사업 유형**: {p_type_ko}\n* **분석 요인**: {', '.join(inferred_factors.keys())}")
+                                                with st.expander("인식된 하위 계층 구조 보기"):
                                                     for msg in factor_msg:
                                                         st.markdown("- " + msg)
                                                         
@@ -1546,52 +1524,52 @@ def run():
                                                 # -----------------------------------------------------
                                                 
                                             else:
-                                                st.warning("?직 ?집???답 ?이?? ?습?다.")
+                                                st.warning("아직 수집된 응답 데이터가 없습니다.")
                                         except Exception as e:
-                                            st.error(f"구? ?트 ?이?? 가?오????류가 발생?습?다: {str(e)}")
+                                            st.error(f"구글 시트 데이터를 가져오는 중 오류가 발생했습니다: {str(e)}")
 
                 if df is not None:
                     try:
                         max_free_evals = 3
                         if not is_official and len(df) > max_free_evals:
-                            st.warning(f"?️ 무료 ?용?는 최? {max_free_evals}명의 ?문 ?이?만 분석 가?합?다. (?식 결제 ??무제??분석 가??")
+                            st.warning(f"⚠️ 무료 사용자는 최대 {max_free_evals}명의 설문 데이터만 분석 가능합니다. (정식 결제 시 무제한 분석 가능)")
                             df = df.head(max_free_evals)
                             
                         res_df, final_yeta_score = yeta_utils.process_yeta_ahp_data(df, p_type, bc_ratio, lir_value, auto_correct_cr=auto_correct_cr)
                         
-                        # ??출력?으로만 ?수???맷???용 (?이???본 보존)
+                        # 웹 출력용으로만 소수점 포맷팅 적용 (데이터 원본 보존)
                         st.markdown("---")
-                        st.markdown("### " + "? 종합??(AHP) 최종 결과")
+                        st.markdown("### " + "📊 종합평가(AHP) 최종 결과")
                         
                         # --- Create standard AHP summary table ---
-                        passed_evals = res_df[res_df["CR ?과"] == "PASS"]
+                        passed_evals = res_df[res_df["CR 통과"] == "PASS"]
                         if len(passed_evals) > 0:
-                            avg_w_econ = passed_evals["경제??가중치"].mean()
-                            avg_w_policy = passed_evals["?책??가중치"].mean()
-                            avg_w_reg = passed_evals["지????가중치"].mean()
-                            avg_w_tech = passed_evals["기술??가중치"].mean()
+                            avg_w_econ = passed_evals["경제성 가중치"].mean()
+                            avg_w_policy = passed_evals["정책성 가중치"].mean()
+                            avg_w_reg = passed_evals["지역균형 가중치"].mean()
+                            avg_w_tech = passed_evals["기술성 가중치"].mean()
                             
-                            avg_s_econ = passed_evals["경제???수"].mean()
-                            avg_s_policy = passed_evals["?책???수"].mean()
-                            avg_s_reg = passed_evals["지?????수"].mean()
-                            avg_s_tech = passed_evals["기술???수"].mean()
+                            avg_s_econ = passed_evals["경제성 점수"].mean()
+                            avg_s_policy = passed_evals["정책성 점수"].mean()
+                            avg_s_reg = passed_evals["지역균형 점수"].mean()
+                            avg_s_tech = passed_evals["기술성 점수"].mean()
                             
                             summary_data = []
-                            summary_data.append({"????": "경제??분석", "가중치": avg_w_econ, "?? 결과 (?수)": avg_s_econ, "비고": "B/C, NPV ??반영"})
-                            summary_data.append({"????": "?책??분석", "가중치": avg_w_policy, "?? 결과 (?수)": avg_s_policy, "비고": "?책?과, 추진?건 ??})
+                            summary_data.append({"평가항목": "경제성 분석", "가중치": avg_w_econ, "평가 결과 (점수)": avg_s_econ, "비고": "B/C, NPV 등 반영"})
+                            summary_data.append({"평가항목": "정책성 분석", "가중치": avg_w_policy, "평가 결과 (점수)": avg_s_policy, "비고": "정책효과, 추진여건 등"})
                             
                             if "rnd" in p_type:
-                                summary_data.append({"????": "기술??분석", "가중치": avg_w_tech, "?? 결과 (?수)": avg_s_tech, "비고": "기술개발 ?공가?성 ??})
+                                summary_data.append({"평가항목": "기술성 분석", "가중치": avg_w_tech, "평가 결과 (점수)": avg_s_tech, "비고": "기술개발 성공가능성 등"})
                             if "non_capital" in p_type or p_type in ["other_bc", "other_ec"]:
-                                summary_data.append({"????": "지???발??분석", "가중치": avg_w_reg, "?? 결과 (?수)": avg_s_reg, "비고": "지???도, ?급?과 ??})
+                                summary_data.append({"평가항목": "지역균형발전 분석", "가중치": avg_w_reg, "평가 결과 (점수)": avg_s_reg, "비고": "지역낙후도, 파급효과 등"})
                                 
-                            summary_data.append({"????": "**종합?? (AHP)**", "가중치": 1.000, "?? 결과 (?수)": final_yeta_score, "비고": "**최종 결과?*"})
+                            summary_data.append({"평가항목": "**종합평가 (AHP)**", "가중치": 1.000, "평가 결과 (점수)": final_yeta_score, "비고": "**최종 결과값**"})
                             
-                            st.write("#### " + "[?? AHP??용??종합?? 결과")
+                            st.write("#### " + "[표] AHP를 이용한 종합평가 결과")
                             summary_df_for_excel = pd.DataFrame(summary_data)
                             
-                            # ??출력 ???수??3?리 고정
-                            format_dict = {"가중치": "{:.3f}", "?? 결과 (?수)": "{:.3f}"}
+                            # 웹 출력 시 소수점 3자리 고정
+                            format_dict = {"가중치": "{:.3f}", "평가 결과 (점수)": "{:.3f}"}
                             st.table(summary_df_for_excel.style.format(format_dict))
                             
                             # Add Excel Download Button
@@ -1603,60 +1581,60 @@ def run():
                                 excel_data = export_yeta_result_excel(summary_df_for_excel, res_df, final_score=final_yeta_score, is_pass=is_pass)
                                 
                                 st.download_button(
-                                    label="? 종합??(AHP) ?? 결과 ?운로드",
+                                    label="📥 종합평가(AHP) 엑셀 결과 다운로드",
                                     data=excel_data,
-                                    file_name="?비??성조사_AHP_최종결과.xlsx",
+                                    file_name="예비타당성조사_AHP_최종결과.xlsx",
                                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                     type="primary",
                                     use_container_width=True
                                 )
                             except Exception as ex:
-                                st.error(f"?? ?운로드 기능 로드 ??류 발생: {ex}")
+                                st.error(f"엑셀 다운로드 기능 로드 중 오류 발생: {ex}")
                                 
                             st.markdown("<br>", unsafe_allow_html=True)
                         # ----------------------------------------
                         
                         is_pass = final_yeta_score >= 0.5
                         card_class = "verdict-pass" if is_pass else "verdict-fail"
-                        verdict_text = "?업 ??성 ?보 (?행)" if is_pass else "?업 ??성 미흡 (미시??"
+                        verdict_text = "사업 타당성 확보 (시행)" if is_pass else "사업 타당성 미흡 (미시행)"
                         
                         st.markdown(f"""
                         <div class="verdict-card {card_class}">
-                            <div class="verdict-title">{"최종 종합 ?? ?정"}</div>
+                            <div class="verdict-title">{"최종 종합 평가 판정"}</div>
                             <div class="verdict-score">{final_yeta_score:.3f}</div>
                             <div style="font-size: 1.3rem; font-weight: bold;">{verdict_text}</div>
                             <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.85;">
-                                {"KDI 지?기?: AHP 종합?수 0.5 ?상??????성 ?보"}
+                                {"KDI 지침 기준: AHP 종합점수 0.5 이상일 때 타당성 확보"}
                             </div>
                         </div>
                         <br>
                         """, unsafe_allow_html=True)
                         
-                        st.info(f"? **조사 결과 ?석**: ??비??성조사???답??{len(res_df)}명의 ?문 결과?바탕?로, 극단?최고??1? 최???1????외??{max(1, len(res_df)-2 if len(res_df) >= 3 else len(res_df))}명의 ?수?종합?여 ?출?었?니?? 최종 AHP 종합?수가 {final_yeta_score:.3f}?로 0.5?{'?어 ?업 ??성???보?습?다' if is_pass else '?? 못해 ?업 ??성??미흡??것으?분석?었?니??}.")
+                        st.info(f"💡 **조사 결과 해석**: 본 예비타당성조사는 응답자 {len(res_df)}명의 설문 결과를 바탕으로, 극단값(최고점 1명, 최저점 1명)을 제외한 {max(1, len(res_df)-2 if len(res_df) >= 3 else len(res_df))}명의 점수를 종합하여 도출되었습니다. 최종 AHP 종합점수가 {final_yeta_score:.3f}으로 0.5를 {'넘어 사업 타당성을 확보했습니다' if is_pass else '넘지 못해 사업 타당성이 미흡한 것으로 분석되었습니다'}.")
                         
-                        with st.expander("? AHP ?출???변??공식 ?내"):
+                        with st.expander("📚 AHP 산출식 및 변환 공식 안내"):
                             st.markdown("""
-                            #### 1. ?량 ?이????비교 척도 변??
-                            경제?????량???치??문조사??9??척도? ?등?게 맞추??해 KDI ?? 공식???용?니??
-                            - **B/C 비율 변??*: `???수 = 8.592933 × ln(B/C비율) ± 1`
-                            - **지???도(LIR) 변??*: `???수 = 2.0 × LIR + 1.0`
+                            #### 1. 정량 데이터 쌍대비교 척도 변환
+                            경제성 등 정량적 수치를 설문조사의 9점 척도와 동등하게 맞추기 위해 KDI 표준 공식을 사용합니다.
+                            - **B/C 비율 변환**: `표준점수 = 8.592933 × ln(B/C비율) ± 1`
+                            - **지역낙후도(LIR) 변환**: `표준점수 = 2.0 × LIR + 1.0`
                             
-                            #### 2. ??비교 척도??가중치(AHP ?수) 변??
-                            ?에???출?????수(`Score`)?바탕?로 '?행(Go)' ??의 ?? 결과(?수)?계산?니??
-                            - **?행(Go) 가중치** = `Score / (Score + 1.0)`
-                            - ?? B/C ?산 ???수가 1.419?면, ?행 ?수??`1.419 / (1.419 + 1) = 0.5866`
+                            #### 2. 쌍대비교 척도의 가중치(AHP 점수) 변환
+                            위에서 도출된 표준점수(`Score`)를 바탕으로 '시행(Go)' 대안의 평가 결과(점수)를 계산합니다.
+                            - **시행(Go) 가중치** = `Score / (Score + 1.0)`
+                            - 예) B/C 환산 표준점수가 1.419라면, 시행 점수는 `1.419 / (1.419 + 1) = 0.5866`
                             
-                            #### 3. 개인??수 ?산 ?최종 종합?수 ?출
-                            ????의 ???가중치? ?에??구한 ?????수?곱해 개인?최종 ?수?계산?니?? 
-                            ?후 ?답?? 3??상??경우, 가???? ?수 1명과 가????? ?수 1명을 집계?서 배제(극단?배제)?????? ?원?의 ?수?**기하?균(Geometric Mean)**?여 최종 AHP ?점???출?니??
+                            #### 3. 개인별 점수 합산 및 최종 종합점수 산출
+                            각 평가자의 항목별 가중치와 위에서 구한 각 항목별 점수를 곱해 개인별 최종 점수를 계산합니다. 
+                            이후 응답자가 3명 이상일 경우, 가장 높은 점수 1명과 가장 낮은 점수 1명을 집계에서 배제(극단값 배제)한 뒤 남은 인원들의 점수를 **기하평균(Geometric Mean)**하여 최종 AHP 평점을 산출합니다.
                             """)
                         
                         st.markdown("<br>", unsafe_allow_html=True)
-                        st.write("#### " + "??????별 ?수 분포 ?극단?배제 ?황")
+                        st.write("#### " + "👨‍🔬 평가자별 점수 분포 및 극단값 배제 현황")
                         st.dataframe(res_df, use_container_width=True)
                         
                     except Exception as e:
-                        st.error(f"분석 ??류가 발생?습?다: {str(e)}")
+                        st.error(f"분석 중 오류가 발생했습니다: {str(e)}")
 
 
 
@@ -1666,20 +1644,20 @@ def run():
     # TAB 1.5: Yeta Excel Template Generator
     # =========================================================================
     with tab_excel:
-        st.write("### " + "?비??성조사 AHP 코딩 ?? ?식 ?정 ??운로드")
+        st.write("### " + "예비타당성조사 AHP 코딩 엑셀 양식 설정 및 다운로드")
         st.markdown("<br>", unsafe_allow_html=True)
         
-        st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 10px;'><i class='fas fa-check-circle'></i> 1?계: 분석 모델(?업 ?형) ?택</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 10px;'><i class='fas fa-check-circle'></i> 1단계: 분석 모델(사업 유형) 선택</h4>", unsafe_allow_html=True)
         with st.container(border=True):
             excel_project_type = st.selectbox(
-                "????업 ?형",
+                "대상 사업 유형",
                 options=[
-                    ("construction_non_capital", "건설?업 (비수?권)"),
-                    ("construction_capital", "건설?업 (?도?"),
-                    ("rnd_bc", "R&D?업 (B/C)"),
-                    ("rnd_ec", "R&D?업 (E/C)"),
-                    ("other_bc", "기? ?정?업 (B/C)"),
-                    ("other_ec", "기? ?정?업 (E/C)")
+                    ("construction_non_capital", "건설사업 (비수도권)"),
+                    ("construction_capital", "건설사업 (수도권)"),
+                    ("rnd_bc", "R&D사업 (B/C)"),
+                    ("rnd_ec", "R&D사업 (E/C)"),
+                    ("other_bc", "기타 재정사업 (B/C)"),
+                    ("other_ec", "기타 재정사업 (E/C)")
                 ],
                 format_func=lambda x: x[1],
                 key="yeta_excel_project_type_select"
@@ -1687,78 +1665,78 @@ def run():
             ex_p_type = excel_project_type[0]
             
             if "rnd" in ex_p_type:
-                st.info("? 1계층 고정 ??: 경제?? ?책?? 과학기술??)
+                st.info("📊 1계층 고정 항목: 경제성, 정책성, 과학기술성")
             elif "capital" in ex_p_type and "non" not in ex_p_type:
-                st.info("? 1계층 고정 ??: 경제?? ?책??)
+                st.info("📊 1계층 고정 항목: 경제성, 정책성")
             else:
-                st.info("? 1계층 고정 ??: 경제?? ?책?? 지???발??)
+                st.info("📊 1계층 고정 항목: 경제성, 정책성, 지역균형발전")
         
-        st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 25px;'><i class='fas fa-list'></i> 2?계: 2계층 ?? ?인 커스?마?징</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='color: #1e3a8a; margin-top: 25px;'><i class='fas fa-list'></i> 2단계: 2계층 평가 요인 커스터마이징</h4>", unsafe_allow_html=True)
         with st.container(border=True):
-            st.caption("????업 ?성??맞춰 ?? ?? ?????표(,)?구분?여 ?력?세?? ?력???인 개수??맞춰 ??비교 ?이 ?동 계산?니??")
+            st.caption("대상 사업 특성에 맞춰 세부 평가 항목을 쉼표(,)로 구분하여 입력하세요. 입력한 요인 개수에 맞춰 쌍대비교 폼이 자동 계산됩니다.")
             
-            policy_input = st.text_input("?책???위 ?인 (2계층)", value="?책?????? ?업추진?의 ?험?인")
+            policy_input = st.text_input("정책성 하위 요인 (2계층)", value="정책의 일관성, 사업추진상의 위험요인")
             policy_2nd = [x.strip() for x in policy_input.split(",") if x.strip()]
             policy_factors = {k: [] for k in policy_2nd}
             if policy_2nd:
-                with st.expander("??'?책?? 3계층 (?분? ?력", expanded=False):
-                    st.info("? ?분?3계층)가 ?는 ??? 비워?시??동?로 2계층?로 처리?니??")
+                with st.expander("↳ '정책성' 3계층 (소분류) 입력", expanded=False):
+                    st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
                     for t2 in policy_2nd:
-                        t3_val = st.text_input(f"'{t2}'???위 ?인 (3계층)", key=f"ex_policy_t3_{t2}")
+                        t3_val = st.text_input(f"'{t2}'의 하위 요인 (3계층)", key=f"ex_policy_t3_{t2}")
                         if t3_val.strip():
                             policy_factors[t2] = [x.strip() for x in t3_val.split(",") if x.strip()]
             
             regional_factors = {}
             if "non_capital" in ex_p_type or "other" in ex_p_type:
-                reg_input = st.text_input("지???발???위 ?인 (2계층)", value="지?????급?과, 지??발계?과??부?성")
+                reg_input = st.text_input("지역균형발전 하위 요인 (2계층)", value="지역경제 파급효과, 지역개발계획과의 부합성")
                 reg_2nd = [x.strip() for x in reg_input.split(",") if x.strip()]
                 regional_factors = {k: [] for k in reg_2nd}
                 if reg_2nd:
-                    with st.expander("??'지???발?? 3계층 (?분? ?력", expanded=False):
-                        st.info("? ?분?3계층)가 ?는 ??? 비워?시??동?로 2계층?로 처리?니??")
+                    with st.expander("↳ '지역균형발전' 3계층 (소분류) 입력", expanded=False):
+                        st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
                         for t2 in reg_2nd:
-                            t3_val = st.text_input(f"'{t2}'???위 ?인 (3계층)", key=f"ex_reg_t3_{t2}")
+                            t3_val = st.text_input(f"'{t2}'의 하위 요인 (3계층)", key=f"ex_reg_t3_{t2}")
                             if t3_val.strip():
                                 regional_factors[t2] = [x.strip() for x in t3_val.split(",") if x.strip()]
                 
             tech_factors = {}
             if "rnd" in ex_p_type:
-                tech_input = st.text_input("과학기술???위 ?인 (2계층)", value="기술개발계획???절?? 기술개발 ?공가?성, 기존 ?업과의 중복??)
+                tech_input = st.text_input("과학기술성 하위 요인 (2계층)", value="기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성")
                 tech_2nd = [x.strip() for x in tech_input.split(",") if x.strip()]
                 tech_factors = {k: [] for k in tech_2nd}
                 if tech_2nd:
-                    with st.expander("??'과학기술?? 3계층 (?분? ?력", expanded=False):
-                        st.info("? ?분?3계층)가 ?는 ??? 비워?시??동?로 2계층?로 처리?니??")
+                    with st.expander("↳ '과학기술성' 3계층 (소분류) 입력", expanded=False):
+                        st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
                         for t2 in tech_2nd:
-                            t3_val = st.text_input(f"'{t2}'???위 ?인 (3계층)", key=f"ex_tech_t3_{t2}")
+                            t3_val = st.text_input(f"'{t2}'의 하위 요인 (3계층)", key=f"ex_tech_t3_{t2}")
                             if t3_val.strip():
                                 tech_factors[t2] = [x.strip() for x in t3_val.split(",") if x.strip()]
 
-        st.markdown(f"<h4 style='color: #047857; margin-top: 25px;'><i class='fas fa-file-excel'></i> 3?계: 맞춤???? ???성 ??운로드</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='color: #047857; margin-top: 25px;'><i class='fas fa-file-excel'></i> 3단계: 맞춤형 엑셀 폼 생성 및 다운로드</h4>", unsafe_allow_html=True)
         with st.container(border=True):
-            st.markdown("<span style='font-size: 0.95rem; color: #4b5563;'>??1?계? 2?계?서 ?정??<b>?비??성조사 분석 모델 ??인</b>??맞춰??용 ?? ???입?다.</span>", unsafe_allow_html=True)
+            st.markdown("<span style='font-size: 0.95rem; color: #4b5563;'>위 1단계와 2단계에서 설정한 <b>예비타당성조사 분석 모델 및 요인</b>에 맞춰진 전용 엑셀 펀칭 폼입니다.</span>", unsafe_allow_html=True)
             
             st.markdown("""
             <div style='background-color: #f9fafb; padding: 15px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px;'>
-                <strong>[?식 구조 ?내]</strong><br>
-                ?️ <b>?일??부?/b>: 2계층 ?후 ????간의 ??비교 ?력 방식 ?CR 검?로직? ?반 AHP? ?일?니??<br>
-                ?️ <b>?라지??부?/b>: ?? 지침에 ?라 1계층(경제/?책/지?? 가중치????비교가 ?닌 <b>100???수?법</b> 비율?기입?니??<br><br>
-                <strong>[? ?이???력 가?드]</strong><br>
-                ?운로드?시???? ?에 ?이?? 기입?실 ???래 규칙???르?요.<br>
-                ?️ ?쪽(?행) ??????중요?면: <b>?수</b> ?력 (?? -3)<br>
-                ?️ ?른?미시?? ??????중요?면: <b>?수</b> ?력 (?? 3)<br>
-                ?️ ???????등?게 중요?면: <b>1</b> ?력
+                <strong>[양식 구조 안내]</strong><br>
+                ✔️ <b>동일한 부분</b>: 2계층 이후 항목들 간의 쌍대비교 입력 방식 및 CR 검증 로직은 일반 AHP와 동일합니다.<br>
+                ✔️ <b>달라지는 부분</b>: 예타 지침에 따라 1계층(경제/정책/지역) 가중치는 쌍대비교가 아닌 <b>100점 상수합법</b> 비율로 기입합니다.<br><br>
+                <strong>[📝 데이터 입력 가이드]</strong><br>
+                다운로드하시는 엑셀 폼에 데이터를 기입하실 때 아래 규칙을 따르세요.<br>
+                ✔️ 왼쪽(시행) 항목이 더 중요하면: <b>음수</b> 입력 (예: -3)<br>
+                ✔️ 오른쪽(미시행) 항목이 더 중요하면: <b>양수</b> 입력 (예: 3)<br>
+                ✔️ 두 항목이 동등하게 중요하면: <b>1</b> 입력
             </div>
             """, unsafe_allow_html=True)
             
             img_file = "ahp_input_guide.png"
-            caption_text = "[참고] ?문 ?답???????력?는 방법"
+            caption_text = "[참고] 설문 응답을 엑셀에 입력하는 방법"
             if os.path.exists(img_file):
                 st.image(img_file, caption=caption_text)
             
             template_bytes = yeta_utils.generate_yeta_excel_template(ex_p_type, policy_factors, regional_factors, tech_factors)
             st.download_button(
-                label="? 맞춤???? AHP ?? ?플??운로드 (.xlsx)",
+                label="👉 맞춤형 예타 AHP 엑셀 템플릿 다운로드 (.xlsx)",
                 data=template_bytes,
                 file_name=f"yeta_ahp_template_{ex_p_type}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1770,13 +1748,13 @@ def run():
     # TAB 2: Yeta Survey Creator
     # =========================================================================
     with tab_survey_create:
-        st.write("### ?비??성조사 AHP ?문가 ?문지 ?작 ?배포")
-        st.info("KDI 지침에 명시???인??바탕?로 ?? ?용 ?문지??게 구성?고 구? ?트? ?동?여 배포?????습?다.")
+        st.write("### 예비타당성조사 AHP 전문가 설문지 제작 및 배포")
+        st.info("KDI 지침에 명시된 요인을 바탕으로 예타 전용 설문지를 쉽게 구성하고 구글 시트와 연동하여 배포할 수 있습니다.")
         
         # ------------------------------------------------------------
-        # 0. ?문 관?(1??1?문 모드)
+        # 0. 설문 관리 (1인 1설문 모드)
         # ------------------------------------------------------------
-        st.subheader("?션 0: ???문 관?)
+        st.subheader("섹션 0: 내 설문 관리")
 
         # Initialize states
         if 'yeta_editing_survey_id' not in st.session_state:
@@ -1790,7 +1768,7 @@ def run():
                 import sqlite3
                 conn = sqlite3.connect('users.db')
                 cur = conn.cursor()
-                cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? AND title LIKE '[??]%' ORDER BY created_at DESC", (st.session_state.user_id,))
+                cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
                 sqlite_surveys = cur.fetchall()
                 conn.close()
             except Exception:
@@ -1800,7 +1778,7 @@ def run():
             try:
                 from survey_manager import get_admin_surveys_from_gsheet
                 gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
-                gs_surveys = [s for s in gs_surveys if str(s[1]).startswith("[??]")]
+                gs_surveys = [s for s in gs_surveys if str(s[1]).startswith("[예타]")]
             except Exception:
                 pass
             
@@ -1824,7 +1802,7 @@ def run():
             meta = load_survey_metadata(sel_id)
             if meta:
                 st.session_state.yeta_editing_survey_id = sel_id
-                st.session_state.edit_yeta_title = meta.get("Title", "").replace("[??] ", "")
+                st.session_state.edit_yeta_title = meta.get("Title", "").replace("[예타] ", "")
                 st.session_state.edit_yeta_desc = meta.get("Description", "")
                 st.session_state.edit_yeta_admin_email = meta.get("Admin_Email", "")
 
@@ -1847,7 +1825,7 @@ def run():
                 for mc, subs in ahp_model.get("sub_subs", {}).items():
                     st.session_state.edit_yeta_sub_sub_inputs[mc] = ", ".join(subs)
                 
-                st.session_state.edit_yeta_p_type = ahp_model.get("yeta_p_type", "건설?업 (비수?권)")
+                st.session_state.edit_yeta_p_type = ahp_model.get("yeta_p_type", "건설사업 (비수도권)")
                 
                 definitions = meta.get("Definitions", {})
                 for k, v in definitions.items():
@@ -1856,17 +1834,17 @@ def run():
             st.session_state.yeta_survey_auto_loaded = True
             st.rerun()
 
-        @st.dialog("? [경고] 기존 ?문 ?구 ?? ?내")
+        @st.dialog("🚨 [경고] 기존 설문 영구 삭제 안내")
         def confirm_new_survey_yeta():
-            st.error("?로???? ?문???성?시?기존 ?동??모든 ?이?? ???니??")
-            agree = st.checkbox("?? 기존 ?이??백업???료?거??불필?하? 모든 ?이???????의?니??")
+            st.error("새로운 예타 설문을 작성하시면 기존 연동된 모든 데이터가 삭제됩니다.")
+            agree = st.checkbox("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.")
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("??취소", use_container_width=True):
+                if st.button("❌ 취소", use_container_width=True):
                     st.rerun()
             with col2:
-                if st.button("???의 ?초기??, type="primary", use_container_width=True, disabled=not agree):
-                    with st.spinner("기존 ?이?? ???는 중입?다..."):
+                if st.button("✅ 동의 및 초기화", type="primary", use_container_width=True, disabled=not agree):
+                    with st.spinner("기존 데이터를 삭제하는 중입니다..."):
                         from survey_manager import delete_admin_survey
                         if user_surveys:
                             delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
@@ -1876,7 +1854,7 @@ def run():
                             del st.session_state[k]
                         st.session_state.yeta_survey_auto_loaded = True
                         st.session_state._survey_cache_dirty_yeta = True
-                    st.success("?료?었?니?? ?면???로고침?니??")
+                    st.success("완료되었습니다. 화면이 새로고침됩니다.")
                     import time
                     time.sleep(1.5)
                     st.rerun()
@@ -1888,12 +1866,12 @@ def run():
                 if s[0] == linked_sheet_id:
                     survey_title_display = s[1]
                     break
-            st.success(f" ?재 배포???? ?문??불러?습?다: **{survey_title_display}**")
-            if st.button("??처음부?????문 ?성?기 (기존 ?이????)", type="secondary"):
+            st.success(f" 현재 배포된 예타 설문을 불러왔습니다: **{survey_title_display}**")
+            if st.button("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", type="secondary"):
                  confirm_new_survey_yeta()
         else:
-            st.info(" ?성 중인 ???? ?문?니??")
-            if st.button("?????용 모두 지?기 (초기??", type="secondary"):
+            st.info(" 작성 중인 새 예타 설문입니다.")
+            if st.button("✨ 폼 내용 모두 지우기 (초기화)", type="secondary"):
                 st.session_state.yeta_editing_survey_id = None
                 keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_yeta_')]
                 for k in keys_to_clear:
@@ -1902,7 +1880,7 @@ def run():
 
         st.divider()
 
-        # ?위 ?? ?누지 ?고 ?나???결???이지?구성
+        # 하위 탭을 나누지 않고 하나의 연결된 페이지로 구성
         def render_section_header(title):
             style = (
                 'background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);'
@@ -1921,30 +1899,30 @@ def run():
             st.markdown(f'<div style="{style}">{title}</div>', unsafe_allow_html=True)
 
         with st.container():
-            render_section_header("?션 1: ?업 기본 ?보 ??료 첨?")
-            survey_title = st.text_input("?문지 ?목", value=st.session_state.get("edit_yeta_title", "?정?자?업 종합??(AHP) ?문가 ?문"))
+            render_section_header("섹션 1: 사업 기본 정보 및 자료 첨부")
+            survey_title = st.text_input("설문지 제목", value=st.session_state.get("edit_yeta_title", "재정투자사업 종합평가(AHP) 전문가 설문"))
             
-            default_survey_desc = """?녕?십?까, ?문가??
+            default_survey_desc = """안녕하십니까, 전문가님.
 
-??문? KDI ?비??성조사 ?행 지침에 ?거?여, ?당 ?정?자?업????성 ?추진 ???
-최종 ?단?기 ?한 '종합??(AHP)' ?도?기획?었?니??
+본 설문은 KDI 예비타당성조사 수행 지침에 의거하여, 해당 재정투자사업의 타당성 및 추진 여부를 
+최종 판단하기 위한 '종합평가(AHP)' 용도로 기획되었습니다.
 
-?문가?께?는 ?공??'AHP ?료? ??업 개요?충분?????신 ?? ?????
-(경제?? ?책?? 지???발?? 기술???? 간의 ????중요?? ???주?기 바랍?다.
+전문가님께서는 제공된 'AHP 자료집' 및 사업 개요를 충분히 숙지하신 후, 각 평가항목
+(경제성, 정책성, 지역균형발전, 기술성 등) 간의 상대적 중요도를 평가해주시기 바랍니다.
 
-??주요 ?? ?의?항
-  1. (??계층 ??) ?분류 ?? 간의 ????중요?? '총합??100'???도?배분??주십?오. (?수?법)
-     ???? KDI ?비??성조사 종합?? 지침에 명시???업 ?형?가?드?인???라 부문별 ?력 
-        가?한 ?수 범위(?하?선)가 ?스?적?로 ?한?어 ?으???????리 ?해 부?드립니??
-  2. (??계층 ??) ?? ?? ???비교 ?? ???? ???중요?다??단?는 쪽으?9??척도 기? 
-     가중치?부?해 주십?오.
-  3. ?문 ?답??????비율(CR)??권고 ??(0.15 미만)?????????도??리?인 ??????립?다.
+■ 주요 평가 유의사항
+  1. (제1계층 평가) 대분류 항목 간의 상대적 중요도를 '총합이 100'이 되도록 배분해 주십시오. (상수합법)
+     ※ 단, KDI 예비타당성조사 종합평가 지침에 명시된 사업 유형별 가이드라인에 따라 부문별 입력 
+        가능한 점수 범위(상하한선)가 시스템적으로 제한되어 있으니 이 점 널리 양해 부탁드립니다.
+  2. (제2계층 평가) 세부 항목 간 쌍대비교 시, 두 항목 중 더 중요하다고 판단되는 쪽으로 9점 척도 기준 
+     가중치를 부여해 주십시오.
+  3. 설문 응답의 일관성 비율(CR)이 권고 수준(0.15 미만)을 유지할 수 있도록 논리적인 평가를 당부드립니다.
 
-주?기?: OOOO
-문의? OOO, sample@test.co.kr, 00)000-0000
+주관기관: OOOO
+문의처: OOO, sample@test.co.kr, 00)000-0000
 
-바쁘???정 중에???? 공공?자?업???리???사결정???해 귀중한 ?간???어 주셔??진심?로 감사?립?다."""
-            st.markdown("**?문 ?내?*")
+바쁘신 일정 중에도 국가 공공투자사업의 합리적 의사결정을 위해 귀중한 시간을 내어 주셔서 진심으로 감사드립니다."""
+            st.markdown("**설문 안내문**")
             
             from quill_editor import st_quill
             survey_desc = st_quill(
@@ -1956,54 +1934,54 @@ def run():
             st.session_state["edit_yeta_desc"] = survey_desc
             
             with st.container():
-                render_section_header("?션 2: ?? ?업 ?형 ?계층구조 모델 ?정")
+                render_section_header("섹션 2: 예타 사업 유형 및 계층구조 모델 설정")
                 yeta_p_type = st.selectbox(
-                    "?? ????업 ?형",
-                    options=["건설?업 (비수?권)", "건설?업 (?도?", "R&D?업 (B/C)", "R&D?업 (E/C)", "?보?사??, "기??업 (B/C)", "기??업 (E/C)"],
-                    index=["건설?업 (비수?권)", "건설?업 (?도?", "R&D?업 (B/C)", "R&D?업 (E/C)", "?보?사??, "기??업 (B/C)", "기??업 (E/C)"].index(st.session_state.get("edit_yeta_p_type", "건설?업 (비수?권)"))
+                    "평가 대상 사업 유형",
+                    options=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"],
+                    index=["건설사업 (비수도권)", "건설사업 (수도권)", "R&D사업 (B/C)", "R&D사업 (E/C)", "정보화사업", "기타사업 (B/C)", "기타사업 (E/C)"].index(st.session_state.get("edit_yeta_p_type", "건설사업 (비수도권)"))
                 )
             
             tier_level = 3
-            st.info("? **?? 모델 ?적 ?정**: ?반 모드? ?일?게 ?계층???표(,)?구분?여 ?력?세?? (1계층? ?? 기본 뼈?????니??")
+            st.info("💡 **예타 모델 동적 설정**: 일반 모드와 동일하게 각 계층을 쉼표(,)로 구분하여 입력하세요. (1계층은 예타 기본 뼈대를 유지합니다)")
 
-            default_yeta_main = "경제?? ?책?? 지???발??
-            if "?도? in yeta_p_type and "비수?권" not in yeta_p_type: default_yeta_main = "경제?? ?책??
-            elif "R&D" in yeta_p_type: default_yeta_main = "기술?? 경제?? ?책??
-            elif "?보?? in yeta_p_type: default_yeta_main = "기술?? 경제?? ?책??
-            elif "기?" in yeta_p_type: default_yeta_main = "경제?? ?책?? 지???발??
+            default_yeta_main = "경제성, 정책성, 지역균형발전"
+            if "수도권" in yeta_p_type and "비수도권" not in yeta_p_type: default_yeta_main = "경제성, 정책성"
+            elif "R&D" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
+            elif "정보화" in yeta_p_type: default_yeta_main = "기술성, 경제성, 정책성"
+            elif "기타" in yeta_p_type: default_yeta_main = "경제성, 정책성, 지역균형발전"
             
-            main_input = st.text_input("1계층 (???)", value=st.session_state.get("edit_yeta_main_input", default_yeta_main), help="?????? ??비교 ???100??분배(?수?법)????니??")
+            main_input = st.text_input("1계층 (대항목)", value=st.session_state.get("edit_yeta_main_input", default_yeta_main), help="이 항목들은 쌍대비교 대신 100점 분배(상수합법)로 평가됩니다.")
             main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
 
             model_structure = {"main": main_list, "subs": {}, "sub_subs": {}, "yeta_p_type": yeta_p_type}
 
             for mc in main_list:
-                if mc == "경제??: 
+                if mc == "경제성": 
                     model_structure["subs"][mc] = []
-                    st.caption(f"??'{mc}' ?위 ?인? ?반?으??익/비용(B/C)?로 ?괄 ?출????력?? ?습?다.")
+                    st.caption(f"✓ '{mc}' 하위 요인은 일반적으로 편익/비용(B/C)으로 일괄 산출되므로 입력하지 않습니다.")
                     continue
                 
                 default_sub_val = ""
-                if mc == "?책??: default_sub_val = "?업추진 ?건, ?책?과"
-                elif mc == "지???발??: default_sub_val = "지???후?? 지?????급?과"
-                elif mc == "기술??: default_sub_val = "기술개발계획???절?? 기술개발 ?공가?성, 기존 ?업과의 중복??
+                if mc == "정책성": default_sub_val = "사업추진 여건, 정책효과"
+                elif mc == "지역균형발전": default_sub_val = "지역 낙후도, 지역경제 파급효과"
+                elif mc == "기술성": default_sub_val = "기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성"
                 
-                sub_input = st.text_input(f"'{mc}'???위 ?인 (2계층)", value=st.session_state.get("edit_yeta_sub_inputs", {}).get(mc, default_sub_val))
+                sub_input = st.text_input(f"'{mc}'의 하위 요인 (2계층)", value=st.session_state.get("edit_yeta_sub_inputs", {}).get(mc, default_sub_val))
                 subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
                 model_structure["subs"][mc] = subs_list
 
                 if subs_list:
-                    with st.expander(f"??'{mc}' ?위??3계층 (?분? ?력", expanded=False):
-                        st.info("? ?분?3계층)가 ?는 ??? 비워?시??동?로 2계층?로 처리?니??")
+                    with st.expander(f"↳ '{mc}' 하위의 3계층 (소분류) 입력", expanded=False):
+                        st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
                         for sub_c in subs_list:
                             sub_sub_val = ""
-                            if sub_c == "?업추진 ?건": sub_sub_val = "?책?치???????건, 지????업?도 ?????건"
-                            elif sub_c == "?책?과": sub_sub_val = "?업?화??, ?자??과, ?활?건 ?향, ?경????, ?전????"
+                            if sub_c == "사업추진 여건": sub_sub_val = "정책일치성 등 내부여건, 지역주민 사업태도 등 외부여건"
+                            elif sub_c == "정책효과": sub_sub_val = "사업특화항목, 일자리 효과, 생활여건 영향, 환경성 평가, 안전성 평가"
                             
                             sub_sub_input = st.text_input(
-                                f"? '{sub_c}'???위 ?인 (?표 구분)", 
+                                f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
                                 value=st.session_state.get("edit_yeta_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
-                                placeholder="?? ??1, ??2",
+                                placeholder="예: 항목1, 항목2",
                                 key=f"yeta_sub_sub_{sub_c}"
                             )
                             parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
@@ -2012,22 +1990,22 @@ def run():
 
         st.divider()
         with st.container():
-            render_section_header("?션 3: ?? ?? ?세 ?명")
-            st.caption("?답?? ????????명확???해?????도?????세 ?명???력?????습?다.")
+            render_section_header("섹션 3: 평가 항목 상세 설명")
+            st.caption("응답자가 각 항목의 의미를 명확히 이해할 수 있도록 항목별 상세 설명을 입력할 수 있습니다.")
             
             definitions_map = {}
             
-            st.markdown("**? 1계층 (???) ?명**")
+            st.markdown("**📌 1계층 (대항목) 설명**")
             for mc in main_list:
                 default_desc = ""
-                if mc == "경제??: default_desc = "?익/비용(B/C) 비율 ?을 바탕?로 ?업??경제????성?????니??"
-                elif mc == "?책??: default_desc = "?업???책?치?? 추진?건, ?책?과 ???책????성?????니??"
-                elif mc == "지???발??: default_desc = "지???도 ?지?????급?과 ?을 바탕?로 지??균형 발전??미치???향?????니??"
-                elif mc == "기술??: default_desc = "기술개발계획???절?? 기술개발 ?공가?성, 기존 ?업과의 중복???을 ???니??"
+                if mc == "경제성": default_desc = "편익/비용(B/C) 비율 등을 바탕으로 사업의 경제적 타당성을 평가합니다."
+                elif mc == "정책성": default_desc = "사업의 정책일치성, 추진여건, 정책효과 등 정책적 타당성을 평가합니다."
+                elif mc == "지역균형발전": default_desc = "지역낙후도 및 지역경제 파급효과 등을 바탕으로 지역 균형 발전에 미치는 영향을 평가합니다."
+                elif mc == "기술성": default_desc = "기술개발계획의 적절성, 기술개발 성공가능성, 기존 사업과의 중복성 등을 평가합니다."
                 
                 key_cached = f"edit_yeta_desc_{mc}"
                 desc_val = st.text_input(
-                    f"'{mc}' ?인 ?명",
+                    f"'{mc}' 요인 설명",
                     value=st.session_state.get(key_cached, default_desc),
                     key=f"yeta_desc_input_{mc}"
                 )
@@ -2043,25 +2021,25 @@ def run():
             
             if has_sub_desc:
                 st.markdown("---")
-                st.markdown("**? 2계층 ?3계층 ?위 ?인 ?명**")
+                st.markdown("**📌 2계층 및 3계층 하위 요인 설명**")
                 
                 for mc in main_list:
                     subs = model_structure["subs"].get(mc, [])
                     if subs:
                         with st.container(border=True):
-                            st.markdown(f"##### ? [{mc}] ?위 ?인 ?명")
+                            st.markdown(f"##### 💡 [{mc}] 하위 요인 설명")
                             for sub_c in subs:
                                 sub_subs = model_structure["sub_subs"].get(sub_c, [])
                                 
                                 default_sub_desc = ""
-                                if sub_c == "?업추진 ?건": default_sub_desc = "?? ?책과의 ?치?? 추진 ??, 지??주? ?지?체???도 ?을 ???니??"
-                                elif sub_c == "?책?과": default_sub_desc = "?자?창출 ?과, 주? ?활 ?건 ?상, ?경????전???향 ?을 ???니??"
-                                elif sub_c == "지???후??: default_sub_desc = "개발 ?? ??후 ?태??량?으?비교 분석?니??"
-                                elif sub_c == "지?????급?과": default_sub_desc = "지????총생?? ?산 ?발, 고용 ?발 ?과 ?을 ???니??"
+                                if sub_c == "사업추진 여건": default_sub_desc = "정부 정책과의 일치성, 추진 의지, 지역 주민 및 지자체의 태도 등을 평가합니다."
+                                elif sub_c == "정책효과": default_sub_desc = "일자리 창출 효과, 주민 생활 여건 향상, 환경성 및 안전성 영향 등을 평가합니다."
+                                elif sub_c == "지역 낙후도": default_sub_desc = "개발 수준 및 낙후 상태를 정량적으로 비교 분석합니다."
+                                elif sub_c == "지역경제 파급효과": default_sub_desc = "지역 내 총생산, 생산 유발, 고용 유발 효과 등을 평가합니다."
                                 
                                 key_cached_sub = f"edit_yeta_desc_{sub_c}"
                                 sub_desc_val = st.text_input(
-                                    f"'{mc} ??{sub_c}' ?인 ?명",
+                                    f"'{mc} ➔ {sub_c}' 요인 설명",
                                     value=st.session_state.get(key_cached_sub, default_sub_desc),
                                     key=f"yeta_desc_input_{sub_c}"
                                 )
@@ -2071,13 +2049,13 @@ def run():
                                 if sub_subs:
                                     for t3 in sub_subs:
                                         default_t3_desc = ""
-                                        if t3 == "?책?치???????건": default_t3_desc = "?위 계획과의 부?성 ?추진 체계??준??도????니??"
-                                        elif t3 == "지????업?도 ?????건": default_t3_desc = "?업 ???지??주????론 ?지?체??추진 ?도????니??"
-                                        elif t3 == "?자??과": default_t3_desc = "건설 ?계 ??영 ?계???규 고용 창출 ?력?????니??"
+                                        if t3 == "정책일치성 등 내부여건": default_t3_desc = "상위 계획과의 부합성 및 추진 체계의 준비 정도를 평가합니다."
+                                        elif t3 == "지역주민 사업태도 등 외부여건": default_t3_desc = "사업 대상 지역 주민의 여론 및 지자체의 추진 태도를 평가합니다."
+                                        elif t3 == "일자리 효과": default_t3_desc = "건설 단계 및 운영 단계의 신규 고용 창출 능력을 평가합니다."
                                         
                                         key_cached_t3 = f"edit_yeta_desc_{t3}"
                                         t3_desc_val = st.text_input(
-                                            f"??'{sub_c} ??{t3}' ?인 ?명",
+                                            f"↳ '{sub_c} ➔ {t3}' 요인 설명",
                                             value=st.session_state.get(key_cached_t3, default_t3_desc),
                                             key=f"yeta_desc_input_{t3}"
                                         )
@@ -2086,11 +2064,11 @@ def run():
 
         st.divider()
         with st.container():
-            render_section_header("?션 4: ?답???집 ?보 ?그룹 분류")
+            render_section_header("섹션 4: 응답자 수집 정보 및 그룹 분류")
             with st.container(border=True):
-                st.markdown("**그룹 분류 문항 ?정**")
-                default_type_q = "귀?의 ?속? ?떻??십?까?"
-                default_type_opts = "?문가, ?반, 공무?? 기?"
+                st.markdown("**그룹 분류 문항 설정**")
+                default_type_q = "귀하의 소속은 어떻게 되십니까?"
+                default_type_opts = "전문가, 일반, 공무원, 기타"
 
                 if "edit_yeta_type_questions" not in st.session_state:
                     st.session_state["edit_yeta_type_questions"] = [{"q": default_type_q, "opts": default_type_opts}]
@@ -2100,19 +2078,19 @@ def run():
 
                 col1, col2, col3 = st.columns([6, 2, 2])
                 with col2:
-                    if st.button("+ 문항 추?", use_container_width=True, disabled=num_types >= 3, key="yeta_add_q_dyn"):
+                    if st.button("+ 문항 추가", use_container_width=True, disabled=num_types >= 3, key="yeta_add_q_dyn"):
                         st.session_state["edit_yeta_type_questions"].append({"q": "", "opts": ""})
                         st.rerun()
                 with col3:
-                    if st.button("- 문항 ??", use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q_dyn"):
+                    if st.button("- 문항 삭제", use_container_width=True, disabled=num_types <= 1, key="yeta_rem_q_dyn"):
                         st.session_state["edit_yeta_type_questions"].pop()
                         st.rerun()
 
                 type_questions = []
                 for i in range(num_types):
                     st.markdown(f"**{i+1}.**")
-                    q_label = "그룹 분류 질문 ?목" if i == 0 else "추? ?문 문항"
-                    opts_label = "보기 ?션 (?표?구분)"
+                    q_label = "그룹 분류 질문 제목" if i == 0 else "추가 설문 문항"
+                    opts_label = "보기 옵션 (쉼표로 구분)"
 
                     q_val = st.text_input(f"{q_label} ({i+1})", value=type_questions_state[i]["q"], key=f"yeta_dyn_tq_q_{i}")
                     opts_val = st.text_input(f"{opts_label} ({i+1})", value=type_questions_state[i]["opts"], key=f"yeta_dyn_tq_opts_{i}")
@@ -2121,16 +2099,16 @@ def run():
                     type_questions_state[i]["opts"] = opts_val
                     type_questions.append({"q": q_val, "opts": [x.strip() for x in opts_val.split(",") if x.strip()]})
         with st.container():
-            render_section_header("?션 5: ?라??배포 ?구? ?트 ?동 ?정")
+            render_section_header("섹션 5: 온라인 배포 및 구글 시트 연동 설정")
             if st.session_state.user_id is None:
-                st.warning("?라??배포 ?구? ?트 ?동? ?원 ?용 기능?니?? 로그?해 주세??")
+                st.warning("온라인 배포 및 구글 시트 연동은 회원 전용 기능입니다. 로그인해 주세요.")
             else:
-                survey_admin_email = st.text_input("?문 ?당???메??(구? ?라?브 ?유??권한 부?용)", value=st.session_state.get("edit_yeta_admin_email", st.session_state.user_id))
+                survey_admin_email = st.text_input("설문 담당자 이메일 (구글 드라이브 소유자 권한 부여용)", value=st.session_state.get("edit_yeta_admin_email", st.session_state.user_id))
                 st.session_state.edit_yeta_admin_email = survey_admin_email
 
                 existing_id = st.session_state.yeta_editing_survey_id
                 if existing_id:
-                    st.info("?재 **기존 ?문 ?정 모드**?니?? ?정???정? 기존 ?동 ?트??반영?니??")
+                    st.info("현재 **기존 설문 수정 모드**입니다. 수정한 설정은 기존 연동 시트에 반영됩니다.")
                     existing_sheet_id_input = existing_id
                 else:
                     past_surveys = []
@@ -2138,7 +2116,7 @@ def run():
                         import sqlite3
                         conn = sqlite3.connect('users.db')
                         c = conn.cursor()
-                        c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? AND title LIKE '[??]%' ORDER BY created_at DESC", (st.session_state.user_id,))
+                        c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? AND title LIKE '[예타]%' ORDER BY created_at DESC", (st.session_state.user_id,))
                         past_surveys = c.fetchall()
                         conn.close()
                     except Exception:
@@ -2149,62 +2127,62 @@ def run():
 
                     if len(past_surveys) > 0:
                         deploy_option = st.radio(
-                            "배포 방식???택??주세??",
+                            "배포 방식을 선택해 주세요.",
                             options=[
-                                "?로??구? ?트 URL ?동 (?규 발급)",
-                                "기존 배포?던 ?문 URL ?사??(???기)"
+                                "새로운 구글 시트 URL 연동 (신규 발급)",
+                                "기존 배포했던 설문 URL 재사용 (덮어쓰기)"
                             ],
                             index=0,
                             key="yeta_deploy_option_radio_new"
                         )
                         st.write("")
 
-                        if "?사?? in deploy_option:
+                        if "재사용" in deploy_option:
                             show_manual_input = False
-                            st.markdown("##### ?️ ?사?할 기존 ?문 ?택")
+                            st.markdown("##### ⚙️ 재사용할 기존 설문 선택")
                             survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
                             selected_survey_label = st.selectbox(
-                                "과거??배포?던 ?문 목록",
+                                "과거에 배포했던 설문 목록",
                                 options=list(survey_options.keys()),
                                 key="yeta_past_survey_select"
                             )
                             existing_sheet_id_input = survey_options[selected_survey_label]
-                            st.info("?택???문??구? ?프?드?트???로???용?????웁?다. 기존 ?답 URL? 그?????니??")
+                            st.info("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.")
 
                     if show_manual_input:
-                        st.markdown("##### ?️ ?동??본인??구? ?프?드?트 ?정 *")
+                        st.markdown("##### ⚙️ 연동할 본인의 구글 스프레드시트 설정 *")
                         st.info("""
-                        **? ?동 방법:**
-                        1. 본인??구? ?라?브?서 **??구? ?프?드?트**??나 ?성?니??
-                        2. ?측 ?단??'공유' 버튼???러 ?래???비??계정 ?메?을 **?집??* (Editor)?추??니??
-                           * ?비??계정 ?메?? `ahp-master-v2@ahp-login.iam.gserviceaccount.com`
-                        3. ?성???프?드?트??**URL 주소** ?는 **?트 ID**?복사?여 ?래??붙여?어 주세??
+                        **💡 연동 방법:**
+                        1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다.
+                        2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
+                           * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                        3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
                         """)
                         col1, col2 = st.columns([1, 2])
                         with col1:
                             if os.path.exists("google_sheets_menu_guide.png"):
-                                st.image("google_sheets_menu_guide.png", caption="구? ?프?드?트 메뉴 ?근 방법", use_container_width=True)
+                                st.image("google_sheets_menu_guide.png", caption="구글 스프레드시트 메뉴 접근 방법", use_container_width=True)
                         with col2:
                             if os.path.exists("manual_sheet_url_guide.png"):
-                                st.image("manual_sheet_url_guide.png", caption="구? ?프?드?트 URL 주소?복사 ?시", use_container_width=True)
-                        existing_sheet_id_input = st.text_input("?동??구? ?프?드?트 URL ?는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
+                                st.image("manual_sheet_url_guide.png", caption="구글 스프레드시트 URL 주소창 복사 예시", use_container_width=True)
+                        existing_sheet_id_input = st.text_input("연동할 구글 스프레드시트 URL 또는 ID *", placeholder="https://docs.google.com/spreadsheets/d/...", key="yeta_sheet_url_input")
 
-                # ==================== ?????정 ====================
+                # ==================== 답례품 설정 ====================
                 coupon_config = None
                 if st.session_state.user_id == 'shjeon':
-                    render_section_header("?션 6: ????발송 ?정 (?션)")
-                    use_coupon = st.checkbox("?문 ?답?에?기프?콘 ?????을 ?공?니??", key="yeta_use_coupon")
+                    render_section_header("섹션 6: 답례품 발송 설정 (옵션)")
+                    use_coupon = st.checkbox("설문 응답자에게 기프티콘 등 답례품을 제공합니다.", key="yeta_use_coupon")
                     if use_coupon:
                         active_coupons = coupon_manager.get_active_coupons()
                         if not active_coupons:
-                            st.warning("?재 ?록?????이 ?습?다. 관리자?게 문의?세??")
+                            st.warning("현재 등록된 답례품이 없습니다. 관리자에게 문의하세요.")
                         else:
-                            coupon_options = {f"{c['name']} ({c['original_price']:,}??": c['id'] for c in active_coupons}
-                            sel_coupon_label = st.selectbox("?공???????택", list(coupon_options.keys()))
+                            coupon_options = {f"{c['name']} ({c['original_price']:,}원)": c['id'] for c in active_coupons}
+                            sel_coupon_label = st.selectbox("제공할 답례품 선택", list(coupon_options.keys()))
                             sel_coupon_id = coupon_options[sel_coupon_label]
                             
-                            coupon_limit = st.number_input("?착???공 ?원", min_value=1, value=100, step=10)
-                            st.info(f"?택?????? ?문 ?출 ?료 ???동?로 발송 ??자??택?????습?다. (?상 비용 ?계: **{int(sel_coupon_label.split('(')[1].replace('??','').replace(',','')) * coupon_limit:,}??*)")
+                            coupon_limit = st.number_input("선착순 제공 인원", min_value=1, value=100, step=10)
+                            st.info(f"선택한 답례품은 설문 제출 완료 시 수동으로 발송 대상자를 선택할 수 있습니다. (예상 비용 합계: **{int(sel_coupon_label.split('(')[1].replace('원)','').replace(',','')) * coupon_limit:,}원**)")
                             
                             coupon_config = {
                                 "enabled": True,
@@ -2259,16 +2237,16 @@ def run():
                         onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
                         onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
                         >
-                            ???문지 ?답 ?면 미리보기
+                            👁️ 설문지 응답 화면 미리보기
                         </div>
                     </a>
                     """
                     st.markdown(preview_link_html, unsafe_allow_html=True)
 
                 with col_p2:
-                    deploy_btn_label = "?? 배포 ?구? ?트 ?동 (?정 ?용 ?용)" if existing_id else "?? 배포 ?구? ?트 ?동"
+                    deploy_btn_label = "🚀 배포 및 구글 시트 연동 (수정 내용 적용)" if existing_id else "🚀 배포 및 구글 시트 연동"
                     if st.button(deploy_btn_label, type="primary", use_container_width=True, key="yeta_deploy_btn"):
-                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "?문 배포 ?행")
+                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
                         target_sheet_id = existing_sheet_id_input.strip()
                         if "docs.google.com/spreadsheets" in target_sheet_id:
                             parts = target_sheet_id.split("/d/")
@@ -2276,9 +2254,9 @@ def run():
                                 target_sheet_id = parts[1].split("/")[0]
 
                         if not target_sheet_id:
-                            st.error("?동??구? ?프?드?트 URL ?는 ID??력??주세??")
+                            st.error("연동할 구글 스프레드시트 URL 또는 ID를 입력해 주세요.")
                         else:
-                            with st.spinner("구? ?프?드?트 ?성 ??문지 ?동 ?.."):
+                            with st.spinner("구글 스프레드시트 생성 및 설문지 연동 중..."):
                                 try:
                                     from survey_manager_v3 import create_yeta_survey_sheet_v3
                                     import sqlite3
@@ -2298,10 +2276,10 @@ def run():
                                         conn = sqlite3.connect('users.db')
                                         cur = conn.cursor()
                                         if existing_id:
-                                            cur.execute("UPDATE admin_surveys SET title = ? WHERE survey_id = ?", (f"[??] {survey_title}", existing_id))
+                                            cur.execute("UPDATE admin_surveys SET title = ? WHERE survey_id = ?", (f"[예타] {survey_title}", existing_id))
                                         else:
                                             cur.execute("INSERT OR IGNORE INTO admin_surveys (survey_id, title, admin_id, created_at) VALUES (?, ?, ?, datetime('now'))",
-                                                        (new_sheet_id, f"[??] {survey_title}", st.session_state.user_id))
+                                                        (new_sheet_id, f"[예타] {survey_title}", st.session_state.user_id))
                                         conn.commit()
                                         conn.close()
 
@@ -2318,20 +2296,20 @@ def run():
                                             base_url += "/"
 
                                         link = f"{base_url}?survey_id={new_sheet_id}"
-                                        st.success("? ?? AHP ?문지 배포가 ?공?으??료?었?니??")
-                                        st.markdown(f"**? ?답??배포???문조사 링크:** [{link}]({link})")
+                                        st.success("🎉 예타 AHP 설문지 배포가 성공적으로 완료되었습니다!")
+                                        st.markdown(f"**🔗 응답자 배포용 설문조사 링크:** [{link}]({link})")
                                         st.code(link)
                                     else:
-                                        st.error("구? ?트 ?동???패?습?다. 구? 계정 권한 ?는 ?비??계정 ?정???인??주세??")
+                                        st.error("구글 시트 연동에 실패했습니다. 구글 계정 권한 또는 서비스 계정 설정을 확인해 주세요.")
                                 except Exception as e:
-                                    st.error(f"?류 발생: {e}")
+                                    st.error(f"오류 발생: {e}")
 
     # =========================================================================
-    # ?시??답 ?황 ??
+    # 실시간 응답 현황 탭
     # =========================================================================
     with tab_live_response:
         if st.session_state.get('user_id') == 'shjeon':
-            # Sub-tabs UI: ?약(Pill) ?태??더링되?록 CSS 주입
+            # Sub-tabs UI: 알약(Pill) 형태로 렌더링되도록 CSS 주입
             st.markdown("""
             <style>
             div[data-testid="stTabs"] div[data-testid="stTabs"] > div[role="tablist"] {
@@ -2365,7 +2343,7 @@ def run():
             </style>
             """, unsafe_allow_html=True)
             
-            sub_tabs = st.tabs(["? 진행 ?황", "? ????발송 관?, "?️ ?????정(Admin)"])
+            sub_tabs = st.tabs(["📊 진행 현황", "🎁 답례품 발송 관리", "⚙️ 답례품 설정(Admin)"])
             tab_live_content = sub_tabs[0]
             with sub_tabs[1]:
                 import coupon_manager
@@ -2377,14 +2355,14 @@ def run():
             tab_live_content = st.container()
 
         with tab_live_content:
-            st.header("?시??답 ?황")
+            st.header("실시간 응답 현황")
             selected_sheet_id = None
         
             if st.session_state.user_id is None:
-                st.warning(" **?시??답 ?황 기능? ?원 ?용 ?비?입?다.**")
-                st.info("무료 ?원가???로그?을 ?료?시?본인??배포???문지???시??답 ?태 ??적 ?이?? 모니?링?고 ?운로드?????습?다. (무료 ?원??기능 ?한 ?이 모든 기능 ?용 가??  \n**좌측 ?이?바??로그???원가???널**???용??주세??")
+                st.warning(" **실시간 응답 현황 기능은 회원 전용 서비스입니다.**")
+                st.info("무료 회원가입 및 로그인을 완료하시면 본인이 배포한 설문지의 실시간 응답 상태 및 누적 데이터를 모니터링하고 다운로드할 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)  \n**좌측 사이드바의 로그인/회원가입 패널**을 이용해 주세요.")
             else:
-                # DB?서 ?당 관리자가 ?성???문 목록 조회
+                # DB에서 해당 관리자가 생성한 설문 목록 조회
 
                 try:
                     sync_short_codes_from_gs()
@@ -2413,15 +2391,15 @@ def run():
                     admin_surveys = list(merged_surveys.values())
                     admin_surveys.sort(key=lambda x: x[2], reverse=True)
                 except Exception as e:
-                    st.error(f"?문 목록 조회 ?패: {e}")
+                    st.error(f"설문 목록 조회 실패: {e}")
 
                 if not admin_surveys:
-                    st.warning("배포???문지가 존재?? ?습?다. '?라???문지 ?작' ?????문??먼? 배포??주세??")
+                    st.warning("배포된 설문지가 존재하지 않습니다. '온라인 설문지 제작' 탭에서 설문을 먼저 배포해 주세요.")
                 else:
-                    # 로그?한 ?이?에 맞춰 본인???문?만 ?롭?운???출?킵?다.
+                    # 로그인한 아이디에 맞춰 본인의 설문들만 드롭다운에 노출시킵니다.
                     survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
                     selected_label = st.selectbox(
-                        "?시??황???인???문 ?택",
+                        "실시간 현황을 확인할 설문 선택",
                         list(survey_options.keys()),
                         key="tab3_survey_select"
                     )
@@ -2431,15 +2409,15 @@ def run():
                     survey_title = selected_survey_info[1]
                     created_at = selected_survey_info[2]
                 
-                    st.success(f" ?재 ?택???문: **{survey_title}** (배포?시: {created_at})")
+                    st.success(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
                     st.divider()
 
-            # ??보???더?
+            # 대시보드 렌더링
             if selected_sheet_id:
 
-                if st.button("? ?시??문 ??보????답 ?이??불러?기 / ?로고침", type="primary"):
+                if st.button("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", type="primary"):
                     from survey_manager import get_survey_stats, get_survey_gspread_client
-                    with st.spinner("?시??문 ?황 로딩 ?.."):
+                    with st.spinner("실시간 설문 현황 로딩 중..."):
                         # 1. Stats Loading
                         st.session_state["survey_stats"] = get_survey_stats(selected_sheet_id.strip())
                     
@@ -2473,43 +2451,43 @@ def run():
                                     st.session_state["demo_df"] = None
 
                             except Exception as g_err:
-                                st.error(f"구? ?트?서 ?이?? ?어?는 ??러 발생: {g_err}")
+                                st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")
                                 st.session_state["live_df"] = None
                         else:
-                            st.warning("구? Sheets API ?라?언???결 ?패??해 구? ?트 ???이?? 직접 ?운로드?????습?다.")
+                            st.warning("구글 Sheets API 클라이언트 연결 실패로 인해 구글 시트 내 데이터를 직접 다운로드할 수 없습니다.")
                             st.session_state["live_df"] = None
 
                 if "survey_stats" in st.session_state:
                     stats = st.session_state["survey_stats"]
                     col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                     with col_stat1:
-                        st.metric("??속????(Visits)", f"{stats['visits']}" + "?)
+                        st.metric("총 접속자 수 (Visits)", f"{stats['visits']}" + "명")
                     with col_stat2:
-                        st.metric("?료 ?답????(Completed)", f"{stats['completed']}" + "?)
+                        st.metric("완료 응답자 수 (Completed)", f"{stats['completed']}" + "명")
                     with col_stat3:
-                        st.metric("????초과 중단??(CR Fail)", f"{stats['abandoned_cr']}" + "??)
+                        st.metric("일관성 초과 중단자 (CR Fail)", f"{stats['abandoned_cr']}" + "회")
                     with col_stat4:
-                        st.metric("?순 ?탈 중단??(Bounce)", f"{stats['abandoned_bounce']}" + "?)
+                        st.metric("단순 이탈 중단자 (Bounce)", f"{stats['abandoned_bounce']}" + "명")
 
-                    # ?각??차트 추?
+                    # 시각화 차트 추가
 
                     chart_data = pd.DataFrame({
-                        "구분": ["?답 ?료", "????초과 중단", "?순 ?이지 ?탈"],
-                        "?원??: [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
+                        "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
+                        "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
                     })
 
                     fig_stats = px.bar(
                         chart_data,
                         x="구분",
-                        y="?원??,
-                        text="?원??,
+                        y="인원수",
+                        text="인원수",
                         color="구분",
                         color_discrete_map={
-                            "?답 ?료": "#2E7D32",
-                            "????초과 중단": "#C62828",
-                            "?순 ?이지 ?탈": "#EF6C00"
+                            "응답 완료": "#2E7D32",
+                            "일관성 초과 중단": "#C62828",
+                            "단순 페이지 이탈": "#EF6C00"
                         },
-                        title="?문 참여 ?태?분포"
+                        title="설문 참여 상태별 분포"
                     )
                     fig_stats.update_layout(showlegend=False)
                     st.plotly_chart(fig_stats, use_container_width=True)
@@ -2518,14 +2496,14 @@ def run():
                     live_df = st.session_state["live_df"]
                     demo_df = st.session_state.get("demo_df", None)
 
-                    # 구? ?트?서 ?시??답 로데?터(Raw_Data) ?운로드 기능 추?
-                    with st.expander("? ?시?구? ?트 ?답 ?이???운로드 ?터", expanded=True):
+                    # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
+                    with st.expander("📥 실시간 구글 시트 응답 데이터 다운로드 센터", expanded=True):
                         if not live_df.empty:
-                            st.success(f"구? ?프?드?트?서 ?시??답 ?이?? ?공?으?불러?습?다. (Raw_Data: {len(live_df)}? + (f", Demographic_Data: {len(demo_df)}? if demo_df is not None else "") + ")")
+                            st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
                         
-                            # ? AHP 분석 ?동 ?축 버튼 추?
-                            if st.button("? ???라???문 ?이?로 즉시 AHP 분석 ?행?기 (분석 ?구??동)", type="primary", use_container_width=True):
-                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "?라???문 ?이???동")
+                            # 📊 AHP 분석 연동 단축 버튼 추가
+                            if st.button("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", type="primary", use_container_width=True):
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "온라인 설문 데이터 연동")
                                 st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                                 from survey_manager import load_survey_metadata
                                 survey_meta = load_survey_metadata(selected_sheet_id)
@@ -2544,7 +2522,7 @@ def run():
                                         if col not in ["ID", "Type"]:
                                             st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce')
                                 
-                                     # 중분?복사
+                                     # 중분류 복사
                                     st.session_state["ahp_sub_dfs"] = {}
                                     sub_criteria_map = ahp_model.get("subs", {})
                                     for main_c, subs in sub_criteria_map.items():
@@ -2560,21 +2538,21 @@ def run():
                                                     st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
                                                 
                                     st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                    st.info("? ?이??분석 준비? ?료?었?니?? **?단??'? AHP 분석 ?구' ??*???택?고 **'? 배포???라???문 ?이???동'** ?디??버튼???택?여 분석 결과?바로 ?인?십?오.")
+                                    st.info("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.")
 
-                            tab_raw, tab_demo = st.tabs(["? Raw_Data (AHP ??비교 ?이??", "? Demographic_Data (?구?계/?전?위)"])
+                            tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
                             with tab_raw:
                                 st.dataframe(live_df, use_container_width=True)
                             with tab_demo:
                                 if demo_df is not None:
                                     st.dataframe(demo_df, use_container_width=True)
                                 else:
-                                    st.info("?집???구?계 ?이?? ?거??Demographic_Data ?트가 ?성?? ?았?니??")
+                                    st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
 
-                            # Excel ?CSV ?보?기 버튼 ?공
+                            # Excel 및 CSV 내보내기 버튼 제공
                             import io
 
-                            # 1. Excel ?보?기 (??개의 ?트?모두 ?함)
+                            # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
                             excel_buffer = io.BytesIO()
                             with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
                                 from survey_manager import load_survey_metadata
@@ -2633,28 +2611,28 @@ def run():
                             col_dl1, col_dl2 = st.columns(2)
                             with col_dl1:
                                 st.download_button(
-                                    "? ?시??답 Excel ?운로드 (.xlsx)",
+                                    "📥 실시간 응답 Excel 다운로드 (.xlsx)",
                                     data=excel_buffer.getvalue(),
                                     file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.xlsx",
                                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                     use_container_width=True,
                                     type="primary"
                                 )
-                            # 2. CSV ?보?기 (Raw_Data ?선 ?보?기)
+                            # 2. CSV 내보내기 (Raw_Data 우선 내보내기)
                             csv_buffer = io.StringIO()
                             live_df.to_csv(csv_buffer, index=False, header=True)
                             with col_dl2:
                                 st.download_button(
-                                    "? ?시??답 CSV ?운로드 (.csv)",
+                                    "📥 실시간 응답 CSV 다운로드 (.csv)",
                                     data=csv_buffer.getvalue().encode('utf-8-sig'),
                                     file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.csv",
                                     mime="text/csv",
                                     use_container_width=True
                                 )
                         else:
-                            st.info("구? ?트???집???답 로데?터가 ?직 비어 ?습?다.")
+                            st.info("구글 시트에 수집된 응답 로데이터가 아직 비어 있습니다.")
 
-                # 로컬 ?전 백업 ?이??조회 ?추출 ?틸리티
+                # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
                 try:
                     conn = get_db_connection('users.db')
                     backup_df = pd.read_sql_query(
@@ -2664,11 +2642,11 @@ def run():
                     conn.close()
 
                     if not backup_df.empty:
-                        with st.expander("???버 로컬 ?전 백업 관??터"):
-                            st.success(f"구? ?트 ?동?관계없???버 로컬 ?이?베?스????된 ?전 백업 ?이?? ?{len(backup_df)}?존재?니??")
+                        with st.expander("🛡️ 서버 로컬 안전 백업 관리 센터"):
+                            st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
                             st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
 
-                            # ?체 ??이??복구 ??/CSV ?이??빌드
+                            # 전체 로 데이터 복구 엑셀/CSV 데이터 빌드
                             recovered_raw_rows = []
                             recovered_demo_rows = []
                             for idx_b, r_b in backup_df.iterrows():
@@ -2676,7 +2654,7 @@ def run():
                                 if "raw_row_data" in payload:
                                     recovered_raw_rows.append(payload["raw_row_data"])
                                 elif "row_data" in payload:
-                                    # ?위 ?환??
+                                    # 하위 호환성
                                     recovered_raw_rows.append(payload["row_data"])
 
                                 if "demo_row_data" in payload:
@@ -2685,7 +2663,7 @@ def run():
                             if recovered_raw_rows:
                                 import io
 
-                                # ?더 복구 로직 추?
+                                # 헤더 복구 로직 추가
                                 raw_headers = None
                                 demo_headers = None
                                 from survey_manager import load_survey_metadata
@@ -2718,19 +2696,19 @@ def run():
                                                     for i in range(len(sub_subs)):
                                                         for j in range(i + 1, len(sub_subs)):
                                                             raw_headers.append(f"{sub_subs[i]}_{sub_subs[j]}")
-                                    raw_headers.append("?출?간")
+                                    raw_headers.append("제출시간")
                                 
                                     demo_headers = ["ID", "Type"]
-                                    if demographics.get("name"): demo_headers.append("?명")
-                                    if demographics.get("age"): demo_headers.append("?령")
-                                    if demographics.get("gender"): demo_headers.append("?별")
-                                    if demographics.get("experience"): demo_headers.append("경력?수")
-                                    # if demographics.get("affiliation"): demo_headers.append("?속")
-                                    if demographics.get("email"): demo_headers.append("?메??)
-                                    demo_headers.append("?전?위지??)
+                                    if demographics.get("name"): demo_headers.append("성명")
+                                    if demographics.get("age"): demo_headers.append("연령")
+                                    if demographics.get("gender"): demo_headers.append("성별")
+                                    if demographics.get("experience"): demo_headers.append("경력년수")
+                                    # if demographics.get("affiliation"): demo_headers.append("소속")
+                                    if demographics.get("email"): demo_headers.append("이메일")
+                                    demo_headers.append("사전순위지정")
                                     if rewards_info.get("enabled"):
-                                        demo_headers.append("경품?락? if tier_level == "3" else "?????락?)
-                                    demo_headers.append("?출?간")
+                                        demo_headers.append("경품연락처" if tier_level == "3" else "답례품_연락처")
+                                    demo_headers.append("제출시간")
 
                                 df_raw_backup = pd.DataFrame(recovered_raw_rows)
                                 if raw_headers and len(raw_headers) == len(df_raw_backup.columns):
@@ -2746,7 +2724,7 @@ def run():
                                     elif demo_headers and len(demo_headers) > len(df_demo_backup.columns):
                                         df_demo_backup.columns = demo_headers[:len(df_demo_backup.columns)]
 
-                                # Excel?백업 ?이?? ?플?구조??맞춰 분할?여 ?운로드
+                                # Excel로 백업 데이터를 템플릿 구조에 맞춰 분할하여 다운로드
                                 if survey_meta and "AHP_Model_JSON" in survey_meta:
                                     excel_backup_buffer = export_to_template_excel(df_raw_backup, df_demo_backup, survey_meta["AHP_Model_JSON"], survey_meta.get("Tier_Level", 2))
                                 else:
@@ -2759,7 +2737,7 @@ def run():
                                 col_b_dl1, col_b_dl2 = st.columns(2)
                                 with col_b_dl1:
                                     st.download_button(
-                                        "? 로컬 백업 Excel ?운로드 (.xlsx)",
+                                        "📥 로컬 백업 Excel 다운로드 (.xlsx)",
                                         data=excel_backup_buffer.getvalue(),
                                         file_name=f"Backup_Recovery_{selected_sheet_id.strip()[:6]}.xlsx",
                                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2768,20 +2746,20 @@ def run():
                                     )
 
                                 with col_b_dl2:
-                                    # CSV ?일 ?태?복구 ?일 ?보?기 (Raw_Data ?선)
+                                    # CSV 파일 형태로 복구 파일 내보내기 (Raw_Data 우선)
                                     output_csv = io.StringIO()
                                     df_raw_backup.to_csv(output_csv, index=False, header=bool(raw_headers))
                                     st.download_button(
-                                        "? 로컬 백업 Raw_Data CSV ?운로드 (.csv)",
+                                        "📥 로컬 백업 Raw_Data CSV 다운로드 (.csv)",
                                         data=output_csv.getvalue().encode('utf-8-sig'),
                                         file_name=f"Backup_Recovery_Raw_{selected_sheet_id.strip()[:6]}.csv",
                                         mime="text/csv",
                                         use_container_width=True
                                     )
                     else:
-                        st.caption("???문지???록??로컬 ?버 백업 ?이?? ?습?다. (모든 ?이???상 ?재)")
+                        st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
                 except Exception as err:
-                    st.caption(f"로컬 백업 조회 불?: {err}")
+                    st.caption(f"로컬 백업 조회 불가: {err}")
 
 
         # =========================================================================
@@ -2790,68 +2768,68 @@ def run():
         with tab_guide:
             st.markdown(f"""
             <div style="padding: 10px 20px;">
-            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">1. AHP 종합????개요 ?목적</h3>
+            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">1. AHP 종합평가의 개요 및 목적</h3>
             <p style="font-size: 1.05rem; line-height: 1.8;">
-            ?비??성조사?서 AHP??경제?? ?책?? 지???발??분석 ??br>?양????????결과????<b>?기준분석</b>???행?여,<br>?업??종합?인 ??성??계량?된 ?치??단?는 ?사결정 ?구?니??<br><br>?? ?해 ????간의 ?견??종합?고, ?사결정 과정???명?과 객??을 ?보?여<br>공공?자 ?업???행 ???결정?니??
+            예비타당성조사에서 AHP는 경제성, 정책성, 지역균형발전 분석 등<br>다양한 평가항목의 결과를 토대로 <b>다기준분석</b>을 수행하여,<br>사업의 종합적인 타당성을 계량화된 수치로 판단하는 의사결정 도구입니다.<br><br>이를 통해 평가자 간의 이견을 종합하고, 의사결정 과정의 투명성과 객관성을 확보하여<br>공공투자 사업의 시행 여부를 결정합니다.
             </p>
 
-            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">2. AHP ?? 계층구조 ?계</h3>
+            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">2. AHP 평가 계층구조 설계</h3>
             <ul style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 10px;">
-            <li style="margin-bottom: 8px;"><b>??계층 (?분류):</b><br>종합???구성?는 주요 부문으?경제??분석, ?책??분석, 지???발??분석(?도??업??경우 ?외) ?으??뉩?다.</li>
-            <li style="margin-bottom: 8px;"><b>??·3계층 (?? ??):</b><br>?책??분석 ?위???업추진 ?건(?책 ?치?? 주? ?업?도 ????책?과(?자??과, ?경?? ?전????, 지???발???위??지???도 ??급?과 ?으?구성?니??</li>
-            <li><b>최하?????</b><br>최종 ?사결정???한 최하??계층? 철???<b>'?업 ?행'?'?업 미시??</b> ??가지 ??으?고정?여 ????행?니??</li>
+            <li style="margin-bottom: 8px;"><b>제1계층 (대분류):</b><br>종합평가를 구성하는 주요 부문으로 경제성 분석, 정책성 분석, 지역균형발전 분석(수도권 사업의 경우 제외) 등으로 나뉩니다.</li>
+            <li style="margin-bottom: 8px;"><b>제2·3계층 (세부 항목):</b><br>정책성 분석 하위의 사업추진 여건(정책 일치성, 주민 사업태도 등)과 정책효과(일자리 효과, 환경성, 안전성 등), 지역균형발전 하위의 지역낙후도 및 파급효과 등으로 구성됩니다.</li>
+            <li><b>최하위 대안:</b><br>최종 의사결정을 위한 최하위 계층은 철저히 <b>'사업 시행'과 '사업 미시행'</b> 두 가지 대안으로 고정하여 평가를 수행합니다.</li>
             </ul>
 
-            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">3. 부문별 가중치 ?용 기? (?수?법)</h3>
+            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">3. 부문별 가중치 적용 기준 (상수합법)</h3>
             <p style="font-size: 1.05rem; line-height: 1.8;">
-            ??계층??가중치???답?의 ?의?을 줄이??해 100??만점??기??로<br>???? 직접 분배?는 <b>?수?법(Constant-Sum)</b>???용?여 측정?니??<br><br>?비??성조사 ?행 총괄지침에 명시??주요 ?업?형?가중치 ?용 범위???음?같습?다.
+            제1계층의 가중치는 응답자의 자의성을 줄이기 위해 100점 만점을 기준으로<br>평가자가 직접 분배하는 <b>상수합법(Constant-Sum)</b>을 사용하여 측정합니다.<br><br>예비타당성조사 수행 총괄지침에 명시된 주요 사업유형별 가중치 허용 범위는 다음과 같습니다.
             </p>
             <ul style="font-size: 1.05rem; line-height: 1.8; background-color: #f8fafc; padding: 15px 20px 15px 40px; border-radius: 8px;">
-            <li><b>건설?업 (비수?권 ?형):</b> 경제??30~45%, ?책??25~40%, 지???발??30~40%</li>
-            <li><b>건설?업 (?도??형):</b> 경제??60~70%, ?책??30~40% (지???발???? ?외)</li>
-            <li><b>?보??R&D ?업 (B/C 분석 ??:</b> 경제??40~50%, 기술??30~40%, ?책??20~30%</li>
+            <li><b>건설사업 (비수도권 유형):</b> 경제성 30~45%, 정책성 25~40%, 지역균형발전 30~40%</li>
+            <li><b>건설사업 (수도권 유형):</b> 경제성 60~70%, 정책성 30~40% (지역균형발전 항목 제외)</li>
+            <li><b>정보화/R&D 사업 (B/C 분석 시):</b> 경제성 40~50%, 기술성 30~40%, 정책성 20~30%</li>
             </ul>
 
-            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">4. 조사 방법 ?조사 ?본(?문가 구성)</h3>
+            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">4. 조사 방법 및 조사 표본(전문가 구성)</h3>
             <ul style="font-size: 1.05rem; line-height: 1.8;">
-            <li style="margin-bottom: 10px;"><b>조사 ?본 (???규모 ?구성):</b><br>?????문?과 객??을 ?보?기 ?해 ?업???성??맞는 관??분야(경제, ?책, 기술, 지??????br>?계 ??구??문가 ??<b>보통 7~10???외???문가 ?널</b>??구성?여 ?문??진행?니??</li>
-            <li><b>조사 방법 (?보 ?공 ?브리??:</b><br>?순???문조사가 ?닌, ?업??개요? ?행 분석 결과(B/C 비율, ?책???지????분석 ?료 ??가 모두 ?록??<b>'AHP ?료?</b>???문가?에??공?니??<br>?? 바탕?로 ?? ?의(브리?? ?는 ?면/?라??방식???해 충분???보??????태?서 ????시?게 ?니??</li>
+            <li style="margin-bottom: 10px;"><b>조사 표본 (평가진 규모 및 구성):</b><br>평가의 전문성과 객관성을 확보하기 위해 사업의 특성에 맞는 관련 분야(경제, 정책, 기술, 지역 등)의<br>학계 및 연구계 전문가 등 <b>보통 7~10인 내외의 전문가 패널</b>을 구성하여 설문을 진행합니다.</li>
+            <li><b>조사 방법 (정보 제공 및 브리핑):</b><br>단순한 설문조사가 아닌, 사업의 개요와 선행 분석 결과(B/C 비율, 정책성 및 지역균형 분석 자료 등)가 모두 수록된 <b>'AHP 자료집'</b>을 전문가들에게 제공합니다.<br>이를 바탕으로 평가 회의(브리핑) 또는 서면/온라인 방식을 통해 충분한 정보를 숙지한 상태에서 평가를 실시하게 됩니다.</li>
             </ul>
 
-            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">5. ?문 ?행 ??수 ?정 (????검??극단?배제)</h3>
+            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">5. 설문 수행 및 점수 산정 (일관성 검증 및 극단값 배제)</h3>
             <ul style="font-size: 1.05rem; line-height: 1.8;">
-            <li style="margin-bottom: 10px;"><b>9??척도 ??비교:</b><br>?? ?? 간의 ????중요?????의 ?호?는 기본?으?9??척도??용?여 ??비교(Pairwise Comparison)??행?니??</li>
-            <li style="margin-bottom: 10px;"><b>객???지?의 ???수??</b><br>주????향??막기 ?해 경제??B/C 비율)?지???도 지??LIR)???해??학???환?을 ?용?여 ?괄 반영?니??</li>
-            <li style="margin-bottom: 10px;"><b>????검?(CR):</b><br>?무???계?고려??<b>CR??0.15 ?하</b>??경우?만 ?뢰?????는 ?효 ?답?로 ?정?며, ?? 초과?????류(Feedback)?여 ?조???을 ?구?니??</li>
-            <li><b>극단?배제 지?</b><br>집단 ?사결정 ???수 ?곡??방??고?? 최종 ?산 과정?서 ?업 ?행 ??에 ???<b style="color: #ef4444;">가???? ?수?준 1??최고???가????? ?수?준 1??최??????답??배제</b>?고, ?머지 결과??기하?균??구합?다.</li>
+            <li style="margin-bottom: 10px;"><b>9점 척도 쌍대비교:</b><br>세부 항목 간의 상대적 중요도 및 대안의 선호도는 기본적으로 9점 척도를 활용하여 쌍대비교(Pairwise Comparison)를 수행합니다.</li>
+            <li style="margin-bottom: 10px;"><b>객관적 지표의 표준점수화:</b><br>주관적 편향을 막기 위해 경제성(B/C 비율)과 지역낙후도 지수(LIR)는 정해진 수학적 전환식을 적용하여 일괄 반영합니다.</li>
+            <li style="margin-bottom: 10px;"><b>일관성 검증 (CR):</b><br>실무적 한계를 고려해 <b>CR이 0.15 이하</b>인 경우에만 신뢰할 수 있는 유효 응답으로 인정하며, 이를 초과할 시 환류(Feedback)하여 재조사 등을 요구합니다.</li>
+            <li><b>극단값 배제 지침:</b><br>집단 의사결정 시 점수 왜곡을 방지하고자, 최종 합산 과정에서 사업 시행 대안에 대해 <b style="color: #ef4444;">가장 높은 점수를 준 1인(최고점)과 가장 낮은 점수를 준 1인(최저점)의 응답을 배제</b>하고, 나머지 결과의 기하평균을 구합니다.</li>
             </ul>
 
-            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">6. 최종 ??성 ?단 기? (?색?역)</h3>
+            <h3 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px;">6. 최종 타당성 판단 기준 (회색영역)</h3>
             <ul style="font-size: 1.05rem; line-height: 1.8;">
-            <li style="margin-bottom: 10px;">기본?으??출??<b>최종 AHP 종합?수가 0.5 ?상?면 ?업 ?행????성(바람직함)???는 ?/b>?로 ?정?니??</li>
-            <li><b>?색?역(Gray Area) ?용:</b><br>?사결정??강건?을 ?보?기 ?해 종합?점??0.5 부근인 ?정 구간(?? 0.473~0.527)??'?색?역'?로 규정?니??<br>?수가 ??구간???치?거????????견 불일치? ?렷??경우 ?일?인 0.5 기? ?용??지?하? '?간 ?중', '?중' ?의 ?? ?단??거쳐 최종 ?업 추진 ???결정?도?권고?니??</li>
+            <li style="margin-bottom: 10px;">기본적으로 산출된 <b>최종 AHP 종합점수가 0.5 이상이면 사업 시행이 타당성(바람직함)이 있는 것</b>으로 판정합니다.</li>
+            <li><b>회색영역(Gray Area) 운용:</b><br>의사결정의 강건성을 확보하기 위해 종합평점이 0.5 부근인 특정 구간(예: 0.473~0.527)을 '회색영역'으로 규정합니다.<br>점수가 이 구간에 위치하거나 평가자 간 의견 불일치가 뚜렷할 경우 획일적인 0.5 기준 적용을 지양하고, '약간 신중', '신중' 등의 세부 판단을 거쳐 최종 사업 추진 여부를 결정하도록 권고합니다.</li>
             </ul>
 
             <hr style="margin-top: 45px; margin-bottom: 25px; border: 0; border-top: 1px solid #e5e7eb;">
         
-            <h3 style="color: #0f766e; margin-bottom: 15px;">7. 관??지??가?드?인 공식 ?운로드 링크</h3>
+            <h3 style="color: #0f766e; margin-bottom: 15px;">7. 관련 지침 및 가이드라인 공식 다운로드 링크</h3>
             <p style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px;">
-            ?기 AHP ?행 기???근거가 ?는 공식 가?드 문서???음???사?트?서 ?문???운로드?실 ???습?다.
+            상기 AHP 수행 기준의 근거가 되는 공식 가이드 문서는 다음의 웹사이트에서 원문을 다운로드하실 수 있습니다.
             </p>
         
             <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e; margin-bottom: 15px;">
-            <a href="https://pimac.kdi.re.kr/study/study_list.jsp?classcd=F1" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">KDI 공공?자관리센??(PIMAC)</a>
-            <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">??업 부문별(?반, ?로/철도 ?? ?비??성조사 ?행 ??지????? 조사보고???운로드</p>
+            <a href="https://pimac.kdi.re.kr/study/study_list.jsp?classcd=F1" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">KDI 공공투자관리센터 (PIMAC)</a>
+            <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">각 사업 부문별(일반, 도로/철도 등) 예비타당성조사 수행 세부지침 및 역대 조사보고서 다운로드</p>
             </div>
         
             <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e; margin-bottom: 15px;">
-            <a href="https://www.kipf.re.kr/gmac/Publication/Finance/kiPublish/CA6/Center/list.do" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">?국조세?정?구?????자분석?터 (KIPF GMAC)</a>
-            <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">?보?????정 부??업??????? 가?드?인 ?착수?의/조사보고???운로드</p>
+            <a href="https://www.kipf.re.kr/gmac/Publication/Finance/kiPublish/CA6/Center/list.do" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">한국조세재정연구원 정부투자분석센터 (KIPF GMAC)</a>
+            <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">정보화 등 특정 부문 사업에 대한 세부 가이드라인 및 착수회의/조사보고서 다운로드</p>
             </div>
         
             <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e;">
-            <a href="https://www.law.go.kr" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">??법령?보?터</a>
-            <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">법적 구속?을 갖춘 기획?정부 ?령???예비??성조사 ?용지침???예비??성조사 ?행 총괄지침??문 ?람</p>
+            <a href="https://www.law.go.kr" target="_blank" style="font-size: 1.1rem; font-weight: bold; color: #0284c7; text-decoration: none;">국가법령정보센터</a>
+            <p style="margin-top: 5px; color: #475569; font-size: 0.95rem; line-height: 1.6;">법적 구속력을 갖춘 기획재정부 훈령인 「예비타당성조사 운용지침」 및 「예비타당성조사 수행 총괄지침」 전문 열람</p>
             </div>
             </div>
             """, unsafe_allow_html=True)
@@ -2860,73 +2838,73 @@ def run():
         # TAB 4: B2B Pricing & Payment (Hybrid Pricing Applied)
         # =========================================================================
     with tab_pricing:
-        st.markdown("## ?비???금 ?내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>? ?구?법인카드 ?계산??지??/span>", unsafe_allow_html=True)
+        st.markdown("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 지원</span>", unsafe_allow_html=True)
 
         col_p1, col_p2, col_p3, col_p4 = st.columns(4)
         user_id = st.session_state.get("user_id")
 
-        # 1. 무료 체험??
+        # 1. 무료 체험판
         with col_p1:
             inner_1 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>무료 체험??/h3>
-                <span style='color: #888; font-size: 1.1rem;'>기본 ?공</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>0??/h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>?? 분석 ?루?의 ?심 ?산?결과?구성???전?????이?할 ???는 무료 버전?니??</p>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>무료 체험판</h3>
+                <span style='color: #888; font-size: 1.1rem;'>기본 제공</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>0원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>예타 분석 솔루션의 핵심 연산과 결과물 구성을 사전에 시뮬레이션할 수 있는 무료 버전입니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><span style='font-size: 0.85rem;'><b>B/C ???수 로그 변???산</b></span></li>
-                    <li><span style='font-size: 0.85rem;'><b>지???도 ??????LIR) 변??/b></span></li>
-                    <li><span style='font-size: 0.85rem;'>?문 ?이???력 (최? 3??한)</span></li>
-                    <li><span style='font-size: 0.85rem;'>?면 결과 리포??출력</span></li>
+                    <li><span style='font-size: 0.85rem;'><b>B/C 표준점수 로그 변환 연산</b></span></li>
+                    <li><span style='font-size: 0.85rem;'><b>지역낙후도 표준화지수(LIR) 변환</b></span></li>
+                    <li><span style='font-size: 0.85rem;'>설문 데이터 입력 (최대 3명 제한)</span></li>
+                    <li><span style='font-size: 0.85rem;'>화면 결과 리포트 출력</span></li>
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "무료 체험??(?구)", 0, 9999, inner_html=inner_1, is_best=False), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "무료 체험판 (영구)", 0, 9999, inner_html=inner_1, is_best=False), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("무료 체험??(?구)", inner_html=inner_1, is_best=False), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("무료 체험판 (영구)", inner_html=inner_1, is_best=False), height=520)
 
-        # 2. [Standard] ?간 ?용?
+        # 2. [Standard] 월간 이용권
         with col_p2:
             inner_2 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Standard] ?간 ?용?/h3>
-                <span style='color: #888; font-size: 1.1rem;'>1개월 무제???용</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>300,000</span>??/h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>1개월 ?안 ?????·분???수 ?한 ?이 ?? AHP ?체 기능???유? ?용?????습?다.</p>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Standard] 월간 이용권</h3>
+                <span style='color: #888; font-size: 1.1rem;'>1개월 무제한 이용</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='yeta-single-price-display-span'>300,000</span>원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>1개월 동안 평가자 수·분석 횟수 제한 없이 예타 AHP 전체 기능을 자유롭게 이용할 수 있습니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><span style='font-size: 0.85rem;'><b>1개월?분석 ?수 무제??/b></span></li>
-                    <li><span style='font-size: 0.85rem;'>???????한 ?음 (무제??</span></li>
-                    <li><span style='font-size: 0.85rem;'>최?/최소 ?웃?이???외 ?동 ?산</span></li>
-                    <li><span style='font-size: 0.85rem;'>보고???출??Excel ?본 ?보?기</span></li>
-                    <li><span style='font-size: 0.85rem;'>계산??간이과세?? ??수?발행 지??/span></li>
+                    <li><span style='font-size: 0.85rem;'><b>1개월간 분석 횟수 무제한</b></span></li>
+                    <li><span style='font-size: 0.85rem;'>평가자 수 제한 없음 (무제한)</span></li>
+                    <li><span style='font-size: 0.85rem;'>최대/최소 아웃라이어 제외 자동 연산</span></li>
+                    <li><span style='font-size: 0.85rem;'>보고서 제출용 Excel 원본 내보내기</span></li>
+                    <li><span style='font-size: 0.85rem;'>계산서(간이과세자) 및 영수증 발행 지원</span></li>
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Standard] ?간 ?용?, 300000, 1, inner_html=inner_2, is_best=False), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Standard] 월간 이용권", 300000, 1, inner_html=inner_2, is_best=False), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("[Standard] ?간 ?용?, inner_html=inner_2, is_best=False), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("[Standard] 월간 이용권", inner_html=inner_2, is_best=False), height=520)
 
-        # 3. [Pro] ?간 ?용?(BEST)
+        # 3. [Pro] 연간 이용권 (BEST)
         with col_p3:
             inner_3 = """
-                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Pro] ?간 ?용?/h3>
-                <span style='color: #888; font-size: 1.1rem;'>1??무제???용</span>
-                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,800,000??/h2>
-                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>?간 ??22% ?감??비용?로 1?간 ?수 ?한 ?이 ?? AHP 분석??문 배포??행?니??</p>
+                <h3 style='margin-top: 0 !important; margin-bottom: 0;'>[Pro] 연간 이용권</h3>
+                <span style='color: #888; font-size: 1.1rem;'>1년 무제한 이용</span>
+                <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>2,800,000원</h2>
+                <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>월간 대비 22% 절감된 비용으로 1년간 횟수 제한 없이 예타 AHP 분석과 설문 배포를 수행합니다.</p>
                 <hr style='margin: 10px 0;'>
                 <ul style='padding-left: 20px; color: #333; line-height: 1.6;'>
-                    <li><span style='font-size: 0.85rem;'><b>1?간 분석 ?수 무제??/b></span></li>
-                    <li><span style='font-size: 0.85rem;'><b>????233,000???? (22% ?감)</b></span></li>
-                    <li><span style='font-size: 0.85rem;'>무제???문가 ?문 ??웃?이???산</span></li>
-                    <li><span style='font-size: 0.85rem;'>B2B 기업??견적??계산??간이과세?? 발행</span></li>
+                    <li><span style='font-size: 0.85rem;'><b>1년간 분석 횟수 무제한</b></span></li>
+                    <li><span style='font-size: 0.85rem;'><b>월 약 233,000원 수준 (22% 절감)</b></span></li>
+                    <li><span style='font-size: 0.85rem;'>무제한 전문가 설문 및 아웃라이어 연산</span></li>
+                    <li><span style='font-size: 0.85rem;'>B2B 기업용 견적서/계산서(간이과세자) 발행</span></li>
                 </ul>
             """
             if user_id:
-                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Pro] ?간 ?용?, 2800000, 12, inner_html=inner_3, is_best=True), height=520)
+                st.components.v1.html(get_yeta_portone_payment_html(user_id, "[Pro] 연간 이용권", 2800000, 12, inner_html=inner_3, is_best=True), height=520)
             else:
-                st.components.v1.html(get_yeta_login_redirect_html("[Pro] ?간 ?용?, inner_html=inner_3, is_best=True), height=520)
+                st.components.v1.html(get_yeta_login_redirect_html("[Pro] 연간 이용권", inner_html=inner_3, is_best=True), height=520)
 
-        # 4. 부가 ?비?????
+        # 4. 부가 서비스 대행
         with col_p4:
             if user_id:
                 st.components.v1.html(get_yeta_portone_custom_services_html(user_id), height=520)
@@ -2936,28 +2914,28 @@ def run():
         st.markdown("<br>", unsafe_allow_html=True)
 
         if not user_id:
-            st.warning("?️ 결제 ?계산??간이과세?? ?청???해?는 로그?이 ?요?니?? 메인 ?털 ?는 ?이?바?서 로그?????용??주세??")
+            st.warning("⚠️ 결제 및 계산서(간이과세자) 신청을 위해서는 로그인이 필요합니다. 메인 포털 또는 사이드바에서 로그인 후 이용해 주세요.")
         else:
-            st.info(f"?속 계정: {user_id} | ?이?스 권한: {'?식 ?원' if is_official else '무료 체험 ?원'}")
+            st.info(f"접속 계정: {user_id} | 라이선스 권한: {'정식 회원' if is_official else '무료 체험 회원'}")
             
             st.markdown("<div id='b2b-payment-section'></div>", unsafe_allow_html=True)
             st.write("---")
             
             with st.form("yeta_tax_form"):
-                st.write("**B2B 기업/?구???용 지?처리 (계좌?체 ?계산??간이과세?? ?청)**")
-                st.write("계산??간이과세?? 발행 ?기? 계좌?체 ?인???요???보??력??주세??")
-                biz_name = st.text_input("?호 / 법인?, key="tax_biz_name")
-                biz_num = st.text_input("?업?등록번??(?자??력)", key="tax_biz_num")
-                rep_name = st.text_input("??자?, key="tax_rep_name")
-                address = st.text_input("?업??주소", key="tax_address")
-                biz_type = st.text_input("?태 ?종목", key="tax_biz_type")
-                email = st.text_input("계산??간이과세?? ?령 ?메??, key="tax_email", value=user_id if "@" in user_id else "")
-                plan_choice = st.selectbox("?택 ?금???랜", ["?간 ?용?(300,000??", "?간 ?용?(2,800,000??"])
+                st.write("**B2B 기업/연구소 전용 지불 처리 (계좌이체 및 계산서(간이과세자) 신청)**")
+                st.write("계산서(간이과세자) 발행 및 기관 계좌이체 승인에 필요한 정보를 입력해 주세요.")
+                biz_name = st.text_input("상호 / 법인명", key="tax_biz_name")
+                biz_num = st.text_input("사업자등록번호 (숫자만 입력)", key="tax_biz_num")
+                rep_name = st.text_input("대표자명", key="tax_rep_name")
+                address = st.text_input("사업장 주소", key="tax_address")
+                biz_type = st.text_input("업태 및 종목", key="tax_biz_type")
+                email = st.text_input("계산서(간이과세자) 수령 이메일", key="tax_email", value=user_id if "@" in user_id else "")
+                plan_choice = st.selectbox("선택 요금제 플랜", ["월간 이용권 (300,000원)", "연간 이용권 (2,800,000원)"])
                 
-                submit_tax = st.form_submit_button("계산??간이과세??/?보?스 발행 ?청", use_container_width=True)
+                submit_tax = st.form_submit_button("계산서(간이과세자)/인보이스 발행 요청", use_container_width=True)
                 if submit_tax:
                     if not biz_name or not biz_num or not email:
-                        st.error("?호? ?업?번?? ?메?? ?수 ?력 ?항?니??")
+                        st.error("상호명, 사업자번호, 이메일은 필수 입력 사항입니다.")
                     else:
                         try:
                             conn = get_db_connection('users.db')
@@ -2973,9 +2951,9 @@ def run():
                             # Send tax invoice email
                             send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_choice)
                             
-                            st.success("??계산??간이과세?? ?결제 ?청???수?었?니?? ?력?신 ?메?로 24?간 ?내???보?스/견적??발송 ??금 계좌??내???립?다.")
+                            st.success("✓ 계산서(간이과세자) 및 결제 요청이 접수되었습니다! 입력하신 이메일로 24시간 이내에 인보이스/견적서 발송 및 입금 계좌를 안내해 드립니다.")
                         except Exception as e:
-                            st.error(f"?청 ?수 ?패: {str(e)}")
+                            st.error(f"요청 접수 실패: {str(e)}")
                         finally:
                             conn.close()
 
@@ -2983,3 +2961,30 @@ def run():
     # TAB 5: Sign Up (Only shown when not logged in)
     # =========================================================================
     if not st.session_state.user_id:
+        with tab_signup:
+            st.write("### " + "AHP 마스터 예타 분석 솔루션 회원가입")
+            
+            agreements = signup_agreement.show_agreement_ui()
+            
+            s_id = st.text_input("아이디 (이메일 주소)", key="main_s_id_yeta")
+            s_pw = st.text_input("비밀번호", type="password", key="main_s_pw_yeta")
+            
+            s_cust_type = "yeta"
+            
+            if st.button("가입신청", key="main_btn_signup_yeta", type="primary"):
+                if not agreements.get("agree_personal_info"):
+                    st.error("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.")
+                elif not validate_email(s_id):
+                    st.error("올바른 이메일 형식이 아닙니다.")
+                elif not validate_password(s_pw):
+                    st.error("비밀번호는 문자+특수문자여야 합니다.")
+                else:
+                    restore_from_deleted_sheet(s_id.strip())
+                    if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                        st.success("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.")
+                        time.sleep(2)
+                        st.rerun()
+                    else:
+                        st.error("이미 존재하는 아이디입니다.")
+
+            st.info("🔒 **개인정보 보호 안내**\n\n예타 AHP 시스템은 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.")
