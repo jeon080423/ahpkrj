@@ -9389,7 +9389,7 @@ with contextlib.nullcontext():
                         </div>
                         ''', unsafe_allow_html=True)
 
-                    if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
+                    if st.button(_("✨ 처음부터 새 설문 작성하기", "✨ Start a new survey from scratch"), type="secondary", use_container_width=True):
                          confirm_new_survey()
                     else:
                         if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
