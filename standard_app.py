@@ -64,17 +64,17 @@ def hash_password(password: str) -> str:
     return hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
 
 def generate_temp_password() -> str:
-    """가입 시 비밀번호 유효성 검사를 통과하는 8자리 임시 비밀번호를 생성합니다."""
+    """가????비?번호 ?효??검?? ?과?는 8?리 ?시 비?번호??성?니??"""
     chars = string.ascii_letters + string.digits
     specials = "!@#$%^&*"
-    # 최소 1개 영문자, 1개 숫자, 1개 특수문자를 포함하도록 구성
+    # 최소 1??문?? 1??자, 1??수문자??함?도?구성
     temp = [
         random.choice(string.ascii_lowercase),
         random.choice(string.uppercase) if hasattr(string, 'uppercase') else random.choice(string.ascii_uppercase),
         random.choice(string.digits),
         random.choice(specials)
     ]
-    # 나머지 4자리는 영문/숫자 중 무작위 선택
+    # ?머지 4?리???문/?자 ?무작???택
     temp += [random.choice(chars) for _ in range(4)]
     random.shuffle(temp)
     return "".join(temp)
@@ -94,10 +94,10 @@ st_javascript = LazyFunction('streamlit_javascript', 'st_javascript')
 
 import base64
 
-# IP 위치 추적 및 공인 IP 추출을 위한 라이브러리 추가
-# (requests는 LazyLoader로 처리)
+# IP ?치 추적 ?공인 IP 추출???한 ?이브러?추?
+# (requests??LazyLoader?처리)
 
-# ANOVA 및 사후검정을 위한 라이브러리 (없을 경우 예외처리)
+# ANOVA ??후검?을 ?한 ?이브러?(?을 경우 ?외처리)
 class LazyTukeyHSD:
     def __call__(self, *args, **kwargs):
         try:
@@ -110,7 +110,7 @@ STATSMODELS_AVAILABLE = True
 
 
 # -----------------------------------------------------------------------------
-# 다국어(English/Korean) 번역 헬퍼 함수
+# ?국??English/Korean) 번역 ?퍼 ?수
 # -----------------------------------------------------------------------------
 try:
     if 'lang' not in st.session_state:
@@ -150,23 +150,23 @@ def _t(text):
     except:
         pass
     return text
-DEFAULT_SURVEY_DESC_KO = """[조사 목적 및 안내문]
+DEFAULT_SURVEY_DESC_KO = """[조사 목적 ??내?
 
-안녕하십니까?
-본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다. 
-바쁘시더라도 잠시 시간을 내어 귀하의 귀중한 의견을 응답해 주시면 연구에 큰 도움이 될 것입니다.
+?녕?십?까?
+??문조사??[?구/?로?트 주제]??관??주요 ?인?의 ????중요?? ?출?기 ?해 ?문가(?는 ?무?? ?러분의 고견???렴?고??마련?었?니?? 
+바쁘?더?도 ?시 ?간???어 귀?의 귀중한 ?견???답??주시??구??????????것입?다.
 
-■ 조사 목적 : [연구/프로젝트 목적 기재]
-■ 조사 내용 : [조사 대상 요인] 간의 AHP(쌍대비교) 평가
-■ 조사 기간 : 202X년 X월 X일 ~ 202X년 X월 X일
-■ 개인정보 보호 : 
-본 조사를 통해 수집된 모든 자료는 통계법 제33조(비밀의 보호)에 의거하여 철저히 보호되며, 오직 연구 및 통계 분석 목적으로만 활용됩니다.
-응답해주신 개인 정보 및 개별 응답 결과는 절대 외부로 유출되지 않음을 약속드립니다.
+??조사 목적 : [?구/?로?트 목적 기재]
+??조사 ?용 : [조사 ????인] 간의 AHP(??비교) ??
+??조사 기간 : 202X??X??X??~ 202X??X??X??
+??개인?보 보호 : 
+?조사??해 ?집??모든 ?료???계???3?비???보호)???거?여 철???보호?며, ?직 ?구 ??계 분석 목적?로??용?니??
+?답?주??개인 ?보 ?개별 ?답 결과???? ????출?? ?음???속?립?다.
 
-귀하의 소중한 참여에 깊은 감사를 드립니다.
+귀?의 ?중??참여??깊? 감사??립?다.
 
-- 연구 책임자 : [이름 기재]
-- 문의처 : [연락처 또는 이메일 기재]"""
+- ?구 책임??: [?름 기재]
+- 문의?: [?락??는 ?메??기재]"""
 
 DEFAULT_SURVEY_DESC_EN = """[Survey Purpose & Instructions]
 
@@ -174,10 +174,10 @@ Greetings,
 This survey is designed to collect the valuable opinions of experts (or practitioners) to derive the relative importance of key factors regarding [Research/Project Topic].
 Your participation will be of great help to our research, and we would deeply appreciate it if you could take a moment out of your busy schedule to respond.
 
-■ Purpose : [Enter Research/Project Purpose]
-■ Content : AHP (Pairwise Comparison) evaluation among [Target Factors]
-■ Period : 202X-XX-XX ~ 202X-XX-XX
-■ Privacy Policy : 
+??Purpose : [Enter Research/Project Purpose]
+??Content : AHP (Pairwise Comparison) evaluation among [Target Factors]
+??Period : 202X-XX-XX ~ 202X-XX-XX
+??Privacy Policy : 
 All data collected through this survey will be strictly protected in accordance with privacy laws and used solely for research and statistical analysis purposes. We promise that your personal information and individual responses will never be leaked externally.
 
 Thank you very much for your valuable participation.
@@ -188,57 +188,57 @@ Thank you very much for your valuable participation.
 # Default definition mappings for auto-translation to English when survey is loaded in English mode
 DEFAULT_TRANSLATED_DEFS = {
     DEFAULT_SURVEY_DESC_KO: DEFAULT_SURVEY_DESC_EN,
-    "제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문": "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots",
-    "협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인": "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.",
-    "협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인": "Factors related to the internal capabilities of the organization, top management support, financial and training status.",
-    "정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인": "External environmental factors such as government support, competitive pressure within the industry, labor shortage, and external cooperation.",
-    "경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인": "Factors such as the management's innovation orientation, members' acceptance of change, and smart factory knowledge/skill levels.",
-    "도입대상 협동로봇간의 상대적 이점": "Relative advantage among the collaborative robots targeted for adoption.",
-    "기존 설비나 타사 협동로봇과의 연결성": "Connectivity with existing equipment or third-party collaborative robots.",
-    "작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준": "Level of human accident prevention when working in the same space as operators without safety fences.",
-    "공급사의 기술 및 A/S 지원 정도": "Degree of technical and A/S support from the supplier.",
-    "경영진의 도입 의지 및 경영철학 반영도": "The management's willingness to adopt and the degree to which management philosophy is reflected.",
-    "조직원의 로봇 활용 기술 준비 수준": "The level of technical readiness of organizational members to utilize robots.",
-    "로봇 구입을 위한 자본 여력 및 자금 조달 편의성": "Capital capacity and financing convenience for purchasing robots.",
-    "기술 향상을 위한 위탁/사내 교육 프로그램 유무": "Availability of external/internal training programs for skill improvement.",
-    "협동로봇 도입을 활성화하기 위한 정부의 재정 지원 및 보조금 혜택 정도": "Degree of government financial support and subsidy benefits to promote the adoption of collaborative robots.",
-    "동종 업계 또는 경쟁사의 협동로봇 도입에 따른 경쟁적 압박 정도": "Degree of competitive pressure due to the adoption of collaborative robots by peers or competitors.",
-    "제조 현장의 구인난 및 생산 인력 수급의 어려움 수준": "Level of difficulty in finding labor and supplying production personnel at the manufacturing site.",
-    "로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적/교육적 지원": "Technical/educational support from external consulting, research institutes, etc., other than the robot supplier.",
-    "최고경영자의 적극적인 의지": "The top management's active willingness to adopt new manufacturing technologies and robots.",
-    "새로운 제조 기술 및 로봇 도입에 대한 최고경영자의 적극적인 의지": "The top management's active willingness to adopt new manufacturing technologies and robots.",
-    "신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도": "Members' acceptance and cooperative attitude towards changes in new equipment and work processes.",
-    "공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준": "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.",
-    "협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준": "Level of internal expertise required for the utilization and maintenance of collaborative robots.",
-    "기능성": "Functionality",
-    "디자인": "Design",
-    "경제성": "Economy",
-    "하드웨어": "Hardware",
-    "소프트웨어": "Software",
-    "외관": "Appearance",
-    "편의성": "Usability",
-    "단말기가격": "Device Price",
-    "유지비용": "Maintenance Cost",
-    "기술 요인": "Technological",
-    "조직 요인": "Organizational",
-    "환경 요인": "Environmental",
-    "혁신 요인": "Innovational",
-    "상대적이점": "Relative Advantage",
-    "호환성": "Compatibility",
-    "안전성": "Security",
-    "서비스지원": "Service Support",
-    "경영진지원": "Top Management Support",
+    "?조???동로봇 ?입 ?인 중요??분석???한 ?문가 AHP ?문": "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots",
+    "?동로봇 ?입 ??기술???능, ?환?? ?전???기술 지????기술 측면???인": "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.",
+    "?동로봇 ?입?관?된 조직 ??????, 경영?지?? ?무 ?교육 ?태 ?인": "Factors related to the internal capabilities of the organization, top management support, financial and training status.",
+    "?? 지?? ?업 ??경쟁 ?력, 구인????? ?력 ???? ?경???인": "External environmental factors such as government support, competitive pressure within the industry, labor shortage, and external cooperation.",
+    "경영진의 ?신 지?성, 구성?의 변???용????마???토?지??기술 ?? ?인": "Factors such as the management's innovation orientation, members' acceptance of change, and smart factory knowledge/skill levels.",
+    "?입????동로봇간의 ?????점": "Relative advantage among the collaborative robots targeted for adoption.",
+    "기존 ?비??????동로봇과의 ?결??: "Connectivity with existing equipment or third-party collaborative robots.",
+    "?업?? 같? 공간?서 ?전 ?스 ?이 ?업???의 ?적 ?고 ?방 ??": "Level of human accident prevention when working in the same space as operators without safety fences.",
+    "공급?의 기술 ?A/S 지???도": "Degree of technical and A/S support from the supplier.",
+    "경영진의 ?입 ?? ?경영철학 반영??: "The management's willingness to adopt and the degree to which management philosophy is reflected.",
+    "조직?의 로봇 ?용 기술 준???": "The level of technical readiness of organizational members to utilize robots.",
+    "로봇 구입???한 ?본 ?력 ??금 조달 ?의??: "Capital capacity and financing convenience for purchasing robots.",
+    "기술 ?상???한 ?탁/?내 교육 ?로그램 ?무": "Availability of external/internal training programs for skill improvement.",
+    "?동로봇 ?입???성?하??한 ?????정 지???보조??택 ?도": "Degree of government financial support and subsidy benefits to promote the adoption of collaborative robots.",
+    "?종 ?계 ?는 경쟁?의 ?동로봇 ?입???른 경쟁???박 ?도": "Degree of competitive pressure due to the adoption of collaborative robots by peers or competitors.",
+    "?조 ?장??구인????산 ?력 ?급???려? ??": "Level of difficulty in finding labor and supplying production personnel at the manufacturing site.",
+    "로봇 공급???의 ?? 컨설?? ?구기? ?의 기술??교육??지??: "Technical/educational support from external consulting, research institutes, etc., other than the robot supplier.",
+    "최고경영?의 ?극?인 ??": "The top management's active willingness to adopt new manufacturing technologies and robots.",
+    "?로???조 기술 ?로봇 ?입?????최고경영?의 ?극?인 ??": "The top management's active willingness to adopt new manufacturing technologies and robots.",
+    "?규 ?비 ??업 ?로?스 변?에 ???구성?들???용 ??조 ?도": "Members' acceptance and cooperative attitude towards changes in new equipment and work processes.",
+    "공장 ?????화, ?보?스??MES ?? ??동??기술???재 구축 ??": "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.",
+    "?동로봇 ?용 ??? 관리에 ?요??조직 ???문 지????": "Level of internal expertise required for the utilization and maintenance of collaborative robots.",
+    "기능??: "Functionality",
+    "?자??: "Design",
+    "경제??: "Economy",
+    "?드?어": "Hardware",
+    "?프?웨??: "Software",
+    "??": "Appearance",
+    "?의??: "Usability",
+    "?말기??: "Device Price",
+    "??비용": "Maintenance Cost",
+    "기술 ?인": "Technological",
+    "조직 ?인": "Organizational",
+    "?경 ?인": "Environmental",
+    "?신 ?인": "Innovational",
+    "???이??: "Relative Advantage",
+    "?환??: "Compatibility",
+    "?전??: "Security",
+    "?비????: "Service Support",
+    "경영진???: "Top Management Support",
     "기술준비도": "Tech Readiness",
-    "금융자원": "Financial Resources",
-    "교육훈련": "Training",
-    "정부지원": "Gov Support",
-    "경쟁압력": "Competitive Pressure",
-    "인력난": "Labor Shortage",
-    "외부지원": "External Support",
-    "경영진의 혁신성": "Management Innovativeness",
-    "변화수용태도": "Change Acceptance",
-    "스마트팩토리수준": "Smart Factory Level",
-    "지식정도": "Knowledge Level"
+    "금융?원": "Financial Resources",
+    "교육?련": "Training",
+    "??지??: "Gov Support",
+    "경쟁?력": "Competitive Pressure",
+    "?력??: "Labor Shortage",
+    "??지??: "External Support",
+    "경영진의 ?신??: "Management Innovativeness",
+    "변?수?태??: "Change Acceptance",
+    "?마?팩?리??": "Smart Factory Level",
+    "지?정??: "Knowledge Level"
 }
 
 def translate_definition_if_default(factor_name, def_text):
@@ -264,12 +264,12 @@ def translate_definition_if_default(factor_name, def_text):
     # Translate the factor_name in pattern matching to match Korean if it's saved in Korean
     trans_factor = DEFAULT_TRANSLATED_DEFS.get(factor_name, _t(factor_name))
     
-    # 2. Pattern matches for "{factor}에 대한 정의입니다." or "{factor}에 대한 정의 입니다."
-    pattern1 = rf"^(?:{re.escape(factor_name)}|{re.escape(trans_factor)})\s*에\s*대한\s*정의\s*입니다\.?$"
+    # 2. Pattern matches for "{factor}??????의?니??" or "{factor}??????의 ?니??"
+    pattern1 = rf"^(?:{re.escape(factor_name)}|{re.escape(trans_factor)})\s*??s*???s*?의\s*?니??.?$"
     if re.match(pattern1, clean_def):
         return f"Definition for {trans_factor}."
         
-    pattern2 = rf"^(?:{re.escape(factor_name)}|{re.escape(trans_factor)})\s*에\s*대한\s*전반적\s*요소를\s*설명합니다\.?$"
+    pattern2 = rf"^(?:{re.escape(factor_name)}|{re.escape(trans_factor)})\s*??s*???s*?반??s*?소?s*?명?니??.?$"
     if re.match(pattern2, clean_def):
         return f"Overall description for {trans_factor}."
         
@@ -281,104 +281,104 @@ def translate_factor_if_default(factor_name):
     return DEFAULT_TRANSLATED_DEFS.get(factor_name, _t(factor_name))
 
 # =============================================================================
-# 0. 시스템 설정 및 유틸리티
+# 0. ?스???정 ??틸리티
 # =============================================================================
 
-# [수정] Base64 문자열의 패딩 및 정제를 위한 유틸리티 함수 강화
+# [?정] Base64 문자?의 ?딩 ??제??한 ?틸리티 ?수 강화
 def fix_base64_padding(data):
     """
-    Base64 문자열의 패딩(Incorrect padding) 오류를 수정하는 함수
+    Base64 문자?의 ?딩(Incorrect padding) ?류??정?는 ?수
     """
     if isinstance(data, str):
-        # 1. 모든 공백 및 줄바꿈 문자 제거 (가장 중요한 수정)
+        # 1. 모든 공백 ?줄바?문자 ?거 (가??중요???정)
         data = re.sub(r'\s+', '', data)
         
-        # 2. 패딩(=) 계산 및 추가
+        # 2. ?딩(=) 계산 ?추?
         missing_padding = len(data) % 4
         if missing_padding:
             data += '=' * (4 - missing_padding)
     return data
 
-# [수정 반영] 1) SEO 태그 삽입, 2) 서비스 명 변경(AHP 마스터), 4) 파비콘 설정
+# [?정 반영] 1) SEO ?그 ?입, 2) ?비???변?AHP 마스??, 4) ?비??정
 try:
     from PIL import Image
     favicon_path = "favicon.png"
     if os.path.exists(favicon_path):
         favicon_img = Image.open(favicon_path)
     else:
-        favicon_img = "📊"
+        favicon_img = "?"
     
     st.set_page_config(
-        page_title=_("AHP 분석 프로그램 | 온라인 AHP 설문·퍼지 AHP 통계 솔루션 – AHP Master", "AHP Master | Traditional & Fuzzy AHP Decision Analysis System"),
+        page_title=_("AHP 분석 ?로그램 | ?라??AHP ?문·?? AHP ?계 ?루????AHP Master", "AHP Master | Traditional & Fuzzy AHP Decision Analysis System"),
         layout="wide", 
         page_icon=favicon_img,
         menu_items={
             'Get Help': None,
             'Report a bug': None,
-            'About': _("AHP 마스터 - 스마트 일반 및 퍼지 AHP 의사결정 분석 시스템", "AHP Master - Smart Traditional & Fuzzy AHP Decision Analysis System")
+            'About': _("AHP 마스??- ?마???반 ??? AHP ?사결정 분석 ?스??, "AHP Master - Smart Traditional & Fuzzy AHP Decision Analysis System")
         }
     )
 except Exception:
     try:
-        st.set_page_config(page_title=_("AHP 마스터 | 퍼지 AHP 지원", "AHP Master | Fuzzy AHP Support"), layout="wide", page_icon="📊")
+        st.set_page_config(page_title=_("AHP 마스??| ?? AHP 지??, "AHP Master | Fuzzy AHP Support"), layout="wide", page_icon="?")
     except Exception:
         pass
 
-# [수정 반영] 메타 코드가 화면에 노출되지 않도록 display:none 스타일을 추가한 SEO 태그 (영한 통합 검색 최적화)
-# [추가] 네이버 서치어드바이저 및 검색 엔진 크롤러 수집을 위해 메타 태그, canonical, JSON-LD 구조화 데이터를 실제 헤드(Parent Head)에 동적으로 삽입하는 1x1 이미지 로더 스크립트 탑재
+# [?정 반영] 메? 코드가 ?면???출?? ?도?display:none ???을 추???SEO ?그 (?한 ?합 검??최적??
+# [추?] ?이??치?드바이? ?검???진 ?롤???집???해 메? ?그, canonical, JSON-LD 구조???이?? ?제 ?드(Parent Head)???적?로 ?입?는 1x1 ??지 로더 ?크립트 ?재
 seo_tags = """<div style="display:none;">
-<title>AHP마스터 - AHP 의사결정 분석</title>
+<title>AHP마스??- AHP ?사결정 분석</title>
 <!-- Multilingual Description -->
-<meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. 학위논문 및 연구용 AHP/퍼지 AHP 분석 솔루션 (AHP 분석 대행, 엑셀 템플릿 자동화, 3계층 모델 쌍대비교 설문지 자동 생성, 응답자 CR 값 0.1 이하 관리, 재설문 방지, 요인별/종합 가중치 계산 및 그래프 시각화 지원). 专业层次分析法(AHP)及模糊层次分析法在线软件与计算器。階層分析法(AHP)ツール。Software del Proceso de Análisis Jerárquico (AHP). Processus d'Analyse Hiérarchique. Analytischer Hierarchieprozess. Quá trình Phân tích Phân cấp. विश्लेषणात्मक पदानुक्रम प्रक्रिया. Analitiese Hiërargieproses. Метод анализа иерархий." />
+<meta name="description" content="AHP Master - Professional Analytic Hierarchy Process (AHP) & Fuzzy AHP automation software tool for thesis, academic papers, and research. Supports Consistency Ratio (CR) calibration, group geometric mean calculation, ANOVA testing. ?위?문 ??구??AHP/?? AHP 분석 ?루??(AHP 분석 ??? ?? ?플??동?? 3계층 모델 ??비교 ?문지 ?동 ?성, ?답??CR ?0.1 ?하 관? ?설?방?, ?인?종합 가중치 계산 ?그래???각??지??. 专业层次?析?AHP)?模糊层次分?法?线?与?算器?階層分?法(AHP)?ー?。Software del Proceso de Análisis Jerárquico (AHP). Processus d'Analyse Hiérarchique. Analytischer Hierarchieprozess. Quá trình Phân tích Phân cấp. विश्लेषणात्म?पदानुक्र?प्रक्रिय? Analitiese Hiërargieproses. ?е?од анализа ие?а??ий." />
 <!-- Multilingual Keywords -->
-<meta name="keywords" content="AHP, Fuzzy AHP, Expert AHP Survey, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스터, AHP 프로그램, AHP 엑셀, AHP 분석 대행, AHP 분석 템플릿, AHP 논문 분석, AHP 일관성 비율 보정, AHP 가중치 계산, 학위논문 AHP 통계, 层次分析法, 模糊层次分析法, 层次分析법计算器, 层次分析법软件, 论文AHP分析, 一致性比例, 階層分析法, ファジィAHP, AHPソフトウェア, AHPツール, Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP, Processus d'Analyse Hiérarchique, AHP Flou, Logiciel AHP, Quá trình Phân tích Phân cấp, AHP mờ, Phần mềm AHP, Analytischer Hierarchieprozess, AHP-Software, AHP Rechner, विश्लेषणात्मक पदानुक्रम प्रक्रिया, फ़ज़ी AHP, AHP SOFTWARE, Analitiese Hiërargieproses, Vae AHP, AHP-sagteware, Метод анализа иерархий, Нечеткий AHP, Программное обеспечение AHP, عملية التحليل الهرمي, عملية التحليل الهرمي الضبابي, برنامج AHP" />
+<meta name="keywords" content="AHP, Fuzzy AHP, Expert AHP Survey, AHP calculator, Fuzzy AHP calculator, Analytic Hierarchy Process software, Consistency Ratio, CR calibration, AHP group consensus, AHP software for thesis, AHP excel template, AHP 마스?? AHP ?로그램, AHP ??, AHP 분석 ??? AHP 분석 ?플? AHP ?문 분석, AHP ????비율 보정, AHP 가중치 계산, ?위?문 AHP ?계, 层次?析? 模糊层次?析? 层次?析법?算器, 层次?析법软? 论文AHP?析, 一?性比? ?層?析? ?ァ?ィAHP, AHP?フ?ウ?ア, AHP?ー?? Proceso de Análisis Jerárquico, AHP Difuso, Software AHP, Calculadora AHP, Processus d'Analyse Hiérarchique, AHP Flou, Logiciel AHP, Quá trình Phân tích Phân cấp, AHP m? Phần mềm AHP, Analytischer Hierarchieprozess, AHP-Software, AHP Rechner, विश्लेषणात्म?पदानुक्र?प्रक्रिय? फ़ज़ी AHP, AHP SOFTWARE, Analitiese Hiërargieproses, Vae AHP, AHP-sagteware, ?е?од анализа ие?а??ий, ?е?е?кий AHP, ??ог?аммное обе?пе?ение AHP, ع???ة ا?تح??? ا??ر??, ع???ة ا?تح??? ا??ر?? ا?ضباب?, بر?ا?ج AHP" />
 <meta name="author" content="AHP Master" />
 <meta name="robots" content="index, follow" />
 <meta name="google-site-verification" content="FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs" />
 <meta name="naver-site-verification" content="f0561d996c39ca52dcc47cf2aad128c5e586a1d6" />
 <!-- Open Graph Tags -->
-<meta property="og:title" content="AHP Master - Global AHP & Fuzzy AHP Analysis Software (层次分析법, 階層分析法)" />
+<meta property="og:title" content="AHP Master - Global AHP & Fuzzy AHP Analysis Software (层次?析? ?層?析?" />
 <meta property="og:description" content="Advanced AHP & Fuzzy AHP decision software with mathematical consistency ratio (CR) calibration, group consensus, and statistical comparison for global researchers." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://ahpkrj.streamlit.app/" />
 <!-- Hidden content for deep indexing -->
 <h1>AHP Master - Analytic Hierarchy Process & Fuzzy AHP Calculator</h1>
 <p>AHP Master is a powerful online software for Traditional AHP and Fuzzy AHP analysis. Perfect for academic thesis, research papers, and corporate decision making. Features automatic consistency ratio (CR) improvement and Excel exports.</p>
-<h2>层次分析법 (AHP) & 模糊层次分析法 在线计算器과 소프트웨어</h2>
-<p>专为学术论文와 연구를 위해 설계된 계층분석과정(AHP) 자동화 분석 도구입니다. 일관성 비율(CR) 자동 보정, 그룹 기하평균 계산, ANOVA 분석 및 엑셀 보고서 내보내기를 지원합니다.</p>
-<h2>階層分析법 (AHP) & ファジィAHP ソフトウェア</h2>
-<p>論文や研究のための階層分析법(AHP)自動화툴. 一貫성比率(CR)의 조정이나 Excelレポート出力に対応。</p>
+<h2>层次?析?(AHP) & 模糊层次?析??线计算?과 ?프?웨??/h2>
+<p>专为?论文? ?구??해 ?계??계층분석과정(AHP) ?동??분석 ?구?니?? ????비율(CR) ?동 보정, 그룹 기하?균 계산, ANOVA 분석 ??? 보고???보?기?지?합?다.</p>
+<h2>?層?析?(AHP) & ?ァ?ィAHP ?フ?ウ?ア</h2>
+<p>論文?研究の?め??層分?법(AHP)?動?툴. 一貫성比率(CR)??조정?나 Excel?ポ?ト?力??応?/p>
 <h2>Proceso de Análisis Jerárquico (AHP) y AHP Difuso</h2>
 <p>Software y calculadora en línea para el Proceso de Análisis Jerárquico (AHP). Ideal para tesis y toma de decisiones, con calibración automática de la Relación de Consistencia (CR).</p>
 <h2>Processus d'Analyse Hiérarchique (AHP) et AHP Flou</h2>
 <p>Logiciel et calculatrice en ligne pour le Processus d'Analyse Hiérarchique (AHP). Idéal pour les thèses académiques et la prise de décision, con calibrage automatique du ratio de cohérence (CR).</p>
 <h2>Analytischer Hierarchieprozess (AHP) und Fuzzy AHP</h2>
 <p>AHP-Software und Rechner für akademische Arbeiten und Forschung. Unterstützt automatische Anpassung der Konsistenzrate (CR).</p>
-<h2>Quá trình Phân tích Phân cấp (AHP) & AHP mờ</h2>
-<p>Phần mềm tự động hóa phân tích AHP và AHP mờ (Fuzzy AHP) chuyên nghiệp dành for luận văn và nghiên cứu.</p>
-<h2>विश्लेषणात्मक पदानुक्रम प्रक्रिया (AHP) और फ़ज़ी AHP</h2>
-<p>शोध प्रबंध, अकादमिक पत्रों and अनुसंधान के लिए पेशेवर AHP and फ़ज़ी AHP स्वचालित सॉफ्टवेयर टूल。</p>
+<h2>Quá trình Phân tích Phân cấp (AHP) & AHP m?/h2>
+<p>Phần mềm t?động hóa phân tích AHP và AHP m?(Fuzzy AHP) chuyên nghiệp dành for luận văn và nghiên cứu.</p>
+<h2>विश्लेषणात्म?पदानुक्र?प्रक्रिय?(AHP) और फ़ज़ी AHP</h2>
+<p>शो?प्रबंध, अकाद??पत्रों and अनुसंधान के लि?पेशेवर AHP and फ़ज़ी AHP स्वचालित सॉफ्टवेय?टूल?/p>
 <h2>Analitiese Hiërargieproses (AHP) en Vae AHP</h2>
 <p>AHP-sagteware instrument vir proefskrifte en navorsing. Ondersteun outomatiese CR kalibrasie en groep geometriese gemiddelde berekening.</p>
-<h2>Метод анализа иерархий (AHP) 및 Нечеткий AHP</h2>
-<p>Программное обеспечение и калькулятор для метода анализа иерархий (AHP). Идеально подходит для академических диссертаций.</p>
-<h2>عملية التحليل الهرمي (AHP) و عملية التحليل الهرمي الضبابي</h2>
-<p>برنامج آلي لعملية التحليل الهرمي (AHP) للرسائل الأكاديمية والبحوث.</p>
-<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs'},{name:'description',content:'AHP 분석과 온라인 설문을 무료로! 논문용 퍼지 AHP, 일관성 비율(CR) 자동 계산, 고급 시각화 차트까지. 별도 설치 없이 웹에서 바로 시작하세요.'},{name:'keywords',content:'AHP 분석, AHP 프로그램, AHP 분석 프로그램, 온라인 AHP 설문, 퍼지 AHP, 논문 통계 솔루션, 예비타당성조사, 예타 AHP, 쌍대비교, 의사결정, 계층화분석법, 일관성비율, CR값 0.1 이하, AHP 가중치 계산'},{property:'og:title',content:'AHP 분석 프로그램 | 온라인 AHP 설문·퍼지 AHP 통계 솔루션 – AHP Master'},{property:'og:description',content:'AHP 분석과 온라인 설문을 무료로! 논문용 퍼지 AHP, 일관성 비율(CR) 자동 계산, 고급 시각화 차트까지.'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스터','url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'AHP 분석과 온라인 설문을 무료로! 논문용 퍼지 AHP, 일관성 비율(CR) 자동 계산, 고급 시각화 차트까지.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
+<h2>?е?од анализа ие?а??ий (AHP) ??е?е?кий AHP</h2>
+<p>??ог?аммное обе?пе?ение и кал?к?л??о? дл? ме?ода анализа ие?а??ий (AHP). ?деал?но под?оди? дл? академи?е?ки? ди??е??а?ий.</p>
+<h2>ع???ة ا?تح??? ا??ر?? (AHP) ? ع???ة ا?تح??? ا??ر?? ا?ضباب?</h2>
+<p>بر?ا?ج آ?? ?ع???ة ا?تح??? ا??ر?? (AHP) ??رسائ? ا?أ?اد???ة ?ا?بح?ث.</p>
+<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onload="(function(){const metaTags=[{name:'naver-site-verification',content:'f0561d996c39ca52dcc47cf2aad128c5e586a1d6'},{name:'google-site-verification',content:'FeA-DlBx8VmFmHx0Y9MEOy-J_ZjgCNZB70LFUgB10hs'},{name:'description',content:'AHP 분석??라???문??무료? ?문???? AHP, ????비율(CR) ?동 계산, 고급 ?각??차트까?. 별도 ?치 ?이 ?에??바로 ?작?세??'},{name:'keywords',content:'AHP 분석, AHP ?로그램, AHP 분석 ?로그램, ?라??AHP ?문, ?? AHP, ?문 ?계 ?루?? ?비??성조사, ?? AHP, ??비교, ?사결정, 계층?분?법, ???비?? CR?0.1 ?하, AHP 가중치 계산'},{property:'og:title',content:'AHP 분석 ?로그램 | ?라??AHP ?문·?? AHP ?계 ?루????AHP Master'},{property:'og:description',content:'AHP 분석??라???문??무료? ?문???? AHP, ????비율(CR) ?동 계산, 고급 ?각??차트까?.'},{property:'og:type',content:'website'},{property:'og:url',content:'https://ahpkrj.streamlit.app/'}];const jsonLd={'@context':'https://schema.org','@type':'WebApplication','name':'AHP Master','alternateName':'AHP 마스??,'url':'https://ahpkrj.streamlit.app/','applicationCategory':'BusinessApplication','operatingSystem':'All','description':'AHP 분석??라???문??무료? ?문???? AHP, ????비율(CR) ?동 계산, 고급 ?각??차트까?.','offers':{'@type':'Offer','price':'0','priceCurrency':'KRW'}};function injectToDoc(doc){if(!doc||!doc.head)return;try{doc.documentElement.setAttribute('lang','ko');}catch(e){}metaTags.forEach(tag=>{const key=tag.name?'name':'property';const val=tag[key];let existing=false;const metas=doc.head.getElementsByTagName('meta');for(let i=0;i<metas.length;i++){if(metas[i].getAttribute(key)===val){existing=true;break;}}if(!existing){const newMeta=doc.createElement('meta');newMeta.setAttribute(key,val);newMeta.setAttribute('content',tag.content);doc.head.appendChild(newMeta);}});let existingCanonical=false;const links=doc.head.getElementsByTagName('link');for(let i=0;i<links.length;i++){if(links[i].getAttribute('rel')==='canonical'){existingCanonical=true;break;}}if(!existingCanonical){const canonicalLink=doc.createElement('link');canonicalLink.setAttribute('rel','canonical');canonicalLink.setAttribute('href','https://ahpkrj.streamlit.app/');doc.head.appendChild(canonicalLink);}let existingJsonLd=false;const scripts=doc.head.getElementsByTagName('script');for(let i=0;i<scripts.length;i++){if(scripts[i].getAttribute('type')==='application/ld+json'){existingJsonLd=true;break;}}if(!existingJsonLd){const script=doc.createElement('script');script.type='application/ld+json';script.text=JSON.stringify(jsonLd);doc.head.appendChild(script);}}try{injectToDoc(document);}catch(e){}try{if(window.parent&&window.parent.document){injectToDoc(window.parent.document);}}catch(e){}})();" style="display:none;"/>
 </div>"""
 st.markdown(seo_tags, unsafe_allow_html=True)
 
 # =============================================================================
-# 전역 AHP 척도 CSS 주입 (메인 화면 및 미리보기 모달 모두에 강제 적용)
+# ?역 AHP 척도 CSS 주입 (메인 ?면 ?미리보기 모달 모두??강제 ?용)
 # =============================================================================
 global_ahp_css = """
 <style>
 /* =============================================================================
-   AHP 마스터 프리미엄 엔터프라이즈 UI 테마 (v3.0)
+   AHP 마스???리미엄 ?터?라?즈 UI ?마 (v3.0)
    ============================================================================= */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
-/* --- 글로벌 폰트 & 기본 텍스트 --- */
+/* --- 글로벌 ?트 & 기본 ?스??--- */
 html, body, [class*="css"], .stMarkdown, .stTextInput label,
 .stSelectbox label, .stRadio label, .stCheckbox label,
 div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
@@ -387,7 +387,7 @@ div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
     color: #1e293b !important;
 }
 
-/* --- 메인 배경색 흰색으로 강제 설정 --- */
+/* --- 메인 배경???색?로 강제 ?정 --- */
 .stApp, 
 .stApp > header,
 .main,
@@ -399,7 +399,7 @@ div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
     background: #ffffff !important;
 }
 
-/* --- 메인 제목 스타일링 (전문적이고 차분하게) --- */
+/* --- 메인 ?목 ???링 (?문?이?차분?게) --- */
 h1 {
     font-weight: 700 !important;
     font-size: 1.6rem !important;
@@ -442,7 +442,7 @@ h5, h6 {
     margin-bottom: 0.5rem !important;
 }
 
-/* --- 안내창(Alert/Info Box) 및 본문 폰트 크기 일관성 유지 --- */
+/* --- ?내?Alert/Info Box) ?본문 ?트 ?기 ?????? --- */
 div[data-testid="stAlert"] p,
 div[data-testid="stAlert"] div,
 div[data-testid="stMarkdownContainer"] p,
@@ -451,32 +451,32 @@ div[data-testid="stMarkdownContainer"] li {
     line-height: 1.6 !important;
 }
 
-/* --- 경고창/안내창(Alert/Info Box) 패널 스타일로 단정하게 통일 --- */
+/* --- 경고??내?Alert/Info Box) ?널 ???로 ?정?게 ?일 --- */
 div[data-testid="stAlert"] {
-    background-color: #ffffff !important; /* 전체 배경색과 통일 */
-    border: 1px solid #e2e8f0 !important; /* 연한 회색 테두리 */
+    background-color: #ffffff !important; /* ?체 배경?과 ?일 */
+    border: 1px solid #e2e8f0 !important; /* ?한 ?색 ?두?*/
     border-radius: 8px !important;
 }
 
 div[data-testid="stAlert"] > div {
-    border-left: none !important; /* 좌측 진한 포인트 색 제거 */
+    border-left: none !important; /* 좌측 진한 ?인?????거 */
     background-color: transparent !important;
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
 }
 
 div[data-testid="stAlert"] div[data-testid="stMarkdownContainer"] > p:first-child {
-    margin-top: 0 !important; /* 환경요인 등 첫 텍스트 상단 공백 제거 (하단과 균형) */
+    margin-top: 0 !important; /* ?경?인 ????스???단 공백 ?거 (?단?균형) */
 }
 div[data-testid="stAlert"] div[data-testid="stMarkdownContainer"] > p:last-child {
     margin-bottom: 0 !important;
 }
 
 div[data-testid="stAlert"] svg {
-    display: none !important; /* 불필요한 기본 아이콘 숨김 */
+    display: none !important; /* 불필?한 기본 ?이??? */
 }
 
-/* --- 스트림릿 기본 크롬 숨기기 --- */
+/* --- ?트림릿 기본 ?롬 ?기?--- */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header[data-testid="stHeader"] {
@@ -491,8 +491,8 @@ header[data-testid="stHeader"]::before {
     height: 0 !important;
 }
 
-/* --- 메인 레이아웃 폭(간격) 및 여백 최적화 --- */
-/* max-width 제한을 1600px로 대폭 확장하여 사이드바와의 빈 공간 최소화 */
+/* --- 메인 ?이?웃 ??간격) ??백 최적??--- */
+/* max-width ?한??1600px?????장?여 ?이?바????공간 최소??*/
 .block-container {
     padding-top: 1rem !important;
     padding-left: 3rem !important;
@@ -500,7 +500,7 @@ header[data-testid="stHeader"]::before {
     max-width: 1600px !important; 
 }
 
-/* 모바일 화면에서는 좌우 패딩을 줄여서 글자가 몰리지 않게 설정 */
+/* 모바???면?서??좌우 ?딩??줄여??글?? 몰리지 ?게 ?정 */
 @media (max-width: 768px) {
     .block-container {
         padding-left: 1rem !important;
@@ -508,7 +508,7 @@ header[data-testid="stHeader"]::before {
     }
 }
 
-/* --- 사이드바 프리미엄 스타일 --- */
+/* --- ?이?바 ?리미엄 ????--- */
 section[data-testid="stSidebar"] {
     background-color: #f8fafc !important;
     border-right: 1px solid #cbd5e1 !important;
@@ -517,7 +517,7 @@ section[data-testid="stSidebar"] > div:first-child {
     padding-top: 1.5rem !important;
 }
 
-/* --- 프리미엄 버튼 (기본) - 플랫/단정 --- */
+/* --- ?리미엄 버튼 (기본) - ?랫/?정 --- */
 div.stButton > button {
     border-radius: 4px !important; 
     font-weight: 600 !important;
@@ -538,7 +538,7 @@ div.stButton > button:hover {
 /* --- Primary 버튼 (type=primary) --- */
 div.stButton > button[kind="primary"],
 div.stButton > button[data-testid="stBaseButton-primary"] {
-    background: #1e3a8a !important; /* 딥 블루 (신뢰감) */
+    background: #1e3a8a !important; /* ??블루 (?뢰? */
     color: #ffffff !important;
     border: 1px solid #1e3a8a !important;
     font-weight: 600 !important;
@@ -546,11 +546,11 @@ div.stButton > button[data-testid="stBaseButton-primary"] {
 }
 div.stButton > button[kind="primary"]:hover,
 div.stButton > button[data-testid="stBaseButton-primary"]:hover {
-    background: #172554 !important; /* 더 어두운 블루 */
+    background: #172554 !important; /* ???두??블루 */
     border-color: #172554 !important;
 }
 
-/* --- 입력 필드 고급 스타일링 --- */
+/* --- ?력 ?드 고급 ???링 --- */
 div.stTextInput > div > div > input {
     border-radius: 4px !important;
     border: 1px solid #cbd5e1 !important;
@@ -564,7 +564,7 @@ div.stTextInput > div > div > input:focus {
     box-shadow: 0 0 0 1px #1e3a8a !important;
 }
 
-/* --- 셀렉트박스 스타일 --- */
+/* --- ??트박스 ????--- */
 div.stSelectbox > div > div {
     border-radius: 4px !important;
     border: 1px solid #cbd5e1 !important;
@@ -574,7 +574,7 @@ div.stSelectbox > div > div:hover {
     border-color: #1e3a8a !important;
 }
 
-/* --- 탭 고급 스타일 --- */
+/* --- ??고급 ????--- */
 div[data-baseweb="tab-list"] {
     gap: 0.2rem !important;
 }
@@ -590,13 +590,13 @@ button[data-baseweb="tab"] {
     white-space: nowrap !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    /* 기존 파란색 밑줄과 색상 강제 지정을 제거하여 Streamlit의 기본 Primary Color(코랄 레드)가 자연스럽게 적용되도록 함 */
+    /* 기존 ????밑줄??상 강제 지?을 ?거?여 Streamlit??기본 Primary Color(코랄 ?드)가 ?연?럽??용?도???*/
 }
 button[data-baseweb="tab"]:hover {
     color: #0f172a !important;
 }
 
-/* 두 번째 탭 (AHP 분석 도구) 은은한 음영 고정 스타일 */
+/* ??번째 ??(AHP 분석 ?구) ?????영 고정 ????*/
 div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:nth-child(2) {
     background-color: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
@@ -616,7 +616,7 @@ div[data-testid="stAppViewBlockContainer"] button[data-baseweb="tab"]:nth-child(
     border-bottom: 2px solid #ff4b4b !important;
 }
 
-/* --- 카드형 Expander 스타일 --- */
+/* --- 카드??Expander ????--- */
 details[data-testid="stExpander"] {
     border: 1px solid #cbd5e1 !important;
     border-radius: 4px !important;
@@ -635,14 +635,14 @@ details[data-testid="stExpander"][open] summary {
     border-bottom: 1px solid #cbd5e1 !important;
 }
 
-/* --- 알림 박스 --- */
+/* --- ?림 박스 --- */
 div[data-testid="stAlert"] {
     border-radius: 4px !important;
     border: 1px solid rgba(0,0,0,0.1) !important;
     box-shadow: none !important;
 }
 
-/* --- 메트릭 카드 스타일 --- */
+/* --- 메트?카드 ????--- */
 div[data-testid="stMetric"] {
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
@@ -652,7 +652,7 @@ div[data-testid="stMetric"] {
     box-shadow: none !important;
 }
 
-/* --- 다운로드 버튼 --- */
+/* --- ?운로드 버튼 --- */
 div.stDownloadButton > button {
     border-radius: 4px !important;
     border: 1px solid #cbd5e1 !important;
@@ -674,20 +674,20 @@ div.stDownloadButton > button:hover {
     color: #0f172a !important;
 }
 
-/* --- 스크롤바 커스텀 --- */
+/* --- ?크롤바 커스? --- */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* --- 사이드바 구분선 --- */
+/* --- ?이?바 구분??--- */
 section[data-testid="stSidebar"] hr {
     border: none !important;
     border-top: 1px solid #cbd5e1 !important;
     margin: 1rem 0 !important;
 }
 
-/* --- 링크 색상 통일 --- */
+/* --- 링크 ?상 ?일 --- */
 a {
     color: #1e3a8a !important;
     text-decoration: none !important;
@@ -696,7 +696,7 @@ a:hover {
     text-decoration: underline !important;
 }
 
-/* 사이드바 탭 글자 크기 축소 & 여백 줄이기 */
+/* ?이?바 ??글???기 축소 & ?백 줄이?*/
 section[data-testid="stSidebar"] button[data-baseweb="tab"] {
     flex: 1 !important;
     justify-content: center !important;
@@ -711,31 +711,31 @@ section[data-testid="stSidebar"] div[data-baseweb="tab-list"] {
     width: 100% !important;
     gap: 0.2rem !important;
 }
-/* 사이드바 내부 이미지(로고) 여백 축소 */
+/* ?이?바 ?? ??지(로고) ?백 축소 */
 section[data-testid="stSidebar"] img {
     margin-bottom: 0.25rem !important;
 }
-/* 사이드바 마크다운 여백 축소 */
+/* ?이?바 마크?운 ?백 축소 */
 section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] {
     margin-bottom: 0 !important;
 }
-/* 사이드바 전체 패딩 축소 */
+/* ?이?바 ?체 ?딩 축소 */
 section[data-testid="stSidebar"] > div:first-child {
     padding-top: 0.75rem !important;
     padding-bottom: 0.5rem !important;
 }
 
 /* =============================================================================
-   AHP 척도 전용 고유 클래스 타겟팅 (.st-key-ahp_survey_matrix)
+   AHP 척도 ?용 고유 ?래???겟팅 (.st-key-ahp_survey_matrix)
    ============================================================================= */
 
-/* 0. 메인 수직 컨테이너(줄간격) 초밀착 및 마진 축소 */
+/* 0. 메인 ?직 컨테?너(줄간? 초???마진 축소 */
 div.st-key-ahp_survey_matrix {
     gap: 4px !important;
     row-gap: 4px !important;
 }
 
-/* 1. 수직 정렬 & 레이아웃 배분 */
+/* 1. ?직 ?렬 & ?이?웃 배분 */
 .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] {
     gap: 0px !important;
     align-items: center !important;
@@ -751,7 +751,7 @@ div.st-key-ahp_survey_matrix {
     padding: 0px !important;
 }
 
-/* 2. 라디오 그룹 전체 100% 분배 강제 및 줄바꿈 원천 차단 */
+/* 2. ?디??그룹 ?체 100% 분배 강제 ?줄바??천 차단 */
 .st-key-ahp_survey_matrix div[data-testid="stElementContainer"],
 .st-key-ahp_survey_matrix div[data-testid="stRadio"],
 .st-key-ahp_survey_matrix .stRadio {
@@ -773,12 +773,12 @@ div.st-key-ahp_survey_matrix {
     margin: 0px !important;
 }
 
-/* 2.5. AHP 컨테이너 내부의 수직 요소 간격 초밀착 */
+/* 2.5. AHP 컨테?너 ?????직 ?소 간격 초??*/
 .st-key-ahp_survey_matrix div[data-testid="stVerticalBlock"] {
     gap: 0px !important;
 }
 
-/* 3. 각 척도 라디오 버튼 1:1 완벽 정렬 */
+/* 3. ?척도 ?디??버튼 1:1 ?벽 ?렬 */
 .st-key-ahp_survey_matrix div[role="radiogroup"] > div,
 .st-key-ahp_survey_matrix div[role="radiogroup"] > label,
 .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"],
@@ -798,12 +798,12 @@ div.st-key-ahp_survey_matrix {
     background-color: transparent !important;
 }
 
-/* 3.5. 라디오 그룹 최소 높이 해제 */
+/* 3.5. ?디??그룹 최소 ?이 ?제 */
 .st-key-ahp_survey_matrix div[role="radiogroup"] {
     min-height: 32px !important;
 }
 
-/* 감싸는 div가 있을 경우 그 내부의 실제 label도 100% 채우도록 지시 */
+/* 감싸??div가 ?을 경우 ??????제 label??100% 채우?록 지??*/
 .st-key-ahp_survey_matrix div[role="radiogroup"] > div label,
 .st-key-ahp_survey_matrix div[data-testid="stRadioHorizontalOption"] label {
     width: 100% !important;
@@ -815,7 +815,7 @@ div.st-key-ahp_survey_matrix {
     padding: 0px !important;
 }
 
-/* 4. 기존 텍스트 찌꺼기 완벽 제거 */
+/* 4. 기존 ?스??찌꺼??벽 ?거 */
 .st-key-ahp_survey_matrix label[data-testid="stWidgetLabel"],
 .st-key-ahp_survey_matrix label p {
     display: none !important;
@@ -828,13 +828,13 @@ div.st-key-ahp_survey_matrix {
     position: absolute !important;
 }
 
-/* stMarkdownContainer의 negative margin 제거하여 컬럼간 수직 평행 맞춤 */
+/* stMarkdownContainer??negative margin ?거?여 컬럼??직 ?행 맞춤 */
 .st-key-ahp_survey_matrix div[data-testid="stMarkdownContainer"] {
     margin-bottom: 0px !important;
     padding-bottom: 0px !important;
 }
 
-/* 라디오 항목 내부의 markdown 컨테이너(텍스트용) 완전히 감추기 */
+/* ?디???? ????markdown 컨테?너(?스?용) ?전??감추?*/
 .st-key-ahp_survey_matrix div[role="radiogroup"] div[data-testid="stMarkdownContainer"] {
     display: none !important;
     height: 0px !important;
@@ -846,19 +846,19 @@ div.st-key-ahp_survey_matrix {
     position: absolute !important;
 }
 
-/* 동그라미 컨테이너 중앙 정렬 및 여백 마진 제거 */
+/* ?그?? 컨테?너 중앙 ?렬 ??백 마진 ?거 */
 .st-key-ahp_survey_matrix label span {
     margin: 0px !important;
     padding: 0px !important;
 }
 
-/* 5. Hover 및 Zebra 효과 */
+/* 5. Hover ?Zebra ?과 */
 .st-key-ahp_survey_matrix label:hover {
     background-color: #f1f5f9 !important;
     cursor: pointer !important;
 }
 
-/* 6. 모바일 가로 스크롤 허용 및 붕괴 방지 */
+/* 6. 모바??가??크??용 ?붕괴 방? */
 @media (max-width: 768px) {
     .stApp > header + div, 
     .block-container,
@@ -883,7 +883,7 @@ div.st-key-ahp_survey_matrix {
     .st-key-ahp_survey_matrix div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
         width: 50% !important;
     }
-/* --- 비밀번호 가시성 토글 버튼(눈 아이콘) 및 래퍼 배경 투명화 --- */
+/* --- 비?번호 가?성 ?? 버튼(???이? ??퍼 배경 ?명??--- */
 div[data-baseweb="input"] {
     background-color: transparent !important;
     border: none !important;
@@ -893,10 +893,10 @@ div[data-testid="stTextInput"] button,
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    color: #475569 !important; /* 아이콘 색상 조정 */
+    color: #475569 !important; /* ?이??상 조정 */
 }
 
-/* ── Google Sheet 네비게이션 버튼 (통합) ── */
+/* ?? Google Sheet ?비게이??버튼 (?합) ?? */
 .gs-nav-btn-box, .gs-nav-btn-box2 {
     background-color: #1e40af !important;
     border-radius: 6px !important;
@@ -916,7 +916,7 @@ div[data-testid="stTextInput"] button,
     width: 100% !important;
 }
 
-/* ── Pill-style 서브탭 (통합) ── */
+/* ?? Pill-style ?브??(?합) ?? */
 div[data-testid="stTabs"] div[data-testid="stTabs"] > div[role="tablist"] {
     border-bottom: none !important;
     gap: 0 !important;
@@ -950,7 +950,7 @@ div[data-testid="stTabs"] div[data-testid="stTabs"] div[data-baseweb="tab-highli
 st.markdown(global_ahp_css, unsafe_allow_html=True)
 
 
-# [폰트 설정]
+# [?트 ?정]
 @st.cache_resource
 def set_font_config():
     system_name = platform.system()
@@ -977,7 +977,7 @@ def set_font_config():
 
 set_font_config()
 
-# [중요 수정] 구글 시트 ID 및 연결 헬퍼 함수
+# [중요 ?정] 구? ?트 ID ??결 ?퍼 ?수
 def get_main_spreadsheet_id():
     return st.secrets.get("SPREADSHEET_ID") or st.secrets.get("LOG_SPREADSHEET_ID") or "1xLvrH6LN8Vw3dVzoguf6TkgRrsJvEpMl2Z8s8HAvrVA"
 
@@ -987,63 +987,63 @@ def get_gspread_client():
     import gspread
     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     
-    # st.secrets에서 값 가져오기 (없을 경우 에러 처리)
+    # st.secrets?서 ?가?오?(?을 경우 ?러 처리)
     if "gcp_service_account" not in st.secrets:
-        st.error("Secrets에 'gcp_service_account' 설정이 없습니다.")
+        st.error("Secrets??'gcp_service_account' ?정???습?다.")
         return None
 
     raw_auth = st.secrets.get("gcp_service_account", {})
     auth_info = {}
 
-    # Case 1: 이미 딕셔너리 형태인 경우 (TOML 포맷) - 가장 일반적인 경우
+    # Case 1: ?? ?셔?리 ?태??경우 (TOML ?맷) - 가???반?인 경우
     if isinstance(raw_auth, dict) or hasattr(raw_auth, "keys"): 
-        auth_info = dict(raw_auth) # AttrDict 등을 dict로 변환
+        auth_info = dict(raw_auth) # AttrDict ?을 dict?변??
     
-    # Case 2: 문자열 형태인 경우 (JSON 문자열 혹은 Base64 인코딩 문자열)
+    # Case 2: 문자???태??경우 (JSON 문자???? Base64 ?코??문자??
     elif isinstance(raw_auth, str):
-        # 앞뒤 공백 및 따옴표 제거
+        # ?뒤 공백 ??옴???거
         auth_str = raw_auth.strip().strip('"').strip("'")
         
         try:
-            # 2-1. 순수 JSON 문자열로 파싱 시도
+            # 2-1. ?수 JSON 문자?로 ?싱 ?도
             auth_info = json.loads(auth_str)
         except json.JSONDecodeError:
-            # 2-2. JSON 파싱 실패 -> Base64 인코딩된 값으로 가정하고 디코딩 시도
+            # 2-2. JSON ?싱 ?패 -> Base64 ?코?된 값으?가?하??코???도
             try:
-                # 1단계: 문자열 정제 (모든 공백 제거)
+                # 1?계: 문자???제 (모든 공백 ?거)
                 clean_b64 = re.sub(r'\s+', '', auth_str)
                 
-                # 2단계: 패딩(=) 보정
+                # 2?계: ?딩(=) 보정
                 missing_padding = len(clean_b64) % 4
                 if missing_padding:
                     clean_b64 += '=' * (4 - missing_padding)
                 
-                # 3단계: Base64 디코딩 (Standard 및 URL-Safe 방식 모두 시도)
+                # 3?계: Base64 ?코??(Standard ?URL-Safe 방식 모두 ?도)
                 try:
                     decoded_bytes = base64.b64decode(clean_b64)
                 except Exception:
-                    # Standard 실패 시 URL-Safe 방식 시도 (-와 _ 문자 처리)
+                    # Standard ?패 ??URL-Safe 방식 ?도 (-? _ 문자 처리)
                     decoded_bytes = base64.urlsafe_b64decode(clean_b64)
                     
                 decoded_info = decoded_bytes.decode('utf-8')
                 auth_info = json.loads(decoded_info)
             except Exception as e:
-                st.error(f"서비스 계정 키 디코딩 실패 (Base64/JSON 오류): {e}")
+                st.error(f"?비??계정 ???코???패 (Base64/JSON ?류): {e}")
                 return None
     else:
-        st.error("gcp_service_account 형식을 인식할 수 없습니다.")
+        st.error("gcp_service_account ?식???식?????습?다.")
         return None
 
-    # [중요] Private Key 내의 줄바꿈 문자(\n) 처리
-    # TOML 등에서 문자열로 읽어올 때 \\n으로 이스케이프된 경우 실제 줄바꿈으로 변경 필요
+    # [중요] Private Key ?의 줄바?문자(\n) 처리
+    # TOML ?에??문자?로 ?어????\\n?로 ?스케?프??경우 ?제 줄바꿈으?변??요
     if auth_info and "private_key" in auth_info:
         auth_info["private_key"] = auth_info["private_key"].replace("\\n", "\n")
 
-    # 필수 필드 확인 (Missing fields 에러 방지)
+    # ?수 ?드 ?인 (Missing fields ?러 방?)
     required_fields = ["private_key", "client_email", "token_uri"]
     missing = [f for f in required_fields if f not in auth_info]
     if missing:
-        st.error(f"서비스 계정 정보에 필수 필드가 누락되었습니다: {', '.join(missing)}")
+        st.error(f"?비??계정 ?보???수 ?드가 ?락?었?니?? {', '.join(missing)}")
         return None
 
     creds = Credentials.from_service_account_info(auth_info, scopes=scope)
@@ -1051,8 +1051,8 @@ def get_gspread_client():
 
 def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwargs):
     """
-    구글 시트 API 호출 시 429(RESOURCE_EXHAUSTED) 등 일시적 오류 발생 시
-    지수 백오프(Exponential Backoff) 및 지터(Jitter)를 적용하여 재시도하는 헬퍼 함수.
+    구? ?트 API ?출 ??429(RESOURCE_EXHAUSTED) ???시???류 발생 ??
+    지??백오??Exponential Backoff) ?지??Jitter)??용?여 ?시?하???퍼 ?수.
     """
     import time
     import random
@@ -1072,7 +1072,7 @@ def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwar
             else:
                 raise e
 
-# [신규] 관리자 페이지 방문 로그 조회를 위한 캐싱 함수 (읽기 요청 최적화 - 5분 TTL)
+# [?규] 관리자 ?이지 방문 로그 조회??한 캐싱 ?수 (?기 ?청 최적??- 5?TTL)
 @st.cache_data(ttl=300, show_spinner=False)
 def get_cached_visit_logs(spreadsheet_id):
     try:
@@ -1082,7 +1082,7 @@ def get_cached_visit_logs(spreadsheet_id):
             try:
                 visit_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Visit_Logs")
                 records = run_gspread_with_retry(visit_sheet.get_all_records)
-                # 구글 시트에서 가져온 전체 로그를 로컬 DB에 자동으로 싱크해 채워넣습니다.
+                # 구? ?트?서 가?온 ?체 로그?로컬 DB???동?로 ?크??채워?습?다.
                 if records:
                     try:
                         conn = sqlite3.connect('users.db')
@@ -1101,12 +1101,12 @@ def get_cached_visit_logs(spreadsheet_id):
             except gspread.exceptions.WorksheetNotFound:
                 return []
     except Exception as e:
-        # 일반 사용자 화면에 429/500 에러 박스가 무분별하게 노출되는 것을 방지합니다.
-        # 관리자 로그인 상태이거나 관리자 모드인 경우에만 st.warning으로 경고하고, 평소에는 콘솔에 기록합니다.
+        # ?반 ?용???면??429/500 ?러 박스가 무분별하??출?는 것을 방??니??
+        # 관리자 로그???태?거??관리자 모드??경우?만 st.warning?로 경고?고, ?소?는 콘솔??기록?니??
         import logging
-        logging.error(f"구글 시트 방문 로그 캐싱 조회 오류: {e}")
+        logging.error(f"구? ?트 방문 로그 캐싱 조회 ?류: {e}")
         if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
-            st.warning(f"⚠️ 구글 시트 방문 로그 캐싱 조회 오류 (관리자 모드): {e}")
+            st.warning(f"?️ 구? ?트 방문 로그 캐싱 조회 ?류 (관리자 모드): {e}")
     return []
 
 def save_short_code_to_gs(short_code, survey_id, title, admin_id):
@@ -1154,7 +1154,7 @@ def sync_short_codes_from_gs():
     except Exception as e:
         pass
 
-# 설문/미리보기 페이지 여부 조기 감지 (Google Sheets API 절약용)
+# ?문/미리보기 ?이지 ?? 조기 감? (Google Sheets API ?약??
 try:
     _q = st.query_params
 except AttributeError:
@@ -1164,11 +1164,11 @@ except AttributeError:
         _q = {}
 _is_survey_or_preview = "preview_id" in _q or "survey_id" in _q
 
-# DB 초기화 및 구글 시트로부터 데이터(회원+방문로그) 복구 로직
+# DB 초기???구? ?트로????이???원+방문로그) 복구 로직
 def init_db():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    # [수정] 구글 시트 구조에 맞춰 agree_info 및 배포통계 컬럼 추가
+    # [?정] 구? ?트 구조??맞춰 agree_info ?배포?계 컬럼 추?
     c.execute('''CREATE TABLE IF NOT EXISTS users
                   (id TEXT PRIMARY KEY, role TEXT, signup_date TEXT, pw TEXT, expiry_date TEXT, agree_info TEXT, 
                    survey_count INTEGER DEFAULT 0, last_survey_link TEXT, plan_type TEXT)''')
@@ -1217,7 +1217,7 @@ def init_db():
     except Exception:
         pass
 
-    # 기존 데이터에 short_code 가 없는 경우 채워넣기
+    # 기존 ?이?에 short_code 가 ?는 경우 채워?기
     try:
         c.execute("SELECT survey_id FROM admin_surveys WHERE short_code IS NULL OR short_code = ''")
         rows = c.fetchall()
@@ -1233,7 +1233,7 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS user_google_credentials
                   (user_id TEXT PRIMARY KEY, token TEXT, refresh_token TEXT, token_uri TEXT, client_id TEXT, client_secret TEXT, scopes TEXT, expiry TEXT)''')
     
-    # [추가] 학위논문 할인 이벤트 설정 테이블
+    # [추?] ?위?문 ?인 ?벤???정 ?이?
     c.execute('''CREATE TABLE IF NOT EXISTS event_settings
                   (id INTEGER PRIMARY KEY, event_active INTEGER, event_title TEXT, event_desc TEXT, event_deadline TEXT, event_discount INTEGER)''')
     c.execute("SELECT COUNT(*) FROM event_settings WHERE id = 1")
@@ -1241,31 +1241,31 @@ def init_db():
     
     if event_exists == 0:
         c.execute("INSERT INTO event_settings (id, event_active, event_title, event_desc, event_deadline, event_discount) VALUES (?, ?, ?, ?, ?, ?)",
-                  (1, 1, "[이벤트] 학위논문 5만원 할인 (~7/30)", "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수", "2026-07-30", 50000))
+                  (1, 1, "[?벤?? ?위?문 5만원 ?인 (~7/30)", "??박사 ??? ?목/??명 ?이????공개 ?의 ?수", "2026-07-30", 50000))
         conn.commit()
 
-    # [추가] 세금계산서 신청 내역 테이블
+    # [추?] ?금계산???청 ?역 ?이?
     c.execute('''CREATE TABLE IF NOT EXISTS tax_invoice_requests
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, biz_num TEXT, biz_name TEXT, rep_name TEXT, address TEXT, biz_type TEXT, email TEXT, plan_name TEXT, request_date TEXT, status TEXT)''')
     
-    # 관리자 계정 생성
+    # 관리자 계정 ?성
     try:
-        # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
+        # [?정] ?????간 기? 가?일 ?정 (?짜?
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         signup_date_str = kst_now.strftime("%Y-%m-%d")
-        # 컬럼 순서: id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link
+        # 컬럼 ?서: id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link
         c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
                   ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
         conn.commit()
 
-        # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (세션당 1회, 설문/미리보기 페이지 제외)
+        # [추?] 관리자 계정??구? ?트???는 경우 ?동 추? (?션??1?? ?문/미리보기 ?이지 ?외)
         if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
             try:
                 client = get_gspread_client()
                 if client and get_main_spreadsheet_id():
                     spreadsheet = client.open_by_key(get_main_spreadsheet_id())
                     sheet = spreadsheet.sheet1
-                    # 헤더 보정
+                    # ?더 보정
                     all_values = sheet.get_all_values()
                     if all_values and len(all_values[0]) < 8:
                         sheet.update(range_name='A1:H1', values=[['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link']])
@@ -1278,8 +1278,8 @@ def init_db():
     except sqlite3.IntegrityError:
         pass 
 
-    # [복구 로직 및 동기화] 세션당 1회만 실행 (설문/미리보기 페이지 제외)
-    # 캐싱(cached_sync_db_from_sheets)을 통해 10분에 최대 1회만 Google Sheets API를 호출하도록 제한
+    # [복구 로직 ??기?? ?션??1?만 ?행 (?문/미리보기 ?이지 ?외)
+    # 캐싱(cached_sync_db_from_sheets)???해 10분에 최? 1?만 Google Sheets API??출?도??한
     if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
         try:
             cached_sync_db_from_sheets()
@@ -1291,7 +1291,7 @@ def init_db():
         except Exception:
             pass
             
-        # 세션당 1회 실행 완료 표시
+        # ?션??1???행 ?료 ?시
         st.session_state._init_gs_done = True
     conn.close()
 
@@ -1315,47 +1315,47 @@ def get_event_settings():
         conn.close()
     return {
         "active": True,
-        "title": "[이벤트] 학위논문 5만원 할인 (~7/30)",
-        "desc": "석/박사 대상. 제목/대학명 사이트 내 공개 동의 필수",
+        "title": "[?벤?? ?위?문 5만원 ?인 (~7/30)",
+        "desc": "??박사 ??? ?목/??명 ?이????공개 ?의 ?수",
         "deadline": "2026-07-30",
         "discount": 50000
     }
 
-# [신규 기능 1] 구글 시트의 내용을 강제로 DB에 동기화하는 함수
+# [?규 기능 1] 구? ?트???용??강제?DB???기?하???수
 def sync_db_from_sheets(silent=False):
-    """구글 시트의 데이터를 읽어와 DB에 없으면 유저를 추가하고, 이미 있다면 구글 시트 기준으로 보정(업데이트)합니다."""
-    # ★★★ 임시 디버깅 코드 ★★★
+    """구? ?트???이?? ?어? DB???으????추??고, ?? ?다?구? ?트 기??로 보정(?데?트)?니??"""
+    # ?★???시 ?버?코드 ?★??
     if not silent:
-        st.write("🔍 **Secrets 디버깅**")
-        st.write("사용 가능한 최상위 키:", list(st.secrets.keys()))
+        st.write("? **Secrets ?버?*")
+        st.write("?용 가?한 최상????", list(st.secrets.keys()))
         
         sid = get_main_spreadsheet_id()
         if sid:
-            st.success(f"✅ SPREADSHEET_ID 발견!")
-            st.write(f"값: {sid}")
+            st.success(f"??SPREADSHEET_ID 발견!")
+            st.write(f"? {sid}")
         else:
-            st.error(" SPREADSHEET_ID가 없습니다!")
+            st.error(" SPREADSHEET_ID가 ?습?다!")
             
         if "gcp_service_account" in st.secrets:
-            st.write("gcp_service_account 내부 키:", list(st.secrets.get("gcp_service_account", {}).keys()))
+            st.write("gcp_service_account ?? ??", list(st.secrets.get("gcp_service_account", {}).keys()))
         
         st.write("---")
-    # ★★★ 디버깅 끝 ★★★
+    # ?★???버????★??
     
     conn = None
     try:
         client = get_gspread_client()
         if not client or not get_main_spreadsheet_id(): 
-            if not silent: st.error(" 구글 시트 인증(gspread client) 또는 시트 ID 획득에 실패했습니다.")
+            if not silent: st.error(" 구? ?트 ?증(gspread client) ?는 ?트 ID ?득???패?습?다.")
             return -1
         
         spreadsheet = run_gspread_with_retry(client.open_by_key, get_main_spreadsheet_id())
         sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
         all_values = run_gspread_with_retry(sheet.get_all_values)
         
-        # 데이터가 헤더 포함 2줄 이상일 때만 진행
+        # ?이?? ?더 ?함 2??상???만 진행
         if len(all_values) > 1:
-            # 30초 타임아웃 추가 및 안전한 커넥션
+            # 30???아??추? ??전??커넥??
             conn = sqlite3.connect('users.db', timeout=30.0)
             c = conn.cursor()
             
@@ -1373,7 +1373,7 @@ def sync_db_from_sheets(silent=False):
                     signup_date = str(row[2]).strip()
                     pw = str(row[3]).strip()
                     
-                    # 8개 컬럼 대응 및 자가 치유
+                    # 8?컬럼 ?????? 치유
                     survey_count = 0
                     last_survey_link = ""
                     if len(row) >= 8:
@@ -1394,13 +1394,13 @@ def sync_db_from_sheets(silent=False):
                         expiry_date = '9999-12-31'
                         agree_info = 'Y'
                         
-                    # [자가 치유] 구글 시트 오류 복구 (expiry_date에 동의 여부가 잘못 들어갔을 때)
-                    if expiry_date in ["Y", "N", "예", "아니오", "yes", "no"]:
+                    # [?? 치유] 구? ?트 ?류 복구 (expiry_date???의 ??가 ?못 ?어갔을 ??
+                    if expiry_date in ["Y", "N", "??, "?니??, "yes", "no"]:
                         if agree_info in ["", None, "Y"]:
                             agree_info = expiry_date
                         expiry_date = "9999-12-31"
 
-                    # 이미 존재하는지 확인 후 없으면 INSERT, 있으면 정보 보정 업데이트
+                    # ?? 존재?는지 ?인 ???으?INSERT, ?으??보 보정 ?데?트
                     c.execute("SELECT id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link FROM users WHERE id=?", (user_id,))
                     db_user = c.fetchone()
                     if not db_user:
@@ -1409,7 +1409,7 @@ def sync_db_from_sheets(silent=False):
                         cnt += 1
                     else:
                         db_role, db_signup_date, db_pw, db_expiry_date, db_agree_info, db_survey_count, db_last_link = db_user[1], db_user[2], db_user[3], db_user[4], db_user[5], db_user[6], db_user[7]
-                        # 변경 사항이 하나라도 있으면 구글 시트 기준으로 강제 업데이트 보정
+                        # 변??항???나?도 ?으?구? ?트 기??로 강제 ?데?트 보정
                         if (db_role != role or db_signup_date != signup_date or 
                             db_pw != pw or db_expiry_date != expiry_date or db_agree_info != agree_info or
                             db_survey_count != survey_count or db_last_link != last_survey_link):
@@ -1422,7 +1422,7 @@ def sync_db_from_sheets(silent=False):
             
             conn.commit()
             
-            # 방문 기록(visit_logs)도 강제 동기화 시도
+            # 방문 기록(visit_logs)??강제 ?기???도
             try:
                 visit_sheet = spreadsheet.worksheet("Visit_Logs")
                 records = visit_sheet.get_all_records()
@@ -1431,14 +1431,14 @@ def sync_db_from_sheets(silent=False):
                               (str(row.get('IP', '')), str(row.get('Date', ''))))
                 conn.commit()
             except Exception as e:
-                # 방문 로그 시트가 없거나 오류가 나도 유저 동기화 결과는 반환
+                # 방문 로그 ?트가 ?거???류가 ?도 ?? ?기??결과??반환
                 pass
                 
             return cnt
     except Exception as e:
         if not silent:
-            st.error(f"🔍 동기화 에러 상세: {str(e)}")
-            st.error(f"에러 타입: {type(e).__name__}")
+            st.error(f"? ?기???러 ?세: {str(e)}")
+            st.error(f"?러 ??? {type(e).__name__}")
         if conn:
             try:
                 conn.rollback()
@@ -1455,11 +1455,11 @@ def sync_db_from_sheets(silent=False):
 
 @st.cache_data(ttl=600, show_spinner=False)
 def cached_sync_db_from_sheets():
-    """백그라운드에서 10분에 한 번씩만 구글 시트 전체 동기화"""
+    """백그?운?에??10분에 ??번씩?구? ?트 ?체 ?기??""
     return sync_db_from_sheets(silent=True)
 
 
-# 방문자 추적 및 구글 시트 실시간 저장
+# 방문??추적 ?구? ?트 ?시????
 def track_visitor():
     js_ip_script = 'await fetch("https://api.ipify.org?format=json").then(r => r.json()).then(d => d.ip)'
     client_ip = st_javascript(js_ip_script)
@@ -1472,7 +1472,7 @@ def track_visitor():
         return
 
     try:
-        # 카운트 방식 개선: [수정] 대한민국 시간 기준 시각 정보 사용
+        # 카운??방식 개선: [?정] ?????간 기? ?각 ?보 ?용
         now_ts = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
         
         country, region, city, lat, lon = "", "", "", "", ""
@@ -1498,7 +1498,7 @@ def track_visitor():
         conn.commit()
         conn.close()
 
-        # 설문/미리보기 페이지에서는 구글 시트에 방문 로그를 기록하지 않음 (API 절약)
+        # ?문/미리보기 ?이지?서??구? ?트??방문 로그?기록?? ?음 (API ?약)
         if not _is_survey_or_preview:
             try:
                 client = get_gspread_client()
@@ -1518,13 +1518,13 @@ def track_visitor():
         try:
             import survey_manager
             guest_id = st.session_state.get('user_id') or "Guest"
-            survey_manager.log_user_action(guest_id, "사이트 방문")
+            survey_manager.log_user_action(guest_id, "?이??방문")
         except:
             pass
     except Exception:
         pass
 
-# 방문자 추적 실행부
+# 방문??추적 ?행부
 try:
     if 'visited' not in st.session_state:
         st.session_state.visited = False
@@ -1586,14 +1586,14 @@ def send_foreign_access_email(ip, country, region, kst_time):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] ⚠️ 해외 접속 감지: {country}"
+    subject = f"[AHP 마스?? ?️ ?외 ?속 감?: {country}"
     
-    body = f"""AHP 마스터에 해외 접속이 감지되었습니다.
+    body = f"""AHP 마스?에 ?외 ?속??감??었?니??
 
-접속 시간 (KST): {kst_time}
-접속 국가: {country}
-접속 지역: {region}
-접속 IP: {ip}
+?속 ?간 (KST): {kst_time}
+?속 ??: {country}
+?속 지?? {region}
+?속 IP: {ip}
 """
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -1636,13 +1636,13 @@ def check_foreign_access():
 
 def send_application_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    # secrets.toml에서 이메일 비밀번호를 안전하게 로드합니다.
+    # secrets.toml?서 ?메??비?번호??전?게 로드?니??
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] 정식 사용자 승인 요청: {user_email}"
-    # [수정] 대한민국 시간 기준 신청일 설정
+    subject = f"[AHP 마스?? ?식 ?용???인 ?청: {user_email}"
+    # [?정] ?????간 기? ?청???정
     kst_today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
-    body = f"사용자가 정식 권한 신청.\nID: {user_email}\n신청일: {kst_today}"
+    body = f"?용?? ?식 권한 ?청.\nID: {user_email}\n?청?? {kst_today}"
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender_email
@@ -1654,13 +1654,13 @@ def send_application_email(user_email):
     except Exception as e:
         print(f"send_application_email Error: {e}")
 
-# [추가 요청사항 반영] 전환 요청 이메일 발송 함수
+# [추? ?청?항 반영] ?환 ?청 ?메??발송 ?수
 def send_conversion_request_email(user_email):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] 정식사용자 전환 요청: {user_email}"
-    body = f"임시 사용자가 정식사용자로 전환 요청 했습니다\nID: {user_email}"
+    subject = f"[AHP 마스?? ?식?용???환 ?청: {user_email}"
+    body = f"?시 ?용?? ?식?용?로 ?환 ?청 ?습?다\nID: {user_email}"
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender_email
@@ -1678,14 +1678,14 @@ def send_refund_request_email(request_type, user_email, opinion):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] 취소/환불 신청: {user_email}"
+    subject = f"[AHP 마스?? 취소/?불 ?청: {user_email}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
     body = (
-        f"취소/환불 신청이 접수되었습니다.\n\n"
-        f"■ 신청 유형: {request_type}\n"
-        f"■ 신청 ID (이메일): {user_email}\n"
-        f"■ 서비스 개선 의견:\n{opinion}\n\n"
-        f"■ 신청 시간 (KST): {kst_now.strftime('%Y-%m-%d %H:%M:%S')}"
+        f"취소/?불 ?청???수?었?니??\n\n"
+        f"???청 ?형: {request_type}\n"
+        f"???청 ID (?메??: {user_email}\n"
+        f"???비??개선 ?견:\n{opinion}\n\n"
+        f"???청 ?간 (KST): {kst_now.strftime('%Y-%m-%d %H:%M:%S')}"
     )
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -1704,18 +1704,18 @@ def send_consulting_email(name, company, email, phone, inquiry_type, details, up
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[분석문의] {name}님 / {company or '개인'}"
+    subject = f"[분석문의] {name}??/ {company or '개인'}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
     
     body = (
-        f"새로운 분석 문의 및 컨설팅 신청이 접수되었습니다.\n\n"
-        f"■ 성함: {name}\n"
-        f"■ 소속 (회사/기관/학교): {company or '없음'}\n"
-        f"■ 연락처: {phone}\n"
-        f"■ 이메일: {email}\n"
-        f"■ 문의 유형: {inquiry_type}\n\n"
-        f"■ 상세 문의 내용:\n{details}\n\n"
-        f"■ 신청 시간 (KST): {kst_now.strftime('%Y-%m-%d %H:%M:%S')}"
+        f"?로??분석 문의 ?컨설???청???수?었?니??\n\n"
+        f"???함: {name}\n"
+        f"???속 (?사/기?/?교): {company or '?음'}\n"
+        f"???락? {phone}\n"
+        f"???메?? {email}\n"
+        f"??문의 ?형: {inquiry_type}\n\n"
+        f"???세 문의 ?용:\n{details}\n\n"
+        f"???청 ?간 (KST): {kst_now.strftime('%Y-%m-%d %H:%M:%S')}"
     )
     
     if uploaded_file is not None:
@@ -1762,13 +1762,13 @@ def send_consulting_email(name, company, email, phone, inquiry_type, details, up
         print(f"send_consulting_email Error: {e}")
         return False
 
-@st.dialog(_("환불 및 취소 신청서", "Refund & Cancellation Request Form"))
+@st.dialog(_("?불 ?취소 ?청??, "Refund & Cancellation Request Form"))
 def show_refund_dialog():
     render_refund_form(is_standalone=False, show_header=False)
 
-@st.dialog(_("정식(유료) 라이선스 업그레이드", "Upgrade to Official/Paid License"), width="large")
+@st.dialog(_("?식(?료) ?이?스 ?그?이??, "Upgrade to Official/Paid License"), width="large")
 def show_upgrade_dialog():
-    st.write(_("사용 목적에 맞는 요금제를 선택해 주세요. 결제 완료 즉시 정식 라이선스로 전환됩니다.", 
+    st.write(_("?용 목적??맞는 ?금?? ?택??주세?? 결제 ?료 즉시 ?식 ?이?스??환?니??", 
                "Please choose a plan that fits your research. Your account will be upgraded instantly after payment."))
     
     col1, col2, col3 = st.columns(3)
@@ -1830,12 +1830,12 @@ def show_upgrade_dialog():
                 <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; background: white; text-align: center; height: 260px;">
                     <h3 style="margin: 0; color: #334155; font-size: 1.2rem;">Basic</h3>
                     <span style="color: #888; font-size: 0.85rem;">2개월</span>
-                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">300,000원</h2>
-                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">표준 AHP 방법론을 활용한 소규모 프로젝트에 적합</p>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">300,000??/h2>
+                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">?? AHP 방법론을 ?용???규??로?트???합</p>
                     <hr style="margin: 8px 0;">
                     <ul style="font-size: 0.75rem; text-align: left; color: #334155; padding-left: 15px; line-height: 1.4; margin: 0;">
-                        <li>최대 10표본 분석</li>
-                        <li>일반 AHP 분석 제공</li>
+                        <li>최? 10?본 분석</li>
+                        <li>?반 AHP 분석 ?공</li>
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
@@ -1847,12 +1847,12 @@ def show_upgrade_dialog():
                     <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold;">BEST</span>
                     <h3 style="margin: 0; color: #15803d; font-size: 1.2rem;">Standard</h3>
                     <span style="color: #16a34a; font-size: 0.85rem;">2개월</span>
-                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">500,000원</h2>
-                    <p style="font-size: 0.8rem; color: #166534; min-height: 45px; line-height: 1.3;">응답자 그룹별 차이 분석(T-Test, ANOVA) 리서치</p>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">500,000??/h2>
+                    <p style="font-size: 0.8rem; color: #166534; min-height: 45px; line-height: 1.3;">?답??그룹?차이 분석(T-Test, ANOVA) 리서?/p>
                     <hr style="margin: 8px 0; border-color: #bbf7d0;">
                     <ul style="font-size: 0.75rem; text-align: left; color: #166534; padding-left: 15px; line-height: 1.4; margin: 0;">
-                        <li>표본수 제한 없이 무제한</li>
-                        <li>집단간 차이 검정</li>
+                        <li>?본???한 ?이 무제??/li>
+                        <li>집단?차이 검??/li>
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
@@ -1863,57 +1863,57 @@ def show_upgrade_dialog():
                 <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; background: white; text-align: center; height: 260px;">
                     <h3 style="margin: 0; color: #334155; font-size: 1.2rem;">Pro</h3>
                     <span style="color: #888; font-size: 0.85rem;">2개월</span>
-                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">950,000원</h2>
-                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">Fuzzy AHP 분석과 최우선 기술 지원 필요시</p>
+                    <h2 style="color: #ff4b4b; margin: 10px 0; font-size: 1.8rem;">950,000??/h2>
+                    <p style="font-size: 0.8rem; color: #64748b; min-height: 45px; line-height: 1.3;">Fuzzy AHP 분석?최우??기술 지???요??/p>
                     <hr style="margin: 8px 0;">
                     <ul style="font-size: 0.75rem; text-align: left; color: #334155; padding-left: 15px; line-height: 1.4; margin: 0;">
-                        <li>퍼지 AHP 분석 포함</li>
-                        <li>설문 셋팅 1회 무료 대행</li>
+                        <li>?? AHP 분석 ?함</li>
+                        <li>?문 ?팅 1??무료 ???/li>
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
             st.components.v1.html(get_portone_payment_html(user_id, "Pro (2개월)", 950000, 2, inner_html="", is_best=False), height=70)
             
     st.markdown("---")
-    st.info(_("💳 연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행(사이드바의 발행 탭 이용) 모두 100% 지원됩니다.", 
-              "💳 Corporate cards, PayPal, and Quotations are 100% supported."))
+    st.info(_("? ?구?법인카드 결제 ?견적??계산??간이과세?? 발행(?이?바??발행 ???용) 모두 100% 지?됩?다.", 
+              "? Corporate cards, PayPal, and Quotations are 100% supported."))
 
 def render_refund_form(is_standalone=False, show_header=True):
     if is_standalone:
-        if st.button(_("← 메인 화면으로 돌아가기", "← Back to Main Menu"), key="back_to_main_refund_standalone", use_container_width=True):
+        if st.button(_("??메인 ?면?로 ?아가?, "??Back to Main Menu"), key="back_to_main_refund_standalone", use_container_width=True):
             st.session_state.go_to_refund = False
             st.rerun()
             
     if show_header:
-        st.header(_("환불 및 취소 신청서", "Refund & Cancellation Request Form"))
+        st.header(_("?불 ?취소 ?청??, "Refund & Cancellation Request Form"))
     
     st.markdown(
         _("""
         <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
-          <h5 style="margin-top: -5px; margin-bottom: 12px; color: #2d3748; font-weight: bold;">환불 및 취소 규정 안내</h5>
+          <h5 style="margin-top: -5px; margin-bottom: 12px; color: #2d3748; font-weight: bold;">?불 ?취소 규정 ?내</h5>
           <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 8px; column-gap: 12px; color: #4a5568;">
-            <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불 규정:</div>
-            <div>서비스 불만족 및 이용 불편 시 정식 사용자 결제 후 <b><span style="color: #0066cc;">1일</span></b> 이내 신청 시</div>
-            <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소 규정:</div>
-            <div>실수, 단순 변심 등으로 <b><span style="color: #0066cc;">30분</span></b> 이내 취소 신청 시</div>
+            <div style="font-weight: bold; color: #333; white-space: nowrap;">???불 규정:</div>
+            <div>?비??불만???용 불편 ???식 ?용??결제 ??<b><span style="color: #0066cc;">1??/span></b> ?내 ?청 ??/div>
+            <div style="font-weight: bold; color: #333; white-space: nowrap;">??취소 규정:</div>
+            <div>?수, ?순 변???으?<b><span style="color: #0066cc;">30?/span></b> ?내 취소 ?청 ??/div>
           </div>
           <hr style="margin: 12px 0; border: 0; border-top: 1px solid #e2e8f0;">
           <div style="font-size: 0.85rem; color: #718096; font-weight: 500;">
-            💡 취소/환불 입금은 카드사 또는 간편결제 대행사의 처리 일정에 따릅니다.
+            ? 취소/?불 ?금? 카드???는 간편결제 ??사??처리 ?정???릅?다.
           </div>
         </div>
         """, """
         <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.6;">
           <h5 style="margin-top: -5px; margin-bottom: 12px; color: #2d3748; font-weight: bold;">Refund & Cancellation Policy</h5>
           <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 8px; column-gap: 12px; color: #4a5568;">
-            <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
+            <div style="font-weight: bold; color: #333; white-space: nowrap;">??Refund Policy:</div>
             <div>Request within <b><span style="color: #0066cc;">1 day</span></b> after payment if unsatisfied or experiencing inconvenience</div>
-            <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
+            <div style="font-weight: bold; color: #333; white-space: nowrap;">??Cancellation Policy:</div>
             <div>Request within <b><span style="color: #0066cc;">30 minutes</span></b> for mistakes or change of mind</div>
           </div>
           <hr style="margin: 12px 0; border: 0; border-top: 1px solid #e2e8f0;">
           <div style="font-size: 0.85rem; color: #718096; font-weight: 500;">
-            💡 Refund processing schedules depend on the card issuer or payment gateway.
+            ? Refund processing schedules depend on the card issuer or payment gateway.
           </div>
         </div>
         """),
@@ -1923,50 +1923,50 @@ def render_refund_form(is_standalone=False, show_header=True):
     form_key = "refund_cancellation_form_standalone" if is_standalone else "refund_cancellation_form_tabbed"
     with st.form(key=form_key):
         req_type = st.radio(
-            _("신청 유형 선택", "Select Request Type"),
-            [_("취소", "Cancellation"), _("환불", "Refund")],
+            _("?청 ?형 ?택", "Select Request Type"),
+            [_("취소", "Cancellation"), _("?불", "Refund")],
             horizontal=True,
             key=f"{form_key}_req_type"
         )
         
         user_email_input = st.text_input(
-            _("회원가입 시 사용 ID (이메일 주소)", "Registered ID (Email Address)"),
+            _("?원가?????용 ID (?메??주소)", "Registered ID (Email Address)"),
             value=st.session_state.get('user_id', '') if st.session_state.get('user_id') else '',
             placeholder="example@email.com",
             key=f"{form_key}_email"
         )
         
         user_opinion = st.text_area(
-            _("서비스 개선을 위한 의견", "Feedback / Suggestions for service improvement"),
-            placeholder=_("불편하셨던 점이나 개선해야 할 사항을 자유롭게 적어주세요. 서비스 개선에 큰 도움이 됩니다.", 
+            _("?비??개선???한 ?견", "Feedback / Suggestions for service improvement"),
+            placeholder=_("불편?셨???이??개선?야 ???항???유? ?어주세?? ?비??개선?????????니??", 
                          "Please share your feedback or reasons for cancellation/refund to help us improve."),
             key=f"{form_key}_opinion"
         )
         
-        submit_btn = st.form_submit_button(_("취소/환불 신청", "Submit Request"), use_container_width=True)
+        submit_btn = st.form_submit_button(_("취소/?불 ?청", "Submit Request"), use_container_width=True)
         
         if submit_btn:
             clean_email = user_email_input.strip()
             if not clean_email:
-                st.error(_("이메일 ID를 입력해 주세요.", "Please enter your Email ID."))
+                st.error(_("?메??ID??력??주세??", "Please enter your Email ID."))
             elif not validate_email(clean_email):
-                st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                st.error(_("?바??메???식???닙?다.", "Invalid email format."))
             else:
-                with st.spinner(_("신청서를 전송하는 중...", "Submitting request...")):
+                with st.spinner(_("?청?? ?송?는 ?..", "Submitting request...")):
                     success = send_refund_request_email(req_type, clean_email, user_opinion)
                     if success:
-                        st.success(_("취소/환불 신청이 성공적으로 접수되었습니다. 관리자 확인 후 순차 처리해 드리겠습니다.", 
+                        st.success(_("취소/?불 ?청???공?으??수?었?니?? 관리자 ?인 ???차 처리???리겠습?다.", 
                                      "Your request has been submitted successfully. We will process it shortly."))
                     else:
-                        st.error(_("신청 메일 전송 중 오류가 발생했습니다. 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.", 
+                        st.error(_("?청 메일 ?송 ??류가 발생?습?다. 관리자?게 ?메??jeon080423@gmail.com)?직접 ?락??주세??", 
                                    "An error occurred while sending the email. Please contact jeon080423@gmail.com directly."))
 
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
-    subject = "[AHP 마스터] 정식 사용자 승인 완료"
-    body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
+    subject = "[AHP 마스?? ?식 ?용???인 ?료"
+    body = f"{user_email}?? ?식 ?용?로 ?인?었?니?? ?늘부??2개월?모든 기능??무제?으??용?실 ???습?다."
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender_email
@@ -1980,14 +1980,14 @@ def send_approval_email(user_email):
         print(f"send_approval_email Error: {e}")
         return False
 
-# 아라비아 숫자를 한국어 금액 명칭으로 변환 (예: 500000 -> 일금오십만원정)
+# ?라비아 ?자??국??금액 명칭?로 변??(?? 500000 -> ?금?십만원??
 def num_to_kor(num):
-    units = ["", "십", "백", "천"]
-    g_units = ["", "만", "억", "조"]
-    digits = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"]
+    units = ["", "??, "?, "?]
+    g_units = ["", "?, "??, "?]
+    digits = ["", "??, "??, "??, "??, "??, "??, "?, "??, "?]
     
     if num == 0:
-        return "영"
+        return "??
         
     num_str = str(num)
     length = len(num_str)
@@ -2004,16 +2004,16 @@ def num_to_kor(num):
                 result.append(g_units[g_idx])
                 
     kor = "".join(result)
-    if kor.startswith("일십"):
+    if kor.startswith("?십"):
         kor = kor[1:]
-    return f"일금 {kor}원정"
+    return f"?금 {kor}?정"
 
-# 견적서 인쇄용 HTML 출력 (프레쉬인사이트 포맷 + CSS 도장 포함)
+# 견적???쇄??HTML 출력 (?레?인?이???맷 + CSS ?장 ?함)
 def get_quotation_html(client_name, project_name, amount, plan_name):
     import datetime
     import base64
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-    today_str = today.strftime("%Y년 %m월 %d일")
+    today_str = today.strftime("%Y??%m??%d??)
     kor_amount = num_to_kor(amount)
     
     stamp_b64 = ""
@@ -2026,13 +2026,13 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
     if stamp_b64:
         stamp_element = f'<img src="data:image/png;base64,{stamp_b64}" style="position: absolute; top: -12px; right: -28px; width: 34px; height: 34px; mix-blend-mode: multiply; pointer-events: none;" />'
     else:
-        stamp_element = '<div class="stamp">전상현<br>인</div>'
+        stamp_element = '<div class="stamp">?상??br>??/div>'
     
     return f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>견적서</title>
+    <title>견적??/title>
     <style>
         body {{ font-family: 'Malgun Gothic', 'Dotum', sans-serif; margin: 10px; color: #000; line-height: 1.5; background: #fff; }}
         .title {{ text-align: center; font-size: 30px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; letter-spacing: 5px; }}
@@ -2060,39 +2060,39 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
     </style>
 </head>
 <body>
-    <div class="title">견 적 서</div>
+    <div class="title">?????/div>
     
     <div class="main-layout">
         <div class="info-left">
             <ul class="meta-list">
-                <li><span class="lbl">■ 과 제 명 :</span> {project_name}</li>
-                <li><span class="lbl">■ 의뢰기관 :</span> {client_name}</li>
-                <li><span class="lbl">■ 서비스명 :</span> AHP 의사결정 분석 솔루션(AHP마스터)</li>
-                <li><span class="lbl">■ 소요예산 :</span> {kor_amount} (\\₩{amount:,}, VAT 포함)</li>
-                <li><span class="lbl">■ 작성일 :</span> {today_str}</li>
-                <li><span class="lbl">■ 담 당 자 :</span> 전상현 / jeon080423@gmail.com / 0507-1347-2610</li>
+                <li><span class="lbl">??????:</span> {project_name}</li>
+                <li><span class="lbl">???뢰기? :</span> {client_name}</li>
+                <li><span class="lbl">???비?명 :</span> AHP ?사결정 분석 ?루??AHP마스??</li>
+                <li><span class="lbl">???요?산 :</span> {kor_amount} (\\??amount:,}, VAT ?함)</li>
+                <li><span class="lbl">???성??:</span> {today_str}</li>
+                <li><span class="lbl">????????:</span> ?상??/ jeon080423@gmail.com / 0507-1347-2610</li>
             </ul>
         </div>
         <div class="info-right">
             <table class="provider-table">
                 <tr>
-                    <th rowspan="4" style="width: 25px; font-size: 11px;">공<br>급<br>자</th>
-                    <th>상호</th>
-                    <td>프레쉬인사이트</td>
+                    <th rowspan="4" style="width: 25px; font-size: 11px;">?br>?br>??/th>
+                    <th>?호</th>
+                    <td>?레?인?이??/td>
                 </tr>
                 <tr>
-                    <th>등록번호</th>
+                    <th>?록번호</th>
                     <td style="font-size: 11px; font-weight: bold;">683-27-00122</td>
                 </tr>
                 <tr>
                     <th>주소</th>
-                    <td style="font-size: 11px;">인천 부평구 원길로 12, 가동 203호 (갈산동, 선우빌딩)</td>
+                    <td style="font-size: 11px;">?천 부?구 ?길?12, 가??203??(갈산?? ?우빌딩)</td>
                 </tr>
                 <tr>
-                    <th>대표자</th>
+                    <th>??자</th>
                     <td>
                         <div class="stamp-container">
-                            전 상 현
+                            ??????
                             {stamp_element}
                         </div>
                     </td>
@@ -2104,34 +2104,34 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 25%;">비 목</th>
-                <th style="width: 20%;">금 액</th>
-                <th style="width: 35%;">산 출 내 역</th>
-                <th style="width: 20%;">비 고</th>
+                <th style="width: 25%;">??/th>
+                <th style="width: 20%;">???/th>
+                <th style="width: 35%;">???????/th>
+                <th style="width: 20%;">??/th>
             </tr>
         </thead>
         <tbody>
             <tr style="height: 35px;">
-                <td style="font-weight: bold; background: #eee;">1. 경비 소계</td>
+                <td style="font-weight: bold; background: #eee;">1. 경비 ?계</td>
                 <td></td>
                 <td></td>
                 <td></td>
             </tr>
             <tr style="height: 50px;">
                 <td style="text-align: left; padding-left: 20px;">
-                    AHP 분석<br>솔루션 이용료 ({plan_name})
+                    AHP 분석<br>?루???용?({plan_name})
                 </td>
                 <td style="text-align: right;">{amount:,}</td>
-                <td>{amount:,} 원 X 1 식</td>
+                <td>{amount:,} ??X 1 ??/td>
                 <td>AHPMASTER</td>
             </tr>
             <tr style="height: 90px;">
                 <td></td>
-                <td colspan="2" style="color: #666; font-size: 12px; vertical-align: top; padding-top: 15px;">이하 여백</td>
+                <td colspan="2" style="color: #666; font-size: 12px; vertical-align: top; padding-top: 15px;">?하 ?백</td>
                 <td></td>
             </tr>
             <tr class="sum-row" style="height: 35px;">
-                <td>총 합 계</td>
+                <td>????/td>
                 <td style="text-align: right;">{amount:,}</td>
                 <td></td>
                 <td></td>
@@ -2139,29 +2139,29 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
         </tbody>
     </table>
     
-    <div style="font-weight: bold; font-size: 12px; margin-bottom: 10px;">※ 간이과세자</div>
+    <div style="font-weight: bold; font-size: 12px; margin-bottom: 10px;">??간이과세??/div>
 </body>
 </html>
 """
 
-# 계산서 신청 알림 메일 전송
+# 계산???청 ?림 메일 ?송
 def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
-    subject = f"[AHP 마스터] 계산서/현금영수증 신청 접수 ({biz_name})"
+    subject = f"[AHP 마스?? 계산???금?수??청 ?수 ({biz_name})"
     body = f"""
-[AHP 마스터 계산서/현금영수증 신청 알림]
+[AHP 마스??계산???금?수??청 ?림]
 
-- 신청 ID: {user_id}
-- 사업자 등록번호: {biz_num}
-- 상호(회사명): {biz_name}
-- 대표자명: {rep_name}
-- 사업장 주소: {address}
-- 업태/업종: {biz_type}
-- 수신 이메일 주소: {email}
-- 신청 요금제: {plan_name}
-- 신청 시간: {datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m-%d %H:%M:%S')} (KST)
+- ?청 ID: {user_id}
+- ?업???록번호: {biz_num}
+- ?호(?사?: {biz_name}
+- ??자? {rep_name}
+- ?업??주소: {address}
+- ?태/?종: {biz_type}
+- ?신 ?메??주소: {email}
+- ?청 ?금?? {plan_name}
+- ?청 ?간: {datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m-%d %H:%M:%S')} (KST)
 """
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -2180,14 +2180,14 @@ def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
-    subject = "[AHP 마스터] 임시 비밀번호 안내"
-    body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
+    subject = "[AHP 마스?? ?시 비?번호 ?내"
+    body = f"""?녕?세?? ?청?신 계정???시 비?번호??내???립?다.
 
 ID: {user_email}
-임시 비밀번호: {temp_pw}
+?시 비?번호: {temp_pw}
 
-로그인 후 즉시 비밀번호를 변경하시기를 권장합니다.
-감사합니다.
+로그????즉시 비?번호?변경하?기?권장?니??
+감사?니??
 """
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -2209,7 +2209,7 @@ def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9
             spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             sheet = spreadsheet.sheet1
             
-            # --- 구글 시트 헤더 체크 및 자동 확장 ---
+            # --- 구? ?트 ?더 체크 ??동 ?장 ---
             try:
                 headers = sheet.row_values(1)
             except Exception:
@@ -2220,25 +2220,25 @@ def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9
                 sheet.update(range_name='A1:L1', values=[expected_headers])
             # ----------------------------------------
             
-            # [수정] 구글 시트 12개 컬럼 순서 보장
+            # [?정] 구? ?트 12?컬럼 ?서 보장
             sheet.append_row([user_id, role, str(signup_date), pw, expiry_date, agree_info, survey_count, last_survey_link, event_applied, thesis_title, university, customer_type])
     except Exception as e:
-        st.error(f"Google Sheets 로깅 오류: {e}")
+        st.error(f"Google Sheets 로깅 ?류: {e}")
 
 def add_user(user_id, pw, role, agree_info="Y", customer_type="standard"):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
+    # [?정] ?????간 기? 가?일 ?정 (?짜?
     signup_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
     expiry_date = "9999-12-31"
     hashed_pw = hash_password(pw)
     plan_type = 'yeta_free' if customer_type == 'yeta' else 'free'
     try:
-        # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type)
+        # [?정] 구? ?트 ?서??맞춰 DB ???(id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type)
         c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                   (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, "", plan_type, customer_type))
         conn.commit()
-        # 12개 컬럼 호출에 맞춰 기본 빈값 및 고객 종류 전달
+        # 12?컬럼 ?출??맞춰 기본 빈값 ?고객 종류 ?달
         log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "", "", "", "", customer_type)
         success = True
     except sqlite3.IntegrityError:
@@ -2249,13 +2249,13 @@ def add_user(user_id, pw, role, agree_info="Y", customer_type="standard"):
 
 def update_user_survey_distribution(user_id, survey_link):
     """
-    사용자가 설문을 배포할 때 호출하여
-    SQLite DB 및 관리자 구글 시트의 배포 횟수와 최종 배포 설문지 링크를 업데이트합니다.
+    ?용?? ?문??배포?????출?여
+    SQLite DB ?관리자 구? ?트??배포 ?수? 최종 배포 ?문지 링크??데?트?니??
     """
     if not user_id:
         return
     try:
-        # 1. SQLite DB 업데이트
+        # 1. SQLite DB ?데?트
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         
@@ -2270,13 +2270,13 @@ def update_user_survey_distribution(user_id, survey_link):
         conn.commit()
         conn.close()
         
-        # 2. 관리자 구글 시트 업데이트
+        # 2. 관리자 구? ?트 ?데?트
         client = get_gspread_client()
         if client and get_main_spreadsheet_id():
             spreadsheet = run_gspread_with_retry(client.open_by_key, get_main_spreadsheet_id())
             sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
             
-            # 헤더 확인 및 컬럼 추가 보정
+            # ?더 ?인 ?컬럼 추? 보정
             headers = run_gspread_with_retry(sheet.row_values, 1)
             headers_updated = False
             if 'survey_count' not in headers:
@@ -2301,7 +2301,7 @@ def update_user_survey_distribution(user_id, survey_link):
         logging.error(f"update_user_survey_distribution Error: {e}")
 
 def upgrade_user_password_to_hash(user_id, pw):
-    """기존 사용자의 평문 비밀번호를 암호화(해시) 버전으로 자동 승급합니다."""
+    """기존 ?용?의 ?문 비?번호??호???시) 버전?로 ?동 ?급?니??"""
     hashed_pw = hash_password(pw)
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -2316,7 +2316,7 @@ def upgrade_user_password_to_hash(user_id, pw):
             sheet = spreadsheet.sheet1
             cell = sheet.find(user_id)
             if cell:
-                # 구글 시트의 PW 컬럼은 4번째(D)
+                # 구? ?트??PW 컬럼? 4번째(D)
                 sheet.update_cell(cell.row, 4, hashed_pw)
     except Exception:
         pass
@@ -2344,9 +2344,9 @@ def check_login(user_id, pw):
         stored_role, stored_expiry, stored_pw, stored_plan, stored_customer = row
         hashed_pw = hash_password(pw)
         
-        # 평문 패스워드가 정확히 일치하거나 해시 패스워드가 일치하는 경우
+        # ?문 ?스?드가 ?확???치?거???시 ?스?드가 ?치?는 경우
         if stored_pw == pw or stored_pw == hashed_pw:
-            # 평문 패스워드로 로그인 성공한 경우, 즉시 해시 패스워드로 업데이트 (보안 승급)
+            # ?문 ?스?드?로그???공??경우, 즉시 ?시 ?스?드??데?트 (보안 ?급)
             if stored_pw == pw:
                 upgrade_user_password_to_hash(user_id, pw)
             return stored_role, stored_expiry, stored_plan, stored_customer
@@ -2376,7 +2376,7 @@ def change_user_password(user_id, new_pw):
             sheet = spreadsheet.sheet1
             cell = sheet.find(user_id)
             if cell:
-                # 구글 시트의 PW 컬럼은 4번째(D)
+                # 구? ?트??PW 컬럼? 4번째(D)
                 sheet.update_cell(cell.row, 4, hashed_pw)
     except Exception:
         pass
@@ -2437,7 +2437,7 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
             spreadsheet = client.open_by_key(get_main_spreadsheet_id())
             sheet = spreadsheet.sheet1
             
-            # --- 구글 시트 헤더 체크 및 자동 확장 ---
+            # --- 구? ?트 ?더 체크 ??동 ?장 ---
             try:
                 headers = sheet.row_values(1)
             except Exception:
@@ -2451,7 +2451,7 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
             cell = sheet.find(user_id)
             kst_today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d")
             
-            # SQLite DB에서 실제 저장된 기존 가입 날짜 및 고객군 정보 조회
+            # SQLite DB?서 ?제 ??된 기존 가???짜 ?고객??보 조회
             db_signup_date = None
             db_customer_type = "standard"
             conn = sqlite3.connect('users.db')
@@ -2492,7 +2492,7 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
                 final_cust_type = customer_type or db_customer_type or "standard"
                 sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, "", event_applied_val, thesis_title_val, university_val, final_cust_type])
     except Exception as e:
-        st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}")
+        st.error(f"구? ?트 ?용???보 ?정 반영 ?류: {e}")
 
 def delete_user(user_id):
     conn = sqlite3.connect('users.db')
@@ -2533,7 +2533,7 @@ def delete_user(user_id):
     except Exception:
         pass
 
-# [신규 기능 2] 재가입 시 Deleted_Users 시트에서 해당 유저 삭제
+# [?규 기능 2] ??????Deleted_Users ?트?서 ?당 ?? ??
 def restore_from_deleted_sheet(user_id):
     try:
         client = get_gspread_client()
@@ -2552,7 +2552,7 @@ def restore_from_deleted_sheet(user_id):
 def save_analysis_to_db(user_id, filename, file_data):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    # [수정] 대한민국 시간 기준 저장 일시 설정
+    # [?정] ?????간 기? ????시 ?정
     save_date = str(datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S"))
     c.execute("INSERT INTO saved_analyses (user_id, filename, save_date, file_data) VALUES (?, ?, ?, ?)",
               (user_id, filename, save_date, file_data))
@@ -2685,41 +2685,41 @@ def improve_consistency(matrix, threshold, min_val, max_val, max_iter=500, learn
     iterations = 0
     if cr <= threshold: return current_matrix, cr, iterations, False
     
-    # 상삼각 행렬의 인덱스 추출 (k=1은 대각선 제외)
+    # ?삼??렬???덱??추출 (k=1? ?각선 ?외)
     triu_indices = np.triu_indices(n, k=1)
     
     for it in range(max_iter):
         if cr <= threshold: break
         
-        # 일관성 있는 행렬 생성
+        # ?????는 ?렬 ?성
         w = calculate_weights(current_matrix, method)
         consistent_matrix = np.outer(w, 1/w)
         
-        # 선형 결합 및 대각선 복구
+        # ?형 결합 ??각선 복구
         new_matrix = (current_matrix * (1 - learning_rate)) + (consistent_matrix * learning_rate)
         np.fill_diagonal(new_matrix, 1.0)
         
-        # 상삼각 행렬 요소 추출
+        # ?삼??렬 ?소 추출
         vals = new_matrix[triu_indices]
         
-        # 벡터화된 역변환 및 스케일링 로직
-        # 1.0 기준 변환
+        # 벡터?된 ?????????링 로직
+        # 1.0 기? 변??
         temp_raw = np.where(vals == 1.0, 1.0, 
                     np.where(vals > 1.0, -np.round(vals), 
                     np.round(1.0/vals)))
         
-        # 범위 제한 (min_val, max_val)
+        # 범위 ?한 (min_val, max_val)
         temp_raw = np.clip(temp_raw, min_val, max_val)
         
-        # 홀수 보정
+        # ???보정
         abs_raw = np.abs(temp_raw)
         signs = np.sign(temp_raw)
-        # 짝수인 경우 -1 (최소 1 유지)
+        # 짝수??경우 -1 (최소 1 ??)
         abs_raw = np.where((abs_raw % 2 == 0) & (abs_raw != 0), np.maximum(1, abs_raw - 1), abs_raw)
-        # 0인 경우 1로 처리
+        # 0??경우 1?처리
         temp_raw = np.where(temp_raw == 0, 1, (signs * abs_raw)).astype(int)
         
-        # 정수화된 값을 다시 AHP 스케일로 변환하여 행렬에 일괄 반영
+        # ?수?된 값을 ?시 AHP ???로 변?하???렬???괄 반영
         final_vals = np.where(temp_raw == 0, 1.0,
                       np.where(temp_raw < 0, np.abs(temp_raw).astype(float),
                       np.where(temp_raw == 1, 1.0, 1.0 / temp_raw)))
@@ -2782,12 +2782,12 @@ def calculate_pairwise_ttest(df, factors):
 
 def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geometric', ahp_method='traditional'):
 
-    # ID와 인구통계(Type) 관련 컬럼을 제외한 나머지를 쌍대비교 컬럼으로 간주
+    # ID? ?구?계(Type) 관??컬럼???외???머지???비교 컬럼?로 간주
     comp_cols = [c for c in df.columns if str(c).strip().lower() != 'id' and not str(c).strip().lower().startswith('type')]
     meta_cols = [c for c in df.columns if c not in comp_cols]
     factors, n = infer_factors_from_columns(comp_cols)
     
-    # 시트 전체 데이터의 로우데이터 최대값/최솟값 계산
+    # ?트 ?체 ?이?의 로우?이??최??최솟?계산
     all_comp_values = pd.to_numeric(df[comp_cols].values.flatten(), errors='coerce')
     valid_comp_values = all_comp_values[~np.isnan(all_comp_values)]
     if len(valid_comp_values) > 0:
@@ -2805,7 +2805,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         respondent_id = meta_data.get('ID', row.iloc[0]) if 'ID' in meta_data else row.iloc[0]
         matrix = np.eye(n)
         
-        # 원본 Rawdata를 정수 형태(-9 ~ 9)로 추출
+        # ?본 Rawdata??수 ?태(-9 ~ 9)?추출
         raw_values = []
         col_idx = 0
         has_format_error = False
@@ -2829,7 +2829,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
             ex_res = meta_data.copy()
             for k, col_name in enumerate(comp_cols):
                 ex_res[col_name] = raw_values[k] if k < len(raw_values) else np.nan
-            ex_res["CR"] = "데이터 오류(Format Error)"
+            ex_res["CR"] = "?이???류(Format Error)"
             excluded_list.append(ex_res)
             continue
             
@@ -2843,7 +2843,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
                 matrix, cr_threshold, sheet_min, sheet_max, max_iter=max_iter, learning_rate=learning_rate, method=method
             )
         
-        # 만약 최대 반복을 수행했음에도 CR이 임계값을 초과할 경우 해당 응답자 제외
+        # 만약 최? 반복???행?음?도 CR???계값을 초과??경우 ?당 ?답???외
         if final_cr > cr_threshold:
             excluded_count += 1
             ex_res = meta_data.copy()
@@ -2853,14 +2853,14 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
             excluded_list.append(ex_res)
             continue
 
-        # 보정 후 Rawdata (역변환: 상삼각 행렬 값을 정수 펀칭 스케일로 변환)
+        # 보정 ??Rawdata (????? ?삼??렬 값을 ?수 ?????로 변??
         final_raw_values = []
         for i in range(n):
             for j in range(i + 1, n):
                 val = final_matrix[i, j]
                 if val == 1.0: final_raw_val = 1
-                elif val > 1.0: final_raw_val = -int(round(val)) # 왼쪽 우선 (음수)
-                else: final_raw_val = int(round(1.0/val)) # 오른쪽 우선 (양수)
+                elif val > 1.0: final_raw_val = -int(round(val)) # ?쪽 ?선 (?수)
+                else: final_raw_val = int(round(1.0/val)) # ?른??선 (?수)
                 final_raw_values.append(final_raw_val)
 
         _unused_cr, final_ci, _unused_lambda = calculate_consistency(final_matrix, method)
@@ -2869,22 +2869,22 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         else:
             final_weights = calculate_weights(final_matrix, method)
         
-        # 결과 딕셔너리 구성 (요청사항 5 재배치 반영)
+        # 결과 ?셔?리 구성 (?청?항 5 ?배?반영)
         res = meta_data.copy()
         
-        # [수정] 1. 보정 전 Rawdata 삽입
+        # [?정] 1. 보정 ??Rawdata ?입
         for k, col_name in enumerate(comp_cols):
             res[f"Raw_Orig_{col_name}"] = raw_values[k]
         
-        # [수정] 2. Original_CI, Original_CR 순서 배치
+        # [?정] 2. Original_CI, Original_CR ?서 배치
         res["Original_CI"] = orig_ci
         res["Original_CR"] = orig_cr
         
-        # [수정] 3. 보정 후 Rawdata 삽입
+        # [?정] 3. 보정 ??Rawdata ?입
         for k, col_name in enumerate(comp_cols):
             res[f"Raw_Final_{col_name}"] = final_raw_values[k]
             
-        # [수정] 4. Final_CI, Final_CR 순서 배치
+        # [?정] 4. Final_CI, Final_CR ?서 배치
         res["Final_CI"] = final_ci
         res["Final_CR"] = final_cr
         
@@ -2976,15 +2976,15 @@ def create_sample_excel_v3():
             subs = {"Functionality": ["Hardware", "Software"], "Design": ["Appearance", "Usability"], "Economy": ["Device Price", "Maintenance"]}
             sub_subs = {"Hardware": ["Camera", "Battery", "Processor"], "Software": ["OS", "Default Apps"], "Appearance": ["Color", "Material"], "Usability": [], "Device Price": ["Lump Sum", "Installment"], "Maintenance": ["Plan", "Repair"]}
         else:
-            main_list = ["기능성", "디자인", "경제성"]
-            subs = {"기능성": ["하드웨어", "소프트웨어"], "디자인": ["외관", "편의성"], "경제성": ["단말기가격", "유지비용"]}
-            sub_subs = {"하드웨어": ["카메라", "배터리", "프로세서"], "소프트웨어": ["운영체제", "기본앱"], "외관": ["색상", "재질"], "편의성": [], "단말기가격": ["일시불", "할부"], "유지비용": ["통신요금", "AS비용"]}
+            main_list = ["기능??, "?자??, "경제??]
+            subs = {"기능??: ["?드?어", "?프?웨??], "?자??: ["??", "?의??], "경제??: ["?말기??, "??비용"]}
+            sub_subs = {"?드?어": ["카메??, "배터?, "?로?서"], "?프?웨??: ["?영체제", "기본??], "??": ["?상", "?질"], "?의??: [], "?말기??: ["?시?, "??"], "??비용": ["?신?금", "AS비용"]}
             
         def _get_dummy_data(cols, num_respondents=3):
             # cols contains ["ID", "Type", pair1, pair2...]
             data = []
             for i in range(num_respondents):
-                row = [i+1, "전문가" if not is_en else "Expert"]
+                row = [i+1, "?문가" if not is_en else "Expert"]
                 for _ in range(len(cols)-2):
                     row.append(int(np.random.choice([1, 3, 5, -3, -5])))
                 data.append(row)
@@ -3051,33 +3051,33 @@ def create_sample_excel():
             sub4_cols = ["ID", "Type", "Economic_Social", "Economic_Performance", "Social_Performance"]
             pd.DataFrame(inconsistent_pattern, columns=sub4_cols).to_excel(writer, sheet_name="Effectiveness", index=False)
         else:
-            main_cols = ["ID", "Type", "거버넌스_계획타당성", "거버넌스_실현가능성", "거버넌스_사업효과", 
-                          "계획타당성_실현가능성", "계획타당성_사업효과", "실현가능성_사업효과"]
+            main_cols = ["ID", "Type", "거버?스_계획??성", "거버?스_?현가?성", "거버?스_?업?과", 
+                          "계획??성_?현가?성", "계획??성_?업?과", "?현가?성_?업?과"]
             main_data = [
-                [1, "전문가",-3,	-3, 3, 1, 1, 1],                
-                [2, "전문가", -5, 3, 3, 3, 3, 3],        
-                [3, "일반", 5, 1, 3, -5, -5, -3],
-                [4, "일반", -3,-3, 3, -3, 3, -3],
-                [5, "공무원", -5, 5, -5, -5, 5, -5]
+                [1, "?문가",-3,	-3, 3, 1, 1, 1],                
+                [2, "?문가", -5, 3, 3, 3, 3, 3],        
+                [3, "?반", 5, 1, 3, -5, -5, -3],
+                [4, "?반", -3,-3, 3, -3, 3, -3],
+                [5, "공무??, -5, 5, -5, -5, 5, -5]
             ]
             df_main = pd.DataFrame(main_data, columns=main_cols)
             df_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
             
             inconsistent_pattern = [
-                [1, "전문가", 1, -3, 1],
-                [2, "전문가", -3, -3, -3],
-                [3, "일반", 3, -3, 1],
-                [4, "일반", -3, 5, 3],
-                [5, "공무원", -3, 5, 3]
+                [1, "?문가", 1, -3, 1],
+                [2, "?문가", -3, -3, -3],
+                [3, "?반", 3, -3, 1],
+                [4, "?반", -3, 5, 3],
+                [5, "공무??, -3, 5, 3]
             ]
-            sub1_cols = ["ID", "Type", "행정지원_지역공동체", "행정지원_총괄사업관리자", "지역공동체_총괄사업관리자"]
-            pd.DataFrame(inconsistent_pattern, columns=sub1_cols).to_excel(writer, sheet_name="거버넌스", index=False)
-            sub2_cols = ["ID", "Type", "현안적정성_대안적정성", "현안적정성_목표구체성", "대안적정성_목표구체성"]
-            pd.DataFrame(inconsistent_pattern, columns=sub2_cols).to_excel(writer, sheet_name="계획타당성", index=False)
-            sub3_cols = ["ID", "Type", "부지확보_사업구체화", "부지확보_사업비적정성", "사업구체화_사업비적정성"]
-            pd.DataFrame(inconsistent_pattern, columns=sub3_cols).to_excel(writer, sheet_name="실현가능성", index=False)
-            sub4_cols = ["ID", "Type", "경제적효과_사회적효과", "경제적효과_성과관리", "사회적효과_성과관리"]
-            pd.DataFrame(inconsistent_pattern, columns=sub4_cols).to_excel(writer, sheet_name="사업효과", index=False)
+            sub1_cols = ["ID", "Type", "?정지??지???체", "?정지??총괄?업관리자", "지???체_총괄?업관리자"]
+            pd.DataFrame(inconsistent_pattern, columns=sub1_cols).to_excel(writer, sheet_name="거버?스", index=False)
+            sub2_cols = ["ID", "Type", "?안?정????적?성", "?안?정??목표구체??, "??적?성_목표구체??]
+            pd.DataFrame(inconsistent_pattern, columns=sub2_cols).to_excel(writer, sheet_name="계획??성", index=False)
+            sub3_cols = ["ID", "Type", "부지?보_?업구체??, "부지?보_?업비적?성", "?업구체???업비적?성"]
+            pd.DataFrame(inconsistent_pattern, columns=sub3_cols).to_excel(writer, sheet_name="?현가?성", index=False)
+            sub4_cols = ["ID", "Type", "경제?효??회?효?, "경제?효??과관?, "?회?효??과관?]
+            pd.DataFrame(inconsistent_pattern, columns=sub4_cols).to_excel(writer, sheet_name="?업?과", index=False)
     output.seek(0)
     return output
 
@@ -3095,11 +3095,11 @@ def calculate_anova_and_posthoc(full_data):
         f_stat, p_val = f_oneway(*groups)
         
         row = {
-            "요인": factor,
-            "F-값": f_stat,
+            "?인": factor,
+            "F-?: f_stat,
             "P-Value": p_val,
-            "유의성": "유의함" if p_val < 0.05 else "유의하지 않음",
-            "사후검정(Tukey HSD)": ""
+            "?의??: "?의?? if p_val < 0.05 else "?의?? ?음",
+            "?후검??Tukey HSD)": ""
         }
         
         if p_val < 0.05 and STATSMODELS_AVAILABLE:
@@ -3111,18 +3111,18 @@ def calculate_anova_and_posthoc(full_data):
                     pairs_str = []
                     for idx_row, r in sig_pairs.iterrows():
                         pairs_str.append(f"{r['group1']} vs {r['group2']}")
-                    row["사후검정(Tukey HSD)"] = ", ".join(pairs_str) + " 차이 있음"
+                    row["?후검??Tukey HSD)"] = ", ".join(pairs_str) + " 차이 ?음"
                 else:
-                    row["사후검정(Tukey HSD)"] = "집단 간 구체적 차이 발견 못함"
+                    row["?후검??Tukey HSD)"] = "집단 ?구체??차이 발견 못함"
             except Exception as e:
-                row["사후검정(Tukey HSD)"] = "계산 오류"
+                row["?후검??Tukey HSD)"] = "계산 ?류"
         
         results.append(row)
         
     return pd.DataFrame(results)
 
 # -----------------------------------------------------------------------------
-# [삭제] 좋아요 기능 제거됨
+# [??] 좋아??기능 ?거??
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
@@ -3133,7 +3133,7 @@ if not st.session_state.get('_db_initialized'):
     init_db()
     st.session_state._db_initialized = True
 
-# CSS 최적화
+# CSS 최적??
 
 
 try:
@@ -3146,7 +3146,7 @@ try:
     if 'signup_paypal_user' not in st.session_state: st.session_state.signup_paypal_user = None
     if 'signup_portone_user' not in st.session_state: st.session_state.signup_portone_user = None
 
-    # 로그인 상태일 경우 가입 결제 대기 상태 초기화
+    # 로그???태??경우 가??결제 ???태 초기??
     if st.session_state.user_id is not None:
         st.session_state.signup_paypal_user = None
         st.session_state.signup_portone_user = None
@@ -3160,7 +3160,7 @@ except Exception:
     pass
 
 # -----------------------------------------------------------------------------
-# 쿼리 매개변수 확인 (다국어 선택 및 결제 완료 처리)
+# 쿼리 매개변???인 (?국???택 ?결제 ?료 처리)
 # -----------------------------------------------------------------------------
 try:
     q_params = st.query_params
@@ -3171,7 +3171,7 @@ except AttributeError:
         q_params = {}
 
 # -----------------------------------------------------------------------------
-# 구글 OAuth 2.0 콜백 처리
+# 구? OAuth 2.0 콜백 처리
 # -----------------------------------------------------------------------------
 if "code" in q_params and st.session_state.get('user_id'):
     import os
@@ -3212,16 +3212,16 @@ if "code" in q_params and st.session_state.get('user_id'):
             conn.commit()
             conn.close()
             
-            st.success("🎉 구글 계정 연동이 완료되었습니다!")
+            st.success("? 구? 계정 ?동???료?었?니??")
             st.query_params.clear()
             st.rerun()
         except Exception as oauth_err:
-            st.error(f"구글 계정 연동 실패: {oauth_err}")
+            st.error(f"구? 계정 ?동 ?패: {oauth_err}")
             st.query_params.clear()
 
 
 # -----------------------------------------------------------------------------
-# [신규] 동적 라우팅 - 응답자 설문 참여 SPA (Single Page Application)
+# [?규] ?적 ?우??- ?답???문 참여 SPA (Single Page Application)
 # -----------------------------------------------------------------------------
 
 
@@ -3235,30 +3235,30 @@ if "preview_id" in q_params or "survey_id" in q_params:
         if isinstance(preview_id_param, list):
             preview_id_param = preview_id_param[0]
             
-        st.info("⚠️ [미리보기 모드] 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.")
+        st.info("?️ [미리보기 모드] ???면? ?답?? 보게 ???면???시?미리보기?니?? ?력???이?는 ?출?? ?습?다.")
         
         preview_file_path = f"temp_previews/{preview_id_param}.json"
         if os.path.exists(preview_file_path):
             with open(preview_file_path, "r", encoding="utf-8") as f:
                 survey_meta = json.load(f)
         else:
-            st.warning(_("미리보기 데이터를 불러올 수 없습니다.", "Failed to load preview data."))
+            st.warning(_("미리보기 ?이?? 불러?????습?다.", "Failed to load preview data."))
             st.markdown(_("""
-#### 📋 미리보기 전에 아래 사항을 먼저 완료해 주세요.
+#### ? 미리보기 ?에 ?래 ?항??먼? ?료??주세??
 
-1. **설문지 설정 완료** — 메인 페이지에서 AHP 모델 구조, 요인, 척도 등 설문 설정을 모두 입력합니다.
-2. **구글 스프레드시트 연동** — 섹션 5에서 본인의 구글 스프레드시트 URL 또는 ID를 입력하고, 서비스 계정 이메일을 편집자로 공유합니다.
-3. **미리보기 버튼 클릭** — 설정이 완료된 후 "👁️ 설문지 응답 화면 미리보기" 버튼을 다시 눌러 주세요.
+1. **?문지 ?정 ?료** ??메인 ?이지?서 AHP 모델 구조, ?인, 척도 ???문 ?정??모두 ?력?니??
+2. **구? ?프?드?트 ?동** ???션 5?서 본인??구? ?프?드?트 URL ?는 ID??력?고, ?비??계정 ?메?을 ?집?로 공유?니??
+3. **미리보기 버튼 ?릭** ???정???료????"???문지 ?답 ?면 미리보기" 버튼???시 ?러 주세??
 
-> 💡 설문 설정 페이지에서 내용을 입력한 뒤 미리보기를 눌러야 정상적으로 표시됩니다.
+> ? ?문 ?정 ?이지?서 ?용???력????미리보기??러???상?으??시?니??
             """, """
-#### 📋 Please complete the following steps before previewing.
+#### ? Please complete the following steps before previewing.
 
-1. **Complete Survey Settings** — Enter all survey settings, including AHP model structure, factors, and scales on the main page.
-2. **Google Spreadsheet Integration** — In Section 5, enter your Google Spreadsheet URL or ID and share it with the service account email as an editor.
-3. **Click Preview Button** — After the setup is complete, click the "👁️ Preview Survey Screen" button again.
+1. **Complete Survey Settings** ??Enter all survey settings, including AHP model structure, factors, and scales on the main page.
+2. **Google Spreadsheet Integration** ??In Section 5, enter your Google Spreadsheet URL or ID and share it with the service account email as an editor.
+3. **Click Preview Button** ??After the setup is complete, click the "??Preview Survey Screen" button again.
 
-> 💡 The preview will display correctly only after entering content on the survey settings page.
+> ? The preview will display correctly only after entering content on the survey settings page.
             """))
             st.stop()
             
@@ -3270,20 +3270,20 @@ if "preview_id" in q_params or "survey_id" in q_params:
 
     submitted_key = f"survey_submitted_{survey_id_param}"
     if st.session_state.get(submitted_key):
-        # 1. HTML/CSS를 이용한 모던하고 수려한 감사 카드 UI 렌더링
-        thank_you_title = _("설문 제출이 성공적으로 완료되었습니다!", "Survey Submitted Successfully!")
+        # 1. HTML/CSS??용??모던?고 ?려??감사 카드 UI ?더?
+        thank_you_title = _("?문 ?출???공?으??료?었?니??", "Survey Submitted Successfully!")
         thank_you_body = _(
-            "의사결정 우선순위 분석을 위해 소중한 시간 내어 응답해 주셔서 대단히 감사합니다. <br>보내주신 답변은 안전하게 기록되었으며 연구 분석에 귀중한 자료로 활용됩니다.",
+            "?사결정 ?선?위 분석???해 ?중???간 ?어 ?답??주셔????히 감사?니?? <br>보내주신 ??? ?전?게 기록?었?며 ?구 분석??귀중한 ?료??용?니??",
             "Thank you very much for taking your valuable time to respond for decision-making priority analysis. <br>Your responses have been safely recorded and will be used as valuable data for research analysis."
         )
         thank_you_note = _(
-            "※ 브라우저 보안 규정에 따라 '창 닫기' 버튼이 동작하지 않을 수 있습니다. <br>동작하지 않을 경우 현재 열려있는 <strong>브라우저 탭의 X 버튼</strong>을 직접 눌러 종료해 주세요.",
-            "※ Depending on browser security policies, the 'Close Window' button may not work. <br>If it does not work, please close the current <strong>browser tab</strong> manually."
+            "??브라?? 보안 규정???라 '??기' 버튼???작?? ?을 ???습?다. <br>?작?? ?을 경우 ?재 ?려?는 <strong>브라?? ?? X 버튼</strong>??직접 ?러 종료??주세??",
+            "??Depending on browser security policies, the 'Close Window' button may not work. <br>If it does not work, please close the current <strong>browser tab</strong> manually."
         )
         st.markdown(f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; font-family: 'Inter', sans-serif; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-top: 40px; border: 1px solid #e2e8f0;">
             <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 50%; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);">
-                <span style="font-size: 45px; color: #10b981;">🎉</span>
+                <span style="font-size: 45px; color: #10b981;">?</span>
             </div>
             <h1 style="font-size: 2.2rem; color: #1f2937; font-weight: 800; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">{thank_you_title}</h1>
             <p style="font-size: 1.1rem; color: #4b5563; max-width: 550px; line-height: 1.6; margin-bottom: 30px; word-break: keep-all;">
@@ -3297,7 +3297,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         
         import streamlit.components.v1 as components
         
-        # 1.5. 모바일 가로 모드 전체화면 자동 해제 및 방향 잠금 해제 스크립트 주입
+        # 1.5. 모바??가?모드 ?체?면 ?동 ?제 ?방향 ?금 ?제 ?크립트 주입
         components.html("""
         <script>
         try {
@@ -3310,7 +3310,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 }
             }
             
-            // 화면 방향 잠금 해제 (세로 모드로 복원 가능하게)
+            // ?면 방향 ?금 ?제 (?로 모드?복원 가?하?
             if (window.screen.orientation && window.screen.orientation.unlock) {
                 window.screen.orientation.unlock();
             } else if (parent.screen.orientation && parent.screen.orientation.unlock) {
@@ -3322,8 +3322,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
         </script>
         """, height=0)
         
-        # 2. 창 닫기 버튼 렌더링 및 자바스크립트 실행 트리거
-        close_clicked = st.button(_("🚪 창 닫기", "🚪 Close Window"), use_container_width=True)
+        # 2. ??기 버튼 ?더???바?크립트 ?행 ?리?
+        close_clicked = st.button(_("? ??기", "? Close Window"), use_container_width=True)
         if close_clicked:
             components.html("""
             <script>
@@ -3346,29 +3346,29 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
         st.stop()
             
-    st.info(_("⚠️ 페이지를 새로고침하거나 이탈 시 입력된 정보가 모두 초기화되니 주의 바랍니다.", "⚠️ Please note that all entered information will be initialized if you refresh or leave the page."))
+    st.info(_("?️ ?이지??로고침?거???탈 ???력???보가 모두 초기?되??주의 바랍?다.", "?️ Please note that all entered information will be initialized if you refresh or leave the page."))
     
-    # 미리보기 모드가 아닌 경우에만 구글 시트에서 메타데이터를 로드
+    # 미리보기 모드가 ?닌 경우?만 구? ?트?서 메??이?? 로드
     if not is_preview_mode:
         survey_meta = load_survey_metadata(survey_id_param)
         if not survey_meta:
-            st.error(_("설문지를 불러올 수 없습니다. 올바른 링크인지 확인해 주세요.", "Failed to load the survey. Please check if the link is correct."))
+            st.error(_("?문지?불러?????습?다. ?바?링크?? ?인??주세??", "Failed to load the survey. Please check if the link is correct."))
             st.stop()
         
-        # 세션 상태 기반 1회성 방문 카운트 증가 처리 (새로고침 방지용 세션변수 활용)
+        # ?션 ?태 기반 1?성 방문 카운??증? 처리 (?로고침 방????션변???용)
         if f"visited_survey_{survey_id_param}" not in st.session_state:
             from survey_manager import increment_survey_visit
             increment_survey_visit(survey_id_param)
             st.session_state[f"visited_survey_{survey_id_param}"] = True
             
-    # [YETA 전용 라우팅] 예타 모드인 경우 예타 전용 렌더러 호출
+    # [YETA ?용 ?우?? ?? 모드??경우 ?? ?용 ?더???출
     if survey_meta.get("Is_Yeta") == "True" or survey_meta.get("Is_Yeta") is True:
         import yeta_survey_renderer
         yeta_survey_renderer.render_yeta_survey(survey_meta, is_preview_mode=is_preview_mode, survey_id_param=survey_id_param)
         st.stop()
         
-    survey_title = survey_meta.get('Title', 'AHP 온라인 설문조사')
-    if survey_title in ['AHP 온라인 설문조사', '제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문']:
+    survey_title = survey_meta.get('Title', 'AHP ?라???문조사')
+    if survey_title in ['AHP ?라???문조사', '?조???동로봇 ?입 ?인 중요??분석???한 ?문가 AHP ?문']:
         survey_title = _(survey_title, 'Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots')
     else:
         survey_title = _t(survey_title)
@@ -3379,10 +3379,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
         st.title(survey_title)
     with lang_col2:
         st.write("") # Add some vertical padding
-        lang_options = {"한국어 (Korean)": "ko", "English (영어)": "en"}
+        lang_options = {"?국??(Korean)": "ko", "English (?어)": "en"}
         current_survey_lang = "en" if st.session_state.get('lang', 'ko') == 'en' else "ko"
         selected_lang_label = st.selectbox(
-            "Language / 언어", 
+            "Language / ?어", 
             options=list(lang_options.keys()), 
             index=0 if current_survey_lang == 'ko' else 1,
             key=f"survey_lang_selector_{survey_id_param}",
@@ -3394,11 +3394,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
             st.rerun()
     # --------------------------------
     
-    # 조사 목적 및 안내문, 설문 담당자 이메일 표시 (깔끔한 디자인 적용)
+    # 조사 목적 ??내? ?문 ?당???메???시 (깔끔???자???용)
     survey_desc = survey_meta.get("Description", "")
     survey_desc = translate_definition_if_default("Description", survey_desc)
     
-    # 텍스트 내의 특정 단어 볼드(**단어**) 및 밑줄(__단어__) 처리 지원
+    # ?스???의 ?정 ?어 볼드(**?어**) ?밑줄(__?어__) 처리 지??
     import re
     survey_desc = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', survey_desc)
     survey_desc = re.sub(r'__(.*?)__', r'<u>\1</u>', survey_desc)
@@ -3410,23 +3410,23 @@ if "preview_id" in q_params or "survey_id" in q_params:
     if survey_desc or survey_email:
         email_html = (
             f"<div style='margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-weight: bold;'>"
-            f"📧 " + _("설문 담당자 문의:", "Contact Survey Administrator:") + " "
+            f"? " + _("?문 ?당??문의:", "Contact Survey Administrator:") + " "
             f"<a href='mailto:{survey_email}' style='color: #2563eb; text-decoration: none;'>{survey_email}</a>"
             f"</div>"
         ) if survey_email else ""
         
         mobile_hint_html = (
             f"<div style='margin-top: 16px; padding: 12px; background-color: #f1f5f9; border-radius: 6px; font-size: 0.9rem; color: #334155; display: flex; gap: 8px; align-items: center;'>"
-            f"<span style='font-size: 1.2rem;'>📱</span> <span>" + _("스마트폰으로 접속하신 경우, <b>기기를 가로로 회전</b>하시면 더욱 편리하게 설문에 응답하실 수 있습니다.", "If you are using a smartphone, you can respond to the survey more conveniently by <b>rotating the screen horizontally</b>.") + "</span>"
+            f"<span style='font-size: 1.2rem;'>?</span> <span>" + _("?마?폰?로 ?속?신 경우, <b>기기?가로로 ?전</b>?시??욱 ?리?게 ?문???답?실 ???습?다.", "If you are using a smartphone, you can respond to the survey more conveniently by <b>rotating the screen horizontally</b>.") + "</span>"
             f"</div>"
         )
         
-        # 사용자 입력 레이아웃(줄바꿈 및 띄어쓰기)을 그대로 유지하기 위해 white-space: pre-wrap 적용
+        # ?용???력 ?이?웃(줄바???어?기)??그?????기 ?해 white-space: pre-wrap ?용
         box_html = f'<div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{survey_desc}\n{email_html}\n{mobile_hint_html}</div>'
         st.markdown(box_html, unsafe_allow_html=True)
 
     
-    # 모델 정보와 인구통계 추출
+    # 모델 ?보? ?구?계 추출
     ahp_model = survey_meta["AHP_Model_JSON"]
     demographics = survey_meta["Demographics"]
     definitions = survey_meta["Definitions"]
@@ -3442,7 +3442,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     rewards_info = survey_meta["Rewards_Info"]
     scale_type = survey_meta.get("Scale_Type", "1-9 Continuous")
     
-    # AHP 쌍대비교 기본 선택값을 1(동등)로 설정하기 위해 session_state 사전 초기화 (버전 v3 적용으로 세션 캐시 갱신)
+    # AHP ??비교 기본 ?택값을 1(?등)??정?기 ?해 session_state ?전 초기??(버전 v3 ?용?로 ?션 캐시 갱신)
     tier_level = int(survey_meta.get("Tier_Level", 2))
     
     init_key = f"init_survey_{survey_id_param}_v5"
@@ -3460,7 +3460,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 pair_key = f"{left_f}_{right_f}"
                 st.session_state[f"pair_ans_{pair_key.replace(' ', '_')}"] = None
     
-    # 단일 스크롤 폼 생성
+    # ?일 ?크????성
     # respondent_survey_form context split - sections 1,2,3 are now outside the form
     # Define professional soft pastel colors for factor boxes
     PASTEL_PALETTES = [
@@ -3490,12 +3490,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
 
     section_num = 1
 
-    # 1. 응답자 기본 정보
-    st.subheader(f"{section_num}. " + _("응답자 기본 정보", "Respondent Demographic Information"))
+    # 1. ?답??기본 ?보
+    st.subheader(f"{section_num}. " + _("?답??기본 ?보", "Respondent Demographic Information"))
     section_num += 1
     resp_data = {}
     
-    # 아이디는 응답자에게 제시하지 말고 임의로 무작위 자동 부여
+    # ?이?는 ?답?에??시?? 말고 ?의?무작???동 부??
     if "survey_resp_uuid" not in st.session_state:
         import uuid
         st.session_state.survey_resp_uuid = str(uuid.uuid4())[:8]
@@ -3503,16 +3503,16 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     sq_idx = 1
     
-    # 성명
+    # ?명
     if demographics.get("name"):
-        name_label = f"SQ{sq_idx}. " + _("성명 *", "Name *")
+        name_label = f"SQ{sq_idx}. " + _("?명 *", "Name *")
         sq_idx += 1
         col1, col2 = st.columns([1, 3])
         with col1:
             resp_data["name"] = st.text_input(name_label, key="survey_resp_name")
-        st.caption(_("💡 수집된 성명은 중복 응답 검토 용도로만 사용됩니다. 성명 전체 입력을 원치 않으실 경우, 이름의 일부만 입력하셔도 무방합니다. (예: 홍@동, 홍길@ 등)", "💡 The collected name is used only for duplicate response checking. If you do not wish to provide your full name, you may enter a partial name. (e.g., J@hn, Joh@ Doe)"))
+        st.caption(_("? ?집???명? 중복 ?답 검???도로만 ?용?니?? ?명 ?체 ?력???치 ?으??경우, ?름??????력?셔??무방?니?? (?? ???? ?길@ ??", "? The collected name is used only for duplicate response checking. If you do not wish to provide your full name, you may enter a partial name. (e.g., J@hn, Joh@ Doe)"))
     
-    # 그룹 분류는 설계자가 설정한 문항과 보기를 적용
+    # 그룹 분류???계?? ?정??문항?보기??용
     type_questions_data = demographics.get("type_questions")
     resp_data["types"] = []
     
@@ -3520,16 +3520,16 @@ if "preview_id" in q_params or "survey_id" in q_params:
         for i, tq in enumerate(type_questions_data):
             tq_q = tq.get("q", tq.get("question", ""))
             tq_opts = tq.get("opts", [])
-            if not tq_q or tq_q == "귀하의 소속은 어떻게 되십니까?":
-                tq_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+            if not tq_q or tq_q == "귀?의 ?속? ?떻??십?까?":
+                tq_q = _("귀?의 ?속? ?떻??십?까?", "What is your affiliation?")
             else:
                 tq_q = _t(tq_q)
             
-            if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["전문가", "일반", "공무원", "기타"]:
+            if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["?문가", "?반", "공무??, "기?"]:
                 if "opts" not in tq: # it was added via UI as short answer text
                     tq_opts = []
                 else:
-                    tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
+                    tq_opts = [_("?문가", "Expert"), _("?반", "General"), _("공무??, "Public Official"), _("기?", "Other")]
             
             if tq_opts:
                 tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
@@ -3539,16 +3539,16 @@ if "preview_id" in q_params or "survey_id" in q_params:
             resp_data["types"].append(ans)
             sq_idx += 1
     else:
-        # 역방향 호환성
+        # ?????환??
         type_q = demographics.get("type_question", "")
-        if not type_q or type_q == "귀하의 소속은 어떻게 되십니까?":
-            type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
+        if not type_q or type_q == "귀?의 ?속? ?떻??십?까?":
+            type_q = _("귀?의 ?속? ?떻??십?까?", "What is your affiliation?")
         else:
             type_q = _t(type_q)
         
         type_opts = demographics.get("type_options", [])
-        if not isinstance(type_opts, list) or not type_opts or type_opts == ["전문가", "일반", "공무원", "기타"]:
-            type_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
+        if not isinstance(type_opts, list) or not type_opts or type_opts == ["?문가", "?반", "공무??, "기?"]:
+            type_opts = [_("?문가", "Expert"), _("?반", "General"), _("공무??, "Public Official"), _("기?", "Other")]
         else:
             type_opts = [translate_factor_if_default(opt) for opt in type_opts]
             
@@ -3556,51 +3556,51 @@ if "preview_id" in q_params or "survey_id" in q_params:
         resp_data["types"].append(ans)
         sq_idx += 1
         
-    # 기존 코드와의 호환성을 위해 type 속성도 유지
+    # 기존 코드????환?을 ?해 type ?성????
     if resp_data["types"]:
         resp_data["type"] = resp_data["types"][0]
     
 
     
-    # 연령: 개방형 vs 10세 단위 선택형
+    # ?령: 개방??vs 10???위 ?택??
     if demographics.get("age"):
-        age_label = f"SQ{sq_idx}. " + _("연령 *", "Age *")
+        age_label = f"SQ{sq_idx}. " + _("?령 *", "Age *")
         sq_idx += 1
-        age_type = demographics.get("age_type", "개방형 (숫자 직접 입력)")
-        if age_type == "10세 단위 선택형":
-            age_options = [_("20대 미만", "Under 20s"), _("20대 (20~29세)", "20s (20-29)"), _("30대 (30~39세)", "30s (30-39)"), _("40대 (40~49세)", "40s (40-49)"), _("50대 (50~59세)", "50s (50-59)"), _("60대 이상", "60s or older")]
+        age_type = demographics.get("age_type", "개방??(?자 직접 ?력)")
+        if age_type == "10???위 ?택??:
+            age_options = [_("20? 미만", "Under 20s"), _("20? (20~29??", "20s (20-29)"), _("30? (30~39??", "30s (30-39)"), _("40? (40~49??", "40s (40-49)"), _("50? (50~59??", "50s (50-59)"), _("60? ?상", "60s or older")]
             resp_data["age"] = st.radio(age_label, age_options, index=0, key="survey_resp_age", horizontal=True)
         else:
             col1, col2 = st.columns([1, 3])
             with col1:
-                resp_data["age"] = st.text_input(f"{age_label} " + _("(세)", "(Years)"), value="", placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_text")
+                resp_data["age"] = st.text_input(f"{age_label} " + _("(??", "(Years)"), value="", placeholder=_("?? 30", "e.g. 30"), key="survey_resp_age_text")
             
     if demographics.get("gender"):
-        resp_data["gender"] = st.radio(f"SQ{sq_idx}. " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
+        resp_data["gender"] = st.radio(f"SQ{sq_idx}. " + _("?별 *", "Gender *"), [_("?자", "Male"), _("?자", "Female")], key="survey_resp_gender", horizontal=True)
         sq_idx += 1
     
-    # 경력년수: 개방형 vs 5년 단위 선택형
+    # 경력?수: 개방??vs 5???위 ?택??
     if demographics.get("experience"):
-        exp_label = f"SQ{sq_idx}. " + _("경력년수 *", "Years of Experience *")
+        exp_label = f"SQ{sq_idx}. " + _("경력?수 *", "Years of Experience *")
         sq_idx += 1
-        exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
-        if exp_type == "5년 단위 선택형":
-            exp_options = [_("5년 미만", "Less than 5 years"), _("5년 이상 ~ 10년 미만", "5 to 10 years"), _("10년 이상 ~ 15년 미만", "10 to 15 years"), _("15년 이상 ~ 20년 미만", "15 to 20 years"), _("20년 이상", "20 years or more")]
+        exp_type = demographics.get("experience_type", "개방??(?자 직접 ?력)")
+        if exp_type == "5???위 ?택??:
+            exp_options = [_("5??미만", "Less than 5 years"), _("5???상 ~ 10??미만", "5 to 10 years"), _("10???상 ~ 15??미만", "10 to 15 years"), _("15???상 ~ 20??미만", "15 to 20 years"), _("20???상", "20 years or more")]
             resp_data["experience"] = st.radio(exp_label, exp_options, index=0, key="survey_resp_experience", horizontal=True)
         else:
             col1, col2 = st.columns([1, 3])
             with col1:
-                resp_data["experience"] = st.text_input(f"{exp_label} " + _("(년)", "(Years)"), value="", placeholder=_("예: 5", "e.g. 5"), key="survey_resp_experience_text")
+                resp_data["experience"] = st.text_input(f"{exp_label} " + _("(??", "(Years)"), value="", placeholder=_("?? 5", "e.g. 5"), key="survey_resp_experience_text")
             
-    # 소속 문항 삭제됨
+    # ?속 문항 ????
     # if demographics.get("affiliation"):
-    #     resp_data["affiliation"] = st.text_input(f"SQ{sq_idx}. " + _("소속 *", "Affiliation *"), key="survey_resp_affiliation")
+    #     resp_data["affiliation"] = st.text_input(f"SQ{sq_idx}. " + _("?속 *", "Affiliation *"), key="survey_resp_affiliation")
     #     sq_idx += 1
         
     if demographics.get("email"):
         col1, col2 = st.columns([1, 3])
         with col1:
-            resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email", value="", placeholder=_("예: user@example.com", "e.g. user@example.com"))
+            resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("?메??*", "Email *"), key="survey_resp_email", value="", placeholder=_("?? user@example.com", "e.g. user@example.com"))
         sq_idx += 1
     
     st.divider()
@@ -3608,28 +3608,28 @@ if "preview_id" in q_params or "survey_id" in q_params:
     main_criteria = ahp_model.get("main", [])
     
     with st.container():
-        # 4. AHP 쌍대비교 문항 생성
-        st.subheader(f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)"))
+        # 4. AHP ??비교 문항 ?성
+        st.subheader(f"{section_num}. " + _("?인 ?????중요???? (??비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)"))
         ahp_section_prefix = f"{section_num}"
         section_num += 1
         
-        st.info(_("더 중요한 방향으로 숫자를 선택하세요. **1**=동등, 숫자가 클수록 해당 방향의 요인이 더 중요합니다.",
+        st.info(_("??중요??방향?로 ?자??택?세?? **1**=?등, ?자가 ?수??당 방향???인????중요?니??",
                   "Select the number toward the more important factor. **1**=Equal, larger number = more important."))
         if cr_guide_method == "realtime":
-            st.markdown(_(":blue[**파란색 배경**]: 일관성(CR)을 최적으로 유지하는 :red[**권장 선택 구간**]입니다.",
+            st.markdown(_(":blue[**????배경**]: ????CR)??최적?로 ???는 :red[**권장 ?택 구간**]?니??",
                           ":blue[**Blue background**]: :red[**recommended range**] to maintain optimal consistency (CR)."))
-        with st.expander(_("상세 응답 가이드", "Detailed Response Guide"), expanded=False):
+        with st.expander(_("?세 ?답 가?드", "Detailed Response Guide"), expanded=False):
             st.markdown(_("""
-- **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
-- **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
-- **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
+- **?등(1)**: ?쪽 ?인???같??중요????가?데 **1**???택?세??
+- **?쪽 ?인????중요????*: ?쪽 방향(??)???자??택?세?? ?자가 ?수??쪽 ?인???씬 중요?을 ???니??
+- **?른??인????중요????*: ?른?방향( ?????자??택?세?? ?자가 ?수??른??인???씬 중요?을 ???니??
             """, """
 - **Equal (1)**: Choose the middle **1** when both factors are equally important.
-- **Left factor more important**: Choose a number on the left (←). Larger = much more important.
-- **Right factor more important**: Choose a number on the right (→). Larger = much more important.
+- **Left factor more important**: Choose a number on the left (??. Larger = much more important.
+- **Right factor more important**: Choose a number on the right (??. Larger = much more important.
             """))
         
-        # 모바일 가로 모드 강제 전환 오버레이
+        # 모바??가?모드 강제 ?환 ?버?이
         import streamlit.components.v1 as components
         mobile_landscape_overlay_html = """
         <script>
@@ -3664,14 +3664,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 parent.head.appendChild(style);
 
                 overlay.innerHTML = `
-                    <div style="font-size: 50px; margin-bottom: 15px;">📱🔄</div>
-                    <h2 style="color: #333; margin-bottom: 10px; font-size: 22px;">가로 모드 최적화</h2>
-                    <p style="color: #444; font-size: 15px; margin-bottom: 5px;">이 설문(AHP 쌍대비교)은 가로 화면에서<br>가장 편하게 응답하실 수 있습니다.</p>
-                    <button class="landscape-btn" id="btn-force-landscape">🔄 화면을 가로로 돌리고 설문 계속하기</button>
+                    <div style="font-size: 50px; margin-bottom: 15px;">??</div>
+                    <h2 style="color: #333; margin-bottom: 10px; font-size: 22px;">가?모드 최적??/h2>
+                    <p style="color: #444; font-size: 15px; margin-bottom: 5px;">???문(AHP ??비교)? 가??면?서<br>가???하??답?실 ???습?다.</p>
+                    <button class="landscape-btn" id="btn-force-landscape">? ?면??가로로 ?리??문 계속?기</button>
                     <div class="landscape-note">
-                        ※ <b>아이폰(iOS) 사용자 안내</b><br>
-                        위 버튼이 작동하지 않을 수 있습니다.<br>
-                        기기의 <b>'자동 회전'을 켜고</b> 스마트폰을 눕혀주시면 안내창이 사라집니다.
+                        ??<b>?이??iOS) ?용???내</b><br>
+                        ??버튼???동?? ?을 ???습?다.<br>
+                        기기??<b>'?동 ?전'??켜고</b> ?마?폰????주시??내창이 ?라집니??
                     </div>
                 `;
                 parent.body.appendChild(overlay);
@@ -3714,15 +3714,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
             for comb in combinations:
                 parent_trans = translate_factor_if_default(comb['parent'])
                 parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + (
-                    _((f"[{parent_trans}] 하위 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
+                    _((f"[{parent_trans}] ?위 ?인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
                     if comb['type'] == 'sub'
-                    else _("대분류(핵심) 요인 비교", "Main Criteria (Core) Comparison")
+                    else _("?분류(?심) ?인 비교", "Main Criteria (Core) Comparison")
                 )
                 st.markdown(f"#### {parent_lbl}")
                 
-                # [수정] 평가 요인 정의 및 설명을 각 척도 평가 바로 위쪽으로 이동
+                # [?정] ?? ?인 ?의 ??명???척도 ?? 바로 ?쪽?로 ?동
                 if comb['type'] == 'sub':
-                    # 해당 대분류(parent) 카드 출력
+                    # ?당 ?분류(parent) 카드 출력
                     main_factor = comb['parent']
                     main_criteria = ahp_model.get("main", [])
                     try:
@@ -3782,7 +3782,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     if main_rows_html:
                         card_html = f"""
                         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-top: 0px; margin-bottom: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("대분류 요인 정의", "Main Criteria Definitions")}</h5>
+                            <h5 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("?분류 ?인 ?의", "Main Criteria Definitions")}</h5>
                             <div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                                 {main_rows_html}
                             </div>
@@ -3792,31 +3792,31 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 
                 comp_idx += 1
             
-                # 척도 인터페이스 설정에 따른 선택 라디오 버튼 옵션 매핑
+                # 척도 ?터?이???정???른 ?택 ?디??버튼 ?션 매핑
                 if "1-3-5 Discrete" in scale_type:
                     options = [-5, -3, 1, 3, 5]
-                    format_func = lambda x: _("왼쪽 요인이 훨씬 중요 (-5)", "Left factor is much more important (-5)") if x == -5 else (_("왼쪽 요인이 약간 중요 (-3)", "Left factor is slightly more important (-3)") if x == -3 else (_("양측이 동등함 (1)", "Equal importance (1)") if x == 1 else (_("오른쪽 요인이 약간 중요 (3)", "Right factor is slightly more important (3)") if x == 3 else _("오른쪽 요인이 훨씬 중요 (5)", "Right factor is much more important (5)"))))
+                    format_func = lambda x: _("?쪽 ?인???씬 중요 (-5)", "Left factor is much more important (-5)") if x == -5 else (_("?쪽 ?인???간 중요 (-3)", "Left factor is slightly more important (-3)") if x == -3 else (_("?측???등??(1)", "Equal importance (1)") if x == 1 else (_("?른??인???간 중요 (3)", "Right factor is slightly more important (3)") if x == 3 else _("?른??인???씬 중요 (5)", "Right factor is much more important (5)"))))
                 elif "1-5 Continuous" in scale_type or ("1-5" in scale_type and "Discrete" not in scale_type):
                     options = [-5, -4, -3, -2, 1, 2, 3, 4, 5]
-                    format_func = lambda x: _(f"왼쪽 중요도 {abs(x)}", f"Left importance {abs(x)}") if x < 0 else (_("동등 (1)", "Equal (1)") if x == 1 else _(f"오른쪽 중요도 {x}", f"Right importance {x}"))
+                    format_func = lambda x: _(f"?쪽 중요??{abs(x)}", f"Left importance {abs(x)}") if x < 0 else (_("?등 (1)", "Equal (1)") if x == 1 else _(f"?른?중요??{x}", f"Right importance {x}"))
                 elif "1-3-7-9 Discrete" in scale_type:
                     options = [-9, -7, -3, 1, 3, 7, 9]
-                    format_func = lambda x: _("왼쪽 절대적 중요 (-9)", "Left is absolutely more important (-9)") if x == -9 else (_("왼쪽 대단히 중요 (-7)", "Left is strongly more important (-7)") if x == -7 else (_("왼쪽 약간 중요 (-3)", "Left is slightly more important (-3)") if x == -3 else (_("동등함 (1)", "Equal (1)") if x == 1 else (_("오른쪽 약간 중요 (3)", "Right is slightly more important (3)") if x == 3 else (_("오른쪽 대단히 중요 (7)", "Right is strongly more important (7)") if x == 7 else _("오른쪽 절대적 중요 (9)", "Right is absolutely more important (9)"))))))
+                    format_func = lambda x: _("?쪽 ????중요 (-9)", "Left is absolutely more important (-9)") if x == -9 else (_("?쪽 ??히 중요 (-7)", "Left is strongly more important (-7)") if x == -7 else (_("?쪽 ?간 중요 (-3)", "Left is slightly more important (-3)") if x == -3 else (_("?등??(1)", "Equal (1)") if x == 1 else (_("?른??간 중요 (3)", "Right is slightly more important (3)") if x == 3 else (_("?른???히 중요 (7)", "Right is strongly more important (7)") if x == 7 else _("?른?????중요 (9)", "Right is absolutely more important (9)"))))))
                 else: # 1-9 Continuous (Default)
                     options = list(range(-9, -1)) + list(range(1, 10))
                     options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
-                    format_func = lambda x: _(f"왼쪽 중요도 {abs(x)}", f"Left importance {abs(x)}") if x < 0 else (_("동등 (1)", "Equal (1)") if x == 1 else _(f"오른쪽 중요도 {x}", f"Right importance {x}"))
+                    format_func = lambda x: _(f"?쪽 중요??{abs(x)}", f"Left importance {abs(x)}") if x < 0 else (_("?등 (1)", "Equal (1)") if x == 1 else _(f"?른?중요??{x}", f"Right importance {x}"))
                 
-                # 모바일 최적화: 가로 스크롤 영역 지정을 위한 컨테이너 생성
+                # 모바??최적?? 가??크??역 지?을 ?한 컨테?너 ?성
                 survey_container = st.container()
                 survey_container.markdown("<div class='ahp_scrollable_area'></div>", unsafe_allow_html=True)
                 
-                # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 모바일 가로 스크롤 지원
+                # CSS 주입: 컬럼 간의 gap??0?로 차단?고 모바??가??크?지??
                 mobile_css = """
                 <style>
-                /* 모바일 (768px 이하) 환경에서 가로 스크롤 허용 및 세로 쌓임 방지 */
+                /* 모바??(768px ?하) ?경?서 가??크??용 ??로 ?임 방? */
                 @media (max-width: 768px) {
-                    /* 직계 자식으로 마커를 가진 stVerticalBlock 만 선택하여 부모 컨테이너 레이아웃 파괴 방지 */
+                    /* 직계 ?식?로 마커?가?stVerticalBlock ??택?여 부?컨테?너 ?이?웃 ?괴 방? */
                     div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .ahp_scrollable_area) {
                         overflow-x: auto !important;
                         padding-bottom: 15px;
@@ -3842,8 +3842,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 """
                 survey_container.markdown(mobile_css, unsafe_allow_html=True)
                 
-                # PDF 설문지와 유사한 헤더 스타일 표 생성
-                # 척도 옵션에 맞추어 표 상단에 표시될 헤더 및 척도 값 구성
+                # PDF ?문지? ?사???더 ???????성
+                # 척도 ?션??맞추?????단???시???더 ?척도 ?구성
                 if "1-3-5 Discrete" in scale_type:
                     left_cols = ["5", "3"]
                     right_cols = ["3", "5"]
@@ -3866,18 +3866,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     options = sorted(list(set(options))) # -9 ~ -2, 1, 2 ~ 9
                     col_headers = ["9", "8", "7", "6", "5", "4", "3", "2", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
             
-                # 척도 수에 맞추어 비율 동적 계산 (left_cols + 동일(1) + right_cols)
+                # 척도 ?에 맞추??비율 ?적 계산 (left_cols + ?일(1) + right_cols)
                 header_cells = left_cols + ["1"] + right_cols
                 total_scale_count = len(header_cells)
                 scale_width = 70.0 / total_scale_count
                 left_width = scale_width * len(left_cols)
                 right_width = scale_width * len(right_cols)
 
-                # CSS 주입: 컬럼 간의 gap을 0으로 차단하고 라디오 그룹을 100% 분배
+                # CSS 주입: 컬럼 간의 gap??0?로 차단?고 ?디??그룹??100% 분배
             
 
-                # HTML 표 헤더 구조
-                # fixed table layout에서 colspan 사용 시 각 컬럼 너비를 동일 배분하도록 colgroup 정의
+                # HTML ???더 구조
+                # fixed table layout?서 colspan ?용 ???컬럼 ?비??일 배분?도?colgroup ?의
                 colgroup_html = "".join([
                     f'<col style="width: 15%;" />',
                     "".join([f'<col style="width: {scale_width}%;" />' for _ in left_cols]),
@@ -3892,11 +3892,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         {colgroup_html}
                     </colgroup>
                     <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
-                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">{_("비교 요인", "Comparison Criteria")}</th>
-                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(left_cols)}">{_("← 좌측 요인 중요도", "← Left Criteria Importance")}</th>
-                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">{_("동등<br>(1)", "Equal<br>(1)")}</th>
-                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(right_cols)}">{_("우측 요인 중요도 →", "Right Criteria Importance →")}</th>
-                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">{_("비교 요인", "Comparison Criteria")}</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">{_("비교 ?인", "Comparison Criteria")}</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(left_cols)}">{_("??좌측 ?인 중요??, "??Left Criteria Importance")}</th>
+                        <th style="border: 1px solid #334155; padding: 4px; background-color: #3b82f6; color: #ffffff; font-size: 12px;" rowspan="2">{_("?등<br>(1)", "Equal<br>(1)")}</th>
+                        <th style="border: 1px solid #334155; padding: 4px; color: #93c5fd; font-size: 12px;" colspan="{len(right_cols)}">{_("?측 ?인 중요????, "Right Criteria Importance ??)}</th>
+                        <th style="border: 1px solid #334155; padding: 6px; font-size: 12px;" rowspan="2">{_("비교 ?인", "Comparison Criteria")}</th>
                     </tr>
                     <tr style="background-color: #334155; color: #cbd5e1; font-weight: bold; border-bottom: 1px solid #cbd5e1;">
                         {"".join([f"<td style='border: 1px solid #475569; padding: 4px 0; font-size: 12px;'>{val}</td>" for val in left_cols])}
@@ -3906,7 +3906,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 """
                 survey_container.markdown(header_html, unsafe_allow_html=True)
 
-                # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
+                # 3??컬럼 배치: [?쪽 ?인?컬럼 (15%)] - [척도 ?디??버튼 ?역 컬럼 (70%)] - [?른??인?컬럼 (15%)]
                 for left_f, right_f in comb["pairs"]:
                     pair_key = f"{left_f}_{right_f}"
                     clean_id = pair_key.replace(" ", "_")
@@ -3914,7 +3914,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 
                     row_cols = survey_container.columns([15, 70, 15])
                 
-                    # 왼쪽 요인명 출력
+                    # ?쪽 ?인?출력
                     with row_cols[0]:
                         left_style = factor_colors.get(left_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
                         left_desc = translate_definition_if_default(left_f, definitions.get(left_f, "")) if definitions else ""
@@ -3929,9 +3929,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         </div>
                         """, unsafe_allow_html=True)
                 
-                    # 라디오 버튼들을 가로로 완전 정렬하여 1열로 배치
+                    # ?디??버튼?을 가로로 ?전 ?렬?여 1?로 배치
                     with row_cols[1]:
-                        # 안전을 위해 options에서 중복 및 -1 값 명시적 제외
+                        # ?전???해 options?서 중복 ?-1 ?명시???외
                         clean_options = [x for x in options if x != -1]
                         
                         valid_options = set()
@@ -3952,7 +3952,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 min_cr_opt = 1
                                 min_cr_val = float('inf')
                                 
-                                # 비교 요인이 2개 초과이고, 그룹 내의 다른 문항들이 모두 응답된 경우에만 권장 범위를 산출합니다.
+                                # 비교 ?인??2?초과?고, 그룹 ?의 ?른 문항?이 모두 ?답??경우?만 권장 범위??출?니??
                                 if len(group_factors) > 2 and not other_missing:
                                     for opt in clean_options:
                                         test_answers = group_answers.copy()
@@ -3967,7 +3967,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 pass
                                 
                         def format_option(opt):
-                            # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
+                            # Streamlit st.radio ?벨 중복(?? ?상) 방???해 ?수 쪽에 보이지 ?는 공백(Zero-width space) 추?
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
                         ans_key = f"pair_ans_{pair_key.replace(' ', '_')}"
@@ -4009,7 +4009,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             if not other_missing:
                                 st.markdown(bar_html, unsafe_allow_html=True)
                 
-                    # 오른쪽 요인명 출력
+                    # ?른??인?출력
                     with row_cols[2]:
                         right_style = factor_colors.get(right_f, {"bg": "#f8fafc", "text": "#334155", "border": "#cbd5e1"})
                         right_desc = translate_definition_if_default(right_f, definitions.get(right_f, "")) if definitions else ""
@@ -4038,123 +4038,123 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 st.session_state["scroll_target"] = None
             
         if demographics.get("name"):
-            st.subheader(_("응답자 성명 확인", "Respondent Name Verification"))
+            st.subheader(_("?답???명 ?인", "Respondent Name Verification"))
             col1, col2 = st.columns([1, 3])
             with col1:
-                name_verify = st.text_input(_("성명 *", "Name *"), key="survey_resp_name_verify", value="", placeholder=_("예: 홍길동 (또는 홍*동)", "e.g. John Doe (or J. Doe)"))
+                name_verify = st.text_input(_("?명 *", "Name *"), key="survey_resp_name_verify", value="", placeholder=_("?? ?길??(?는 ????", "e.g. John Doe (or J. Doe)"))
                 if name_verify:
                     resp_data["name"] = name_verify
-                st.caption(_("중복 응답 확인을 위해 입력을 요청드립니다. 전체 이름 공개가 불편하신 경우 성씨 또는 성씨와 이름 끝자만 입력하셔도 됩니다.", "Requested to check for duplicate responses. If uncomfortable disclosing your full name, you may enter just your last name or initials."))
+                st.caption(_("중복 ?답 ?인???해 ?력???청?립?다. ?체 ?름 공개가 불편?신 경우 ?씨 ?는 ?씨? ?름 ?자??력?셔???니??", "Requested to check for duplicate responses. If uncomfortable disclosing your full name, you may enter just your last name or initials."))
             st.divider()
 
-        # 5. 개인정보 수집 및 답례품 동적 노출 및 문구 설정
+        # 5. 개인?보 ?집 ??????적 ?출 ?문구 ?정
         has_demographics = any(demographics.values()) if demographics else False
         has_rewards = rewards_info.get("enabled", False) if rewards_info else False
         
-        agree_check = _("동의", "Agree")
+        agree_check = _("?의", "Agree")
         if has_demographics or has_rewards:
             if has_rewards:
-                subheader_text = f"{section_num}. " + _("개인정보 수집 및 답례품", "Personal Information Collection & Reward")
-                radio_label = _("개인정보 수집 및 답례품 지급을 위한 이용 동의에 동의하십니까? *", "Do you agree to the collection of personal information and use for reward distribution? *")
+                subheader_text = f"{section_num}. " + _("개인?보 ?집 ?????, "Personal Information Collection & Reward")
+                radio_label = _("개인?보 ?집 ?????지급을 ?한 ?용 ?의???의?십?까? *", "Do you agree to the collection of personal information and use for reward distribution? *")
             else:
-                subheader_text = f"{section_num}. " + _("개인정보 수집 동의", "Consent to Personal Information Collection")
-                radio_label = _("개인정보 수집 및 이용에 동의하십니까? *", "Do you agree to the collection and use of personal information? *")
+                subheader_text = f"{section_num}. " + _("개인?보 ?집 ?의", "Consent to Personal Information Collection")
+                radio_label = _("개인?보 ?집 ??용???의?십?까? *", "Do you agree to the collection and use of personal information? *")
                 
             st.subheader(subheader_text)
             section_num += 1
             
             if has_rewards:
-                st.info(f"**" + _("답례품 안내", "Reward Info") + f"**: {rewards_info.get('desc', _('설문 완료 시 답례품을 제공합니다.', 'A reward will be provided upon survey completion.'))}")
-                reward_contact = st.text_input(_("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *", "Contact for Reward (Mobile number or Email) *"), key="survey_reward_contact")
+                st.info(f"**" + _("?????내", "Reward Info") + f"**: {rewards_info.get('desc', _('?문 ?료 ?????을 ?공?니??', 'A reward will be provided upon survey completion.'))}")
+                reward_contact = st.text_input(_("????지급용 ?락?????번호 ?는 ?메?? *", "Contact for Reward (Mobile number or Email) *"), key="survey_reward_contact")
                 resp_data["reward_contact"] = reward_contact
                 
-            agree_check = st.radio(radio_label, [_("동의", "Agree"), _("비동의", "Disagree")], index=1, key="survey_agree_check")
+            agree_check = st.radio(radio_label, [_("?의", "Agree"), _("비동??, "Disagree")], index=1, key="survey_agree_check")
         
-        # 마법사 상태 확인
+        # 마법???태 ?인
         wizard_state_key = f"cr_wizard_state_{survey_id_param}"
         wizard_state = st.session_state.get(wizard_state_key, {"active": False})
         
         if wizard_state.get("active"):
-            st.warning(_("⚠️ 일관성 비율(CR) 점검", "⚠️ Consistency Ratio (CR) Check"))
-            st.error(_(f"분석 결과, **[{wizard_state['failed_group']}]** 문항들의 응답 일관성이 부족합니다. (현재 CR: {wizard_state['cr']:.3f} > 기준치: {cr_limit})", f"Analysis shows inconsistent responses for **[{wizard_state['failed_group']}]**. (Current CR: {wizard_state['cr']:.3f} > Limit: {cr_limit})"))
+            st.warning(_("?️ ????비율(CR) ??", "?️ Consistency Ratio (CR) Check"))
+            st.error(_(f"분석 결과, **[{wizard_state['failed_group']}]** 문항?의 ?답 ???이 부족합?다. (?재 CR: {wizard_state['cr']:.3f} > 기?? {cr_limit})", f"Analysis shows inconsistent responses for **[{wizard_state['failed_group']}]**. (Current CR: {wizard_state['cr']:.3f} > Limit: {cr_limit})"))
             
             w_pair = wizard_state['worst_pair']
             cur_v = wizard_state['current_val']
             sug_v = wizard_state['suggested_val']
             
             def val_to_text(v, p1, p2):
-                if v == 1: return _("동등함 (1)", "Equal (1)")
-                if v < 0: return f"{p1} 방향으로 {abs(v)}"
-                return f"{p2} 방향으로 {v}"
+                if v == 1: return _("?등??(1)", "Equal (1)")
+                if v < 0: return f"{p1} 방향?로 {abs(v)}"
+                return f"{p2} 방향?로 {v}"
                 
             cur_txt = val_to_text(cur_v, w_pair[0], w_pair[1])
             sug_txt = val_to_text(sug_v, w_pair[0], w_pair[1])
             
             st.info(_(f"""
-            💡 **지능형 수정 제안**: 
-            현재 [{w_pair[0]}]와 [{w_pair[1]}]의 비교 응답이 다른 응답들과 수학적 모순이 가장 큽니다.
-            * 현재 선택하신 값: **{cur_txt}**
-            * 논리적 일관성을 위한 추천 값: **{sug_txt}**
+            ? **지?형 ?정 ?안**: 
+            ?재 [{w_pair[0]}]? [{w_pair[1]}]??비교 ?답???른 ?답?과 ?학??모순??가???니??
+            * ?재 ?택?신 ? **{cur_txt}**
+            * ?리?????을 ?한 추천 ? **{sug_txt}**
             """, f"""
-            💡 **Smart Fix Suggestion**: 
+            ? **Smart Fix Suggestion**: 
             Your comparison between [{w_pair[0]}] and [{w_pair[1]}] has the highest mathematical contradiction with your other answers.
             * Your current selection: **{cur_txt}**
             * Suggested value for logical consistency: **{sug_txt}**
             """))
             
-            if st.button(_("다시 검토", "Review again"), use_container_width=True):
+            if st.button(_("?시 검??, "Review again"), use_container_width=True):
                 st.session_state[wizard_state_key]["active"] = False
                 target_key = f"{w_pair[0]}_{w_pair[1]}"
                 st.session_state["scroll_target"] = target_key
                 st.session_state["highlight_target"] = target_key
                 st.rerun()
                     
-            submit_btn = False # 마법사 표시 중에는 일반 제출 안함
+            submit_btn = False # 마법???시 중에???반 ?출 ?함
         else:
-            # 제출 버튼
-            submit_btn = st.button(_("설문지 제출하기", "Submit Survey"), type="primary")
+            # ?출 버튼
+            submit_btn = st.button(_("?문지 ?출?기", "Submit Survey"), type="primary")
         if submit_btn:
-            # 필수값 유효성 검증
+            # ?수??효??검?
             missing = False
             
-            # AHP 응답 누락 검증
+            # AHP ?답 ?락 검?
             missing_ahp = [k for k, v in ahp_answers.items() if v is None]
             
-            # 인구통계 필수값
+            # ?구?계 ?수?
             if demographics.get("name") and not resp_data.get("name"): missing = True
             if demographics.get("age") and resp_data.get("age") is None: missing = True
             if demographics.get("experience") and resp_data.get("experience") is None: missing = True
             if demographics.get("email") and not resp_data.get("email"): missing = True
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
-            if agree_check not in ["동의", "Agree"]:
-                st.error(_("설문제출을 위해 개인정보 수집 동의에 체크해 주세요.", "Please agree to the personal information collection to submit the survey."))
+            if agree_check not in ["?의", "Agree"]:
+                st.error(_("?문?출???해 개인?보 ?집 ?의??체크??주세??", "Please agree to the personal information collection to submit the survey."))
                 st.stop()
                 
             if missing_ahp:
-                st.error(_("답변하지 않은 AHP 쌍대비교 문항이 있습니다. 모든 문항에 응답해 주십시오.", "There are unanswered AHP pairwise comparison questions. Please answer all questions."))
+                st.error(_("???? ?? AHP ??비교 문항???습?다. 모든 문항???답??주십?오.", "There are unanswered AHP pairwise comparison questions. Please answer all questions."))
                 st.stop()
 
             if missing:
-                st.error(_("입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.", "There are missing required fields (*). Please check the form again."))
+                st.error(_("?력?? ?? ?수 문항(*)???습?다. ?을 ?시 ????인??주세??", "There are missing required fields (*). Please check the form again."))
                 st.stop()
                 
-            # CR 계산 및 마법사 로직
+            # CR 계산 ?마법??로직
             if cr_limit is not None:
                 cr_failed = False
                 failed_factors = []
                 failed_group_name = ""
                 failed_cr = 0.0
                 
-                # 대분류 CR 체크
+                # ?분류 CR 체크
                 main_cr = calculate_matrix_cr(main_criteria, ahp_answers)
                 if main_cr > cr_limit:
                     cr_failed = True
                     failed_factors = main_criteria
-                    failed_group_name = _("대분류", "Main Criteria")
+                    failed_group_name = _("?분류", "Main Criteria")
                     failed_cr = main_cr
                 
-                # 하위분류 CR 체크
+                # ?위분류 CR 체크
                 if not cr_failed:
                     for parent, subs in ahp_model.get("subs", {}).items():
                         if len(subs) >= 3:
@@ -4182,15 +4182,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             }
                             st.rerun()
                     
-                    # 마법사가 없거나 마법사 제안을 계산할 수 없는 경우 (기존 로직)
+                    # 마법?? ?거??마법???안??계산?????는 경우 (기존 로직)
                     if not is_preview_mode:
                         from survey_manager import increment_abandoned_cr
                         increment_abandoned_cr(survey_id_param)
-                    st.error(_(f"[{failed_group_name}] 항목의 응답 일관성이 부족합니다. (일관성 비율: {failed_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.", f"The consistency of your responses for [{failed_group_name}] is insufficient. (CR: {failed_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
+                    st.error(_(f"[{failed_group_name}] ?????답 ???이 부족합?다. (????비율: {failed_cr:.3f} > ?정 ?계? {cr_limit}) ?? 문항???시 검?해 주십?오.", f"The consistency of your responses for [{failed_group_name}] is insufficient. (CR: {failed_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
                     st.stop()
             
-            # 저장 진행
-            with st.spinner(_("응답을 안전하게 전송 중입니다...", "Submitting your response safely...")):
+            # ???진행
+            with st.spinner(_("?답???전?게 ?송 중입?다...", "Submitting your response safely...")):
                 if is_preview_mode:
                     import time
                     time.sleep(1.0)
@@ -4210,18 +4210,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.session_state[f"survey_submitted_{survey_id_param}"] = True
                         st.rerun()
                     else:
-                        st.error(_("데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.", "A server error occurred while saving data. Please try again later."))
+                        st.error(_("?이???????버 ?러가 발생?습?다. ?시 ???시 ?도??주세??", "A server error occurred while saving data. Please try again later."))
                     
     st.stop()
 
-# 자동 로그인 및 권한 갱신 처리 (쿼리 파라미터 기반)
+# ?동 로그???권한 갱신 처리 (쿼리 ?라미터 기반)
 if "login_user" in q_params and "login_token" in q_params:
     login_user_val = q_params["login_user"]
     if isinstance(login_user_val, list): login_user_val = login_user_val[0]
     login_token_val = q_params["login_token"]
     if isinstance(login_token_val, list): login_token_val = login_token_val[0]
     
-    # 토큰 검증
+    # ?큰 검?
     expected_token = hashlib.sha256(f"{login_user_val}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
     if login_token_val == expected_token:
         conn = sqlite3.connect('users.db')
@@ -4236,11 +4236,11 @@ if "login_user" in q_params and "login_token" in q_params:
             st.session_state.expiry_date = db_user[1]
             try:
                 import survey_manager
-                survey_manager.log_user_action(login_user_val, "로그인 (URL 파라미터)")
+                survey_manager.log_user_action(login_user_val, "로그??(URL ?라미터)")
             except:
                 pass
             
-            # URL 파라미터를 정리하여 불필요한 반복 쿼리 및 노출 방지
+            # URL ?라미터??리?여 불필?한 반복 쿼리 ??출 방?
             if "login_user" in st.query_params:
                 try:
                     del st.query_params["login_user"]
@@ -4253,13 +4253,13 @@ if "login_user" in q_params and "login_token" in q_params:
                     pass
             
             if role_changed:
-                st.toast("🎉 Account status updated!")
+                st.toast("? Account status updated!")
                 st.rerun()
 
 
-# 자동 로그아웃 처리 (30분 미활동 시)
+# ?동 로그?웃 처리 (30?미활????
 import time
-TIMEOUT_LIMIT = 1800 # 30분 (초 단위)
+TIMEOUT_LIMIT = 1800 # 30?(??위)
 current_time = int(time.time())
 
 if st.session_state.get('user_id') is not None:
@@ -4270,13 +4270,13 @@ if st.session_state.get('user_id') is not None:
         try:
             elapsed = current_time - int(last_act)
             if elapsed > TIMEOUT_LIMIT:
-                # 세션 및 쿼리 파라미터 초기화
+                # ?션 ?쿼리 ?라미터 초기??
                 st.session_state.user_id = None
                 st.session_state.user_role = None
                 st.session_state.expiry_date = None
                 st.session_state.admin_mode = False
                 st.query_params.clear()
-                st.toast(_(" 30분간 활동이 없어 보안을 위해 자동 로그아웃되었습니다.", " Logged out automatically due to 30 minutes of inactivity."))
+                st.toast(_(" 30분간 ?동???어 보안???해 ?동 로그?웃?었?니??", " Logged out automatically due to 30 minutes of inactivity."))
                 st.rerun()
             else:
                 st.query_params["last_activity"] = str(current_time)
@@ -4285,7 +4285,7 @@ if st.session_state.get('user_id') is not None:
     else:
         st.query_params["last_activity"] = str(current_time)
 
-# 다국어 처리
+# ?국??처리
 if "lang" in q_params:
     lang_val = q_params["lang"]
     if isinstance(lang_val, list): lang_val = lang_val[0]
@@ -4294,13 +4294,13 @@ if "lang" in q_params:
     elif str(lang_val).lower() in ["ko", "korean"]:
         st.session_state.lang = "ko"
 
-# PortOne 자동 결제 승격 처리
+# PortOne ?동 결제 ?격 처리
 if "portone_paid" in q_params and "user_id" in q_params:
     user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
     months_param = int(q_params.get("months", ["2"])[0] if isinstance(q_params.get("months"), list) else q_params.get("months", 2))
-    plan_name_param = q_params.get("plan_name", ["정식 사용자"])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "정식 사용자")
+    plan_name_param = q_params.get("plan_name", ["?식 ?용??])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "?식 ?용??)
     
-    # 이벤트 관련 파라미터 파싱 (추가)
+    # ?벤??관???라미터 ?싱 (추?)
     event_applied_param = q_params.get("event_applied", ["N"])[0] if isinstance(q_params.get("event_applied"), list) else q_params.get("event_applied", "N")
     university_param = q_params.get("university", [""])[0] if isinstance(q_params.get("university"), list) else q_params.get("university", "")
     thesis_title_param = q_params.get("thesis_title", [""])[0] if isinstance(q_params.get("thesis_title"), list) else q_params.get("thesis_title", "")
@@ -4308,7 +4308,7 @@ if "portone_paid" in q_params and "user_id" in q_params:
     if user_id_param:
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         
-        # 기존 사용자 정보 조회
+        # 기존 ?용???보 조회
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         c.execute("SELECT role, expiry_date FROM users WHERE id=?", (user_id_param,))
@@ -4327,7 +4327,7 @@ if "portone_paid" in q_params and "user_id" in q_params:
             new_expiry_date = current_expiry
             target_role = current_role
             
-        # update_user_full_info 인자에 이벤트 데이터 추가 전달
+        # update_user_full_info ?자???벤???이??추? ?달
         update_user_full_info(
             user_id_param, None, target_role, new_expiry_date, 
             plan_type=plan_name_param, 
@@ -4343,11 +4343,11 @@ if "portone_paid" in q_params and "user_id" in q_params:
         <html>
         <head><meta charset="utf-8"></head>
         <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-          <h3 style="color: green;">🎉 결제가 완료되어 정식 사용자로 승급되었습니다!</h3>
-          <p>아래 버튼을 클릭하여 로그인을 진행해 주세요.</p>
-          <button onclick="handleLogin()" style="padding: 12px 24px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; font-weight: bold;">로그인하기</button>
+          <h3 style="color: green;">? 결제가 ?료?어 ?식 ?용?로 ?급?었?니??</h3>
+          <p>?래 버튼???릭?여 로그?을 진행??주세??</p>
+          <button onclick="handleLogin()" style="padding: 12px 24px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; font-weight: bold;">로그?하?/button>
           <script>
-            // 원래 창(opener)이 있다면 로그인 처리 URL로 이동시킵니다.
+            // ?래 ?opener)???다?로그??처리 URL??동?킵?다.
             var loginUrl = "https://ahpkrj.streamlit.app/?login_user=" + encodeURIComponent("{user_id_param}") + "&login_token=" + encodeURIComponent("{login_token}");
             try {{
                 var mainWin = null;
@@ -4365,9 +4365,9 @@ if "portone_paid" in q_params and "user_id" in q_params:
             }}
 
             function handleLogin() {{
-                // 새 브라우저 창 띄우기 (자동 로그인 URL 포함)
+                // ??브라?? ??우?(?동 로그??URL ?함)
                 window.open(loginUrl, "_blank");
-                // 결제완료창 닫기
+                // 결제?료??기
                 try {{
                     if (window.top) {{
                         window.top.close();
@@ -4385,7 +4385,7 @@ if "portone_paid" in q_params and "user_id" in q_params:
         st.components.v1.html(html_code, height=400)
     st.stop()
 
-# 페이팔 자동 결제 승격 처리 (서버 검증 포함)
+# ?이???동 결제 ?격 처리 (?버 검??함)
 if "paypal_order_id" in q_params:
     order_id_val = q_params["paypal_order_id"]
     if isinstance(order_id_val, list):
@@ -4398,11 +4398,11 @@ if "paypal_order_id" in q_params:
         target_user = current_user or user_id_param
         if target_user:
             months_param = int(q_params.get("months", ["2"])[0] if isinstance(q_params.get("months"), list) else q_params.get("months", 2))
-            plan_name_param = q_params.get("plan_name", ["정식 사용자"])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "정식 사용자")
+            plan_name_param = q_params.get("plan_name", ["?식 ?용??])[0] if isinstance(q_params.get("plan_name"), list) else q_params.get("plan_name", "?식 ?용??)
             
             kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
             
-            # 기존 사용자 정보 조회
+            # 기존 ?용???보 조회
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
             c.execute("SELECT role, expiry_date FROM users WHERE id=?", (target_user,))
@@ -4426,14 +4426,14 @@ if "paypal_order_id" in q_params:
             if st.session_state.get("user_id") == target_user:
                 st.session_state.user_role = target_role
                 st.session_state.expiry_date = new_expiry_date
-            st.toast("🎉 PayPal Payment successful! Account upgraded/updated.")
+            st.toast("? PayPal Payment successful! Account upgraded/updated.")
     else:
         st.error(f"Payment verification failed: {msg}")
         
     st.query_params.clear()
     st.rerun()
 
-# 정식 회원 자동 만료 체크 (로그인 상태)
+# ?식 ?원 ?동 만료 체크 (로그???태)
 if st.session_state.get('user_id') is not None and st.session_state.get('user_role') == 'official':
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
     try:
@@ -4442,16 +4442,16 @@ if st.session_state.get('user_id') is not None and st.session_state.get('user_ro
             update_user_full_info(st.session_state.user_id, None, "temp", "9999-12-31")
             st.session_state.user_role = "temp"
             st.session_state.expiry_date = "9999-12-31"
-            st.toast("📅 Subscription expired. Automatically downgraded to Free User.")
+            st.toast("? Subscription expired. Automatically downgraded to Free User.")
             st.rerun()
     except Exception:
         pass
 
 # =============================================================================
-# 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
+# 3. Sidebar (Auth & Settings) - ?? ?시?도??치 조정
 # =============================================================================
 
-def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False, lang="ko"):
+def get_login_redirect_html(plan_name="?식 ?용??, inner_html="", is_best=False, lang="ko"):
     import datetime
     event_cfg = get_event_settings()
     is_cfg_active = event_cfg["active"]
@@ -4485,7 +4485,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
         """
         
     btn_label = f"Pay {plan_name.split(' (')[0]}" if lang == "en" else f"결제 {plan_name.split(' (')[0]}"
-    alert_msg = "Login or Sign-up is required. Please proceed in the main tab or sidebar." if lang == "en" else "로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요."
+    alert_msg = "Login or Sign-up is required. Please proceed in the main tab or sidebar." if lang == "en" else "로그???는 ?원가?이 ?요?니?? 메인 ?????이?바??해 로그??가?을 진행?주?요."
     
     return f"""
     <!DOCTYPE html>
@@ -4533,7 +4533,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
         function redirectSignup() {{
             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
             for (let i = 0; i < tabs.length; i++) {{
-                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
+                if (tabs[i].innerText.includes('?원가??) || tabs[i].innerText.includes('Sign Up')) {{
                     tabs[i].click();
                     window.parent.scrollTo(0, 0);
                     return;
@@ -4548,7 +4548,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
     </html>
     """
 
-def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2, inner_html="", is_best=False):
+def get_portone_payment_html(user_id, plan_name="?식 ?용??, amount=500000, months=2, inner_html="", is_best=False):
     import hashlib
     import datetime
     login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
@@ -4568,7 +4568,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     event_deadline_str = event_cfg["deadline"]
     event_discount = event_cfg["discount"]
     
-    # 이벤트 활성화 여부 기한 검사
+    # ?벤???성???? 기한 검??
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
     try:
         event_deadline = datetime.datetime.strptime(event_deadline_str, "%Y-%m-%d")
@@ -4593,16 +4593,16 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             </div>
             <label style="display: flex; align-items: center; gap: 4px; font-weight: bold; color: #1e293b; cursor: pointer; user-select: none; font-size: 0.7rem; margin: 0;">
                 <input type="checkbox" id="event-agree" onchange="toggleEvent()" style="accent-color: #0284c7; cursor: pointer; width: 13px; height: 13px; margin: 0;">
-                할인 신청 ({event_discount:,}원 즉시 할인)
+                ?인 ?청 ({event_discount:,}??즉시 ?인)
             </label>
             <div id="event-inputs" style="display: none; flex-direction: column; gap: 4px; background: white; padding: 6px 24px 6px 10px; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px;">
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">대학명:</span>
-                    <input type="text" id="univ-name" placeholder="예: 한국대 대학원" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">??명:</span>
+                    <input type="text" id="univ-name" placeholder="?? ?국? ??원" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">논문명:</span>
-                    <input type="text" id="thesis-title" placeholder="예: AHP 의사결정 연구" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
+                    <span style="color: #334155; font-weight: 600; font-size: 0.68rem; min-width: 36px;">?문?</span>
+                    <input type="text" id="thesis-title" placeholder="?? AHP ?사결정 ?구" style="flex-grow: 1; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 0.68rem; outline: none; font-family: inherit; height: 22px; box-sizing: border-box;">
                 </div>
             </div>
         </div>
@@ -4672,8 +4672,8 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
                 if (document.getElementById("thesis-title")) document.getElementById("thesis-title").value = "";
             }}
             
-            // iframe 밖의 메인 문서에 정의된 가격 텍스트도 변경을 시도합니다.
-            // basic-price-display-span, standard-price-display-span 등으로 찾아봅니다.
+            // iframe 밖의 메인 문서???의??가??스?도 변경을 ?도?니??
+            // basic-price-display-span, standard-price-display-span ?으?찾아봅니??
             let priceSpanOuter = null;
             if (originalAmount === 350000) {{
                 priceSpanOuter = window.parent.document.getElementById("basic-price-display-span");
@@ -4688,7 +4688,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
 
         function openPaymentWindow() {{
           if (!{is_logged_in_js}) {{
-              alert("회원 전용 결제 서비스입니다. 회원가입 또는 로그인 후 이용해 주세요.");
+              alert("?원 ?용 결제 ?비?입?다. ?원가???는 로그?????용??주세??");
               redirectSignup();
               return;
           }}
@@ -4702,12 +4702,12 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
               thesis = tInput ? tInput.value.trim() : "";
               
               if (!univ) {{
-                  alert("이벤트 혜택 적용을 위해 대학명을 입력해 주세요.");
+                  alert("?벤???택 ?용???해 ??명???력??주세??");
                   if (uInput) uInput.focus();
                   return;
               }}
               if (!thesis) {{
-                  alert("이벤트 혜택 적용을 위해 논문명을 입력해 주세요.");
+                  alert("?벤???택 ?용???해 ?문명을 ?력??주세??");
                   if (tInput) tInput.focus();
                   return;
               }}
@@ -4715,7 +4715,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
 
           const win = window.open("", "_blank", "width=850,height=700");
           if (!win) {{
-             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             alert("?업 차단???정?어 ?습?다. ?업 차단???제?주?요.");
              return;
           }}
           win.document.write(`
@@ -4723,11 +4723,11 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             <html>
             <head>
               <meta charset="utf-8">
-              <title>안전 결제 진행</title>
+              <title>?전 결제 진행</title>
             </head>
             <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
-              <h3 id="statusMsg">결제 모듈을 안전하게 불러오는 중입니다...</h3>
-              <p>이 창을 닫지 마세요.</p>
+              <h3 id="statusMsg">결제 모듈???전?게 불러?는 중입?다...</h3>
+              <p>??창을 ?? 마세??</p>
             </body>
             </html>
           `);
@@ -4750,7 +4750,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
           script.onload = function() {{
-            win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
+            win.document.getElementById("statusMsg").innerText = "결제창을 ?우??중입?다...";
             const r = Math.random().toString(36).substring(2, 15);
             win.PortOne.requestPayment({{
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
@@ -4763,23 +4763,23 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
               redirectUrl: returnUrl,
               customer: {{
                 email: "{safe_email}",
-                fullName: "사용자",
+                fullName: "?용??,
                 phoneNumber: "010-0000-0000"
               }}
             }}).then(function(response) {{
               if (response.code != null) {{
-                alert("결제 실패: " + response.message);
+                alert("결제 ?패: " + response.message);
                 win.close();
               }} else {{
                 win.location.href = returnUrl;
               }}
             }}).catch(function(error) {{
-              alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+              alert("결제 ??출 ??류가 발생?습?다: " + error.message);
               win.close();
             }});
           }};
           script.onerror = function() {{
-            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
+            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 ?패! ?터???결???인?세??";
           }};
           win.document.head.appendChild(script);
         }}
@@ -4870,48 +4870,48 @@ def get_portone_custom_services_html(user_id=None):
     </head>
     <body>
       <div class="pricing-box">
-          <h3 class="title">부가 서비스 대행</h3>
+          <h3 class="title">부가 ?비?????/h3>
           <span class="subtitle">Custom Services</span>
           <div class="price-container">
-              <h2 class="price" id="totalPriceDisplay">0원</h2>
+              <h2 class="price" id="totalPriceDisplay">0??/h2>
           </div>
-          <p class="period">선택된 서비스 합계 금액</p>
-          <p class="desc" id="statusDesc">필요한 서비스를 선택해 주세요.</p>
+          <p class="period">?택???비???계 금액</p>
+          <p class="desc" id="statusDesc">?요???비?? ?택??주세??</p>
           <hr class="divider">
           
           <ul class="svc-list">
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅" onchange="updatePrice()">
-                      <span>AHP 온라인 설문 셋팅 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                      <input type="checkbox" id="svc_opt_1" value="50000" data-name="?라???문 ?팅" onchange="updatePrice()">
+                      <span>AHP ?라???문 ?팅 <span style="color: #666; font-size: 0.75rem;">(50,000??</span></span>
                   </label>
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_2" value="50000" data-name="결과 분석 대행" onchange="updatePrice()">
-                      <span>AHP 결과 분석 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
+                      <input type="checkbox" id="svc_opt_2" value="50000" data-name="결과 분석 ??? onchange="updatePrice()">
+                      <span>AHP 결과 분석 ???<span style="color: #666; font-size: 0.75rem;">(50,000??</span></span>
                   </label>
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 엑셀 양식 설정 대행" onchange="updatePrice()">
-                      <span>AHP 코딩 엑셀 설정 대행 <span style="color: #666; font-size: 0.75rem;">(30,000원)</span></span>
+                      <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 ?? ?식 ?정 ??? onchange="updatePrice()">
+                      <span>AHP 코딩 ?? ?정 ???<span style="color: #666; font-size: 0.75rem;">(30,000??</span></span>
                   </label>
               </li>
           
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_ext" value="100000" data-name="1개월 이용 연장" onchange="updatePrice()">
-                      <span>1개월 이용 연장 <span style="color: #666; font-size: 0.75rem;">(100,000원)</span></span>
+                      <input type="checkbox" id="svc_opt_ext" value="100000" data-name="1개월 ?용 ?장" onchange="updatePrice()">
+                      <span>1개월 ?용 ?장 <span style="color: #666; font-size: 0.75rem;">(100,000??</span></span>
                   </label>
               </li>
           </ul>
           
           <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
-              견적서 발급 및 부가서비스 문의: <br>카톡아이디: <b>AHPkr</b>
+              견적??발급 ?부가?비??문의: <br>카톡?이?? <b>AHPkr</b>
           </div>
           
-          <button class="btn" id="payBtn" onclick="handlePayAction()">결제하기</button>
+          <button class="btn" id="payBtn" onclick="handlePayAction()">결제?기</button>
       </div>
       
       <script>
@@ -4926,14 +4926,14 @@ def get_portone_custom_services_html(user_id=None):
             if (opt2.checked) {{ total += parseInt(opt2.value); count++; }}
             if (opt3.checked) {{ total += parseInt(opt3.value); count++; }}
             
-            document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + "원";
+            document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + "??;
             if (count > 0) {{
-                document.getElementById("statusDesc").innerText = "선택된 대행 서비스 총 " + count + "건";
-                document.getElementById("payBtn").innerText = "결제하기";
+                document.getElementById("statusDesc").innerText = "?택??????비???" + count + "?;
+                document.getElementById("payBtn").innerText = "결제?기";
                 document.getElementById("payBtn").style.backgroundColor = "#ff4b4b";
             }} else {{
-                document.getElementById("statusDesc").innerText = "필요한 서비스를 선택해 주세요.";
-                document.getElementById("payBtn").innerText = "옵션을 선택해주세요";
+                document.getElementById("statusDesc").innerText = "?요???비?? ?택??주세??";
+                document.getElementById("payBtn").innerText = "?션???택?주?요";
                 document.getElementById("payBtn").style.backgroundColor = "#333333";
             }}
         }}
@@ -4952,7 +4952,7 @@ def get_portone_custom_services_html(user_id=None):
             if (opt3.checked) {{ total += parseInt(opt3.value); items.push(opt3.getAttribute("data-name")); }}
             
             if (total === 0) {{
-                alert("결제하실 부가 서비스 대행 옵션을 하나 이상 선택해주세요.");
+                alert("결제?실 부가 ?비??????션???나 ?상 ?택?주?요.");
                 return;
             }}
             
@@ -4966,25 +4966,25 @@ def get_portone_custom_services_html(user_id=None):
         function redirectSignup() {{
             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
             for (let i = 0; i < tabs.length; i++) {{
-                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
+                if (tabs[i].innerText.includes('?원가??) || tabs[i].innerText.includes('Sign Up')) {{
                     tabs[i].click();
                     window.parent.scrollTo(0, 0);
                     return;
                 }}
             }}
-            alert('로그인 또는 회원가입이 필요합니다. 메인 탭이나 사이드바를 통해 로그인/가입을 진행해주세요.');
+            alert('로그???는 ?원가?이 ?요?니?? 메인 ?????이?바??해 로그??가?을 진행?주?요.');
             window.parent.scrollTo(0, 0);
         }}
         
         function openPaymentWindow(amount, planName, addMonths) {{
           if (!{is_logged_in}) {{
-              alert("회원 전용 결제 서비스입니다. 회원가입 또는 로그인 후 이용해 주세요.");
+              alert("?원 ?용 결제 ?비?입?다. ?원가???는 로그?????용??주세??");
               redirectSignup();
               return;
           }}
           const win = window.open("", "_blank", "width=850,height=700");
           if (!win) {{
-             alert("팝업 차단이 설정되어 있습니다. 팝업 차단을 해제해주세요.");
+             alert("?업 차단???정?어 ?습?다. ?업 차단???제?주?요.");
              return;
           }}
           win.document.write(`
@@ -4992,11 +4992,11 @@ def get_portone_custom_services_html(user_id=None):
             <html>
             <head>
               <meta charset="utf-8">
-              <title>안전 결제 진행</title>
+              <title>?전 결제 진행</title>
             </head>
             <body style="margin:0; padding:20px; font-family: sans-serif; text-align: center;">
-              <h3 id="statusMsg">결제 모듈을 안전하게 불러오는 중입니다...</h3>
-              <p>이 창을 닫지 마세요.</p>
+              <h3 id="statusMsg">결제 모듈???전?게 불러?는 중입?다...</h3>
+              <p>??창을 ?? 마세??</p>
             </body>
             </html>
           `);
@@ -5010,41 +5010,41 @@ def get_portone_custom_services_html(user_id=None):
           }} catch(e) {{}}
           if (baseOrigin.endsWith("/")) {{ baseOrigin = baseOrigin.slice(0, -1); }}
           
-          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months=" + addMonths + "&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
+          const returnUrl = baseOrigin + "/?portone_paid=true&user_id=" + encodeURIComponent("{user_id}") + "&login_user=" + encodeURIComponent("{user_id}") + "&login_token=" + encodeURIComponent("{login_token}") + "&months=" + addMonths + "&plan_name=" + encodeURIComponent("부가 ?비?? " + planName);
           
           const script = win.document.createElement("script");
           script.src = "https://cdn.portone.io/v2/browser-sdk.js";
           script.onload = function() {{
-            win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
+            win.document.getElementById("statusMsg").innerText = "결제창을 ?우??중입?다...";
             const r = Math.random().toString(36).substring(2, 15);
             win.PortOne.requestPayment({{
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
               paymentId: "pay-" + r,
-              orderName: "부가 서비스: " + planName + " - {safe_email}",
+              orderName: "부가 ?비?? " + planName + " - {safe_email}",
               totalAmount: amount,
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
               redirectUrl: returnUrl,
               customer: {{
                 email: "{safe_email}",
-                fullName: "사용자",
+                fullName: "?용??,
                 phoneNumber: "010-0000-0000"
               }}
             }}).then(function(response) {{
               if (response.code != null) {{
-                alert("결제 실패: " + response.message);
+                alert("결제 ?패: " + response.message);
                 win.close();
               }} else {{
                 win.location.href = returnUrl;
               }}
             }}).catch(function(error) {{
-              alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
+              alert("결제 ??출 ??류가 발생?습?다: " + error.message);
               win.close();
             }});
           }};
           script.onerror = function() {{
-            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 실패! 인터넷 연결을 확인하세요.";
+            win.document.getElementById("statusMsg").innerText = "결제 모듈 로드 ?패! ?터???결???인?세??";
           }};
           win.document.head.appendChild(script);
         }}
@@ -5624,7 +5624,7 @@ def get_paypal_custom_services_html(user_id=None):
               }},
               onApprove: function(data, actions) {{
                 return actions.order.capture().then(function(details) {{
-                  window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months=" + addMonths + "&plan_name=" + encodeURIComponent("부가 서비스: " + planName);
+                  window.top.location.href = window.top.location.origin + window.top.location.pathname + "?paypal_order_id=" + data.orderID + "&user_id=" + encodeURIComponent("{user_id}") + "&months=" + addMonths + "&plan_name=" + encodeURIComponent("부가 ?비?? " + planName);
                 }});
               }},
               onError: function(err) {{
@@ -5638,7 +5638,7 @@ def get_paypal_custom_services_html(user_id=None):
         function redirectSignup() {{
             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
             for (let i = 0; i < tabs.length; i++) {{
-                if (tabs[i].innerText.includes('회원가입') || tabs[i].innerText.includes('Sign Up')) {{
+                if (tabs[i].innerText.includes('?원가??) || tabs[i].innerText.includes('Sign Up')) {{
                     tabs[i].click();
                     window.parent.scrollTo(0, 0);
                     return;
@@ -5665,34 +5665,34 @@ def get_fee_info_text():
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #fffbeb; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">👑 정식(유료) 회원 전환 혜택</span>
+    <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">? ?식(?료) ?원 ?환 ?택</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
-      정식 회원으로 전환하시면 모든 분석 한도가 즉시 해제되며 아래 혜택을 제공합니다:
+      ?식 ?원?로 ?환?시?모든 분석 ?도가 즉시 ?제?며 ?래 ?택???공?니??
     </span>
     <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
-      <li><span style="font-size: 0.85rem;">분석 표본수 제한 완전 해제 (무제한 분석)</span></li>
-      <li><span style="font-size: 0.85rem;">집단간 차이 분석 (T-Test, ANOVA) 제공</span></li>
-      <li><span style="font-size: 0.85rem;">퍼지(Fuzzy) AHP 분석 기능 지원 (Pro)</span></li>
-      <li><span style="font-size: 0.85rem;">논문용 고해상도 시각화 보고서 다운로드</span></li>
+      <li><span style="font-size: 0.85rem;">분석 ?본???한 ?전 ?제 (무제??분석)</span></li>
+      <li><span style="font-size: 0.85rem;">집단?차이 분석 (T-Test, ANOVA) ?공</span></li>
+      <li><span style="font-size: 0.85rem;">??(Fuzzy) AHP 분석 기능 지??(Pro)</span></li>
+      <li><span style="font-size: 0.85rem;">?문??고해?도 ?각??보고???운로드</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서/현금영수증 발급</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">? 계산???금?수?발급</span>
   </div>
-  <h3 style="margin-top: -5px; margin-bottom: 8px;">환불 및 취소 규정</h3>
+  <h3 style="margin-top: -5px; margin-bottom: 8px;">?불 ?취소 규정</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
-      <div>불만족 100% 환불</div>
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
-      <div>30분 이내 취소 신청</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">???불?책:</div>
+      <div>불만?100% ?불</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">??취소규정:</div>
+      <div>30??내 취소 ?청</div>
     </div>
   </div>
 </div>""",
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #fffbeb; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">👑 Upgrade to Paid License</span>
+    <span style="font-size: 0.95rem; color: #b45309; font-weight: bold; display: block; margin-bottom: 6px;">? Upgrade to Paid License</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       Upgrade to a paid license to unlock all limits and enjoy the following benefits:
     </span>
@@ -5704,14 +5704,14 @@ def get_fee_info_text():
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice & Cash Receipt Available</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">? Tax Invoice & Cash Receipt Available</span>
   </div>
   <h3 style="margin-top: -5px; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">??Refund Policy:</div>
       <div>100% Refund if unsatisfied</div>
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">??Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
     </div>
   </div>
@@ -5722,35 +5722,35 @@ def get_fee_info_text():
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #f0fdf4; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 무료 회원가입 안내</span>
+    <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">? 무료 ?원가???내</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
-      상단의 <strong>'회원가입'</strong> 탭에서 <strong>무료 회원가입</strong>이 가능합니다. 무료 회원에게는 아래 혜택이 제공됩니다:
+      ?단??<strong>'?원가??</strong> ????<strong>무료 ?원가??/strong>??가?합?다. 무료 ?원?게???래 ?택???공?니??
     </span>
     <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
-      <li><span style="font-size: 0.85rem;">AHP 코딩 엑셀 양식 다운로드</span></li>
-      <li><span style="font-size: 0.85rem;">온라인 AHP 설문지 제작/배포 (무료)</span></li>
-      <li><span style="font-size: 0.85rem;">실시간 설문 데이터 구글 시트 연동</span></li>
-      <li><span style="font-size: 0.85rem;">설문 응답 모니터링 & 결과 다운로드</span></li>
-      <li><span style="font-size: 0.85rem;">AHP 분석 도구 무료 체험 (최대 3표본)</span></li>
+      <li><span style="font-size: 0.85rem;">AHP 코딩 ?? ?식 ?운로드</span></li>
+      <li><span style="font-size: 0.85rem;">?라??AHP ?문지 ?작/배포 (무료)</span></li>
+      <li><span style="font-size: 0.85rem;">?시??문 ?이??구? ?트 ?동</span></li>
+      <li><span style="font-size: 0.85rem;">?문 ?답 모니?링 & 결과 ?운로드</span></li>
+      <li><span style="font-size: 0.85rem;">AHP 분석 ?구 무료 체험 (최? 3?본)</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 계산서/현금영수증 발급</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">? 계산???금?수?발급</span>
   </div>
-  <h3 style="margin-top: -5px; margin-bottom: 8px;">환불 및 취소 규정</h3>
+  <h3 style="margin-top: -5px; margin-bottom: 8px;">?불 ?취소 규정</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 환불정책:</div>
-      <div>불만족 100% 환불</div>
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• 취소규정:</div>
-      <div>30분 이내 취소 신청</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">???불?책:</div>
+      <div>불만?100% ?불</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">??취소규정:</div>
+      <div>30??내 취소 ?청</div>
     </div>
   </div>
 </div>""",
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #f0fdf4; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 Free Account Benefits</span>
+    <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">? Free Account Benefits</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       You can sign up for a <strong>free account</strong> via the <strong>'Sign Up'</strong> tab at the top. Free members enjoy:
     </span>
@@ -5763,14 +5763,14 @@ def get_fee_info_text():
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
-    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">💡 Tax Invoice Available</span>
+    <span style="font-size: 0.9rem; color: #0050b3; font-weight: bold;">? Tax Invoice Available</span>
   </div>
   <h3 style="margin-top: -5px; margin-bottom: 8px;">Refund & Cancellation Policy</h3>
   <div style="margin-top: 10px; font-size: 0.85rem; color: #444; background-color: #f9f9f9; padding: 12px; border-radius: 5px; border: 1px solid #eee;">
     <div style="display: grid; grid-template-columns: auto 1fr; row-gap: 6px; column-gap: 8px; line-height: 1.45;">
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Refund Policy:</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">??Refund Policy:</div>
       <div>100% Refund if unsatisfied</div>
-      <div style="font-weight: bold; color: #333; white-space: nowrap;">• Cancellation Policy:</div>
+      <div style="font-weight: bold; color: #333; white-space: nowrap;">??Cancellation Policy:</div>
       <div>Cancellation within 30 minutes</div>
     </div>
   </div>
@@ -5793,27 +5793,27 @@ with st.sidebar:
     except:
         st.markdown(
             f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; color: inherit;">'
-            f'<h3 style="margin-top: -5px; margin-bottom: 10px;">{_(" AHP 마스터", " AHP Master")}</h3>'
+            f'<h3 style="margin-top: -5px; margin-bottom: 10px;">{_(" AHP 마스??, " AHP Master")}</h3>'
             f'</a>',
             unsafe_allow_html=True
         )
 
 
     if st.session_state.user_id is None:
-        tab_login, tab_find_pw = st.tabs([_("로그인", "Login"), _("비밀번호 찾기", "Find Password")])
+        tab_login, tab_find_pw = st.tabs([_("로그??, "Login"), _("비?번호 찾기", "Find Password")])
         
         with tab_login:
-            l_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="l_id")
-            l_pw = st.text_input(_("비밀번호 (PW)", "Password (PW)"), type="password", key="l_pw")
-            if st.button(_("로그인 실행", "Login")):
+            l_id = st.text_input(_("?이??(?메??주소)", "Username (Email Address)"), key="l_id")
+            l_pw = st.text_input(_("비?번호 (PW)", "Password (PW)"), type="password", key="l_pw")
+            if st.button(_("로그???행", "Login")):
                 result = check_login(l_id.strip(), l_pw)
                 if result:
-                    # [수정] 대한민국 시간 기준 오늘 날짜 가져오기
+                    # [?정] ?????간 기? ?늘 ?짜 가?오?
                     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
                     expiry_date_val = datetime.datetime.strptime(result[1], "%Y-%m-%d").date()
                     if today > expiry_date_val:
                         if result[0] == 'official':
-                            # 정식 사용자가 만료된 경우 -> 자동으로 무료사용자(temp)로 즉시 안전 승격 해제 및 전환
+                            # ?식 ?용?? 만료??경우 -> ?동?로 무료?용??temp)?즉시 ?전 ?격 ?제 ??환
                             try:
                                 update_user_full_info(l_id.strip(), None, "temp", "9999-12-31")
                                 st.session_state.user_id = l_id.strip()
@@ -5821,20 +5821,20 @@ with st.sidebar:
                                 st.session_state.expiry_date = "9999-12-31"
                                 try:
                                     import survey_manager
-                                    survey_manager.log_user_action(l_id.strip(), "로그인 (임시 발급)")
+                                    survey_manager.log_user_action(l_id.strip(), "로그??(?시 발급)")
                                 except:
                                     pass
                                 st.query_params["login_user"] = l_id.strip()
                                 st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
                                 st.query_params["last_activity"] = str(int(time.time()))
-                                st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Automatically downgraded to Free User."))
-                                st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(3표본 분석 가능) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
+                                st.toast(_("? ?식 ?용 기간??만료?어 무료?용??권한?로 ?동 ?환?었?니??", "? Subscription expired. Automatically downgraded to Free User."))
+                                st.success(_(f"?영?니?? {l_id}?? ?식 ?용 기간??만료?어 무료?용??3?본 분석 가?? 권한?로 ?동 ?환?었?니?? ?이?바?서 ?제???장 결제?실 ???습?다!",
                                              f"Welcome, {l_id}! Your subscription expired and you were automatically downgraded to a Free User (5-sample analysis possible). You can extend your subscription anytime in the sidebar!"))
                                 st.rerun()
                             except Exception as e:
-                                st.error(_(f"만료 회원 자동 전환 처리 중 오류가 발생했습니다: {e}", f"Error during automatic expiry downgrade: {e}"))
+                                st.error(_(f"만료 ?원 ?동 ?환 처리 ??류가 발생?습?다: {e}", f"Error during automatic expiry downgrade: {e}"))
                         else:
-                            st.error(_(f"❌ 이용 기간이 만료되었습니다. (만료일: {result[1]})", f"❌ Subscription expired. (Expiry date: {result[1]})"))
+                            st.error(_(f"???용 기간??만료?었?니?? (만료?? {result[1]})", f"??Subscription expired. (Expiry date: {result[1]})"))
                     else:
                         st.session_state.user_id = l_id.strip()
                         st.session_state.user_role = result[0]
@@ -5845,7 +5845,7 @@ with st.sidebar:
                         st.session_state.survey_auto_loaded = False
                         try:
                             import survey_manager
-                            survey_manager.log_user_action(l_id.strip(), "로그인")
+                            survey_manager.log_user_action(l_id.strip(), "로그??)
                         except:
                             pass
                         st.session_state.plan_type = result[2] if len(result) > 2 else None
@@ -5856,19 +5856,19 @@ with st.sidebar:
                             del st.session_state.signup_paypal_user
                         if 'signup_portone_user' in st.session_state:
                             del st.session_state.signup_portone_user
-                        st.success(_(f"환영합니다, {l_id}님!", f"Welcome, {l_id}!"))
+                        st.success(_(f"?영?니?? {l_id}??", f"Welcome, {l_id}!"))
                         st.rerun()
                 else:
-                    st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
+                    st.error(_("?이???는 비?번호가 ?치?? ?습?다.", "Incorrect username or password."))
             
             
         with tab_find_pw:
-            st.write(_("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.",
+            st.write(_("가?????용???메??주소??력?주?요. ?메?로 ?로???시 비?번호가 발송?니??",
                        "Please enter the email address used at registration. A new temporary password will be sent to your email."))
-            f_id = st.text_input(_("가입한 아이디 (이메일)", "Registered ID (Email)"), key="f_id")
-            if st.button(_("임시 비밀번호 전송", "Send Temporary Password")):
+            f_id = st.text_input(_("가?한 ?이??(?메??", "Registered ID (Email)"), key="f_id")
+            if st.button(_("?시 비?번호 ?송", "Send Temporary Password")):
                 if not f_id:
-                    st.warning(_("이메일 주소를 입력해주세요.", "Please enter your email address."))
+                    st.warning(_("?메??주소??력?주?요.", "Please enter your email address."))
                 else:
                     conn = sqlite3.connect('users.db')
                     c = conn.cursor()
@@ -5881,39 +5881,39 @@ with st.sidebar:
                         change_user_password(f_id.strip(), temp_pw)
                         
                         if send_password_recovery_email(f_id.strip(), temp_pw):
-                            st.success(_(f"'{f_id}'로 임시 비밀번호를 전송했습니다.\n이메일을 확인해주세요.", f"Temporary password sent to '{f_id}'.\nPlease check your email."))
+                            st.success(_(f"'{f_id}'??시 비?번호??송?습?다.\n?메?을 ?인?주?요.", f"Temporary password sent to '{f_id}'.\nPlease check your email."))
                         else:
-                            st.error(_("이메일 전송 중 오류가 발생했습니다.", "Error sending email."))
+                            st.error(_("?메???송 ??류가 발생?습?다.", "Error sending email."))
                     else:
-                        st.error(_("등록되지 않은 아이디입니다.", "ID is not registered."))
+                        st.error(_("?록?? ?? ?이?입?다.", "ID is not registered."))
 
     else:
         if st.session_state.user_role == 'admin':
             role_disp = _("관리자", "Admin")
         elif st.session_state.user_role == 'official':
             pt = st.session_state.get('plan_type')
-            role_disp = f"{_('정식 사용자', 'Official User')} ({pt})" if pt else _("정식 사용자", "Official User")
+            role_disp = f"{_('?식 ?용??, 'Official User')} ({pt})" if pt else _("?식 ?용??, "Official User")
         else:
-            role_disp = _("무료사용자", "Free User")
+            role_disp = _("무료?용??, "Free User")
         
         expiry_info = ""
         if st.session_state.expiry_date:
-            expiry_label = _("만료일: ", "Expiry: ")
+            expiry_label = _("만료?? ", "Expiry: ")
             expiry_info = f' | {expiry_label}{st.session_state.expiry_date}'
             
         info_html = f"""<div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.85rem; padding: 8px 10px; text-align: center; margin-bottom: 8px;">
-👤 {st.session_state.user_id} ({role_disp}{expiry_info})
+? {st.session_state.user_id} ({role_disp}{expiry_info})
 </div>"""
         st.markdown(info_html, unsafe_allow_html=True)
         
         if st.session_state.user_role == 'admin':
-            btn_label = _("🔧 관리자 화면 닫기", "🔧 Exit Admin Panel") if st.session_state.get('admin_mode', False) else _("🔧 관리자 화면 접속", "🔧 Connect to Admin Panel")
+            btn_label = _("? 관리자 ?면 ?기", "? Exit Admin Panel") if st.session_state.get('admin_mode', False) else _("? 관리자 ?면 ?속", "? Connect to Admin Panel")
             if st.button(btn_label):
                 st.session_state.admin_mode = not st.session_state.admin_mode
                 st.rerun()
 
-        # [위치 이동] 2. 로그아웃 버튼
-        if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
+        # [?치 ?동] 2. 로그?웃 버튼
+        if st.button(_("로그?웃", "Log Out"), key="btn_logout_new"):
             st.session_state.user_id = None
             st.session_state.user_role = None
             st.session_state.expiry_date = None
@@ -5943,36 +5943,36 @@ with st.sidebar:
             st.rerun()
 
 
-        # [위치 이동] 1. 비밀번호 변경 expander
-        with st.expander(_("비밀번호 변경", "Change Password")):
-            cur_pw = st.text_input(_("현재 비밀번호", "Current Password"), type="password", key="chg_cur_new")
-            new_pw_val = st.text_input(_("새 비밀번호", "New Password"), type="password", key="chg_new_new")
-            confirm_pw = st.text_input(_("새 비밀번호 확인", "Confirm New Password"), type="password", key="chg_conf_new")
+        # [?치 ?동] 1. 비?번호 변?expander
+        with st.expander(_("비?번호 변?, "Change Password")):
+            cur_pw = st.text_input(_("?재 비?번호", "Current Password"), type="password", key="chg_cur_new")
+            new_pw_val = st.text_input(_("??비?번호", "New Password"), type="password", key="chg_new_new")
+            confirm_pw = st.text_input(_("??비?번호 ?인", "Confirm New Password"), type="password", key="chg_conf_new")
             
-            if st.button(_("비밀번호 변경", "Change Password"), key="btn_chg_pw_new"):
+            if st.button(_("비?번호 변?, "Change Password"), key="btn_chg_pw_new"):
                 if new_pw_val != confirm_pw:
-                    st.error(_("새 비밀번호가 일치하지 않습니다.", "New passwords do not match."))
+                    st.error(_("??비?번호가 ?치?? ?습?다.", "New passwords do not match."))
                 elif not validate_password(new_pw_val):
-                    st.error(_("비밀번호는 4자 이상, 영문+특수문자를 포함해야 합니다.", "Password must be at least 4 characters and contain letters and special characters."))
+                    st.error(_("비?번호??4???상, ?문+?수문자??함?야 ?니??", "Password must be at least 4 characters and contain letters and special characters."))
                 else:
                     chk_res = check_login(st.session_state.user_id, cur_pw)
                     if chk_res:
                         change_user_password(st.session_state.user_id, new_pw_val)
-                        st.success(_("비밀번호가 변경되었습니다.", "Password successfully changed."))
+                        st.success(_("비?번호가 변경되?습?다.", "Password successfully changed."))
                     else:
-                        st.error(_("현재 비밀번호가 올바르지 않습니다.", "Incorrect current password."))
+                        st.error(_("?재 비?번호가 ?바르? ?습?다.", "Incorrect current password."))
 
     st.markdown(get_fee_info_text(), unsafe_allow_html=True)
-    if st.button(_("환불 및 취소 신청", "Request Refund & Cancellation"), key="sidebar_refund_btn", use_container_width=True):
+    if st.button(_("?불 ?취소 ?청", "Request Refund & Cancellation"), key="sidebar_refund_btn", use_container_width=True):
         show_refund_dialog()
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
-        if st.button(_("⭐ 정식 사용자로 전환하기", "⭐ Upgrade to Paid License Now"), key="sidebar_upgrade_btn", use_container_width=True):
+        if st.button(_("??식 ?용?로 ?환?기", "?Upgrade to Paid License Now"), key="sidebar_upgrade_btn", use_container_width=True):
             st.components.v1.html("""
                 <script>
                     const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
                     for (let i = 0; i < tabs.length; i++) {
-                        if (tabs[i].innerText.includes('서비스 안내') || tabs[i].innerText.includes('Service Info')) {
+                        if (tabs[i].innerText.includes('?비???내') || tabs[i].innerText.includes('Service Info')) {
                             tabs[i].click();
                             window.parent.scrollTo(0, 0);
                             break;
@@ -5983,16 +5983,16 @@ with st.sidebar:
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-      <h3 style="margin-top: -5px; margin-bottom: 8px;">사업자정보</h3>
+      <h3 style="margin-top: -5px; margin-bottom: 8px;">?업?정?/h3>
       <div style="font-size: 0.85rem; color: #555;">
-        상호: 프레쉬인사이트<br>
-        대표자: 전상현<br>
-        사업자등록번호: 683-27-00122<br>
-        사업장 주소: 인천시 부평구 원길로 12, 가동 203호<br>
-        전화번호: 0507-1347-2610<br>
-        이메일: jeon080423@gmail.com<br>
-        개인정보관리책임자: 전상현<br>
-        통신판매업 신고번호: 간이과세자<br>
+        ?호: ?레?인?이??br>
+        ??자: ?상??br>
+        ?업?등록번?? 683-27-00122<br>
+        ?업??주소: ?천??부?구 ?길?12, 가??203??br>
+        ?화번호: 0507-1347-2610<br>
+        ?메?? jeon080423@gmail.com<br>
+        개인?보관리책?자: ?상??br>
+        ?신?매???고번호: 간이과세??br>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -6004,13 +6004,13 @@ with st.sidebar:
 # =============================================================================
 
 if st.session_state.get('page', 'main') == 'guide':
-    if st.button("← Back to AHP Analysis Tool", use_container_width=True, key="btn_back_to_main"):
+    if st.button("??Back to AHP Analysis Tool", use_container_width=True, key="btn_back_to_main"):
         st.session_state.page = "main"
         st.rerun()
     
     st.title(" AHP Master - English User Guide")
     st.markdown("""
-    🚀 **Welcome!** **AHP Master** is a smart web service that automatically processes the entire Analytic Hierarchy Process (AHP) workflow in 1 second, without requiring complex equations or statistical software.
+    ?? **Welcome!** **AHP Master** is a smart web service that automatically processes the entire Analytic Hierarchy Process (AHP) workflow in 1 second, without requiring complex equations or statistical software.
     This guide is designed to walk first-time users through the step-by-step process of completing their academic thesis statistics and decision analysis smoothly.
     
     ---
@@ -6019,20 +6019,20 @@ if st.session_state.get('page', 'main') == 'guide':
     AHP Master uses a specifically formatted Excel file to read your survey data.
     
     1. **Download Template**: Go to the AHP Master website (https://ahpkrj.streamlit.app/) and click the **[Download Excel Template]** button on the home screen.
-    2. **🔥 Customize to Fit Your Model (Important)**:
+    2. **? Customize to Fit Your Model (Important)**:
        * The default template items (evaluation criteria, alternatives, etc.) and hierarchical structure can be freely edited to match your specific research model.
        * You can add or delete criteria to construct your own custom AHP model.
     3. **Enter Survey Data**: Open the customized Excel template and enter your pairwise comparison survey responses.
        * **Evaluation Scale**: Uses Saaty's 1-9 fundamental scale (e.g., enter 7 if item A is much more important than B, enter 1 if they are equally important).
        * **Note**: Be careful not to break the core structure (sheet configuration, etc.) of the template.
     
-    ### 📥 Step 2: Upload File & Run Basic Analysis
+    ### ? Step 2: Upload File & Run Basic Analysis
     Once your data entry is complete, it's time to run the analysis.
     
     1. **File Upload**: Drag and drop your Excel file into the **[Drag and drop file here]** zone in the center of the screen, or click **[Browse files]** to select your file.
     2. **Automatic Execution**: The system will instantly run the complex matrix calculations in the background. Basic analysis typically completes in 1 to 3 seconds.
     
-    ### ⚙️ Step 3: Utilize [Analysis Settings] in the Sidebar
+    ### ?️ Step 3: Utilize [Analysis Settings] in the Sidebar
     After uploading, you can fine-tune the analysis details through the "Analysis Settings" in the left sidebar to suit your research methodology.
     
     1. **Select Aggregation Method**:
@@ -6041,15 +6041,15 @@ if st.session_state.get('page', 'main') == 'guide':
        * You can set boundaries such as how much you allow the original response to change (Correction Intensity/Learning Rate) when performing Consistency Ratio (CR) calibration.
        * *(If accessing on a mobile device, tap the `>` icon in the top left to reveal the sidebar menu.)*
     
-    ### 📊 Step 4: Consistency Validation & Automatic Calibration (CR)
+    ### ? Step 4: Consistency Validation & Automatic Calibration (CR)
     This is the step to validate the logical consistency of responses, which is critical in AHP academic studies.
     
     1. **Check Initial CR Value**: Check the **Consistency Ratio (CR)** displayed in the results panel.
        * `CR < 0.1` (Green): Indicates highly consistent and logical responses (Passed).
        * `CR > 0.1` (Red): Indicates logical contradictions exceed the standard limit (Needs Calibration).
-    2. **🔥 One-Click Auto Calibration**: If the initial CR value exceeds 0.1, do not worry. Simply click the **[CR Auto Calibration]** button. AHP Master's optimization algorithm will adjust the CR value to under 0.1 automatically, preserving the original response preferences as much as possible.
+    2. **? One-Click Auto Calibration**: If the initial CR value exceeds 0.1, do not worry. Simply click the **[CR Auto Calibration]** button. AHP Master's optimization algorithm will adjust the CR value to under 0.1 automatically, preserving the original response preferences as much as possible.
     
-    ### 🏆 Step 5: Check Weights & Save Results
+    ### ? Step 5: Check Weights & Save Results
     Once all validations and settings are complete, use the final results in your report or paper.
     
     1. **Check Weights & Rankings**:
@@ -6061,7 +6061,7 @@ if st.session_state.get('page', 'main') == 'guide':
     
     ---
     
-    ### 💡 Frequently Asked Questions (FAQ)
+    ### ? Frequently Asked Questions (FAQ)
     
     * **Q1. Can I change the template items to fit my specific paper?**
       * **Yes, absolutely!** The default template is only an example. You can add or delete rows and columns, rename text, and modify items to build **your own custom hierarchical model (Custom Model)** to fit your evaluation criteria and alternative count.
@@ -6072,21 +6072,21 @@ if st.session_state.get('page', 'main') == 'guide':
     
     ---
     
-    ### 💬 Contact & Support
+    ### ? Contact & Support
     If you have any questions during analysis, or need custom AHP consulting (expert survey execution, thesis statistical consulting, etc.), please contact us:
     * **Email**: jeon080423@gmail.com
     * **KakaoTalk ID**: AHPkr
     * **Mobile**: 0507-1347-2610
     """)
     
-    if st.button("← Back to AHP Analysis Tool", use_container_width=True, key="btn_back_to_main_bottom"):
+    if st.button("??Back to AHP Analysis Tool", use_container_width=True, key="btn_back_to_main_bottom"):
         st.session_state.page = "main"
         st.rerun()
     st.stop()
 
-# 메인 헤더 영역
+# 메인 ?더 ?역
 try:
-    # 성능 최적화를 위해 메인 화면에서는 구글 시트 대신 로컬 DB의 방문 로그 수만 즉시 집계합니다.
+    # ?능 최적?? ?해 메인 ?면?서??구? ?트 ???로컬 DB??방문 로그 ?만 즉시 집계?니??
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("SELECT COUNT(*) FROM visit_logs")
@@ -6097,11 +6097,11 @@ except Exception:
 
 col_main_title, col_settings_title = st.columns([3.0, 1.1], gap="large")
 with col_main_title:
-    st.title(_("AHP 의사결정 분석 솔루션", "AHP Decision Analysis Solution"))
+    st.title(_("AHP ?사결정 분석 ?루??, "AHP Decision Analysis Solution"))
 
 with col_settings_title:
-    visitor_label = _("누적 방문자", "Total Visitors")
-    visitor_unit = _("명", " visitors")
+    visitor_label = _("?적 방문??, "Total Visitors")
+    visitor_unit = _("?, " visitors")
     
     import urllib.parse
     current_params = dict(st.query_params)
@@ -6122,7 +6122,7 @@ with col_settings_title:
     counter_html = f"""
     <div style="text-align: right; margin-top: 32px; display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
         <span style="font-size: 0.85rem;">
-            <a href="{ko_url}" target="_self" style="text-decoration: none; color: {lang_ko_color}; font-weight: {lang_ko_weight};">한국어</a>
+            <a href="{ko_url}" target="_self" style="text-decoration: none; color: {lang_ko_color}; font-weight: {lang_ko_weight};">?국??/a>
             <span style="color: #ccc; margin: 0 4px;">|</span>
             <a href="{en_url}" target="_self" style="text-decoration: none; color: {lang_en_color}; font-weight: {lang_en_weight};">English</a>
         </span>
@@ -6136,24 +6136,24 @@ with col_settings_title:
 import contextlib
 col_main = contextlib.nullcontext()
 col_settings = contextlib.nullcontext()
-@st.dialog(_("알림", "Notice"))
+@st.dialog(_("?림", "Notice"))
 def show_warning_dialog():
-    st.warning(_("⚠️ 분석 후 확인 가능합니다. (데이터를 먼저 업로드하세요)", "⚠️ Available after analysis. (Please upload data first)"))
+    st.warning(_("?️ 분석 ???인 가?합?다. (?이?? 먼? ?로?하?요)", "?️ Available after analysis. (Please upload data first)"))
 
 # ---------- CR Distortion Verification Dialog ----------
-@st.dialog(_("🔍 CR 보정 결과 왜곡 검증", "🔍 CR Consistency Distortion Verification"), width="large")
+@st.dialog(_("? CR 보정 결과 ?곡 검?, "? CR Consistency Distortion Verification"), width="large")
 def show_cr_distortion_dialog():
 
     from cr_analysis import run_analysis, matrix_to_heatmap_img
         
-    st.info(_("📊 업로드된 메인 기준 데이터(응답자 전체 기하평균 행렬)를 바탕으로 검증을 수행합니다.", "📊 Performing verification based on the uploaded Main Criteria data (geometric mean matrix of all respondents)."))
+    st.info(_("? ?로?된 메인 기? ?이???답???체 기하?균 ?렬)?바탕?로 검증을 ?행?니??", "? Performing verification based on the uploaded Main Criteria data (geometric mean matrix of all respondents)."))
     original_matrix = st.session_state.uploaded_matrix
 
     # Determine selected CR option
     option = st.session_state.get('cr_threshold_label', '0.1')
-    if option in ["보정 하지 않음", "Do Not Correct"]:
+    if option in ["보정 ?? ?음", "Do Not Correct"]:
         corrected_matrix = original_matrix.copy()
-        option_name = _("보정 안 함", "Do Not Correct")
+        option_name = _("보정 ????, "Do Not Correct")
     else:
         corrected_matrix, cr_val, iters, _unused = improve_consistency(
             original_matrix,
@@ -6169,35 +6169,35 @@ def show_cr_distortion_dialog():
     left_col, right_col = st.columns([1.2, 1])
 
     with right_col:
-        st.subheader(_(" 검증 결과", " Verification Results"))
+        st.subheader(_(" 검?결과", " Verification Results"))
         st.dataframe(pd.DataFrame([metrics]), use_container_width=True)
 
         # Heatmaps side by side
-        orig_img = matrix_to_heatmap_img(original_matrix, _("원본 행렬", "Original Matrix"))
+        orig_img = matrix_to_heatmap_img(original_matrix, _("?본 ?렬", "Original Matrix"))
         corr_img = matrix_to_heatmap_img(corrected_matrix, option_name)
         hm1, hm2 = st.columns(2)
         with hm1:
-            st.image(f"data:image/png;base64,{orig_img}", caption=_("원본 행렬", "Original Matrix"), use_container_width=True)
+            st.image(f"data:image/png;base64,{orig_img}", caption=_("?본 ?렬", "Original Matrix"), use_container_width=True)
         with hm2:
-            st.image(f"data:image/png;base64,{corr_img}", caption=_("보정 행렬", "Corrected Matrix"), use_container_width=True)
+            st.image(f"data:image/png;base64,{corr_img}", caption=_("보정 ?렬", "Corrected Matrix"), use_container_width=True)
 
     with left_col:
-        st.subheader(_(" 검증 방법", " Verification Method"))
+        st.subheader(_(" 검?방법", " Verification Method"))
         st.markdown(_(
             f"""
-본 검증은 CR(일관성 비율) 보정 과정에서 **원본 응답 데이터가 얼마나 변형되었는지**를 정량적으로 측정합니다.
+?검증? CR(????비율) 보정 과정?서 **?본 ?답 ?이?? ?마??변?되?는지**??량?으?측정?니??
 
-**검증 절차:**
-1. **원본 행렬 확보** — 설문 응답자의 쌍대비교 판단 행렬을 그대로 사용합니다.
-2. **보정 행렬 생성** — 선택된 CR 임계값(`{option_name}`)에 따라 반복 수렴 조정법(Iterative Adjustment)으로 보정된 행렬을 생성합니다.
-3. **차이 분석** — 원본과 보정 행렬 간 4가지 수리적 지표를 계산합니다:
-   - **유클리드 거리**: 행렬 원소 간 직선 거리
-   - **맨해튼 거리**: 행렬 원소 간 절대 차이의 합
-   - **코사인 유사도**: 두 행렬 벡터의 방향 일치도
-   - **왜곡 점수**: 위 지표들을 종합한 왜곡 수준 지수
-4. **종합 판정** — 왜곡 점수를 기준으로 보정의 신뢰성을 평가합니다.
+**검??차:**
+1. **?본 ?렬 ?보** ???문 ?답?의 ??비교 ?단 ?렬??그???용?니??
+2. **보정 ?렬 ?성** ???택??CR ?계?`{option_name}`)???라 반복 ?렴 조정?Iterative Adjustment)?로 보정???렬???성?니??
+3. **차이 분석** ???본?보정 ?렬 ?4가지 ?리??지?? 계산?니??
+   - **?클리드 거리**: ?렬 ?소 ?직선 거리
+   - **맨해??거리**: ?렬 ?소 ??? 차이????
+   - **코사???사??*: ???렬 벡터??방향 ?치??
+   - **?곡 ?수**: ??지?들??종합???곡 ?? 지??
+4. **종합 ?정** ???곡 ?수?기??로 보정???뢰?을 ???니??
 
-> 💡 왜곡 점수가 낮을수록 보정이 원본 응답의 경향성을 잘 보존했음을 의미합니다.
+> ? ?곡 ?수가 ???록 보정???본 ?답??경향?을 ??보존?음?????니??
 
 ---
 """,
@@ -6205,21 +6205,21 @@ def show_cr_distortion_dialog():
 This verification quantitatively measures **how much the original response data was altered** during the CR (Consistency Ratio) correction process.
 
 **Verification Procedure:**
-1. **Obtain Original Matrix** — Use the respondent's raw pairwise comparison judgment matrix as-is.
-2. **Generate Corrected Matrix** — Apply the Iterative Adjustment method based on the selected CR threshold (`{option_name}`) to produce a corrected matrix.
-3. **Difference Analysis** — Calculate 4 mathematical metrics between the original and corrected matrices:
+1. **Obtain Original Matrix** ??Use the respondent's raw pairwise comparison judgment matrix as-is.
+2. **Generate Corrected Matrix** ??Apply the Iterative Adjustment method based on the selected CR threshold (`{option_name}`) to produce a corrected matrix.
+3. **Difference Analysis** ??Calculate 4 mathematical metrics between the original and corrected matrices:
    - **Euclidean Distance**: Straight-line distance between matrix elements
    - **Manhattan Distance**: Sum of absolute element-wise differences
    - **Cosine Similarity**: Directional alignment of the two matrix vectors
    - **Distortion Score**: Composite index summarizing overall distortion
-4. **Overall Verdict** — Evaluate the reliability of the correction based on the Distortion Score.
+4. **Overall Verdict** ??Evaluate the reliability of the correction based on the Distortion Score.
 
-> 💡 A lower Distortion Score means the correction better preserved the original response patterns.
+> ? A lower Distortion Score means the correction better preserved the original response patterns.
 
 ---
 """))
 
-        st.subheader(_(" 결과 해석", " Interpretation"))
+        st.subheader(_(" 결과 ?석", " Interpretation"))
 
         # Extract metric values
         euc = metrics.get("euclidean", 0)
@@ -6229,20 +6229,20 @@ This verification quantitatively measures **how much the original response data 
 
         st.markdown(_( 
             f"""
-**1. 유클리드 거리 (Euclidean Distance): `{euc:.6f}`**  
-원본 행렬과 보정 행렬 사이의 직선 거리입니다.  
-값이 **0에 가까울수록** 보정이 원본을 거의 변형하지 않았음을 의미합니다.
+**1. ?클리드 거리 (Euclidean Distance): `{euc:.6f}`**  
+?본 ?렬?보정 ?렬 ?이??직선 거리?니??  
+값이 **0??가까울?록** 보정???본??거의 변?하지 ?았?을 ???니??
 
-**2. 맨해튼 거리 (Manhattan Distance): `{man:.6f}`**  
-각 원소별 차이의 절대값 합입니다.  
-유클리드 거리와 함께 보정의 **전체적인 변동 크기**를 나타냅니다.
+**2. 맨해??거리 (Manhattan Distance): `{man:.6f}`**  
+??소?차이??????입?다.  
+?클리드 거리? ?께 보정??**?체?인 변???기**????니??
 
-**3. 코사인 유사도 (Cosine Similarity): `{cos:.6f}`**  
-두 행렬 벡터 간의 방향 유사도입니다.  
-**1.0에 가까울수록** 보정 전후 응답 패턴이 동일한 방향을 유지하고 있습니다.
+**3. 코사???사??(Cosine Similarity): `{cos:.6f}`**  
+???렬 벡터 간의 방향 ?사?입?다.  
+**1.0??가까울?록** 보정 ?후 ?답 ?턴???일??방향?????고 ?습?다.
 
-**4. 왜곡 점수 (Distortion Score): `{dist:.6f}`**  
-종합적인 왜곡 수준을 나타내는 지표입니다.
+**4. ?곡 ?수 (Distortion Score): `{dist:.6f}`**  
+종합?인 ?곡 ???????는 지?입?다.
 
 ---
 
@@ -6269,23 +6269,23 @@ A composite index representing the overall distortion level.
 
         # Verdict
         if dist < 0.01:
-            verdict_icon = "✅"
-            verdict = _("왜곡 수준: **매우 낮음** — 보정이 원본 응답을 거의 변형하지 않았습니다. 신뢰할 수 있는 결과입니다.",
-                        "Distortion Level: **Very Low** — The correction barely altered the original responses. The result is reliable.")
+            verdict_icon = "??
+            verdict = _("?곡 ??: **매우 ??** ??보정???본 ?답??거의 변?하지 ?았?니?? ?뢰?????는 결과?니??",
+                        "Distortion Level: **Very Low** ??The correction barely altered the original responses. The result is reliable.")
         elif dist < 0.05:
-            verdict_icon = "🟡"
-            verdict = _("왜곡 수준: **낮음** — 경미한 조정이 있었으나 원본 경향성이 잘 보존되었습니다.",
-                        "Distortion Level: **Low** — Minor adjustments were made, but the original trends are well preserved.")
+            verdict_icon = "?"
+            verdict = _("?곡 ??: **??** ??경???조정???었?나 ?본 경향?이 ??보존?었?니??",
+                        "Distortion Level: **Low** ??Minor adjustments were made, but the original trends are well preserved.")
         elif dist < 0.15:
-            verdict_icon = "🟠"
-            verdict = _("왜곡 수준: **보통** — 일부 변형이 발생했습니다. 결과 해석에 주의가 필요합니다.",
-                        "Distortion Level: **Moderate** — Some distortion occurred. Interpret results with caution.")
+            verdict_icon = "?"
+            verdict = _("?곡 ??: **보통** ???? 변?이 발생?습?다. 결과 ?석??주의가 ?요?니??",
+                        "Distortion Level: **Moderate** ??Some distortion occurred. Interpret results with caution.")
         else:
-            verdict_icon = "🔴"
-            verdict = _("왜곡 수준: **높음** — 보정 과정에서 상당한 변형이 발생했습니다. CR 임계값을 조정하거나 원본 데이터를 재검토하세요.",
-                        "Distortion Level: **High** — Significant distortion occurred during correction. Consider adjusting the CR threshold or reviewing the original data.")
+            verdict_icon = "?"
+            verdict = _("?곡 ??: **?음** ??보정 과정?서 ?당??변?이 발생?습?다. CR ?계값을 조정?거???본 ?이?? ???하?요.",
+                        "Distortion Level: **High** ??Significant distortion occurred during correction. Consider adjusting the CR threshold or reviewing the original data.")
 
-        st.markdown(f"### {verdict_icon} {_('종합 판정', 'Overall Verdict')}")
+        st.markdown(f"### {verdict_icon} {_('종합 ?정', 'Overall Verdict')}")
         st.info(verdict)
 
 
@@ -6299,29 +6299,29 @@ def render_ahp_analysis_settings():
         pass
     else:
         with st.container(border=True):
-            st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("AHP 분석 설정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
-            ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
-            ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
+            st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("AHP 분석 ?정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
+            ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('?반 AHP (Traditional AHP)', 'Traditional AHP'), _('?? AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
+            ahp_method = 'traditional' if '?반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
             if ahp_method == 'fuzzy':
                 tier = get_current_tier()
                 if tier != 'Pro':
-                    st.error(_("🔒 퍼지 AHP는 Pro 요금제 전용 기능입니다.", "🔒 Fuzzy AHP is exclusive to Pro Tier."))
-                    st.warning(_("현재 무료 및 일반 회원 등급에서는 일반 AHP 결과만 분석 및 제공됩니다. 퍼지 AHP 분석을 이용하시려면 Pro 등급으로 업그레이드해주시기 바랍니다.", 
+                    st.error(_("? ?? AHP??Pro ?금???용 기능?니??", "? Fuzzy AHP is exclusive to Pro Tier."))
+                    st.warning(_("?재 무료 ??반 ?원 ?급?서???반 AHP 결과?분석 ??공?니?? ?? AHP 분석???용?시?면 Pro ?급?로 ?그?이?해주시?바랍?다.", 
                                  "In your current tier, only Traditional AHP results are analyzed and provided. To use Fuzzy AHP, please upgrade to the Pro Tier."))
                     ahp_method = 'traditional'
-            mean_method_label = st.radio(_("평균 산출 방식", "Aggregation Method"), (_('기하평균 (Geometric)', 'Geometric Mean'), _('산술평균 (Arithmetic)', 'Arithmetic Mean')), index=0)
+            mean_method_label = st.radio(_("?균 ?출 방식", "Aggregation Method"), (_('기하?균 (Geometric)', 'Geometric Mean'), _('?술?균 (Arithmetic)', 'Arithmetic Mean')), index=0)
             mean_method = 'geometric' if '기하' in mean_method_label or 'Geometric' in mean_method_label else 'arithmetic'
             cr_threshold_label = st.selectbox(
-                _("일관성 비율(CR) 임계값", "Consistency Ratio (CR) Threshold"), 
-                [_("0.1", "0.1"), _("0.15", "0.15"), _("0.2", "0.2"), _("보정 하지 않음", "Do Not Correct")], 
+                _("????비율(CR) ?계?, "Consistency Ratio (CR) Threshold"), 
+                [_("0.1", "0.1"), _("0.15", "0.15"), _("0.2", "0.2"), _("보정 ?? ?음", "Do Not Correct")], 
                 index=0,
                 key="cr_threshold_label",
                 help=_(
-                    "임계값 설정(0.1, 0.15 또는 0.2)은 일관성 비율(CR)을 해당 수치로 정확하게 일치시키는 것이 아니라, 해당 임계값 이하로 만드는 것을 의미합니다. 이미 임계값 이하인 데이터는 보정하지 않으며, 이를 통해 원본 응답이 과도하게 왜곡되는 것을 방지합니다.",
+                    "?계??정(0.1, 0.15 ?는 0.2)? ????비율(CR)???당 ?치??확?게 ?치?키??것이 ?니?? ?당 ?계??하?만드??것을 ???니?? ?? ?계??하???이?는 보정?? ?으? ?? ?해 ?본 ?답??과도?게 ?곡?는 것을 방??니??",
                     "The threshold setting (0.1, 0.15 or 0.2) does not force the consistency ratio (CR) to equal that value. Instead, it adjusts the CR to be less than or equal to the threshold. If a matrix is already within the threshold, no correction is applied, preventing excessive distortion of the original responses."
                 )
             )
-            if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
+            if "보정 ?? ?음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
                 cr_threshold = 999.0
                 learning_rate = 0.0
             else:
@@ -6329,34 +6329,34 @@ def render_ahp_analysis_settings():
                     cr_threshold = float(cr_threshold_label)
                 except ValueError:
                     cr_threshold = 0.1
-            if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
+            if "보정 ?? ?음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
                 max_iter_val = 0
-                st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=0, max_value=500, value=0, step=50, disabled=True, key="max_iter_disabled")
+                st.number_input(_("최? 보정 반복 ?수", "Max Correction Iterations"), min_value=0, max_value=500, value=0, step=50, disabled=True, key="max_iter_disabled")
             else:
-                max_iter_val = st.number_input(_("최대 보정 반복 횟수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50, key="max_iter_enabled")
+                max_iter_val = st.number_input(_("최? 보정 반복 ?수", "Max Correction Iterations"), min_value=10, max_value=500, value=500, step=50, key="max_iter_enabled")
         
-            if "보정 하지 않음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
+            if "보정 ?? ?음" in cr_threshold_label or "Do Not Correct" in cr_threshold_label:
                 st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.0, max_value=0.9, value=0.0, step=0.1, disabled=True, key="learning_rate_disabled")
             else:
                 learning_rate = st.slider(_("보정 강도 (Learning Rate)", "Correction Intensity (Learning Rate)"), min_value=0.1, max_value=0.9, value=0.6, step=0.1, key="learning_rate_enabled")
-        # 1. CR 보정 결과 왜곡 검증
-        with st.expander(_("CR 보정 결과 왜곡 검증", "CR Consistency Distortion Verification"), expanded=False):
-            if st.button(_("▶ 검증 실행", "▶ Run Verification"), use_container_width=True, key="btn_cr_verify"):
+        # 1. CR 보정 결과 ?곡 검?
+        with st.expander(_("CR 보정 결과 ?곡 검?, "CR Consistency Distortion Verification"), expanded=False):
+            if st.button(_("??검??행", "??Run Verification"), use_container_width=True, key="btn_cr_verify"):
                 if "uploaded_matrix" not in st.session_state:
                     show_warning_dialog()
                 else:
                     show_cr_distortion_dialog()
 
-        # 2. 일관성 보정 기준
-        with st.expander(_("일관성 보정 기준", "Consistency Correction Standard"), expanded=False):
+        # 2. ????보정 기?
+        with st.expander(_("????보정 기?", "Consistency Correction Standard"), expanded=False):
             st.markdown(_(r"""
-            **보정 방법: 반복 수렴 조정법(Iterative Adjustment)**
-            가중치 산출 알고리즘(Saaty)에 의해 판단 행렬이 비일관적(CR > 임계값)인 경우, 수학적으로 일관된 행렬과 원본 행렬을 일정 비율로 혼합하여 반복적으로 가중치를 미세 조정한 결과를 제시합니다.
+            **보정 방법: 반복 ?렴 조정?Iterative Adjustment)**
+            가중치 ?출 ?고리즘(Saaty)???해 ?단 ?렬??비일관??CR > ?계???경우, ?학?으??????렬??본 ?렬???정 비율??합?여 반복?으?가중치?미세 조정??결과??시?니??
         
-            **현재 방법의 특징:**
-            1. **최소 판단 왜곡**: 원본 설문 응답의 경향성을 보존하면서 수학적 일관성만을 확보합니다.
-            2. **자동 수렴**: 설정된 반복 횟수 내에서 CR 값을 임계값 이하로 자동 개선합니다. ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
-            3. **과도한 보정 방지**: 임계값 설정(0.1, 0.15 또는 0.2)은 CR 값을 정확히 맞추는 것이 아니라 임계값 '이하'로 만드는 것을 목표로 합니다. 이미 임계값 이하인 응답은 보정을 수행하지 않아 원본 판단을 최대한 보존합니다.
+            **?재 방법???징:**
+            1. **최소 ?단 ?곡**: ?본 ?문 ?답??경향?을 보존?면???학?????만???보?니??
+            2. **?동 ?렴**: ?정??반복 ?수 ?에??CR 값을 ?계??하??동 개선?니?? ($New = (1-\alpha) \times Old + \alpha \times Ideal$)
+            3. **과도??보정 방?**: ?계??정(0.1, 0.15 ?는 0.2)? CR 값을 ?확??맞추??것이 ?니???계?'?하'?만드??것을 목표??니?? ?? ?계??하???답? 보정???행?? ?아 ?본 ?단??최???보존?니??
         
             """, r"""
             **Correction Method: Iterative Adjustment**
@@ -6369,23 +6369,23 @@ def render_ahp_analysis_settings():
         
             """))
 
-        # 3. 이용자 가이드
-        with st.expander(_("이용자 가이드", "User Guide"), expanded=False):
-            st.markdown(_("AHP 마스터 서비스 사용 설명서 및 가이드 링크입니다.", "Link to the AHP Master user manual and guide."))
+        # 3. ?용??가?드
+        with st.expander(_("?용??가?드", "User Guide"), expanded=False):
+            st.markdown(_("AHP 마스???비???용 ?명???가?드 링크?니??", "Link to the AHP Master user manual and guide."))
             if st.session_state.get('lang', 'ko') == 'en':
                 if st.button("Read English User Guide", use_container_width=True, key="btn_read_guide"):
                     st.session_state.page = "guide"
                     st.rerun()
             else:
-                st.link_button("이용자 가이드 바로가기", "https://morison.tistory.com/103", use_container_width=True)
+                st.link_button("?용??가?드 바로가?, "https://morison.tistory.com/103", use_container_width=True)
 
-        with st.expander(_("학술 논문 및 연구 보고서 기재 방법 예시", "Example of citation in academic papers/reports"), expanded=False):
-            st.info(_("AHP 분석 결과를 학위 논문이나 연구 보고서에 기술할 때 아래 예시문을 참고하여 인용 및 서술하실 수 있습니다.",
+        with st.expander(_("?술 ?문 ??구 보고??기재 방법 ?시", "Example of citation in academic papers/reports"), expanded=False):
+            st.info(_("AHP 분석 결과??위 ?문?나 ?구 보고?에 기술?????래 ?시문을 참고?여 ?용 ??술?실 ???습?다.",
                       "When describing AHP analysis results in your thesis or research report, you can refer to and cite the example below."))
             st.markdown(_("""
-            > **[논문 기재 예시문]**
+            > **[?문 기재 ?시?**
             > 
-            > "본 연구에서 수집된 설문 데이터는 웹 기반 AHP 전용 분석 솔루션인 'AHP 마스터'를 활용하여 분석을 수행하였다. Saaty(1980)의 계층분석과정에 따라 쌍대비교 행렬을 구성하여 국지적 가중치와 종합 가중치(Global Weight)를 산출하였으며, 일관성 비율(CR)이 0.1 미만이 되도록 시스템의 보정 기능을 거쳐 결과의 타당성을 확보하였다."
+            > "??구?서 ?집???문 ?이?는 ??기반 AHP ?용 분석 ?루?인 'AHP 마스????용?여 분석???행???? Saaty(1980)??계층분석과정???라 ??비교 ?렬??구성?여 ????가중치? 종합 가중치(Global Weight)??출???며, ????비율(CR)??0.1 미만???도??스?의 보정 기능??거쳐 결과????성???보????"
             """,
             """
             > **[Example of Paper Citation]**
@@ -6399,7 +6399,7 @@ def render_ahp_analysis_settings():
                 import base64
                 with open(pdf_path, "rb") as f:
                     base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-                pdf_html = f'<a href="data:application/pdf;base64,{base64_pdf}" download="AHP_Master_Accuracy_Paper.pdf" style="text-decoration: underline; font-weight: bold; font-size: 14px; color: #1B2A4A;">📄 AHP 정확성 검증 논문 (PDF) 다운로드</a>'
+                pdf_html = f'<a href="data:application/pdf;base64,{base64_pdf}" download="AHP_Master_Accuracy_Paper.pdf" style="text-decoration: underline; font-weight: bold; font-size: 14px; color: #1B2A4A;">? AHP ?확??검??문 (PDF) ?운로드</a>'
                 st.markdown("<br/>", unsafe_allow_html=True)
                 st.markdown(pdf_html, unsafe_allow_html=True)
 
@@ -6411,28 +6411,28 @@ with contextlib.nullcontext():
                 
     
     if st.session_state.get('admin_mode', False) and st.session_state.user_role == 'admin':
-        # 세션 스테이트 기반 성공 메시지 잔존 출력
+        # ?션 ?테?트 기반 ?공 메시지 ?존 출력
         if "sync_success_msg" in st.session_state:
             st.success(st.session_state["sync_success_msg"])
             del st.session_state["sync_success_msg"]
     
-        st.subheader(_(" 가입자 현황 및 관리", " Registered Users & Admin Control"))
+        st.subheader(_(" 가?자 ?황 ?관?, " Registered Users & Admin Control"))
         
         col_sync1, col_sync2 = st.columns([2, 8])
         with col_sync1:
-            if st.button("🔄 구글 시트와 동기화"):
-                with st.spinner("구글 시트 데이터 불러오는 중..."):
-                    # 캐시 수동 비우기
+            if st.button("? 구? ?트? ?기??):
+                with st.spinner("구? ?트 ?이??불러?는 ?.."):
+                    # 캐시 ?동 비우?
                     get_cached_visit_logs.clear()
                     added_count = sync_db_from_sheets()
                 if added_count >= 0:
-                    st.session_state["sync_success_msg"] = f"🎉 동기화 완료! (보정 및 복구된 데이터: {added_count}건)"
+                    st.session_state["sync_success_msg"] = f"? ?기???료! (보정 ?복구???이?? {added_count}?"
                     st.rerun()
                 else:
-                    st.error("동기화 중 오류가 발생했습니다. 화면상의 에러 메시지를 확인해 주세요.")
+                    st.error("?기????류가 발생?습?다. ?면?의 ?러 메시지??인??주세??")
         
         try:
-            # [최적화] 구글 시트 API 분당 호출 제한(429)을 피하기 위해 5분 캐시 처리된 함수를 사용합니다.
+            # [최적?? 구? ?트 API 분당 ?출 ?한(429)???하??해 5?캐시 처리???수??용?니??
             visit_data_gs = get_cached_visit_logs(get_main_spreadsheet_id()) if get_main_spreadsheet_id() else []
             if not visit_data_gs:
                 try:
@@ -6440,7 +6440,7 @@ with contextlib.nullcontext():
                     df_local = pd.read_sql_query("SELECT ip_address as IP, visit_date as Date FROM visit_logs", conn)
                     conn.close()
                     if not df_local.empty:
-                        # 지도 시각화 등에 필요한 컬럼 빈값 보정
+                        # 지???각???에 ?요??컬럼 빈값 보정
                         df_local['Country'] = ""
                         df_local['Region'] = ""
                         df_local['City'] = ""
@@ -6455,7 +6455,7 @@ with contextlib.nullcontext():
                 daily_df_counts = daily_df_logs.groupby('Date_Only').size().reset_index(name='count')
                 # total_visits remains as calculated from local db above
     
-                st.write("#### 🗺️ 접속자 실시간 위치 분포")
+                st.write("#### ???속???시??치 분포")
                 if 'Latitude' in daily_df_logs.columns and 'Longitude' in daily_df_logs.columns:
                     map_data = daily_df_logs[daily_df_logs['Latitude'].astype(str).str.strip() != ""].copy()
                     if not map_data.empty:
@@ -6467,35 +6467,35 @@ with contextlib.nullcontext():
                             map_display['size'] = map_display['visit_count'] * 20
                             st.map(map_display, latitude='lat', longitude='lon', size='size')
                         else:
-                            st.info("유효한 좌표 데이터가 없습니다.")
+                            st.info("?효??좌표 ?이?? ?습?다.")
                     else:
-                        st.info("지도에 표시할 위치 정보 데이터가 아직 수집되지 않았습니다.")
+                        st.info("지?에 ?시???치 ?보 ?이?? ?직 ?집?? ?았?니??")
                 else:
-                    st.info("위치 정보 컬럼이 존재하지 않습니다.")
+                    st.info("?치 ?보 컬럼??존재?? ?습?다.")
             else:
                 total_visits = 0
                 daily_df_counts = pd.DataFrame()
     
-            st.write(f"**누적 방문자:** {total_visits:,}명")
-            st.write("#### 📅 일별 방문자 현황 (날짜별 합산)")
+            st.write(f"**?적 방문??** {total_visits:,}?)
+            st.write("#### ? ?별 방문???황 (?짜??산)")
             if not daily_df_counts.empty:
                 fig_visit = px.bar(daily_df_counts, x='Date_Only', y='count', text='count',
-                                    labels={'Date_Only': '날짜', 'count': '방문자 수'})
+                                    labels={'Date_Only': '?짜', 'count': '방문????})
                 fig_visit.update_traces(textposition='outside')
-                fig_visit.update_layout(xaxis_title="날짜", yaxis_title="방문자 수", showlegend=False, xaxis={'type': 'category'})
+                fig_visit.update_layout(xaxis_title="?짜", yaxis_title="방문????, showlegend=False, xaxis={'type': 'category'})
                 st.plotly_chart(fig_visit, use_container_width=True)
             else:
-                st.info("방문 기록이 없습니다.")
+                st.info("방문 기록???습?다.")
         except Exception as e:
-            st.error(f"통계 오류: {e}")
+            st.error(f"?계 ?류: {e}")
         st.divider()
         
-        # 배포 통계 집계 및 시각화
+        # 배포 ?계 집계 ??각??
         st.write("---")
-        st.write(_("### 📊 설문지 배포 통계", "### 📊 Survey Distribution Statistics"))
+        st.write(_("### ? ?문지 배포 ?계", "### ? Survey Distribution Statistics"))
         users_df = get_all_users()
         
-        # 컬럼 존재 확인 및 결측치 보정
+        # 컬럼 존재 ?인 ?결측?보정
         if 'survey_count' not in users_df.columns:
             users_df['survey_count'] = 0
         if 'last_survey_link' not in users_df.columns:
@@ -6503,150 +6503,150 @@ with contextlib.nullcontext():
             
         users_df['survey_count'] = pd.to_numeric(users_df['survey_count'].fillna(0)).astype(int)
         
-        # 1. 요약 통계
+        # 1. ?약 ?계
         total_dist_surveys = users_df['survey_count'].sum()
         active_users_count = (users_df['survey_count'] > 0).sum()
         total_registered_users = len(users_df)
         
         col_stat1, col_stat2, col_stat3 = st.columns(3)
         with col_stat1:
-            st.metric(_("총 설문 배포 건수", "Total Distributed Surveys"), f"{total_dist_surveys}" + _("건", ""))
+            st.metric(_("??문 배포 건수", "Total Distributed Surveys"), f"{total_dist_surveys}" + _("?, ""))
         with col_stat2:
-            st.metric(_("설문 배포 경험 회원 수", "Members with Distribution Experience"), f"{active_users_count}" + _("명", ""))
+            st.metric(_("?문 배포 경험 ?원 ??, "Members with Distribution Experience"), f"{active_users_count}" + _("?, ""))
         with col_stat3:
-            st.metric(_("총 가입 회원 수", "Total Registered Members"), f"{total_registered_users}" + _("명", ""))
+            st.metric(_("?가???원 ??, "Total Registered Members"), f"{total_registered_users}" + _("?, ""))
             
-        # 2. 사용자별 배포 횟수 차트
+        # 2. ?용?별 배포 ?수 차트
         active_users_df = users_df[users_df['survey_count'] > 0].copy()
         if not active_users_df.empty:
             active_users_df = active_users_df.sort_values(by='survey_count', ascending=False)
             fig_dist = px.bar(active_users_df, x='id', y='survey_count', text='survey_count',
-                              labels={'id': '회원 ID', 'survey_count': '배포 건수'},
-                              title="회원별 설문지 배포 현황 (1건 이상 배포 회원)")
+                              labels={'id': '?원 ID', 'survey_count': '배포 건수'},
+                              title="?원??문지 배포 ?황 (1??상 배포 ?원)")
             fig_dist.update_traces(textposition='outside')
-            fig_dist.update_layout(xaxis_title="회원 ID", yaxis_title="배포 건수")
+            fig_dist.update_layout(xaxis_title="?원 ID", yaxis_title="배포 건수")
             st.plotly_chart(fig_dist, use_container_width=True)
         else:
-            st.info(_("아직 설문을 배포한 사용자가 없습니다.", "No users have distributed a survey yet."))
+            st.info(_("?직 ?문??배포???용?? ?습?다.", "No users have distributed a survey yet."))
             
         st.write("---")
-        st.write(_("### 👥 가입자 현황 및 최종 배포 링크", "### 👥 Subscriber Status and Latest Distribution Links"))
+        st.write(_("### ? 가?자 ?황 ?최종 배포 링크", "### ? Subscriber Status and Latest Distribution Links"))
         
-        # 컬럼 순서 및 구성 재조정하여 데이터프레임으로 출력
+        # 컬럼 ?서 ?구성 ?조?하???이?프?임?로 출력
         display_df = users_df[['id', 'role', 'signup_date', 'pw', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info']].copy()
         st.dataframe(
             display_df,
             column_config={
-                "id": "회원 ID",
+                "id": "?원 ID",
                 "role": "권한",
-                "signup_date": "가입일",
-                "pw": "비밀번호",
-                "survey_count": "배포 횟수",
-                "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
-                "expiry_date": "만료일",
-                "agree_info": "동의여부"
+                "signup_date": "가?일",
+                "pw": "비?번호",
+                "survey_count": "배포 ?수",
+                "last_survey_link": st.column_config.LinkColumn("최종 배포 ?문지 링크", display_text="?문지 바로가?),
+                "expiry_date": "만료??,
+                "agree_info": "?의??"
             },
             hide_index=True,
             use_container_width=True
         )
     
-        with st.expander("회원 정보 수정 (비밀번호 초기화 포함)"):
-            edit_id = st.selectbox("수정할 회원 ID", users_df['id'].unique())
+        with st.expander("?원 ?보 ?정 (비?번호 초기???함)"):
+            edit_id = st.selectbox("?정???원 ID", users_df['id'].unique())
             selected_user = users_df[users_df['id'] == edit_id].iloc[0]
-            new_role_val = st.selectbox("권한 변경", ['temp', 'official', 'admin'], 
+            new_role_val = st.selectbox("권한 변?, ['temp', 'official', 'admin'], 
                                     index=['temp', 'official', 'admin'].index(selected_user['role']))
             
             if new_role_val == 'official' and selected_user['role'] != 'official':
                 suggested_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date() + relativedelta(months=2)
-                new_expiry_val = st.text_input("만료일 설정 (YYYY-MM-DD) - 2개월 기한 자동 제안됨", value=str(suggested_date))
+                new_expiry_val = st.text_input("만료???정 (YYYY-MM-DD) - 2개월 기한 ?동 ?안??, value=str(suggested_date))
             else:
-                new_expiry_val = st.text_input("만료일 변경 (YYYY-MM-DD)", value=selected_user['expiry_date'])
+                new_expiry_val = st.text_input("만료??변?(YYYY-MM-DD)", value=selected_user['expiry_date'])
                 
-            new_pw_edit = st.text_input("새 비밀번호 (입력 시 변경됨)", type="password", placeholder="변경하지 않으려면 비워두세요")
+            new_pw_edit = st.text_input("??비?번호 (?력 ??변경됨)", type="password", placeholder="변경하지 ?으?면 비워?세??)
             
             col_admin_act1, col_admin_act2 = st.columns(2)
             with col_admin_act1:
-                if st.button("정보 수정 적용", use_container_width=True):
+                if st.button("?보 ?정 ?용", use_container_width=True):
                     update_user_full_info(edit_id, new_pw_edit, new_role_val, new_expiry_val)
                     if new_role_val == 'official' and selected_user['role'] != 'official':
                         send_approval_email(edit_id)
-                    st.success(f"{edit_id} 회원의 정보가 수정되었습니다.")
+                    st.success(f"{edit_id} ?원???보가 ?정?었?니??")
                     st.rerun()
             with col_admin_act2:
-                if st.button("🔑 이 계정으로 로그인", use_container_width=True, type="secondary", help="비밀번호 없이 이 사용자의 계정으로 세션을 즉시 전환합니다."):
+                if st.button("? ??계정?로 로그??, use_container_width=True, type="secondary", help="비?번호 ?이 ???용?의 계정?로 ?션??즉시 ?환?니??"):
                     st.session_state.user_id = edit_id
                     st.session_state.user_role = selected_user['role']
                     st.session_state.expiry_date = selected_user['expiry_date']
-                    st.session_state.admin_mode = False  # 일반 사용자 시점으로 전환
-                    st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
+                    st.session_state.admin_mode = False  # ?반 ?용???점?로 ?환
+                    st.toast(f"? {edit_id} 계정?로 로그?했?니??")
                     st.rerun()
         
-        with st.expander("회원 삭제"):
-            del_id = st.selectbox("삭제할 회원 ID 선택", users_df['id'].unique(), key='del_user_select')
-            if st.button("선택한 회원 삭제"):
+        with st.expander("?원 ??"):
+            del_id = st.selectbox("?????원 ID ?택", users_df['id'].unique(), key='del_user_select')
+            if st.button("?택???원 ??"):
                 if del_id == st.session_state.user_id:
-                    st.error("본인은 삭제할 수 없습니다.")
+                    st.error("본인? ???????습?다.")
                 else:
                     delete_user(del_id)
-                    st.success("삭제 완료")
+                    st.success("?? ?료")
                     st.rerun()
 
-        with st.expander("🎁 학위논문 할인 이벤트 설정 및 제어"):
+        with st.expander("? ?위?문 ?인 ?벤???정 ??어"):
             event_cfg = get_event_settings()
             
-            new_active = st.checkbox("이벤트 활성화 여부", value=event_cfg["active"], key="admin_event_active")
-            new_title = st.text_input("이벤트 제목", value=event_cfg["title"], key="admin_event_title")
-            new_desc = st.text_area("이벤트 내용/설명", value=event_cfg["desc"], key="admin_event_desc")
+            new_active = st.checkbox("?벤???성????", value=event_cfg["active"], key="admin_event_active")
+            new_title = st.text_input("?벤???목", value=event_cfg["title"], key="admin_event_title")
+            new_desc = st.text_area("?벤???용/?명", value=event_cfg["desc"], key="admin_event_desc")
             
             try:
                 default_deadline_date = datetime.datetime.strptime(event_cfg["deadline"], "%Y-%m-%d").date()
             except Exception:
                 default_deadline_date = datetime.date(2026, 7, 30)
-            new_deadline_date = st.date_input("이벤트 종료일", value=default_deadline_date, key="admin_event_deadline")
+            new_deadline_date = st.date_input("?벤??종료??, value=default_deadline_date, key="admin_event_deadline")
             new_deadline_str = str(new_deadline_date)
             
-            new_discount = st.number_input("할인 금액 (원)", min_value=0, max_value=500000, value=event_cfg["discount"], step=5000, key="admin_event_discount")
+            new_discount = st.number_input("?인 금액 (??", min_value=0, max_value=500000, value=event_cfg["discount"], step=5000, key="admin_event_discount")
             
-            if st.button("이벤트 설정 저장", use_container_width=True):
+            if st.button("?벤???정 ???, use_container_width=True):
                 conn = sqlite3.connect('users.db')
                 c = conn.cursor()
                 try:
                     c.execute("UPDATE event_settings SET event_active=?, event_title=?, event_desc=?, event_deadline=?, event_discount=? WHERE id=1",
                               (1 if new_active else 0, new_title, new_desc, new_deadline_str, int(new_discount)))
                     conn.commit()
-                    st.success("🎉 이벤트 설정이 성공적으로 저장되었습니다!")
+                    st.success("? ?벤???정???공?으???되?습?다!")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"설정 저장 실패: {e}")
+                    st.error(f"?정 ????패: {e}")
                 finally:
                     conn.close()
 
         st.divider()
     
     # -------------------------------------------------------------------------
-    # [수정] 관리자용 상단 탭 연동 (Tab 1: 분석, Tab 2: 설문지 제작)
-    # 일반 사용자에게는 Tab 1 화면(분석)만 직접 단일 노출시킵니다.
+    # [?정] 관리자???단 ???동 (Tab 1: 분석, Tab 2: ?문지 ?작)
+    # ?반 ?용?에게는 Tab 1 ?면(분석)?직접 ?일 ?출?킵?다.
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_service = st.tabs([
-        _("엑셀 업로드 분석", "Upload & Analyze"), 
-        _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
-        _("설문 배포", "Deploy Survey"), 
-        _("응답 현황", "Responses"),
-        _("서비스 안내", "Service Info")
-    ], default=_("엑셀 업로드 분석", "Upload & Analyze"))
+        _("?? ?로??분석", "Upload & Analyze"), 
+        _("?이???력 ?식 만들?, "Create Data Entry Template"), 
+        _("?문 배포", "Deploy Survey"), 
+        _("?답 ?황", "Responses"),
+        _("?비???내", "Service Info")
+    ], default=_("?? ?로??분석", "Upload & Analyze"))
         
     with main_tab1:
         tab1_main_col, tab1_settings_col = st.columns([3.0, 1.1], gap="large")
         with tab1_settings_col:
             ahp_method, mean_method, cr_threshold, max_iter_val, learning_rate = render_ahp_analysis_settings()
         tab1_main_col.__enter__()
-        # 빠른 시작 섹션을 AHP 분석도구 탭 내부 최상단에 배치
+        # 빠른 ?작 ?션??AHP 분석?구 ???? 최상?에 배치
 
-        st.header(_("빠른 시작", "Quick Start"))
-        st.info(_("일반 AHP 및 :blue[**퍼지 AHP**] 분석을 지원합니다. 엑셀 업로드 → 가중치 산출, 일관성(CR) 자동 보정, 그룹 집계까지 한 번에 완료됩니다.",
-                  "Supports both Traditional and :blue[**Fuzzy AHP**] analysis. Upload Excel → individual weights, automatic CR correction, and group aggregation in one step."))
+        st.header(_("빠른 ?작", "Quick Start"))
+        st.info(_("?반 AHP ?:blue[**?? AHP**] 분석??지?합?다. ?? ?로????가중치 ?출, ????CR) ?동 보정, 그룹 집계까? ??번에 ?료?니??",
+                  "Supports both Traditional and :blue[**Fuzzy AHP**] analysis. Upload Excel ??individual weights, automatic CR correction, and group aggregation in one step."))
             
         sample_excel = create_sample_excel()
             
@@ -6670,31 +6670,31 @@ with contextlib.nullcontext():
         if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
         if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
     
-        # 3계층 샘플 데이터: 권한에 따라 분기
-        # - 정식/관리자: Mock_3Tier_Full.xlsx (100행, 실제 분석 가능)
-        # - 무료/비로그인: create_sample_excel_v3() (3행, 3행 제한 통과)
+        # 3계층 ?플 ?이?? 권한???라 분기
+        # - ?식/관리자: Mock_3Tier_Full.xlsx (100?? ?제 분석 가??
+        # - 무료/비로그인: create_sample_excel_v3() (3?? 3???한 ?과)
         _role_now = st.session_state.get('user_role', None)
         _is_full_user = (_role_now in ('admin', 'official'))
         if _is_full_user:
             try:
                 with open("Mock_3Tier_Full.xlsx", "rb") as f:
                     sample_excel_v3 = f.read()
-                _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+                _v3_label = _("? 3계층 ?플 ?이??, "? 3-Tier Sample Data")
                 _v3_filename = "Mock_3Tier_Full.xlsx"
             except Exception:
                 sample_excel_v3 = create_sample_excel_v3()
-                _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+                _v3_label = _("? 3계층 ?플 ?이??, "? 3-Tier Sample Data")
                 _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
         else:
-            sample_excel_v3 = create_sample_excel_v3()   # 3행 — 무료 3행 제한 통과
-            _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+            sample_excel_v3 = create_sample_excel_v3()   # 3????무료 3???한 ?과
+            _v3_label = _("? 3계층 ?플 ?이??, "? 3-Tier Sample Data")
             _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
             
-        # 모든 사용자에게 2계층·3계층 샘플 데이터 + 결과 예시 버튼 4개 표시
+        # 모든 ?용?에?2계층·3계층 ?플 ?이??+ 결과 ?시 버튼 4??시
         col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
         with col_btn1:
             st.download_button(
-                label=_("📂 2계층 샘플 데이터", "📂 2-Tier Sample Data"),
+                label=_("? 2계층 ?플 ?이??, "? 2-Tier Sample Data"),
                 data=sample_excel,
                 file_name=_("AHP_UrbanRegeneration_2Tier_Sample.xlsx", "AHP_UrbanRegeneration_2Tier_Sample.xlsx"),
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -6712,7 +6712,7 @@ with contextlib.nullcontext():
             )
         with col_btn3:
             st.download_button(
-                label=_("📄 일반 AHP 분석 결과(예시)", "📄 Traditional AHP Report (Example)"),
+                label=_("? ?반 AHP 분석 결과(?시)", "? Traditional AHP Report (Example)"),
                 data=tahp_data if tahp_data else b"",
                 file_name=_("E_TAHP_Result.xlsx", "E_TAHP_Result.xlsx") if is_en else _("K_TAHP_Result.xlsx", "K_TAHP_Result.xlsx"),
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -6721,7 +6721,7 @@ with contextlib.nullcontext():
             )
         with col_btn4:
             st.download_button(
-                label=_("📄 퍼지 AHP 분석 결과(예시)", "📄 Fuzzy AHP Report (Example)"),
+                label=_("? ?? AHP 분석 결과(?시)", "? Fuzzy AHP Report (Example)"),
                 data=fahp_data if fahp_data else b"",
                 file_name=_("E_FAHP_Result.xlsx", "E_FAHP_Result.xlsx") if is_en else _("K_FAHP_Result.xlsx", "K_FAHP_Result.xlsx"),
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -6729,19 +6729,19 @@ with contextlib.nullcontext():
                 disabled=(not fahp_data)
             )
         
-        st.subheader(_("1. 데이터 업로드 및 분석", "1. Data Upload & Analysis"))
+        st.subheader(_("1. ?이???로???분석", "1. Data Upload & Analysis"))
         
         if st.session_state.get('user_role') == 'admin':
-            st.info(_("**혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 코딩 엑셀 양식을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "**Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
+            st.info(_("**?합 계층(Mixed-Tier) ?? 분석 ?내**: 3계층 코딩 ?? ?식???로?할 ?? ?정 ????????분??? ?트가 ?거???답??비워???더?도 ?스?이 ?당 ?????동?로 2계층 가중치?간주?여 ?러 ?이 분석???행?니??", "**Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
 
-        # 데이터 소스 선택 추가
+        # ?이???스 ?택 추?
         data_source = st.radio(
-            _("분석 데이터 소스 선택", "Select Analysis Data Source"),
-            [_("📂 엑셀 파일 직접 업로드", "Upload Excel File"), _("🌐 배포된 온라인 설문 데이터 연동", "Link Online Survey Data")],
+            _("분석 ?이???스 ?택", "Select Analysis Data Source"),
+            [_("? ?? ?일 직접 ?로??, "Upload Excel File"), _("? 배포???라???문 ?이???동", "Link Online Survey Data")],
             horizontal=True
         )
     
-        # [신규 추가] 인구통계 빈도/비율 분석용 헬퍼 함수
+        # [?규 추?] ?구?계 빈도/비율 분석???퍼 ?수
         def generate_demographics_summary(demo_df):
             if demo_df is None or demo_df.empty:
                 return None
@@ -6754,7 +6754,7 @@ with contextlib.nullcontext():
                     s = s[:-2]
                 return s
             
-            # 1. 최종 완료 응답자(ID)만 필터링 (미완료/이탈자 제외)
+            # 1. 최종 ?료 ?답??ID)??터?(미완??탈???외)
             completed_ids = set()
             if "ahp_df_main" in st.session_state and st.session_state["ahp_df_main"] is not None:
                 if "ID" in st.session_state["ahp_df_main"].columns:
@@ -6775,8 +6775,8 @@ with contextlib.nullcontext():
             if working_df.empty:
                 return None
 
-            # 불필요한 시스템용 컬럼 제외
-            exclude_keywords = ["id", "type", "사전순위", "답례품", "연락처", "제출시간"]
+            # 불필?한 ?스?용 컬럼 ?외
+            exclude_keywords = ["id", "type", "?전?위", "????, "?락?, "?출?간"]
             target_cols = []
             for col in working_df.columns:
                 col_lower = str(col).lower()
@@ -6791,15 +6791,15 @@ with contextlib.nullcontext():
                 col_str = str(col).strip()
                 col_data = working_df[col]
                 
-                # 2. 질문 문구가 응답 보기로 들어가거나 빈 값인 항목 제거 (유효 응답만 필터링)
+                # 2. 질문 문구가 ?답 보기??어가거나 ?값인 ?? ?거 (?효 ?답??터?
                 valid_items = []
                 for val in col_data:
                     if pd.isna(val):
                         continue
                     val_str = str(val).strip()
-                    if not val_str or val_str == "미응답(N/A)":
+                    if not val_str or val_str == "미응??N/A)":
                         continue
-                    # 질문 헤더 텍스트와 동일하거나 일부 포함된 기본값 텍스트 제외
+                    # 질문 ?더 ?스?? ?일?거???? ?함??기본??스???외
                     if val_str == col_str or (len(val_str) >= 8 and (val_str in col_str or col_str in val_str)):
                         continue
                     valid_items.append(val_str)
@@ -6813,9 +6813,9 @@ with contextlib.nullcontext():
                 for val, count in counts.items():
                     pct = (count / total) * 100 if total > 0 else 0
                     summary_rows.append({
-                        "인구통계 항목 (Demographic Field)": col,
-                        "응답 보기 (Value)": val,
-                        "빈도수 (Frequency)": count,
+                        "?구?계 ?? (Demographic Field)": col,
+                        "?답 보기 (Value)": val,
+                        "빈도??(Frequency)": count,
                         "비율 (Percentage, %)": round(pct, 1)
                     })
                     
@@ -6824,11 +6824,11 @@ with contextlib.nullcontext():
             return None
 
         def preprocess_uploaded_df(df):
-            # 1. 제출시간/타임스탬프 제거
-            drop_cols = [c for c in df.columns if str(c).strip().lower() in ["타임스탬프", "제출시간", "timestamp"]]
+            # 1. ?출?간/??스?프 ?거
+            drop_cols = [c for c in df.columns if str(c).strip().lower() in ["??스?프", "?출?간", "timestamp"]]
             if drop_cols:
                 df = df.drop(columns=drop_cols)
-            # 다중 인구통계(Type 1, Type 2...)는 유지하여 향후 선택적 분석이 가능하도록 함
+            # ?중 ?구?계(Type 1, Type 2...)?????여 ?후 ?택??분석??가?하?록 ??
             return df
             
         df_main = None
@@ -6836,8 +6836,8 @@ with contextlib.nullcontext():
         sheet_names = []
         filename_base = "AHP_Analysis"
     
-        if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
-            uploaded_file = st.file_uploader(_("작성된 엑셀 파일 업로드 (.xlsx)", "Upload completed Excel file (.xlsx)"), type=['xlsx', 'xls'])
+        if data_source == _("? ?? ?일 직접 ?로??, "Upload Excel File"):
+            uploaded_file = st.file_uploader(_("?성???? ?일 ?로??(.xlsx)", "Upload completed Excel file (.xlsx)"), type=['xlsx', 'xls'])
             if uploaded_file:
                 try:
                     excel_obj = pd.ExcelFile(uploaded_file)
@@ -6845,18 +6845,18 @@ with contextlib.nullcontext():
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
                     df_main = preprocess_uploaded_df(df_main)
                     
-                    # [신규] Basic 요금제 표본수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
+                    # [?규] Basic ?금???본???한 (최? 10?본?로 ?라?싱?여 분석 ?용)
                     if st.session_state.get('plan_type') == 'Basic' and len(df_main) > 10:
                         df_main = df_main.head(10)
-                        st.warning(_("⚠️ 베이직 요금제는 엑셀 업로드 시 최대 10표본까지만 분석할 수 있습니다. 처음 10개 표본만 분석에 사용됩니다.",
-                                     "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 samples will be analyzed."))
+                        st.warning(_("?️ 베이??금?는 ?? ?로????최? 10?본까??분석?????습?다. 처음 10??본?분석???용?니??",
+                                     "?️ Basic users can only analyze up to 10 samples. Only the first 10 samples will be analyzed."))
                     
                     if "Type" not in df_main.columns and len(df_main.columns) > 1:
                         col1 = df_main.columns[1]
-                        if "_" not in col1 and col1 not in ["ID", "제출시간"]:
+                        if "_" not in col1 and col1 not in ["ID", "?출?간"]:
                             df_main.rename(columns={col1: "Type"}, inplace=True)
                             
-                    # 3계층 식별 로직 (df_main 컬럼에서 _ 포함된 것으로 대분류 요인 도출)
+                    # 3계층 ?별 로직 (df_main 컬럼?서 _ ?함??것으??분류 ?인 ?출)
                     main_criteria_infer = set()
                     for col in df_main.columns:
                         if '_' in col:
@@ -6868,7 +6868,7 @@ with contextlib.nullcontext():
                     inferred_sub_sub_dfs = {}
                     ignore_sheets = ["raw_data", "raw_data_dump", "demographic_data", "raw data"]
                     for sn in sheet_names[1:]:
-                        # [추가] 온라인 설문 배포 형식 엑셀의 원본/인구통계 데이터 시트 자동 무시 (단, 인구통계는 별도 저장)
+                        # [추?] ?라???문 배포 ?식 ?????본/?구?계 ?이???트 ?동 무시 (?? ?구?계??별도 ???
                         sn_lower = sn.lower().strip()
                         if sn_lower in ignore_sheets:
                             if "demographic" in sn_lower:
@@ -6886,10 +6886,10 @@ with contextlib.nullcontext():
                             
                         if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
                             col1 = df_sheet.columns[1]
-                            if "_" not in col1 and col1 not in ["ID", "제출시간"]:
+                            if "_" not in col1 and col1 not in ["ID", "?출?간"]:
                                 df_sheet.rename(columns={col1: "Type"}, inplace=True)
                                 
-                        # 안전한 시트명(safe_sheet_name)을 위해 앞부분이 일치하는지 확인
+                        # ?전???트?safe_sheet_name)???해 ??분이 ?치?는지 ?인
                         is_sub = any(sn == mc[:31] for mc in main_criteria_infer)
                         if is_sub:
                             sub_dfs[sn] = df_sheet
@@ -6904,11 +6904,11 @@ with contextlib.nullcontext():
                         
                     filename_base = uploaded_file.name.split('.')[0]
                 except Exception as e:
-                    st.error(f"엑셀 파일 로드 실패: {e}")
+                    st.error(f"?? ?일 로드 ?패: {e}")
         else:
-            # 배포된 온라인 설문 데이터 연동
+            # 배포???라???문 ?이???동
             if st.session_state.user_id is None:
-                st.warning(_(" 온라인 설문 데이터 연동 분석은 회원 전용 기능입니다. 로그인해 주세요.", " Online survey integration is available for members. Please log in."))
+                st.warning(_(" ?라???문 ?이???동 분석? ?원 ?용 기능?니?? 로그?해 주세??", " Online survey integration is available for members. Please log in."))
             else:
                 import sqlite3
                 try:
@@ -6936,7 +6936,7 @@ with contextlib.nullcontext():
                 admin_surveys.sort(key=lambda x: x[2], reverse=True)
             
                 if not admin_surveys:
-                    st.warning(_("배포된 온라인 설문이 없습니다.", "No deployed online surveys found."))
+                    st.warning(_("배포???라???문???습?다.", "No deployed online surveys found."))
                 else:
                     survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
                 
@@ -6945,18 +6945,18 @@ with contextlib.nullcontext():
                         default_idx = list(survey_options.values()).index(st.session_state.get("selected_survey_for_analysis"))
                 
                     selected_survey_label = st.selectbox(
-                        _("분석할 온라인 설문 선택", "Select Online Survey for Analysis"),
+                        _("분석???라???문 ?택", "Select Online Survey for Analysis"),
                         list(survey_options.keys()),
                         index=default_idx
                     )
                     selected_sheet_id = survey_options[selected_survey_label]
                     filename_base = f"Survey_{selected_sheet_id[:6]}"
                 
-                    if st.button(_("🔄 구글 시트에서 실시간 응답 가져오기", "🔄 Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
-                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "실시간 응답 가져오기")
+                    if st.button(_("? 구? ?트?서 ?시??답 가?오?, "? Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
+                        import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "?시??답 가?오?)
                         st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                         from survey_manager import load_survey_metadata, get_survey_gspread_client
-                        with st.spinner(_("구글 시트에서 설문 데이터 및 구조를 가져오는 중...", "Fetching survey structure and responses...")):
+                        with st.spinner(_("구? ?트?서 ?문 ?이???구조?가?오???..", "Fetching survey structure and responses...")):
                             survey_meta = load_survey_metadata(selected_sheet_id)
                             g_client = get_survey_gspread_client()
                             if survey_meta and g_client:
@@ -6972,22 +6972,22 @@ with contextlib.nullcontext():
                                         
                                         if "Type" not in raw_df.columns and len(raw_df.columns) > 1:
                                             col1 = raw_df.columns[1]
-                                            if "_" not in col1 and col1 not in ["ID", "제출시간"]:
+                                            if "_" not in col1 and col1 not in ["ID", "?출?간"]:
                                                 raw_df.rename(columns={col1: "Type"}, inplace=True)
                                                 
-                                        # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 3표본)
+                                        # [?규] ?용???급???른 ?본 ???한 (무료 ?용?? 최? 3?본)
                                         if st.session_state.get('user_role') == 'free' and len(raw_df) > 3:
                                             raw_df = raw_df.head(5)
-                                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 3표본까지만 분석할 수 있습니다. 처음 접수된 3명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 3 samples. Only the first 3 responses will be analyzed."))
+                                            st.warning(_("?️ 무료 ?용?는 ?라???문 ?동 ??최? 3?본까??분석?????습?다. 처음 ?수??3??????답?분석???용?니??", "?️ Free users can only analyze up to 3 samples. Only the first 3 responses will be analyzed."))
                                     
-                                        # [신규] Basic 요금제 표본 수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
+                                        # [?규] Basic ?금???본 ???한 (최? 10?본?로 ?라?싱?여 분석 ?용)
                                         if st.session_state.get('plan_type') == 'Basic' and len(raw_df) > 10:
                                             raw_df = raw_df.head(10)
-                                            st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
-                                                         "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
+                                            st.warning(_("?️ 베이??금?는 ?라???문 ?동 ??최? 10?본까??분석?????습?다. 처음 ?수??10??????답?분석???용?니??",
+                                                         "?️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
                                     
                                         for col in raw_df.columns:
-                                            if col not in ["ID", "Type", "제출시간", "답례품_연락처"]:
+                                            if col not in ["ID", "Type", "?출?간", "?????락?]:
                                                 raw_df[col] = pd.to_numeric(raw_df[col], errors='coerce')
                                             
                                         ahp_model = survey_meta["AHP_Model_JSON"]
@@ -7013,7 +7013,7 @@ with contextlib.nullcontext():
                                                 sub_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_pairs if p in raw_df.columns]
                                                 st.session_state["ahp_sub_dfs"][main_c] = raw_df[sub_cols].copy()
                                             
-                                        # [신규] 3계층 모델인 경우 소분류(sub_subs) 데이터프레임 파싱
+                                        # [?규] 3계층 모델??경우 ?분?sub_subs) ?이?프?임 ?싱
                                         tier_level = int(survey_meta.get("Tier_Level", 2))
                                         st.session_state["ahp_sub_sub_dfs"] = {}
                                         if tier_level == 3:
@@ -7034,19 +7034,19 @@ with contextlib.nullcontext():
                                             sheet_names_list += list(st.session_state["ahp_sub_sub_dfs"].keys())
                                             
                                         st.session_state["ahp_sheet_names"] = sheet_names_list
-                                        st.success(_(f"✅ 구글 시트에서 총 {len(raw_df)}건의 응답 데이터를 성공적으로 가져왔습니다!", f"✅ Successfully fetched {len(raw_df)} responses!"))
+                                        st.success(_(f"??구? ?트?서 ?{len(raw_df)}건의 ?답 ?이?? ?공?으?가?왔?니??", f"??Successfully fetched {len(raw_df)} responses!"))
                                     else:
-                                        st.warning(_("가져올 설문 응답 데이터가 시트에 존재하지 않습니다 (헤더만 존재).", "No survey responses found in the sheet."))
+                                        st.warning(_("가?올 ?문 ?답 ?이?? ?트??존재?? ?습?다 (?더?존재).", "No survey responses found in the sheet."))
                                 except Exception as g_err:
-                                    st.error(f"구글 시트 로드 실패: {g_err}")
+                                    st.error(f"구? ?트 로드 ?패: {g_err}")
                             else:
-                                st.error(_("설문 메타데이터 또는 구글 API 클라이언트를 로드할 수 없습니다.", "Failed to load survey metadata or Google client."))
+                                st.error(_("?문 메??이???는 구? API ?라?언?? 로드?????습?다.", "Failed to load survey metadata or Google client."))
                 
                     if "ahp_df_main" in st.session_state:
                         df_main = st.session_state["ahp_df_main"]
                         sub_dfs = st.session_state["ahp_sub_dfs"]
                         sheet_names = st.session_state["ahp_sheet_names"]
-                        st.info(_("구글 시트에서 로드된 실시간 데이터 분석 모드입니다. (새 데이터를 가져오려면 위 버튼을 클릭해 주세요)", "Live data analysis mode. Click the button above to refresh data."))
+                        st.info(_("구? ?트?서 로드???시??이??분석 모드?니?? (???이?? 가?오?면 ??버튼???릭??주세??", "Live data analysis mode. Click the button above to refresh data."))
 
         if df_main is not None:
             try:
@@ -7065,12 +7065,12 @@ with contextlib.nullcontext():
                         expiry_chk = datetime.datetime.strptime(st.session_state.expiry_date, "%Y-%m-%d").date()
                         if today_chk > expiry_chk:
                             permission_granted = False
-                            message = _("⛔ 이용 기간이 만료되었습니다.", "⛔ Your subscription period has expired.")
+                            message = _("???용 기간??만료?었?니??", "??Your subscription period has expired.")
                         
 
                 else: 
                     rows_ok = True
-                    if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
+                    if data_source == _("? ?? ?일 직접 ?로??, "Upload Excel File"):
                         for sn in sheet_names:
                             if len(pd.read_excel(uploaded_file, sheet_name=sn)) > 3:
                                 rows_ok = False
@@ -7083,13 +7083,13 @@ with contextlib.nullcontext():
                                 rows_ok = False
                                 break
                     if rows_ok: permission_granted = True
-                    else: message = _(f"⛔ **무료사용자**는 시트당 최대 3개 표본까지만 분석 가능합니다. (현재: {len(df_main)}개 표본)",
-                                     f"⛔ **Free Users** can only analyze up to 3 samples per sheet. (Current: {len(df_main)} samples)")
+                    else: message = _(f"??**무료?용??*???트??최? 3??본까??분석 가?합?다. (?재: {len(df_main)}??본)",
+                                     f"??**Free Users** can only analyze up to 3 samples per sheet. (Current: {len(df_main)} samples)")
             
                 if permission_granted:
                     tier = get_current_tier()
                     try:
-                        if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
+                        if data_source == _("? ?? ?일 직접 ?로??, "Upload Excel File"):
                             tier_level = st.session_state.get("inferred_tier_level", 2)
                         else:
                             if 'survey_meta' not in locals():
@@ -7105,11 +7105,11 @@ with contextlib.nullcontext():
                             final_df_v3 = None
                             output_res_v3 = None
                             ui_data_v3 = {}
-                            with st.spinner(_("3계층(소분류 포함) AHP 종합 분석 수행 중...", "Performing 3-Tier AHP...")):
+                            with st.spinner(_("3계층(?분??함) AHP 종합 분석 ?행 ?..", "Performing 3-Tier AHP...")):
                                 from ahp_utils_v3 import run_ahp_analysis_v3
                                 sub_sub_dfs = st.session_state.get("ahp_sub_sub_dfs", {})
                                 
-                                # 인구통계 요약본 생성하여 전달
+                                # ?구?계 ?약??성?여 ?달
                                 demo_summary_df_v3 = None
                                 if "demo_df" in st.session_state and st.session_state["demo_df"] is not None:
                                     demo_summary_df_v3 = generate_demographics_summary(st.session_state["demo_df"])
@@ -7124,7 +7124,7 @@ with contextlib.nullcontext():
                                 st.stop()
                             
                             if st.session_state.user_role == 'official':
-                                if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
+                                if data_source == _("? ?? ?일 직접 ?로??, "Upload Excel File") and uploaded_file is not None:
                                     save_data = uploaded_file.getvalue()
                                     save_filename = f"{filename_base}_Raw.xlsx"
                                 else:
@@ -7141,14 +7141,14 @@ with contextlib.nullcontext():
                                     save_filename = f"{filename_base}_Raw.xlsx"
                                 save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
 
-                            st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
+                            st.success(_("??3계층 AHP 분석???공?으??료?었?니??", "??3-Tier AHP Analysis successfully completed!"))
                             if st.session_state.get('plan_type') == 'Basic':
-                                st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
-                                          "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
-                            st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
-                                         "⚠️ Results reset on refresh. Download via the Results tab."))
+                                st.info(_("**Basic ?한**: ?본 10개로 ?한?니?? Standard ?상?로 ?그?이?하?요.",
+                                          "? **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
+                            st.caption(_("?️ ?로고침 ??결과가 리셋?니?? 결과 ?운로드 ????반드????하?요.",
+                                         "?️ Results reset on refresh. Download via the Results tab."))
 
-                            # --- 3계층 전용 5개 탭 UI ---
+                            # --- 3계층 ?용 5???UI ---
                             v3_unique_groups = ui_data_v3.get("unique_groups", [])
                             v3_comparison_df  = ui_data_v3.get("comparison_df", pd.DataFrame())
                             v3_anova_df       = ui_data_v3.get("anova_df", pd.DataFrame())
@@ -7158,75 +7158,75 @@ with contextlib.nullcontext():
 
                             tab3v1, tab3v2, tab3v3, tab3v4, tab3v5 = st.tabs([
                                 _("종합 분석 (Global)", "Global Comprehensive Analysis"),
-                                _("그룹별 분석", "Group Analysis"),
-                                _("통계 검정 (ANOVA)", "Statistical Test (ANOVA)"),
-                                _("시각화 센터", "Visualization Center"),
-                                _("결과 다운로드", "Download Results")
+                                _("그룹?분석", "Group Analysis"),
+                                _("?계 검??(ANOVA)", "Statistical Test (ANOVA)"),
+                                _("?각???터", "Visualization Center"),
+                                _("결과 ?운로드", "Download Results")
                             ])
 
-                            # ─── Tab 1: 종합 분석 ────────────────────────────────────────────
+                            # ??? Tab 1: 종합 분석 ????????????????????????????????????????????
                             with tab3v1:
-                                st.subheader(_(" 3계층 종합 중요도 및 순위", " 3-Tier Global Weights & Rankings"))
+                                st.subheader(_(" 3계층 종합 중요????위", " 3-Tier Global Weights & Rankings"))
                                 if is_english:
                                     _disp_v3 = final_df_v3.rename(columns={
-                                        "대분류": "Main Criteria",    "대분류 가중치": "Main Weight",
-                                        "중분류": "Sub-Criteria",     "중분류 가중치": "Sub Weight",
-                                        "소분류": "Sub-sub-Criteria", "소분류 가중치": "Sub-sub Weight",
-                                        "CR(대분류)": "CR(Main)",     "CI(대분류)": "CI(Main)",
-                                        "CR(중분류)": "CR(Sub)",      "CI(중분류)": "CI(Sub)",
-                                        "CR(소분류)": "CR(Sub-sub)",  "CI(소분류)": "CI(Sub-sub)"
+                                        "?분류": "Main Criteria",    "?분류 가중치": "Main Weight",
+                                        "중분?: "Sub-Criteria",     "중분?가중치": "Sub Weight",
+                                        "?분?: "Sub-sub-Criteria", "?분?가중치": "Sub-sub Weight",
+                                        "CR(?분류)": "CR(Main)",     "CI(?분류)": "CI(Main)",
+                                        "CR(중분?": "CR(Sub)",      "CI(중분?": "CI(Sub)",
+                                        "CR(?분?": "CR(Sub-sub)",  "CI(?분?": "CI(Sub-sub)"
                                     })
                                 else:
                                     _disp_v3 = final_df_v3
                                 st.dataframe(_disp_v3.style.format(precision=4), use_container_width=True)
 
-                                st.markdown(_("---\n####  대분류별 소분류 항목 글로벌 가중치",
-                                              "---\n#### 📊 Sub-sub-Criteria Global Weights by Main Criteria"))
-                                _non_dummy_v3 = final_df_v3[~final_df_v3["소분류"].str.endswith("_단일항목", na=False)].copy()
+                                st.markdown(_("---\n####  ?분류??분??? 글로벌 가중치",
+                                              "---\n#### ? Sub-sub-Criteria Global Weights by Main Criteria"))
+                                _non_dummy_v3 = final_df_v3[~final_df_v3["?분?].str.endswith("_?일??", na=False)].copy()
                                 if _non_dummy_v3.empty:
                                     _non_dummy_v3 = final_df_v3.copy()
                                 for _mf_v3 in v3_main_factors:
-                                    _mf_subset = _non_dummy_v3[_non_dummy_v3["대분류"] == _mf_v3]
+                                    _mf_subset = _non_dummy_v3[_non_dummy_v3["?분류"] == _mf_v3]
                                     if _mf_subset.empty:
                                         continue
                                     _mf_chart = _mf_subset.sort_values("Global Weight", ascending=True).copy()
                                     if is_english:
-                                        _mf_chart = _mf_chart.rename(columns={"소분류": "Sub-sub-Criteria"})
+                                        _mf_chart = _mf_chart.rename(columns={"?분?: "Sub-sub-Criteria"})
                                         _y_col_v3 = "Sub-sub-Criteria"
                                     else:
-                                        _y_col_v3 = "소분류"
+                                        _y_col_v3 = "?분?
                                     _fig_v3_bar = px.bar(
                                         _mf_chart, y=_y_col_v3, x="Global Weight",
                                         orientation="h", text_auto=".4f",
-                                        title=_(f"[{_mf_v3}] 소분류 항목별 글로벌 가중치", f"[{_mf_v3}] Sub-sub-Criteria Global Weights"),
+                                        title=_(f"[{_mf_v3}] ?분????글로벌 가중치", f"[{_mf_v3}] Sub-sub-Criteria Global Weights"),
                                         color_discrete_sequence=["#4F81BD"]
                                     )
                                     _fig_v3_bar.update_layout(height=max(300, len(_mf_chart)*40+80), margin=dict(l=0,r=10,t=40,b=20))
                                     st.plotly_chart(_fig_v3_bar, use_container_width=True)
 
-                            # ─── Tab 2: 그룹별 분석 ──────────────────────────────────────────
+                            # ??? Tab 2: 그룹?분석 ??????????????????????????????????????????
                             with tab3v2:
-                                st.markdown(_("#### 그룹별 소분류 항목 글로벌 가중치 비교",
+                                st.markdown(_("#### 그룹??분??? 글로벌 가중치 비교",
                                               "#### Sub-sub-Criteria Global Weight Comparison by Group"))
                                 if not v3_comparison_df.empty:
                                     if is_english:
                                         _disp_comp_v3 = v3_comparison_df.copy()
                                         _disp_comp_v3.rename(columns={
-                                            "대분류": "Main Criteria", "중분류": "Sub-Criteria", "소분류": "Sub-sub-Criteria",
-                                            "종합평균(Overall)": "Overall Avg", "F-값": "F-Value",
-                                            "유의성": "Significance", "사후검정(Tukey HSD)": "Post-Hoc (Tukey HSD)"
+                                            "?분류": "Main Criteria", "중분?: "Sub-Criteria", "?분?: "Sub-sub-Criteria",
+                                            "종합?균(Overall)": "Overall Avg", "F-?: "F-Value",
+                                            "?의??: "Significance", "?후검??Tukey HSD)": "Post-Hoc (Tukey HSD)"
                                         }, inplace=True)
                                         if "Significance" in _disp_comp_v3.columns:
                                             _disp_comp_v3["Significance"] = _disp_comp_v3["Significance"].map(
-                                                {"유의함": "Significant", "유의하지 않음": "Not Significant"}).fillna(_disp_comp_v3["Significance"])
+                                                {"?의??: "Significant", "?의?? ?음": "Not Significant"}).fillna(_disp_comp_v3["Significance"])
                                     else:
                                         _disp_comp_v3 = v3_comparison_df
                                     st.dataframe(_disp_comp_v3.style.format(precision=4), use_container_width=True)
                                 else:
-                                    st.info(_("그룹별 비교 데이터가 없습니다.", "No group comparison data available."))
+                                    st.info(_("그룹?비교 ?이?? ?습?다.", "No group comparison data available."))
 
                                 if len(v3_unique_groups) >= 2 and v3_group_full_dfs:
-                                    st.markdown(_("---\n#### 그룹별 대분류 가중치 비교",
+                                    st.markdown(_("---\n#### 그룹??분류 가중치 비교",
                                                   "---\n#### Main Criteria Weight Comparison by Group"))
                                     _grp_main_rows = []
                                     for _grp_v3 in v3_unique_groups:
@@ -7234,43 +7234,43 @@ with contextlib.nullcontext():
                                             continue
                                         _g_df_v3 = v3_group_full_dfs[_grp_v3]
                                         for _mf_v3b in v3_main_factors:
-                                            _mf_sub_b = _g_df_v3[_g_df_v3["대분류"] == _mf_v3b]
+                                            _mf_sub_b = _g_df_v3[_g_df_v3["?분류"] == _mf_v3b]
                                             if not _mf_sub_b.empty:
                                                 _grp_main_rows.append({
                                                     _("그룹","Group"): _grp_v3,
-                                                    _("대분류","Main Criteria"): _mf_v3b,
-                                                    "Weight": float(_mf_sub_b.iloc[0]["대분류 가중치"])
+                                                    _("?분류","Main Criteria"): _mf_v3b,
+                                                    "Weight": float(_mf_sub_b.iloc[0]["?분류 가중치"])
                                                 })
                                     if _grp_main_rows:
                                         _grp_main_chart_df = pd.DataFrame(_grp_main_rows)
                                         _fig_grp_main = px.bar(
                                             _grp_main_chart_df,
-                                            x=_("대분류","Main Criteria"), y="Weight",
+                                            x=_("?분류","Main Criteria"), y="Weight",
                                             color=_("그룹","Group"), barmode="group", text_auto=".4f",
-                                            title=_("그룹별 대분류 가중치 비교", "Main Criteria Weight Comparison by Group")
+                                            title=_("그룹??분류 가중치 비교", "Main Criteria Weight Comparison by Group")
                                         )
                                         st.plotly_chart(_fig_grp_main, use_container_width=True)
 
-                            # ─── Tab 3: ANOVA ─────────────────────────────────────────────────
+                            # ??? Tab 3: ANOVA ?????????????????????????????????????????????????
                             with tab3v3:
-                                st.markdown(_("#### 집단 간 유의성 분석 (3계층 기준)",
+                                st.markdown(_("#### 집단 ??의??분석 (3계층 기?)",
                                               "#### Significance Analysis Between Groups (3-Tier Level)"))
                                 if not v3_anova_df.empty:
                                     if is_english:
                                         _disp_anova_v3 = v3_anova_df.copy()
                                         _disp_anova_v3.rename(columns={
-                                            "요인": "Factor/Criteria", "F-값": "F-Value",
-                                            "유의성": "Significance", "사후검정(Tukey HSD)": "Post-Hoc (Tukey HSD)"
+                                            "?인": "Factor/Criteria", "F-?: "F-Value",
+                                            "?의??: "Significance", "?후검??Tukey HSD)": "Post-Hoc (Tukey HSD)"
                                         }, inplace=True)
                                         if "Significance" in _disp_anova_v3.columns:
                                             _disp_anova_v3["Significance"] = _disp_anova_v3["Significance"].map(
-                                                {"유의함": "Significant", "유의하지 않음": "Not Significant"}).fillna(_disp_anova_v3["Significance"])
+                                                {"?의??: "Significant", "?의?? ?음": "Not Significant"}).fillna(_disp_anova_v3["Significance"])
                                         def _translate_ph_v3(v):
                                             if not isinstance(v, str): return v
-                                            v = v.replace("전문가","Expert").replace("일반","General").replace("공무원","Public Official")
-                                            v = v.replace(" 차이 있음"," (Diff exists)")
-                                            v = v.replace("집단 간 구체적 차이 발견 못함","No significant pairwise difference found")
-                                            v = v.replace("계산 오류","Calculation Error")
+                                            v = v.replace("?문가","Expert").replace("?반","General").replace("공무??,"Public Official")
+                                            v = v.replace(" 차이 ?음"," (Diff exists)")
+                                            v = v.replace("집단 ?구체??차이 발견 못함","No significant pairwise difference found")
+                                            v = v.replace("계산 ?류","Calculation Error")
                                             return v
                                         if "Post-Hoc (Tukey HSD)" in _disp_anova_v3.columns:
                                             _disp_anova_v3["Post-Hoc (Tukey HSD)"] = _disp_anova_v3["Post-Hoc (Tukey HSD)"].apply(_translate_ph_v3)
@@ -7278,52 +7278,52 @@ with contextlib.nullcontext():
                                         _disp_anova_v3 = v3_anova_df
                                     st.dataframe(_disp_anova_v3.style.format(precision=5), use_container_width=True)
 
-                                    _sig_col_v3 = "Significance" if is_english else "유의성"
-                                    _sig_val_v3 = "Significant" if is_english else "유의함"
+                                    _sig_col_v3 = "Significance" if is_english else "?의??
+                                    _sig_val_v3 = "Significant" if is_english else "?의??
                                     if _sig_col_v3 in _disp_anova_v3.columns:
                                         _sig_items_v3 = _disp_anova_v3[_disp_anova_v3[_sig_col_v3] == _sig_val_v3]
                                         if not _sig_items_v3.empty:
-                                            _fcol_v3 = "Factor/Criteria" if is_english else "요인"
+                                            _fcol_v3 = "Factor/Criteria" if is_english else "?인"
                                             _snames = ", ".join(_sig_items_v3[_fcol_v3].tolist())
-                                            st.success(_(f"✅ 유의한 차이 발견 항목: {_snames}", f"✅ Statistically significant factors: {_snames}"))
+                                            st.success(_(f"???의??차이 발견 ??: {_snames}", f"??Statistically significant factors: {_snames}"))
                                         else:
-                                            st.info(_("모든 항목에서 그룹 간 유의한 차이가 없습니다.", "No statistically significant group differences found."))
+                                            st.info(_("모든 ???서 그룹 ??의??차이가 ?습?다.", "No statistically significant group differences found."))
                                 else:
-                                    st.info(_("통계 검정을 위해 2개 이상의 그룹 데이터가 필요합니다.",
+                                    st.info(_("?계 검?을 ?해 2??상??그룹 ?이?? ?요?니??",
                                               "At least 2 group datasets are required for ANOVA."))
 
-                            # ─── Tab 4: 시각화 센터 ──────────────────────────────────────────
+                            # ??? Tab 4: ?각???터 ??????????????????????????????????????????
                             with tab3v4:
-                                st.markdown(_("####  3계층 AHP 시각화 센터", "####  3-Tier AHP Visualization Center"))
+                                st.markdown(_("####  3계층 AHP ?각???터", "####  3-Tier AHP Visualization Center"))
 
-                                st.markdown(_("**① 글로벌 가중치 순위 버블 차트 (버블 크기 = 중분류 가중치, 색 = 대분류)**",
-                                              "**① Global Weight Bubble Chart (bubble size = Sub weight, color = Main Criteria)**"))
-                                _nd_v3 = final_df_v3[~final_df_v3["소분류"].str.endswith("_단일항목", na=False)].copy()
+                                st.markdown(_("**??글로벌 가중치 ?위 버블 차트 (버블 ?기 = 중분?가중치, ??= ?분류)**",
+                                              "**??Global Weight Bubble Chart (bubble size = Sub weight, color = Main Criteria)**"))
+                                _nd_v3 = final_df_v3[~final_df_v3["?분?].str.endswith("_?일??", na=False)].copy()
                                 if _nd_v3.empty:
                                     _nd_v3 = final_df_v3.copy()
-                                    _item_col_bub = "중분류"
+                                    _item_col_bub = "중분?
                                 else:
-                                    _item_col_bub = "소분류"
+                                    _item_col_bub = "?분?
                                 _bubble_df = _nd_v3.copy()
                                 if "Global Rank" not in _bubble_df.columns:
                                     _bubble_df["Global Rank"] = _bubble_df["Global Weight"].rank(ascending=False, method="min").astype(int)
-                                # 버블 크기: 중분류 가중치 기반 (최소 크기 보장)
-                                _bubble_df["_bubble_size"] = (_bubble_df["중분류 가중치"] * 100).clip(lower=3)
+                                # 버블 ?기: 중분?가중치 기반 (최소 ?기 보장)
+                                _bubble_df["_bubble_size"] = (_bubble_df["중분?가중치"] * 100).clip(lower=3)
                                 if is_english:
                                     _bubble_df_disp = _bubble_df.rename(columns={
-                                        "소분류": "Sub-sub-Criteria", "대분류": "Main Criteria",
-                                        "중분류": "Sub-Criteria", "중분류 가중치": "Sub Weight"
+                                        "?분?: "Sub-sub-Criteria", "?분류": "Main Criteria",
+                                        "중분?: "Sub-Criteria", "중분?가중치": "Sub Weight"
                                     })
-                                    _label_col_bub = "Sub-sub-Criteria" if _item_col_bub == "소분류" else "Sub-Criteria"
+                                    _label_col_bub = "Sub-sub-Criteria" if _item_col_bub == "?분? else "Sub-Criteria"
                                     _color_bub = "Main Criteria"
                                     _hover_sub_bub = "Sub-Criteria"
                                     _hover_subw_bub = "Sub Weight"
                                 else:
                                     _bubble_df_disp = _bubble_df
                                     _label_col_bub = _item_col_bub
-                                    _color_bub = "대분류"
-                                    _hover_sub_bub = "중분류"
-                                    _hover_subw_bub = "중분류 가중치"
+                                    _color_bub = "?분류"
+                                    _hover_sub_bub = "중분?
+                                    _hover_subw_bub = "중분?가중치"
                                 _fig_bub = px.scatter(
                                     _bubble_df_disp,
                                     x="Global Rank", y="Global Weight",
@@ -7337,23 +7337,23 @@ with contextlib.nullcontext():
                                         "Global Rank": True,
                                         "_bubble_size": False
                                     },
-                                    title=_("소분류 글로벌 가중치 버블 차트 (버블이 클수록 중분류 비중 높음, 위로 갈수록 글로벌 가중치 높음)",
+                                    title=_("?분?글로벌 가중치 버블 차트 (버블???수?중분?비중 ?음, ?로 갈수?글로벌 가중치 ?음)",
                                             "Sub-sub-Criteria Global Weight Bubble Chart (larger = higher sub weight, higher = higher global weight)"),
                                     color_discrete_sequence=px.colors.qualitative.Set2,
                                     size_max=55
                                 )
                                 _fig_bub.update_traces(textposition="top center", textfont_size=10)
                                 _fig_bub.update_xaxes(
-                                    title=_("종합 순위 (1위 = 가장 중요)", "Global Rank (1 = Most Important)"),
+                                    title=_("종합 ?위 (1??= 가??중요)", "Global Rank (1 = Most Important)"),
                                     dtick=1, autorange="reversed"
                                 )
                                 _fig_bub.update_yaxes(title=_("글로벌 가중치", "Global Weight"))
                                 _fig_bub.update_layout(height=560, legend_title_text=_color_bub)
                                 st.plotly_chart(_fig_bub, use_container_width=True)
 
-                                st.markdown(_("**② 계층별 일관성 비율(CR) 분포 — 바이올린 플롯**",
-                                              "**② Consistency Ratio (CR) Distribution by Tier — Violin Plot**"))
-                                st.caption(_("계층을 선택하면 해당 수준 응답자들의 CR 분포를 표시합니다. 바이올린 폭 = 밀도, 내부 박스 = 중앙값·사분위수, 점 = 개별 응답자",
+                                st.markdown(_("**??계층?????비율(CR) 분포 ??바이?린 ?롯**",
+                                              "**??Consistency Ratio (CR) Distribution by Tier ??Violin Plot**"))
+                                st.caption(_("계층???택?면 ?당 ?? ?답?들??CR 분포??시?니?? 바이?린 ??= 밀?? ?? 박스 = 중앙값·사분위?? ??= 개별 ?답??,
                                              "Select a tier to view respondent CR distribution. Width = density, box = median/IQR, dots = individual respondents"))
 
                                 _vio_main_df   = ui_data_v3.get("main_results_df", pd.DataFrame())
@@ -7361,11 +7361,11 @@ with contextlib.nullcontext():
                                 _vio_ss_stor   = ui_data_v3.get("sub_sub_results_storage", {})
                                 _vio_mf_list   = ui_data_v3.get("main_factors", [])
 
-                                _tier_options_ko = ["대분류 (Main)", "중분류 (Sub)", "소분류 (Sub-sub)"]
+                                _tier_options_ko = ["?분류 (Main)", "중분?(Sub)", "?분?(Sub-sub)"]
                                 _tier_options_en = ["Main Criteria", "Sub-Criteria", "Sub-sub-Criteria"]
                                 _tier_opts = _tier_options_en if is_english else _tier_options_ko
                                 _sel_tier = st.selectbox(
-                                    _("📂 표시할 계층 선택", "📂 Select Tier to Display"),
+                                    _("? ?시??계층 ?택", "? Select Tier to Display"),
                                     options=_tier_opts,
                                     key="vio_tier_select_v3"
                                 )
@@ -7389,11 +7389,11 @@ with contextlib.nullcontext():
                                     _fig_vio = _go_vio.Figure()
                                     _ci = 0
 
-                                    # ── 선택: 대분류 ─────────────────────────────────
+                                    # ?? ?택: ?분류 ?????????????????????????????????
                                     if _sel_tier in [_tier_opts[0]]:
                                         if not _vio_main_df.empty and "Final_CR" in _vio_main_df.columns:
                                             _main_cr = _vio_main_df["Final_CR"].dropna().tolist()
-                                            _xlbl = _("대분류", "Main Criteria")
+                                            _xlbl = _("?분류", "Main Criteria")
                                             _fig_vio.add_trace(_go_vio.Violin(
                                                 y=_main_cr, x=[_xlbl]*len(_main_cr),
                                                 name=_xlbl, box_visible=True, meanline_visible=True,
@@ -7403,12 +7403,12 @@ with contextlib.nullcontext():
                                                 hovertemplate="<b>" + _xlbl + "</b><br>CR: %{y:.4f}<extra></extra>",
                                                 showlegend=True
                                             ))
-                                        _vio_xaxis_title = _("대분류", "Main Criteria")
-                                        _vio_legend_title = _("대분류", "Main Criteria")
+                                        _vio_xaxis_title = _("?분류", "Main Criteria")
+                                        _vio_legend_title = _("?분류", "Main Criteria")
 
-                                    # ── 선택: 중분류 ─────────────────────────────────
+                                    # ?? ?택: 중분??????????????????????????????????
                                     elif _sel_tier in [_tier_opts[1]]:
-                                        # 대분류별로 하나의 바이올린 (해당 대분류 중분류 비교 시 CR)
+                                        # ?분류별로 ?나??바이?린 (?당 ?분류 중분?비교 ??CR)
                                         for _mf in _vio_mf_list:
                                             _sinfo = _vio_sub_stor.get(_mf, {})
                                             _sdf = _sinfo.get("df", None)
@@ -7417,7 +7417,7 @@ with contextlib.nullcontext():
                                             _cr_vals = _sdf["Final_CR"].dropna().tolist()
                                             if len(_cr_vals) < 2:
                                                 continue
-                                            _xlbl = _(f"중분류({_mf})", f"Sub({_mf})")
+                                            _xlbl = _(f"중분?{_mf})", f"Sub({_mf})")
                                             _fig_vio.add_trace(_go_vio.Violin(
                                                 y=_cr_vals, x=[_xlbl]*len(_cr_vals),
                                                 name=_xlbl, box_visible=True, meanline_visible=True,
@@ -7429,12 +7429,12 @@ with contextlib.nullcontext():
                                                 showlegend=True
                                             ))
                                             _ci += 1
-                                        _vio_xaxis_title = _("대분류 (중분류 비교 CR)", "Main Criteria (Sub-Criteria Comparison CR)")
-                                        _vio_legend_title = _("중분류", "Sub-Criteria")
+                                        _vio_xaxis_title = _("?분류 (중분?비교 CR)", "Main Criteria (Sub-Criteria Comparison CR)")
+                                        _vio_legend_title = _("중분?, "Sub-Criteria")
 
-                                    # ── 선택: 소분류 ─────────────────────────────────
+                                    # ?? ?택: ?분??????????????????????????????????
                                     else:
-                                        # 중분류별로 하나의 바이올린 (해당 중분류 소분류 비교 시 CR)
+                                        # 중분류별??나??바이?린 (?당 중분??분?비교 ??CR)
                                         for _mf in _vio_mf_list:
                                             _sinfo = _vio_sub_stor.get(_mf, {})
                                             _sub_factors = _sinfo.get("factors", [])
@@ -7446,7 +7446,7 @@ with contextlib.nullcontext():
                                                 _cr_vals = _ssdf["Final_CR"].dropna().tolist()
                                                 if len(_cr_vals) < 2:
                                                     continue
-                                                _xlbl = _(f"소분류({_sf})", f"Sub-sub({_sf})")
+                                                _xlbl = _(f"?분?{_sf})", f"Sub-sub({_sf})")
                                                 _fig_vio.add_trace(_go_vio.Violin(
                                                     y=_cr_vals, x=[_xlbl]*len(_cr_vals),
                                                     name=_xlbl, box_visible=True, meanline_visible=True,
@@ -7458,22 +7458,22 @@ with contextlib.nullcontext():
                                                     showlegend=True
                                                 ))
                                                 _ci += 1
-                                        _vio_xaxis_title = _("중분류 (소분류 비교 CR)", "Sub-Criteria (Sub-sub Comparison CR)")
-                                        _vio_legend_title = _("소분류", "Sub-sub-Criteria")
+                                        _vio_xaxis_title = _("중분?(?분?비교 CR)", "Sub-Criteria (Sub-sub Comparison CR)")
+                                        _vio_legend_title = _("?분?, "Sub-sub-Criteria")
 
                                     if len(_fig_vio.data) == 0:
-                                        st.info(_("선택한 계층의 CR 데이터가 없거나 응답 수가 부족합니다.",
+                                        st.info(_("?택??계층??CR ?이?? ?거???답 ?? 부족합?다.",
                                                   "No CR data available for the selected tier or insufficient responses."))
                                     else:
                                         _fig_vio.add_hline(
                                             y=0.1, line_dash="dash", line_color="red",
-                                            annotation_text=_("CR 임계값 (0.1)", "CR Threshold (0.1)"),
+                                            annotation_text=_("CR ?계?(0.1)", "CR Threshold (0.1)"),
                                             annotation_position="top right"
                                         )
                                         _fig_vio.update_layout(
                                             title=_(
-                                                f"바이올린플롯 CR — {_sel_tier}",
-                                                f"Violin Plot CR — {_sel_tier}"
+                                                f"바이?린?롯 CR ??{_sel_tier}",
+                                                f"Violin Plot CR ??{_sel_tier}"
                                             ),
                                             xaxis_title=_vio_xaxis_title,
                                             yaxis_title="Final_CR",
@@ -7487,72 +7487,72 @@ with contextlib.nullcontext():
                                         )
                                         st.plotly_chart(_fig_vio, use_container_width=True)
                                 except Exception as _e_vio:
-                                    st.warning(_(f"바이올린 플롯 생성 실패: {_e_vio}", f"Violin plot generation failed: {_e_vio}"))
+                                    st.warning(_(f"바이?린 ?롯 ?성 ?패: {_e_vio}", f"Violin plot generation failed: {_e_vio}"))
 
                                 if len(v3_unique_groups) >= 2 and v3_group_full_dfs:
-                                    st.markdown(_("**③ 그룹별 대분류 중요도 레이더 차트**",
-                                                  "**③ Main Criteria Importance Radar Chart by Group**"))
+                                    st.markdown(_("**??그룹??분류 중요???이??차트**",
+                                                  "**??Main Criteria Importance Radar Chart by Group**"))
                                     _radar_rows = []
                                     for _grp_rd in v3_unique_groups:
                                         if _grp_rd not in v3_group_full_dfs: continue
                                         _gdf_rd = v3_group_full_dfs[_grp_rd]
                                         for _mf_rd in v3_main_factors:
-                                            _mf_rd_sub = _gdf_rd[_gdf_rd["대분류"]==_mf_rd]
-                                            _w_rd = float(_mf_rd_sub.iloc[0]["대분류 가중치"]) if not _mf_rd_sub.empty else 0.0
-                                            _lbl_rd = str(_grp_rd).replace("전문가","Expert").replace("일반","General").replace("공무원","Public Official") if is_english else _grp_rd
-                                            _radar_rows.append({_("그룹","Group"): _lbl_rd, _("항목","Factor"): _mf_rd, "Weight": _w_rd})
+                                            _mf_rd_sub = _gdf_rd[_gdf_rd["?분류"]==_mf_rd]
+                                            _w_rd = float(_mf_rd_sub.iloc[0]["?분류 가중치"]) if not _mf_rd_sub.empty else 0.0
+                                            _lbl_rd = str(_grp_rd).replace("?문가","Expert").replace("?반","General").replace("공무??,"Public Official") if is_english else _grp_rd
+                                            _radar_rows.append({_("그룹","Group"): _lbl_rd, _("??","Factor"): _mf_rd, "Weight": _w_rd})
                                     if _radar_rows:
                                         _radar_df_v3 = pd.DataFrame(_radar_rows)
-                                        _cats_rd = _radar_df_v3[_("항목","Factor")].unique().tolist()
+                                        _cats_rd = _radar_df_v3[_("??","Factor")].unique().tolist()
                                         _fig_rd = go.Figure()
                                         _colors_rd = ["#4F81BD","#C0504D","#9BBB59","#8064A2","#F79646"]
                                         for _i_rd, _grp_rdn in enumerate(_radar_df_v3[_("그룹","Group")].unique()):
                                             _g_rd = _radar_df_v3[_radar_df_v3[_("그룹","Group")]==_grp_rdn]
-                                            _vals_rd = [_g_rd[_g_rd[_("항목","Factor")]==c]["Weight"].values[0] if len(_g_rd[_g_rd[_("항목","Factor")]==c])>0 else 0 for c in _cats_rd]
+                                            _vals_rd = [_g_rd[_g_rd[_("??","Factor")]==c]["Weight"].values[0] if len(_g_rd[_g_rd[_("??","Factor")]==c])>0 else 0 for c in _cats_rd]
                                             _vals_cl = _vals_rd + [_vals_rd[0]]
                                             _cats_cl = _cats_rd + [_cats_rd[0]]
                                             _fig_rd.add_trace(go.Scatterpolar(r=_vals_cl, theta=_cats_cl, fill="toself", name=_grp_rdn, line_color=_colors_rd[_i_rd % len(_colors_rd)], opacity=0.7))
                                         _fig_rd.update_layout(
                                             polar=dict(radialaxis=dict(visible=True, range=[0, max(0.01, _radar_df_v3["Weight"].max()*1.2)])),
                                             showlegend=True,
-                                            title=_("그룹별 대분류 중요도 패턴", "Main Criteria Importance Pattern by Group"),
+                                            title=_("그룹??분류 중요???턴", "Main Criteria Importance Pattern by Group"),
                                             height=450
                                         )
                                         st.plotly_chart(_fig_rd, use_container_width=True)
 
-                            # ─── Tab 5: 결과 다운로드 ────────────────────────────────────────
+                            # ??? Tab 5: 결과 ?운로드 ????????????????????????????????????????
                             with tab3v5:
-                                st.markdown(_("###  3계층 AHP 종합분석 결과 다운로드",
-                                              "### 📑 Download 3-Tier AHP Comprehensive Analysis Results"))
+                                st.markdown(_("###  3계층 AHP 종합분석 결과 ?운로드",
+                                              "### ? Download 3-Tier AHP Comprehensive Analysis Results"))
                                 st.download_button(
-                                    label=_("📥 3계층 AHP 종합분석 결과 다운로드 (.xlsx)", "📥 Download 3-Tier AHP Results (.xlsx)"),
+                                    label=_("? 3계층 AHP 종합분석 결과 ?운로드 (.xlsx)", "? Download 3-Tier AHP Results (.xlsx)"),
                                     data=output_res_v3,
                                     file_name="3Tier_AHP_Result.xlsx",
                                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                     type="primary",
                                     use_container_width=True
                                 )
-                                st.info(_("📋 엑셀 파일에는 종합분석, 그룹비교, 계층별 상세행렬, CR 분포 등 전체 분석 결과가 포함됩니다.",
-                                          "📋 The Excel file contains all results: comprehensive summary, group comparison, detailed matrices per tier, and CR distribution."))
+                                st.info(_("? ?? ?일?는 종합분석, 그룹비교, 계층??세?렬, CR 분포 ???체 분석 결과가 ?함?니??",
+                                          "? The Excel file contains all results: comprehensive summary, group comparison, detailed matrices per tier, and CR distribution."))
 
-                            # 3계층 처리 완료 – 기존 2계층 UI 스킵
+                            # 3계층 처리 ?료 ??기존 2계층 UI ?킵
                             st.stop()
                         
-                        with st.spinner(_("계층 분석 수행 중...", "Performing Analytic Hierarchy Process (AHP)...")):
-                            # 1. 메인 시트 분석 시도
+                        with st.spinner(_("계층 분석 ?행 ?..", "Performing Analytic Hierarchy Process (AHP)...")):
+                            # 1. 메인 ?트 분석 ?도
                             try:
                                 main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(
                                     df_main, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
                                 )
                             except Exception as e:
-                                st.error(_("❌ [메인 시트] 분석 중 오류가 발생했습니다.", "❌ Error occurred during [Main Criteria] analysis."))
-                                with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                st.error(_("??[메인 ?트] 분석 ??류가 발생?습?다.", "??Error occurred during [Main Criteria] analysis."))
+                                with st.expander(_("? ?유 ??결 방법 보기", "? View Reason & Solution"), expanded=True):
                                     st.markdown(_(f"""
-                                    **원인:** 메인 시트의 데이터 구조가 올바르지 않거나 읽을 수 있는 유효 데이터가 없습니다. (Error: {e})
-                                    **해결 방법:**
-                                    1. 엑셀의 첫 번째 시트 이름이 `Main_Criteria`인지 확인하세요.
-                                    2. ID와 Type 열 다음에 쌍대비교 데이터가 올바르게 입력되었는지 확인하세요.
-                                    3. 빈 행이 포함되어 있다면 삭제 후 다시 시도하세요.
+                                    **?인:** 메인 ?트???이??구조가 ?바르? ?거???을 ???는 ?효 ?이?? ?습?다. (Error: {e})
+                                    **?결 방법:**
+                                    1. ?????번째 ?트 ?름??`Main_Criteria`?? ?인?세??
+                                    2. ID? Type ???음????비교 ?이?? ?바르게 ?력?었?? ?인?세??
+                                    3. ??이 ?함?어 ?다??? ???시 ?도?세??
                                     """,
                                     f"""
                                     **Cause:** The structure of the main sheet is incorrect or contains no readable valid data. (Error: {e})
@@ -7563,17 +7563,17 @@ with contextlib.nullcontext():
                                     """))
                                 st.stop()
     
-                            # [방어 코드] 메인 결과 충분성 체크
+                            # [방어 코드] 메인 결과 충분??체크
                             if main_results_df.empty or len(main_results_df) < 1:
-                                st.error(_(f"⚠️ 분석 불가: 메인 기준 유효 응답자가 부족합니다. (현재 {len(main_results_df)}명)",
-                                           f"⚠️ Cannot Analyze: Insufficient valid respondents for Main Criteria. (Current: {len(main_results_df)} respondents)"))
-                                with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                st.error(_(f"?️ 분석 불?: 메인 기? ?효 ?답?? 부족합?다. (?재 {len(main_results_df)}?",
+                                           f"?️ Cannot Analyze: Insufficient valid respondents for Main Criteria. (Current: {len(main_results_df)} respondents)"))
+                                with st.expander(_("? ?유 ??결 방법 보기", "? View Reason & Solution"), expanded=True):
                                     st.markdown(_(f"""
-                                    **원인:** 모든 응답자의 일관성 비율(CR)이 임계치({cr_threshold})를 초과하여 보정 후에도 수렴하지 못했습니다.
-                                    **해결 방법:**
-                                    1. 왼쪽 사이드바에서 **'일관성 비율(CR) 임계값'**을 0.15 또는 0.2로 완화해 보세요.
-                                    2. **'보정 강도(Learning Rate)'**를 0.7 이상으로 높여보세요.
-                                    3. **'최대 보정 반복 횟수'**를 500회로 설정했는지 확인하세요.
+                                    **?인:** 모든 ?답?의 ????비율(CR)???계?{cr_threshold})?초과?여 보정 ?에???렴?? 못했?니??
+                                    **?결 방법:**
+                                    1. ?쪽 ?이?바?서 **'????비율(CR) ?계?**??0.15 ?는 0.2??화??보세??
+                                    2. **'보정 강도(Learning Rate)'**?0.7 ?상?로 ?여보세??
+                                    3. **'최? 보정 반복 ?수'**?500?로 ?정?는지 ?인?세??
                                     """,
                                     f"""
                                     **Cause:** The Consistency Ratio (CR) of all respondents exceeded the threshold ({cr_threshold}) and could not converge even after correction.
@@ -7592,7 +7592,7 @@ with contextlib.nullcontext():
                                 st.session_state.uploaded_matrix = agg_orig_matrix
                             # -----------------------------------------------------------
 
-                            # 2. 하위 시트 분석 및 저장
+                            # 2. ?위 ?트 분석 ????
                             sub_results_storage = {}
                             total_excl_df_list = [main_excluded_df]
                         
@@ -7600,8 +7600,8 @@ with contextlib.nullcontext():
                         
                             if is_single_sheet:
                                 for parent_factor in main_factors:
-                                    # 1단계 분석인 경우 (하위 시트가 없음), 
-                                    # 하위 가중치 1.0을 가지는 더미 데이터를 자동으로 생성하여 연산을 마칩니다.
+                                    # 1?계 분석??경우 (?위 ?트가 ?음), 
+                                    # ?위 가중치 1.0??가지???? ?이?? ?동?로 ?성?여 ?산??마칩?다.
                                     dummy_list = []
                                     for idx, row in main_results_df.iterrows():
                                         dummy_list.append({
@@ -7629,7 +7629,7 @@ with contextlib.nullcontext():
                                     }
                             else:
                                 for parent_factor in main_factors:
-                                    # 대분류 항목명과 일치하는 시트명 찾기 (대소문자, 공백 무시 및 31자 제한 고려)
+                                    # ?분류 ??명과 ?치?는 ?트?찾기 (??문?? 공백 무시 ?31???한 고려)
                                     target_name = parent_factor.strip().lower()
                                     target_name_31 = parent_factor[:31].strip().lower()
                                 
@@ -7641,13 +7641,13 @@ with contextlib.nullcontext():
                                             break
                                 
                                     if matched_sheet_name is None:
-                                        st.error(_(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.", f"❌ [Detailed Sheet: {parent_factor}] Sheet not found."))
-                                        with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                        st.error(_(f"??[?? ?트: {parent_factor}] ?트?찾을 ???습?다.", f"??[Detailed Sheet: {parent_factor}] Sheet not found."))
+                                        with st.expander(_("? ?유 ??결 방법 보기", "? View Reason & Solution"), expanded=True):
                                             st.markdown(_(f"""
-                                            **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 엑셀 파일 내에 존재하지 않거나 시트 이름이 다릅니다.
-                                            **해결 방법:**
-                                            1. 업로드한 엑셀 파일 내에 **'{parent_factor}'** (또는 31자 이내로 앞부분이 일치하는 명칭)의 시트가 존재하는지 확인하세요.
-                                            2. 시트 이름의 앞뒤 공백이나 오탈자(예: '리드타임민감도'와 '리드타임 민감도')가 없는지 확인하고 시트명을 맞춰주세요.
+                                            **?인:** 메인 기? ?트?서 ?출???분류 ?? **'{parent_factor}'**????하???? ?문 ?답 ?트가 ?? ?일 ?에 존재?? ?거???트 ?름???릅?다.
+                                            **?결 방법:**
+                                            1. ?로?한 ?? ?일 ?에 **'{parent_factor}'** (?는 31???내???분이 ?치?는 명칭)???트가 존재?는지 ?인?세??
+                                            2. ?트 ?름???뒤 공백?나 ?탈???? '리드???감도'? '리드???민감??)가 ?는지 ?인?고 ?트명을 맞춰주세??
                                             """,
                                             f"""
                                             **Cause:** The detailed survey response sheet corresponding to the main criteria category **'{parent_factor}'** does not exist in the Excel file or has a different name.
@@ -7658,7 +7658,7 @@ with contextlib.nullcontext():
                                         st.stop()
                                 
                                     try:
-                                        if data_source == _("🌐 배포된 온라인 설문 데이터 연동", "🌐 Connect Online Survey Data"):
+                                        if data_source == _("? 배포???라???문 ?이???동", "? Connect Online Survey Data"):
                                             df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
                                         else:
                                             df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
@@ -7669,9 +7669,9 @@ with contextlib.nullcontext():
                                         )
                                     
                                         if sub_res_df.empty:
-                                            raise ValueError(f"'{matched_sheet_name}' 시트에 유효한 분석 데이터가 없습니다.")
+                                            raise ValueError(f"'{matched_sheet_name}' ?트???효??분석 ?이?? ?습?다.")
                                         
-                                        # 통계 계산 로직
+                                        # ?계 계산 로직
                                         sub_w_cols = [f"Weight_{f}" for f in sub_facts]
                                         sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
                                         sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
@@ -7696,13 +7696,13 @@ with contextlib.nullcontext():
                                             total_excl_df_list.append(sub_excl_df)
                                         
                                     except Exception as e:
-                                        st.error(_(f"❌ [세부 시트: {matched_sheet_name}] 분석 중 오류가 발생했습니다.", f"❌ Error occurred during [Detailed Sheet: {matched_sheet_name}] analysis."))
-                                        with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                        st.error(_(f"??[?? ?트: {matched_sheet_name}] 분석 ??류가 발생?습?다.", f"??Error occurred during [Detailed Sheet: {matched_sheet_name}] analysis."))
+                                        with st.expander(_("? ?유 ??결 방법 보기", "? View Reason & Solution"), expanded=True):
                                             st.markdown(_(f"""
-                                            **원인:** 시트 내부의 데이터 구조가 올바르지 않거나, 해당 시트의 응답자들이 모두 일관성 기준을 통과하지 못했습니다. (Error: {e})
-                                            **해결 방법:**
-                                            1. 해당 세부 시트의 데이터에 빈 칸이나 문자가 섞여 있는지 확인하세요.
-                                            2. CR 임계값을 높여서 다시 분석해 보세요.
+                                            **?인:** ?트 ?????이??구조가 ?바르? ?거?? ?당 ?트???답?들??모두 ????기????과?? 못했?니?? (Error: {e})
+                                            **?결 방법:**
+                                            1. ?당 ?? ?트???이?에 ?칸이??문자가 ?여 ?는지 ?인?세??
+                                            2. CR ?계값을 ?여???시 분석??보세??
                                             """,
                                             f"""
                                             **Cause:** The internal data structure of the sheet is incorrect, or all respondents for this sheet failed to pass the consistency ratio criteria. (Error: {e})
@@ -7712,9 +7712,9 @@ with contextlib.nullcontext():
                                             """))
                                         st.stop()
     
-                            # 분석 헤더 윗쪽에 제외된 사례수 표시
+                            # 분석 ?더 ?쪽???외???????시
                             total_excluded = main_excluded
-                            st.markdown(f"**" + _(f"분석 제외: {total_excluded}건", f"Excluded from Analysis: {total_excluded} cases") + "**")
+                            st.markdown(f"**" + _(f"분석 ?외: {total_excluded}?, f"Excluded from Analysis: {total_excluded} cases") + "**")
     
                             main_sig_df = calculate_pairwise_ttest(main_results_df, main_factors)
                             main_weight_cols = [f"Weight_{f}" for f in main_factors]
@@ -7736,10 +7736,10 @@ with contextlib.nullcontext():
                         
                             main_cr_final_avg = main_results_df['Final_CR'].mean()
                         
-                            # --- 다중 인구통계 변수 처리 UI ---
+                            # --- ?중 ?구?계 변??처리 UI ---
                             demo_cols = [c for c in main_results_df.columns if str(c).strip().lower() == 'type' or str(c).strip().lower().startswith('type ')]
                             if len(demo_cols) > 1 and tier in ['Standard', 'Pro']:
-                                selected_demo = st.selectbox(_("📊 교차분석 그룹 기준 변수 선택", "📊 Select Grouping Variable for Analysis"), demo_cols)
+                                selected_demo = st.selectbox(_("? 교차분석 그룹 기? 변???택", "? Select Grouping Variable for Analysis"), demo_cols)
                                 main_results_df['Type'] = main_results_df[selected_demo]
                                 for mf in main_factors:
                                     sub_results_storage[mf]['df']['Type'] = sub_results_storage[mf]['df'][selected_demo]
@@ -7785,17 +7785,17 @@ with contextlib.nullcontext():
                                     s_weight = sub_info['weights'].iloc[s_idx] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][s_idx]
                                     global_w = m_weight * s_weight
                                     summary_rows.append({
-                                        "대분류": main_f, "대분류 가중치": m_weight, "중분류": sub_f, "중분류 가중치": s_weight,
+                                        "?분류": main_f, "?분류 가중치": m_weight, "중분?: sub_f, "중분?가중치": s_weight,
                                         "Global Weight": global_w, 
-                                        "CR(대분류)": main_grp_cr, 
-                                        "CI(대분류)": main_grp_ci,
-                                        "CR(중분류)": sub_info['group_cr'],
-                                        "CI(중분류)": sub_info['group_ci']
+                                        "CR(?분류)": main_grp_cr, 
+                                        "CI(?분류)": main_grp_ci,
+                                        "CR(중분?": sub_info['group_cr'],
+                                        "CI(중분?": sub_info['group_ci']
                                     })
                         
                             final_df = pd.DataFrame(summary_rows)
                             final_df['Global Rank'] = final_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
-                            cols_order = ["대분류", "대분류 가중치", "중분류", "중분류 가중치", "Global Weight", "Global Rank", "CR(대분류)", "CI(대분류)", "CR(중분류)", "CI(중분류)"]
+                            cols_order = ["?분류", "?분류 가중치", "중분?, "중분?가중치", "Global Weight", "Global Rank", "CR(?분류)", "CI(?분류)", "CR(중분?", "CI(중분?"]
                             final_df = final_df[cols_order]
     
                             unique_groups = sorted(main_results_df['Type'].astype(str).unique())
@@ -7838,35 +7838,35 @@ with contextlib.nullcontext():
                                     for s_idx, sf in enumerate(sub_facts):
                                         s_w_val = g_sub_w.iloc[s_idx] if isinstance(g_sub_w, pd.Series) else g_sub_w[s_idx]
                                         grp_rows.append({
-                                            "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": s_w_val,
+                                            "?분류": main_f, "?분류 가중치": m_w, "중분?: sf, "중분?가중치": s_w_val,
                                             "Global Weight": m_w * s_w_val, 
-                                            "CR(대분류)": g_main_cr, 
-                                            "CI(대분류)": g_main_ci,
-                                            "CR(중분류)": g_sub_cr, 
-                                            "CI(중분류)": g_sub_ci
+                                            "CR(?분류)": g_main_cr, 
+                                            "CI(?분류)": g_main_ci,
+                                            "CR(중분?": g_sub_cr, 
+                                            "CI(중분?": g_sub_ci
                                         })
                                 g_df = pd.DataFrame(grp_rows)
                                 if not g_df.empty:
                                     g_df['Global Rank'] = g_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
                                     group_full_dfs[grp] = g_df[cols_order]
-                                    group_analysis_results[grp] = group_full_dfs[grp][['대분류', '중분류', 'Global Weight']]
+                                    group_analysis_results[grp] = group_full_dfs[grp][['?분류', '중분?, 'Global Weight']]
     
-                            comparison_df = final_df[['대분류', '중분류', 'Global Weight']].copy()
-                            comparison_df.rename(columns={'Global Weight': '종합평균(Overall)'}, inplace=True)
+                            comparison_df = final_df[['?분류', '중분?, 'Global Weight']].copy()
+                            comparison_df.rename(columns={'Global Weight': '종합?균(Overall)'}, inplace=True)
                             for grp, df_res in group_analysis_results.items():
                                 temp_df = df_res.rename(columns={'Global Weight': grp})
-                                comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류'], how='left')
+                                comparison_df = comparison_df.merge(temp_df, on=['?분류', '중분?], how='left')
     
                             output_res = io.BytesIO()
                             with pd.ExcelWriter(output_res, engine='xlsxwriter') as writer:
                                 workbook = writer.book
                                 
-                                # [신규 추가] 인구통계 결과 엑셀 시트 출력
+                                # [?규 추?] ?구?계 결과 ?? ?트 출력
                                 if "demo_df" in st.session_state and st.session_state["demo_df"] is not None:
                                     demo_summary_df = generate_demographics_summary(st.session_state["demo_df"])
                                     if demo_summary_df is not None:
                                         demo_summary_df.to_excel(writer, sheet_name='Result_Demographics', index=False)
-                                        # Result_Demographics 엑셀 서식 적용
+                                        # Result_Demographics ?? ?식 ?용
                                         ws_demo = writer.sheets['Result_Demographics']
                                         header_format_demo = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1})
                                         body_format_demo = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1})
@@ -7894,54 +7894,54 @@ with contextlib.nullcontext():
     
                                 total_excluded_df = pd.concat(total_excl_df_list, ignore_index=True)
                                 sheet_name_comp = _('종합분석', 'Comprehensive Analysis')
-                                current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
+                                current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, final_df, _("1) ?체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
                                 for grp in unique_groups:
                                     if grp in group_full_dfs:
-                                        current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
+                                        current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, group_full_dfs[grp], _(f"??[그룹: {grp}] 분석 결과", f"??[Group: {grp}] Analysis Results"), current_row_ws, formats)
     
                                 if len(unique_groups) >= 1:
                                     ws_comp = workbook.add_worksheet('Group_Comparison')
                                     writer.sheets['Group_Comparison'] = ws_comp
                                     s_row_cp = 1
-                                    ws_comp.write_string(s_row_cp, 0, _("그룹 간 비교(일원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
+                                    ws_comp.write_string(s_row_cp, 0, _("그룹 ?비교(?원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
                                     s_row_cp += 1
                                 
                                     tier = get_current_tier()
                                     if tier not in ['Standard', 'Pro']:
-                                        ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Standard 등급 이상 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Standard and Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+                                        ws_comp.write_string(s_row_cp, 0, _("? ?계 검??결과(ANOVA/?후검????Standard ?급 ?상 ?식 ?용?에게만 ?공?니??", "? Statistical test results (ANOVA/Post-hoc) are exclusive to Standard and Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
                                         s_row_cp += 1
                                 
                                     if tier in ['Standard', 'Pro'] and not anova_df.empty:
-                                        anova_for_merge = anova_df.rename(columns={'요인': '중분류'})
-                                        integrated_df = comparison_df.merge(anova_for_merge, on='중분류', how='left')
+                                        anova_for_merge = anova_df.rename(columns={'?인': '중분?})
+                                        integrated_df = comparison_df.merge(anova_for_merge, on='중분?, how='left')
                                     else:
                                         integrated_df = comparison_df
                                 
                                     # English renaming logic for columns & significance
                                     if st.session_state.get('lang', 'ko') == 'en':
                                         rename_dict = {
-                                            '대분류': 'Main Criteria',
-                                            '중분류': 'Sub-Criteria',
-                                            '종합평균(Overall)': 'Overall',
-                                            'F-값': 'F-Value',
+                                            '?분류': 'Main Criteria',
+                                            '중분?: 'Sub-Criteria',
+                                            '종합?균(Overall)': 'Overall',
+                                            'F-?: 'F-Value',
                                             'P-Value': 'P-Value',
-                                            '유의성': 'Significance',
-                                            '사후검정(Tukey HSD)': 'Post-hoc (Tukey HSD)'
+                                            '?의??: 'Significance',
+                                            '?후검??Tukey HSD)': 'Post-hoc (Tukey HSD)'
                                         }
                                         integrated_df_excel = integrated_df.copy()
                                         integrated_df_excel.rename(columns=rename_dict, inplace=True)
                                         if 'Significance' in integrated_df_excel.columns:
                                             integrated_df_excel['Significance'] = integrated_df_excel['Significance'].replace({
-                                                '유의함': 'Significant',
-                                                '유의하지 않음': 'Not Significant'
+                                                '?의??: 'Significant',
+                                                '?의?? ?음': 'Not Significant'
                                             })
                                         if 'Post-hoc (Tukey HSD)' in integrated_df_excel.columns:
                                             integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].replace({
-                                                '집단 간 구체적 차이 발견 못함': 'No specific difference found',
-                                                '계산 오류': 'Calculation Error'
+                                                '집단 ?구체??차이 발견 못함': 'No specific difference found',
+                                                '계산 ?류': 'Calculation Error'
                                             })
                                             integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].apply(
-                                                lambda x: x.replace(" 차이 있음", " Diff Exists") if isinstance(x, str) else x
+                                                lambda x: x.replace(" 차이 ?음", " Diff Exists") if isinstance(x, str) else x
                                             )
                                     else:
                                         integrated_df_excel = integrated_df
@@ -7964,19 +7964,19 @@ with contextlib.nullcontext():
                                     ws_comp.set_column('A:G', 20) 
                                 
                                     if tier in ['Standard', 'Pro']:
-                                        comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
-                                                       "※ Reasons why group differences are not statistically significant despite variation in priorities")
+                                        comp_title = _("??그룹 ?중요?의 차이가 ????계?으??의?? ?게 ???는 ?유",
+                                                       "??Reasons why group differences are not statistically significant despite variation in priorities")
                                         ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
     
                                     guide_content_ko = [
-                                        ("1. 그룹 내 편차(분산)가 너무 큰 경우", "ANOVA는 '그룹 간의 차이'와 '그룹 내의 차이'를 비교합니다.\n\n■ 원리: 그룹 간 평균 차이가 크더라도, 각 그룹 내부 데이터들이 서로 들쭉날쭉(분산이 큼)하다면 통계적으로는 '이 차이가 우연히 발생했을 가능성이 높다'고 판단합니다."),
-                                        ("2. 표본 크기(Sample Size)의 부족", "통계적 유의성은 표본의 수에 매우 민감합니다.\n\n■ 현상: 각 그룹의 데이터 개수(표본수)가 너무 적다면 통계적 힘(Power)이 부족하여 유의미한 차이를 찾아내지 못합니다."),
-                                        ("3. 데이터의 단위(Scale)와 변동성", "표에 나타난 수치들이 대부분 매우 작은 소수점 단위입니다. 실제 계산 과정에서 표준오차 범위 내에 있다면 통계적으로는 측정 오차 범위 내의 흔들림으로 간주됩니다.")
+                                        ("1. 그룹 ???차(분산)가 ?무 ??경우", "ANOVA??'그룹 간의 차이'? '그룹 ?의 차이'?비교?니??\n\n???리: 그룹 ??균 차이가 ?더?도, ?그룹 ?? ?이?들???로 ?쭉?쭉(분산?????다??계?으로는 '??차이가 ?연??발생?을 가?성???다'??단?니??"),
+                                        ("2. ?본 ?기(Sample Size)??부?, "?계???의?? ?본???에 매우 민감?니??\n\n???상: ?그룹???이??개수(?본??가 ?무 ?다??계????Power)??부족하???의미한 차이?찾아?? 못합?다."),
+                                        ("3. ?이?의 ?위(Scale)? 변?성", "?에 ?????치?이 ?부?매우 ?? ?수???위?니?? ?제 계산 과정?서 ???차 범위 ?에 ?다??계?으로는 측정 ?차 범위 ?의 ?들림으?간주?니??")
                                     ]
                                 
                                     guide_content_en = [
-                                        ("1. Within-Group Variance is Too Large", "ANOVA compares variance between groups against variance within groups.\n\n■ Principle: Even if the mean difference between groups is large, if individual responses within each group are highly scattered (large variance), statistics will determine that the difference is likely due to chance."),
-                                        ("2. Insufficient Sample Size", "Statistical significance is highly sensitive to the number of samples.\n\n■ Phenomenon: If the number of data points (sample size) in each group is too small, statistical power is insufficient to detect significant differences."),
+                                        ("1. Within-Group Variance is Too Large", "ANOVA compares variance between groups against variance within groups.\n\n??Principle: Even if the mean difference between groups is large, if individual responses within each group are highly scattered (large variance), statistics will determine that the difference is likely due to chance."),
+                                        ("2. Insufficient Sample Size", "Statistical significance is highly sensitive to the number of samples.\n\n??Phenomenon: If the number of data points (sample size) in each group is too small, statistical power is insufficient to detect significant differences."),
                                         ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
                                     ]
                                 
@@ -7995,7 +7995,7 @@ with contextlib.nullcontext():
                                     writer.sheets[sheet_name] = ws
                                     s_row_det = 0
                                 
-                                    excl_label = _(f"분석 제외 사례수: {sheet_excl_count}건", f"Excluded cases: {sheet_excl_count}")
+                                    excl_label = _(f"분석 ?외 ???? {sheet_excl_count}?, f"Excluded cases: {sheet_excl_count}")
                                     ws.write(s_row_det, 0, excl_label, workbook.add_format({'bold': True, 'font_color': 'red'}))
                                     s_row_det += 1
                                 
@@ -8010,7 +8010,7 @@ with contextlib.nullcontext():
                                             ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
                                             if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
                                 
-                                    # [신규 추가] 전체 종합 행렬 오른쪽에 전체 CR, CI 값 표시
+                                    # [?규 추?] ?체 종합 ?렬 ?른쪽에 ?체 CR, CI ??시
                                     n_dim = len(matrix_df)
                                     cr_val, ci_val, _unused_lambda = calculate_consistency(matrix_df, mean_method)
                                 
@@ -8040,17 +8040,17 @@ with contextlib.nullcontext():
                                     ws.set_column(n_dim + 2, n_dim + 2, 12)
                                     ws.set_column(n_dim + 3, n_dim + 3, 12)
                                 
-                                    ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("전체 일관성 지표", "Overall Consistency Indicators"), ci_cr_header_fmt)
-                                    ws.write(s_row_det + 1, n_dim + 2, _("전체 CI", "Overall CI"), ci_cr_label_fmt)
+                                    ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("?체 ????지??, "Overall Consistency Indicators"), ci_cr_header_fmt)
+                                    ws.write(s_row_det + 1, n_dim + 2, _("?체 CI", "Overall CI"), ci_cr_label_fmt)
                                     ws.write(s_row_det + 1, n_dim + 3, ci_val, ci_cr_val_fmt)
-                                    ws.write(s_row_det + 2, n_dim + 2, _("전체 CR", "Overall CR"), ci_cr_label_fmt)
+                                    ws.write(s_row_det + 2, n_dim + 2, _("?체 CR", "Overall CR"), ci_cr_label_fmt)
                                     ws.write(s_row_det + 2, n_dim + 3, cr_val, ci_cr_val_fmt)
                                 
                                     s_row_det += len(matrix_df) + 3
                                 
                                     if group_matrices:
                                         for g_name, g_mat in group_matrices.items():
-                                            ws.write_string(s_row_det, 0, _(f"] 그룹 종합 행렬: {g_name}", f"] Group Combined Matrix: {g_name}"))
+                                            ws.write_string(s_row_det, 0, _(f"] 그룹 종합 ?렬: {g_name}", f"] Group Combined Matrix: {g_name}"))
                                             s_row_det += 1
                                             gm_df_obj = pd.DataFrame(g_mat, index=row_labels, columns=row_labels)
                                             gm_df_obj.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det)
@@ -8061,7 +8061,7 @@ with contextlib.nullcontext():
                                                     ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
                                                     if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
                                         
-                                            # [신규 추가] 그룹 종합 행렬 오른쪽에 그룹 CR, CI 값 표시
+                                            # [?규 추?] 그룹 종합 ?렬 ?른쪽에 그룹 CR, CI ??시
                                             g_cr_val, g_ci_val, _unused_lambda = calculate_consistency(g_mat, mean_method)
                                             g_ci_cr_val_fmt = workbook.add_format({
                                                 'align': 'center', 'valign': 'vcenter', 'border': 1,
@@ -8076,7 +8076,7 @@ with contextlib.nullcontext():
                                                     'font_name': 'NanumGothic'
                                                 })
                                         
-                                            ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("그룹 일관성 지표", "Group Consistency Indicators"), ci_cr_header_fmt)
+                                            ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("그룹 ????지??, "Group Consistency Indicators"), ci_cr_header_fmt)
                                             ws.write(s_row_det + 1, n_dim + 2, _("그룹 CI", "Group CI"), ci_cr_label_fmt)
                                             ws.write(s_row_det + 1, n_dim + 3, g_ci_val, g_ci_cr_val_fmt)
                                             ws.write(s_row_det + 2, n_dim + 2, _("그룹 CR", "Group CR"), ci_cr_label_fmt)
@@ -8113,9 +8113,9 @@ with contextlib.nullcontext():
                                         main_group_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
     
                                 out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
-                                write_detailed_sheet_ws('(대분류) Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
+                                write_detailed_sheet_ws('(?분류) Main', main_group_matrix, out_main, _("[?분류 ?? 종합 ?렬]", "[Main Criteria Combined Matrix]"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
                                 for mf, info in sub_results_storage.items():
-                                    safe_name = f"(중분류) {mf}"[:31]
+                                    safe_name = f"(중분? {mf}"[:31]
                                     sub_grp_mats = {}
                                     for grp in unique_groups:
                                         g_sub_df = info['df'][info['df']['Type'].astype(str) == grp]
@@ -8130,8 +8130,8 @@ with contextlib.nullcontext():
                                              if mf in df_ex['Sheet'].unique():
                                                  sub_excl_val = len(df_ex[df_ex['Sheet'] == mf])
                                              
-                                    title_ko = f"[중분류 평가 종합 행렬]  ▶ 상위 계층: 대분류 [{mf}]"
-                                    title_en = f"[Sub-Criteria Combined Matrix]  ▶ Parent: Main [{mf}]"
+                                    title_ko = f"[중분??? 종합 ?렬]  ???위 계층: ?분류 [{mf}]"
+                                    title_en = f"[Sub-Criteria Combined Matrix]  ??Parent: Main [{mf}]"
                                     write_detailed_sheet_ws(safe_name, info['group_matrix'], out_sub, _(title_ko, title_en), info['factors'], group_matrices=sub_grp_mats, sheet_excl_count=sub_excl_val)
     
                                 is_english = (st.session_state.get('lang', 'ko') == 'en')
@@ -8153,16 +8153,16 @@ with contextlib.nullcontext():
                                     ]
                                 else:
                                     theory_text = [
-                                        ["의사결정론적 관점에서의 AHP 일관성 보정 원리 및 학술적 근거"],
+                                        ["?사결정론적 관?에?의 AHP ????보정 ?리 ??술??근거"],
                                         [""],
-                                        ["1. 서론: 계층분석과정(AHP)의 일관성 문제"],
-                                        ["Saaty(1980)에 의해 제안된 계층분석과정은 인간의 주관적 판단을 정량화하는 다기준 의사결정 도구이다. 비일관적 판단이 발생할 경우 수학적으로 교정하여 분석의 신뢰성을 확보한다."],
+                                        ["1. ?론: 계층분석과정(AHP)??????문제"],
+                                        ["Saaty(1980)???해 ?안??계층분석과정? ?간??주????단???량?하???기준 ?사결정 ?구?다. 비일관???단??발생??경우 ?학?으?교정?여 분석???뢰?을 ?보?다."],
                                         [""],
-                                        ["2. 보정 알고리즘: 반복 수렴 조정법"],
-                                        [f"원본 행렬 A와 이상적 행렬 W를 설정된 학습률(α={learning_rate})에 따라 선형 결합한다: A_new = (1-α)A + αW."],
+                                        ["2. 보정 ?고리즘: 반복 ?렴 조정?],
+                                        [f"?본 ?렬 A? ?상???렬 W??정???습?α={learning_rate})???라 ?형 결합?다: A_new = (1-α)A + αW."],
                                         [""],
-                                        ["3. 학술적 근거 및 효과"],
-                                        ["원본 행렬과 일관 행렬의 가중 평균을 이용한 조정은 의사결정자의 원래 선호 경향성을 최대한 보존하면서 수학적 일관성을 향상시킨다."]
+                                        ["3. ?술??근거 ??과"],
+                                        ["?본 ?렬??? ?렬??가??균???용??조정? ?사결정?의 ?래 ?호 경향?을 최???보존?면???학?????을 ?상?킨??"]
                                     ]
                                 theory_ws.set_column('A:A', 100)
                                 for r_idx, row_content in enumerate(theory_text):
@@ -8179,7 +8179,7 @@ with contextlib.nullcontext():
                                     guide_ws.set_column('B:B', 75)
                                 
                                     # Merge title row
-                                    guide_title = _("1단계 AHP 분석 결과 해석 및 주의사항", "Step 1 AHP Analysis Result Interpretation and Guidelines")
+                                    guide_title = _("1?계 AHP 분석 결과 ?석 ?주의?항", "Step 1 AHP Analysis Result Interpretation and Guidelines")
                                     guide_ws.merge_range('A1:B1', guide_title, guide_title_fmt)
                                     guide_ws.set_row(0, 35)
                                 
@@ -8194,12 +8194,12 @@ with contextlib.nullcontext():
                                         ]
                                     else:
                                         guide_data = [
-                                            ("분류", "상세 내용"),
-                                            ("1. 분석 개요", "본 보고서는 하위 요소 없이 대분류(1단계) 평가 기준만을 비교한 단일 계층 AHP 분석 결과입니다."),
-                                            ("2. 결과 해석 방법", "하위 가중치가 1.0으로 고정되어 '대분류 가중치'와 'Global Weight(종합 가중치)'가 동일한 수치로 산출되었습니다. 따라서 'Global Weight'를 각 항목의 최종 중요도로 해석하시면 됩니다."),
-                                            ("3. 내부 가상 연산 안내", "AHP 분석 시스템의 2단계 연산 일관성 유지를 위해, 시스템 내부적으로 대분류 항목 하위에 가중치 1.0을 가지는 더미 세부 항목을 자동 생성하여 연산하였습니다. 이로 인해 결과 다운로드 파일에 'Result_[대분류명]' 시트가 1x1 행렬로 존재하지만 이는 정상적인 가상 연산 결과입니다."),
-                                            ("4. 일관성 비율(CR) 주의사항", "제공된 일관성 비율은 대분류 쌍대비교의 일관성 비율(CR)만을 나타냅니다. 하위 요소가 존재하지 않으므로 '중분류 일관성 비율(CR)'은 무조건 0.000으로 표기되며 이는 오류가 아닙니다."),
-                                            ("5. 학술/보고서 기재 팁", "학술 연구나 보고서에 활용 시 '단일 계층(1단계) 계층 구조 하에서 쌍대비교 분석을 수행하였다'고 명시적으로 기재하시기 바랍니다.")
+                                            ("분류", "?세 ?용"),
+                                            ("1. 분석 개요", "?보고?는 ?위 ?소 ?이 ?분류(1?계) ?? 기?만을 비교???일 계층 AHP 분석 결과?니??"),
+                                            ("2. 결과 ?석 방법", "?위 가중치가 1.0?로 고정?어 '?분류 가중치'? 'Global Weight(종합 가중치)'가 ?일???치??출?었?니?? ?라??'Global Weight'??????최종 중요?로 ?석?시??니??"),
+                                            ("3. ?? 가???산 ?내", "AHP 분석 ?스?의 2?계 ?산 ????????해, ?스?????으??분류 ?? ?위??가중치 1.0??가지???? ?? ?????동 ?성?여 ?산???니?? ?로 ?해 결과 ?운로드 ?일??'Result_[?분류?' ?트가 1x1 ?렬?존재????는 ?상?인 가???산 결과?니??"),
+                                            ("4. ????비율(CR) 주의?항", "?공??????비율? ?분류 ??비교??????비율(CR)만을 ???니?? ?위 ?소가 존재?? ?으므?'중분?????비율(CR)'? 무조?0.000?로 ?기?며 ?는 ?류가 ?닙?다."),
+                                            ("5. ?술/보고??기재 ??, "?술 ?구??보고?에 ?용 ??'?일 계층(1?계) 계층 구조 ?에????비교 분석???행?????명시?으?기재?시?바랍?다.")
                                         ]
                                 
                                     for r_idx, (section, content) in enumerate(guide_data, start=1):
@@ -8213,7 +8213,7 @@ with contextlib.nullcontext():
                                         guide_ws.set_row(r_idx, 60 if r_idx > 1 else 20)
     
                                 if ahp_method == 'fuzzy':
-                                    # 1. Fuzzy AHP 가중치 분석 결과 시트 추가
+                                    # 1. Fuzzy AHP 가중치 분석 결과 ?트 추?
                                     ws_fuzzy = workbook.add_worksheet('Fuzzy_AHP_Results')
                                     writer.sheets['Fuzzy_AHP_Results'] = ws_fuzzy
                                     ws_fuzzy.set_column('A:A', 25)
@@ -8230,7 +8230,7 @@ with contextlib.nullcontext():
                                 
                                     row_idx = 1
                                 
-                                    ws_fuzzy.write_string(row_idx, 0, _("■ 대분류 (Main Criteria) 퍼지 AHP 분석 결과 (삼각피지수 적용)", "■ Main Criteria Fuzzy AHP Results (TFN Applied)"), title_fmt)
+                                    ws_fuzzy.write_string(row_idx, 0, _("???분류 (Main Criteria) ?? AHP 분석 결과 (?각?????용)", "??Main Criteria Fuzzy AHP Results (TFN Applied)"), title_fmt)
                                     row_idx += 1
                                 
                                     headers = [
@@ -8238,9 +8238,9 @@ with contextlib.nullcontext():
                                         _("Fuzzy 가중치 (Lower)", "Fuzzy Weight (Lower)"), 
                                         _("Fuzzy 가중치 (Medium)", "Fuzzy Weight (Medium)"), 
                                         _("Fuzzy 가중치 (Upper)", "Fuzzy Weight (Upper)"), 
-                                        _("비퍼지화 (Crisp)", "Defuzzified (Crisp)"), 
+                                        _("비퍼지??(Crisp)", "Defuzzified (Crisp)"), 
                                         _("최종 가중치 (Norm)", "Final Weight (Norm)"), 
-                                        _("순위", "Rank")
+                                        _("?위", "Rank")
                                     ]
                                 
                                     for c_idx, h in enumerate(headers):
@@ -8269,7 +8269,7 @@ with contextlib.nullcontext():
                                 
                                     for parent_f, sub_info in sub_results_storage.items():
                                         if sub_info.get('group_Si'):
-                                            ws_fuzzy.write_string(row_idx, 0, _(f"■ 세부항목 [{parent_f}] 퍼지 AHP 분석 결과 (삼각피지수 적용)", f"■ Sub-Criteria [{parent_f}] Fuzzy AHP Results (TFN Applied)"), title_fmt)
+                                            ws_fuzzy.write_string(row_idx, 0, _(f"?????? [{parent_f}] ?? AHP 분석 결과 (?각?????용)", f"??Sub-Criteria [{parent_f}] Fuzzy AHP Results (TFN Applied)"), title_fmt)
                                             row_idx += 1
                                         
                                             for c_idx, h in enumerate(headers):
@@ -8300,7 +8300,7 @@ with contextlib.nullcontext():
                                         
                                             row_idx += 2
     
-                                    # 2. 일관성 비율(CR) 분포 분석 결과 시트 추가
+                                    # 2. ????비율(CR) 분포 분석 결과 ?트 추?
                                     ws_cr = workbook.add_worksheet('CR_Distribution')
                                     writer.sheets['CR_Distribution'] = ws_cr
                                     ws_cr.set_column('A:A', 25)
@@ -8312,17 +8312,17 @@ with contextlib.nullcontext():
                                         'font_name': 'NanumGothic'
                                     })
                                 
-                                    ws_cr.write_string(1, 0, _("■ 일관성 비율(CR) 분석 요약", "■ Consistency Ratio (CR) Analysis Summary"), title_fmt)
+                                    ws_cr.write_string(1, 0, _("??????비율(CR) 분석 ?약", "??Consistency Ratio (CR) Analysis Summary"), title_fmt)
                                 
                                     cr_headers = [
-                                        _("평가 시트명", "Sheet Name"),
-                                        _("평균 CR", "Mean CR"),
-                                        _("중앙값 CR", "Median CR"),
+                                        _("?? ?트?, "Sheet Name"),
+                                        _("?균 CR", "Mean CR"),
+                                        _("중앙?CR", "Median CR"),
                                         _("최소 CR", "Min CR"),
-                                        _("최대 CR", "Max CR"),
-                                        _("통과 표본 수 (CR <= 0.1)", "Passed Samples (CR <= 0.1)"),
-                                        _("전체 표본 수", "Total Samples"),
-                                        _("통과율 (%)", "Pass Rate (%)")
+                                        _("최? CR", "Max CR"),
+                                        _("?과 ?본 ??(CR <= 0.1)", "Passed Samples (CR <= 0.1)"),
+                                        _("?체 ?본 ??, "Total Samples"),
+                                        _("?과??(%)", "Pass Rate (%)")
                                     ]
                                 
                                     for c_idx, h in enumerate(cr_headers):
@@ -8358,15 +8358,15 @@ with contextlib.nullcontext():
                                         cr_row_idx += 1
                                     
                                     cr_row_idx += 2
-                                    ws_cr.write_string(cr_row_idx, 0, _("■ 개별 응답자별 일관성 비율(CR) 상세 내역", "■ Detailed Consistency Ratio (CR) by Respondent"), title_fmt)
+                                    ws_cr.write_string(cr_row_idx, 0, _("??개별 ?답?별 ????비율(CR) ?세 ?역", "??Detailed Consistency Ratio (CR) by Respondent"), title_fmt)
                                     cr_row_idx += 1
                                 
                                     indiv_headers = [
-                                        _("ID (설문자)", "Respondent ID"),
+                                        _("ID (?문??", "Respondent ID"),
                                         _("그룹 (Type)", "Group Type"),
-                                        _("평가 시트명", "Sheet Name"),
-                                        _("일관성 비율 (CR)", "Consistency Ratio (CR)"),
-                                        _("판정 (CR <= 0.1)", "Status (CR <= 0.1)")
+                                        _("?? ?트?, "Sheet Name"),
+                                        _("????비율 (CR)", "Consistency Ratio (CR)"),
+                                        _("?정 (CR <= 0.1)", "Status (CR <= 0.1)")
                                     ]
                                     for c_idx, h in enumerate(indiv_headers):
                                         ws_cr.write(cr_row_idx, c_idx, h, cr_header_fmt)
@@ -8374,7 +8374,7 @@ with contextlib.nullcontext():
                                 
                                     for idx_row, r in main_results_df.iterrows():
                                         cr_val = r['Final_CR']
-                                        status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만족 (Fail)", "Fail")
+                                        status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만?(Fail)", "Fail")
                                         ws_cr.write(cr_row_idx, 0, r['ID'], formats['body'])
                                         ws_cr.write(cr_row_idx, 1, r['Type'], formats['body'])
                                         ws_cr.write(cr_row_idx, 2, "Main_Criteria", formats['body'])
@@ -8385,7 +8385,7 @@ with contextlib.nullcontext():
                                     for mf, info in sub_results_storage.items():
                                         for idx_row, r in info['df'].iterrows():
                                             cr_val = r['Final_CR']
-                                            status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만족 (Fail)", "Fail")
+                                            status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만?(Fail)", "Fail")
                                             ws_cr.write(cr_row_idx, 0, r['ID'], formats['body'])
                                             ws_cr.write(cr_row_idx, 1, r['Type'], formats['body'])
                                             ws_cr.write(cr_row_idx, 2, mf, formats['body'])
@@ -8393,12 +8393,12 @@ with contextlib.nullcontext():
                                             ws_cr.write(cr_row_idx, 4, status, formats['body'])
                                             cr_row_idx += 1
     
-                        st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
+                        st.success(_("분석???료?었?니??", "Analysis completed successfully."))
                         if st.session_state.get('plan_type') == 'Basic':
-                            st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
-                                      "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
+                            st.info(_("**Basic ?한**: ?본 10개로 ?한?니?? Standard ?상?로 ?그?이?하?요.",
+                                      "? **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
                         if st.session_state.user_role == 'official':
-                            if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
+                            if data_source == _("? ?? ?일 직접 ?로??, "Upload Excel File") and uploaded_file is not None:
                                 save_data = uploaded_file.getvalue()
                                 save_filename = f"{filename_base}_Raw.xlsx"
                             else:
@@ -8415,30 +8415,30 @@ with contextlib.nullcontext():
                                 save_filename = f"{filename_base}_Raw.xlsx"
                             save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
     
-                        st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
-                                     "⚠️ Results reset on refresh. Download via the Results tab."))
+                        st.caption(_("?️ ?로고침 ??결과가 리셋?니?? 결과 ?운로드 ????반드????하?요.",
+                                     "?️ Results reset on refresh. Download via the Results tab."))
     
                         tab1, tab2, tab3, tab4, tab5 = st.tabs([
                             _("종합 분석 (Global)", "Global Comprehensive Analysis"),
-                            _("그룹별 분석", "Group Analysis"),
-                            _("통계 검정 (ANOVA)", "Statistical Test (ANOVA)"),
-                            _("시각화 센터", "Visualization Center"),
-                            _("결과 다운로드", "Download Results")
+                            _("그룹?분석", "Group Analysis"),
+                            _("?계 검??(ANOVA)", "Statistical Test (ANOVA)"),
+                            _("?각???터", "Visualization Center"),
+                            _("결과 ?운로드", "Download Results")
                         ])
                         with tab1:
-                            st.subheader(_(" 종합 중요도 및 순위", " Global Weights & Rankings"))
+                            st.subheader(_(" 종합 중요????위", " Global Weights & Rankings"))
                             if is_english:
                                 disp_final_df = final_df.rename(columns={
-                                    "대분류": "Main Criteria",
-                                    "대분류 가중치": "Main Criteria Weight",
-                                    "중분류": "Sub-Criteria",
-                                    "중분류 가중치": "Sub-Criteria Weight",
+                                    "?분류": "Main Criteria",
+                                    "?분류 가중치": "Main Criteria Weight",
+                                    "중분?: "Sub-Criteria",
+                                    "중분?가중치": "Sub-Criteria Weight",
                                     "Global Weight": "Global Weight",
                                     "Global Rank": "Global Rank",
-                                    "CR(대분류)": "CR (Main Criteria)",
-                                    "CI(대분류)": "CI (Main Criteria)",
-                                    "CR(중분류)": "CR (Sub-Criteria)",
-                                    "CI(중분류)": "CI (Sub-Criteria)"
+                                    "CR(?분류)": "CR (Main Criteria)",
+                                    "CI(?분류)": "CI (Main Criteria)",
+                                    "CR(중분?": "CR (Sub-Criteria)",
+                                    "CI(중분?": "CI (Sub-Criteria)"
                                 })
                             else:
                                 disp_final_df = final_df
@@ -8447,68 +8447,68 @@ with contextlib.nullcontext():
 
     
                         with tab2:
-                            st.markdown(_("#### 그룹별 가중치 상세 비교", "#### Detailed Comparison of Weights by Group"))
+                            st.markdown(_("#### 그룹?가중치 ?세 비교", "#### Detailed Comparison of Weights by Group"))
                             disp_comparison_df = comparison_df.copy()
                             if is_english:
                                 disp_comparison_df.rename(columns={
-                                    "중분류": "Sub-Criteria",
+                                    "중분?: "Sub-Criteria",
                                     "Overall": "Overall",
-                                    "전문가": "Expert",
-                                    "일반": "General",
-                                    "공무원": "Public Official"
+                                    "?문가": "Expert",
+                                    "?반": "General",
+                                    "공무??: "Public Official"
                                 }, inplace=True)
                             st.dataframe(disp_comparison_df.style.format(precision=4), use_container_width=True)
                         with tab3:
-                            st.markdown(_("#### 집단 간 유의성 분석", "#### Analysis of Significance Between Groups"))
+                            st.markdown(_("#### 집단 ??의??분석", "#### Analysis of Significance Between Groups"))
                             if not anova_df.empty:
                                 if is_english:
                                     disp_anova = anova_df.copy()
                                     disp_anova.rename(columns={
-                                        "요인": "Factor/Criteria",
-                                        "F-값": "F-Value",
+                                        "?인": "Factor/Criteria",
+                                        "F-?: "F-Value",
                                         "P-Value": "P-Value",
-                                        "유의성": "Significance",
-                                        "사후검정(Tukey HSD)": "Post-Hoc (Tukey HSD)"
+                                        "?의??: "Significance",
+                                        "?후검??Tukey HSD)": "Post-Hoc (Tukey HSD)"
                                     }, inplace=True)
                                 
                                     # Map values in Significance
                                     disp_anova["Significance"] = disp_anova["Significance"].map({
-                                        "유의함": "Significant",
-                                        "유의하지 않음": "Not Significant"
+                                        "?의??: "Significant",
+                                        "?의?? ?음": "Not Significant"
                                     }).fillna(disp_anova["Significance"])
                                 
                                     # Map values in Post-Hoc
                                     def translate_posthoc(val):
                                         if not isinstance(val, str):
                                             return val
-                                        val = val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
-                                        val = val.replace(" 차이 있음", " (Diff exists)")
-                                        val = val.replace("집단 간 구체적 차이 발견 못함", "No significant pairwise difference found")
-                                        val = val.replace("계산 오류", "Calculation Error")
+                                        val = val.replace("?문가", "Expert").replace("?반", "General").replace("공무??, "Public Official")
+                                        val = val.replace(" 차이 ?음", " (Diff exists)")
+                                        val = val.replace("집단 ?구체??차이 발견 못함", "No significant pairwise difference found")
+                                        val = val.replace("계산 ?류", "Calculation Error")
                                         return val
                                     disp_anova["Post-Hoc (Tukey HSD)"] = disp_anova["Post-Hoc (Tukey HSD)"].apply(translate_posthoc)
                                 else:
                                     disp_anova = anova_df
                                 st.dataframe(disp_anova.style.format(precision=5), use_container_width=True)
                             else:
-                                st.info(_("통계 검정을 위해 2개 이상의 그룹 데이터가 필요합니다.", "At least 2 group datasets are required for statistical testing (ANOVA)."))
+                                st.info(_("?계 검?을 ?해 2??상??그룹 ?이?? ?요?니??", "At least 2 group datasets are required for statistical testing (ANOVA)."))
                         with tab4:
-                            st.markdown(_("####  시각화 센터", "####  Visualization Center"))
+                            st.markdown(_("####  ?각???터", "####  Visualization Center"))
                             col_chart1, col_chart2 = st.columns(2)
                             with col_chart1:
-                                st.write(_("**종합 중요도 (Bar)**", "**Global Importance (Bar)**"))
+                                st.write(_("**종합 중요??(Bar)**", "**Global Importance (Bar)**"))
                                 chart_bar_df = final_df.sort_values('Global Weight').copy()
                                 if is_english:
-                                    chart_bar_df.rename(columns={"중분류": "Sub-Criteria", "Global Weight": "Global Weight"}, inplace=True)
+                                    chart_bar_df.rename(columns={"중분?: "Sub-Criteria", "Global Weight": "Global Weight"}, inplace=True)
                                     y_col = "Sub-Criteria"
                                     x_col = "Global Weight"
                                 else:
-                                    y_col = "중분류"
+                                    y_col = "중분?
                                     x_col = "Global Weight"
                                 fig_bar = px.bar(chart_bar_df, y=y_col, x=x_col, orientation='h', text_auto='.3f')
                                 st.plotly_chart(fig_bar, use_container_width=True)
                             with col_chart2:
-                                st.write(_("**그룹별 중요도 패턴 (Radar)**", "**Importance Pattern by Group (Radar)**"))
+                                st.write(_("**그룹?중요???턴 (Radar)**", "**Importance Pattern by Group (Radar)**"))
                                 indiv_global_radar = []
                                 all_ids_r = main_results_df['ID'].unique()
                                 for rid in all_ids_r:
@@ -8516,7 +8516,7 @@ with contextlib.nullcontext():
                                     rtype_rd = m_row_rd['Type']
                                     grp_name_en = rtype_rd
                                     if is_english:
-                                        grp_name_en = str(rtype_rd).replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
+                                        grp_name_en = str(rtype_rd).replace("?문가", "Expert").replace("?반", "General").replace("공무??, "Public Official")
                                     for m_f_rd in main_factors:
                                         mw_indiv_rd = m_row_rd[f"Weight_{m_f_rd}"]
                                         s_row_df_rd = sub_results_storage[m_f_rd]['df']
@@ -8535,17 +8535,70 @@ with contextlib.nullcontext():
                                     fig_radar.add_trace(go.Scatterpolar(r=t_data['Global_Weight'], theta=t_data['Factor'], fill='toself', name=t))
                                 st.plotly_chart(fig_radar, use_container_width=True)
                         
-                            # [바이올린 플롯] CR 분포 시각화 — 드롭다운 계층 선택
+                            # [바이?린 ?롯] CR 분포 ?각?????롭?운 계층 ?택
+        with tab_signup_side:
+            if st.session_state.user_id:
+                st.info(_("?? 로그?되???습?다.", "You are already logged in."))
+            else:
+                signup_type = st.radio(
+                    _("가??구분 ?택", "Select Registration Type"),
+                    options=[
+                        _("무료 ?원가??, "Free Registration"),
+                        _("?식(?료) ?원가??, "Official (Paid) Registration")
+                    ],
+                    horizontal=True,
+                    key="main_signup_type"
+                )
+
+                if signup_type == _("?식(?료) ?원가??, "Official (Paid) Registration"):
+                    st.info(_(
+                        "? **?식(?료) ?이?스 ?용 ?내**\n\n"
+                        "1. 먼? **'무료 ?원가??**???택?여 계정???성??주세??\n"
+                        "2. ?성??계정?로 로그?한 ?? ?쪽 ?이?바??**결제 ?동** ?는 ?단??**'?비???금'** ?? ?해 결제??료?시?즉시 ?식 ?이?스??그?이?됩?다.\n\n"
+                        "? *?구?법인카드 결제 ?견적??계산??간이과세?? 발행??100% 지?됩?다.*",
+                        "? **Official (Paid) License Info**\n\n"
+                        "1. Please first select **'Free Registration'** to create your account.\n"
+                        "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
+                        "? *Supports Research/Corporate Cards, and Quotations (100% supported).*"
+                    ))
+                else:
+                    agreements = show_agreement_ui()
+                    s_id = st.text_input(_("?이??(?메??주소)", "Username (Email Address)"), key="main_s_id")
+                    s_pw = st.text_input(_("비?번호", "Password"), type="password", key="main_s_pw")
+
+                    s_cust_type = "standard"
+
+                    if st.button(_("가?신?, "Register"), key="main_btn_signup"):
+                        if not agreements.get("agree_personal_info"):
+                            st.error(_("개인?보 ?집·?용???의?야 가?신? ???습?다.", "You must agree to the privacy policy to register."))
+                        elif not validate_email(s_id):
+                            st.error(_("?바??메???식???닙?다.", "Invalid email format."))
+                        elif not validate_password(s_pw):
+                            st.error(_("비?번호??문자+?수문자?야 ?니??", "Password must contain both letters and special characters."))
+                        else:
+                            restore_from_deleted_sheet(s_id.strip())
+                            # 가????무조?'temp' 권한?로 배정
+                            if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                                st.success(_("?원가?이 ?료?었?니?? ?이?바??'로그?? ????로그?해 주시?바랍?다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
+                                import time
+                                time.sleep(2)
+                                st.rerun()
+                            else:
+                                st.error(_("?? 존재?는 ?이?입?다.", "ID already exists."))
+
+                    st.info(_("? **개인?보 보호 ?내**\n\nAHP 마스?는 ?용?의 ?름, ?화번호 ??불필?한 개인?보??집?? ?습?다. ?한 ?력?신 비?번호??강력?게 ?호?되????되므?관리자???????습?다. ?심?고 ?용??주세??", "? **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
+
+
                             st.markdown("---")
-                            st.write(_("**일관성 비율(CR) 분포 (Violin Plot)**", "**Consistency Ratio (CR) Distribution (Violin Plot)**"))
-                            st.caption(_("계층을 선택하면 해당 수준 응답자들의 CR 분포를 표시합니다. 바이올린 폭 = 밀도, 내부 박스 = 중앙값·사분위수, 점 = 개별 응답자",
+                            st.write(_("**????비율(CR) 분포 (Violin Plot)**", "**Consistency Ratio (CR) Distribution (Violin Plot)**"))
+                            st.caption(_("계층???택?면 ?당 ?? ?답?들??CR 분포??시?니?? 바이?린 ??= 밀?? ?? 박스 = 중앙값·사분위?? ??= 개별 ?답??,
                                          "Select a tier to view respondent CR distribution. Width = density, box = median/IQR, dots = individual respondents"))
 
-                            _t2_tier_opts_ko = ["대분류 (Main)", "중분류 (Sub)"]
+                            _t2_tier_opts_ko = ["?분류 (Main)", "중분?(Sub)"]
                             _t2_tier_opts_en = ["Main Criteria", "Sub-Criteria"]
                             _t2_tier_opts = _t2_tier_opts_en if is_english else _t2_tier_opts_ko
                             _t2_sel_tier = st.selectbox(
-                                _("📂 표시할 계층 선택", "📂 Select Tier to Display"),
+                                _("? ?시??계층 ?택", "? Select Tier to Display"),
                                 options=_t2_tier_opts,
                                 key="vio_tier_select_2tier"
                             )
@@ -8569,11 +8622,11 @@ with contextlib.nullcontext():
                                 _fig_t2_vio = go.Figure()
                                 _t2_ci = 0
 
-                                # ── 선택: 대분류 ─────────────────────────────────
+                                # ?? ?택: ?분류 ?????????????????????????????????
                                 if _t2_sel_tier == _t2_tier_opts[0]:
                                     if not main_results_df.empty and "Final_CR" in main_results_df.columns:
                                         _t2_main_cr = main_results_df["Final_CR"].dropna().tolist()
-                                        _t2_xlbl = _("대분류", "Main Criteria")
+                                        _t2_xlbl = _("?분류", "Main Criteria")
                                         _fig_t2_vio.add_trace(go.Violin(
                                             y=_t2_main_cr, x=[_t2_xlbl]*len(_t2_main_cr),
                                             name=_t2_xlbl, box_visible=True, meanline_visible=True,
@@ -8584,10 +8637,10 @@ with contextlib.nullcontext():
                                             hovertemplate="<b>" + _t2_xlbl + "</b><br>CR: %{y:.4f}<extra></extra>",
                                             showlegend=True
                                         ))
-                                    _t2_xaxis_title = _("대분류", "Main Criteria")
-                                    _t2_legend_title = _("대분류", "Main Criteria")
+                                    _t2_xaxis_title = _("?분류", "Main Criteria")
+                                    _t2_legend_title = _("?분류", "Main Criteria")
 
-                                # ── 선택: 중분류 ─────────────────────────────────
+                                # ?? ?택: 중분??????????????????????????????????
                                 else:
                                     for _t2_mf, _t2_info in sub_results_storage.items():
                                         _t2_sdf = _t2_info.get("df", None)
@@ -8596,7 +8649,7 @@ with contextlib.nullcontext():
                                         _t2_cr_vals = _t2_sdf["Final_CR"].dropna().tolist()
                                         if len(_t2_cr_vals) < 2:
                                             continue
-                                        _t2_xlbl = _(f"중분류({_t2_mf})", f"Sub({_t2_mf})")
+                                        _t2_xlbl = _(f"중분?{_t2_mf})", f"Sub({_t2_mf})")
                                         _fig_t2_vio.add_trace(go.Violin(
                                             y=_t2_cr_vals, x=[_t2_xlbl]*len(_t2_cr_vals),
                                             name=_t2_xlbl, box_visible=True, meanline_visible=True,
@@ -8608,22 +8661,22 @@ with contextlib.nullcontext():
                                             showlegend=True
                                         ))
                                         _t2_ci += 1
-                                    _t2_xaxis_title = _("대분류 (중분류 비교 CR)", "Main Criteria (Sub-Criteria Comparison CR)")
-                                    _t2_legend_title = _("중분류", "Sub-Criteria")
+                                    _t2_xaxis_title = _("?분류 (중분?비교 CR)", "Main Criteria (Sub-Criteria Comparison CR)")
+                                    _t2_legend_title = _("중분?, "Sub-Criteria")
 
                                 if len(_fig_t2_vio.data) == 0:
-                                    st.info(_("선택한 계층의 CR 데이터가 없거나 응답 수가 부족합니다.",
+                                    st.info(_("?택??계층??CR ?이?? ?거???답 ?? 부족합?다.",
                                               "No CR data available for the selected tier or insufficient responses."))
                                 else:
                                     _fig_t2_vio.add_hline(
                                         y=0.1, line_dash="dash", line_color="red",
-                                        annotation_text=_("CR 임계값 (0.1)", "CR Threshold (0.1)"),
+                                        annotation_text=_("CR ?계?(0.1)", "CR Threshold (0.1)"),
                                         annotation_position="top right"
                                     )
                                     _fig_t2_vio.update_layout(
                                         title=_(
-                                            f"바이올린플롯 CR — {_t2_sel_tier}",
-                                            f"Violin Plot CR — {_t2_sel_tier}"
+                                            f"바이?린?롯 CR ??{_t2_sel_tier}",
+                                            f"Violin Plot CR ??{_t2_sel_tier}"
                                         ),
                                         xaxis_title=_t2_xaxis_title,
                                         yaxis_title="Final_CR",
@@ -8637,13 +8690,13 @@ with contextlib.nullcontext():
                                     )
                                     st.plotly_chart(_fig_t2_vio, use_container_width=True)
                             except Exception as _e_t2_vio:
-                                st.warning(_(f"바이올린 플롯 생성 실패: {_e_t2_vio}", f"Violin plot generation failed: {_e_t2_vio}"))
+                                st.warning(_(f"바이?린 ?롯 ?성 ?패: {_e_t2_vio}", f"Violin plot generation failed: {_e_t2_vio}"))
     
-                            # ── Fuzzy AHP TFN 삼각퍼지 그래프 (Tab1 결과 화면 직후) ──
+                            # ?? Fuzzy AHP TFN ?각?? 그래??(Tab1 결과 ?면 직후) ??
                             if ahp_method == 'fuzzy':
                                 st.markdown("---")
-                                st.subheader(_(" 삼각퍼지수(TFN) 가중치 분포", " Triangular Fuzzy Number (TFN) Weight Distribution"))
-                                st.caption(_("각 요인의 삼각퍼지수(L, M, U)와 비퍼지화된 Crisp 가중치를 시각화합니다.",
+                                st.subheader(_(" ?각????TFN) 가중치 분포", " Triangular Fuzzy Number (TFN) Weight Distribution"))
+                                st.caption(_("??인???각????L, M, U)? 비퍼지?된 Crisp 가중치??각?합?다.",
                                              "Visualizes each factor's Triangular Fuzzy Numbers (L, M, U) and defuzzified Crisp weights."))
     
                                 tfn_color_palette = [
@@ -8656,7 +8709,7 @@ with contextlib.nullcontext():
                                     for i, (l, m, u) in enumerate(tfn_Si_data):
                                         color = tfn_color_palette[i % len(tfn_color_palette)]
                                         crisp = (l * m * u) ** (1/3)
-                                        # 삼각형 채우기 (반투명)
+                                        # ?각??채우?(반투?
                                         fig.add_trace(go.Scatter(
                                             x=[l, m, u, l],
                                             y=[0, 1, 0, 0],
@@ -8672,7 +8725,7 @@ with contextlib.nullcontext():
                                             ),
                                             showlegend=True
                                         ))
-                                        # Crisp 가중치 수직 점선
+                                        # Crisp 가중치 ?직 ?선
                                         fig.add_trace(go.Scatter(
                                             x=[crisp, crisp],
                                             y=[0, 0.85],
@@ -8695,8 +8748,8 @@ with contextlib.nullcontext():
                                         ))
                                     fig.update_layout(
                                         title=dict(text=chart_title, font=dict(size=14)),
-                                        xaxis_title=_("가중치 값 (Weight Value)", "Weight Value"),
-                                        yaxis_title=_("소속도 (Membership Degree)", "Membership Degree"),
+                                        xaxis_title=_("가중치 ?(Weight Value)", "Weight Value"),
+                                        yaxis_title=_("?속??(Membership Degree)", "Membership Degree"),
                                         yaxis=dict(range=[-0.05, 1.25]),
                                         height=420,
                                         margin=dict(l=30, r=30, t=50, b=40),
@@ -8715,50 +8768,50 @@ with contextlib.nullcontext():
                                     fig.update_yaxes(gridcolor='rgba(200,200,200,0.3)')
                                     return fig
     
-                                # 1) 메인 기준 TFN 그래프
+                                # 1) 메인 기? TFN 그래??
                                 if main_group_Si:
                                     st.plotly_chart(
                                         render_tfn_chart(main_group_Si, main_factors,
-                                            _("▶ 대분류 (Main Criteria) 삼각퍼지 분포", "▶ Main Criteria TFN Distribution")),
+                                            _("???분류 (Main Criteria) ?각?? 분포", "??Main Criteria TFN Distribution")),
                                         use_container_width=True
                                     )
     
-                                    # TFN 수치 테이블
+                                    # TFN ?치 ?이?
                                     tfn_table_rows = []
                                     for i, (l, m, u) in enumerate(main_group_Si):
                                         crisp = (l * m * u) ** (1/3)
                                         tfn_table_rows.append({
-                                            _("요인", "Factor"): main_factors[i],
+                                            _("?인", "Factor"): main_factors[i],
                                             "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
                                             "Crisp Weight": crisp,
-                                            _("정규화 가중치", "Normalized Weight"): group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
+                                            _("?규??가중치", "Normalized Weight"): group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
                                         })
                                     st.dataframe(pd.DataFrame(tfn_table_rows).style.format(precision=4), use_container_width=True)
     
-                                # 2) 세부 기준별 TFN 그래프
+                                # 2) ?? 기??TFN 그래??
                                 for parent_f, sub_info in sub_results_storage.items():
                                     if sub_info.get('group_Si'):
                                         st.markdown("---")
                                         st.plotly_chart(
                                             render_tfn_chart(sub_info['group_Si'], sub_info['factors'],
-                                                _(f"▶ [{parent_f}] 세부항목 삼각퍼지 분포", f"▶ [{parent_f}] Sub-Criteria TFN Distribution")),
+                                                _(f"??[{parent_f}] ???? ?각?? 분포", f"??[{parent_f}] Sub-Criteria TFN Distribution")),
                                             use_container_width=True
                                         )
                                         sub_tfn_rows = []
                                         for i, (l, m, u) in enumerate(sub_info['group_Si']):
                                             crisp = (l * m * u) ** (1/3)
                                             sub_tfn_rows.append({
-                                                _("요인", "Factor"): sub_info['factors'][i],
+                                                _("?인", "Factor"): sub_info['factors'][i],
                                                 "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
                                                 "Crisp Weight": crisp,
-                                                _("정규화 가중치", "Normalized Weight"): sub_info['weights'].iloc[i] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][i]
+                                                _("?규??가중치", "Normalized Weight"): sub_info['weights'].iloc[i] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][i]
                                             })
                                         st.dataframe(pd.DataFrame(sub_tfn_rows).style.format(precision=4), use_container_width=True)
     
                         with tab5:
-                            st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;"> 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
-                                          '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
-                            st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary", on_click=lambda: __import__("survey_manager").log_user_action(st.session_state.get("user_id") or "Guest", "결과 엑셀 다운로드"))
+                            st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;"> 주의: 분석 결과가 ?상???구 ??되지 ?으므? ?래 ?운로드 버튼???러 결과??? ?일??컴퓨?에 반드????해 주세??</p>',
+                                          '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">?️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
+                            st.download_button(_("? 결과 ?일 ?운로드 (Excel)", "? Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary", on_click=lambda: __import__("survey_manager").log_user_action(st.session_state.get("user_id") or "Guest", "결과 ?? ?운로드"))
                             if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
                                 disp_radar_df = radar_indiv_df.copy()
                                 if is_english:
@@ -8773,14 +8826,14 @@ with contextlib.nullcontext():
     
                     except Exception as e:
                         import traceback
-                        st.error(_("❌ 분석 시스템 내부 오류가 발생했습니다.", "❌ An internal error occurred in the analysis system."))
-                        st.info(_(f"상세 에러 내용: {e}", f"Detailed error: {e}"))
-                        with st.expander(_("🔍 상세 스택 트레이스", "🔍 Detailed Stack Trace")):
+                        st.error(_("??분석 ?스???? ?류가 발생?습?다.", "??An internal error occurred in the analysis system."))
+                        st.info(_(f"?세 ?러 ?용: {e}", f"Detailed error: {e}"))
+                        with st.expander(_("? ?세 ?택 ?레?스", "? Detailed Stack Trace")):
                             st.code(traceback.format_exc())
                         st.stop()
                 else:
                     st.warning(message)
-                    if role_chk == 'temp' and ("3개 표본" in message or "3 samples" in message):
+                    if role_chk == 'temp' and ("3??본" in message or "3 samples" in message):
                         st.markdown("---")
                         with st.container(border=True):
                             is_english = (st.session_state.get('lang', 'ko') == 'en')
@@ -8830,15 +8883,15 @@ with contextlib.nullcontext():
                                 """
                                 st.components.v1.html(paypal_html, height=180)
                             else:
-                                st.markdown(_("### 💳 무제한 분석 및 즉시 해제", "### 💳 Upgrade to Official User for Unlimited Analysis"))
-                                st.markdown("정식 사용자로 승격하시면 **표본 수 제한(3개)이 즉시 해제**되며 모든 분석 기능을 무제한으로 사용하실 수 있습니다.")
-                                st.error("⛔ **현재 데이터는 3표본을 초과하여 분석이 차단되었습니다.**\n\n지금 바로 업그레이드하고 끊김 없이 분석을 이어가세요!")
-                                if st.button("🚀 지금 업그레이드하고 무제한 분석하기", type="primary", use_container_width=True):
+                                st.markdown(_("### ? 무제??분석 ?즉시 ?제", "### ? Upgrade to Official User for Unlimited Analysis"))
+                                st.markdown("?식 ?용?로 ?격?시?**?본 ???한(3???즉시 ?제**?며 모든 분석 기능??무제?으??용?실 ???습?다.")
+                                st.error("??**?재 ?이?는 3?본??초과?여 분석??차단?었?니??**\n\n지?바로 ?그?이?하??? ?이 분석???어가?요!")
+                                if st.button("?? 지??그?이?하?무제??분석?기", type="primary", use_container_width=True):
                                     st.components.v1.html("""
                                         <script>
                                             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
                                             for (let i = 0; i < tabs.length; i++) {
-                                                if (tabs[i].innerText.includes('서비스 안내') || tabs[i].innerText.includes('Service Info')) {
+                                                if (tabs[i].innerText.includes('?비???내') || tabs[i].innerText.includes('Service Info')) {
                                                     tabs[i].click();
                                                     window.parent.scrollTo(0, 0);
                                                     break;
@@ -8847,14 +8900,14 @@ with contextlib.nullcontext():
                                         </script>
                                     """, height=0, width=0)
             except Exception as e:
-                st.error(f"파일 처리 오류 발생: {e}")
+                st.error(f"?일 처리 ?류 발생: {e}")
             
         st.markdown("---")
     
         if st.session_state.user_role == 'official':
-            with st.expander(_("나의 분석 보관함 (중요: 반드시 컴퓨터에 백업해 주세요)", "My Analysis Storage (Important: Please backup to your computer)")):
+            with st.expander(_("?의 분석 보???(중요: 반드??컴퓨?에 백업??주세??", "My Analysis Storage (Important: Please backup to your computer)")):
                 my_analyses = get_user_analyses(st.session_state.user_id)
-                if not my_analyses: st.info(_("저장된 분석 없음", "No saved analyses found."))
+                if not my_analyses: st.info(_("??된 분석 ?음", "No saved analyses found."))
                 else:
                     for item in my_analyses:
                         a_id, filename, save_date = item
@@ -8867,24 +8920,24 @@ with contextlib.nullcontext():
                                 fname, fdata = file_info
                                 st.download_button("⬇️", fdata, fname, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", key=f"dl_{a_id}", type="primary")
                         with col_List4:
-                            if st.button("🗑", key=f"del_{a_id}"):
+                            if st.button("?", key=f"del_{a_id}"):
                                 delete_analysis(a_id)
                                 st.rerun()
     
 
     
     # -------------------------------------------------------------------------
-    # [신규] 코딩 엑셀 양식 탭
+    # [?규] 코딩 ?? ?식 ??
     # -------------------------------------------------------------------------
     with main_tab_coding:
         # -------------------------------------------------------------------------
-        # [신규] 온라인 설문지 제작 탭 (Tab 2) 상세 구현
+        # [?규] ?라???문지 ?작 ??(Tab 2) ?세 구현
         # -------------------------------------------------------------------------
-        st.header(_("AHP 분석 모델 설정 및 코딩 양식 다운로드", "Setup AHP Decision Model & Download Coding Form"))
+        st.header(_("AHP 분석 모델 ?정 ?코딩 ?식 ?운로드", "Setup AHP Decision Model & Download Coding Form"))
         
         saved_model = None
         if st.session_state.user_id is None:
-            st.info(_("로그인 후 나만의 분석 모델을 저장할 수 있습니다. (비로그인에서도 샘플 데이터로 미리보기 가능)",
+            st.info(_("로그?????만??분석 모델????할 ???습?다. (비로그인?서???플 ?이?로 미리보기 가??",
                       "Log in to save your custom models. (Preview with sample data available without login)"))
         else:
             saved_model = load_user_model(st.session_state.user_id)
@@ -8897,15 +8950,15 @@ with contextlib.nullcontext():
             "Feasibility": "LandAcquisition, ProjectDetail, CostFit",
             "Effectiveness": "Economic, Social, Performance"
         }
-        ko_default_main = "거버넌스, 계획타당성, 실현가능성, 사업효과"
+        ko_default_main = "거버?스, 계획??성, ?현가?성, ?업?과"
         ko_default_subs = {
-            "거버넌스": "행정지원, 지역공동체, 총괄사업관리자",
-            "계획타당성": "현안적정성, 대안적정성, 목표구체성",
-            "실현가능성": "부지확보, 사업구체화, 사업비적정성",
-            "사업효과": "경제적효과, 사회적효과, 성과관리"
+            "거버?스": "?정지?? 지???체, 총괄?업관리자",
+            "계획??성": "?안?정?? ??적?성, 목표구체??,
+            "?현가?성": "부지?보, ?업구체?? ?업비적?성",
+            "?업?과": "경제?효? ?회?효? ?과관?
         }
 
-        # [신규] 3계층(V3) 샘플 데이터 (스마트폰 구매 결정)
+        # [?규] 3계층(V3) ?플 ?이??(?마?폰 구매 결정)
         en_default_main_v3 = "Functionality, Design, Economy"
         en_default_subs_v3 = {
             "Functionality": "Hardware, Software",
@@ -8921,33 +8974,33 @@ with contextlib.nullcontext():
             "Maintenance": "Plan, Repair"
         }
 
-        ko_default_main_v3 = "기능성, 디자인, 경제성"
+        ko_default_main_v3 = "기능?? ?자?? 경제??
         ko_default_subs_v3 = {
-            "기능성": "하드웨어, 소프트웨어",
-            "디자인": "외관, 편의성",
-            "경제성": "단말기가격, 유지비용"
+            "기능??: "?드?어, ?프?웨??,
+            "?자??: "??, ?의??,
+            "경제??: "?말기?? ??비용"
         }
         ko_default_sub_subs_v3 = {
-            "하드웨어": "카메라, 배터리, 프로세서",
-            "소프트웨어": "운영체제, 기본앱",
-            "외관": "색상, 재질",
-            "편의성": "", 
-            "단말기가격": "일시불, 할부",
-            "유지비용": "통신요금, AS비용"
+            "?드?어": "카메?? 배터? ?로?서",
+            "?프?웨??: "?영체제, 기본??,
+            "??": "?상, ?질",
+            "?의??: "", 
+            "?말기??: "?시? ??",
+            "??비용": "?신?금, AS비용"
         }
     
     
-        with st.expander(_("나의 분석 모델 만들기", "Create Custom AHP Model"), expanded=True):
-            st.info(_("대항목과 세부항목을 입력하여 코딩 엑셀 양식을 생성하세요. (일반 AHP / 퍼지 AHP 공용)",
+        with st.expander(_("?의 분석 모델 만들?, "Create Custom AHP Model"), expanded=True):
+            st.info(_("???????????력?여 코딩 ?? ?식???성?세?? (?반 AHP / ?? AHP 공용)",
                       "Enter criteria to generate your coding Excel template. (For both Traditional and Fuzzy AHP)"))
             
-            # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
+            # 계층 구조 ?정 (2계층 기???일?게 ?체 공개)
             tier_level = 2
-            st.markdown("#####  계층 구조 설정")
+            st.markdown("#####  계층 구조 ?정")
             tier_choice = st.radio(
-                _("계층 레벨을 선택하세요.", "Select Hierarchy Level."),
-                [_("2계층 (대분류 - 중분류)", "2-Tier (Main - Sub)"),
-                 _("3계층 (대분류 - 중분류 - 소분류)", "3-Tier (Main - Sub - Sub-sub)")],
+                _("계층 ?벨???택?세??", "Select Hierarchy Level."),
+                [_("2계층 (?분류 - 중분?", "2-Tier (Main - Sub)"),
+                 _("3계층 (?분류 - 중분?- ?분?", "3-Tier (Main - Sub - Sub-sub)")],
                 index=0,
                 horizontal=True,
                 key="tab1_tier_choice"
@@ -8956,7 +9009,7 @@ with contextlib.nullcontext():
                 tier_level = 3
             st.markdown("---")
                 
-            # [신규] tier_level에 따라 샘플 데이터 스위칭
+            # [?규] tier_level???라 ?플 ?이???위?
             if is_en:
                 default_main = en_default_main_v3 if tier_level == 3 else en_default_main
                 default_subs = en_default_subs_v3 if tier_level == 3 else en_default_subs
@@ -8976,7 +9029,7 @@ with contextlib.nullcontext():
                     default_main = saved_main
                     default_subs = saved_model.get('subs', default_subs)
                     
-            main_criteria_input = st.text_input(_("대항목 (Main Criteria, 쉼표 구분)", "Main Criteria (comma-separated)"), value=default_main)
+            main_criteria_input = st.text_input(_("??? (Main Criteria, ?표 구분)", "Main Criteria (comma-separated)"), value=default_main)
             main_criteria_list = [x.strip() for x in main_criteria_input.split(',') if x.strip()]
             
             model_structure = {}
@@ -8985,101 +9038,101 @@ with contextlib.nullcontext():
                 for mc in main_criteria_list:
                     d_val = default_subs.get(mc, "")
                     if isinstance(d_val, list): d_val = ", ".join(d_val)
-                    sub_input = st.text_input(_(f"'{mc}'의 세부항목", f"Sub-criteria for '{mc}'"), value=d_val, key=f"tab1_sub_{mc}")
+                    sub_input = st.text_input(_(f"'{mc}'??????", f"Sub-criteria for '{mc}'"), value=d_val, key=f"tab1_sub_{mc}")
                     sub_list = [x.strip() for x in sub_input.split(',') if x.strip()]
                     model_structure[mc] = sub_list
                     
                     if tier_level == 3 and sub_list:
-                        with st.expander(_(f"▶ '{mc}'의 소분류 (Sub-sub-criteria) 입력", f"▶ Enter Sub-sub-criteria for '{mc}'"), expanded=True):
+                        with st.expander(_(f"??'{mc}'???분?(Sub-sub-criteria) ?력", f"??Enter Sub-sub-criteria for '{mc}'"), expanded=True):
 
                             for sub_c in sub_list:
                                 sub_sub_input = st.text_input(
-                                    f"▶ '{sub_c}'의 소분류 (쉼표 구분)", 
+                                    f"??'{sub_c}'???분?(?표 구분)", 
                                     value=default_sub_subs.get(sub_c, ""),
-                                    placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
-                                    help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
+                                    placeholder="?? ??1, ??2 (???위 ?인???다?비워?세??",
+                                    help="?력칸을 비워?면 ????? ?동?로 2계층 구조?간주?어 분석?니??",
                                     key=f"tab1_sub_sub_{sub_c}"
                                 )
                                 parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
                                 if parsed_sub_subs:
                                     sub_sub_structure[sub_c] = parsed_sub_subs
             
-            # ── 계층 구조 트리 시각화 ──────────────────────────────────────
+            # ?? 계층 구조 ?리 ?각????????????????????????????????????????
             if main_criteria_list:
                 st.markdown("---")
-                st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
+                st.markdown(_("##### ? 계층 구조 미리보기", "##### ? Hierarchy Preview"))
                 tree_lines = []
                 for mi, mc in enumerate(main_criteria_list):
                     is_last_main = (mi == len(main_criteria_list) - 1)
-                    prefix_main = "└── " if is_last_main else "├── "
+                    prefix_main = "??? " if is_last_main else "??? "
                     tree_lines.append(f"{prefix_main}[{mc}]")
                     
                     subs = model_structure.get(mc, [])
                     for si, sc in enumerate(subs):
                         is_last_sub = (si == len(subs) - 1)
-                        branch_main = "    " if is_last_main else "│   "
-                        prefix_sub = "└── " if is_last_sub else "├── "
+                        branch_main = "    " if is_last_main else "??  "
+                        prefix_sub = "??? " if is_last_sub else "??? "
                         
                         sub_subs = sub_sub_structure.get(sc, []) if tier_level == 3 else []
                         if sub_subs:
                             tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
                             for ssi, ssc in enumerate(sub_subs):
                                 is_last_ss = (ssi == len(sub_subs) - 1)
-                                branch_sub = "    " if is_last_sub else "│   "
-                                prefix_ss = "└── " if is_last_ss else "├── "
+                                branch_sub = "    " if is_last_sub else "??  "
+                                prefix_ss = "??? " if is_last_ss else "??? "
                                 tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{ssc}")
                         else:
                             tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
                 
                 tree_text = "\n".join(tree_lines)
                 st.code(tree_text, language=None)
-            # ─────────────────────────────────────────────────────────────
+            # ?????????????????????????????????????????????????????????????
 
-            # ── 데이터 입력 가이드 (항상 노출) ────────────────────────────
-            with st.expander(_("📝 다운로드한 엑셀에 데이터를 입력하는 방법", "📝 How to enter data in the downloaded Excel"), expanded=False):
+            # ?? ?이???력 가?드 (?? ?출) ????????????????????????????
+            with st.expander(_("? ?운로드???????이?? ?력?는 방법", "? How to enter data in the downloaded Excel"), expanded=False):
                 st.markdown(_("""
-**① 엑셀 파일 열기**: 아래 버튼으로 다운로드한 엑셀 파일을 실행합니다.
+**???? ?일 ?기**: ?래 버튼?로 ?운로드???? ?일???행?니??
 
-**② 쌍대비교 데이터 입력**:
-- **왼쪽(시행)** 항목이 더 중요하면: **음수** 입력 (예: `-3`)
-- **오른쪽(미시행)** 항목이 더 중요하면: **양수** 입력 (예: `3`)
-- 두 항목이 **동등**하면: `1` 입력
+**????비교 ?이???력**:
+- **?쪽(?행)** ??????중요?면: **?수** ?력 (?? `-3`)
+- **?른?미시??** ??????중요?면: **?수** ?력 (?? `3`)
+- ??????**?등**?면: `1` ?력
 
-**③ 필수 정보 입력**:
-- A열(`ID`): 응답자 번호 (1, 2, 3, ...)
-- B열(`Type`): 그룹명 (예: 전문가, 주민, 공무원 등)
+**???수 ?보 ?력**:
+- A??`ID`): ?답??번호 (1, 2, 3, ...)
+- B??`Type`): 그룹?(?? ?문가, 주?, 공무????
                 """, """
-**① Open the Excel file**: Run the template downloaded via the button below.
+**??Open the Excel file**: Run the template downloaded via the button below.
 
-**② Enter pairwise comparison data**:
+**??Enter pairwise comparison data**:
 - If the **left** item is more important: enter a **negative** value (e.g., `-3`)
 - If the **right** item is more important: enter a **positive** value (e.g., `3`)
 - If they are **equal**: enter `1`
 
-**③ Required information**:
+**??Required information**:
 - Column A (`ID`): Respondent number (1, 2, 3, ...)
 - Column B (`Type`): Group name (e.g., Expert, Public, Official)
                 """))
                 img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
                 if os.path.exists(img_file):
-                    st.image(img_file, caption=_("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel"))
-            # ─────────────────────────────────────────────────────────────
+                    st.image(img_file, caption=_("[참고] ?문 ?답???????력?는 방법", "[Reference] How to enter survey responses into Excel"))
+            # ?????????????????????????????????????????????????????????????
 
             col1, col2 = st.columns(2)
             with col1:
-                generate_clicked = st.button(_("1️⃣ 설정한 모델로 AHP 코딩 엑셀 양식 생성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
+                generate_clicked = st.button(_("1️⃣ ?정??모델?AHP 코딩 ?? ?식 ?성", "1️⃣ Generate Excel Template with this Model"), use_container_width=True)
                 if generate_clicked:
-                    import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "AHP 엑셀 양식 생성")
+                    import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "AHP ?? ?식 ?성")
             
             if generate_clicked:
                 if st.session_state.user_id is None:
-                    st.warning(_("코딩 엑셀 양식 생성 및 다운로드는 로그인한 사용자(무료 회원 포함)만 이용 가능합니다. 왼쪽 메뉴에서 로그인하거나 회원가입을 해주세요.", "Generating and downloading Excel templates is only available to logged-in users (including free members). Please log in or sign up from the left menu."))
+                    st.warning(_("코딩 ?? ?식 ?성 ??운로드??로그?한 ?용??무료 ?원 ?함)??용 가?합?다. ?쪽 메뉴?서 로그?하거나 ?원가?을 ?주?요.", "Generating and downloading Excel templates is only available to logged-in users (including free members). Please log in or sign up from the left menu."))
                 elif not main_criteria_list:
-                    st.error(_("대항목 입력 필요", "Main criteria input is required"))
+                    st.error(_("??? ?력 ?요", "Main criteria input is required"))
                 else:
                     current_model = {'main': main_criteria_input, 'subs': model_structure, 'sub_subs': sub_sub_structure, 'Tier_Level': tier_level}
                     save_user_model(st.session_state.user_id, current_model)
-                    st.toast(_("모델 저장 완료", "Model successfully saved"))
+                    st.toast(_("모델 ????료", "Model successfully saved"))
                     
                     output_template = io.BytesIO()
                     with pd.ExcelWriter(output_template, engine='xlsxwriter') as writer:
@@ -9100,7 +9153,7 @@ with contextlib.nullcontext():
                             safe_sheet_name = mc[:31]
                             df_sub.to_excel(writer, sheet_name=safe_sheet_name, index=False)
                             
-                        # 3계층 시트 생성
+                        # 3계층 ?트 ?성
                         if tier_level == 3:
                             for mc, subs in model_structure.items():
                                 for sub_c in subs:
@@ -9119,7 +9172,7 @@ with contextlib.nullcontext():
                     
                     with col2:
                         st.download_button(
-                            label=_("2️⃣ 📥 코딩 엑셀 양식 다운로드", "2️⃣ 📥 Download Excel Template"),
+                            label=_("2️⃣ ? 코딩 ?? ?식 ?운로드", "2️⃣ ? Download Excel Template"),
                             data=output_template,
                             file_name="AHP_Master_Template.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -9127,22 +9180,22 @@ with contextlib.nullcontext():
                             type="primary"
                         )
                     
-                    st.info(_("**안내:** 1번 버튼을 눌러 모델을 생성 및 저장했습니다. 우측의 2번 버튼을 클릭하여 컴퓨터에 코딩 엑셀 양식 파일을 저장하세요.", 
-                              "💡 **Info:** The model has been generated and saved. Click the 2nd button on the right to download the Excel template file to your computer."))
+                    st.info(_("**?내:** 1?버튼???러 모델???성 ???했?니?? ?측??2?버튼???릭?여 컴퓨?에 코딩 ?? ?식 ?일????하?요.", 
+                              "? **Info:** The model has been generated and saved. Click the 2nd button on the right to download the Excel template file to your computer."))
     
                     st.markdown(_("""
                     ---
-                    ### 📝 데이터 입력 가이드
-                    1. **엑셀 파일 열기**: 위 버튼을 눌러 다운로드한 엑셀 파일을 실행합니다.
-                    2. **쌍대비교 데이터 입력**:
-                        - **왼쪽** 항목이 더 중요하면: **음수** 입력 (예: -3)
-                        - **오른쪽** 항목이 더 중요하면: **양수** 입력 (예: 3)
-                        - **동등**하면: `1` 입력
-                    3. **필수 정보 입력**: A열(ID), **B열(Type)에 그룹명 입력 (예: 전문가, 주민 등)**
+                    ### ? ?이???력 가?드
+                    1. **?? ?일 ?기**: ??버튼???러 ?운로드???? ?일???행?니??
+                    2. **??비교 ?이???력**:
+                        - **?쪽** ??????중요?면: **?수** ?력 (?? -3)
+                        - **?른?* ??????중요?면: **?수** ?력 (?? 3)
+                        - **?등**?면: `1` ?력
+                    3. **?수 ?보 ?력**: A??ID), **B??Type)??그룹??력 (?? ?문가, 주? ??**
                     """,
                     """
                     ---
-                    ### 📝 Data Input Guide
+                    ### ? Data Input Guide
                     1. **Open the Excel file**: Run the Excel template downloaded above.
                     2. **Enter pairwise comparisons**:
                         - If the **left** item is more important: enter a **negative** value (e.g., -3)
@@ -9151,7 +9204,7 @@ with contextlib.nullcontext():
                     3. **Required Information**: Column A (ID), **Column B (Type) for group names (e.g., Expert, Public, etc.)**
                     """))
                     img_file = _("ahp_input_guide.png", "ahp_input_guide_en.png")
-                    caption_text = _("[참고] 설문 응답을 엑셀에 입력하는 방법", "[Reference] How to enter survey responses into Excel")
+                    caption_text = _("[참고] ?문 ?답???????력?는 방법", "[Reference] How to enter survey responses into Excel")
                     if os.path.exists(img_file):
                         st.image(img_file, caption=caption_text)
         tab1_main_col.__exit__(None, None, None)
@@ -9165,29 +9218,29 @@ with contextlib.nullcontext():
                 retention_manager.run_retention_check_silent()
             except Exception:
                 pass
-            st.header(_("AHP 온라인 설문 자동 생성 및 배포", "AHP Online Survey Auto-Generator & Deployer"))
+            st.header(_("AHP ?라???문 ?동 ?성 ?배포", "AHP Online Survey Auto-Generator & Deployer"))
             box_style = """
             <div style="background-color: #f8f9fc; border: none; border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; color: #1e293b; font-size: 0.95em; line-height: 1.6; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
             """
             if st.session_state.user_id is None:
                 msg = _(
-                    "<strong>비회원도 온라인 설문 폼을 미리 작성해 볼 수 있습니다.</strong><br>"
-                    "작성하신 내용은 좌측 사이드바에서 회원가입 및 로그인을 하시면 그대로 유지되어 바로 배포하실 수 있습니다. (무료 회원도 기능 제한 없이 모든 기능 사용 가능)<br><br>"
-                    "응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.<br>"
-                    "⚠️ <strong>주의:</strong> 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.",
+                    "<strong>비회?도 ?라???문 ?을 미리 ?성??????습?다.</strong><br>"
+                    "?성?신 ?용? 좌측 ?이?바?서 ?원가???로그?을 ?시?그?????어 바로 배포?실 ???습?다. (무료 ?원??기능 ?한 ?이 모든 기능 ?용 가??<br><br>"
+                    "?답 ?이?는 ?동?신 구? ?프?드?트????됩?다. 배포 ???이?? ?상 기록?는지 반드???스?해 주세??<br>"
+                    "?️ <strong>주의:</strong> ?동 ?제???트?크 ?애 ?으??한 ?이???실????서??책임지지 ?으므? 중요 ?이?는 주기?으?백업 ?보??시?바랍?다.",
                     
                     "<strong>Non-members can also preview and fill out the online survey form.</strong><br>"
                     "Once you sign up and log in from the left sidebar, the contents you have written will be maintained and you can deploy immediately. (Free members can also use all features without restriction)<br><br>"
                     "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.<br>"
-                    "⚠️ <strong>Caution:</strong> We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."
+                    "?️ <strong>Caution:</strong> We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."
                 )
             else:
                 msg = _(
-                    "응답 데이터는 연동하신 구글 스프레드시트에 저장됩니다. 배포 전 데이터가 정상 기록되는지 반드시 테스트해 주세요.<br>"
-                    "⚠️ <strong>주의:</strong> 연동 해제나 네트워크 장애 등으로 인한 데이터 유실에 대해서는 책임지지 않으므로, 중요 데이터는 주기적으로 백업 및 보관하시기 바랍니다.",
+                    "?답 ?이?는 ?동?신 구? ?프?드?트????됩?다. 배포 ???이?? ?상 기록?는지 반드???스?해 주세??<br>"
+                    "?️ <strong>주의:</strong> ?동 ?제???트?크 ?애 ?으??한 ?이???실????서??책임지지 ?으므? 중요 ?이?는 주기?으?백업 ?보??시?바랍?다.",
                     
                     "Response data is stored in your linked Google Spreadsheet. Please test data recording before deploying the survey.<br>"
-                    "⚠️ <strong>Caution:</strong> We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."
+                    "?️ <strong>Caution:</strong> We are not responsible for data loss due to unlinking or network failures. Please backup your important data periodically."
                 )
             st.markdown(f"{box_style}{msg}</div>", unsafe_allow_html=True)
             def render_section_header(title):
@@ -9210,7 +9263,7 @@ with contextlib.nullcontext():
             col_survey_main, col_survey_settings = st.columns([3.0, 1.1], gap="large")
             with col_survey_settings:
                 with st.container(border=True):
-                    st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("내 설문 관리", "My Survey Management")}</h4>', unsafe_allow_html=True)
+                    st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("???문 관?, "My Survey Management")}</h4>', unsafe_allow_html=True)
 
                     # Initialize states
                     if 'editing_survey_id' not in st.session_state:
@@ -9218,7 +9271,7 @@ with contextlib.nullcontext():
                     if 'survey_auto_loaded' not in st.session_state:
                         st.session_state.survey_auto_loaded = False
 
-                    # Check existing surveys (SQLite와 구글 시트 모두 조회하여 병합) — 세션 캐싱
+                    # Check existing surveys (SQLite? 구? ?트 모두 조회?여 병합) ???션 캐싱
                     if '_cached_user_surveys' not in st.session_state or st.session_state.get('_survey_cache_dirty'):
                         sqlite_surveys = []
                         try:
@@ -9276,8 +9329,8 @@ with contextlib.nullcontext():
                             st.session_state.edit_demo_name = demo.get("name", False)
                             st.session_state.edit_demo_age = demo.get("age", False)
                             st.session_state.edit_demo_exp = demo.get("experience", False)
-                            st.session_state.edit_age_type = demo.get("age_type", "개방형 (숫자 직접 입력)")
-                            st.session_state.edit_exp_type = demo.get("experience_type", "개방형 (숫자 직접 입력)")
+                            st.session_state.edit_age_type = demo.get("age_type", "개방??(?자 직접 ?력)")
+                            st.session_state.edit_exp_type = demo.get("experience_type", "개방??(?자 직접 ?력)")
 
                             st.session_state.edit_scale_type = meta.get("Scale_Type", "1-9 Continuous")
                             cr_limit_raw = meta.get("CR_Limit", 0.1)
@@ -9296,18 +9349,18 @@ with contextlib.nullcontext():
                         st.session_state.survey_auto_loaded = True
                         st.rerun()
 
-                    @st.dialog(_("🚨 [경고] 기존 설문 영구 삭제 안내", "🚨 [Warning] Permanent Deletion of Existing Survey"))
+                    @st.dialog(_("? [경고] 기존 ?문 ?구 ?? ?내", "? [Warning] Permanent Deletion of Existing Survey"))
                     def confirm_new_survey():
-                        st.error(_("새로운 설문을 작성하시면 기존 연동된 구글 시트에 저장된 **모든 데이터(설문 구조, 문항, 수집된 전체 응답 결과)가 즉시 삭제되며 절대 복구할 수 없습니다.**", "If you create a new survey, **ALL data saved in the linked Google Sheet (survey structure, questions, collected responses) will be immediately deleted and CANNOT be recovered.**"))
-                        st.info(_("**데이터 보존 안내:** 기존 설문의 응답 결과 보존을 원하신다면, 삭제에 동의하시기 전에 구글 스프레드시트에 접속하여 **[파일] -> [다운로드]** 메뉴를 통해 엑셀(.xlsx) 파일 등으로 백업본을 사용자 컴퓨터에 미리 다운로드해 두시기 바랍니다.", "**Data Preservation Guide:** If you wish to keep the existing responses, please go to the Google Spreadsheet and use the **[File] -> [Download]** menu to download a backup copy (e.g., .xlsx) to your computer before agreeing to delete."))
-                        agree = st.checkbox(_("네, 기존 데이터 백업을 완료했거나 불필요하며, 모든 데이터 삭제에 동의합니다.", "Yes, I have backed up or do not need the existing data, and I agree to delete all data."))
+                        st.error(_("?로???문???성?시?기존 ?동??구? ?트????된 **모든 ?이???문 구조, 문항, ?집???체 ?답 결과)가 즉시 ???며 ?? 복구?????습?다.**", "If you create a new survey, **ALL data saved in the linked Google Sheet (survey structure, questions, collected responses) will be immediately deleted and CANNOT be recovered.**"))
+                        st.info(_("**?이??보존 ?내:** 기존 ?문???답 결과 보존???하?다? ?????의?시??에 구? ?프?드?트???속?여 **[?일] -> [?운로드]** 메뉴??해 ??(.xlsx) ?일 ?으?백업본을 ?용??컴퓨?에 미리 ?운로드???시?바랍?다.", "**Data Preservation Guide:** If you wish to keep the existing responses, please go to the Google Spreadsheet and use the **[File] -> [Download]** menu to download a backup copy (e.g., .xlsx) to your computer before agreeing to delete."))
+                        agree = st.checkbox(_("?? 기존 ?이??백업???료?거??불필?하? 모든 ?이???????의?니??", "Yes, I have backed up or do not need the existing data, and I agree to delete all data."))
                         col1, col2 = st.columns(2)
                         with col1:
-                            if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True):
+                            if st.button(_("??취소", "??Cancel"), use_container_width=True):
                                 st.rerun()
                         with col2:
-                            if st.button(_("✅ 동의 및 초기화", "✅ Agree & Initialize"), type="primary", use_container_width=True, disabled=not agree):
-                                with st.spinner(_("기존 데이터를 삭제하는 중입니다...", "Deleting existing data...")):
+                            if st.button(_("???의 ?초기??, "??Agree & Initialize"), type="primary", use_container_width=True, disabled=not agree):
+                                with st.spinner(_("기존 ?이?? ???는 중입?다...", "Deleting existing data...")):
                                     from survey_manager import delete_admin_survey
                                     if user_surveys:
                                         delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
@@ -9317,7 +9370,7 @@ with contextlib.nullcontext():
                                         del st.session_state[k]
                                     st.session_state.survey_auto_loaded = True
                                     st.session_state._survey_cache_dirty = True
-                                st.success(_("완료되었습니다. 화면이 새로고침됩니다.", "Completed. The screen will be refreshed."))
+                                st.success(_("?료?었?니?? ?면???로고침?니??", "Completed. The screen will be refreshed."))
                                 import time
                                 time.sleep(1.5)
                                 st.rerun()
@@ -9329,35 +9382,35 @@ with contextlib.nullcontext():
                             if s[0] == linked_sheet_id:
                                 survey_title_display = s[1]
                                 break
-                        st.success(_(f" 현재 배포된 설문을 불러왔습니다: **{survey_title_display}**", f" Loaded deployed survey: **{survey_title_display}**"))
-                        st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
+                        st.success(_(f" ?재 배포???문??불러?습?다: **{survey_title_display}**", f" Loaded deployed survey: **{survey_title_display}**"))
+                        st.info(_("?래 ?에???용???정?신 ???단??**[배포 ?DB ?동 (?정 ?용 ?용)]** 버튼???르?면 기존 ?트???용?????워집니??", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
                         
-                        # [신규] 연동된 구글 스프레드시트 바로가기 및 온라인 설문 링크 제시
+                        # [?규] ?동??구? ?프?드?트 바로가???라???문 링크 ?시
                         base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                         if "localhost" in base_url or "127.0.0.1" in base_url:
                             active_survey_url = f"{base_url}?survey_id={linked_sheet_id}"
                         else:
                             active_survey_url = f"https://ahpkrj.streamlit.app/?survey_id={linked_sheet_id}"
 
-                        st.markdown(_("##### 🌐 온라인 설문지 링크 (응답자 배포용)", "##### 🌐 Online Survey Link (For Distribution)"))
+                        st.markdown(_("##### ? ?라???문지 링크 (?답??배포??", "##### ? Online Survey Link (For Distribution)"))
                         st.code(active_survey_url, language="text")
-                        st.caption(_("💡 위 설문 링크를 복사하여 이메일이나 메신저로 응답 대상자에게 전달하세요.", "💡 Copy the survey link above and send it to respondents via email or messenger."))
+                        st.caption(_("? ???문 링크?복사?여 ?메?이??메신???답 ??자?게 ?달?세??", "? Copy the survey link above and send it to respondents via email or messenger."))
 
                         gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
-                        btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
+                        btn_label = _("?동??구? ?프?드?트 바로가?, "Open Linked Google Sheet")
                         st.markdown(f'''
 
                         <div class="gs-nav-btn-box">
                             <a href="{gs_link}" target="_blank">
-                                📊 {btn_label}
+                                ? {btn_label}
                             </a>
                         </div>
                         ''', unsafe_allow_html=True)
 
-                    if st.button(_("✨ 처음부터 새 설문 작성하기 (기존 데이터 삭제)", "✨ Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
+                    if st.button(_("??처음부?????문 ?성?기 (기존 ?이????)", "??Start a new survey from scratch (Delete existing data)"), type="secondary", use_container_width=True):
                          confirm_new_survey()
                     else:
-                        if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
+                        if st.button(_("?????용 모두 지?기 (초기??", "??Clear all form contents (Initialize)"), type="secondary"):
                             st.session_state.editing_survey_id = None
                             keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
                             for k in keys_to_clear:
@@ -9366,47 +9419,47 @@ with contextlib.nullcontext():
 
                     st.divider()
 
-                    # [신규] URL 단축 및 QR코드 생성 지원 서비스 링크 (가로줄 밑 상시 배치)
-                    st.markdown(_("###### 🔗 설문 배포 유용한 도구", "###### 🔗 Useful Distribution Tools"))
+                    # [?규] URL ?축 ?QR코드 ?성 지???비??링크 (가로줄 ??시 배치)
+                    st.markdown(_("###### ? ?문 배포 ?용???구", "###### ? Useful Distribution Tools"))
                     st.markdown(_(
-                        "• **긴 URL 단축**: [buly.kr 바로가기 ↗️](https://buly.kr/)\n\n"
-                        "• **QR코드 생성**: [qr.naver.com 바로가기 ↗️](https://qr.naver.com/)",
-                        "• **Shorten Long URL**: [buly.kr ↗️](https://buly.kr/)\n\n"
-                        "• **Generate QR Code**: [qr.naver.com ↗️](https://qr.naver.com/)"
+                        "??**?URL ?축**: [buly.kr 바로가??️](https://buly.kr/)\n\n"
+                        "??**QR코드 ?성**: [qr.naver.com 바로가??️](https://qr.naver.com/)",
+                        "??**Shorten Long URL**: [buly.kr ?️](https://buly.kr/)\n\n"
+                        "??**Generate QR Code**: [qr.naver.com ?️](https://qr.naver.com/)"
                     ))
 
                     from survey_manager import create_survey_sheet
 
-                    # 하위 탭을 나누지 않고 하나의 연결된 페이지로 구성
+                    # ?위 ?? ?누지 ?고 ?나???결???이지?구성
 
             with col_survey_main:
-                # 5개 섹션 설문지 생성 폼 구성
-                # 섹션 1: 기본 정보
-                render_section_header(_("섹션 1: 설문 기본 정보 설정", "Section 1: Survey Basic Info Setup"))
-                default_survey_title = _("제조용 협동로봇 도입 요인 중요도 분석을 위한 전문가 AHP 설문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
-                st.markdown(f"**{_('설문지 제목', 'Survey Title')}**")
-                survey_title = st.text_input(_('설문지 제목', 'Survey Title'), value=st.session_state.get("edit_title", default_survey_title), label_visibility="collapsed")
+                # 5??션 ?문지 ?성 ??구성
+                # ?션 1: 기본 ?보
+                render_section_header(_("?션 1: ?문 기본 ?보 ?정", "Section 1: Survey Basic Info Setup"))
+                default_survey_title = _("?조???동로봇 ?입 ?인 중요??분석???한 ?문가 AHP ?문", "Expert AHP Survey on the Importance of Factors for Adopting Manufacturing Collaborative Robots")
+                st.markdown(f"**{_('?문지 ?목', 'Survey Title')}**")
+                survey_title = st.text_input(_('?문지 ?목', 'Survey Title'), value=st.session_state.get("edit_title", default_survey_title), label_visibility="collapsed")
             
-                default_survey_desc_ko = """[조사 목적 및 안내문]
+                default_survey_desc_ko = """[조사 목적 ??내?
 
-안녕하십니까?
-본 설문조사는 [연구/프로젝트 주제]에 관한 주요 요인들의 상대적 중요도를 도출하기 위해 
-전문가(또는 실무자) 여러분의 고견을 수렴하고자 마련되었습니다.
+?녕?십?까?
+??문조사??[?구/?로?트 주제]??관??주요 ?인?의 ????중요?? ?출?기 ?해 
+?문가(?는 ?무?? ?러분의 고견???렴?고??마련?었?니??
 
-바쁘시더라도 잠시 시간을 내어 귀하의 귀중한 의견을 응답해 주시면 연구에 큰 도움이 될 것입니다.
+바쁘?더?도 ?시 ?간???어 귀?의 귀중한 ?견???답??주시??구??????????것입?다.
 
-■ 조사 목적 : [연구/프로젝트 목적 기재]
-■ 조사 내용 : [조사 대상 요인] 간의 AHP(쌍대비교) 평가
-■ 조사 기간 : 202X년 X월 X일 ~ 202X년 X월 X일
-■ 개인정보 보호 :
-  - 본 조사를 통해 수집된 모든 자료는 통계법 제33조(비밀의 보호)에 의거하여 철저히 보호되며, 
-    오직 연구 및 통계 분석 목적으로만 활용됩니다.
-  - 응답해주신 개인 정보 및 개별 응답 결과는 절대 외부로 유출되지 않음을 약속드립니다.
+??조사 목적 : [?구/?로?트 목적 기재]
+??조사 ?용 : [조사 ????인] 간의 AHP(??비교) ??
+??조사 기간 : 202X??X??X??~ 202X??X??X??
+??개인?보 보호 :
+  - ?조사??해 ?집??모든 ?료???계???3?비???보호)???거?여 철???보호?며, 
+    ?직 ?구 ??계 분석 목적?로??용?니??
+  - ?답?주??개인 ?보 ?개별 ?답 결과???? ????출?? ?음???속?립?다.
 
-귀하의 소중한 참여에 깊은 감사를 드립니다.
+귀?의 ?중??참여??깊? 감사??립?다.
 
-- 연구 책임자 : [이름 기재]
-- 문의처 : [연락처 또는 이메일 기재]"""
+- ?구 책임??: [?름 기재]
+- 문의?: [?락??는 ?메??기재]"""
     
                 default_survey_desc_en = """[Survey Purpose & Instructions]
 
@@ -9416,10 +9469,10 @@ of major factors regarding [Research/Project Topic].
 
 Even if you are busy, taking a moment to provide your valuable input will be of great help to our research.
 
-■ Purpose : [Enter Research/Project Purpose]
-■ Content : AHP (Pairwise Comparison) evaluation among [Factors to be Surveyed]
-■ Period : [Start Date] ~ [End Date]
-■ Privacy :
+??Purpose : [Enter Research/Project Purpose]
+??Content : AHP (Pairwise Comparison) evaluation among [Factors to be Surveyed]
+??Period : [Start Date] ~ [End Date]
+??Privacy :
   - All data collected through this survey is strictly protected under Article 33 (Protection of Secrets) 
     of the Statistics Act and will be used solely for research and statistical analysis purposes.
   - We promise that your personal information and individual responses will never be leaked externally.
@@ -9429,7 +9482,7 @@ Thank you deeply for your valuable participation.
 - Lead Researcher : [Enter Name]
 - Contact : [Enter Phone or Email]"""
     
-                st.markdown(f"**{_('조사 목적 및 안내문', 'Survey Purpose & Instructions')}**")
+                st.markdown(f"**{_('조사 목적 ??내?, 'Survey Purpose & Instructions')}**")
                 
                 from quill_editor import st_quill
                 survey_desc = st_quill(
@@ -9452,20 +9505,20 @@ Thank you deeply for your valuable participation.
                 survey_admin_email = default_admin_email
 
                 st.write("")
-                # 응답자 수집 정보 및 그룹 분류 설정 (섹션 1로 통합)
+                # ?답???집 ?보 ?그룹 분류 ?정 (?션 1??합)
 
-                # 그룹 분류 문항 설정
-                st.markdown(f"**{_('그룹 분류 문항 설정', 'Group Classification Setup')}**")
+                # 그룹 분류 문항 ?정
+                st.markdown(f"**{_('그룹 분류 문항 ?정', 'Group Classification Setup')}**")
                 
-                default_type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
-                default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
+                default_type_q = _("귀?의 ?속? ?떻??십?까?", "What is your affiliation?")
+                default_type_opts = _("?문가, ?반, 공무?? 기?", "Expert, General, Public Official, Other")
                 
                 if "edit_type_questions" not in st.session_state:
                     legacy_q = st.session_state.get("edit_type_question")
                     legacy_opts = st.session_state.get("edit_type_options")
                 
-                    init_q = legacy_q if legacy_q and legacy_q != "귀하의 소속은 어떻게 되십니까?" else default_type_q
-                    init_opts = legacy_opts if legacy_opts and legacy_opts != "전문가, 일반, 공무원, 기타" else default_type_opts
+                    init_q = legacy_q if legacy_q and legacy_q != "귀?의 ?속? ?떻??십?까?" else default_type_q
+                    init_opts = legacy_opts if legacy_opts and legacy_opts != "?문가, ?반, 공무?? 기?" else default_type_opts
                     st.session_state["edit_type_questions"] = [{"q": init_q, "opts": init_opts}]
 
                 type_questions_state = st.session_state["edit_type_questions"]
@@ -9473,11 +9526,11 @@ Thank you deeply for your valuable participation.
                 
                 col1, col2, col3 = st.columns([6, 2, 2])
                 with col2:
-                    if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 3):
+                    if st.button(_("??문항 추?", "??Add Question"), use_container_width=True, disabled=num_types >= 3):
                         st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
                         st.rerun()
                 with col3:
-                    if st.button(_("➖ 문항 삭제", "➖ Remove"), use_container_width=True, disabled=num_types <= 1):
+                    if st.button(_("??문항 ??", "??Remove"), use_container_width=True, disabled=num_types <= 1):
                         st.session_state["edit_type_questions"].pop()
                         st.rerun()
                 
@@ -9486,11 +9539,11 @@ Thank you deeply for your valuable participation.
                 for i in range(num_types):
                     st.markdown(f"**{i+1}.**")
                     if i == 0:
-                        q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
-                        opts_label = _("그룹 분류 보기 옵션 (쉼표로 구분)", "Group Classification Options (comma-separated)")
+                        q_label = _("그룹 분류 질문 ?목", "Group Classification Question Title")
+                        opts_label = _("그룹 분류 보기 ?션 (?표?구분)", "Group Classification Options (comma-separated)")
                     else:
-                        q_label = _("추가 설문 문항", "Additional Survey Question")
-                        opts_label = _("추가 문항 보기 옵션 (쉼표로 구분)", "Additional Question Options (comma-separated)")
+                        q_label = _("추? ?문 문항", "Additional Survey Question")
+                        opts_label = _("추? 문항 보기 ?션 (?표?구분)", "Additional Question Options (comma-separated)")
                     
                     q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i]["q"], key=f"tq_q_{i}")
                     opts_val = st.text_input(opts_label + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"tq_opts_{i}")
@@ -9507,29 +9560,29 @@ Thank you deeply for your valuable participation.
                 type_options = ", ".join(type_questions[0]["opts"]) if type_questions else ""
 
 
-                # 인구통계학 정보 설정
-                st.markdown(f"**{_('인구통계학적 문항 수집 설정', 'Demographic Questions Setup')}**")
-                demo_name = st.checkbox(_("이름 수집", "Collect Name"), value=st.session_state.get("edit_demo_name", False))
-                demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
-                demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
+                # ?구?계???보 ?정
+                st.markdown(f"**{_('?구?계?적 문항 ?집 ?정', 'Demographic Questions Setup')}**")
+                demo_name = st.checkbox(_("?름 ?집", "Collect Name"), value=st.session_state.get("edit_demo_name", False))
+                demo_gender = st.checkbox(_("?별 ?집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
+                demo_email = st.checkbox(_("?메???집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
 
 
 
 
-                demo_age = st.checkbox(_("연령 수집", "Collect Age"), value=st.session_state.get("edit_demo_age", False))
-                age_type = "개방형 (숫자 직접 입력)"
+                demo_age = st.checkbox(_("?령 ?집", "Collect Age"), value=st.session_state.get("edit_demo_age", False))
+                age_type = "개방??(?자 직접 ?력)"
                 if demo_age:
-                    age_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("10세 단위 선택형", "Multiple Choice (10-year intervals)")]
-                    age_type = st.radio(_("연령 수집 방식", "Age Collection Method"), age_type_options, index=0 if st.session_state.get("edit_age_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_age_type_setup")
+                    age_type_options = [_("개방??(?자 직접 ?력)", "Open-ended (Type Number)"), _("10???위 ?택??, "Multiple Choice (10-year intervals)")]
+                    age_type = st.radio(_("?령 ?집 방식", "Age Collection Method"), age_type_options, index=0 if st.session_state.get("edit_age_type", "개방??(?자 직접 ?력)") == "개방??(?자 직접 ?력)" else 1, horizontal=True, key="survey_age_type_setup")
 
 
 
 
-                demo_exp = st.checkbox(_("경력년수 수집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", False))
-                exp_type = "개방형 (숫자 직접 입력)"
+                demo_exp = st.checkbox(_("경력?수 ?집", "Collect Years of Experience"), value=st.session_state.get("edit_demo_exp", False))
+                exp_type = "개방??(?자 직접 ?력)"
                 if demo_exp:
-                    exp_type_options = [_("개방형 (숫자 직접 입력)", "Open-ended (Type Number)"), _("5년 단위 선택형", "Multiple Choice (5-year intervals)")]
-                    exp_type = st.radio(_("경력년수 수집 방식", "Experience Collection Method"), exp_type_options, index=0 if st.session_state.get("edit_exp_type", "개방형 (숫자 직접 입력)") == "개방형 (숫자 직접 입력)" else 1, horizontal=True, key="survey_exp_type_setup")
+                    exp_type_options = [_("개방??(?자 직접 ?력)", "Open-ended (Type Number)"), _("5???위 ?택??, "Multiple Choice (5-year intervals)")]
+                    exp_type = st.radio(_("경력?수 ?집 방식", "Experience Collection Method"), exp_type_options, index=0 if st.session_state.get("edit_exp_type", "개방??(?자 직접 ?력)") == "개방??(?자 직접 ?력)" else 1, horizontal=True, key="survey_exp_type_setup")
 
                 demographics_settings = {
                     "name": demo_name,
@@ -9538,7 +9591,7 @@ Thank you deeply for your valuable participation.
                     "gender": demo_gender,
                     "experience": demo_exp,
                     "experience_type": exp_type,
-                    "affiliation": False,  # 소속 수집 삭제
+                    "affiliation": False,  # ?속 ?집 ??
                     "email": demo_email,
                     "type_question": type_question,
                     "type_options": [x.strip() for x in type_options.split(",") if x.strip()],
@@ -9551,18 +9604,18 @@ Thank you deeply for your valuable participation.
 
 
                 with st.container():
-                    # 섹션 2: AHP 모델 계층구조 입력 폼
-                    render_section_header(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
+                    # ?션 2: AHP 모델 계층구조 ?력 ??
+                    render_section_header(_("?션 2: AHP ?인 계층구조 ?문항 ?정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
 
-                    # 계층 구조 선택 (2계층 기준과 동일하게 전체 공개)
+                    # 계층 구조 ?택 (2계층 기???일?게 ?체 공개)
                     tier_level = 2
 
 
-                    st.markdown(_("#####  계층 구조 레벨 선택", "#####  Select Hierarchy Level"))
+                    st.markdown(_("#####  계층 구조 ?벨 ?택", "#####  Select Hierarchy Level"))
                     tier_choice_tab2 = st.radio(
-                        _("설문 모델의 계층 깊이를 선택하세요.", "Select the hierarchy depth for your survey model."),
-                        [_("2계층 (대분류 ➔ 중분류)", "2-Tier (Main ➔ Sub)"),
-                         _("3계층 (대분류 ➔ 중분류 ➔ 소분류)", "3-Tier (Main ➔ Sub ➔ Sub-sub)")],
+                        _("?문 모델??계층 깊이??택?세??", "Select the hierarchy depth for your survey model."),
+                        [_("2계층 (?분류 ??중분?", "2-Tier (Main ??Sub)"),
+                         _("3계층 (?분류 ??중분????분?", "3-Tier (Main ??Sub ??Sub-sub)")],
                         index=0,
                         horizontal=True,
                         key="tab2_tier_choice"
@@ -9573,16 +9626,16 @@ Thank you deeply for your valuable participation.
 
 
                     st.info(_(
-                        "💡 현재 입력된 요인은 **예시**일 뿐이며, 사용자의 연구 모델에 맞추어 내용을 모두 수정하여 사용할 수 있습니다.\n\n"
-                        "- 대분류 및 하위 요인은 반드시 **쉼표(,)** 로 구분하여 입력해 주세요.\n"
-                        "- 요인명에 언더바(`_`) 기호는 시스템 내부 처리와 충돌하므로 사용할 수 없습니다. (입력 시 자동으로 공백으로 변환됩니다.)",
-                        "💡 The current criteria are just **examples**. You can freely modify them to fit your research model.\n\n"
+                        "? ?재 ?력???인? **?시**??뿐이? ?용?의 ?구 모델??맞추???용??모두 ?정?여 ?용?????습?다.\n\n"
+                        "- ?분류 ??위 ?인? 반드??**?표(,)** ?구분?여 ?력??주세??\n"
+                        "- ?인명에 ?더?`_`) 기호???스???? 처리? 충돌????용?????습?다. (?력 ???동?로 공백?로 변?됩?다.)",
+                        "? The current criteria are just **examples**. You can freely modify them to fit your research model.\n\n"
                         "- Separate Main and Sub criteria using **commas(,)**.\n"
                         "- Do not use underscores (`_`) in criteria names. (They will be automatically converted to spaces.)"
                     ))
 
-                    default_tab2_main = _("기능성, 디자인, 경제성", "Functionality, Design, Economy") if tier_level == 3 else _("기술 요인, 조직 요인, 환경 요인, 혁신 요인", "Technological, Organizational, Environmental, Innovational")
-                    main_input = st.text_input(_("대항목 (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", default_tab2_main))
+                    default_tab2_main = _("기능?? ?자?? 경제??, "Functionality, Design, Economy") if tier_level == 3 else _("기술 ?인, 조직 ?인, ?경 ?인, ?신 ?인", "Technological, Organizational, Environmental, Innovational")
+                    main_input = st.text_input(_("??? (Main Criteria)", "Main Criteria"), value=st.session_state.get("edit_main_input", default_tab2_main))
                     main_list = [x.strip().replace("_", " ") for x in main_input.split(",") if x.strip()]
 
                     model_structure = {"main": main_list, "subs": {}}
@@ -9590,151 +9643,151 @@ Thank you deeply for your valuable participation.
                         model_structure["sub_subs"] = {}
 
                     for i, mc in enumerate(main_list):
-                        # 기본값 제안 (기존 양승훈 협동로봇 및 3계층 스마트폰 구매 결정)
+                        # 기본??안 (기존 ?승???동로봇 ?3계층 ?마?폰 구매 결정)
                         default_sub_val = ""
-                        if mc in ["기술 요인", "Technological"]: default_sub_val = _("상대적이점, 호환성, 안전성, 서비스지원", "Relative Advantage, Compatibility, Security, Service Support")
-                        elif mc in ["조직 요인", "Organizational"]: default_sub_val = _("경영진지원, 기술준비도, 금융자원, 교육훈련", "Top Management Support, Tech Readiness, Financial Resources, Training")
-                        elif mc in ["환경 요인", "Environmental"]: default_sub_val = _("정부지원, 경쟁압력, 인력난, 외부지원", "Gov Support, Competitive Pressure, Labor Shortage, External Support")
-                        elif mc in ["혁신 요인", "Innovational"]: default_sub_val = _("경영진의 혁신성, 변화수용태도, 스마트팩토리수준, 지식정도", "Management Innovativeness, Change Acceptance, Smart Factory Level, Knowledge Level")
-                        elif mc in ["기능성", "Functionality"]: default_sub_val = _("하드웨어, 소프트웨어", "Hardware, Software")
-                        elif mc in ["디자인", "Design"]: default_sub_val = _("외관, 편의성", "Appearance, Usability")
-                        elif mc in ["경제성", "Economy"]: default_sub_val = _("단말기가격, 유지비용", "Device Price, Maintenance Cost")
+                        if mc in ["기술 ?인", "Technological"]: default_sub_val = _("???이?? ?환?? ?전?? ?비????, "Relative Advantage, Compatibility, Security, Service Support")
+                        elif mc in ["조직 ?인", "Organizational"]: default_sub_val = _("경영진??? 기술준비도, 금융?원, 교육?련", "Top Management Support, Tech Readiness, Financial Resources, Training")
+                        elif mc in ["?경 ?인", "Environmental"]: default_sub_val = _("??지?? 경쟁?력, ?력?? ??지??, "Gov Support, Competitive Pressure, Labor Shortage, External Support")
+                        elif mc in ["?신 ?인", "Innovational"]: default_sub_val = _("경영진의 ?신?? 변?수?태?? ?마?팩?리??, 지?정??, "Management Innovativeness, Change Acceptance, Smart Factory Level, Knowledge Level")
+                        elif mc in ["기능??, "Functionality"]: default_sub_val = _("?드?어, ?프?웨??, "Hardware, Software")
+                        elif mc in ["?자??, "Design"]: default_sub_val = _("??, ?의??, "Appearance, Usability")
+                        elif mc in ["경제??, "Economy"]: default_sub_val = _("?말기?? ??비용", "Device Price, Maintenance Cost")
 
-                        sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
+                        sub_input = st.text_input(_(f"'{mc}'???위 ?인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
                         subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
                         model_structure["subs"][mc] = subs_list
 
-                        # [신규] 3계층 선택 시 소분류 입력 필드 동적 생성
+                        # [?규] 3계층 ?택 ???분??력 ?드 ?적 ?성
                         if tier_level == 3 and subs_list:
-                            with st.expander(_(f"↳ '{mc}' 하위의 소분류 (Sub-sub-criteria) 입력", f"↳ Enter Sub-sub-criteria under '{mc}'"), expanded=True):
+                            with st.expander(_(f"??'{mc}' ?위???분?(Sub-sub-criteria) ?력", f"??Enter Sub-sub-criteria under '{mc}'"), expanded=True):
 
                                 for sub_c in subs_list:
-                                    sub_sub_val = "" # 3계층 기본값은 빈칸
-                                    if sub_c in ["하드웨어", "Hardware"]: sub_sub_val = _("카메라, 배터리, 프로세서", "Camera, Battery, Processor")
-                                    elif sub_c in ["소프트웨어", "Software"]: sub_sub_val = _("운영체제, 기본앱", "OS, Default Apps")
-                                    elif sub_c in ["외관", "Appearance"]: sub_sub_val = _("색상, 재질", "Color, Material")
-                                    elif sub_c in ["단말기가격", "Device Price"]: sub_sub_val = _("일시불, 할부", "Lump Sum, Installment")
-                                    elif sub_c in ["유지비용", "Maintenance Cost"]: sub_sub_val = _("통신요금, AS비용", "Telecom Fee, A/S Cost")
+                                    sub_sub_val = "" # 3계층 기본값? 빈칸
+                                    if sub_c in ["?드?어", "Hardware"]: sub_sub_val = _("카메?? 배터? ?로?서", "Camera, Battery, Processor")
+                                    elif sub_c in ["?프?웨??, "Software"]: sub_sub_val = _("?영체제, 기본??, "OS, Default Apps")
+                                    elif sub_c in ["??", "Appearance"]: sub_sub_val = _("?상, ?질", "Color, Material")
+                                    elif sub_c in ["?말기??, "Device Price"]: sub_sub_val = _("?시? ??", "Lump Sum, Installment")
+                                    elif sub_c in ["??비용", "Maintenance Cost"]: sub_sub_val = _("?신?금, AS비용", "Telecom Fee, A/S Cost")
                         
                                     sub_sub_input = st.text_input(
-                                        f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
+                                        f"? '{sub_c}'???위 ?인 (?표 구분)", 
                                         value=st.session_state.get("edit_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
-                                        placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
-                                        help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
+                                        placeholder="?? ??1, ??2 (???위 ?인???다?비워?세??",
+                                        help="?력칸을 비워?면 ????? ?동?로 2계층 구조?간주?어 분석?니??",
                                         key=f"sub_sub_{sub_c}"
                                     )
-                                    # 소분류가 입력된 경우에만 저장, 없으면 무시
+                                    # ?분류? ?력??경우?만 ??? ?으?무시
                                     parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
                                     if parsed_sub_subs:
                                         model_structure["sub_subs"][sub_c] = parsed_sub_subs
 
-                    # ── 계층 구조 트리 시각화 ──────────────────────────────
+                    # ?? 계층 구조 ?리 ?각????????????????????????????????
                     if main_list:
                         st.markdown("---")
-                        st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
+                        st.markdown(_("##### ? 계층 구조 미리보기", "##### ? Hierarchy Preview"))
                         tree_lines = []
                         for mi, mc in enumerate(main_list):
                             is_last_main = (mi == len(main_list) - 1)
-                            prefix_main = "└── " if is_last_main else "├── "
+                            prefix_main = "??? " if is_last_main else "??? "
                             tree_lines.append(f"{prefix_main}[{mc}]")
                             
                             subs = model_structure.get("subs", {}).get(mc, [])
                             sub_subs_map = model_structure.get("sub_subs", {})
                             for si, sc in enumerate(subs):
                                 is_last_sub = (si == len(subs) - 1)
-                                branch_main = "    " if is_last_main else "│   "
-                                prefix_sub = "└── " if is_last_sub else "├── "
+                                branch_main = "    " if is_last_main else "??  "
+                                prefix_sub = "??? " if is_last_sub else "??? "
                                 
                                 sub_subs = sub_subs_map.get(sc, []) if tier_level == 3 else []
                                 if sub_subs:
                                     tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
                                     for ssi, ssc in enumerate(sub_subs):
                                         is_last_ss = (ssi == len(sub_subs) - 1)
-                                        branch_sub = "    " if is_last_sub else "│   "
-                                        prefix_ss = "└── " if is_last_ss else "├── "
+                                        branch_sub = "    " if is_last_sub else "??  "
+                                        prefix_ss = "??? " if is_last_ss else "??? "
                                         tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{ssc}")
                                 else:
                                     tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
                         
                         tree_text = "\n".join(tree_lines)
                         st.code(tree_text, language=None)
-                    # ──────────────────────────────────────────────────────
+                    # ??????????????????????????????????????????????????????
 
-                    st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
+                    st.caption(_("????비교 ?작 ???답?? ?반???인 ?위?매기??'?전 중요???위 지??문항'? ?동?로 ?문???함?니??", "??A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
 
 
 
 
                 with st.container():
-                    # 섹션 3: 요인 조작적 정의 설정
-                    render_section_header(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
-                    st.info(_("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.", "Please provide detailed descriptions so respondents can intuitively understand each criteria concept."))
+                    # ?션 3: ?인 조작???의 ?정
+                    render_section_header(_("?션 3: ?인??세 ?명 (조작???의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
+                    st.info(_("?답?? ?인 개념??직??으??악?????도??세 ?명??기술??주십?오.", "Please provide detailed descriptions so respondents can intuitively understand each criteria concept."))
                     definitions_map = {}
                     for i, mc in enumerate(main_list):
-                        # 대분류명 파란색 볼드 및 이모티콘을 이용해 대조 설정
-                        st.markdown(_(f"####  :blue[**대분류: {mc}**]", f"####  :blue[**Main Criteria: {mc}**]"))
+                        # ?분류?????볼드 ??모?콘???용?????정
+                        st.markdown(_(f"####  :blue[**?분류: {mc}**]", f"####  :blue[**Main Criteria: {mc}**]"))
                         default_main_def = ""
-                        if mc in ["기술 요인", "Technological"]: default_main_def = _("협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인", "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.")
-                        elif mc in ["조직 요인", "Organizational"]: default_main_def = _("협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인", "Factors related to the internal capabilities of the organization, top management support, financial and training status.")
-                        elif mc in ["환경 요인", "Environmental"]: default_main_def = _("정부 지원, 산업 내 경쟁 압력, 구인난 및 외부 협력 등 외부 환경적 요인", "External environmental factors such as government support, competitive pressure within the industry, labor shortage, and external cooperation.")
-                        elif mc in ["혁신 요인", "Innovational"]: default_main_def = _("경영진의 혁신 지향성, 구성원의 변화 수용도 및 스마트 팩토리 지식/기술 수준 요인", "Factors such as the management's innovation orientation, members' acceptance of change, and smart factory knowledge/skill levels.")
+                        if mc in ["기술 ?인", "Technological"]: default_main_def = _("?동로봇 ?입 ??기술???능, ?환?? ?전???기술 지????기술 측면???인", "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.")
+                        elif mc in ["조직 ?인", "Organizational"]: default_main_def = _("?동로봇 ?입?관?된 조직 ??????, 경영?지?? ?무 ?교육 ?태 ?인", "Factors related to the internal capabilities of the organization, top management support, financial and training status.")
+                        elif mc in ["?경 ?인", "Environmental"]: default_main_def = _("?? 지?? ?업 ??경쟁 ?력, 구인????? ?력 ???? ?경???인", "External environmental factors such as government support, competitive pressure within the industry, labor shortage, and external cooperation.")
+                        elif mc in ["?신 ?인", "Innovational"]: default_main_def = _("경영진의 ?신 지?성, 구성?의 변???용????마???토?지??기술 ?? ?인", "Factors such as the management's innovation orientation, members' acceptance of change, and smart factory knowledge/skill levels.")
 
                         edit_def_val = st.session_state.get("edit_definitions", {}).get(mc)
-                        val_to_use = edit_def_val if edit_def_val is not None else (default_main_def or _(f"{mc}에 대한 전반적 요소를 설명합니다.", f"Overall description for {mc}."))
+                        val_to_use = edit_def_val if edit_def_val is not None else (default_main_def or _(f"{mc}??????반???소??명?니??", f"Overall description for {mc}."))
                         val_to_use = translate_definition_if_default(mc, val_to_use)
 
                         definitions_map[mc] = st.text_input(
-                            _(f"👉 [{mc}] 요인의 전체적인 설명 입력", f"👉 Enter overall description for [{mc}]"),
+                            _(f"? [{mc}] ?인???체?인 ?명 ?력", f"? Enter overall description for [{mc}]"),
                             value=val_to_use,
                             key=f"def_main_{mc}_{i}"
                         )
 
-                        # 중분류들은 연관 관계를 묶을 수 있도록 시각적으로 구분된 테두리 컨테이너 안에 배치
+                        # 중분류들? ?? 관계? 묶을 ???도??각?으?구분???두?컨테?너 ?에 배치
                         with st.container(border=True):
                             for j, sc in enumerate(model_structure["subs"].get(mc, [])):
-                                # 기본 양승훈 설문 정의 적용
+                                # 기본 ?승???문 ?의 ?용
                                 default_def = ""
-                                if sc in ["상대적이점", "Relative Advantage"]: default_def = _("도입대상 협동로봇간의 상대적 이점", "Relative advantage among the collaborative robots targeted for adoption.")
-                                elif sc in ["호환성", "Compatibility"]: default_def = _("기존 설비나 타사 협동로봇과의 연결성", "Connectivity with existing equipment or third-party collaborative robots.")
-                                elif sc in ["안전성", "Security"]: default_def = _("작업자와 같은 공간에서 안전 펜스 없이 작업할 때의 인적 사고 예방 수준", "Level of human accident prevention when working in the same space as operators without safety fences.")
-                                elif sc in ["서비스지원", "Service Support"]: default_def = _("공급사의 기술 및 A/S 지원 정도", "Degree of technical and A/S support from the supplier.")
-                                elif sc in ["경영진지원", "Top Management Support"]: default_def = _("경영진의 도입 의지 및 경영철학 반영도", "The management's willingness to adopt and the degree to which management philosophy is reflected.")
-                                elif sc in ["기술준비도", "Tech Readiness"]: default_def = _("조직원의 로봇 활용 기술 준비 수준", "The level of technical readiness of organizational members to utilize robots.")
-                                elif sc in ["금융자원", "Financial Resources"]: default_def = _("로봇 구입을 위한 자본 여력 및 자금 조달 편의성", "Capital capacity and financing convenience for purchasing robots.")
-                                elif sc in ["교육훈련", "Training"]: default_def = _("기술 향상을 위한 위탁/사내 교육 프로그램 유무", "Availability of external/internal training programs for skill improvement.")
-                                elif sc in ["정부지원", "Gov Support"]: default_def = _("협동로봇 도입을 활성화하기 위한 정부의 재정 지원 및 보조금 혜택 정도", "Degree of government financial support and subsidy benefits to promote the adoption of collaborative robots.")
-                                elif sc in ["경쟁압력", "Competitive Pressure"]: default_def = _("동종 업계 또는 경쟁사의 협동로봇 도입에 따른 경쟁적 압박 정도", "Degree of competitive pressure due to the adoption of collaborative robots by peers or competitors.")
-                                elif sc in ["인력난", "Labor Shortage"]: default_def = _("제조 현장의 구인난 및 생산 인력 수급의 어려움 수준", "Level of difficulty in finding labor and supplying production personnel at the manufacturing site.")
-                                elif sc in ["외부지원", "External Support"]: default_def = _("로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적/교육적 지원", "Technical/educational support from external consulting, research institutes, etc., other than the robot supplier.")
-                                elif sc in ["경영진의 혁신성", "Management Innovativeness"]: default_def = _("새로운 제조 기술 및 로봇 도입에 대한 최고경영자의 적극적인 의지", "The top management's active willingness to adopt new manufacturing technologies and robots.")
-                                elif sc in ["변화수용태도", "Change Acceptance"]: default_def = _("신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도", "Members' acceptance and cooperative attitude towards changes in new equipment and work processes.")
-                                elif sc in ["스마트팩토리수준", "Smart Factory Level"]: default_def = _("공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준", "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.")
-                                elif sc in ["지식정도", "Knowledge Level"]: default_def = _("협동로봇 활용 및 유지 관리에 필요한 조직 내 전문 지식 수준", "Level of internal expertise required for the utilization and maintenance of collaborative robots.")
+                                if sc in ["???이??, "Relative Advantage"]: default_def = _("?입????동로봇간의 ?????점", "Relative advantage among the collaborative robots targeted for adoption.")
+                                elif sc in ["?환??, "Compatibility"]: default_def = _("기존 ?비??????동로봇과의 ?결??, "Connectivity with existing equipment or third-party collaborative robots.")
+                                elif sc in ["?전??, "Security"]: default_def = _("?업?? 같? 공간?서 ?전 ?스 ?이 ?업???의 ?적 ?고 ?방 ??", "Level of human accident prevention when working in the same space as operators without safety fences.")
+                                elif sc in ["?비????, "Service Support"]: default_def = _("공급?의 기술 ?A/S 지???도", "Degree of technical and A/S support from the supplier.")
+                                elif sc in ["경영진???, "Top Management Support"]: default_def = _("경영진의 ?입 ?? ?경영철학 반영??, "The management's willingness to adopt and the degree to which management philosophy is reflected.")
+                                elif sc in ["기술준비도", "Tech Readiness"]: default_def = _("조직?의 로봇 ?용 기술 준???", "The level of technical readiness of organizational members to utilize robots.")
+                                elif sc in ["금융?원", "Financial Resources"]: default_def = _("로봇 구입???한 ?본 ?력 ??금 조달 ?의??, "Capital capacity and financing convenience for purchasing robots.")
+                                elif sc in ["교육?련", "Training"]: default_def = _("기술 ?상???한 ?탁/?내 교육 ?로그램 ?무", "Availability of external/internal training programs for skill improvement.")
+                                elif sc in ["??지??, "Gov Support"]: default_def = _("?동로봇 ?입???성?하??한 ?????정 지???보조??택 ?도", "Degree of government financial support and subsidy benefits to promote the adoption of collaborative robots.")
+                                elif sc in ["경쟁?력", "Competitive Pressure"]: default_def = _("?종 ?계 ?는 경쟁?의 ?동로봇 ?입???른 경쟁???박 ?도", "Degree of competitive pressure due to the adoption of collaborative robots by peers or competitors.")
+                                elif sc in ["?력??, "Labor Shortage"]: default_def = _("?조 ?장??구인????산 ?력 ?급???려? ??", "Level of difficulty in finding labor and supplying production personnel at the manufacturing site.")
+                                elif sc in ["??지??, "External Support"]: default_def = _("로봇 공급???의 ?? 컨설?? ?구기? ?의 기술??교육??지??, "Technical/educational support from external consulting, research institutes, etc., other than the robot supplier.")
+                                elif sc in ["경영진의 ?신??, "Management Innovativeness"]: default_def = _("?로???조 기술 ?로봇 ?입?????최고경영?의 ?극?인 ??", "The top management's active willingness to adopt new manufacturing technologies and robots.")
+                                elif sc in ["변?수?태??, "Change Acceptance"]: default_def = _("?규 ?비 ??업 ?로?스 변?에 ???구성?들???용 ??조 ?도", "Members' acceptance and cooperative attitude towards changes in new equipment and work processes.")
+                                elif sc in ["?마?팩?리??", "Smart Factory Level"]: default_def = _("공장 ?????화, ?보?스??MES ?? ??동??기술???재 구축 ??", "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.")
+                                elif sc in ["지?정??, "Knowledge Level"]: default_def = _("?동로봇 ?용 ??? 관리에 ?요??조직 ???문 지????", "Level of internal expertise required for the utilization and maintenance of collaborative robots.")
 
                                 edit_sub_def_val = st.session_state.get("edit_definitions", {}).get(sc)
-                                sub_val_to_use = edit_sub_def_val if edit_sub_def_val is not None else (default_def or _(f"{sc}에 대한 정의입니다.", f"Definition for {sc}."))
+                                sub_val_to_use = edit_sub_def_val if edit_sub_def_val is not None else (default_def or _(f"{sc}??????의?니??", f"Definition for {sc}."))
                                 sub_val_to_use = translate_definition_if_default(sc, sub_val_to_use)
 
                                 definitions_map[sc] = st.text_input(
-                                    _(f"ㄴ 중분류 [{sc}] 설명 입력", f"👉 Enter description for sub-criteria [{sc}]"),
+                                    _(f"??중분?[{sc}] ?명 ?력", f"? Enter description for sub-criteria [{sc}]"),
                                     value=sub_val_to_use,
                                     key=f"def_sub_{mc}_{sc}_{j}"
                                 )
-                        st.write("") # 섹션 간 시각적 여백 추가
+                        st.write("") # ?션 ??각???백 추?
 
 
 
 
                 with st.container():
-                    # 섹션 4: 척도 인터페이스 설정
-                    render_section_header(_("섹션 4: 쌍대비교 응답 척도 및 일관성(CR) 검증 레벨 설정", "Section 4: Scale Type & CR Validation Level Setup"))
+                    # ?션 4: 척도 ?터?이???정
+                    render_section_header(_("?션 4: ??비교 ?답 척도 ?????CR) 검??벨 ?정", "Section 4: Scale Type & CR Validation Level Setup"))
                     scale_options = [
-                        _("1-9 Continuous (1부터 9까지 연속형 스케일)", "1-9 Continuous Scale"),
-                        _("1-5 Continuous (1부터 5까지 연속형 스케일)", "1-5 Continuous Scale"),
-                        _("1-3-7-9 Discrete (이산형 척도)", "1-3-7-9 Discrete Scale"),
-                        _("1-3-5 Discrete (이산형 척도)", "1-3-5 Discrete Scale")
+                        _("1-9 Continuous (1부??9까? ?속??????", "1-9 Continuous Scale"),
+                        _("1-5 Continuous (1부??5까? ?속??????", "1-5 Continuous Scale"),
+                        _("1-3-7-9 Discrete (?산??척도)", "1-3-7-9 Discrete Scale"),
+                        _("1-3-5 Discrete (?산??척도)", "1-3-5 Discrete Scale")
                     ]
-                    st.markdown(f"**{_('응답 척도 타입', 'Response Scale Type')}**")
+                    st.markdown(f"**{_('?답 척도 ???, 'Response Scale Type')}**")
                     default_scale = st.session_state.get("edit_scale_type", "1-9 Continuous")
                     scale_idx = 0
                     if "1-5" in default_scale and "Discrete" not in default_scale:
@@ -9744,18 +9797,18 @@ Thank you deeply for your valuable participation.
                     elif "1-3-5" in default_scale:
                         scale_idx = 3
 
-                    scale_option = st.radio(_("응답 척도 타입", "Response Scale Type"), scale_options, index=scale_idx, label_visibility="collapsed")
+                    scale_option = st.radio(_("?답 척도 ???, "Response Scale Type"), scale_options, index=scale_idx, label_visibility="collapsed")
 
 
 
 
-                    # 섹션 5: 답례품 및 개인정보 수집 동의 설정
+                    # ?션 5: ?????개인?보 ?집 ?의 ?정
                     if st.session_state.get("user_id") == "shjeon":
-                        st.markdown(_("#### 🎁 [선택] 답례품 및 동의 양식 설정 (shjeon 전용)", "#### 🎁 [Optional] Reward & Consent Form Setup (shjeon only)"))
-                        reward_enabled = st.toggle(_("답례품(기프티콘 등) 제공 활성화", "Enable Rewards (e.g., Gifticons)"))
+                        st.markdown(_("#### ? [?택] ??????의 ?식 ?정 (shjeon ?용)", "#### ? [Optional] Reward & Consent Form Setup (shjeon only)"))
+                        reward_enabled = st.toggle(_("????기프?콘 ?? ?공 ?성??, "Enable Rewards (e.g., Gifticons)"))
                         reward_desc = ""
                         if reward_enabled:
-                            reward_desc = st.text_area(_("답례품 설명", "Reward Description"), value=st.session_state.get("edit_reward_desc", "모든 설문 응답을 마친 분들에게 스타벅스 아메리카노 기프티콘을 발송해 드립니다."))
+                            reward_desc = st.text_area(_("?????명", "Reward Description"), value=st.session_state.get("edit_reward_desc", "모든 ?문 ?답??마친 분들?게 ??벅스 ?메리카??기프?콘??발송???립?다."))
                 
                         rewards_info = {
                             "enabled": reward_enabled,
@@ -9766,9 +9819,9 @@ Thank you deeply for your valuable participation.
                     else:
                         rewards_info = {"enabled": False}
 
-                    # 일관성 비율 (CR) 검증 레벨 설정
-                    st.markdown(_("**일관성 비율 (CR) 검증 레벨 설정**", "**Consistency Ratio (CR) Validation Level Setup**"))
-                    # Get default index from edit state if editing, otherwise default to index 3 (0.2 이하)
+                    # ????비율 (CR) 검??벨 ?정
+                    st.markdown(_("**????비율 (CR) 검??벨 ?정**", "**Consistency Ratio (CR) Validation Level Setup**"))
+                    # Get default index from edit state if editing, otherwise default to index 3 (0.2 ?하)
                     default_cr_idx = 3
                     if st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is not None:
                         cr_val = float(st.session_state.get("edit_cr_limit"))
@@ -9779,12 +9832,12 @@ Thank you deeply for your valuable participation.
                     elif st.session_state.get("editing_survey_id") and st.session_state.get("edit_cr_limit") is None:
                         default_cr_idx = 0
             
-                    cr_limit_opt = st.selectbox(_("일관성 비율(CR) 허용 기준치", "Consistency Ratio (CR) Tolerance Limit"), [
-                        _("제한하지 않음 (이탈률 감소용)", "No Limit (To reduce drop-out rate)"),
-                        _("0.1 이하 (매우 엄격함)", "0.1 or below (Very Strict)"),
-                        _("0.15 이하 (엄격함)", "0.15 or below (Strict)"),
-                        _("0.2 이하 (보통)", "0.2 or below (Normal)"),
-                        _("0.3 이하 (일부 허용)", "0.3 or below (Somewhat Lenient)")
+                    cr_limit_opt = st.selectbox(_("????비율(CR) ?용 기??, "Consistency Ratio (CR) Tolerance Limit"), [
+                        _("?한?? ?음 (?탈?감소??", "No Limit (To reduce drop-out rate)"),
+                        _("0.1 ?하 (매우 ?격??", "0.1 or below (Very Strict)"),
+                        _("0.15 ?하 (?격??", "0.15 or below (Strict)"),
+                        _("0.2 ?하 (보통)", "0.2 or below (Normal)"),
+                        _("0.3 ?하 (?? ?용)", "0.3 or below (Somewhat Lenient)")
                     ], index=default_cr_idx)
 
                     cr_limit = None
@@ -9794,9 +9847,9 @@ Thank you deeply for your valuable participation.
                     elif "0.3" in cr_limit_opt: cr_limit = 0.3
 
                     if cr_limit is not None:
-                        st.warning(_("⚠️ 일관성 비율(CR) 기준을 너무 엄격하게(낮게) 설정할 경우, 논리적 모순이 있는 설문이 대거 무효 처리되어 응답자의 재검토 피로도가 극대화되고 설문 이탈률이 급증할 수 있으니 유의하시기 바랍니다. 응답자 이탈을 낮추기 위해 일관성 비율 허용 기준치를 0.3 이하로 여유롭게 설정하고, 데이터 수집 후 AHP마스터의 일관성 보정 기능을 통해 사후 보정하여 분석하시기를 적극 추천드립니다.", "⚠️ Warning: If the CR limit is set too strict (low), many logically inconsistent surveys will be invalidated. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. To reduce respondent dropout, we strongly recommend setting the consistency ratio tolerance to 0.3 or less and post-calibrating the collected data using the AHP Master consistency calibration feature."))
-                        # CR 가이드 방식 선택
-                        st.markdown(_("**응답자 일관성 유지(CR) 가이드 방식 선택**", "**Select Consistency Ratio (CR) Guide Method for Respondents**"))
+                        st.warning(_("?️ ????비율(CR) 기????무 ?격?게(??) ?정??경우, ?리??모순???는 ?문????무효 처리?어 ?답?의 ?????로?? 극??되??문 ?탈률이 급증?????으???의?시?바랍?다. ?답???탈??????해 ????비율 ?용 기?치? 0.3 ?하??유? ?정?고, ?이???집 ??AHP마스?의 ????보정 기능???해 ?후 보정?여 분석?시기? ?극 추천?립?다.", "?️ Warning: If the CR limit is set too strict (low), many logically inconsistent surveys will be invalidated. This maximizes respondent fatigue and can cause the survey drop-out rate to spike. To reduce respondent dropout, we strongly recommend setting the consistency ratio tolerance to 0.3 or less and post-calibrating the collected data using the AHP Master consistency calibration feature."))
+                        # CR 가?드 방식 ?택
+                        st.markdown(_("**?답????????(CR) 가?드 방식 ?택**", "**Select Consistency Ratio (CR) Guide Method for Respondents**"))
             
                         default_guide = st.session_state.get("edit_cr_guide_method", "realtime")
             
@@ -9808,9 +9861,9 @@ Thank you deeply for your valuable participation.
                                 default_guide = "none"
             
                         options_kr = {
-                            "realtime": "실시간 권장 범위 시각화 안내 (이탈률 최소화, 편의성 높음)",
-                            "post_wizard": "제출 후 지능형 수정 제안 마법사 (가장 학술적인 방식, 편향성 제거)",
-                            "none": "일관성 가이드 없음(엄격한 검증만 수행)"
+                            "realtime": "?시?권장 범위 ?각???내 (?탈?최소?? ?의???음)",
+                            "post_wizard": "?출 ??지?형 ?정 ?안 마법??(가???술?인 방식, ?향???거)",
+                            "none": "????가?드 ?음(?격??검증만 ?행)"
                         }
                         options_en = {
                             "realtime": "Real-time Visual Range Guide (Minimizes dropout, high convenience)",
@@ -9823,7 +9876,7 @@ Thank you deeply for your valuable participation.
                             return keys.index(val) if val in keys else 0
                 
                         selected_idx = st.radio(
-                            label=_("가이드 방식을 선택하세요", "Choose guide method"),
+                            label=_("가?드 방식???택?세??, "Choose guide method"),
                             options=[0, 1, 2],
                             format_func=lambda x: options_kr[list(options_kr.keys())[x]] if _("ko", "en") == "ko" else options_en[list(options_en.keys())[x]],
                             index=get_idx(default_guide),
@@ -9833,24 +9886,24 @@ Thank you deeply for your valuable participation.
                         cr_guide_method = list(options_kr.keys())[selected_idx]
             
                         if cr_guide_method == "realtime":
-                            st.info(_("**실시간 안내**: 응답자가 설문 중 일관성을 유지할 수 있도록 파란색 배경으로 권장되는 허용 범위를 안내합니다. 편의성이 높고 이탈률을 크게 낮출 수 있습니다.", "**Real-time Guide**: Highlights the recommended range with a blue background to help respondents maintain consistency. Highly convenient and reduces dropouts."))
+                            st.info(_("**?시??내**: ?답?? ?문 ????을 ???????도?????배경?로 권장?는 ?용 범위??내?니?? ?의?이 ?고 ?탈률을 ?게 ?? ???습?다.", "**Real-time Guide**: Highlights the recommended range with a blue background to help respondents maintain consistency. Highly convenient and reduces dropouts."))
                         elif cr_guide_method == "post_wizard":
-                            st.success(_("💡 **지능형 수정 제안 (추천)**: 응답 중에는 아무런 가이드를 주지 않아 응답자의 진짜 생각을 편향 없이 수집합니다. 제출 버튼을 눌렀을 때 CR이 초과하면, 가장 모순이 큰 딱 1개 문항을 찾아내어 수정을 권고하는 마법사를 띄웁니다.", "💡 **Smart Fix Wizard (Recommended)**: Collects true thoughts without bias by providing no guide during response. If CR exceeds the limit upon submission, a wizard will appear to suggest fixing the single most contradictory question."))
+                            st.success(_("? **지?형 ?정 ?안 (추천)**: ?답 중에???무??가?드?주? ?아 ?답?의 진짜 ?각???향 ?이 ?집?니?? ?출 버튼????????CR??초과?면, 가??모순??????1?문항??찾아?어 ?정??권고?는 마법?? ?웁?다.", "? **Smart Fix Wizard (Recommended)**: Collects true thoughts without bias by providing no guide during response. If CR exceeds the limit upon submission, a wizard will appear to suggest fixing the single most contradictory question."))
                         else:
-                            st.warning(_("**안내 없음**: 응답자에게 어떤 힌트도 주지 않으며, 제출 시 CR을 초과하면 에러 메시지와 함께 전체 재검토를 요구합니다. 이탈률이 높아질 수 있습니다.", "**No Guide**: Gives no hints. If CR is exceeded upon submission, an error message is shown requiring a full review. Dropouts may increase."))
+                            st.warning(_("**?내 ?음**: ?답?에??떤 ?트??주? ?으? ?출 ??CR??초과?면 ?러 메시지? ?께 ?체 ???? ?구?니?? ?탈률이 ?아????습?다.", "**No Guide**: Gives no hints. If CR is exceeded upon submission, an error message is shown requiring a full review. Dropouts may increase."))
                     else:
                         cr_guide_method = "none"
 
 
 
 
-                    # 섹션 7: 최종 미리보기 및 배포
-                    render_section_header(_("섹션 5: 저장 전 최종 미리보기 및 배포", "Section 5: Final Preview & Deployment Before Saving"))
+                    # ?션 7: 최종 미리보기 ?배포
+                    render_section_header(_("?션 5: ?????최종 미리보기 ?배포", "Section 5: Final Preview & Deployment Before Saving"))
 
-                    # [추가] 구글 스프레드시트 연동 설정
+                    # [추?] 구? ?프?드?트 ?동 ?정
                     if st.session_state.get('editing_survey_id'):
-                        st.markdown(_("#####  기존 구글 스프레드시트 연동 (수정 모드)", "#####  Existing Google Spreadsheet Integration (Edit Mode)"))
-                        st.info(_("현재 **기존 설문 수정 모드**로 진입했습니다. 수정한 설정 내용은 기존 연동된 구글 스프레드시트에 안전하게 덮어씌워집니다.", "You have entered **Existing Survey Edit Mode**. The modified settings will be safely overwritten to the existing linked Google Spreadsheet."))
+                        st.markdown(_("#####  기존 구? ?프?드?트 ?동 (?정 모드)", "#####  Existing Google Spreadsheet Integration (Edit Mode)"))
+                        st.info(_("?재 **기존 ?문 ?정 모드**?진입?습?다. ?정???정 ?용? 기존 ?동??구? ?프?드?트???전?게 ???워집니??", "You have entered **Existing Survey Edit Mode**. The modified settings will be safely overwritten to the existing linked Google Spreadsheet."))
                         existing_sheet_id_input = st.session_state.editing_survey_id
                     else:
                         past_surveys = []
@@ -9867,15 +9920,15 @@ Thank you deeply for your valuable participation.
                         
                         existing_sheet_id_input = ""
                         deploy_opts = [
-                            _("새 구글 스프레드시트 연동 (직접 URL 입력)", "Link New Google Spreadsheet (Manual URL Input)")
+                            _("??구? ?프?드?트 ?동 (직접 URL ?력)", "Link New Google Spreadsheet (Manual URL Input)")
                         ]
                         if len(past_surveys) > 0:
-                            deploy_opts.append(_("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)"))
+                            deploy_opts.append(_("기존 배포?던 ?문 URL ?사??(???기)", "Reuse Existing Deployed Survey URL (Overwrite)"))
                         
                         if len(deploy_opts) > 1:
-                            st.markdown("##### 🔗 배포 방식 선택 (Deployment Method)")
+                            st.markdown("##### ? 배포 방식 ?택 (Deployment Method)")
                             deploy_option = st.radio(
-                                _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
+                                _("배포 방식???택??주세??", "Please select a deployment method."),
                                 options=deploy_opts,
                                 index=0,
                                 key="deploy_option_radio",
@@ -9885,22 +9938,22 @@ Thank you deeply for your valuable participation.
                         else:
                             deploy_option = deploy_opts[0]
                 
-                        if "재사용" in deploy_option or "Reuse" in deploy_option:
-                            st.markdown(_("##### ⚙️ 재사용할 기존 설문 선택", "##### ⚙️ Select Existing Survey to Reuse"))
+                        if "?사?? in deploy_option or "Reuse" in deploy_option:
+                            st.markdown(_("##### ?️ ?사?할 기존 ?문 ?택", "##### ?️ Select Existing Survey to Reuse"))
                             survey_options = {f"{row[0]} ({row[2][:16]})" : row[1] for row in past_surveys}
                             selected_survey_label = st.selectbox(
-                                _("과거에 배포했던 설문 목록", "List of previously deployed surveys"),
+                                _("과거??배포?던 ?문 목록", "List of previously deployed surveys"),
                                 options=list(survey_options.keys())
                             )
                             existing_sheet_id_input = survey_options[selected_survey_label]
-                            st.info(_("선택한 설문의 구글 스프레드시트에 새로운 내용을 덮어씌웁니다. 기존 응답 URL은 그대로 유지됩니다.", "The new content will be overwritten on the Google Spreadsheet of the selected survey. The existing response URL will be maintained."))
+                            st.info(_("?택???문??구? ?프?드?트???로???용?????웁?다. 기존 ?답 URL? 그?????니??", "The new content will be overwritten on the Google Spreadsheet of the selected survey. The existing response URL will be maintained."))
                             
                         else:
-                            st.markdown(_("##### 📝 구글 스프레드시트 직접 연동", "##### 📝 Link Google Spreadsheet Manually"))
+                            st.markdown(_("##### ? 구? ?프?드?트 직접 ?동", "##### ? Link Google Spreadsheet Manually"))
                             st.warning(_(
-                                "1. 본인 구글 드라이브에서 '빈 스프레드시트'를 새로 만듭니다.\n"
-                                f"2. 우측 상단 [공유] 버튼을 눌러 `{st.secrets.get('gcp_service_account', {}).get('client_email', '서비스계정')}` 계정을 **편집자**로 추가합니다.\n"
-                                "3. 해당 스프레드시트의 주소(URL)를 복사하여 아래에 붙여넣습니다.",
+                                "1. 본인 구? ?라?브?서 '??프?드?트'??로 만듭?다.\n"
+                                f"2. ?측 ?단 [공유] 버튼???러 `{st.secrets.get('gcp_service_account', {}).get('client_email', '?비?계??)}` 계정??**?집??*?추??니??\n"
+                                "3. ?당 ?프?드?트??주소(URL)?복사?여 ?래??붙여?습?다.",
                                 "1. Create a 'Blank Spreadsheet' in your Google Drive.\n"
                                 f"2. Click [Share] and add `{st.secrets.get('gcp_service_account', {}).get('client_email', 'service_account')}` as an **Editor**.\n"
                                 "3. Copy and paste the spreadsheet URL below."
@@ -9909,11 +9962,11 @@ Thank you deeply for your valuable participation.
                             col1, col2 = st.columns([1, 2])
                             with col1:
                                 if os.path.exists("google_sheets_menu_guide.png"):
-                                    st.image("google_sheets_menu_guide.png", caption=_("구글 스프레드시트 메뉴 접근 방법", "How to access Google Sheets menu"), use_container_width=True)
+                                    st.image("google_sheets_menu_guide.png", caption=_("구? ?프?드?트 메뉴 ?근 방법", "How to access Google Sheets menu"), use_container_width=True)
                             with col2:
                                 if os.path.exists("manual_sheet_url_guide.png"):
-                                    st.image("manual_sheet_url_guide.png", caption=_("구글 스프레드시트 URL 주소창 복사 예시", "Google Spreadsheet URL Copy Example"), use_container_width=True)
-                            manual_url = st.text_input(_("스프레드시트 URL 입력", "Input Spreadsheet URL"), placeholder="https://docs.google.com/spreadsheets/d/...")
+                                    st.image("manual_sheet_url_guide.png", caption=_("구? ?프?드?트 URL 주소?복사 ?시", "Google Spreadsheet URL Copy Example"), use_container_width=True)
+                            manual_url = st.text_input(_("?프?드?트 URL ?력", "Input Spreadsheet URL"), placeholder="https://docs.google.com/spreadsheets/d/...")
                             if manual_url:
                                 existing_sheet_id_input = manual_url.strip()
                             else:
@@ -9929,7 +9982,7 @@ Thank you deeply for your valuable participation.
                         "Description": survey_desc,
                         "Admin_Email": survey_admin_email,
                         "AHP_Model_JSON": model_structure,
-                        "Tier_Level": tier_level, # [신규] 3계층 구분용
+                        "Tier_Level": tier_level, # [?규] 3계층 구분??
                         "Scale_Type": scale_option,
                         "Demographics": demographics_settings,
                         "Definitions": definitions_map,
@@ -9970,7 +10023,7 @@ Thank you deeply for your valuable participation.
                             onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
                             onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
                             >
-                                {_("👁️ 설문지 응답 화면 미리보기", "👁️ Preview Survey Form")}
+                                {_("???문지 ?답 ?면 미리보기", "??Preview Survey Form")}
                             </div>
                         </a>
                         """
@@ -9978,21 +10031,21 @@ Thank you deeply for your valuable participation.
 
                     with col_p2:
                         if st.session_state.user_id is None:
-                            btn_label = _(" 무료 회원가입 후 배포하기", " Deploy after Free Sign Up")
+                            btn_label = _(" 무료 ?원가????배포?기", " Deploy after Free Sign Up")
                             if st.button(btn_label, type="primary", use_container_width=True):
-                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
-                                st.warning(_(" 배포 및 DB 연동은 회원가입 후 가능합니다. (무료 사용자도 제한 없이 배포 및 연동 가능함)", " Deployment and DB integration are available after sign-up. (Free users can also deploy and link DB)"))
-                                st.info(_("안심하세요. 현재 작성하신 내용은 창을 닫지 않고 왼쪽 사이드바에서 회원가입/로그인을 완료하시면 날아가지 않고 그대로 유지되어 즉시 배포하실 수 있습니다.", "Rest assured. The contents you have written will be maintained if you sign up and log in from the left sidebar without closing the window, allowing you to deploy immediately."))
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "?문 배포 ?행")
+                                st.warning(_(" 배포 ?DB ?동? ?원가????가?합?다. (무료 ?용?도 ?한 ?이 배포 ??동 가?함)", " Deployment and DB integration are available after sign-up. (Free users can also deploy and link DB)"))
+                                st.info(_("?심?세?? ?재 ?성?신 ?용? 창을 ?? ?고 ?쪽 ?이?바?서 ?원가??로그?을 ?료?시??아가지 ?고 그?????어 즉시 배포?실 ???습?다.", "Rest assured. The contents you have written will be maintained if you sign up and log in from the left sidebar without closing the window, allowing you to deploy immediately."))
                     
                                 pass
                         else:
-                            btn_label = _("🚀 배포 및 DB 연동 (수정 내용 적용)", "🚀 Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("🚀 배포 및 DB 연동", "🚀 Deploy & Link DB")
+                            btn_label = _("?? 배포 ?DB ?동 (?정 ?용 ?용)", "?? Deploy & Link DB (Apply Changes)") if st.session_state.get("editing_survey_id") else _("?? 배포 ?DB ?동", "?? Deploy & Link DB")
                             if st.button(btn_label, type="primary", use_container_width=True):
-                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "설문 배포 실행")
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "?문 배포 ?행")
                                 if not existing_sheet_id_input.strip():
-                                    st.error(_("연동할 구글 스프레드시트 URL 주소를 입력하거나, 재사용할 기존 설문을 선택해 주세요.", "Please enter a valid Spreadsheet URL or select an existing survey to reuse."))
+                                    st.error(_("?동??구? ?프?드?트 URL 주소??력?거?? ?사?할 기존 ?문???택??주세??", "Please enter a valid Spreadsheet URL or select an existing survey to reuse."))
                                 else:
-                                    with st.spinner(_("구글 스프레드시트와 설문 구조를 연동하는 중...", "Linking survey structure with Google Spreadsheet...")):
+                                    with st.spinner(_("구? ?프?드?트? ?문 구조??동?는 ?..", "Linking survey structure with Google Spreadsheet...")):
                                         try:
                                             target_sheet_id = existing_sheet_id_input.strip()
                                             if "docs.google.com/spreadsheets" in target_sheet_id:
@@ -10040,7 +10093,7 @@ Thank you deeply for your valuable participation.
 
 
 
-                                            # admin_surveys 테이블에 신규 설문 자동 등록 및 마스터 구글 시트 백업
+                                            # admin_surveys ?이블에 ?규 ?문 ?동 ?록 ?마스??구? ?트 백업
                                             try:
                                                 from survey_manager import save_admin_survey_to_gsheet
                                                 save_admin_survey_to_gsheet(sheet_id, survey_title, st.session_state.user_id)
@@ -10054,22 +10107,22 @@ Thank you deeply for your valuable participation.
                                             except Exception as dbe:
                                                 pass
 
-                                            # 배포 주소 생성
+                                            # 배포 주소 ?성
                                             base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                                             if "localhost" in base_url or "127.0.0.1" in base_url:
                                                 short_url = f"{base_url}?survey_id={sheet_id}"
                                             else:
                                                 short_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
 
-                                            # 사용자 배포 통계 및 설문 링크 기록
+                                            # ?용??배포 ?계 ??문 링크 기록
                                             update_user_survey_distribution(st.session_state.user_id, short_url)
-                                            st.session_state._survey_cache_dirty = True  # 설문 목록 캐시 무효화
+                                            st.session_state._survey_cache_dirty = True  # ?문 목록 캐시 무효??
 
                                             st.balloons()
-                                            st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))
+                                            st.success(_("? AHP ?라???문지가 ?공?으??데?트(?정) ?었?니??", "? AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("? AHP ?라???문지 ??동 구? ?트 ?성???료?었?니??", "? AHP online survey and linked Google Sheet creation are complete!"))
 
                                             st.code(short_url, language="text")
-                                            st.info(_("**설문 전달 안내:** 생성된 설문조사 링크를 복사하여 이메일이나 메신저(카카오톡 등)로 응답 대상자에게 전달해 주세요.", "**Survey Sharing Guide:** Please copy the generated survey link and send it to respondents via email or messenger."))
+                                            st.info(_("**?문 ?달 ?내:** ?성???문조사 링크?복사?여 ?메?이??메신?(카카?톡 ????답 ??자?게 ?달??주세??", "**Survey Sharing Guide:** Please copy the generated survey link and send it to respondents via email or messenger."))
                                             
                                             sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
                                             st.write("")
@@ -10077,32 +10130,32 @@ Thank you deeply for your valuable participation.
 
                                             <div class="gs-nav-btn-box2">
                                                 <a href="{sheet_url}" target="_blank">
-                                                    📊 연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)
+                                                    ? ?동??구? ?프?드?트 바로가?(?답 ?이???시??인)
                                                 </a>
                                             </div>
                                             ''', unsafe_allow_html=True)
                                             
-                                            st.info(f"""**구글 시트 및 데이터 확인 안내:**
-1. **즉시 확인:** 위의 **[📊 연동된 구글 스프레드시트 바로가기]** 버튼을 클릭하면 생성된 시트로 바로 이동합니다.
-2. **이메일 알림:** 귀하의 구글 계정({survey_admin_email})으로 '편집자 권한 공유' 초대 메일이 발송되었습니다. 메일의 링크를 통해서도 언제든 접속할 수 있습니다.
-3. **구글 드라이브:** 본인의 구글 드라이브 좌측 메뉴 중 **[공유 문서함 (Shared with me)]**에서 언제든 해당 설문 시트를 찾고 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하거나 다운로드할 수 있습니다.""")
+                                            st.info(f"""**구? ?트 ??이???인 ?내:**
+1. **즉시 ?인:** ?의 **[? ?동??구? ?프?드?트 바로가?** 버튼???릭?면 ?성???트?바로 ?동?니??
+2. **?메???림:** 귀?의 구? 계정({survey_admin_email})?로 '?집??권한 공유' 초? 메일??발송?었?니?? 메일??링크??해?도 ?제???속?????습?다.
+3. **구? ?라?브:** 본인??구? ?라?브 좌측 메뉴 ?**[공유 문서??(Shared with me)]**?서 ?제???당 ?문 ?트?찾고 ?이??Sheet 2: Raw_Data, Sheet 3: Demographic_Data)??인?거???운로드?????습?다.""")
                                         except Exception as ex:
-                                            st.error(f"구글 시트 연동 실패: {ex}")
+                                            st.error(f"구? ?트 ?동 ?패: {ex}")
                                             import streamlit.components.v1 as components
                                             error_msg = str(ex).replace("'", "\\'").replace("\\n", " ")
-                                            components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp2-75@ahp2-486703.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
+                                            components.html(f"<script>alert('??구? ?프?드?트 ?동???패?습?다.\\n\\n?력?신 URL???프?드?트???근?????습?다.\\n?내???비??계정 ?메??ahp-master-v2@ahp-login.iam.gserviceaccount.com)??반드??[?집???추??고 공유??주셔???동 ?배포가 가?합?다.\\n\\n?세 ?러: {error_msg}');</script>", height=0, width=0)
 
 
         _survey_setup_fragment()
 
     # -------------------------------------------------------------------------
-    # [신규] 응답현황 대시보드 탭 (Tab 3) 상세 구현
+    # [?규] ?답?황 ??보????(Tab 3) ?세 구현
     # -------------------------------------------------------------------------
     with main_tab3:
         if st.session_state.get('user_id') == 'shjeon':
-            # Sub-tabs UI: pill CSS는 글로벌 테마(global_ahp_css)에 통합됨
+            # Sub-tabs UI: pill CSS??글로벌 ?마(global_ahp_css)???합??
             
-            sub_tabs = st.tabs(["진행 현황", "답례품 발송 관리", "답례품 설정(Admin)"])
+            sub_tabs = st.tabs(["진행 ?황", "????발송 관?, "?????정(Admin)"])
             tab_live_content = sub_tabs[0]
             with sub_tabs[1]:
                 import coupon_manager
@@ -10114,14 +10167,14 @@ Thank you deeply for your valuable participation.
             tab_live_content = st.container()
 
         with tab_live_content:
-            st.header(_("실시간 응답 현황", "Real-time Response Status"))
+            st.header(_("?시??답 ?황", "Real-time Response Status"))
             selected_sheet_id = None
         
             if st.session_state.user_id is None:
-                st.warning(_("로그인 후 이용 가능한 회원 전용 서비스입니다. (무료 회원도 모든 기능 사용 가능)",
+                st.warning(_("로그?????용 가?한 ?원 ?용 ?비?입?다. (무료 ?원??모든 기능 ?용 가??",
                              "Member-only service. Log in to monitor responses. (Free members can use all features)"))
             else:
-                # DB에서 해당 관리자가 생성한 설문 목록 조회
+                # DB?서 ?당 관리자가 ?성???문 목록 조회
                 import sqlite3
                 import pandas as pd
 
@@ -10152,15 +10205,15 @@ Thank you deeply for your valuable participation.
                     admin_surveys = list(merged_surveys.values())
                     admin_surveys.sort(key=lambda x: x[2], reverse=True)
                 except Exception as e:
-                    st.error(f"설문 목록 조회 실패: {e}")
+                    st.error(f"?문 목록 조회 ?패: {e}")
 
                 if not admin_surveys:
-                    st.warning("배포된 설문지가 존재하지 않습니다. '온라인 설문지 제작' 탭에서 설문을 먼저 배포해 주세요.")
+                    st.warning("배포???문지가 존재?? ?습?다. '?라???문지 ?작' ?????문??먼? 배포??주세??")
                 else:
-                    # 로그인한 아이디에 맞춰 본인의 설문들만 드롭다운에 노출시킵니다.
+                    # 로그?한 ?이?에 맞춰 본인???문?만 ?롭?운???출?킵?다.
                     survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
                     selected_label = st.selectbox(
-                        "실시간 현황을 확인할 설문 선택",
+                        "?시??황???인???문 ?택",
                         list(survey_options.keys()),
                         key="tab3_survey_select"
                     )
@@ -10170,15 +10223,15 @@ Thank you deeply for your valuable participation.
                     survey_title = selected_survey_info[1]
                     created_at = selected_survey_info[2]
                 
-                    st.success(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
+                    st.success(f" ?재 ?택???문: **{survey_title}** (배포?시: {created_at})")
                     st.divider()
 
-            # 대시보드 렌더링
+            # ??보???더?
             if selected_sheet_id:
 
-                if st.button("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", type="primary"):
+                if st.button("? ?시??문 ??보????답 ?이??불러?기 / ?로고침", type="primary"):
                     from survey_manager import get_survey_stats, get_survey_gspread_client
-                    with st.spinner("실시간 설문 현황 로딩 중..."):
+                    with st.spinner("?시??문 ?황 로딩 ?.."):
                         # 1. Stats Loading
                         st.session_state["survey_stats"] = get_survey_stats(selected_sheet_id.strip())
                     
@@ -10212,44 +10265,44 @@ Thank you deeply for your valuable participation.
                                     st.session_state["demo_df"] = None
 
                             except Exception as g_err:
-                                st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")
+                                st.error(f"구? ?트?서 ?이?? ?어?는 ??러 발생: {g_err}")
                                 st.session_state["live_df"] = None
                         else:
-                            st.warning("구글 Sheets API 클라이언트 연결 실패로 인해 구글 시트 내 데이터를 직접 다운로드할 수 없습니다.")
+                            st.warning("구? Sheets API ?라?언???결 ?패??해 구? ?트 ???이?? 직접 ?운로드?????습?다.")
                             st.session_state["live_df"] = None
 
                 if "survey_stats" in st.session_state:
                     stats = st.session_state["survey_stats"]
                     col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                     with col_stat1:
-                        st.metric(_("총 접속자 수 (Visits)", "Total Visits"), f"{stats['visits']}" + _("명", ""))
+                        st.metric(_("??속????(Visits)", "Total Visits"), f"{stats['visits']}" + _("?, ""))
                     with col_stat2:
-                        st.metric(_("완료 응답자 수 (Completed)", "Completed Responses"), f"{stats['completed']}" + _("명", ""))
+                        st.metric(_("?료 ?답????(Completed)", "Completed Responses"), f"{stats['completed']}" + _("?, ""))
                     with col_stat3:
-                        st.metric(_("일관성 초과 중단자 (CR Fail)", "CR Fail Abandonments"), f"{stats['abandoned_cr']}" + _("회", " times"))
+                        st.metric(_("????초과 중단??(CR Fail)", "CR Fail Abandonments"), f"{stats['abandoned_cr']}" + _("??, " times"))
                     with col_stat4:
-                        st.metric(_("단순 이탈 중단자 (Bounce)", "Bounced Visitors"), f"{stats['abandoned_bounce']}" + _("명", ""))
+                        st.metric(_("?순 ?탈 중단??(Bounce)", "Bounced Visitors"), f"{stats['abandoned_bounce']}" + _("?, ""))
 
-                    # 시각화 차트 추가
+                    # ?각??차트 추?
                     import plotly.express as px
 
                     chart_data = pd.DataFrame({
-                        "구분": ["응답 완료", "일관성 초과 중단", "단순 페이지 이탈"],
-                        "인원수": [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
+                        "구분": ["?답 ?료", "????초과 중단", "?순 ?이지 ?탈"],
+                        "?원??: [stats['completed'], stats['abandoned_cr'], stats['abandoned_bounce']]
                     })
 
                     fig_stats = px.bar(
                         chart_data,
                         x="구분",
-                        y="인원수",
-                        text="인원수",
+                        y="?원??,
+                        text="?원??,
                         color="구분",
                         color_discrete_map={
-                            "응답 완료": "#2E7D32",
-                            "일관성 초과 중단": "#C62828",
-                            "단순 페이지 이탈": "#EF6C00"
+                            "?답 ?료": "#2E7D32",
+                            "????초과 중단": "#C62828",
+                            "?순 ?이지 ?탈": "#EF6C00"
                         },
-                        title="설문 참여 상태별 분포"
+                        title="?문 참여 ?태?분포"
                     )
                     fig_stats.update_layout(showlegend=False)
                     st.plotly_chart(fig_stats, use_container_width=True)
@@ -10258,14 +10311,14 @@ Thank you deeply for your valuable participation.
                     live_df = st.session_state["live_df"]
                     demo_df = st.session_state.get("demo_df", None)
 
-                    # 구글 시트에서 실시간 응답 로데이터(Raw_Data) 다운로드 기능 추가
-                    with st.expander(_("📥 실시간 구글 시트 응답 데이터 다운로드 센터", "📥 Real-time Google Sheet Response Data Download Center"), expanded=True):
+                    # 구? ?트?서 ?시??답 로데?터(Raw_Data) ?운로드 기능 추?
+                    with st.expander(_("? ?시?구? ?트 ?답 ?이???운로드 ?터", "? Real-time Google Sheet Response Data Download Center"), expanded=True):
                         if not live_df.empty:
-                            st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
+                            st.success(f"구? ?프?드?트?서 ?시??답 ?이?? ?공?으?불러?습?다. (Raw_Data: {len(live_df)}? + (f", Demographic_Data: {len(demo_df)}? if demo_df is not None else "") + ")")
                         
-                            # 📊 AHP 분석 연동 단축 버튼 추가
-                            if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
-                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "온라인 설문 데이터 연동")
+                            # ? AHP 분석 ?동 ?축 버튼 추?
+                            if st.button(_("? ???라???문 ?이?로 즉시 AHP 분석 ?행?기 (분석 ?구??동)", "? Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
+                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "?라???문 ?이???동")
                                 st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                                 from survey_manager import load_survey_metadata
                                 survey_meta = load_survey_metadata(selected_sheet_id)
@@ -10284,7 +10337,7 @@ Thank you deeply for your valuable participation.
                                         if col not in ["ID", "Type"]:
                                             st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce')
                                 
-                                     # 중분류 복사
+                                     # 중분?복사
                                     st.session_state["ahp_sub_dfs"] = {}
                                     sub_criteria_map = ahp_model.get("subs", {})
                                     for main_c, subs in sub_criteria_map.items():
@@ -10300,21 +10353,21 @@ Thank you deeply for your valuable participation.
                                                     st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
                                                 
                                     st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                    st.info(_("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.", "📊 Data analysis preparation is complete! Select the **'📊 AHP Analysis Tool' tab at the top** and choose the **'🌐 Link Distributed Online Survey Data'** radio button to view the results instantly."))
+                                    st.info(_("? ?이??분석 준비? ?료?었?니?? **?단??'? AHP 분석 ?구' ??*???택?고 **'? 배포???라???문 ?이???동'** ?디??버튼???택?여 분석 결과?바로 ?인?십?오.", "? Data analysis preparation is complete! Select the **'? AHP Analysis Tool' tab at the top** and choose the **'? Link Distributed Online Survey Data'** radio button to view the results instantly."))
 
-                            tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
+                            tab_raw, tab_demo = st.tabs(["? Raw_Data (AHP ??비교 ?이??", "? Demographic_Data (?구?계/?전?위)"])
                             with tab_raw:
                                 st.dataframe(live_df, use_container_width=True)
                             with tab_demo:
                                 if demo_df is not None:
                                     st.dataframe(demo_df, use_container_width=True)
                                 else:
-                                    st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
+                                    st.info("?집???구?계 ?이?? ?거??Demographic_Data ?트가 ?성?? ?았?니??")
 
-                            # Excel 및 CSV 내보내기 버튼 제공
+                            # Excel ?CSV ?보?기 버튼 ?공
                             import io
 
-                            # 1. Excel 내보내기 (두 개의 시트를 모두 포함)
+                            # 1. Excel ?보?기 (??개의 ?트?모두 ?함)
                             excel_buffer = io.BytesIO()
                             with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
                                 from survey_manager import load_survey_metadata
@@ -10373,28 +10426,28 @@ Thank you deeply for your valuable participation.
                             col_dl1, col_dl2 = st.columns(2)
                             with col_dl1:
                                 st.download_button(
-                                    "📥 실시간 응답 Excel 다운로드 (.xlsx)",
+                                    "? ?시??답 Excel ?운로드 (.xlsx)",
                                     data=excel_buffer.getvalue(),
                                     file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.xlsx",
                                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                     use_container_width=True,
                                     type="primary"
                                 )
-                            # 2. CSV 내보내기 (Raw_Data 우선 내보내기)
+                            # 2. CSV ?보?기 (Raw_Data ?선 ?보?기)
                             csv_buffer = io.StringIO()
                             live_df.to_csv(csv_buffer, index=False, header=True)
                             with col_dl2:
                                 st.download_button(
-                                    "📥 실시간 응답 CSV 다운로드 (.csv)",
+                                    "? ?시??답 CSV ?운로드 (.csv)",
                                     data=csv_buffer.getvalue().encode('utf-8-sig'),
                                     file_name=f"Survey_Live_Data_{selected_sheet_id.strip()[:6]}.csv",
                                     mime="text/csv",
                                     use_container_width=True
                                 )
                         else:
-                            st.info("구글 시트에 수집된 응답 로데이터가 아직 비어 있습니다.")
+                            st.info("구? ?트???집???답 로데?터가 ?직 비어 ?습?다.")
 
-                # 로컬 안전 백업 데이터 조회 및 추출 유틸리티
+                # 로컬 ?전 백업 ?이??조회 ?추출 ?틸리티
                 try:
                     conn = sqlite3.connect('users.db')
                     backup_df = pd.read_sql_query(
@@ -10404,11 +10457,11 @@ Thank you deeply for your valuable participation.
                     conn.close()
 
                     if not backup_df.empty:
-                        with st.expander("🛡️ 서버 로컬 안전 백업 관리 센터"):
-                            st.success(f"구글 시트 연동과 관계없이 서버 로컬 데이터베이스에 저장된 안전 백업 데이터가 총 {len(backup_df)}건 존재합니다.")
+                        with st.expander("???버 로컬 ?전 백업 관??터"):
+                            st.success(f"구? ?트 ?동?관계없???버 로컬 ?이?베?스????된 ?전 백업 ?이?? ?{len(backup_df)}?존재?니??")
                             st.dataframe(backup_df[["id", "respondent_id", "created_at"]], use_container_width=True)
 
-                            # 전체 로 데이터 복구 엑셀/CSV 데이터 빌드
+                            # ?체 ??이??복구 ??/CSV ?이??빌드
                             recovered_raw_rows = []
                             recovered_demo_rows = []
                             for idx_b, r_b in backup_df.iterrows():
@@ -10416,7 +10469,7 @@ Thank you deeply for your valuable participation.
                                 if "raw_row_data" in payload:
                                     recovered_raw_rows.append(payload["raw_row_data"])
                                 elif "row_data" in payload:
-                                    # 하위 호환성
+                                    # ?위 ?환??
                                     recovered_raw_rows.append(payload["row_data"])
 
                                 if "demo_row_data" in payload:
@@ -10425,7 +10478,7 @@ Thank you deeply for your valuable participation.
                             if recovered_raw_rows:
                                 import io
 
-                                # 헤더 복구 로직 추가
+                                # ?더 복구 로직 추?
                                 raw_headers = None
                                 demo_headers = None
                                 from survey_manager import load_survey_metadata
@@ -10458,19 +10511,19 @@ Thank you deeply for your valuable participation.
                                                     for i in range(len(sub_subs)):
                                                         for j in range(i + 1, len(sub_subs)):
                                                             raw_headers.append(f"{sub_subs[i]}_{sub_subs[j]}")
-                                    raw_headers.append("제출시간")
+                                    raw_headers.append("?출?간")
                                 
                                     demo_headers = ["ID", "Type"]
-                                    if demographics.get("name"): demo_headers.append("성명")
-                                    if demographics.get("age"): demo_headers.append("연령")
-                                    if demographics.get("gender"): demo_headers.append("성별")
-                                    if demographics.get("experience"): demo_headers.append("경력년수")
-                                    # if demographics.get("affiliation"): demo_headers.append("소속")
-                                    if demographics.get("email"): demo_headers.append("이메일")
-                                    demo_headers.append("사전순위지정")
+                                    if demographics.get("name"): demo_headers.append("?명")
+                                    if demographics.get("age"): demo_headers.append("?령")
+                                    if demographics.get("gender"): demo_headers.append("?별")
+                                    if demographics.get("experience"): demo_headers.append("경력?수")
+                                    # if demographics.get("affiliation"): demo_headers.append("?속")
+                                    if demographics.get("email"): demo_headers.append("?메??)
+                                    demo_headers.append("?전?위지??)
                                     if rewards_info.get("enabled"):
-                                        demo_headers.append("경품연락처" if tier_level == "3" else "답례품_연락처")
-                                    demo_headers.append("제출시간")
+                                        demo_headers.append("경품?락? if tier_level == "3" else "?????락?)
+                                    demo_headers.append("?출?간")
 
                                 df_raw_backup = pd.DataFrame(recovered_raw_rows)
                                 if raw_headers and len(raw_headers) == len(df_raw_backup.columns):
@@ -10486,7 +10539,7 @@ Thank you deeply for your valuable participation.
                                     elif demo_headers and len(demo_headers) > len(df_demo_backup.columns):
                                         df_demo_backup.columns = demo_headers[:len(df_demo_backup.columns)]
 
-                                # Excel로 백업 데이터를 템플릿 구조에 맞춰 분할하여 다운로드
+                                # Excel?백업 ?이?? ?플?구조??맞춰 분할?여 ?운로드
                                 if survey_meta and "AHP_Model_JSON" in survey_meta:
                                     excel_backup_buffer = export_to_template_excel(df_raw_backup, df_demo_backup, survey_meta["AHP_Model_JSON"], survey_meta.get("Tier_Level", 2))
                                 else:
@@ -10499,7 +10552,7 @@ Thank you deeply for your valuable participation.
                                 col_b_dl1, col_b_dl2 = st.columns(2)
                                 with col_b_dl1:
                                     st.download_button(
-                                        "📥 로컬 백업 Excel 다운로드 (.xlsx)",
+                                        "? 로컬 백업 Excel ?운로드 (.xlsx)",
                                         data=excel_backup_buffer.getvalue(),
                                         file_name=f"Backup_Recovery_{selected_sheet_id.strip()[:6]}.xlsx",
                                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -10508,34 +10561,34 @@ Thank you deeply for your valuable participation.
                                     )
 
                                 with col_b_dl2:
-                                    # CSV 파일 형태로 복구 파일 내보내기 (Raw_Data 우선)
+                                    # CSV ?일 ?태?복구 ?일 ?보?기 (Raw_Data ?선)
                                     output_csv = io.StringIO()
                                     df_raw_backup.to_csv(output_csv, index=False, header=bool(raw_headers))
                                     st.download_button(
-                                        "📥 로컬 백업 Raw_Data CSV 다운로드 (.csv)",
+                                        "? 로컬 백업 Raw_Data CSV ?운로드 (.csv)",
                                         data=output_csv.getvalue().encode('utf-8-sig'),
                                         file_name=f"Backup_Recovery_Raw_{selected_sheet_id.strip()[:6]}.csv",
                                         mime="text/csv",
                                         use_container_width=True
                                     )
                     else:
-                        st.caption("이 설문지에 등록된 로컬 서버 백업 데이터가 없습니다. (모든 데이터 정상 적재)")
+                        st.caption("???문지???록??로컬 ?버 백업 ?이?? ?습?다. (모든 ?이???상 ?재)")
                 except Exception as err:
-                    st.caption(f"로컬 백업 조회 불가: {err}")
+                    st.caption(f"로컬 백업 조회 불?: {err}")
 
 
 
     with main_tab_service:
         svc_tab_pricing, svc_tab_consulting, svc_tab_signup, svc_tab_quote, svc_tab_invoice = st.tabs([
-            _("서비스 요금", "Pricing"),
-            _("컨설팅 문의", "Consulting"),
-            _("회원가입", "Sign Up"),
-            _("견적서 출력", "Estimate"),
-            _("계산서/영수증", "Invoice")
+            _("?비???금", "Pricing"),
+            _("컨설??문의", "Consulting"),
+            _("?원가??, "Sign Up"),
+            _("견적??출력", "Estimate"),
+            _("계산???수?, "Invoice")
         ])
 
         with svc_tab_pricing:
-            st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices Supported</span>"), unsafe_allow_html=True)
+            st.markdown(_("## ?비???금 ?내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>? ?구?법인카드 ?계산??지??/span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>? Research Cards & Invoices Supported</span>"), unsafe_allow_html=True)
 
             if st.session_state.lang == 'en':
                 st.components.v1.html(get_unified_english_pricing_html(st.session_state.user_id), height=560)
@@ -10546,14 +10599,14 @@ Thank you deeply for your valuable participation.
                     inner_1 = """
                         <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Basic</h3>
                         <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>300,000</span>원</h2>
-                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>표준 AHP 방법론을 활용하여 신뢰성 있는 결과를 도출하는 소규모 프로젝트에 적합합니다.</p>
+                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='basic-price-display-span'>300,000</span>??/h2>
+                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>?? AHP 방법론을 ?용?여 ?뢰???는 결과??출?는 ?규??로?트???합?니??</p>
                         <hr style='margin: 10px 0;'>
                         <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                            <li><b>일반 AHP 기능 제공</b></li>
-                            <li><b>표본 수: 10표본 이하</b></li>
-                            <li>프로젝트 생성 무제한</li>
-                            <li>일반 이메일 지원</li>
+                            <li><b>?반 AHP 기능 ?공</b></li>
+                            <li><b>?본 ?? 10?본 ?하</b></li>
+                            <li>?로?트 ?성 무제??/li>
+                            <li>?반 ?메??지??/li>
                         </ul>
                     """
                     if st.session_state.user_id:
@@ -10566,14 +10619,14 @@ Thank you deeply for your valuable participation.
                     inner_3 = """
                         <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Standard</h3>
                         <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>원</h2>
-                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>응답자 그룹별 차이 분석을 통해 보다 정교한 결론을 도출하는 전문 리서치에 적합합니다.</p>
+                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='standard-price-display-span'>500,000</span>??/h2>
+                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>?답??그룹?차이 분석???해 보다 ?교??결론???출?는 ?문 리서치에 ?합?니??</p>
                         <hr style='margin: 10px 0;'>
                         <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                            <li><b>집단간 차이 분석 (T-Test, ANOVA) 제공</b></li>
-                            <li><b>표본수 무제한</b></li>
-                            <li>프로젝트 생성 무제한</li>
-                            <li>일반 이메일 지원</li>
+                            <li><b>집단?차이 분석 (T-Test, ANOVA) ?공</b></li>
+                            <li><b>?본??무제??/b></li>
+                            <li>?로?트 ?성 무제??/li>
+                            <li>?반 ?메??지??/li>
                         </ul>
                     """
                     if st.session_state.user_id:
@@ -10586,15 +10639,15 @@ Thank you deeply for your valuable participation.
                     inner_6 = """
                         <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
                         <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
-                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
+                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000??/h2>
+                        <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>고도?된 ?? AHP 분석?최우??기술 지?이 ?요???문 ?술지 ?고 ??구 기????합?니??</p>
                         <hr style='margin: 10px 0;'>
                         <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
-                            <li><b>퍼지 AHP (Fuzzy AHP) 분석 기능 포함</b></li>
-                            <li>집단간 차이 분석 (T-Test, ANOVA) 제공</li>
-                            <li>표본수 무제한 및 프로젝트 무제한</li>
-                            <li>최우선 기술/오류 지원</li>
-                            <li><b>설문 셋팅 1회 무료 대행</b></li>
+                            <li><b>?? AHP (Fuzzy AHP) 분석 기능 ?함</b></li>
+                            <li>집단?차이 분석 (T-Test, ANOVA) ?공</li>
+                            <li>?본??무제????로?트 무제??/li>
+                            <li>최우??기술/?류 지??/li>
+                            <li><b>?문 ?팅 1??무료 ???/b></li>
                         </ul>
                     """
                     if st.session_state.user_id:
@@ -10602,7 +10655,7 @@ Thank you deeply for your valuable participation.
                     else:
                         st.components.v1.html(get_login_redirect_html("Pro (2개월)", inner_html=inner_6, is_best=False), height=520)
 
-                # 부가 서비스 대행
+                # 부가 ?비?????
                 with col_p4:
                     st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
 
@@ -10610,40 +10663,40 @@ Thank you deeply for your valuable participation.
 
 
         with svc_tab_consulting:
-            st.header(_("분석 문의 및 컨설팅 신청", "Analysis Inquiry & Consulting Application"))
+            st.header(_("분석 문의 ?컨설???청", "Analysis Inquiry & Consulting Application"))
 
-            # 안내 문구 및 전화번호
+            # ?내 문구 ??화번호
             st.markdown(
                 _("""
                 <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
                   <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                    <span>✨</span> 전문 분석 및 AHP/통계 컨설팅 문의
+                    <span>??/span> ?문 분석 ?AHP/?계 컨설??문의
                   </h4>
                   <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
-                    학위논문, 연구보고서, 리서치 프로젝트 등 AHP 및 통계 분석에 대한 전문적인 컨설팅을 제공해 드립니다.
+                    ?위?문, ?구보고?? 리서??로?트 ??AHP ??계 분석??????문?인 컨설?을 ?공???립?다.
                   </p>
                   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                    <div style="font-weight: 600; color: #1e293b;">📞 전화번호: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
-                    <div style="font-weight: 600; color: #1e293b;">💬 카카오톡 ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
+                    <div style="font-weight: 600; color: #1e293b;">? ?화번호: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                    <div style="font-weight: 600; color: #1e293b;">? 카카?톡 ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
                   </div>
                   <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
-                    💡 궁금하신 사항은 전화, 카카오톡 또는 아래 문의 폼을 통해 편하게 연락주시면 신속하게 안내해 드리겠습니다.
+                    ? 궁금?신 ?항? ?화, 카카?톡 ?는 ?래 문의 ?을 ?해 ?하??락주시??속?게 ?내???리겠습?다.
                   </div>
                 </div>
                 """, """
                 <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #475569; padding: 20px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); font-size: 0.95rem; line-height: 1.6;">
                   <h4 style="margin-top: -5px; margin-bottom: 12px; color: #1e293b; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                    <span>✨</span> Professional AHP & Statistical Consulting
+                    <span>??/span> Professional AHP & Statistical Consulting
                   </h4>
                   <p style="color: #475569; margin-bottom: 16px; font-size: 0.9rem;">
                     We provide professional consultation on AHP and statistical analysis for academic theses, research reports, and market research.
                   </p>
                   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: white; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                    <div style="font-weight: 600; color: #1e293b;">📞 Phone: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
-                    <div style="font-weight: 600; color: #1e293b;">💬 KakaoTalk ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
+                    <div style="font-weight: 600; color: #1e293b;">? Phone: <span style="color: #1e3a8a; font-weight: bold;">0507-1347-2610</span></div>
+                    <div style="font-weight: 600; color: #1e293b;">? KakaoTalk ID: <span style="color: #1e3a8a; font-weight: bold;">AHPkr</span></div>
                   </div>
                   <div style="font-size: 0.85rem; color: #64748b; margin-top: 12px; font-weight: 500;">
-                    💡 Please feel free to call us, find KakaoTalk ID, or submit the form below. We will get back to you shortly.
+                    ? Please feel free to call us, find KakaoTalk ID, or submit the form below. We will get back to you shortly.
                   </div>
                 </div>
                 """),
@@ -10651,53 +10704,53 @@ Thank you deeply for your valuable participation.
             )
 
             with st.form(key="consulting_inquiry_form"):
-                c_name = st.text_input(_("성함 (필수)", "Name (Required)"), key="c_name")
-                c_company = st.text_input(_("소속 기관/회사/학교 (선택)", "Organization/Company/School (Optional)"), key="c_company")
-                c_phone = st.text_input(_("연락처 (선택)", "Contact Number (Optional)"), key="c_phone", placeholder="010-1234-5678")
+                c_name = st.text_input(_("?함 (?수)", "Name (Required)"), key="c_name")
+                c_company = st.text_input(_("?속 기?/?사/?교 (?택)", "Organization/Company/School (Optional)"), key="c_company")
+                c_phone = st.text_input(_("?락?(?택)", "Contact Number (Optional)"), key="c_phone", placeholder="010-1234-5678")
                 c_email = st.text_input(
-                    _("답변 받으실 이메일 (필수)", "Email to Receive Answer (Required)"),
+                    _("?? 받으???메??(?수)", "Email to Receive Answer (Required)"),
                     value=st.session_state.get('user_id', '') if st.session_state.get('user_id') else '',
                     key="c_email"
                 )
 
                 c_type = st.selectbox(
-                    _("문의 유형 선택 (필수)", "Select Inquiry Type (Required)"),
+                    _("문의 ?형 ?택 (?수)", "Select Inquiry Type (Required)"),
                     [
-                        _("AHP 분석 및 컨설팅", "AHP Analysis & Consulting"),
-                        _("Fuzzy AHP 분석 및 컨설팅", "Fuzzy AHP Analysis & Consulting"),
-                        _("AHP 온라인 설문 셋팅 대행", "AHP Online Survey Setup Agency"),
-                        _("일관성(CR) 오류 보정 및 조정", "Consistency Ratio (CR) Error Correction"),
-                        _("기타 분석 및 통계 관련 문의", "Other Statistical / Analysis Inquiries")
+                        _("AHP 분석 ?컨설??, "AHP Analysis & Consulting"),
+                        _("Fuzzy AHP 분석 ?컨설??, "Fuzzy AHP Analysis & Consulting"),
+                        _("AHP ?라???문 ?팅 ???, "AHP Online Survey Setup Agency"),
+                        _("????CR) ?류 보정 ?조정", "Consistency Ratio (CR) Error Correction"),
+                        _("기? 분석 ??계 관??문의", "Other Statistical / Analysis Inquiries")
                     ],
                     key="c_type"
                 )
 
                 c_details = st.text_area(
-                    _("상세 문의 내용 (필수)", "Detailed Inquiry (Required)"),
-                    placeholder=_("분석 목적, 표본 수, 모형의 계층 구조 등 구체적인 내용을 기재해 주시면 더 정확하고 빠른 상담이 가능합니다.",
+                    _("?세 문의 ?용 (?수)", "Detailed Inquiry (Required)"),
+                    placeholder=_("분석 목적, ?본 ?? 모형??계층 구조 ??구체?인 ?용??기재??주시????확?고 빠른 ?담??가?합?다.",
                                  "Please describe your project details, sample size, or structure for a faster response."),
                     key="c_details"
                 )
 
                 c_file = st.file_uploader(
-                    _("관련 참고 파일 첨부 (선택, 최대 10MB)", "Attach Reference File (Optional, Max 10MB)"),
+                    _("관??참고 ?일 첨? (?택, 최? 10MB)", "Attach Reference File (Optional, Max 10MB)"),
                     type=["xlsx", "xls", "pdf", "docx", "zip", "png", "jpg"],
                     key="c_file"
                 )
 
-                c_submit = st.form_submit_button(_("문의하기", "Submit Inquiry"), use_container_width=True)
+                c_submit = st.form_submit_button(_("문의?기", "Submit Inquiry"), use_container_width=True)
 
                 if c_submit:
                     if not c_name.strip():
-                        st.error(_("성함을 입력해 주세요.", "Please enter your name."))
+                        st.error(_("?함???력??주세??", "Please enter your name."))
                     elif not c_email.strip():
-                        st.error(_("이메일 주소를 입력해 주세요.", "Please enter your email address."))
+                        st.error(_("?메??주소??력??주세??", "Please enter your email address."))
                     elif not validate_email(c_email.strip()):
-                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                        st.error(_("?바??메???식???닙?다.", "Invalid email format."))
                     elif not c_details.strip():
-                        st.error(_("상세 문의 내용을 입력해 주세요.", "Please enter the detailed inquiry."))
+                        st.error(_("?세 문의 ?용???력??주세??", "Please enter the detailed inquiry."))
                     else:
-                        with st.spinner(_("문의 내용을 전송하는 중...", "Submitting inquiry...")):
+                        with st.spinner(_("문의 ?용???송?는 ?..", "Submitting inquiry...")):
                             success = send_consulting_email(
                                 name=c_name.strip(),
                                 company=c_company.strip(),
@@ -10708,77 +10761,25 @@ Thank you deeply for your valuable participation.
                                 uploaded_file=c_file
                             )
                             if success:
-                                st.success(_("문의 신청이 성공적으로 접수되었습니다. 담당자가 확인 후 신속하게 연락해 드리겠습니다.",
+                                st.success(_("문의 ?청???공?으??수?었?니?? ?당?? ?인 ???속?게 ?락???리겠습?다.",
                                              "Your inquiry has been submitted successfully. We will get back to you shortly."))
                             else:
-                                st.error(_("문의 메일 전송 중 오류가 발생했습니다. 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.",
+                                st.error(_("문의 메일 ?송 ??류가 발생?습?다. 관리자?게 ?메??jeon080423@gmail.com)?직접 ?락??주세??",
                                            "An error occurred while sending the email. Please contact jeon080423@gmail.com directly."))
 
 
-        with svc_tab_signup:
-            if st.session_state.user_id:
-                st.info(_("이미 로그인되어 있습니다.", "You are already logged in."))
-            else:
-                signup_type = st.radio(
-                    _("가입 구분 선택", "Select Registration Type"),
-                    options=[
-                        _("무료 회원가입", "Free Registration"),
-                        _("정식(유료) 회원가입", "Official (Paid) Registration")
-                    ],
-                    horizontal=True,
-                    key="main_signup_type"
-                )
-
-                if signup_type == _("정식(유료) 회원가입", "Official (Paid) Registration"):
-                    st.info(_(
-                        "💡 **정식(유료) 라이선스 이용 안내**\n\n"
-                        "1. 먼저 **'무료 회원가입'**을 선택하여 계정을 생성해 주세요.\n"
-                        "2. 생성한 계정으로 로그인한 후, 왼쪽 사이드바의 **결제 연동** 또는 상단의 **'서비스 요금'** 탭을 통해 결제를 완료하시면 즉시 정식 라이선스로 업그레이드됩니다.\n\n"
-                        "💳 *연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.*",
-                        "💡 **Official (Paid) License Info**\n\n"
-                        "1. Please first select **'Free Registration'** to create your account.\n"
-                        "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
-                        "💳 *Supports Research/Corporate Cards, and Quotations (100% supported).*"
-                    ))
-                else:
-                    agreements = show_agreement_ui()
-                    s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
-                    s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
-
-                    s_cust_type = "standard"
-
-                    if st.button(_("가입신청", "Register"), key="main_btn_signup"):
-                        if not agreements.get("agree_personal_info"):
-                            st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
-                        elif not validate_email(s_id):
-                            st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                        elif not validate_password(s_pw):
-                            st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
-                        else:
-                            restore_from_deleted_sheet(s_id.strip())
-                            # 가입 시 무조건 'temp' 권한으로 배정
-                            if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
-                                st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
-                                import time
-                                time.sleep(2)
-                                st.rerun()
-                            else:
-                                st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
-
-                    st.info(_("🔒 **개인정보 보호 안내**\n\nAHP 마스터는 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
-
 
         with svc_tab_quote:
-            with st.expander(_("📄 견적서 출력", "📄 Print Estimate")):
-                q_client = st.text_input(_("의뢰기관명 (수신)", "Client Institution"), placeholder=_("예: (주)에이치피테크", "e.g., HP Tech Co., Ltd."), key="q_client_input")
-                q_project = st.text_input(_("과제명 (프로젝트명)", "Project / Task Name"), placeholder=_("예: AHP 가중치 평가 분석", "e.g., AHP Weight Assessment Analysis"), key="q_project_input")
+            with st.expander(_("? 견적??출력", "? Print Estimate")):
+                q_client = st.text_input(_("?뢰기??(?신)", "Client Institution"), placeholder=_("?? (??이치피?크", "e.g., HP Tech Co., Ltd."), key="q_client_input")
+                q_project = st.text_input(_("과제?(?로?트?", "Project / Task Name"), placeholder=_("?? AHP 가중치 ?? 분석", "e.g., AHP Weight Assessment Analysis"), key="q_project_input")
 
                 q_tier = st.selectbox(
-                    _("서비스 구분 (요금제)", "Pricing Plan Tier"),
+                    _("?비??구분 (?금??", "Pricing Plan Tier"),
                     options=[
-                        (_("Basic 요금제 (300,000원)", "Basic Plan (300,000 KRW)"), 300000, "Basic"),
-                        (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), 500000, "Standard"),
-                        (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), 950000, "Pro")
+                        (_("Basic ?금??(300,000??", "Basic Plan (300,000 KRW)"), 300000, "Basic"),
+                        (_("Standard ?금??(500,000??", "Standard Plan (500,000 KRW)"), 500000, "Standard"),
+                        (_("Pro ?금??(950,000??", "Pro Plan (950,000 KRW)"), 950000, "Pro")
                     ],
                     format_func=lambda x: x[0],
                     key="q_tier_select"
@@ -10813,7 +10814,7 @@ Thank you deeply for your valuable participation.
                             font-family: sans-serif;
                         }}
                     </style>
-                    <button class="btn" id="dl-pdf-btn">📄 견적서 다운로드 (PDF)</button>
+                    <button class="btn" id="dl-pdf-btn">? 견적???운로드 (PDF)</button>
                     <div id="hidden-q-container" style="display: none; width: 720px; background: white; padding: 10px;"></div>
 
                     <script>
@@ -10824,7 +10825,7 @@ Thank you deeply for your valuable participation.
 
                             var opt = {{
                                 margin:       [10, 10, 10, 10],
-                                filename:     '견적서_{clean_client}.pdf',
+                                filename:     '견적??{clean_client}.pdf',
                                 image:        {{ type: 'jpeg', quality: 0.98 }},
                                 html2canvas:  {{ scale: 2.2, useCORS: true, logging: false }},
                                 jsPDF:        {{ unit: 'mm', format: 'a4', orientation: 'portrait' }}
@@ -10838,43 +10839,43 @@ Thank you deeply for your valuable participation.
                     """
                     st.components.v1.html(button_iframe, height=45)
                 else:
-                    st.warning(_("견적서 다운로드를 위해 의뢰기관명과 과제명을 먼저 입력해 주세요.",
+                    st.warning(_("견적???운로드??해 ?뢰기?명과 과제명을 먼? ?력??주세??",
                                  "Please enter the Client Institution and Project Name to enable download."))
 
 
         with svc_tab_invoice:
-            with st.expander(_("📄 계산서/현금영수증 신청", "📄 Request Invoice/Cash Receipt")):
-                t_biz_num = st.text_input(_("사업자 등록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
-                t_biz_name = st.text_input(_("상호 (회사명)", "Company Name"), key="t_biz_name_input")
-                t_rep_name = st.text_input(_("대표자명", "CEO Name"), key="t_rep_name_input")
-                t_address = st.text_input(_("사업장 주소", "Business Address"), key="t_address_input")
-                t_biz_type = st.text_input(_("업태 / 업종", "Business Category / Type"), key="t_biz_type_input")
-                t_email = st.text_input(_("계산서/현금영수증 수신 이메일", "Invoice/Cash Receipt Email"), key="t_email_input")
+            with st.expander(_("? 계산???금?수??청", "? Request Invoice/Cash Receipt")):
+                t_biz_num = st.text_input(_("?업???록번호", "Business Registration Number"), placeholder="000-00-00000", key="t_biz_num_input")
+                t_biz_name = st.text_input(_("?호 (?사?", "Company Name"), key="t_biz_name_input")
+                t_rep_name = st.text_input(_("??자?, "CEO Name"), key="t_rep_name_input")
+                t_address = st.text_input(_("?업??주소", "Business Address"), key="t_address_input")
+                t_biz_type = st.text_input(_("?태 / ?종", "Business Category / Type"), key="t_biz_type_input")
+                t_email = st.text_input(_("계산???금?수??신 ?메??, "Invoice/Cash Receipt Email"), key="t_email_input")
 
                 t_tier = st.selectbox(
-                    _("신청 서비스 (요금제)", "Pricing Plan for Invoice"),
+                    _("?청 ?비??(?금??", "Pricing Plan for Invoice"),
                     options=[
-                        (_("Basic 요금제 (300,000원)", "Basic Plan (300,000 KRW)"), "Basic"),
-                        (_("Standard 요금제 (500,000원)", "Standard Plan (500,000 KRW)"), "Standard"),
-                        (_("Pro 요금제 (950,000원)", "Pro Plan (950,000 KRW)"), "Pro")
+                        (_("Basic ?금??(300,000??", "Basic Plan (300,000 KRW)"), "Basic"),
+                        (_("Standard ?금??(500,000??", "Standard Plan (500,000 KRW)"), "Standard"),
+                        (_("Pro ?금??(950,000??", "Pro Plan (950,000 KRW)"), "Pro")
                     ],
                     format_func=lambda x: x[0],
                     key="t_tier_select"
                 )
 
-                if st.button(_("계산서/현금영수증 신청하기", "Submit Invoice/Cash Receipt Request"), use_container_width=True, key="btn_request_tax"):
+                if st.button(_("계산???금?수??청?기", "Submit Invoice/Cash Receipt Request"), use_container_width=True, key="btn_request_tax"):
                     if not t_biz_num.strip():
-                        st.error(_("사업자 등록번호를 입력해 주세요.", "Please enter the Business Registration Number."))
+                        st.error(_("?업???록번호??력??주세??", "Please enter the Business Registration Number."))
                     elif not t_biz_name.strip():
-                        st.error(_("상호를 입력해 주세요.", "Please enter the Company Name."))
+                        st.error(_("?호??력??주세??", "Please enter the Company Name."))
                     elif not t_rep_name.strip():
-                        st.error(_("대표자명을 입력해 주세요.", "Please enter the CEO Name."))
+                        st.error(_("??자명을 ?력??주세??", "Please enter the CEO Name."))
                     elif not t_email.strip():
-                        st.error(_("이메일을 입력해 주세요.", "Please enter the Email."))
+                        st.error(_("?메?을 ?력??주세??", "Please enter the Email."))
                     elif not validate_email(t_email.strip()):
-                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                        st.error(_("?바??메???식???닙?다.", "Invalid email format."))
                     else:
-                        with st.spinner(_("신청서를 제출하는 중...", "Submitting request...")):
+                        with st.spinner(_("?청?? ?출?는 ?..", "Submitting request...")):
                             import sqlite3
                             conn = sqlite3.connect('users.db')
                             c = conn.cursor()
@@ -10894,13 +10895,13 @@ Thank you deeply for your valuable participation.
                                 )
 
                                 if mail_success:
-                                    st.success(_("계산서/현금영수증 신청이 접수되었습니다! 관리자 확인 후 발행됩니다.",
+                                    st.success(_("계산???금?수??청???수?었?니?? 관리자 ?인 ??발행?니??",
                                                  "Request submitted! The invoice will be issued after review."))
                                 else:
-                                    st.warning(_("DB 저장은 성공했으나 알림 메일 발송에 실패했습니다. 관리자가 확인 후 순차 처리해 드리겠습니다.",
+                                    st.warning(_("DB ??? ?공?으???림 메일 발송???패?습?다. 관리자가 ?인 ???차 처리???리겠습?다.",
                                                  "Saved to DB, but email alert failed. The admin will review it soon."))
                             except Exception as e:
-                                st.error(_(f"신청 중 오류가 발생했습니다: {e}", f"Error during submission: {e}"))
+                                st.error(_(f"?청 ??류가 발생?습?다: {e}", f"Error during submission: {e}"))
                             finally:
                                 conn.close()
 
