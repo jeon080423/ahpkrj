@@ -9392,7 +9392,7 @@ with contextlib.nullcontext():
                     if st.button(_("✨ 처음부터 새 설문 작성하기", "✨ Start a new survey from scratch"), type="secondary", use_container_width=True):
                          confirm_new_survey()
                     else:
-                        if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary"):
+                        if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary", use_container_width=True):
                             st.session_state.editing_survey_id = None
                             keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
                             for k in keys_to_clear:

@@ -1895,11 +1895,11 @@ def run():
                     survey_title_display = s[1]
                     break
             st.success(f" 현재 배포된 예타 설문을 불러왔습니다: **{survey_title_display}**")
-            if st.button("✨ 처음부터 새 설문 작성하기", type="secondary"):
+            if st.button("✨ 처음부터 새 설문 작성하기", type="secondary", use_container_width=True):
                  confirm_new_survey_yeta()
         else:
             st.info(" 작성 중인 새 예타 설문입니다.")
-            if st.button("✨ 폼 내용 모두 지우기 (초기화)", type="secondary"):
+            if st.button("✨ 폼 내용 모두 지우기 (초기화)", type="secondary", use_container_width=True):
                 st.session_state.yeta_editing_survey_id = None
                 keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_yeta_')]
                 for k in keys_to_clear:
