@@ -3028,9 +3028,7 @@ def create_sample_excel():
             main_data = [
                 [1, "Expert", -3, -3, 3, 1, 1, 1],                
                 [2, "Expert", -5, 3, 3, 3, 3, 3],        
-                [3, "General", 5, 1, 3, -5, -5, -3],
-                [4, "General", -3, -3, 3, -3, 3, -3],
-                [5, "Official", -5, 5, -5, -5, 5, -5]
+                [3, "General", 5, 1, 3, -5, -5, -3]
             ]
             df_main = pd.DataFrame(main_data, columns=main_cols)
             df_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
@@ -3038,9 +3036,7 @@ def create_sample_excel():
             inconsistent_pattern = [
                 [1, "Expert", 1, -3, 1],
                 [2, "Expert", -3, -3, -3],
-                [3, "General", 3, -3, 1],
-                [4, "General", -3, 5, 3],
-                [5, "Official", -3, 5, 3]
+                [3, "General", 3, -3, 1]
             ]
             sub1_cols = ["ID", "Type", "AdminSupport_Community", "AdminSupport_PM", "Community_PM"]
             pd.DataFrame(inconsistent_pattern, columns=sub1_cols).to_excel(writer, sheet_name="Governance", index=False)
@@ -3056,9 +3052,7 @@ def create_sample_excel():
             main_data = [
                 [1, "전문가",-3,	-3, 3, 1, 1, 1],                
                 [2, "전문가", -5, 3, 3, 3, 3, 3],        
-                [3, "일반", 5, 1, 3, -5, -5, -3],
-                [4, "일반", -3,-3, 3, -3, 3, -3],
-                [5, "공무원", -5, 5, -5, -5, 5, -5]
+                [3, "일반", 5, 1, 3, -5, -5, -3]
             ]
             df_main = pd.DataFrame(main_data, columns=main_cols)
             df_main.to_excel(writer, sheet_name="Main_Criteria", index=False)
@@ -3066,9 +3060,7 @@ def create_sample_excel():
             inconsistent_pattern = [
                 [1, "전문가", 1, -3, 1],
                 [2, "전문가", -3, -3, -3],
-                [3, "일반", 3, -3, 1],
-                [4, "일반", -3, 5, 3],
-                [5, "공무원", -3, 5, 3]
+                [3, "일반", 3, -3, 1]
             ]
             sub1_cols = ["ID", "Type", "행정지원_지역공동체", "행정지원_총괄사업관리자", "지역공동체_총괄사업관리자"]
             pd.DataFrame(inconsistent_pattern, columns=sub1_cols).to_excel(writer, sheet_name="거버넌스", index=False)
@@ -6729,21 +6721,9 @@ with contextlib.nullcontext():
         # - 정식/관리자: Mock_3Tier_Full.xlsx (100행, 실제 분석 가능)
         # - 무료/비로그인: create_sample_excel_v3() (3행, 3행 제한 통과)
         _role_now = st.session_state.get('user_role', None)
-        _is_full_user = (_role_now in ('admin', 'official'))
-        if _is_full_user:
-            try:
-                with open("Mock_3Tier_Full.xlsx", "rb") as f:
-                    sample_excel_v3 = f.read()
-                _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
-                _v3_filename = "Mock_3Tier_Full.xlsx"
-            except Exception:
-                sample_excel_v3 = create_sample_excel_v3()
-                _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
-                _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
-        else:
-            sample_excel_v3 = create_sample_excel_v3()   # 3행 — 무료 3행 제한 통과
-            _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
-            _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
+        sample_excel_v3 = create_sample_excel_v3()
+        _v3_label = _("📂 3계층 샘플 데이터", "📂 3-Tier Sample Data")
+        _v3_filename = _("AHP_3Tier_Sample.xlsx", "AHP_3Tier_Sample.xlsx")
             
         # 모든 사용자에게 2계층·3계층 샘플 데이터 + 결과 예시 버튼 4개 표시
         col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
