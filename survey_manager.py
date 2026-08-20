@@ -367,13 +367,25 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
 @st.cache_data(ttl=300, show_spinner=False)
 def _fetch_survey_metadata_from_sheets(spreadsheet_id):
     """구글 시트에서 실시간으로 설문 데이터를 가져와서 데코딩하고 로컬 DB 캐시를 갱신합니다."""
+    import time
     client = get_survey_gspread_client()
     if not client:
         raise Exception("구글 시트 API 클라이언트를 초기화할 수 없습니다.")
         
-    spreadsheet = client.open_by_key(spreadsheet_id)
-    meta_sheet = spreadsheet.worksheet("Survey_Metadata")
-    records = meta_sheet.get_all_records()
+    max_retries = 3
+    records = None
+    for attempt in range(max_retries):
+        try:
+            spreadsheet = client.open_by_key(spreadsheet_id)
+            meta_sheet = spreadsheet.worksheet("Survey_Metadata")
+            records = meta_sheet.get_all_records()
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                time.sleep(1.5 ** attempt)  # 1s, 1.5s
+                client = get_survey_gspread_client()
+            else:
+                raise e
     
     meta_dict = {}
     for row in records:
