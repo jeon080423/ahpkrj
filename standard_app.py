@@ -5880,56 +5880,53 @@ with st.sidebar:
                         st.error(_("등록되지 않은 아이디입니다.", "ID is not registered."))
 
         with tab_signup_side:
-            if st.session_state.user_id:
-                st.info(_("이미 로그인되어 있습니다.", "You are already logged in."))
+            signup_type = st.radio(
+                _("가입 구분 선택", "Select Registration Type"),
+                options=[
+                    _("무료 회원가입", "Free Registration"),
+                    _("정식(유료) 회원가입", "Official (Paid) Registration")
+                ],
+                horizontal=True,
+                key="main_signup_type"
+            )
+
+            if signup_type == _("정식(유료) 회원가입", "Official (Paid) Registration"):
+                st.info(_(
+                    "💡 **정식(유료) 라이선스 이용 안내**\n\n"
+                    "1. 먼저 **'무료 회원가입'**을 선택하여 계정을 생성해 주세요.\n"
+                    "2. 생성한 계정으로 로그인한 후, 왼쪽 사이드바의 **결제 연동** 또는 상단의 **'서비스 요금'** 탭을 통해 결제를 완료하시면 즉시 정식 라이선스로 업그레이드됩니다.\n\n"
+                    "💳 *연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.*",
+                    "💡 **Official (Paid) License Info**\n\n"
+                    "1. Please first select **'Free Registration'** to create your account.\n"
+                    "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
+                    "💳 *Supports Research/Corporate Cards, and Quotations (100% supported).*"
+                ))
             else:
-                signup_type = st.radio(
-                    _("가입 구분 선택", "Select Registration Type"),
-                    options=[
-                        _("무료 회원가입", "Free Registration"),
-                        _("정식(유료) 회원가입", "Official (Paid) Registration")
-                    ],
-                    horizontal=True,
-                    key="main_signup_type"
-                )
+                agreements = show_agreement_ui()
+                s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
+                s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
 
-                if signup_type == _("정식(유료) 회원가입", "Official (Paid) Registration"):
-                    st.info(_(
-                        "💡 **정식(유료) 라이선스 이용 안내**\n\n"
-                        "1. 먼저 **'무료 회원가입'**을 선택하여 계정을 생성해 주세요.\n"
-                        "2. 생성한 계정으로 로그인한 후, 왼쪽 사이드바의 **결제 연동** 또는 상단의 **'서비스 요금'** 탭을 통해 결제를 완료하시면 즉시 정식 라이선스로 업그레이드됩니다.\n\n"
-                        "💳 *연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.*",
-                        "💡 **Official (Paid) License Info**\n\n"
-                        "1. Please first select **'Free Registration'** to create your account.\n"
-                        "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
-                        "💳 *Supports Research/Corporate Cards, and Quotations (100% supported).*"
-                    ))
-                else:
-                    agreements = show_agreement_ui()
-                    s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
-                    s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
+                s_cust_type = "standard"
 
-                    s_cust_type = "standard"
-
-                    if st.button(_("가입신청", "Register"), key="main_btn_signup"):
-                        if not agreements.get("agree_personal_info"):
-                            st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
-                        elif not validate_email(s_id):
-                            st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                        elif not validate_password(s_pw):
-                            st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                if st.button(_("가입신청", "Register"), key="main_btn_signup"):
+                    if not agreements.get("agree_personal_info"):
+                        st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
+                    elif not validate_email(s_id):
+                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                    elif not validate_password(s_pw):
+                        st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                    else:
+                        restore_from_deleted_sheet(s_id.strip())
+                        # 가입 시 무조건 'temp' 권한으로 배정
+                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                            st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
+                            import time
+                            time.sleep(2)
+                            st.rerun()
                         else:
-                            restore_from_deleted_sheet(s_id.strip())
-                            # 가입 시 무조건 'temp' 권한으로 배정
-                            if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
-                                st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
-                                import time
-                                time.sleep(2)
-                                st.rerun()
-                            else:
-                                st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+                            st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
-                    st.info(_("🔒 **개인정보 보호 안내**\n\nAHP 마스터는 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
+                st.info(_("🔒 **개인정보 보호 안내**\n\nAHP 마스터는 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
 
 
 
