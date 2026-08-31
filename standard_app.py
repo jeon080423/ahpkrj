@@ -6770,11 +6770,17 @@ with contextlib.nullcontext():
             st.info(_("**혼합 계층(Mixed-Tier) 엑셀 분석 안내**: 3계층 코딩 엑셀 양식을 업로드할 때, 특정 항목에 대한 소분류 평가 시트가 없거나 응답이 비워져 있더라도 시스템이 해당 항목을 자동으로 2계층 가중치로 간주하여 에러 없이 분석을 수행합니다.", "**Mixed-Tier Excel Analysis Guide**: When uploading a 3-tier Excel template, if there are no sub-sub-criteria evaluation sheets for specific items or the responses are blank, the system automatically considers them as 2-tier weights and performs the analysis without errors."))
 
         # 데이터 소스 선택 추가
+        _ds_options = [_("📂 엑셀 파일 직접 업로드", "Upload Excel File"), _("🌐 배포된 온라인 설문 데이터 연동", "Link Online Survey Data")]
+        _ds_default_idx = 1 if st.session_state.get("_auto_switch_to_online") else 0
         data_source = st.radio(
             _("분석 데이터 소스 선택", "Select Analysis Data Source"),
-            [_("📂 엑셀 파일 직접 업로드", "Upload Excel File"), _("🌐 배포된 온라인 설문 데이터 연동", "Link Online Survey Data")],
+            _ds_options,
+            index=_ds_default_idx,
             horizontal=True
         )
+        # 플래그 사용 후 해제 (수동 전환 시 간섭 방지)
+        if st.session_state.get("_auto_switch_to_online"):
+            st.session_state["_auto_switch_to_online"] = False
     
         # [신규 추가] 인구통계 빈도/비율 분석용 헬퍼 함수
         def generate_demographics_summary(demo_df):
@@ -10335,7 +10341,9 @@ Thank you deeply for your valuable participation.
                                                     st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
                                                 
                                     st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                    st.info(_("📊 데이터 분석 준비가 완료되었습니다! **상단의 '📊 AHP 분석 도구' 탭**을 선택하고 **'🌐 배포된 온라인 설문 데이터 연동'** 라디오 버튼을 선택하여 분석 결과를 바로 확인하십시오.", "📊 Data analysis preparation is complete! Select the **'📊 AHP Analysis Tool' tab at the top** and choose the **'🌐 Link Distributed Online Survey Data'** radio button to view the results instantly."))
+                                    # 라디오 버튼을 자동으로 '온라인 설문 데이터 연동'으로 전환 후 rerun
+                                    st.session_state["_auto_switch_to_online"] = True
+                                    st.rerun()
 
                             tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
                             with tab_raw:
