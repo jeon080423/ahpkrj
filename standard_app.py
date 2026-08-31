@@ -10339,10 +10339,33 @@ Thank you deeply for your valuable participation.
 
                             tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
                             with tab_raw:
-                                st.dataframe(live_df, use_container_width=True)
+                                # Prevent duplicate column name error (PyArrow ValueError)
+                                _display_df = live_df.copy()
+                                if _display_df.columns.duplicated().any():
+                                    cols = list(_display_df.columns)
+                                    seen = {}
+                                    for i, c in enumerate(cols):
+                                        if c in seen:
+                                            seen[c] += 1
+                                            cols[i] = f"{c}_{seen[c]}"
+                                        else:
+                                            seen[c] = 0
+                                    _display_df.columns = cols
+                                st.dataframe(_display_df, use_container_width=True)
                             with tab_demo:
                                 if demo_df is not None:
-                                    st.dataframe(demo_df, use_container_width=True)
+                                    _demo_display = demo_df.copy()
+                                    if _demo_display.columns.duplicated().any():
+                                        cols = list(_demo_display.columns)
+                                        seen = {}
+                                        for i, c in enumerate(cols):
+                                            if c in seen:
+                                                seen[c] += 1
+                                                cols[i] = f"{c}_{seen[c]}"
+                                            else:
+                                                seen[c] = 0
+                                        _demo_display.columns = cols
+                                    st.dataframe(_demo_display, use_container_width=True)
                                 else:
                                     st.info("수집된 인구통계 데이터가 없거나 Demographic_Data 시트가 생성되지 않았습니다.")
 
