@@ -98,11 +98,12 @@ if saved_user and not st.session_state.get('user_id') and not st.session_state.g
     else:
         need_delete_cookie = True
 
-# Sync state to cookie
+# Sync state to cookie (sliding expiration: 1 hour)
+SESSION_TIMEOUT = 3600  # 1 hour
 current_user = st.session_state.get('user_id')
-if current_user and current_user != saved_user and not st.session_state.get('logout_requested'):
+if current_user and not st.session_state.get('logout_requested'):
     try:
-        cookie_manager.set("ahp_user_id", current_user, max_age=86400 * 30, key="set_ahp_user_cookie")
+        cookie_manager.set("ahp_user_id", current_user, max_age=SESSION_TIMEOUT, key="set_ahp_user_cookie")
     except Exception:
         pass
 elif (not current_user and saved_user) or need_delete_cookie or st.session_state.get('logout_requested'):
