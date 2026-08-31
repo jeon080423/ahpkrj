@@ -142,6 +142,18 @@ def translate_dynamic_text(text, target_lang='en'):
     except Exception:
         return text
 
+@st.cache_data(show_spinner=False)
+def _load_example_file(path):
+    """Load sample/example Excel files with caching to prevent rerun issues."""
+    try:
+        import os
+        base_dir = os.path.dirname(__file__)
+        full_path = os.path.join(base_dir, path)
+        with open(full_path, "rb") as f:
+            return f.read(), None
+    except Exception as e:
+        return b"", str(e)
+
 def _t(text):
     """Dynamically translates user-provided text if the current language is English."""
     try:
@@ -6694,22 +6706,13 @@ with contextlib.nullcontext():
             
         sample_excel = create_sample_excel()
             
-        def load_example_file(path):
-            try:
-                import os
-                base_dir = os.path.dirname(__file__)
-                full_path = os.path.join(base_dir, path)
-                with open(full_path, "rb") as f:
-                    return f.read(), None
-            except Exception as e:
-                return b"", str(e)
-    
         is_en = st.session_state.get('lang', 'ko') == 'en'
         tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
         fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
             
-        tahp_data, tahp_err = load_example_file(tahp_path)
-        fahp_data, fahp_err = load_example_file(fahp_path)
+        tahp_data, tahp_err = _load_example_file(tahp_path)
+        fahp_data, fahp_err = _load_example_file(fahp_path)
+
             
         if tahp_err: st.error(f"TAHP Load Error: {tahp_err} | Path: {tahp_path}")
         if fahp_err: st.error(f"FAHP Load Error: {fahp_err} | Path: {fahp_path}")
