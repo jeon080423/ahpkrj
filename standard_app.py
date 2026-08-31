@@ -10370,7 +10370,7 @@ Thank you deeply for your valuable participation.
                                         _w_cols = [f"Weight_{f}" for f in _main_facts]
                                         _main_matrices = np.stack(_main_res['Matrix_Object'].values)
                                         _grp_matrix = gmean(_main_matrices, axis=0)
-                                        _grp_cr, _grp_ci, _ = calculate_consistency(_grp_matrix, method=_inline_mean)
+                                        _grp_cr, _grp_ci, _not_used = calculate_consistency(_grp_matrix, method=_inline_mean)
                                         _grp_w = _main_res[_w_cols].apply(lambda x: gmean(x), axis=0)
                                         _grp_w = _grp_w / _grp_w.sum()
                                         
