@@ -10412,7 +10412,7 @@ Thank you deeply for your valuable participation.
                                             st.markdown(_("#### 📋 하위 기준 가중치", "#### 📋 Sub-Criteria Weights"))
                                             for _parent, _sub_df in _sub_dfs.items():
                                                 try:
-                                                    _sub_res, _sub_facts, _, _ = process_single_sheet(
+                                                    _sub_res, _sub_facts, _sub_excl, _sub_excl_df = process_single_sheet(
                                                         _sub_df, _inline_cr, _inline_max_iter, _inline_lr, _inline_mean, _inline_method
                                                     )
                                                     if not _sub_res.empty:
