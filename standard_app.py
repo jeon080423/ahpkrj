@@ -1245,6 +1245,9 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS user_google_credentials
                   (user_id TEXT PRIMARY KEY, token TEXT, refresh_token TEXT, token_uri TEXT, client_id TEXT, client_secret TEXT, scopes TEXT, expiry TEXT)''')
     
+    c.execute('''CREATE TABLE IF NOT EXISTS survey_backup_responses
+                  (id INTEGER PRIMARY KEY AUTOINCREMENT, survey_id TEXT, respondent_id TEXT, response_json TEXT, saved_to_sheet INTEGER DEFAULT 0, created_at TEXT)''')
+    
     # [추가] 학위논문 할인 이벤트 설정 테이블
     c.execute('''CREATE TABLE IF NOT EXISTS event_settings
                   (id INTEGER PRIMARY KEY, event_active INTEGER, event_title TEXT, event_desc TEXT, event_deadline TEXT, event_discount INTEGER)''')
