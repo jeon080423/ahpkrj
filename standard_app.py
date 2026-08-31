@@ -10308,7 +10308,7 @@ Thank you deeply for your valuable participation.
                             st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
                         
                             # 📊 AHP 분석 연동 단축 버튼 추가
-                            if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)"), type="primary", use_container_width=True):
+                            if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
                                 import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "온라인 설문 데이터 연동")
                                 st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                                 from survey_manager import load_survey_metadata
