@@ -10183,8 +10183,8 @@ Thank you deeply for your valuable participation.
                     try:
                         from survey_manager import get_admin_surveys_from_gsheet
                         gs_surveys = get_admin_surveys_from_gsheet(st.session_state.user_id)
-                    except Exception:
-                        pass
+                    except Exception as gs_err:
+                        st.warning(f"구글 스프레드시트 설문 동기화 실패: {gs_err}")
                 
                     merged_surveys = {}
                     for s in gs_surveys + sqlite_surveys:
