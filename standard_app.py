@@ -10308,7 +10308,7 @@ Thank you deeply for your valuable participation.
                             st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
                         
                             # 📊 AHP 분석 연동 단축 버튼 추가
-                            if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
+                            if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)"), type="primary", use_container_width=True):
                                 import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "온라인 설문 데이터 연동")
                                 st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                                 from survey_manager import load_survey_metadata
@@ -10344,9 +10344,104 @@ Thank you deeply for your valuable participation.
                                                     st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
                                                 
                                     st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                    # 라디오 버튼을 자동으로 '온라인 설문 데이터 연동'으로 전환 후 rerun
                                     st.session_state["_auto_switch_to_online"] = True
+                                    st.session_state["_run_inline_analysis"] = True
                                     st.rerun()
+
+                            # ── 인라인 AHP 분석 결과 표시 ──
+                            if st.session_state.get("_run_inline_analysis") and st.session_state.get("ahp_df_main") is not None:
+                                st.session_state["_run_inline_analysis"] = False
+                                st.divider()
+                                st.subheader(_("📊 AHP 분석 결과 (빠른 미리보기)", "📊 AHP Analysis Results (Quick Preview)"))
+                                
+                                _inline_cr = 0.1
+                                _inline_max_iter = 500
+                                _inline_lr = 0.6
+                                _inline_mean = 'geometric'
+                                _inline_method = 'traditional'
+                                
+                                try:
+                                    _df_main = st.session_state["ahp_df_main"]
+                                    _main_res, _main_facts, _main_excl, _main_excl_df = process_single_sheet(
+                                        _df_main, _inline_cr, _inline_max_iter, _inline_lr, _inline_mean, _inline_method
+                                    )
+                                    
+                                    if not _main_res.empty:
+                                        _w_cols = [f"Weight_{f}" for f in _main_facts]
+                                        _main_matrices = np.stack(_main_res['Matrix_Object'].values)
+                                        _grp_matrix = gmean(_main_matrices, axis=0)
+                                        _grp_cr, _grp_ci, _ = calculate_consistency(_grp_matrix, method=_inline_mean)
+                                        _grp_w = _main_res[_w_cols].apply(lambda x: gmean(x), axis=0)
+                                        _grp_w = _grp_w / _grp_w.sum()
+                                        
+                                        # 상위 기준 가중치 표시
+                                        st.markdown(_("#### 📋 상위 기준 가중치", "#### 📋 Main Criteria Weights"))
+                                        
+                                        _weight_data = []
+                                        for i, f in enumerate(_main_facts):
+                                            _weight_data.append({
+                                                _("순위", "Rank"): i + 1,
+                                                _("평가 기준", "Criteria"): f,
+                                                _("가중치", "Weight"): round(float(_grp_w.iloc[i] if hasattr(_grp_w, 'iloc') else _grp_w[i]), 4),
+                                            })
+                                        _weight_data.sort(key=lambda x: x[_("가중치", "Weight")], reverse=True)
+                                        for rank_i, item in enumerate(_weight_data):
+                                            item[_("순위", "Rank")] = rank_i + 1
+                                        
+                                        _weight_df = pd.DataFrame(_weight_data)
+                                        st.dataframe(_weight_df, use_container_width=True, hide_index=True)
+                                        
+                                        col_cr1, col_cr2, col_cr3 = st.columns(3)
+                                        col_cr1.metric(_("유효 응답자 수", "Valid Respondents"), f"{len(_main_res)}명")
+                                        col_cr2.metric(_("제외 응답자 수", "Excluded"), f"{len(_main_excl_df) if not _main_excl_df.empty else 0}명")
+                                        col_cr3.metric(_("그룹 CR", "Group CR"), f"{_grp_cr:.4f}")
+                                        
+                                        # 가중치 막대 차트
+                                        import plotly.express as px
+                                        _chart_df = _weight_df.sort_values(_("가중치", "Weight"), ascending=True)
+                                        _fig = px.bar(_chart_df, x=_("가중치", "Weight"), y=_("평가 기준", "Criteria"),
+                                                      orientation='h', text=_("가중치", "Weight"),
+                                                      title=_("상위 기준 가중치 비교", "Main Criteria Weight Comparison"))
+                                        _fig.update_traces(texttemplate='%{text:.4f}', textposition='outside')
+                                        _fig.update_layout(height=max(300, len(_main_facts) * 50), yaxis={'categoryorder': 'total ascending'})
+                                        st.plotly_chart(_fig, use_container_width=True)
+                                        
+                                        # 하위 기준 분석
+                                        _sub_dfs = st.session_state.get("ahp_sub_dfs", {})
+                                        if _sub_dfs:
+                                            st.markdown(_("#### 📋 하위 기준 가중치", "#### 📋 Sub-Criteria Weights"))
+                                            for _parent, _sub_df in _sub_dfs.items():
+                                                try:
+                                                    _sub_res, _sub_facts, _, _ = process_single_sheet(
+                                                        _sub_df, _inline_cr, _inline_max_iter, _inline_lr, _inline_mean, _inline_method
+                                                    )
+                                                    if not _sub_res.empty:
+                                                        _sw_cols = [f"Weight_{f}" for f in _sub_facts]
+                                                        _sw = _sub_res[_sw_cols].apply(lambda x: gmean(x), axis=0)
+                                                        _sw = _sw / _sw.sum()
+                                                        _sub_weight_data = []
+                                                        for si, sf in enumerate(_sub_facts):
+                                                            _sub_weight_data.append({
+                                                                _("순위", "Rank"): si + 1,
+                                                                _("상위 기준", "Parent"): _parent,
+                                                                _("하위 기준", "Sub-Criteria"): sf,
+                                                                _("가중치", "Weight"): round(float(_sw.iloc[si] if hasattr(_sw, 'iloc') else _sw[si]), 4),
+                                                            })
+                                                        _sub_weight_data.sort(key=lambda x: x[_("가중치", "Weight")], reverse=True)
+                                                        for ri, si_item in enumerate(_sub_weight_data):
+                                                            si_item[_("순위", "Rank")] = ri + 1
+                                                        
+                                                        with st.expander(f"📂 {_parent}", expanded=True):
+                                                            st.dataframe(pd.DataFrame(_sub_weight_data), use_container_width=True, hide_index=True)
+                                                except Exception:
+                                                    pass
+                                        
+                                        st.info(_("💡 상세 분석 결과는 상단의 **'엑셀 업로드 분석'** 탭에서 **'🌐 배포된 온라인 설문 데이터 연동'**을 선택하면 전체 결과(CR 보정, ANOVA, 엑셀 다운로드 등)를 확인할 수 있습니다.",
+                                                  "💡 For detailed results (CR correction, ANOVA, Excel download), go to the **'Upload & Analyze'** tab and select **'Link Online Survey Data'**."))
+                                    else:
+                                        st.warning(_("유효한 분석 데이터가 없습니다.", "No valid analysis data found."))
+                                except Exception as _inline_err:
+                                    st.error(f"인라인 분석 실행 중 오류: {_inline_err}")
 
                             tab_raw, tab_demo = st.tabs(["📊 Raw_Data (AHP 쌍대비교 데이터)", "👤 Demographic_Data (인구통계/사전순위)"])
                             with tab_raw:
