@@ -320,6 +320,10 @@
                     periodSpan.innerText = months + t.planSuffix;
                 }
             });
+
+            // Update CTA button hrefs with lang parameter
+            document.getElementById('btn-start-standard').href = 'https://ahpkrj.streamlit.app/?mode=standard&lang=' + lang;
+            document.getElementById('btn-start-yeta').href = 'https://ahpkrj.streamlit.app/?mode=yeta&lang=' + lang;
         }
 
         document.getElementById('lang-toggle').addEventListener('click', function(e) {
