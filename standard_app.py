@@ -411,6 +411,12 @@ div[data-testid="stSidebar"], div[data-testid="stAppViewBlockContainer"] {
     background: #ffffff !important;
 }
 
+/* --- 사이드바 상단 여백 최적화 (본문 타이틀 수평 라인 일치) --- */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"],
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1.2rem !important;
+}
+
 /* --- 메인 제목 스타일링 (전문적이고 차분하게) --- */
 h1 {
     font-weight: 700 !important;
@@ -5793,7 +5799,7 @@ with st.sidebar:
             encoded_logo = base64.b64encode(f.read()).decode()
         st.markdown(
             f'<a href="https://www.ahpmaster.com" target="_blank">'
-            f'<img src="data:image/png;base64,{encoded_logo}" style="width:100%; border-radius: 4px; display: block; margin-bottom: 10px;">'
+            f'<img src="data:image/png;base64,{encoded_logo}" style="width:100%; border-radius: 4px; display: block; margin-top: -24px; margin-bottom: 12px;">'
             f'</a>',
             unsafe_allow_html=True
         )
