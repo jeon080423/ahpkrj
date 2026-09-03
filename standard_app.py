@@ -569,17 +569,34 @@ div.stButton > button[data-testid="stBaseButton-primary"]:hover {
 }
 
 /* --- 입력 필드 고급 스타일링 --- */
-div.stTextInput > div > div > input {
-    border-radius: 4px !important;
-    border: 1px solid #cbd5e1 !important;
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.9rem !important;
-    background: #ffffff !important;
+/* --- 입력 필드 테두리 완전 제거 (미니멀 모던 플랫) --- */
+div.stTextInput > div,
+div.stTextInput div[data-baseweb="base-input"],
+div.stTextInput div[data-baseweb="input"],
+div.stTextInput > div > div {
+    border: none !important;
+    border-color: transparent !important;
+    border-width: 0 !important;
     box-shadow: none !important;
+    outline: none !important;
+    border-radius: 6px !important;
+    background-color: #ffffff !important;
 }
-div.stTextInput > div > div > input:focus {
-    border-color: #1e3a8a !important;
-    box-shadow: 0 0 0 1px #1e3a8a !important;
+div.stTextInput > div > div > input,
+div.stTextInput input {
+    border: none !important;
+    border-color: transparent !important;
+    border-width: 0 !important;
+    padding: 0.55rem 0.75rem !important;
+    font-size: 0.9rem !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+div.stTextInput div[data-baseweb="base-input"]:focus-within,
+div.stTextInput div[data-baseweb="input"]:focus-within {
+    border: none !important;
+    box-shadow: 0 0 0 1.5px rgba(37, 99, 235, 0.45) !important;
 }
 
 /* --- 셀렉트박스 스타일 --- */
