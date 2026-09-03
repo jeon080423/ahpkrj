@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>AHPMASTER - 사이드바 장착 비율 비교 시뮬레이션</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0B0F19;
+      color: #F8FAFC;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 {
+      font-size: 28px; font-weight: 900; margin: 0 0 8px 0;
+      background: linear-gradient(135deg, #38BDF8, #818CF8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .header p { font-size: 14px; color: #94A3B8; margin: 0; }
+    
+    /* 실제 Streamlit 사이드바(너비 280px) 시뮬레이션 컨테이너 */
+    .showcase-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 28px;
+      max-width: 1300px;
+      width: 100%;
+    }
+    .sidebar-mockup {
+      width: 290px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      color: #0F172A;
+      display: flex;
+      flex-direction: column;
+    }
+    .mockup-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #38BDF8;
+      background: #1E293B;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .logo-slot {
+      width: 100%;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .logo-slot img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .mock-menu {
+      border-top: 1px solid #F1F5F9;
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .mock-item {
+      height: 32px;
+      background: #F8FAFC;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748B;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+    }
+    .mock-item.active {
+      background: #EEF2FF;
+      color: #4F46E5;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>1번 Hierarchical Prism - 사이드바 실제 장착 시뮬레이션</h1>
+    <p>Streamlit 실제 사이드바 폭(280px)에서 각 비율이 어떻게 보이는지 비교해 보세요.</p>
+  </div>
+  <div class="showcase-row">
+    <div>
+      <div class="mockup-label">A. 사이드바 스택형 (라이트)</div>
+      <div class="sidebar-mockup">
+        <div class="logo-slot">
+          <img src="01_sidebar_stacked_light.png" alt="A. 사이드바 스택형 (라이트)">
+        </div>
+        <div class="mock-menu">
+          <div class="mock-item active">📊 설문 분석 및 가중치</div>
+          <div class="mock-item">⚖️ 쌍대비교 매트릭스</div>
+          <div class="mock-item">📈 일관성 비율(CR) 검증</div>
+          <div class="mock-item">💾 Excel 엑스포트</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="mockup-label">B. 사이드바 스택형 (다크 네이비)</div>
+      <div class="sidebar-mockup">
+        <div class="logo-slot">
+          <img src="02_sidebar_stacked_dark.png" alt="B. 사이드바 스택형 (다크 네이비)">
+        </div>
+        <div class="mock-menu">
+          <div class="mock-item active">📊 설문 분석 및 가중치</div>
+          <div class="mock-item">⚖️ 쌍대비교 매트릭스</div>
+          <div class="mock-item">📈 일관성 비율(CR) 검증</div>
+          <div class="mock-item">💾 Excel 엑스포트</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="mockup-label">C. 컴팩트 가로형 (2.6 : 1 비율)</div>
+      <div class="sidebar-mockup">
+        <div class="logo-slot">
+          <img src="03_compact_horizontal_box.png" alt="C. 컴팩트 가로형 (2.6 : 1 비율)">
+        </div>
+        <div class="mock-menu">
+          <div class="mock-item active">📊 설문 분석 및 가중치</div>
+          <div class="mock-item">⚖️ 쌍대비교 매트릭스</div>
+          <div class="mock-item">📈 일관성 비율(CR) 검증</div>
+          <div class="mock-item">💾 Excel 엑스포트</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="mockup-label">D. 투명 배경 인라인 슬림 (Transparent)</div>
+      <div class="sidebar-mockup">
+        <div class="logo-slot">
+          <img src="04_transparent_slim_inline.png" alt="D. 투명 배경 인라인 슬림 (Transparent)">
+        </div>
+        <div class="mock-menu">
+          <div class="mock-item active">📊 설문 분석 및 가중치</div>
+          <div class="mock-item">⚖️ 쌍대비교 매트릭스</div>
+          <div class="mock-item">📈 일관성 비율(CR) 검증</div>
+          <div class="mock-item">💾 Excel 엑스포트</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="600" height="360">
+  <rect x="3" y="3" width="594" height="354" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  
+  <g transform="translate(240, 42)">
+    <line x1="60" y1="25" x2="25" y2="60" stroke="#93C5FD" stroke-width="4"/>
+    <line x1="60" y1="25" x2="95" y2="60" stroke="#93C5FD" stroke-width="4"/>
+    <line x1="25" y1="60" x2="60" y2="95" stroke="#93C5FD" stroke-width="4"/>
+    <line x1="95" y1="60" x2="60" y2="95" stroke="#93C5FD" stroke-width="4"/>
+    <rect x="46" y="11" width="28" height="28" rx="8" transform="rotate(45 60 25)" fill="#2563EB"/>
+    <rect x="11" y="46" width="28" height="28" rx="8" transform="rotate(45 25 60)" fill="#3B82F6"/>
+    <rect x="81" y="46" width="28" height="28" rx="8" transform="rotate(45 95 60)" fill="#3B82F6"/>
+    <rect x="46" y="81" width="28" height="28" rx="8" transform="rotate(45 60 95)" fill="#60A5FA"/>
+  </g>
+  
+  <text x="300" y="240" font-family="'Segoe UI', Roboto, sans-serif" font-size="46" font-weight="900" fill="#0F172A" text-anchor="middle" letter-spacing="-1">AHP<tspan fill="#2563EB">MASTER</tspan></text>
+  <text x="300" y="278" font-family="'Segoe UI', Roboto, sans-serif" font-size="15.5" font-weight="700" fill="#64748B" text-anchor="middle" letter-spacing="4">MULTI-CRITERIA DECISION SUITE</text>
+  <rect x="250" y="305" width="100" height="4" rx="2" fill="#2563EB"/>
+</svg>
