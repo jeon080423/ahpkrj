@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 230" width="600" height="230">
+  <rect x="3" y="3" width="594" height="224" rx="16" fill="#0B0F19" stroke="#1E293B" stroke-width="2"/>
+  
+  <g transform="translate(40, 48)">
+    <line x1="60" y1="25" x2="25" y2="60" stroke="#38BDF8" stroke-width="3.5" opacity="0.6"/>
+    <line x1="60" y1="25" x2="95" y2="60" stroke="#38BDF8" stroke-width="3.5" opacity="0.6"/>
+    <line x1="25" y1="60" x2="60" y2="95" stroke="#38BDF8" stroke-width="3.5" opacity="0.6"/>
+    <line x1="95" y1="60" x2="60" y2="95" stroke="#38BDF8" stroke-width="3.5" opacity="0.6"/>
+    <rect x="47" y="12" width="26" height="26" rx="7" transform="rotate(45 60 25)" fill="#38BDF8"/>
+    <rect x="12" y="47" width="26" height="26" rx="7" transform="rotate(45 25 60)" fill="#2563EB"/>
+    <rect x="82" y="47" width="26" height="26" rx="7" transform="rotate(45 95 60)" fill="#2563EB"/>
+    <rect x="47" y="82" width="26" height="26" rx="7" transform="rotate(45 60 95)" fill="#1D4ED8"/>
+  </g>
+  
+  <text x="185" y="112" font-family="'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" letter-spacing="-1">AHP<tspan fill="#38BDF8">MASTER</tspan></text>
+  <text x="187" y="146" font-family="'Segoe UI', Roboto, sans-serif" font-size="14.5" font-weight="700" fill="#94A3B8" letter-spacing="3.5">MULTI-CRITERIA DECISION</text>
+  
+  <rect x="187" y="166" width="65" height="24" rx="12" fill="#1E293B"/>
+  <text x="219" y="182" font-family="sans-serif" font-size="11.5" font-weight="800" fill="#38BDF8" text-anchor="middle">PRO</text>
+</svg>

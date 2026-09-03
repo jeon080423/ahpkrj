@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 110" width="620" height="110">
+  <rect x="2" y="2" width="616" height="106" rx="14" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
+  <g transform="translate(40, 18)">
+    <polygon points="36,6 64,22 64,54 36,70 8,54 8,22" fill="none" stroke="#1E3A8A" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M22 25 L22 51 M22 38 L48 25 M28 35 L50 51" fill="none" stroke="#3B82F6" stroke-width="4.5" stroke-linecap="round"/>
+    <circle cx="36" cy="6" r="3.5" fill="#1E3A8A"/>
+    <circle cx="64" cy="22" r="3.5" fill="#1E3A8A"/>
+    <circle cx="36" cy="70" r="3.5" fill="#1E3A8A"/>
+  </g>
+  <text x="135" y="55" font-family="'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="900" fill="#0F172A" letter-spacing="-0.5">AHP<tspan fill="#1E3A8A">MASTER</tspan></text>
+  <text x="137" y="77" font-family="'Segoe UI', Roboto, sans-serif" font-size="11.5" font-weight="700" fill="#64748B" letter-spacing="3.5">STANDARD DECISION PLATFORM</text>
+  <rect x="520" y="16" width="70" height="24" rx="12" fill="#DBEAFE"/>
+  <text x="555" y="32" font-family="sans-serif" font-size="11" font-weight="700" fill="#1E40AF" text-anchor="middle">OFFICIAL</text>
+</svg>

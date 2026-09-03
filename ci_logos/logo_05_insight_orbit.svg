@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 110" width="620" height="110">
+  <rect x="2" y="2" width="616" height="106" rx="14" fill="#110E1B" stroke="#251F38" stroke-width="1.5"/>
+  <g transform="translate(38, 20)">
+    <ellipse cx="36" cy="35" rx="30" ry="13" fill="none" stroke="#8B5CF6" stroke-width="2.5" transform="rotate(-25 36 35)"/>
+    <ellipse cx="36" cy="35" rx="30" ry="13" fill="none" stroke="#D946EF" stroke-width="2" transform="rotate(35 36 35)" stroke-dasharray="4 3"/>
+    <circle cx="36" cy="35" r="10" fill="#7C3AED"/>
+    <circle cx="58" cy="24" r="4" fill="#F43F5E"/>
+  </g>
+  <text x="135" y="55" font-family="'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="900" fill="#F8FAFC" letter-spacing="-0.5">AHP<tspan fill="#A855F7">MASTER</tspan></text>
+  <text x="137" y="77" font-family="'Segoe UI', Roboto, sans-serif" font-size="11.5" font-weight="700" fill="#94A3B8" letter-spacing="3.5">INTELLIGENT DECISION ENGINE</text>
+  <rect x="525" y="16" width="65" height="24" rx="12" fill="#2E1065"/>
+  <text x="557" y="32" font-family="sans-serif" font-size="11" font-weight="700" fill="#C084FC" text-anchor="middle">AI LAB</text>
+</svg>

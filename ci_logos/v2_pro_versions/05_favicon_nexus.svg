@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <filter id="favGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#38BDF8" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect width="300" height="300" rx="64" fill="#0B0F19"/>
+  <g transform="translate(65, 45)" filter="url(#favGlow)">
+    <line x1="85" y1="35" x2="35" y2="85" stroke="#38BDF8" stroke-width="5" opacity="0.6"/>
+    <line x1="85" y1="35" x2="135" y2="85" stroke="#38BDF8" stroke-width="5" opacity="0.6"/>
+    <line x1="35" y1="85" x2="85" y2="135" stroke="#38BDF8" stroke-width="5" opacity="0.6"/>
+    <line x1="135" y1="85" x2="85" y2="135" stroke="#38BDF8" stroke-width="5" opacity="0.6"/>
+    <rect x="66" y="16" width="38" height="38" rx="10" transform="rotate(45 85 35)" fill="#38BDF8"/>
+    <rect x="16" y="66" width="38" height="38" rx="10" transform="rotate(45 35 85)" fill="#2563EB"/>
+    <rect x="116" y="66" width="38" height="38" rx="10" transform="rotate(45 135 85)" fill="#2563EB"/>
+    <rect x="66" y="116" width="38" height="38" rx="10" transform="rotate(45 85 135)" fill="#1D4ED8"/>
+  </g>
+  <text x="150" y="258" font-family="'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">AHP MASTER</text>
+</svg>

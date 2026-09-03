@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 110" width="620" height="110">
+  <rect x="2" y="2" width="616" height="106" rx="14" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <g transform="translate(40, 18)">
+    <polygon points="36,8 63,23 36,38 9,23" fill="#6366F1"/>
+    <polygon points="9,25 36,40 36,70 9,55" fill="#4338CA"/>
+    <polygon points="36,40 63,25 63,55 36,70" fill="#818CF8"/>
+    <polyline points="36,8 36,38 63,55" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.65"/>
+  </g>
+  <text x="135" y="55" font-family="'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="900" fill="#0F172A" letter-spacing="-0.5">AHP<tspan fill="#6366F1">MASTER</tspan></text>
+  <text x="137" y="77" font-family="'Segoe UI', Roboto, sans-serif" font-size="11.5" font-weight="700" fill="#64748B" letter-spacing="3.2">DIMENSIONAL DECISION SYSTEM</text>
+  <rect x="525" y="16" width="65" height="24" rx="12" fill="#EEF2FF"/>
+  <text x="557" y="32" font-family="sans-serif" font-size="11" font-weight="700" fill="#6366F1" text-anchor="middle">SaaS</text>
+</svg>
