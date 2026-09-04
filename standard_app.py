@@ -5812,14 +5812,25 @@ with st.sidebar:
 
     try:
         import base64
-        with open("ahp_master_logo.png", "rb") as f:
-            encoded_logo = base64.b64encode(f.read()).decode()
-        st.markdown(
-            f'<a href="https://www.ahpmaster.com" target="_blank">'
-            f'<img src="data:image/png;base64,{encoded_logo}" style="width:100%; border-radius: 4px; display: block; margin-top: -24px; margin-bottom: 12px;">'
-            f'</a>',
-            unsafe_allow_html=True
-        )
+        import os
+        if os.path.exists("ahp_master_logo.svg"):
+            with open("ahp_master_logo.svg", "r", encoding="utf-8") as f:
+                svg_markup = f.read()
+            st.markdown(
+                f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; display: block; width: 100%; margin-top: -24px; margin-bottom: 12px;">'
+                f'{svg_markup}'
+                f'</a>',
+                unsafe_allow_html=True
+            )
+        else:
+            with open("ahp_master_logo.png", "rb") as f:
+                encoded_logo = base64.b64encode(f.read()).decode()
+            st.markdown(
+                f'<a href="https://www.ahpmaster.com" target="_blank">'
+                f'<img src="data:image/png;base64,{encoded_logo}" style="width:100%; border-radius: 4px; display: block; margin-top: -24px; margin-bottom: 12px; image-rendering: -webkit-optimize-contrast;">'
+                f'</a>',
+                unsafe_allow_html=True
+            )
     except:
         st.markdown(
             f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; color: inherit;">'
