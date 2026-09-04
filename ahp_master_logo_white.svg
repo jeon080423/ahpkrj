@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 96" width="100%" height="auto" style="display:block; width:100%;">
+  <g transform="translate(6, 8)">
+    <line x1="40" y1="16" x2="16" y2="40" stroke="#38BDF8" stroke-width="3.6" stroke-linecap="round" opacity="0.8"/>
+    <line x1="40" y1="16" x2="64" y2="40" stroke="#38BDF8" stroke-width="3.6" stroke-linecap="round" opacity="0.8"/>
+    <line x1="16" y1="40" x2="40" y2="64" stroke="#38BDF8" stroke-width="3.6" stroke-linecap="round" opacity="0.8"/>
+    <line x1="64" y1="40" x2="40" y2="64" stroke="#38BDF8" stroke-width="3.6" stroke-linecap="round" opacity="0.8"/>
+    <rect x="29" y="5" width="22" height="22" rx="6" transform="rotate(45 40 16)" fill="#38BDF8"/>
+    <rect x="5" y="29" width="22" height="22" rx="6" transform="rotate(45 16 40)" fill="#2563EB"/>
+    <rect x="53" y="29" width="22" height="22" rx="6" transform="rotate(45 64 40)" fill="#2563EB"/>
+    <rect x="29" y="53" width="22" height="22" rx="6" transform="rotate(45 40 64)" fill="#1D4ED8"/>
+  </g>
+  <text x="108" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', Roboto, sans-serif" font-size="46" font-weight="900" fill="#FFFFFF" letter-spacing="-0.8">AHP<tspan fill="#38BDF8">MASTER</tspan></text>
+  <text x="110" y="80" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', Roboto, sans-serif" font-size="13.5" font-weight="700" fill="#94A3B8" letter-spacing="3.8">MULTI-CRITERIA DECISION</text>
+</svg>
