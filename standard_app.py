@@ -6688,7 +6688,8 @@ with contextlib.nullcontext():
                         get_admin_surveys_from_gsheet.clear()
                     except Exception:
                         pass
-                    for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_')]:
+                    st.session_state.pop('tab2_tier_choice', None)
+                    for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_') or k.startswith('sub_sub_')]:
                         del st.session_state[k]
                     st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
                     st.rerun()
@@ -9322,7 +9323,8 @@ with contextlib.nullcontext():
                         st.session_state._survey_cache_dirty = True
                         st.session_state.survey_auto_loaded = False
                         st.session_state.editing_survey_id = None
-                        for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_')]:
+                        st.session_state.pop('tab2_tier_choice', None)
+                        for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_') or k.startswith('sub_sub_')]:
                             del st.session_state[k]
 
                     if '_cached_user_surveys' not in st.session_state or st.session_state.get('_survey_cache_dirty'):
@@ -9398,6 +9400,27 @@ with contextlib.nullcontext():
                             for mc, subs in ahp_model.get("subs", {}).items():
                                 st.session_state.edit_sub_inputs[mc] = ", ".join(subs)
 
+                            # [신규] 3계층 소분류(sub_subs) 및 Tier_Level 복원
+                            sub_subs_map = ahp_model.get("sub_subs", {})
+                            st.session_state.edit_sub_sub_inputs = {}
+                            for sub_c, sub_subs in sub_subs_map.items():
+                                joined = ", ".join(sub_subs) if isinstance(sub_subs, list) else str(sub_subs)
+                                st.session_state.edit_sub_sub_inputs[sub_c] = joined
+                                st.session_state[f"sub_sub_{sub_c}"] = joined
+
+                            raw_tier = meta.get("Tier_Level")
+                            if raw_tier is not None:
+                                try:
+                                    tier_val = int(raw_tier)
+                                except Exception:
+                                    tier_val = 3 if len(sub_subs_map) > 0 else 2
+                            else:
+                                tier_val = 3 if len(sub_subs_map) > 0 else 2
+
+                            st.session_state.edit_tier_level = tier_val
+                            tier_choice_label = _("3계층 (대분류 ➔ 중분류 ➔ 소분류)", "3-Tier (Main ➔ Sub ➔ Sub-sub)") if tier_val == 3 else _("2계층 (대분류 ➔ 중분류)", "2-Tier (Main ➔ Sub)")
+                            st.session_state["tab2_tier_choice"] = tier_choice_label
+
                             definitions = meta.get("Definitions", {})
                             st.session_state.edit_definitions = definitions
                         st.session_state.survey_auto_loaded = True
@@ -9419,7 +9442,8 @@ with contextlib.nullcontext():
                                     if user_surveys:
                                         delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
                                     st.session_state.editing_survey_id = None
-                                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
+                                    st.session_state.pop('tab2_tier_choice', None)
+                                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_')]
                                     for k in keys_to_clear:
                                         del st.session_state[k]
                                     st.session_state.survey_auto_loaded = True
@@ -9466,7 +9490,8 @@ with contextlib.nullcontext():
                     else:
                         if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary", use_container_width=True):
                             st.session_state.editing_survey_id = None
-                            keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_')]
+                            st.session_state.pop('tab2_tier_choice', None)
+                            keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_')]
                             for k in keys_to_clear:
                                 del st.session_state[k]
                             st.rerun()
@@ -9662,20 +9687,25 @@ Thank you deeply for your valuable participation.
                     render_section_header(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
 
                     # 계층 구조 선택 (2계층 기준과 동일하게 전체 공개)
-                    tier_level = 2
+                    tier_choice_options = [
+                        _("2계층 (대분류 ➔ 중분류)", "2-Tier (Main ➔ Sub)"),
+                        _("3계층 (대분류 ➔ 중분류 ➔ 소분류)", "3-Tier (Main ➔ Sub ➔ Sub-sub)")
+                    ]
+                    loaded_tier = st.session_state.get("edit_tier_level", 2)
+                    default_tier_idx = 1 if loaded_tier == 3 else 0
 
+                    if "tab2_tier_choice" in st.session_state and st.session_state["tab2_tier_choice"] not in tier_choice_options:
+                        del st.session_state["tab2_tier_choice"]
 
                     st.markdown(_("#####  계층 구조 레벨 선택", "#####  Select Hierarchy Level"))
                     tier_choice_tab2 = st.radio(
                         _("설문 모델의 계층 깊이를 선택하세요.", "Select the hierarchy depth for your survey model."),
-                        [_("2계층 (대분류 ➔ 중분류)", "2-Tier (Main ➔ Sub)"),
-                         _("3계층 (대분류 ➔ 중분류 ➔ 소분류)", "3-Tier (Main ➔ Sub ➔ Sub-sub)")],
-                        index=0,
+                        tier_choice_options,
+                        index=default_tier_idx,
                         horizontal=True,
                         key="tab2_tier_choice"
                     )
-                    if _("3계층", "3-Tier") in tier_choice_tab2:
-                        tier_level = 3
+                    tier_level = 3 if _("3계층", "3-Tier") in tier_choice_tab2 else 2
 
 
 
