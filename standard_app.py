@@ -6669,7 +6669,27 @@ with contextlib.nullcontext():
                     st.session_state.user_id = edit_id
                     st.session_state.user_role = selected_user['role']
                     st.session_state.expiry_date = selected_user['expiry_date']
+                    if 'plan_type' in selected_user:
+                        st.session_state.plan_type = selected_user['plan_type']
                     st.session_state.admin_mode = False  # 일반 사용자 시점으로 전환
+                    st.session_state.logout_requested = False
+                    st.session_state._survey_cache_dirty = True
+                    st.session_state.pop('_cached_user_surveys', None)
+                    st.session_state.pop('_cached_user_id', None)
+                    st.session_state.survey_auto_loaded = False
+                    st.session_state.editing_survey_id = None
+                    st.session_state._survey_cache_dirty_yeta = True
+                    st.session_state.pop('_cached_user_surveys_yeta', None)
+                    st.session_state.pop('_cached_yeta_user_id', None)
+                    st.session_state.yeta_survey_auto_loaded = False
+                    st.session_state.yeta_editing_survey_id = None
+                    try:
+                        from survey_manager import get_admin_surveys_from_gsheet
+                        get_admin_surveys_from_gsheet.clear()
+                    except Exception:
+                        pass
+                    for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_')]:
+                        del st.session_state[k]
                     st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
                     st.rerun()
         
@@ -9296,6 +9316,15 @@ with contextlib.nullcontext():
                         st.session_state.survey_auto_loaded = False
 
                     # Check existing surveys (SQLite와 구글 시트 모두 조회하여 병합) — 세션 캐싱
+                    if st.session_state.get('_cached_user_id') != st.session_state.user_id:
+                        st.session_state._cached_user_id = st.session_state.user_id
+                        st.session_state.pop('_cached_user_surveys', None)
+                        st.session_state._survey_cache_dirty = True
+                        st.session_state.survey_auto_loaded = False
+                        st.session_state.editing_survey_id = None
+                        for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_')]:
+                            del st.session_state[k]
+
                     if '_cached_user_surveys' not in st.session_state or st.session_state.get('_survey_cache_dirty'):
                         sqlite_surveys = []
                         try:
@@ -9322,6 +9351,7 @@ with contextlib.nullcontext():
                         user_surveys = list(merged_surveys.values())
                         user_surveys.sort(key=lambda x: x[2], reverse=True)
                         st.session_state._cached_user_surveys = user_surveys
+                        st.session_state._cached_user_id = st.session_state.user_id
                         st.session_state._survey_cache_dirty = False
                     else:
                         user_surveys = st.session_state._cached_user_surveys
@@ -10141,6 +10171,12 @@ Thank you deeply for your valuable participation.
                                             # 사용자 배포 통계 및 설문 링크 기록
                                             update_user_survey_distribution(st.session_state.user_id, short_url)
                                             st.session_state._survey_cache_dirty = True  # 설문 목록 캐시 무효화
+                                            st.session_state.pop('_cached_user_surveys', None)
+                                            try:
+                                                from survey_manager import get_admin_surveys_from_gsheet
+                                                get_admin_surveys_from_gsheet.clear()
+                                            except Exception:
+                                                pass
 
                                             st.balloons()
                                             st.success(_("🎉 AHP 온라인 설문지가 성공적으로 업데이트(수정) 되었습니다!", "🎉 AHP online survey has been successfully updated!") if st.session_state.get("editing_survey_id") else _("🎉 AHP 온라인 설문지 및 연동 구글 시트 생성이 완료되었습니다!", "🎉 AHP online survey and linked Google Sheet creation are complete!"))

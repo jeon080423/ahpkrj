@@ -1166,7 +1166,27 @@ section[data-testid="stSidebar"] > div:first-child {
                     st.session_state.user_id = edit_id
                     st.session_state.user_role = selected_user['role']
                     st.session_state.expiry_date = selected_user['expiry_date']
+                    if 'plan_type' in selected_user:
+                        st.session_state.plan_type = selected_user['plan_type']
                     st.session_state.admin_mode = False
+                    st.session_state.logout_requested = False
+                    st.session_state._survey_cache_dirty = True
+                    st.session_state.pop('_cached_user_surveys', None)
+                    st.session_state.pop('_cached_user_id', None)
+                    st.session_state.survey_auto_loaded = False
+                    st.session_state.editing_survey_id = None
+                    st.session_state._survey_cache_dirty_yeta = True
+                    st.session_state.pop('_cached_user_surveys_yeta', None)
+                    st.session_state.pop('_cached_yeta_user_id', None)
+                    st.session_state.yeta_survey_auto_loaded = False
+                    st.session_state.yeta_editing_survey_id = None
+                    try:
+                        from survey_manager import get_admin_surveys_from_gsheet
+                        get_admin_surveys_from_gsheet.clear()
+                    except Exception:
+                        pass
+                    for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_') or k.startswith('edit_yeta_')]:
+                        del st.session_state[k]
                     st.toast(f"🔑 {edit_id} 계정으로 로그인했습니다.")
                     st.rerun()
 
@@ -1824,6 +1844,15 @@ section[data-testid="stSidebar"] > div:first-child {
         if 'yeta_survey_auto_loaded' not in st.session_state:
             st.session_state.yeta_survey_auto_loaded = False
 
+        if st.session_state.get('_cached_yeta_user_id') != st.session_state.user_id:
+            st.session_state._cached_yeta_user_id = st.session_state.user_id
+            st.session_state.pop('_cached_user_surveys_yeta', None)
+            st.session_state._survey_cache_dirty_yeta = True
+            st.session_state.yeta_survey_auto_loaded = False
+            st.session_state.yeta_editing_survey_id = None
+            for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_yeta_')]:
+                del st.session_state[k]
+
         if '_cached_user_surveys_yeta' not in st.session_state or st.session_state.get('_survey_cache_dirty_yeta'):
             sqlite_surveys = []
             try:
@@ -1851,6 +1880,7 @@ section[data-testid="stSidebar"] > div:first-child {
             user_surveys = list(merged_surveys.values())
             user_surveys.sort(key=lambda x: x[2], reverse=True)
             st.session_state._cached_user_surveys_yeta = user_surveys
+            st.session_state._cached_yeta_user_id = st.session_state.user_id
             st.session_state._survey_cache_dirty_yeta = False
         else:
             user_surveys = st.session_state._cached_user_surveys_yeta
@@ -2347,6 +2377,12 @@ section[data-testid="stSidebar"] > div:first-child {
 
                                         st.session_state.yeta_editing_survey_id = new_sheet_id
                                         st.session_state._survey_cache_dirty_yeta = True
+                                        st.session_state.pop('_cached_user_surveys_yeta', None)
+                                        try:
+                                            from survey_manager import get_admin_surveys_from_gsheet
+                                            get_admin_surveys_from_gsheet.clear()
+                                        except Exception:
+                                            pass
 
                                         base_url = "https://ahpkrj.streamlit.app/"
                                         try:
