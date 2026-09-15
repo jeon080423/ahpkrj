@@ -7613,1241 +7613,1240 @@ with contextlib.nullcontext():
                                 st.info(_("📋 엑셀 파일에는 종합분석, 그룹비교, 계층별 상세행렬, CR 분포 등 전체 분석 결과가 포함됩니다.",
                                           "📋 The Excel file contains all results: comprehensive summary, group comparison, detailed matrices per tier, and CR distribution."))
 
-                            # 3계층 처리 완료 – 기존 2계층 UI 스킵
-                            st.stop()
+                        else:
                         
-                        with st.spinner(_("계층 분석 수행 중...", "Performing Analytic Hierarchy Process (AHP)...")):
-                            # 1. 메인 시트 분석 시도
-                            try:
-                                main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(
-                                    df_main, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
-                                )
-                            except Exception as e:
-                                st.error(_("❌ [메인 시트] 분석 중 오류가 발생했습니다.", "❌ Error occurred during [Main Criteria] analysis."))
-                                with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
-                                    st.markdown(_(f"""
-                                    **원인:** 메인 시트의 데이터 구조가 올바르지 않거나 읽을 수 있는 유효 데이터가 없습니다. (Error: {e})
-                                    **해결 방법:**
-                                    1. 엑셀의 첫 번째 시트 이름이 `Main_Criteria`인지 확인하세요.
-                                    2. ID와 Type 열 다음에 쌍대비교 데이터가 올바르게 입력되었는지 확인하세요.
-                                    3. 빈 행이 포함되어 있다면 삭제 후 다시 시도하세요.
-                                    """,
-                                    f"""
-                                    **Cause:** The structure of the main sheet is incorrect or contains no readable valid data. (Error: {e})
-                                    **Solution:**
-                                    1. Ensure that the first sheet name in Excel is `Main_Criteria`.
-                                    2. Verify that pair-wise comparison data is correctly input after the 'ID' and 'Type' columns.
-                                    3. If empty rows are included, delete them and try again.
-                                    """))
-                                st.stop()
+                            with st.spinner(_("계층 분석 수행 중...", "Performing Analytic Hierarchy Process (AHP)...")):
+                                # 1. 메인 시트 분석 시도
+                                try:
+                                    main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(
+                                        df_main, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
+                                    )
+                                except Exception as e:
+                                    st.error(_("❌ [메인 시트] 분석 중 오류가 발생했습니다.", "❌ Error occurred during [Main Criteria] analysis."))
+                                    with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                        st.markdown(_(f"""
+                                        **원인:** 메인 시트의 데이터 구조가 올바르지 않거나 읽을 수 있는 유효 데이터가 없습니다. (Error: {e})
+                                        **해결 방법:**
+                                        1. 엑셀의 첫 번째 시트 이름이 `Main_Criteria`인지 확인하세요.
+                                        2. ID와 Type 열 다음에 쌍대비교 데이터가 올바르게 입력되었는지 확인하세요.
+                                        3. 빈 행이 포함되어 있다면 삭제 후 다시 시도하세요.
+                                        """,
+                                        f"""
+                                        **Cause:** The structure of the main sheet is incorrect or contains no readable valid data. (Error: {e})
+                                        **Solution:**
+                                        1. Ensure that the first sheet name in Excel is `Main_Criteria`.
+                                        2. Verify that pair-wise comparison data is correctly input after the 'ID' and 'Type' columns.
+                                        3. If empty rows are included, delete them and try again.
+                                        """))
+                                    st.stop()
     
-                            # [방어 코드] 메인 결과 충분성 체크
-                            if main_results_df.empty or len(main_results_df) < 1:
-                                st.error(_(f"⚠️ 분석 불가: 메인 기준 유효 응답자가 부족합니다. (현재 {len(main_results_df)}명)",
-                                           f"⚠️ Cannot Analyze: Insufficient valid respondents for Main Criteria. (Current: {len(main_results_df)} respondents)"))
-                                with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
-                                    st.markdown(_(f"""
-                                    **원인:** 모든 응답자의 일관성 비율(CR)이 임계치({cr_threshold})를 초과하여 보정 후에도 수렴하지 못했습니다.
-                                    **해결 방법:**
-                                    1. 왼쪽 사이드바에서 **'일관성 비율(CR) 임계값'**을 0.15 또는 0.2로 완화해 보세요.
-                                    2. **'보정 강도(Learning Rate)'**를 0.7 이상으로 높여보세요.
-                                    3. **'최대 보정 반복 횟수'**를 500회로 설정했는지 확인하세요.
-                                    """,
-                                    f"""
-                                    **Cause:** The Consistency Ratio (CR) of all respondents exceeded the threshold ({cr_threshold}) and could not converge even after correction.
-                                    **Solution:**
-                                    1. Loosen the **'Consistency Ratio (CR) Threshold'** to 0.15 or 0.2 in the left sidebar.
-                                    2. Increase the **'Correction Intensity (Learning Rate)'** to 0.7 or higher.
-                                    3. Ensure **'Max Correction Iterations'** is set to 500.
-                                    """))
-                                st.stop()
+                                # [방어 코드] 메인 결과 충분성 체크
+                                if main_results_df.empty or len(main_results_df) < 1:
+                                    st.error(_(f"⚠️ 분석 불가: 메인 기준 유효 응답자가 부족합니다. (현재 {len(main_results_df)}명)",
+                                               f"⚠️ Cannot Analyze: Insufficient valid respondents for Main Criteria. (Current: {len(main_results_df)} respondents)"))
+                                    with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                        st.markdown(_(f"""
+                                        **원인:** 모든 응답자의 일관성 비율(CR)이 임계치({cr_threshold})를 초과하여 보정 후에도 수렴하지 못했습니다.
+                                        **해결 방법:**
+                                        1. 왼쪽 사이드바에서 **'일관성 비율(CR) 임계값'**을 0.15 또는 0.2로 완화해 보세요.
+                                        2. **'보정 강도(Learning Rate)'**를 0.7 이상으로 높여보세요.
+                                        3. **'최대 보정 반복 횟수'**를 500회로 설정했는지 확인하세요.
+                                        """,
+                                        f"""
+                                        **Cause:** The Consistency Ratio (CR) of all respondents exceeded the threshold ({cr_threshold}) and could not converge even after correction.
+                                        **Solution:**
+                                        1. Loosen the **'Consistency Ratio (CR) Threshold'** to 0.15 or 0.2 in the left sidebar.
+                                        2. Increase the **'Correction Intensity (Learning Rate)'** to 0.7 or higher.
+                                        3. Ensure **'Max Correction Iterations'** is set to 500.
+                                        """))
+                                    st.stop()
     
-                            # --- Uploaded Data Matrix for CR Distortion Verification ---
-                            if 'Orig_Matrix_Object' in main_results_df.columns:
-                                orig_mats = np.stack(main_results_df['Orig_Matrix_Object'].values)
-                                # Use geometric mean to aggregate the raw matrices of all respondents
-                                agg_orig_matrix = np.exp(np.mean(np.log(orig_mats), axis=0))
-                                st.session_state.uploaded_matrix = agg_orig_matrix
-                            # -----------------------------------------------------------
+                                # --- Uploaded Data Matrix for CR Distortion Verification ---
+                                if 'Orig_Matrix_Object' in main_results_df.columns:
+                                    orig_mats = np.stack(main_results_df['Orig_Matrix_Object'].values)
+                                    # Use geometric mean to aggregate the raw matrices of all respondents
+                                    agg_orig_matrix = np.exp(np.mean(np.log(orig_mats), axis=0))
+                                    st.session_state.uploaded_matrix = agg_orig_matrix
+                                # -----------------------------------------------------------
 
-                            # 2. 하위 시트 분석 및 저장
-                            sub_results_storage = {}
-                            total_excl_df_list = [main_excluded_df]
+                                # 2. 하위 시트 분석 및 저장
+                                sub_results_storage = {}
+                                total_excl_df_list = [main_excluded_df]
                         
-                            is_single_sheet = (len(sheet_names) == 1)
+                                is_single_sheet = (len(sheet_names) == 1)
                         
-                            if is_single_sheet:
-                                for parent_factor in main_factors:
-                                    # 1단계 분석인 경우 (하위 시트가 없음), 
-                                    # 하위 가중치 1.0을 가지는 더미 데이터를 자동으로 생성하여 연산을 마칩니다.
-                                    dummy_list = []
-                                    for idx, row in main_results_df.iterrows():
-                                        dummy_list.append({
-                                            "ID": row['ID'],
-                                            "Type": row['Type'],
-                                            "Original_CI": 0.0,
-                                            "Original_CR": 0.0,
-                                            "Final_CI": 0.0,
-                                            "Final_CR": 0.0,
-                                            "Iterations": 0,
-                                            "Corrected": False,
-                                            "Matrix_Object": np.array([[1.0]]),
-                                            f"Weight_{parent_factor}": 1.0
-                                        })
-                                    dummy_df = pd.DataFrame(dummy_list)
-                                    sub_results_storage[parent_factor] = {
-                                        'weights': np.array([1.0]),
-                                        'factors': [parent_factor],
-                                        'cr': 0.0,
-                                        'ci': 0.0,
-                                        'df': dummy_df,
-                                        'group_matrix': np.array([[1.0]]),
-                                        'group_cr': 0.0,
-                                        'group_ci': 0.0
-                                    }
-                            else:
-                                for parent_factor in main_factors:
-                                    # 대분류 항목명과 일치하는 시트명 찾기 (대소문자, 공백 무시 및 31자 제한 고려)
-                                    target_name = parent_factor.strip().lower()
-                                    target_name_31 = parent_factor[:31].strip().lower()
-                                
-                                    matched_sheet_name = None
-                                    for sn in sheet_names[1:]:
-                                        sn_clean = sn.strip().lower()
-                                        if sn_clean == target_name or sn_clean == target_name_31:
-                                            matched_sheet_name = sn
-                                            break
-                                
-                                    if matched_sheet_name is None:
-                                        st.error(_(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.", f"❌ [Detailed Sheet: {parent_factor}] Sheet not found."))
-                                        with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
-                                            st.markdown(_(f"""
-                                            **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 엑셀 파일 내에 존재하지 않거나 시트 이름이 다릅니다.
-                                            **해결 방법:**
-                                            1. 업로드한 엑셀 파일 내에 **'{parent_factor}'** (또는 31자 이내로 앞부분이 일치하는 명칭)의 시트가 존재하는지 확인하세요.
-                                            2. 시트 이름의 앞뒤 공백이나 오탈자(예: '리드타임민감도'와 '리드타임 민감도')가 없는지 확인하고 시트명을 맞춰주세요.
-                                            """,
-                                            f"""
-                                            **Cause:** The detailed survey response sheet corresponding to the main criteria category **'{parent_factor}'** does not exist in the Excel file or has a different name.
-                                            **Solution:**
-                                            1. Check if a sheet named **'{parent_factor}'** (or a name matching the first 31 characters) exists in the uploaded Excel file.
-                                            2. Ensure there are no leading/trailing spaces or spelling discrepancies (e.g., 'Lead Time Sensitivity' vs 'LeadTime Sensitivity') and align the sheet names.
-                                            """))
-                                        st.stop()
-                                
-                                    try:
-                                        if data_source == _("🌐 배포된 온라인 설문 데이터 연동", "🌐 Connect Online Survey Data"):
-                                            df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
-                                        else:
-                                            df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
-                                            df_sub = preprocess_uploaded_df(df_sub)
-                                            
-                                        sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
-                                            df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
-                                        )
-                                    
-                                        if sub_res_df.empty:
-                                            raise ValueError(f"'{matched_sheet_name}' 시트에 유효한 분석 데이터가 없습니다.")
-                                        
-                                        # 통계 계산 로직
-                                        sub_w_cols = [f"Weight_{f}" for f in sub_facts]
-                                        sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
-                                        sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
-                                        sub_grp_cr, sub_grp_ci, _not_used_lambda = calculate_consistency(sub_group_matrix, method=mean_method)
-                                    
-                                        if ahp_method == 'fuzzy':
-                                            sw_vals, sub_group_Si = fuzzy_ahp_analysis(sub_group_matrix)
-                                            group_sub_w = pd.Series(sw_vals, index=sub_w_cols)
-                                        else:
-                                            sub_group_Si = None
-                                            group_sub_w = sub_res_df[sub_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(sub_res_df[sub_w_cols].values, axis=0)
-                                            group_sub_w = group_sub_w / group_sub_w.sum()
-                                    
+                                if is_single_sheet:
+                                    for parent_factor in main_factors:
+                                        # 1단계 분석인 경우 (하위 시트가 없음), 
+                                        # 하위 가중치 1.0을 가지는 더미 데이터를 자동으로 생성하여 연산을 마칩니다.
+                                        dummy_list = []
+                                        for idx, row in main_results_df.iterrows():
+                                            dummy_list.append({
+                                                "ID": row['ID'],
+                                                "Type": row['Type'],
+                                                "Original_CI": 0.0,
+                                                "Original_CR": 0.0,
+                                                "Final_CI": 0.0,
+                                                "Final_CR": 0.0,
+                                                "Iterations": 0,
+                                                "Corrected": False,
+                                                "Matrix_Object": np.array([[1.0]]),
+                                                f"Weight_{parent_factor}": 1.0
+                                            })
+                                        dummy_df = pd.DataFrame(dummy_list)
                                         sub_results_storage[parent_factor] = {
-                                            'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
-                                            'ci': sub_res_df['Final_CI'].mean(),
-                                            'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr,
-                                            'group_ci': sub_grp_ci, 'group_Si': sub_group_Si
+                                            'weights': np.array([1.0]),
+                                            'factors': [parent_factor],
+                                            'cr': 0.0,
+                                            'ci': 0.0,
+                                            'df': dummy_df,
+                                            'group_matrix': np.array([[1.0]]),
+                                            'group_cr': 0.0,
+                                            'group_ci': 0.0
                                         }
-                                        if not sub_excl_df.empty:
-                                            sub_excl_df['Sheet'] = parent_factor
-                                            total_excl_df_list.append(sub_excl_df)
-                                        
-                                    except Exception as e:
-                                        st.error(_(f"❌ [세부 시트: {matched_sheet_name}] 분석 중 오류가 발생했습니다.", f"❌ Error occurred during [Detailed Sheet: {matched_sheet_name}] analysis."))
-                                        with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
-                                            st.markdown(_(f"""
-                                            **원인:** 시트 내부의 데이터 구조가 올바르지 않거나, 해당 시트의 응답자들이 모두 일관성 기준을 통과하지 못했습니다. (Error: {e})
-                                            **해결 방법:**
-                                            1. 해당 세부 시트의 데이터에 빈 칸이나 문자가 섞여 있는지 확인하세요.
-                                            2. CR 임계값을 높여서 다시 분석해 보세요.
-                                            """,
-                                            f"""
-                                            **Cause:** The internal data structure of the sheet is incorrect, or all respondents for this sheet failed to pass the consistency ratio criteria. (Error: {e})
-                                            **Solution:**
-                                            1. Check if there are empty cells or text mixed in the data of the detailed sheet.
-                                            2. Try analyzing again with a higher CR threshold.
-                                            """))
-                                        st.stop()
-    
-                            # 분석 헤더 윗쪽에 제외된 사례수 표시
-                            total_excluded = main_excluded
-                            st.markdown(f"**" + _(f"분석 제외: {total_excluded}건", f"Excluded from Analysis: {total_excluded} cases") + "**")
-    
-                            main_sig_df = calculate_pairwise_ttest(main_results_df, main_factors)
-                            main_weight_cols = [f"Weight_{f}" for f in main_factors]
-                        
-                            main_matrices = np.stack(main_results_df['Matrix_Object'].values)
-                            main_group_matrix = np.mean(main_matrices, axis=0) if mean_method == 'arithmetic' else gmean(main_matrices, axis=0)
-                            main_grp_cr, main_grp_ci, _not_used_lambda = calculate_consistency(main_group_matrix, mean_method)
-                        
-                            if ahp_method == 'fuzzy':
-                                mw_vals, main_group_Si = fuzzy_ahp_analysis(main_group_matrix)
-                                group_main_weights = pd.Series(mw_vals, index=main_weight_cols)
-                            else:
-                                main_group_Si = None
-                                if mean_method == 'arithmetic':
-                                    group_main_weights = main_results_df[main_weight_cols].mean(axis=0)
                                 else:
-                                    group_main_weights = gmean(main_results_df[main_weight_cols].values, axis=0)
-                                group_main_weights = group_main_weights / group_main_weights.sum()
-                        
-                            main_cr_final_avg = main_results_df['Final_CR'].mean()
-                        
-                            # --- 다중 인구통계 변수 처리 UI ---
-                            demo_cols = [c for c in main_results_df.columns if str(c).strip().lower() == 'type' or str(c).strip().lower().startswith('type ')]
-                            if len(demo_cols) > 1 and tier in ['Standard', 'Pro']:
-                                selected_demo = st.selectbox(_("📊 교차분석 그룹 기준 변수 선택", "📊 Select Grouping Variable for Analysis"), demo_cols)
-                                main_results_df['Type'] = main_results_df[selected_demo]
-                                for mf in main_factors:
-                                    sub_results_storage[mf]['df']['Type'] = sub_results_storage[mf]['df'][selected_demo]
-                            elif len(demo_cols) > 0:
-                                main_results_df['Type'] = main_results_df[demo_cols[0]]
-                                for mf in main_factors:
-                                    sub_results_storage[mf]['df']['Type'] = sub_results_storage[mf]['df'][demo_cols[0]]
-                            else:
-                                main_results_df['Type'] = 'All'
-                                for mf in main_factors:
-                                    sub_results_storage[mf]['df']['Type'] = 'All'
-
-                            indiv_global_data = []
-                            all_ids = main_results_df['ID'].unique()
-                        
-                            for uid in all_ids:
-                                u_main = main_results_df[main_results_df['ID'] == uid]
-                                if u_main.empty: continue
-                                u_type = u_main['Type'].values[0]
-                                for mf in main_factors:
-                                    m_w = u_main[f"Weight_{mf}"].values[0]
-                                    s_row_df = sub_results_storage[mf]['df']
-                                    u_sub = s_row_df[s_row_df['ID'] == uid]
-                                    if u_sub.empty: continue
-                                    for sf in sub_results_storage[mf]['factors']:
-                                        s_w = u_sub[f"Weight_{sf}"].values[0]
-                                        indiv_global_data.append({
-                                            "ID": uid, "Type": str(u_type), "Factor": sf, "Global_Weight": m_w * s_w,
-                                            "Original_CR": u_main['Original_CR'].values[0],
-                                            "Final_CR": u_main['Final_CR'].values[0]
-                                        })
-                            indiv_df = pd.DataFrame(indiv_global_data)
-                        
-                            anova_df = pd.DataFrame()
-                            if not indiv_df.empty and len(indiv_df['Type'].unique()) >= 2:
-                                anova_df = calculate_anova_and_posthoc(indiv_df)
-    
-                            summary_rows = []
-                            for idx, main_f in enumerate(main_factors):
-                                m_weight = group_main_weights.iloc[idx] if isinstance(group_main_weights, pd.Series) else group_main_weights[idx]
-                                sub_info = sub_results_storage[main_f]
-                                for s_idx, sub_f in enumerate(sub_info['factors']):
-                                    s_weight = sub_info['weights'].iloc[s_idx] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][s_idx]
-                                    global_w = m_weight * s_weight
-                                    summary_rows.append({
-                                        "대분류": main_f, "대분류 가중치": m_weight, "중분류": sub_f, "중분류 가중치": s_weight,
-                                        "Global Weight": global_w, 
-                                        "CR(대분류)": main_grp_cr, 
-                                        "CI(대분류)": main_grp_ci,
-                                        "CR(중분류)": sub_info['group_cr'],
-                                        "CI(중분류)": sub_info['group_ci']
-                                    })
-                        
-                            final_df = pd.DataFrame(summary_rows)
-                            final_df['Global Rank'] = final_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
-                            cols_order = ["대분류", "대분류 가중치", "중분류", "중분류 가중치", "Global Weight", "Global Rank", "CR(대분류)", "CI(대분류)", "CR(중분류)", "CI(중분류)"]
-                            final_df = final_df[cols_order]
-    
-                            unique_groups = sorted(main_results_df['Type'].astype(str).unique())
-                            group_analysis_results = {}
-                            group_full_dfs = {} 
-                        
-                            for grp in unique_groups:
-                                grp_main_df = main_results_df[main_results_df['Type'].astype(str) == grp]
-                                if grp_main_df.empty: continue
-                                g_main_mats = np.stack(grp_main_df['Matrix_Object'].values)
-                                g_main_mat_obj = np.mean(g_main_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_main_mats, axis=0)
-                                g_main_cr, g_main_ci, _not_used_lambda = calculate_consistency(g_main_mat_obj, method=mean_method)
-                            
-                                if ahp_method == 'fuzzy':
-                                    mw_vals_grp, _unused_Si = fuzzy_ahp_analysis(g_main_mat_obj)
-                                    g_main_w = pd.Series(mw_vals_grp, index=main_weight_cols)
-                                else:
-                                    g_main_w = grp_main_df[main_weight_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_main_df[main_weight_cols].values, axis=0)
-                                    g_main_w = g_main_w / g_main_w.sum()
-                            
-                                grp_rows = []
-                                for idx, main_f in enumerate(main_factors):
-                                    m_w = g_main_w.iloc[idx] if isinstance(g_main_w, pd.Series) else g_main_w[idx]
-                                    full_sub_df = sub_results_storage[main_f]['df']
-                                    grp_sub_df = full_sub_df[full_sub_df['Type'].astype(str) == grp]
-                                    sub_facts = sub_results_storage[main_f]['factors']
-                                    if grp_sub_df.empty: continue
-                                    s_w_cols = [f"Weight_{f}" for f in sub_facts]
-                                    g_sub_mats = np.stack(grp_sub_df['Matrix_Object'].values)
-                                    g_sub_mat_obj = np.mean(g_sub_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_sub_mats, axis=0)
-                                    g_sub_cr, g_sub_ci, _not_used_lambda = calculate_consistency(g_sub_mat_obj, method=mean_method)
+                                    for parent_factor in main_factors:
+                                        # 대분류 항목명과 일치하는 시트명 찾기 (대소문자, 공백 무시 및 31자 제한 고려)
+                                        target_name = parent_factor.strip().lower()
+                                        target_name_31 = parent_factor[:31].strip().lower()
                                 
-                                    if ahp_method == 'fuzzy':
-                                        sw_vals_grp, _unused_Si = fuzzy_ahp_analysis(g_sub_mat_obj)
-                                        g_sub_w = pd.Series(sw_vals_grp, index=s_w_cols)
-                                    else:
-                                        g_sub_w = grp_sub_df[s_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_sub_df[s_w_cols].values, axis=0)
-                                        g_sub_w = g_sub_w / g_sub_w.sum()
+                                        matched_sheet_name = None
+                                        for sn in sheet_names[1:]:
+                                            sn_clean = sn.strip().lower()
+                                            if sn_clean == target_name or sn_clean == target_name_31:
+                                                matched_sheet_name = sn
+                                                break
+                                
+                                        if matched_sheet_name is None:
+                                            st.error(_(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.", f"❌ [Detailed Sheet: {parent_factor}] Sheet not found."))
+                                            with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                                st.markdown(_(f"""
+                                                **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 엑셀 파일 내에 존재하지 않거나 시트 이름이 다릅니다.
+                                                **해결 방법:**
+                                                1. 업로드한 엑셀 파일 내에 **'{parent_factor}'** (또는 31자 이내로 앞부분이 일치하는 명칭)의 시트가 존재하는지 확인하세요.
+                                                2. 시트 이름의 앞뒤 공백이나 오탈자(예: '리드타임민감도'와 '리드타임 민감도')가 없는지 확인하고 시트명을 맞춰주세요.
+                                                """,
+                                                f"""
+                                                **Cause:** The detailed survey response sheet corresponding to the main criteria category **'{parent_factor}'** does not exist in the Excel file or has a different name.
+                                                **Solution:**
+                                                1. Check if a sheet named **'{parent_factor}'** (or a name matching the first 31 characters) exists in the uploaded Excel file.
+                                                2. Ensure there are no leading/trailing spaces or spelling discrepancies (e.g., 'Lead Time Sensitivity' vs 'LeadTime Sensitivity') and align the sheet names.
+                                                """))
+                                            st.stop()
+                                
+                                        try:
+                                            if data_source == _("🌐 배포된 온라인 설문 데이터 연동", "🌐 Connect Online Survey Data"):
+                                                df_sub = st.session_state["ahp_sub_dfs"][matched_sheet_name]
+                                            else:
+                                                df_sub = pd.read_excel(uploaded_file, sheet_name=matched_sheet_name)
+                                                df_sub = preprocess_uploaded_df(df_sub)
+                                            
+                                            sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
+                                                df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
+                                            )
                                     
-                                    for s_idx, sf in enumerate(sub_facts):
-                                        s_w_val = g_sub_w.iloc[s_idx] if isinstance(g_sub_w, pd.Series) else g_sub_w[s_idx]
-                                        grp_rows.append({
-                                            "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": s_w_val,
-                                            "Global Weight": m_w * s_w_val, 
-                                            "CR(대분류)": g_main_cr, 
-                                            "CI(대분류)": g_main_ci,
-                                            "CR(중분류)": g_sub_cr, 
-                                            "CI(중분류)": g_sub_ci
+                                            if sub_res_df.empty:
+                                                raise ValueError(f"'{matched_sheet_name}' 시트에 유효한 분석 데이터가 없습니다.")
+                                        
+                                            # 통계 계산 로직
+                                            sub_w_cols = [f"Weight_{f}" for f in sub_facts]
+                                            sub_matrices = np.stack(sub_res_df['Matrix_Object'].values)
+                                            sub_group_matrix = np.mean(sub_matrices, axis=0) if mean_method == 'arithmetic' else gmean(sub_matrices, axis=0)
+                                            sub_grp_cr, sub_grp_ci, _not_used_lambda = calculate_consistency(sub_group_matrix, method=mean_method)
+                                    
+                                            if ahp_method == 'fuzzy':
+                                                sw_vals, sub_group_Si = fuzzy_ahp_analysis(sub_group_matrix)
+                                                group_sub_w = pd.Series(sw_vals, index=sub_w_cols)
+                                            else:
+                                                sub_group_Si = None
+                                                group_sub_w = sub_res_df[sub_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(sub_res_df[sub_w_cols].values, axis=0)
+                                                group_sub_w = group_sub_w / group_sub_w.sum()
+                                    
+                                            sub_results_storage[parent_factor] = {
+                                                'weights': group_sub_w, 'factors': sub_facts, 'cr': sub_res_df['Final_CR'].mean(),
+                                                'ci': sub_res_df['Final_CI'].mean(),
+                                                'df': sub_res_df, 'group_matrix': sub_group_matrix, 'group_cr': sub_grp_cr,
+                                                'group_ci': sub_grp_ci, 'group_Si': sub_group_Si
+                                            }
+                                            if not sub_excl_df.empty:
+                                                sub_excl_df['Sheet'] = parent_factor
+                                                total_excl_df_list.append(sub_excl_df)
+                                        
+                                        except Exception as e:
+                                            st.error(_(f"❌ [세부 시트: {matched_sheet_name}] 분석 중 오류가 발생했습니다.", f"❌ Error occurred during [Detailed Sheet: {matched_sheet_name}] analysis."))
+                                            with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                                st.markdown(_(f"""
+                                                **원인:** 시트 내부의 데이터 구조가 올바르지 않거나, 해당 시트의 응답자들이 모두 일관성 기준을 통과하지 못했습니다. (Error: {e})
+                                                **해결 방법:**
+                                                1. 해당 세부 시트의 데이터에 빈 칸이나 문자가 섞여 있는지 확인하세요.
+                                                2. CR 임계값을 높여서 다시 분석해 보세요.
+                                                """,
+                                                f"""
+                                                **Cause:** The internal data structure of the sheet is incorrect, or all respondents for this sheet failed to pass the consistency ratio criteria. (Error: {e})
+                                                **Solution:**
+                                                1. Check if there are empty cells or text mixed in the data of the detailed sheet.
+                                                2. Try analyzing again with a higher CR threshold.
+                                                """))
+                                            st.stop()
+    
+                                # 분석 헤더 윗쪽에 제외된 사례수 표시
+                                total_excluded = main_excluded
+                                st.markdown(f"**" + _(f"분석 제외: {total_excluded}건", f"Excluded from Analysis: {total_excluded} cases") + "**")
+    
+                                main_sig_df = calculate_pairwise_ttest(main_results_df, main_factors)
+                                main_weight_cols = [f"Weight_{f}" for f in main_factors]
+                        
+                                main_matrices = np.stack(main_results_df['Matrix_Object'].values)
+                                main_group_matrix = np.mean(main_matrices, axis=0) if mean_method == 'arithmetic' else gmean(main_matrices, axis=0)
+                                main_grp_cr, main_grp_ci, _not_used_lambda = calculate_consistency(main_group_matrix, mean_method)
+                        
+                                if ahp_method == 'fuzzy':
+                                    mw_vals, main_group_Si = fuzzy_ahp_analysis(main_group_matrix)
+                                    group_main_weights = pd.Series(mw_vals, index=main_weight_cols)
+                                else:
+                                    main_group_Si = None
+                                    if mean_method == 'arithmetic':
+                                        group_main_weights = main_results_df[main_weight_cols].mean(axis=0)
+                                    else:
+                                        group_main_weights = gmean(main_results_df[main_weight_cols].values, axis=0)
+                                    group_main_weights = group_main_weights / group_main_weights.sum()
+                        
+                                main_cr_final_avg = main_results_df['Final_CR'].mean()
+                        
+                                # --- 다중 인구통계 변수 처리 UI ---
+                                demo_cols = [c for c in main_results_df.columns if str(c).strip().lower() == 'type' or str(c).strip().lower().startswith('type ')]
+                                if len(demo_cols) > 1 and tier in ['Standard', 'Pro']:
+                                    selected_demo = st.selectbox(_("📊 교차분석 그룹 기준 변수 선택", "📊 Select Grouping Variable for Analysis"), demo_cols)
+                                    main_results_df['Type'] = main_results_df[selected_demo]
+                                    for mf in main_factors:
+                                        sub_results_storage[mf]['df']['Type'] = sub_results_storage[mf]['df'][selected_demo]
+                                elif len(demo_cols) > 0:
+                                    main_results_df['Type'] = main_results_df[demo_cols[0]]
+                                    for mf in main_factors:
+                                        sub_results_storage[mf]['df']['Type'] = sub_results_storage[mf]['df'][demo_cols[0]]
+                                else:
+                                    main_results_df['Type'] = 'All'
+                                    for mf in main_factors:
+                                        sub_results_storage[mf]['df']['Type'] = 'All'
+
+                                indiv_global_data = []
+                                all_ids = main_results_df['ID'].unique()
+                        
+                                for uid in all_ids:
+                                    u_main = main_results_df[main_results_df['ID'] == uid]
+                                    if u_main.empty: continue
+                                    u_type = u_main['Type'].values[0]
+                                    for mf in main_factors:
+                                        m_w = u_main[f"Weight_{mf}"].values[0]
+                                        s_row_df = sub_results_storage[mf]['df']
+                                        u_sub = s_row_df[s_row_df['ID'] == uid]
+                                        if u_sub.empty: continue
+                                        for sf in sub_results_storage[mf]['factors']:
+                                            s_w = u_sub[f"Weight_{sf}"].values[0]
+                                            indiv_global_data.append({
+                                                "ID": uid, "Type": str(u_type), "Factor": sf, "Global_Weight": m_w * s_w,
+                                                "Original_CR": u_main['Original_CR'].values[0],
+                                                "Final_CR": u_main['Final_CR'].values[0]
+                                            })
+                                indiv_df = pd.DataFrame(indiv_global_data)
+                        
+                                anova_df = pd.DataFrame()
+                                if not indiv_df.empty and len(indiv_df['Type'].unique()) >= 2:
+                                    anova_df = calculate_anova_and_posthoc(indiv_df)
+    
+                                summary_rows = []
+                                for idx, main_f in enumerate(main_factors):
+                                    m_weight = group_main_weights.iloc[idx] if isinstance(group_main_weights, pd.Series) else group_main_weights[idx]
+                                    sub_info = sub_results_storage[main_f]
+                                    for s_idx, sub_f in enumerate(sub_info['factors']):
+                                        s_weight = sub_info['weights'].iloc[s_idx] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][s_idx]
+                                        global_w = m_weight * s_weight
+                                        summary_rows.append({
+                                            "대분류": main_f, "대분류 가중치": m_weight, "중분류": sub_f, "중분류 가중치": s_weight,
+                                            "Global Weight": global_w, 
+                                            "CR(대분류)": main_grp_cr, 
+                                            "CI(대분류)": main_grp_ci,
+                                            "CR(중분류)": sub_info['group_cr'],
+                                            "CI(중분류)": sub_info['group_ci']
                                         })
-                                g_df = pd.DataFrame(grp_rows)
-                                if not g_df.empty:
-                                    g_df['Global Rank'] = g_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
-                                    group_full_dfs[grp] = g_df[cols_order]
-                                    group_analysis_results[grp] = group_full_dfs[grp][['대분류', '중분류', 'Global Weight']]
+                        
+                                final_df = pd.DataFrame(summary_rows)
+                                final_df['Global Rank'] = final_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
+                                cols_order = ["대분류", "대분류 가중치", "중분류", "중분류 가중치", "Global Weight", "Global Rank", "CR(대분류)", "CI(대분류)", "CR(중분류)", "CI(중분류)"]
+                                final_df = final_df[cols_order]
     
-                            comparison_df = final_df[['대분류', '중분류', 'Global Weight']].copy()
-                            comparison_df.rename(columns={'Global Weight': '종합평균(Overall)'}, inplace=True)
-                            for grp, df_res in group_analysis_results.items():
-                                temp_df = df_res.rename(columns={'Global Weight': grp})
-                                comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류'], how='left')
-    
-                            output_res = io.BytesIO()
-                            with pd.ExcelWriter(output_res, engine='xlsxwriter') as writer:
-                                workbook = writer.book
-                                
-                                # [신규 추가] 인구통계 결과 엑셀 시트 출력
-                                if "demo_df" in st.session_state and st.session_state["demo_df"] is not None:
-                                    demo_summary_df = generate_demographics_summary(st.session_state["demo_df"])
-                                    if demo_summary_df is not None:
-                                        demo_summary_df.to_excel(writer, sheet_name='Result_Demographics', index=False)
-                                        # Result_Demographics 엑셀 서식 적용
-                                        ws_demo = writer.sheets['Result_Demographics']
-                                        header_format_demo = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1})
-                                        body_format_demo = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1})
-                                        for col_num, value in enumerate(demo_summary_df.columns.values):
-                                            ws_demo.write(0, col_num, value, header_format_demo)
-                                        for row in range(len(demo_summary_df)):
-                                            for col in range(len(demo_summary_df.columns)):
-                                                ws_demo.write(row+1, col, demo_summary_df.iloc[row, col], body_format_demo)
-                                        ws_demo.set_column('A:A', 30)
-                                        ws_demo.set_column('B:D', 20)
-                                
-                                formats = {
-                                    'header': workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#000000', 'font_color': '#FFFFFF', 'border': 1}),
-                                    'merge': workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1}),
-                                    'body': workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1}),
-                                    'num': workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1, 'num_format': '0.000'}),
-                                    'sum_row': workbook.add_format({'bold': True, 'bg_color': '#D3D3D3', 'align': 'center', 'valign': 'vcenter', 'border': 1}),
-                                    'sum_val': workbook.add_format({'num_format': '0', 'bg_color': '#D3D3D3', 'border': 1, 'align':'center'}),
-                                    'num_sum': workbook.add_format({'num_format': '0.000', 'bg_color': '#D3D3D3', 'border': 1, 'align':'center'}),
-                                    'yellow': workbook.add_format({'bg_color': 'yellow', 'border': 1, 'align': 'center', 'num_format': '0.000'})
-                                }
-                                border_fmt = workbook.add_format({'border': 1})
-                                fmt_float_no_border = workbook.add_format({'num_format': '0.000', 'align': 'center', 'valign': 'vcenter', 'border': 1})
-                                fmt_diagonal = workbook.add_format({'num_format': '0', 'align': 'center', 'valign': 'vcenter', 'bg_color': '#E7E6E6', 'border': 1})
-    
-                                total_excluded_df = pd.concat(total_excl_df_list, ignore_index=True)
-                                sheet_name_comp = _('종합분석', 'Comprehensive Analysis')
-                                current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
+                                unique_groups = sorted(main_results_df['Type'].astype(str).unique())
+                                group_analysis_results = {}
+                                group_full_dfs = {} 
+                        
                                 for grp in unique_groups:
-                                    if grp in group_full_dfs:
-                                        current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
-    
-                                if len(unique_groups) >= 1:
-                                    ws_comp = workbook.add_worksheet('Group_Comparison')
-                                    writer.sheets['Group_Comparison'] = ws_comp
-                                    s_row_cp = 1
-                                    ws_comp.write_string(s_row_cp, 0, _("그룹 간 비교(일원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
-                                    s_row_cp += 1
+                                    grp_main_df = main_results_df[main_results_df['Type'].astype(str) == grp]
+                                    if grp_main_df.empty: continue
+                                    g_main_mats = np.stack(grp_main_df['Matrix_Object'].values)
+                                    g_main_mat_obj = np.mean(g_main_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_main_mats, axis=0)
+                                    g_main_cr, g_main_ci, _not_used_lambda = calculate_consistency(g_main_mat_obj, method=mean_method)
+                            
+                                    if ahp_method == 'fuzzy':
+                                        mw_vals_grp, _unused_Si = fuzzy_ahp_analysis(g_main_mat_obj)
+                                        g_main_w = pd.Series(mw_vals_grp, index=main_weight_cols)
+                                    else:
+                                        g_main_w = grp_main_df[main_weight_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_main_df[main_weight_cols].values, axis=0)
+                                        g_main_w = g_main_w / g_main_w.sum()
+                            
+                                    grp_rows = []
+                                    for idx, main_f in enumerate(main_factors):
+                                        m_w = g_main_w.iloc[idx] if isinstance(g_main_w, pd.Series) else g_main_w[idx]
+                                        full_sub_df = sub_results_storage[main_f]['df']
+                                        grp_sub_df = full_sub_df[full_sub_df['Type'].astype(str) == grp]
+                                        sub_facts = sub_results_storage[main_f]['factors']
+                                        if grp_sub_df.empty: continue
+                                        s_w_cols = [f"Weight_{f}" for f in sub_facts]
+                                        g_sub_mats = np.stack(grp_sub_df['Matrix_Object'].values)
+                                        g_sub_mat_obj = np.mean(g_sub_mats, axis=0) if mean_method == 'arithmetic' else gmean(g_sub_mats, axis=0)
+                                        g_sub_cr, g_sub_ci, _not_used_lambda = calculate_consistency(g_sub_mat_obj, method=mean_method)
                                 
-                                    tier = get_current_tier()
-                                    if tier not in ['Standard', 'Pro']:
-                                        ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Standard 등급 이상 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Standard and Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+                                        if ahp_method == 'fuzzy':
+                                            sw_vals_grp, _unused_Si = fuzzy_ahp_analysis(g_sub_mat_obj)
+                                            g_sub_w = pd.Series(sw_vals_grp, index=s_w_cols)
+                                        else:
+                                            g_sub_w = grp_sub_df[s_w_cols].mean(axis=0) if mean_method == 'arithmetic' else gmean(grp_sub_df[s_w_cols].values, axis=0)
+                                            g_sub_w = g_sub_w / g_sub_w.sum()
+                                    
+                                        for s_idx, sf in enumerate(sub_facts):
+                                            s_w_val = g_sub_w.iloc[s_idx] if isinstance(g_sub_w, pd.Series) else g_sub_w[s_idx]
+                                            grp_rows.append({
+                                                "대분류": main_f, "대분류 가중치": m_w, "중분류": sf, "중분류 가중치": s_w_val,
+                                                "Global Weight": m_w * s_w_val, 
+                                                "CR(대분류)": g_main_cr, 
+                                                "CI(대분류)": g_main_ci,
+                                                "CR(중분류)": g_sub_cr, 
+                                                "CI(중분류)": g_sub_ci
+                                            })
+                                    g_df = pd.DataFrame(grp_rows)
+                                    if not g_df.empty:
+                                        g_df['Global Rank'] = g_df['Global Weight'].round(3).rank(ascending=False, method='min').astype(int)
+                                        group_full_dfs[grp] = g_df[cols_order]
+                                        group_analysis_results[grp] = group_full_dfs[grp][['대분류', '중분류', 'Global Weight']]
+    
+                                comparison_df = final_df[['대분류', '중분류', 'Global Weight']].copy()
+                                comparison_df.rename(columns={'Global Weight': '종합평균(Overall)'}, inplace=True)
+                                for grp, df_res in group_analysis_results.items():
+                                    temp_df = df_res.rename(columns={'Global Weight': grp})
+                                    comparison_df = comparison_df.merge(temp_df, on=['대분류', '중분류'], how='left')
+    
+                                output_res = io.BytesIO()
+                                with pd.ExcelWriter(output_res, engine='xlsxwriter') as writer:
+                                    workbook = writer.book
+                                
+                                    # [신규 추가] 인구통계 결과 엑셀 시트 출력
+                                    if "demo_df" in st.session_state and st.session_state["demo_df"] is not None:
+                                        demo_summary_df = generate_demographics_summary(st.session_state["demo_df"])
+                                        if demo_summary_df is not None:
+                                            demo_summary_df.to_excel(writer, sheet_name='Result_Demographics', index=False)
+                                            # Result_Demographics 엑셀 서식 적용
+                                            ws_demo = writer.sheets['Result_Demographics']
+                                            header_format_demo = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1})
+                                            body_format_demo = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1})
+                                            for col_num, value in enumerate(demo_summary_df.columns.values):
+                                                ws_demo.write(0, col_num, value, header_format_demo)
+                                            for row in range(len(demo_summary_df)):
+                                                for col in range(len(demo_summary_df.columns)):
+                                                    ws_demo.write(row+1, col, demo_summary_df.iloc[row, col], body_format_demo)
+                                            ws_demo.set_column('A:A', 30)
+                                            ws_demo.set_column('B:D', 20)
+                                
+                                    formats = {
+                                        'header': workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#000000', 'font_color': '#FFFFFF', 'border': 1}),
+                                        'merge': workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1}),
+                                        'body': workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1}),
+                                        'num': workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1, 'num_format': '0.000'}),
+                                        'sum_row': workbook.add_format({'bold': True, 'bg_color': '#D3D3D3', 'align': 'center', 'valign': 'vcenter', 'border': 1}),
+                                        'sum_val': workbook.add_format({'num_format': '0', 'bg_color': '#D3D3D3', 'border': 1, 'align':'center'}),
+                                        'num_sum': workbook.add_format({'num_format': '0.000', 'bg_color': '#D3D3D3', 'border': 1, 'align':'center'}),
+                                        'yellow': workbook.add_format({'bg_color': 'yellow', 'border': 1, 'align': 'center', 'num_format': '0.000'})
+                                    }
+                                    border_fmt = workbook.add_format({'border': 1})
+                                    fmt_float_no_border = workbook.add_format({'num_format': '0.000', 'align': 'center', 'valign': 'vcenter', 'border': 1})
+                                    fmt_diagonal = workbook.add_format({'num_format': '0', 'align': 'center', 'valign': 'vcenter', 'bg_color': '#E7E6E6', 'border': 1})
+    
+                                    total_excluded_df = pd.concat(total_excl_df_list, ignore_index=True)
+                                    sheet_name_comp = _('종합분석', 'Comprehensive Analysis')
+                                    current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, final_df, _("1) 전체_종합결과", "1) Overall Aggregated Results"), 1, formats, excluded_df=total_excluded_df)
+                                    for grp in unique_groups:
+                                        if grp in group_full_dfs:
+                                            current_row_ws = write_custom_ahp_table(writer, sheet_name_comp, group_full_dfs[grp], _(f"▶ [그룹: {grp}] 분석 결과", f"▶ [Group: {grp}] Analysis Results"), current_row_ws, formats)
+    
+                                    if len(unique_groups) >= 1:
+                                        ws_comp = workbook.add_worksheet('Group_Comparison')
+                                        writer.sheets['Group_Comparison'] = ws_comp
+                                        s_row_cp = 1
+                                        ws_comp.write_string(s_row_cp, 0, _("그룹 간 비교(일원배치 분산분석: ANOVA)", "Group Comparison (One-way ANOVA)"), workbook.add_format({'bold': True, 'font_size': 12}))
                                         s_row_cp += 1
                                 
-                                    if tier in ['Standard', 'Pro'] and not anova_df.empty:
-                                        anova_for_merge = anova_df.rename(columns={'요인': '중분류'})
-                                        integrated_df = comparison_df.merge(anova_for_merge, on='중분류', how='left')
-                                    else:
-                                        integrated_df = comparison_df
+                                        tier = get_current_tier()
+                                        if tier not in ['Standard', 'Pro']:
+                                            ws_comp.write_string(s_row_cp, 0, _("🔒 통계 검정 결과(ANOVA/사후검정)는 Standard 등급 이상 정식 사용자에게만 제공됩니다.", "🔒 Statistical test results (ANOVA/Post-hoc) are exclusive to Standard and Pro Tier users."), workbook.add_format({'italic': True, 'font_color': '#FF0000', 'font_name': 'NanumGothic'}))
+                                            s_row_cp += 1
                                 
-                                    # English renaming logic for columns & significance
-                                    if st.session_state.get('lang', 'ko') == 'en':
-                                        rename_dict = {
-                                            '대분류': 'Main Criteria',
-                                            '중분류': 'Sub-Criteria',
-                                            '종합평균(Overall)': 'Overall',
-                                            'F-값': 'F-Value',
-                                            'P-Value': 'P-Value',
-                                            '유의성': 'Significance',
-                                            '사후검정(Tukey HSD)': 'Post-hoc (Tukey HSD)'
-                                        }
-                                        integrated_df_excel = integrated_df.copy()
-                                        integrated_df_excel.rename(columns=rename_dict, inplace=True)
-                                        if 'Significance' in integrated_df_excel.columns:
-                                            integrated_df_excel['Significance'] = integrated_df_excel['Significance'].replace({
-                                                '유의함': 'Significant',
-                                                '유의하지 않음': 'Not Significant'
-                                            })
-                                        if 'Post-hoc (Tukey HSD)' in integrated_df_excel.columns:
-                                            integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].replace({
-                                                '집단 간 구체적 차이 발견 못함': 'No specific difference found',
-                                                '계산 오류': 'Calculation Error'
-                                            })
-                                            integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].apply(
-                                                lambda x: x.replace(" 차이 있음", " Diff Exists") if isinstance(x, str) else x
-                                            )
-                                    else:
-                                        integrated_df_excel = integrated_df
+                                        if tier in ['Standard', 'Pro'] and not anova_df.empty:
+                                            anova_for_merge = anova_df.rename(columns={'요인': '중분류'})
+                                            integrated_df = comparison_df.merge(anova_for_merge, on='중분류', how='left')
+                                        else:
+                                            integrated_df = comparison_df
+                                
+                                        # English renaming logic for columns & significance
+                                        if st.session_state.get('lang', 'ko') == 'en':
+                                            rename_dict = {
+                                                '대분류': 'Main Criteria',
+                                                '중분류': 'Sub-Criteria',
+                                                '종합평균(Overall)': 'Overall',
+                                                'F-값': 'F-Value',
+                                                'P-Value': 'P-Value',
+                                                '유의성': 'Significance',
+                                                '사후검정(Tukey HSD)': 'Post-hoc (Tukey HSD)'
+                                            }
+                                            integrated_df_excel = integrated_df.copy()
+                                            integrated_df_excel.rename(columns=rename_dict, inplace=True)
+                                            if 'Significance' in integrated_df_excel.columns:
+                                                integrated_df_excel['Significance'] = integrated_df_excel['Significance'].replace({
+                                                    '유의함': 'Significant',
+                                                    '유의하지 않음': 'Not Significant'
+                                                })
+                                            if 'Post-hoc (Tukey HSD)' in integrated_df_excel.columns:
+                                                integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].replace({
+                                                    '집단 간 구체적 차이 발견 못함': 'No specific difference found',
+                                                    '계산 오류': 'Calculation Error'
+                                                })
+                                                integrated_df_excel['Post-hoc (Tukey HSD)'] = integrated_df_excel['Post-hoc (Tukey HSD)'].apply(
+                                                    lambda x: x.replace(" 차이 있음", " Diff Exists") if isinstance(x, str) else x
+                                                )
+                                        else:
+                                            integrated_df_excel = integrated_df
     
-                                    integrated_df_excel.to_excel(writer, sheet_name='Group_Comparison', startrow=s_row_cp, index=False)
-                                    add_borders_to_data(ws_comp, s_row_cp, 0, integrated_df_excel, border_fmt)
+                                        integrated_df_excel.to_excel(writer, sheet_name='Group_Comparison', startrow=s_row_cp, index=False)
+                                        add_borders_to_data(ws_comp, s_row_cp, 0, integrated_df_excel, border_fmt)
                                 
-                                    num_format_3 = workbook.add_format({'num_format': '0.000', 'border': 1, 'align': 'center'})
-                                    for r in range(len(integrated_df_excel)):
-                                        for c in range(1, len(integrated_df_excel.columns)):
-                                            val = integrated_df_excel.iloc[r, c]
-                                            if pd.notnull(val) and isinstance(val, (int, float)):
-                                                ws_comp.write_number(s_row_cp + 1 + r, c, val, num_format_3)
-                                            elif pd.notnull(val):
-                                                ws_comp.write(s_row_cp + 1 + r, c, val, border_fmt)
+                                        num_format_3 = workbook.add_format({'num_format': '0.000', 'border': 1, 'align': 'center'})
+                                        for r in range(len(integrated_df_excel)):
+                                            for c in range(1, len(integrated_df_excel.columns)):
+                                                val = integrated_df_excel.iloc[r, c]
+                                                if pd.notnull(val) and isinstance(val, (int, float)):
+                                                    ws_comp.write_number(s_row_cp + 1 + r, c, val, num_format_3)
+                                                elif pd.notnull(val):
+                                                    ws_comp.write(s_row_cp + 1 + r, c, val, border_fmt)
     
-                                    guide_start_row = s_row_cp + len(integrated_df_excel) + 3
-                                    bold_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'valign': 'vcenter', 'align': 'left', 'bg_color': '#F2F2F2', 'border': 1})
-                                    text_fmt = workbook.add_format({'font_size': 10, 'text_wrap': True, 'valign': 'top', 'align': 'left', 'border': 1})
-                                    ws_comp.set_column('A:G', 20) 
+                                        guide_start_row = s_row_cp + len(integrated_df_excel) + 3
+                                        bold_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'valign': 'vcenter', 'align': 'left', 'bg_color': '#F2F2F2', 'border': 1})
+                                        text_fmt = workbook.add_format({'font_size': 10, 'text_wrap': True, 'valign': 'top', 'align': 'left', 'border': 1})
+                                        ws_comp.set_column('A:G', 20) 
                                 
-                                    if tier in ['Standard', 'Pro']:
-                                        comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
-                                                       "※ Reasons why group differences are not statistically significant despite variation in priorities")
-                                        ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
+                                        if tier in ['Standard', 'Pro']:
+                                            comp_title = _("※ 그룹 간 중요도의 차이가 있지만 통계적으로 유의하지 않게 나타나는 이유",
+                                                           "※ Reasons why group differences are not statistically significant despite variation in priorities")
+                                            ws_comp.merge_range(guide_start_row, 0, guide_start_row, 6, comp_title, bold_fmt)
     
-                                    guide_content_ko = [
-                                        ("1. 그룹 내 편차(분산)가 너무 큰 경우", "ANOVA는 '그룹 간의 차이'와 '그룹 내의 차이'를 비교합니다.\n\n■ 원리: 그룹 간 평균 차이가 크더라도, 각 그룹 내부 데이터들이 서로 들쭉날쭉(분산이 큼)하다면 통계적으로는 '이 차이가 우연히 발생했을 가능성이 높다'고 판단합니다."),
-                                        ("2. 표본 크기(Sample Size)의 부족", "통계적 유의성은 표본의 수에 매우 민감합니다.\n\n■ 현상: 각 그룹의 데이터 개수(표본수)가 너무 적다면 통계적 힘(Power)이 부족하여 유의미한 차이를 찾아내지 못합니다."),
-                                        ("3. 데이터의 단위(Scale)와 변동성", "표에 나타난 수치들이 대부분 매우 작은 소수점 단위입니다. 실제 계산 과정에서 표준오차 범위 내에 있다면 통계적으로는 측정 오차 범위 내의 흔들림으로 간주됩니다.")
-                                    ]
+                                        guide_content_ko = [
+                                            ("1. 그룹 내 편차(분산)가 너무 큰 경우", "ANOVA는 '그룹 간의 차이'와 '그룹 내의 차이'를 비교합니다.\n\n■ 원리: 그룹 간 평균 차이가 크더라도, 각 그룹 내부 데이터들이 서로 들쭉날쭉(분산이 큼)하다면 통계적으로는 '이 차이가 우연히 발생했을 가능성이 높다'고 판단합니다."),
+                                            ("2. 표본 크기(Sample Size)의 부족", "통계적 유의성은 표본의 수에 매우 민감합니다.\n\n■ 현상: 각 그룹의 데이터 개수(표본수)가 너무 적다면 통계적 힘(Power)이 부족하여 유의미한 차이를 찾아내지 못합니다."),
+                                            ("3. 데이터의 단위(Scale)와 변동성", "표에 나타난 수치들이 대부분 매우 작은 소수점 단위입니다. 실제 계산 과정에서 표준오차 범위 내에 있다면 통계적으로는 측정 오차 범위 내의 흔들림으로 간주됩니다.")
+                                        ]
                                 
-                                    guide_content_en = [
-                                        ("1. Within-Group Variance is Too Large", "ANOVA compares variance between groups against variance within groups.\n\n■ Principle: Even if the mean difference between groups is large, if individual responses within each group are highly scattered (large variance), statistics will determine that the difference is likely due to chance."),
-                                        ("2. Insufficient Sample Size", "Statistical significance is highly sensitive to the number of samples.\n\n■ Phenomenon: If the number of data points (sample size) in each group is too small, statistical power is insufficient to detect significant differences."),
-                                        ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
-                                    ]
+                                        guide_content_en = [
+                                            ("1. Within-Group Variance is Too Large", "ANOVA compares variance between groups against variance within groups.\n\n■ Principle: Even if the mean difference between groups is large, if individual responses within each group are highly scattered (large variance), statistics will determine that the difference is likely due to chance."),
+                                            ("2. Insufficient Sample Size", "Statistical significance is highly sensitive to the number of samples.\n\n■ Phenomenon: If the number of data points (sample size) in each group is too small, statistical power is insufficient to detect significant differences."),
+                                            ("3. Data Scale and Volatility", "The values in the table are mostly very small decimals. If they fall within the range of standard error, they are considered as minor fluctuations within the measurement error range.")
+                                        ]
                                 
-                                    guide_content = (guide_content_en if st.session_state.get('lang', 'ko') == 'en' else guide_content_ko) if tier in ['Standard', 'Pro'] else []
+                                        guide_content = (guide_content_en if st.session_state.get('lang', 'ko') == 'en' else guide_content_ko) if tier in ['Standard', 'Pro'] else []
     
-                                    current_row_comp = guide_start_row + 1
-                                    for title, body in guide_content:
-                                        ws_comp.set_row(current_row_comp, 25)
-                                        ws_comp.merge_range(current_row_comp, 0, current_row_comp, 6, title, bold_fmt)
-                                        ws_comp.set_row(current_row_comp + 1, 80)
-                                        ws_comp.merge_range(current_row_comp + 1, 0, current_row_comp + 1, 6, body, text_fmt)
-                                        current_row_comp += 2
+                                        current_row_comp = guide_start_row + 1
+                                        for title, body in guide_content:
+                                            ws_comp.set_row(current_row_comp, 25)
+                                            ws_comp.merge_range(current_row_comp, 0, current_row_comp, 6, title, bold_fmt)
+                                            ws_comp.set_row(current_row_comp + 1, 80)
+                                            ws_comp.merge_range(current_row_comp + 1, 0, current_row_comp + 1, 6, body, text_fmt)
+                                            current_row_comp += 2
     
-                                def write_detailed_sheet_ws(sheet_name, matrix_df, detail_df, matrix_title, row_labels, group_matrices=None, sheet_excl_count=0):
-                                    ws = workbook.add_worksheet(sheet_name)
-                                    writer.sheets[sheet_name] = ws
-                                    s_row_det = 0
+                                    def write_detailed_sheet_ws(sheet_name, matrix_df, detail_df, matrix_title, row_labels, group_matrices=None, sheet_excl_count=0):
+                                        ws = workbook.add_worksheet(sheet_name)
+                                        writer.sheets[sheet_name] = ws
+                                        s_row_det = 0
                                 
-                                    excl_label = _(f"분석 제외 사례수: {sheet_excl_count}건", f"Excluded cases: {sheet_excl_count}")
-                                    ws.write(s_row_det, 0, excl_label, workbook.add_format({'bold': True, 'font_color': 'red'}))
-                                    s_row_det += 1
+                                        excl_label = _(f"분석 제외 사례수: {sheet_excl_count}건", f"Excluded cases: {sheet_excl_count}")
+                                        ws.write(s_row_det, 0, excl_label, workbook.add_format({'bold': True, 'font_color': 'red'}))
+                                        s_row_det += 1
                                 
-                                    ws.write_string(s_row_det, 0, matrix_title)
-                                    s_row_det += 1
-                                    m_df_obj = pd.DataFrame(matrix_df, index=row_labels, columns=row_labels)
-                                    m_df_obj.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det)
-                                    add_borders_to_data(ws, s_row_det, 0, m_df_obj, border_fmt, has_header=True, has_index=True)
-                                    for r in range(len(matrix_df)):
-                                        for c in range(len(matrix_df)):
-                                            val = 1 if r==c else matrix_df[r][c]
-                                            ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
-                                            if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
+                                        ws.write_string(s_row_det, 0, matrix_title)
+                                        s_row_det += 1
+                                        m_df_obj = pd.DataFrame(matrix_df, index=row_labels, columns=row_labels)
+                                        m_df_obj.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det)
+                                        add_borders_to_data(ws, s_row_det, 0, m_df_obj, border_fmt, has_header=True, has_index=True)
+                                        for r in range(len(matrix_df)):
+                                            for c in range(len(matrix_df)):
+                                                val = 1 if r==c else matrix_df[r][c]
+                                                ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
+                                                if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
                                 
-                                    # [신규 추가] 전체 종합 행렬 오른쪽에 전체 CR, CI 값 표시
-                                    n_dim = len(matrix_df)
-                                    cr_val, ci_val, _unused_lambda = calculate_consistency(matrix_df, mean_method)
+                                        # [신규 추가] 전체 종합 행렬 오른쪽에 전체 CR, CI 값 표시
+                                        n_dim = len(matrix_df)
+                                        cr_val, ci_val, _unused_lambda = calculate_consistency(matrix_df, mean_method)
                                 
-                                    ci_cr_header_fmt = workbook.add_format({
-                                        'bold': True, 'align': 'center', 'valign': 'vcenter',
-                                        'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1,
-                                        'font_name': 'NanumGothic'
-                                    })
-                                    ci_cr_label_fmt = workbook.add_format({
-                                        'bold': True, 'align': 'center', 'valign': 'vcenter',
-                                        'bg_color': '#D9E1F2', 'border': 1,
-                                        'font_name': 'NanumGothic'
-                                    })
-                                    ci_cr_val_fmt = workbook.add_format({
-                                        'align': 'center', 'valign': 'vcenter', 'border': 1,
-                                        'num_format': '0.000',
-                                        'font_name': 'NanumGothic'
-                                    })
-                                    if cr_val > 0.1:
+                                        ci_cr_header_fmt = workbook.add_format({
+                                            'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                            'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1,
+                                            'font_name': 'NanumGothic'
+                                        })
+                                        ci_cr_label_fmt = workbook.add_format({
+                                            'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                            'bg_color': '#D9E1F2', 'border': 1,
+                                            'font_name': 'NanumGothic'
+                                        })
                                         ci_cr_val_fmt = workbook.add_format({
                                             'align': 'center', 'valign': 'vcenter', 'border': 1,
                                             'num_format': '0.000',
-                                            'bg_color': '#FFC7CE', 'font_color': '#9C0006',
                                             'font_name': 'NanumGothic'
                                         })
-                                
-                                    ws.set_column(n_dim + 2, n_dim + 2, 12)
-                                    ws.set_column(n_dim + 3, n_dim + 3, 12)
-                                
-                                    ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("전체 일관성 지표", "Overall Consistency Indicators"), ci_cr_header_fmt)
-                                    ws.write(s_row_det + 1, n_dim + 2, _("전체 CI", "Overall CI"), ci_cr_label_fmt)
-                                    ws.write(s_row_det + 1, n_dim + 3, ci_val, ci_cr_val_fmt)
-                                    ws.write(s_row_det + 2, n_dim + 2, _("전체 CR", "Overall CR"), ci_cr_label_fmt)
-                                    ws.write(s_row_det + 2, n_dim + 3, cr_val, ci_cr_val_fmt)
-                                
-                                    s_row_det += len(matrix_df) + 3
-                                
-                                    if group_matrices:
-                                        for g_name, g_mat in group_matrices.items():
-                                            ws.write_string(s_row_det, 0, _(f"] 그룹 종합 행렬: {g_name}", f"] Group Combined Matrix: {g_name}"))
-                                            s_row_det += 1
-                                            gm_df_obj = pd.DataFrame(g_mat, index=row_labels, columns=row_labels)
-                                            gm_df_obj.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det)
-                                            add_borders_to_data(ws, s_row_det, 0, gm_df_obj, border_fmt, has_header=True, has_index=True)
-                                            for r in range(len(g_mat)):
-                                                for c in range(len(g_mat)):
-                                                    val = 1 if r==c else g_mat[r][c]
-                                                    ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
-                                                    if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
-                                        
-                                            # [신규 추가] 그룹 종합 행렬 오른쪽에 그룹 CR, CI 값 표시
-                                            g_cr_val, g_ci_val, _unused_lambda = calculate_consistency(g_mat, mean_method)
-                                            g_ci_cr_val_fmt = workbook.add_format({
+                                        if cr_val > 0.1:
+                                            ci_cr_val_fmt = workbook.add_format({
                                                 'align': 'center', 'valign': 'vcenter', 'border': 1,
                                                 'num_format': '0.000',
+                                                'bg_color': '#FFC7CE', 'font_color': '#9C0006',
                                                 'font_name': 'NanumGothic'
                                             })
-                                            if g_cr_val > 0.1:
+                                
+                                        ws.set_column(n_dim + 2, n_dim + 2, 12)
+                                        ws.set_column(n_dim + 3, n_dim + 3, 12)
+                                
+                                        ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("전체 일관성 지표", "Overall Consistency Indicators"), ci_cr_header_fmt)
+                                        ws.write(s_row_det + 1, n_dim + 2, _("전체 CI", "Overall CI"), ci_cr_label_fmt)
+                                        ws.write(s_row_det + 1, n_dim + 3, ci_val, ci_cr_val_fmt)
+                                        ws.write(s_row_det + 2, n_dim + 2, _("전체 CR", "Overall CR"), ci_cr_label_fmt)
+                                        ws.write(s_row_det + 2, n_dim + 3, cr_val, ci_cr_val_fmt)
+                                
+                                        s_row_det += len(matrix_df) + 3
+                                
+                                        if group_matrices:
+                                            for g_name, g_mat in group_matrices.items():
+                                                ws.write_string(s_row_det, 0, _(f"] 그룹 종합 행렬: {g_name}", f"] Group Combined Matrix: {g_name}"))
+                                                s_row_det += 1
+                                                gm_df_obj = pd.DataFrame(g_mat, index=row_labels, columns=row_labels)
+                                                gm_df_obj.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det)
+                                                add_borders_to_data(ws, s_row_det, 0, gm_df_obj, border_fmt, has_header=True, has_index=True)
+                                                for r in range(len(g_mat)):
+                                                    for c in range(len(g_mat)):
+                                                        val = 1 if r==c else g_mat[r][c]
+                                                        ws.write(s_row_det+r+1, c+1, val, border_fmt if r!=c else fmt_diagonal)
+                                                        if r!=c: ws.write(s_row_det+r+1, c+1, val, fmt_float_no_border)
+                                        
+                                                # [신규 추가] 그룹 종합 행렬 오른쪽에 그룹 CR, CI 값 표시
+                                                g_cr_val, g_ci_val, _unused_lambda = calculate_consistency(g_mat, mean_method)
                                                 g_ci_cr_val_fmt = workbook.add_format({
                                                     'align': 'center', 'valign': 'vcenter', 'border': 1,
                                                     'num_format': '0.000',
-                                                    'bg_color': '#FFC7CE', 'font_color': '#9C0006',
                                                     'font_name': 'NanumGothic'
                                                 })
+                                                if g_cr_val > 0.1:
+                                                    g_ci_cr_val_fmt = workbook.add_format({
+                                                        'align': 'center', 'valign': 'vcenter', 'border': 1,
+                                                        'num_format': '0.000',
+                                                        'bg_color': '#FFC7CE', 'font_color': '#9C0006',
+                                                        'font_name': 'NanumGothic'
+                                                    })
                                         
-                                            ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("그룹 일관성 지표", "Group Consistency Indicators"), ci_cr_header_fmt)
-                                            ws.write(s_row_det + 1, n_dim + 2, _("그룹 CI", "Group CI"), ci_cr_label_fmt)
-                                            ws.write(s_row_det + 1, n_dim + 3, g_ci_val, g_ci_cr_val_fmt)
-                                            ws.write(s_row_det + 2, n_dim + 2, _("그룹 CR", "Group CR"), ci_cr_label_fmt)
-                                            ws.write(s_row_det + 2, n_dim + 3, g_cr_val, g_ci_cr_val_fmt)
+                                                ws.merge_range(s_row_det, n_dim + 2, s_row_det, n_dim + 3, _("그룹 일관성 지표", "Group Consistency Indicators"), ci_cr_header_fmt)
+                                                ws.write(s_row_det + 1, n_dim + 2, _("그룹 CI", "Group CI"), ci_cr_label_fmt)
+                                                ws.write(s_row_det + 1, n_dim + 3, g_ci_val, g_ci_cr_val_fmt)
+                                                ws.write(s_row_det + 2, n_dim + 2, _("그룹 CR", "Group CR"), ci_cr_label_fmt)
+                                                ws.write(s_row_det + 2, n_dim + 3, g_cr_val, g_ci_cr_val_fmt)
                                         
-                                            s_row_det += len(g_mat) + 3
+                                                s_row_det += len(g_mat) + 3
                                 
-                                    detail_df.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det, index=False)
-                                    for c_idx, col_val in enumerate(detail_df.columns):
-                                        ws.write(s_row_det, c_idx, col_val, formats['header'])
+                                        detail_df.to_excel(writer, sheet_name=sheet_name, startrow=s_row_det, index=False)
+                                        for c_idx, col_val in enumerate(detail_df.columns):
+                                            ws.write(s_row_det, c_idx, col_val, formats['header'])
                                 
-                                    for r_idx in range(len(detail_df)):
-                                        row_pos = s_row_det + 1 + r_idx
-                                        for c_idx, col_name in enumerate(detail_df.columns):
-                                            val = detail_df.iloc[r_idx, c_idx]
-                                            current_fmt = border_fmt
-                                            if col_name in ['Original_CR', 'Final_CR'] and isinstance(val, (float, int)) and val > 0.1:
-                                                current_fmt = formats['yellow']
-                                            elif isinstance(val, (float, np.float64)):
-                                                current_fmt = formats['num']
-                                            else:
-                                                current_fmt = formats['body']
+                                        for r_idx in range(len(detail_df)):
+                                            row_pos = s_row_det + 1 + r_idx
+                                            for c_idx, col_name in enumerate(detail_df.columns):
+                                                val = detail_df.iloc[r_idx, c_idx]
+                                                current_fmt = border_fmt
+                                                if col_name in ['Original_CR', 'Final_CR'] and isinstance(val, (float, int)) and val > 0.1:
+                                                    current_fmt = formats['yellow']
+                                                elif isinstance(val, (float, np.float64)):
+                                                    current_fmt = formats['num']
+                                                else:
+                                                    current_fmt = formats['body']
                                         
-                                            if pd.isnull(val):
-                                                ws.write_blank(row_pos, c_idx, "", current_fmt)
-                                            else:
-                                                ws.write(row_pos, c_idx, val, current_fmt)
+                                                if pd.isnull(val):
+                                                    ws.write_blank(row_pos, c_idx, "", current_fmt)
+                                                else:
+                                                    ws.write(row_pos, c_idx, val, current_fmt)
     
-                                main_group_mats = {}
-                                for grp in unique_groups:
-                                    g_df_m = main_results_df[main_results_df['Type'].astype(str) == grp]
-                                    if not g_df_m.empty:
-                                        mats = np.stack(g_df_m['Matrix_Object'].values)
-                                        main_group_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
-    
-                                out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
-                                write_detailed_sheet_ws('(대분류) Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
-                                for mf, info in sub_results_storage.items():
-                                    safe_name = f"(중분류) {mf}"[:31]
-                                    sub_grp_mats = {}
+                                    main_group_mats = {}
                                     for grp in unique_groups:
-                                        g_sub_df = info['df'][info['df']['Type'].astype(str) == grp]
-                                        if not g_sub_df.empty:
-                                            mats = np.stack(g_sub_df['Matrix_Object'].values)
-                                            sub_grp_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
-                                    out_sub = info['df'].drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
+                                        g_df_m = main_results_df[main_results_df['Type'].astype(str) == grp]
+                                        if not g_df_m.empty:
+                                            mats = np.stack(g_df_m['Matrix_Object'].values)
+                                            main_group_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
+    
+                                    out_main = main_results_df.drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
+                                    write_detailed_sheet_ws('(대분류) Main', main_group_matrix, out_main, _("[대분류 평가 종합 행렬]", "[Main Criteria Combined Matrix]"), main_factors, group_matrices=main_group_mats, sheet_excl_count=main_excluded)
+                                    for mf, info in sub_results_storage.items():
+                                        safe_name = f"(중분류) {mf}"[:31]
+                                        sub_grp_mats = {}
+                                        for grp in unique_groups:
+                                            g_sub_df = info['df'][info['df']['Type'].astype(str) == grp]
+                                            if not g_sub_df.empty:
+                                                mats = np.stack(g_sub_df['Matrix_Object'].values)
+                                                sub_grp_mats[grp] = np.mean(mats, axis=0) if mean_method == 'arithmetic' else gmean(mats, axis=0)
+                                        out_sub = info['df'].drop(columns=['Matrix_Object', 'Orig_Matrix_Object'], errors='ignore')
                                 
-                                    sub_excl_val = 0
-                                    for df_ex in total_excl_df_list:
-                                        if 'Sheet' in df_ex.columns and not df_ex.empty:
-                                             if mf in df_ex['Sheet'].unique():
-                                                 sub_excl_val = len(df_ex[df_ex['Sheet'] == mf])
+                                        sub_excl_val = 0
+                                        for df_ex in total_excl_df_list:
+                                            if 'Sheet' in df_ex.columns and not df_ex.empty:
+                                                 if mf in df_ex['Sheet'].unique():
+                                                     sub_excl_val = len(df_ex[df_ex['Sheet'] == mf])
                                              
-                                    title_ko = f"[중분류 평가 종합 행렬]  ▶ 상위 계층: 대분류 [{mf}]"
-                                    title_en = f"[Sub-Criteria Combined Matrix]  ▶ Parent: Main [{mf}]"
-                                    write_detailed_sheet_ws(safe_name, info['group_matrix'], out_sub, _(title_ko, title_en), info['factors'], group_matrices=sub_grp_mats, sheet_excl_count=sub_excl_val)
+                                        title_ko = f"[중분류 평가 종합 행렬]  ▶ 상위 계층: 대분류 [{mf}]"
+                                        title_en = f"[Sub-Criteria Combined Matrix]  ▶ Parent: Main [{mf}]"
+                                        write_detailed_sheet_ws(safe_name, info['group_matrix'], out_sub, _(title_ko, title_en), info['factors'], group_matrices=sub_grp_mats, sheet_excl_count=sub_excl_val)
     
-                                is_english = (st.session_state.get('lang', 'ko') == 'en')
-                                theory_ws = workbook.add_worksheet("Consistency_Theory")
-                                theory_title_fmt = workbook.add_format({'bold': True, 'font_size': 14, 'font_name': 'NanumGothic'})
-                                theory_body_fmt = workbook.add_format({'text_wrap': True, 'valign': 'top', 'font_name': 'NanumGothic'})
-                                if is_english:
-                                    theory_text = [
-                                        ["AHP Consistency Calibration Principle & Academic Foundation from a Decision-Making Perspective"],
-                                        [""],
-                                        ["1. Introduction: The Issue of Consistency in the Analytic Hierarchy Process (AHP)"],
-                                        ["The Analytic Hierarchy Process, proposed by Saaty (1980), is a multi-criteria decision-making tool that quantifies human subjective judgment. When inconsistent judgments occur, they are mathematically corrected to ensure the reliability of the analysis."],
-                                        [""],
-                                        ["2. Calibration Algorithm: Iterative Convergence Adjusting Method"],
-                                        [f"The original matrix A and the ideal matrix W are linearly combined according to the set learning rate (learning rate α={learning_rate}): A_new = (1-α)A + αW."],
-                                        [""],
-                                        ["3. Academic Foundation & Effects"],
-                                        ["Adjustment using a weighted average of the original matrix and the consistent matrix preserves the decision maker's original preferences as much as possible while improving mathematical consistency."]
-                                    ]
-                                else:
-                                    theory_text = [
-                                        ["의사결정론적 관점에서의 AHP 일관성 보정 원리 및 학술적 근거"],
-                                        [""],
-                                        ["1. 서론: 계층분석과정(AHP)의 일관성 문제"],
-                                        ["Saaty(1980)에 의해 제안된 계층분석과정은 인간의 주관적 판단을 정량화하는 다기준 의사결정 도구이다. 비일관적 판단이 발생할 경우 수학적으로 교정하여 분석의 신뢰성을 확보한다."],
-                                        [""],
-                                        ["2. 보정 알고리즘: 반복 수렴 조정법"],
-                                        [f"원본 행렬 A와 이상적 행렬 W를 설정된 학습률(α={learning_rate})에 따라 선형 결합한다: A_new = (1-α)A + αW."],
-                                        [""],
-                                        ["3. 학술적 근거 및 효과"],
-                                        ["원본 행렬과 일관 행렬의 가중 평균을 이용한 조정은 의사결정자의 원래 선호 경향성을 최대한 보존하면서 수학적 일관성을 향상시킨다."]
-                                    ]
-                                theory_ws.set_column('A:A', 100)
-                                for r_idx, row_content in enumerate(theory_text):
-                                    fmt = theory_title_fmt if r_idx == 0 else theory_body_fmt
-                                    theory_ws.write(r_idx, 0, row_content[0], fmt)
-    
-                                if is_single_sheet:
-                                    guide_ws = workbook.add_worksheet("Single_Sheet_Guide")
-                                    guide_title_fmt = workbook.add_format({'bold': True, 'font_size': 14, 'font_name': 'NanumGothic', 'bg_color': '#D9E1F2', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
-                                    guide_section_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'font_name': 'NanumGothic', 'bg_color': '#F2F2F2', 'border': 1, 'valign': 'vcenter', 'align': 'center'})
-                                    guide_body_fmt = workbook.add_format({'text_wrap': True, 'valign': 'top', 'font_name': 'NanumGothic', 'border': 1})
-                                
-                                    guide_ws.set_column('A:A', 25)
-                                    guide_ws.set_column('B:B', 75)
-                                
-                                    # Merge title row
-                                    guide_title = _("1단계 AHP 분석 결과 해석 및 주의사항", "Step 1 AHP Analysis Result Interpretation and Guidelines")
-                                    guide_ws.merge_range('A1:B1', guide_title, guide_title_fmt)
-                                    guide_ws.set_row(0, 35)
-                                
+                                    is_english = (st.session_state.get('lang', 'ko') == 'en')
+                                    theory_ws = workbook.add_worksheet("Consistency_Theory")
+                                    theory_title_fmt = workbook.add_format({'bold': True, 'font_size': 14, 'font_name': 'NanumGothic'})
+                                    theory_body_fmt = workbook.add_format({'text_wrap': True, 'valign': 'top', 'font_name': 'NanumGothic'})
                                     if is_english:
-                                        guide_data = [
-                                            ("Classification", "Detailed Content"),
-                                            ("1. Analysis Overview", "This report is a single-level AHP analysis result comparing only the main criteria (Step 1) evaluation criteria without sub-criteria."),
-                                            ("2. Result Interpretation Method", "Since the sub-weights are fixed at 1.0, the 'Main Criteria Weight' and the 'Global Weight' are calculated with the same values. Therefore, you can interpret the 'Global Weight' as the final importance of each item."),
-                                            ("3. Internal Virtual Operation Guide", "To maintain consistency of the 2-level operation of the AHP analysis system, the system internally auto-generated and computed dummy detailed items with a weight of 1.0 under the main criteria items. Due to this, the 'Result_[Main Criteria Name]' sheet exists in the results download file as a 1x1 matrix, which is a normal virtual operation result."),
-                                            ("4. Consistency Ratio (CR) Warnings", "The provided consistency ratio represents only the CR of the pairwise comparison of the main criteria. Since there are no sub-criteria, the 'Sub-Criteria Consistency Ratio (CR)' is unconditionally marked as 0.000, which is not an error."),
-                                            ("5. Academic/Report Writing Tip", "When utilizing this in academic research or reports, please explicitly state that 'pairwise comparison analysis was performed under a single-level (Step 1) hierarchical structure.'")
+                                        theory_text = [
+                                            ["AHP Consistency Calibration Principle & Academic Foundation from a Decision-Making Perspective"],
+                                            [""],
+                                            ["1. Introduction: The Issue of Consistency in the Analytic Hierarchy Process (AHP)"],
+                                            ["The Analytic Hierarchy Process, proposed by Saaty (1980), is a multi-criteria decision-making tool that quantifies human subjective judgment. When inconsistent judgments occur, they are mathematically corrected to ensure the reliability of the analysis."],
+                                            [""],
+                                            ["2. Calibration Algorithm: Iterative Convergence Adjusting Method"],
+                                            [f"The original matrix A and the ideal matrix W are linearly combined according to the set learning rate (learning rate α={learning_rate}): A_new = (1-α)A + αW."],
+                                            [""],
+                                            ["3. Academic Foundation & Effects"],
+                                            ["Adjustment using a weighted average of the original matrix and the consistent matrix preserves the decision maker's original preferences as much as possible while improving mathematical consistency."]
                                         ]
                                     else:
-                                        guide_data = [
-                                            ("분류", "상세 내용"),
-                                            ("1. 분석 개요", "본 보고서는 하위 요소 없이 대분류(1단계) 평가 기준만을 비교한 단일 계층 AHP 분석 결과입니다."),
-                                            ("2. 결과 해석 방법", "하위 가중치가 1.0으로 고정되어 '대분류 가중치'와 'Global Weight(종합 가중치)'가 동일한 수치로 산출되었습니다. 따라서 'Global Weight'를 각 항목의 최종 중요도로 해석하시면 됩니다."),
-                                            ("3. 내부 가상 연산 안내", "AHP 분석 시스템의 2단계 연산 일관성 유지를 위해, 시스템 내부적으로 대분류 항목 하위에 가중치 1.0을 가지는 더미 세부 항목을 자동 생성하여 연산하였습니다. 이로 인해 결과 다운로드 파일에 'Result_[대분류명]' 시트가 1x1 행렬로 존재하지만 이는 정상적인 가상 연산 결과입니다."),
-                                            ("4. 일관성 비율(CR) 주의사항", "제공된 일관성 비율은 대분류 쌍대비교의 일관성 비율(CR)만을 나타냅니다. 하위 요소가 존재하지 않으므로 '중분류 일관성 비율(CR)'은 무조건 0.000으로 표기되며 이는 오류가 아닙니다."),
-                                            ("5. 학술/보고서 기재 팁", "학술 연구나 보고서에 활용 시 '단일 계층(1단계) 계층 구조 하에서 쌍대비교 분석을 수행하였다'고 명시적으로 기재하시기 바랍니다.")
+                                        theory_text = [
+                                            ["의사결정론적 관점에서의 AHP 일관성 보정 원리 및 학술적 근거"],
+                                            [""],
+                                            ["1. 서론: 계층분석과정(AHP)의 일관성 문제"],
+                                            ["Saaty(1980)에 의해 제안된 계층분석과정은 인간의 주관적 판단을 정량화하는 다기준 의사결정 도구이다. 비일관적 판단이 발생할 경우 수학적으로 교정하여 분석의 신뢰성을 확보한다."],
+                                            [""],
+                                            ["2. 보정 알고리즘: 반복 수렴 조정법"],
+                                            [f"원본 행렬 A와 이상적 행렬 W를 설정된 학습률(α={learning_rate})에 따라 선형 결합한다: A_new = (1-α)A + αW."],
+                                            [""],
+                                            ["3. 학술적 근거 및 효과"],
+                                            ["원본 행렬과 일관 행렬의 가중 평균을 이용한 조정은 의사결정자의 원래 선호 경향성을 최대한 보존하면서 수학적 일관성을 향상시킨다."]
+                                        ]
+                                    theory_ws.set_column('A:A', 100)
+                                    for r_idx, row_content in enumerate(theory_text):
+                                        fmt = theory_title_fmt if r_idx == 0 else theory_body_fmt
+                                        theory_ws.write(r_idx, 0, row_content[0], fmt)
+    
+                                    if is_single_sheet:
+                                        guide_ws = workbook.add_worksheet("Single_Sheet_Guide")
+                                        guide_title_fmt = workbook.add_format({'bold': True, 'font_size': 14, 'font_name': 'NanumGothic', 'bg_color': '#D9E1F2', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+                                        guide_section_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'font_name': 'NanumGothic', 'bg_color': '#F2F2F2', 'border': 1, 'valign': 'vcenter', 'align': 'center'})
+                                        guide_body_fmt = workbook.add_format({'text_wrap': True, 'valign': 'top', 'font_name': 'NanumGothic', 'border': 1})
+                                
+                                        guide_ws.set_column('A:A', 25)
+                                        guide_ws.set_column('B:B', 75)
+                                
+                                        # Merge title row
+                                        guide_title = _("1단계 AHP 분석 결과 해석 및 주의사항", "Step 1 AHP Analysis Result Interpretation and Guidelines")
+                                        guide_ws.merge_range('A1:B1', guide_title, guide_title_fmt)
+                                        guide_ws.set_row(0, 35)
+                                
+                                        if is_english:
+                                            guide_data = [
+                                                ("Classification", "Detailed Content"),
+                                                ("1. Analysis Overview", "This report is a single-level AHP analysis result comparing only the main criteria (Step 1) evaluation criteria without sub-criteria."),
+                                                ("2. Result Interpretation Method", "Since the sub-weights are fixed at 1.0, the 'Main Criteria Weight' and the 'Global Weight' are calculated with the same values. Therefore, you can interpret the 'Global Weight' as the final importance of each item."),
+                                                ("3. Internal Virtual Operation Guide", "To maintain consistency of the 2-level operation of the AHP analysis system, the system internally auto-generated and computed dummy detailed items with a weight of 1.0 under the main criteria items. Due to this, the 'Result_[Main Criteria Name]' sheet exists in the results download file as a 1x1 matrix, which is a normal virtual operation result."),
+                                                ("4. Consistency Ratio (CR) Warnings", "The provided consistency ratio represents only the CR of the pairwise comparison of the main criteria. Since there are no sub-criteria, the 'Sub-Criteria Consistency Ratio (CR)' is unconditionally marked as 0.000, which is not an error."),
+                                                ("5. Academic/Report Writing Tip", "When utilizing this in academic research or reports, please explicitly state that 'pairwise comparison analysis was performed under a single-level (Step 1) hierarchical structure.'")
+                                            ]
+                                        else:
+                                            guide_data = [
+                                                ("분류", "상세 내용"),
+                                                ("1. 분석 개요", "본 보고서는 하위 요소 없이 대분류(1단계) 평가 기준만을 비교한 단일 계층 AHP 분석 결과입니다."),
+                                                ("2. 결과 해석 방법", "하위 가중치가 1.0으로 고정되어 '대분류 가중치'와 'Global Weight(종합 가중치)'가 동일한 수치로 산출되었습니다. 따라서 'Global Weight'를 각 항목의 최종 중요도로 해석하시면 됩니다."),
+                                                ("3. 내부 가상 연산 안내", "AHP 분석 시스템의 2단계 연산 일관성 유지를 위해, 시스템 내부적으로 대분류 항목 하위에 가중치 1.0을 가지는 더미 세부 항목을 자동 생성하여 연산하였습니다. 이로 인해 결과 다운로드 파일에 'Result_[대분류명]' 시트가 1x1 행렬로 존재하지만 이는 정상적인 가상 연산 결과입니다."),
+                                                ("4. 일관성 비율(CR) 주의사항", "제공된 일관성 비율은 대분류 쌍대비교의 일관성 비율(CR)만을 나타냅니다. 하위 요소가 존재하지 않으므로 '중분류 일관성 비율(CR)'은 무조건 0.000으로 표기되며 이는 오류가 아닙니다."),
+                                                ("5. 학술/보고서 기재 팁", "학술 연구나 보고서에 활용 시 '단일 계층(1단계) 계층 구조 하에서 쌍대비교 분석을 수행하였다'고 명시적으로 기재하시기 바랍니다.")
+                                            ]
+                                
+                                        for r_idx, (section, content) in enumerate(guide_data, start=1):
+                                            if r_idx == 1:
+                                                # Header row
+                                                guide_ws.write(r_idx, 0, section, workbook.add_format({'bold': True, 'align': 'center', 'bg_color': '#A6A6A6', 'border': 1}))
+                                                guide_ws.write(r_idx, 1, content, workbook.add_format({'bold': True, 'align': 'center', 'bg_color': '#A6A6A6', 'border': 1}))
+                                            else:
+                                                guide_ws.write(r_idx, 0, section, guide_section_fmt)
+                                                guide_ws.write(r_idx, 1, content, guide_body_fmt)
+                                            guide_ws.set_row(r_idx, 60 if r_idx > 1 else 20)
+    
+                                    if ahp_method == 'fuzzy':
+                                        # 1. Fuzzy AHP 가중치 분석 결과 시트 추가
+                                        ws_fuzzy = workbook.add_worksheet('Fuzzy_AHP_Results')
+                                        writer.sheets['Fuzzy_AHP_Results'] = ws_fuzzy
+                                        ws_fuzzy.set_column('A:A', 25)
+                                        ws_fuzzy.set_column('B:G', 20)
+                                
+                                        fuzzy_header_fmt = workbook.add_format({
+                                            'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                            'bg_color': '#1F4E78', 'font_color': '#FFFFFF', 'border': 1,
+                                            'font_name': 'NanumGothic'
+                                        })
+                                        title_fmt = workbook.add_format({
+                                            'bold': True, 'font_size': 12, 'font_name': 'NanumGothic'
+                                        })
+                                
+                                        row_idx = 1
+                                
+                                        ws_fuzzy.write_string(row_idx, 0, _("■ 대분류 (Main Criteria) 퍼지 AHP 분석 결과 (삼각피지수 적용)", "■ Main Criteria Fuzzy AHP Results (TFN Applied)"), title_fmt)
+                                        row_idx += 1
+                                
+                                        headers = [
+                                            _("구분", "Criteria"), 
+                                            _("Fuzzy 가중치 (Lower)", "Fuzzy Weight (Lower)"), 
+                                            _("Fuzzy 가중치 (Medium)", "Fuzzy Weight (Medium)"), 
+                                            _("Fuzzy 가중치 (Upper)", "Fuzzy Weight (Upper)"), 
+                                            _("비퍼지화 (Crisp)", "Defuzzified (Crisp)"), 
+                                            _("최종 가중치 (Norm)", "Final Weight (Norm)"), 
+                                            _("순위", "Rank")
                                         ]
                                 
-                                    for r_idx, (section, content) in enumerate(guide_data, start=1):
-                                        if r_idx == 1:
-                                            # Header row
-                                            guide_ws.write(r_idx, 0, section, workbook.add_format({'bold': True, 'align': 'center', 'bg_color': '#A6A6A6', 'border': 1}))
-                                            guide_ws.write(r_idx, 1, content, workbook.add_format({'bold': True, 'align': 'center', 'bg_color': '#A6A6A6', 'border': 1}))
-                                        else:
-                                            guide_ws.write(r_idx, 0, section, guide_section_fmt)
-                                            guide_ws.write(r_idx, 1, content, guide_body_fmt)
-                                        guide_ws.set_row(r_idx, 60 if r_idx > 1 else 20)
-    
-                                if ahp_method == 'fuzzy':
-                                    # 1. Fuzzy AHP 가중치 분석 결과 시트 추가
-                                    ws_fuzzy = workbook.add_worksheet('Fuzzy_AHP_Results')
-                                    writer.sheets['Fuzzy_AHP_Results'] = ws_fuzzy
-                                    ws_fuzzy.set_column('A:A', 25)
-                                    ws_fuzzy.set_column('B:G', 20)
-                                
-                                    fuzzy_header_fmt = workbook.add_format({
-                                        'bold': True, 'align': 'center', 'valign': 'vcenter',
-                                        'bg_color': '#1F4E78', 'font_color': '#FFFFFF', 'border': 1,
-                                        'font_name': 'NanumGothic'
-                                    })
-                                    title_fmt = workbook.add_format({
-                                        'bold': True, 'font_size': 12, 'font_name': 'NanumGothic'
-                                    })
-                                
-                                    row_idx = 1
-                                
-                                    ws_fuzzy.write_string(row_idx, 0, _("■ 대분류 (Main Criteria) 퍼지 AHP 분석 결과 (삼각피지수 적용)", "■ Main Criteria Fuzzy AHP Results (TFN Applied)"), title_fmt)
-                                    row_idx += 1
-                                
-                                    headers = [
-                                        _("구분", "Criteria"), 
-                                        _("Fuzzy 가중치 (Lower)", "Fuzzy Weight (Lower)"), 
-                                        _("Fuzzy 가중치 (Medium)", "Fuzzy Weight (Medium)"), 
-                                        _("Fuzzy 가중치 (Upper)", "Fuzzy Weight (Upper)"), 
-                                        _("비퍼지화 (Crisp)", "Defuzzified (Crisp)"), 
-                                        _("최종 가중치 (Norm)", "Final Weight (Norm)"), 
-                                        _("순위", "Rank")
-                                    ]
-                                
-                                    for c_idx, h in enumerate(headers):
-                                        ws_fuzzy.write(row_idx, c_idx, h, fuzzy_header_fmt)
-                                    row_idx += 1
-                                
-                                    main_rows = []
-                                    for i, (l, m, u) in enumerate(main_group_Si):
-                                        crisp = (l * m * u) ** (1/3)
-                                        norm_w = group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
-                                        main_rows.append([main_factors[i], l, m, u, crisp, norm_w])
-                                
-                                    norm_w_list = [r[5] for r in main_rows]
-                                    sorted_weights = sorted(list(set(norm_w_list)), reverse=True)
-                                    ranks = [sorted_weights.index(w) + 1 for w in norm_w_list]
-                                
-                                    for i, r in enumerate(main_rows):
-                                        r.append(ranks[i])
-                                        ws_fuzzy.write(row_idx, 0, r[0], formats['body'])
-                                        for c_idx in range(1, 6):
-                                            ws_fuzzy.write_number(row_idx, c_idx, r[c_idx], formats['num'])
-                                        ws_fuzzy.write_number(row_idx, 6, r[6], formats['body'])
+                                        for c_idx, h in enumerate(headers):
+                                            ws_fuzzy.write(row_idx, c_idx, h, fuzzy_header_fmt)
                                         row_idx += 1
-                                    
-                                    row_idx += 2
                                 
-                                    for parent_f, sub_info in sub_results_storage.items():
-                                        if sub_info.get('group_Si'):
-                                            ws_fuzzy.write_string(row_idx, 0, _(f"■ 세부항목 [{parent_f}] 퍼지 AHP 분석 결과 (삼각피지수 적용)", f"■ Sub-Criteria [{parent_f}] Fuzzy AHP Results (TFN Applied)"), title_fmt)
+                                        main_rows = []
+                                        for i, (l, m, u) in enumerate(main_group_Si):
+                                            crisp = (l * m * u) ** (1/3)
+                                            norm_w = group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
+                                            main_rows.append([main_factors[i], l, m, u, crisp, norm_w])
+                                
+                                        norm_w_list = [r[5] for r in main_rows]
+                                        sorted_weights = sorted(list(set(norm_w_list)), reverse=True)
+                                        ranks = [sorted_weights.index(w) + 1 for w in norm_w_list]
+                                
+                                        for i, r in enumerate(main_rows):
+                                            r.append(ranks[i])
+                                            ws_fuzzy.write(row_idx, 0, r[0], formats['body'])
+                                            for c_idx in range(1, 6):
+                                                ws_fuzzy.write_number(row_idx, c_idx, r[c_idx], formats['num'])
+                                            ws_fuzzy.write_number(row_idx, 6, r[6], formats['body'])
                                             row_idx += 1
-                                        
-                                            for c_idx, h in enumerate(headers):
-                                                ws_fuzzy.write(row_idx, c_idx, h, fuzzy_header_fmt)
-                                            row_idx += 1
-                                        
-                                            sub_factors = sub_info['factors']
-                                            sub_group_Si = sub_info['group_Si']
-                                            group_sub_w = sub_info['weights']
-                                        
-                                            sub_rows = []
-                                            for i, (l, m, u) in enumerate(sub_group_Si):
-                                                crisp = (l * m * u) ** (1/3)
-                                                norm_w = group_sub_w.iloc[i] if isinstance(group_sub_w, pd.Series) else group_sub_w[i]
-                                                sub_rows.append([sub_factors[i], l, m, u, crisp, norm_w])
-                                            
-                                            norm_w_list = [r[5] for r in sub_rows]
-                                            sorted_weights = sorted(list(set(norm_w_list)), reverse=True)
-                                            ranks = [sorted_weights.index(w) + 1 for w in norm_w_list]
-                                        
-                                            for i, r in enumerate(sub_rows):
-                                                r.append(ranks[i])
-                                                ws_fuzzy.write(row_idx, 0, r[0], formats['body'])
-                                                for c_idx in range(1, 6):
-                                                    ws_fuzzy.write_number(row_idx, c_idx, r[c_idx], formats['num'])
-                                                ws_fuzzy.write_number(row_idx, 6, r[6], formats['body'])
+                                    
+                                        row_idx += 2
+                                
+                                        for parent_f, sub_info in sub_results_storage.items():
+                                            if sub_info.get('group_Si'):
+                                                ws_fuzzy.write_string(row_idx, 0, _(f"■ 세부항목 [{parent_f}] 퍼지 AHP 분석 결과 (삼각피지수 적용)", f"■ Sub-Criteria [{parent_f}] Fuzzy AHP Results (TFN Applied)"), title_fmt)
                                                 row_idx += 1
                                         
-                                            row_idx += 2
+                                                for c_idx, h in enumerate(headers):
+                                                    ws_fuzzy.write(row_idx, c_idx, h, fuzzy_header_fmt)
+                                                row_idx += 1
+                                        
+                                                sub_factors = sub_info['factors']
+                                                sub_group_Si = sub_info['group_Si']
+                                                group_sub_w = sub_info['weights']
+                                        
+                                                sub_rows = []
+                                                for i, (l, m, u) in enumerate(sub_group_Si):
+                                                    crisp = (l * m * u) ** (1/3)
+                                                    norm_w = group_sub_w.iloc[i] if isinstance(group_sub_w, pd.Series) else group_sub_w[i]
+                                                    sub_rows.append([sub_factors[i], l, m, u, crisp, norm_w])
+                                            
+                                                norm_w_list = [r[5] for r in sub_rows]
+                                                sorted_weights = sorted(list(set(norm_w_list)), reverse=True)
+                                                ranks = [sorted_weights.index(w) + 1 for w in norm_w_list]
+                                        
+                                                for i, r in enumerate(sub_rows):
+                                                    r.append(ranks[i])
+                                                    ws_fuzzy.write(row_idx, 0, r[0], formats['body'])
+                                                    for c_idx in range(1, 6):
+                                                        ws_fuzzy.write_number(row_idx, c_idx, r[c_idx], formats['num'])
+                                                    ws_fuzzy.write_number(row_idx, 6, r[6], formats['body'])
+                                                    row_idx += 1
+                                        
+                                                row_idx += 2
     
-                                    # 2. 일관성 비율(CR) 분포 분석 결과 시트 추가
-                                    ws_cr = workbook.add_worksheet('CR_Distribution')
-                                    writer.sheets['CR_Distribution'] = ws_cr
-                                    ws_cr.set_column('A:A', 25)
-                                    ws_cr.set_column('B:H', 20)
+                                        # 2. 일관성 비율(CR) 분포 분석 결과 시트 추가
+                                        ws_cr = workbook.add_worksheet('CR_Distribution')
+                                        writer.sheets['CR_Distribution'] = ws_cr
+                                        ws_cr.set_column('A:A', 25)
+                                        ws_cr.set_column('B:H', 20)
                                 
-                                    cr_header_fmt = workbook.add_format({
-                                        'bold': True, 'align': 'center', 'valign': 'vcenter',
-                                        'bg_color': '#595959', 'font_color': '#FFFFFF', 'border': 1,
-                                        'font_name': 'NanumGothic'
-                                    })
+                                        cr_header_fmt = workbook.add_format({
+                                            'bold': True, 'align': 'center', 'valign': 'vcenter',
+                                            'bg_color': '#595959', 'font_color': '#FFFFFF', 'border': 1,
+                                            'font_name': 'NanumGothic'
+                                        })
                                 
-                                    ws_cr.write_string(1, 0, _("■ 일관성 비율(CR) 분석 요약", "■ Consistency Ratio (CR) Analysis Summary"), title_fmt)
+                                        ws_cr.write_string(1, 0, _("■ 일관성 비율(CR) 분석 요약", "■ Consistency Ratio (CR) Analysis Summary"), title_fmt)
                                 
-                                    cr_headers = [
-                                        _("평가 시트명", "Sheet Name"),
-                                        _("평균 CR", "Mean CR"),
-                                        _("중앙값 CR", "Median CR"),
-                                        _("최소 CR", "Min CR"),
-                                        _("최대 CR", "Max CR"),
-                                        _("통과 표본 수 (CR <= 0.1)", "Passed Samples (CR <= 0.1)"),
-                                        _("전체 표본 수", "Total Samples"),
-                                        _("통과율 (%)", "Pass Rate (%)")
-                                    ]
+                                        cr_headers = [
+                                            _("평가 시트명", "Sheet Name"),
+                                            _("평균 CR", "Mean CR"),
+                                            _("중앙값 CR", "Median CR"),
+                                            _("최소 CR", "Min CR"),
+                                            _("최대 CR", "Max CR"),
+                                            _("통과 표본 수 (CR <= 0.1)", "Passed Samples (CR <= 0.1)"),
+                                            _("전체 표본 수", "Total Samples"),
+                                            _("통과율 (%)", "Pass Rate (%)")
+                                        ]
                                 
-                                    for c_idx, h in enumerate(cr_headers):
-                                        ws_cr.write(2, c_idx, h, cr_header_fmt)
+                                        for c_idx, h in enumerate(cr_headers):
+                                            ws_cr.write(2, c_idx, h, cr_header_fmt)
                                     
-                                    cr_row_idx = 3
+                                        cr_row_idx = 3
                                 
-                                    sheets_to_process = [("Main_Criteria", main_results_df)]
-                                    for mf, info in sub_results_storage.items():
-                                        sheets_to_process.append((mf, info['df']))
+                                        sheets_to_process = [("Main_Criteria", main_results_df)]
+                                        for mf, info in sub_results_storage.items():
+                                            sheets_to_process.append((mf, info['df']))
                                     
-                                    for sheet_name, df_s in sheets_to_process:
-                                        if df_s.empty: continue
-                                        cr_vals = df_s['Final_CR'].dropna().values
-                                        if len(cr_vals) == 0: continue
+                                        for sheet_name, df_s in sheets_to_process:
+                                            if df_s.empty: continue
+                                            cr_vals = df_s['Final_CR'].dropna().values
+                                            if len(cr_vals) == 0: continue
                                     
-                                        mean_cr = np.mean(cr_vals)
-                                        median_cr = np.median(cr_vals)
-                                        min_cr = np.min(cr_vals)
-                                        max_cr = np.max(cr_vals)
-                                        total_cnt = len(cr_vals)
-                                        pass_cnt = np.sum(cr_vals <= 0.1)
-                                        pass_rate = (pass_cnt / total_cnt) * 100
+                                            mean_cr = np.mean(cr_vals)
+                                            median_cr = np.median(cr_vals)
+                                            min_cr = np.min(cr_vals)
+                                            max_cr = np.max(cr_vals)
+                                            total_cnt = len(cr_vals)
+                                            pass_cnt = np.sum(cr_vals <= 0.1)
+                                            pass_rate = (pass_cnt / total_cnt) * 100
                                     
-                                        ws_cr.write(cr_row_idx, 0, sheet_name, formats['body'])
-                                        ws_cr.write_number(cr_row_idx, 1, mean_cr, formats['num'])
-                                        ws_cr.write_number(cr_row_idx, 2, median_cr, formats['num'])
-                                        ws_cr.write_number(cr_row_idx, 3, min_cr, formats['num'])
-                                        ws_cr.write_number(cr_row_idx, 4, max_cr, formats['num'])
-                                        ws_cr.write_number(cr_row_idx, 5, pass_cnt, formats['body'])
-                                        ws_cr.write_number(cr_row_idx, 6, total_cnt, formats['body'])
-                                        ws_cr.write_number(cr_row_idx, 7, pass_rate, formats['num'])
+                                            ws_cr.write(cr_row_idx, 0, sheet_name, formats['body'])
+                                            ws_cr.write_number(cr_row_idx, 1, mean_cr, formats['num'])
+                                            ws_cr.write_number(cr_row_idx, 2, median_cr, formats['num'])
+                                            ws_cr.write_number(cr_row_idx, 3, min_cr, formats['num'])
+                                            ws_cr.write_number(cr_row_idx, 4, max_cr, formats['num'])
+                                            ws_cr.write_number(cr_row_idx, 5, pass_cnt, formats['body'])
+                                            ws_cr.write_number(cr_row_idx, 6, total_cnt, formats['body'])
+                                            ws_cr.write_number(cr_row_idx, 7, pass_rate, formats['num'])
+                                            cr_row_idx += 1
+                                    
+                                        cr_row_idx += 2
+                                        ws_cr.write_string(cr_row_idx, 0, _("■ 개별 응답자별 일관성 비율(CR) 상세 내역", "■ Detailed Consistency Ratio (CR) by Respondent"), title_fmt)
                                         cr_row_idx += 1
-                                    
-                                    cr_row_idx += 2
-                                    ws_cr.write_string(cr_row_idx, 0, _("■ 개별 응답자별 일관성 비율(CR) 상세 내역", "■ Detailed Consistency Ratio (CR) by Respondent"), title_fmt)
-                                    cr_row_idx += 1
                                 
-                                    indiv_headers = [
-                                        _("ID (설문자)", "Respondent ID"),
-                                        _("그룹 (Type)", "Group Type"),
-                                        _("평가 시트명", "Sheet Name"),
-                                        _("일관성 비율 (CR)", "Consistency Ratio (CR)"),
-                                        _("판정 (CR <= 0.1)", "Status (CR <= 0.1)")
-                                    ]
-                                    for c_idx, h in enumerate(indiv_headers):
-                                        ws_cr.write(cr_row_idx, c_idx, h, cr_header_fmt)
-                                    cr_row_idx += 1
-                                
-                                    for idx_row, r in main_results_df.iterrows():
-                                        cr_val = r['Final_CR']
-                                        status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만족 (Fail)", "Fail")
-                                        ws_cr.write(cr_row_idx, 0, r['ID'], formats['body'])
-                                        ws_cr.write(cr_row_idx, 1, r['Type'], formats['body'])
-                                        ws_cr.write(cr_row_idx, 2, "Main_Criteria", formats['body'])
-                                        ws_cr.write_number(cr_row_idx, 3, cr_val, formats['num'])
-                                        ws_cr.write(cr_row_idx, 4, status, formats['body'])
+                                        indiv_headers = [
+                                            _("ID (설문자)", "Respondent ID"),
+                                            _("그룹 (Type)", "Group Type"),
+                                            _("평가 시트명", "Sheet Name"),
+                                            _("일관성 비율 (CR)", "Consistency Ratio (CR)"),
+                                            _("판정 (CR <= 0.1)", "Status (CR <= 0.1)")
+                                        ]
+                                        for c_idx, h in enumerate(indiv_headers):
+                                            ws_cr.write(cr_row_idx, c_idx, h, cr_header_fmt)
                                         cr_row_idx += 1
-                                    
-                                    for mf, info in sub_results_storage.items():
-                                        for idx_row, r in info['df'].iterrows():
+                                
+                                        for idx_row, r in main_results_df.iterrows():
                                             cr_val = r['Final_CR']
                                             status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만족 (Fail)", "Fail")
                                             ws_cr.write(cr_row_idx, 0, r['ID'], formats['body'])
                                             ws_cr.write(cr_row_idx, 1, r['Type'], formats['body'])
-                                            ws_cr.write(cr_row_idx, 2, mf, formats['body'])
+                                            ws_cr.write(cr_row_idx, 2, "Main_Criteria", formats['body'])
                                             ws_cr.write_number(cr_row_idx, 3, cr_val, formats['num'])
                                             ws_cr.write(cr_row_idx, 4, status, formats['body'])
                                             cr_row_idx += 1
+                                    
+                                        for mf, info in sub_results_storage.items():
+                                            for idx_row, r in info['df'].iterrows():
+                                                cr_val = r['Final_CR']
+                                                status = _("만족 (Pass)", "Pass") if cr_val <= 0.1 else _("불만족 (Fail)", "Fail")
+                                                ws_cr.write(cr_row_idx, 0, r['ID'], formats['body'])
+                                                ws_cr.write(cr_row_idx, 1, r['Type'], formats['body'])
+                                                ws_cr.write(cr_row_idx, 2, mf, formats['body'])
+                                                ws_cr.write_number(cr_row_idx, 3, cr_val, formats['num'])
+                                                ws_cr.write(cr_row_idx, 4, status, formats['body'])
+                                                cr_row_idx += 1
     
-                        st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
-                        if st.session_state.get('plan_type') == 'Basic':
-                            st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
-                                      "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
-                        if st.session_state.user_role == 'official':
-                            if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
-                                save_data = uploaded_file.getvalue()
-                                save_filename = f"{filename_base}_Raw.xlsx"
-                            else:
-                                uploadable_io = io.BytesIO()
-                                with pd.ExcelWriter(uploadable_io, engine='openpyxl') as writer:
-                                    if df_main is not None and not df_main.empty:
-                                        df_main.to_excel(writer, index=False, sheet_name="Main_Criteria")
-                                    for s_name, s_df in sub_dfs.items():
-                                        s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
-                                    sub_sub_dfs_to_save = st.session_state.get("ahp_sub_sub_dfs", {})
-                                    for s_name, s_df in sub_sub_dfs_to_save.items():
-                                        s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
-                                save_data = uploadable_io.getvalue()
-                                save_filename = f"{filename_base}_Raw.xlsx"
-                            save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
+                            st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
+                            if st.session_state.get('plan_type') == 'Basic':
+                                st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
+                                          "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
+                            if st.session_state.user_role == 'official':
+                                if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
+                                    save_data = uploaded_file.getvalue()
+                                    save_filename = f"{filename_base}_Raw.xlsx"
+                                else:
+                                    uploadable_io = io.BytesIO()
+                                    with pd.ExcelWriter(uploadable_io, engine='openpyxl') as writer:
+                                        if df_main is not None and not df_main.empty:
+                                            df_main.to_excel(writer, index=False, sheet_name="Main_Criteria")
+                                        for s_name, s_df in sub_dfs.items():
+                                            s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
+                                        sub_sub_dfs_to_save = st.session_state.get("ahp_sub_sub_dfs", {})
+                                        for s_name, s_df in sub_sub_dfs_to_save.items():
+                                            s_df.to_excel(writer, index=False, sheet_name=s_name[:31])
+                                    save_data = uploadable_io.getvalue()
+                                    save_filename = f"{filename_base}_Raw.xlsx"
+                                save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
     
-                        st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
-                                     "⚠️ Results reset on refresh. Download via the Results tab."))
+                            st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
+                                         "⚠️ Results reset on refresh. Download via the Results tab."))
     
-                        tab1, tab2, tab3, tab4, tab5 = st.tabs([
-                            _("종합 분석 (Global)", "Global Comprehensive Analysis"),
-                            _("그룹별 분석", "Group Analysis"),
-                            _("통계 검정 (ANOVA)", "Statistical Test (ANOVA)"),
-                            _("시각화 센터", "Visualization Center"),
-                            _("결과 다운로드", "Download Results")
-                        ])
-                        with tab1:
-                            st.subheader(_(" 종합 중요도 및 순위", " Global Weights & Rankings"))
-                            if is_english:
-                                disp_final_df = final_df.rename(columns={
-                                    "대분류": "Main Criteria",
-                                    "대분류 가중치": "Main Criteria Weight",
-                                    "중분류": "Sub-Criteria",
-                                    "중분류 가중치": "Sub-Criteria Weight",
-                                    "Global Weight": "Global Weight",
-                                    "Global Rank": "Global Rank",
-                                    "CR(대분류)": "CR (Main Criteria)",
-                                    "CI(대분류)": "CI (Main Criteria)",
-                                    "CR(중분류)": "CR (Sub-Criteria)",
-                                    "CI(중분류)": "CI (Sub-Criteria)"
-                                })
-                            else:
-                                disp_final_df = final_df
-                            st.dataframe(disp_final_df.style.format(precision=3), use_container_width=True)
+                            tab1, tab2, tab3, tab4, tab5 = st.tabs([
+                                _("종합 분석 (Global)", "Global Comprehensive Analysis"),
+                                _("그룹별 분석", "Group Analysis"),
+                                _("통계 검정 (ANOVA)", "Statistical Test (ANOVA)"),
+                                _("시각화 센터", "Visualization Center"),
+                                _("결과 다운로드", "Download Results")
+                            ])
+                            with tab1:
+                                st.subheader(_(" 종합 중요도 및 순위", " Global Weights & Rankings"))
+                                if is_english:
+                                    disp_final_df = final_df.rename(columns={
+                                        "대분류": "Main Criteria",
+                                        "대분류 가중치": "Main Criteria Weight",
+                                        "중분류": "Sub-Criteria",
+                                        "중분류 가중치": "Sub-Criteria Weight",
+                                        "Global Weight": "Global Weight",
+                                        "Global Rank": "Global Rank",
+                                        "CR(대분류)": "CR (Main Criteria)",
+                                        "CI(대분류)": "CI (Main Criteria)",
+                                        "CR(중분류)": "CR (Sub-Criteria)",
+                                        "CI(중분류)": "CI (Sub-Criteria)"
+                                    })
+                                else:
+                                    disp_final_df = final_df
+                                st.dataframe(disp_final_df.style.format(precision=3), use_container_width=True)
     
 
     
-                        with tab2:
-                            st.markdown(_("#### 그룹별 가중치 상세 비교", "#### Detailed Comparison of Weights by Group"))
-                            disp_comparison_df = comparison_df.copy()
-                            if is_english:
-                                disp_comparison_df.rename(columns={
-                                    "중분류": "Sub-Criteria",
-                                    "Overall": "Overall",
-                                    "전문가": "Expert",
-                                    "일반": "General",
-                                    "공무원": "Public Official"
-                                }, inplace=True)
-                            st.dataframe(disp_comparison_df.style.format(precision=4), use_container_width=True)
-                        with tab3:
-                            st.markdown(_("#### 집단 간 유의성 분석", "#### Analysis of Significance Between Groups"))
-                            if not anova_df.empty:
+                            with tab2:
+                                st.markdown(_("#### 그룹별 가중치 상세 비교", "#### Detailed Comparison of Weights by Group"))
+                                disp_comparison_df = comparison_df.copy()
                                 if is_english:
-                                    disp_anova = anova_df.copy()
-                                    disp_anova.rename(columns={
-                                        "요인": "Factor/Criteria",
-                                        "F-값": "F-Value",
-                                        "P-Value": "P-Value",
-                                        "유의성": "Significance",
-                                        "사후검정(Tukey HSD)": "Post-Hoc (Tukey HSD)"
+                                    disp_comparison_df.rename(columns={
+                                        "중분류": "Sub-Criteria",
+                                        "Overall": "Overall",
+                                        "전문가": "Expert",
+                                        "일반": "General",
+                                        "공무원": "Public Official"
                                     }, inplace=True)
-                                
-                                    # Map values in Significance
-                                    disp_anova["Significance"] = disp_anova["Significance"].map({
-                                        "유의함": "Significant",
-                                        "유의하지 않음": "Not Significant"
-                                    }).fillna(disp_anova["Significance"])
-                                
-                                    # Map values in Post-Hoc
-                                    def translate_posthoc(val):
-                                        if not isinstance(val, str):
-                                            return val
-                                        val = val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
-                                        val = val.replace(" 차이 있음", " (Diff exists)")
-                                        val = val.replace("집단 간 구체적 차이 발견 못함", "No significant pairwise difference found")
-                                        val = val.replace("계산 오류", "Calculation Error")
-                                        return val
-                                    disp_anova["Post-Hoc (Tukey HSD)"] = disp_anova["Post-Hoc (Tukey HSD)"].apply(translate_posthoc)
-                                else:
-                                    disp_anova = anova_df
-                                st.dataframe(disp_anova.style.format(precision=5), use_container_width=True)
-                            else:
-                                st.info(_("통계 검정을 위해 2개 이상의 그룹 데이터가 필요합니다.", "At least 2 group datasets are required for statistical testing (ANOVA)."))
-                        with tab4:
-                            st.markdown(_("####  시각화 센터", "####  Visualization Center"))
-                            col_chart1, col_chart2 = st.columns(2)
-                            with col_chart1:
-                                st.write(_("**종합 중요도 (Bar)**", "**Global Importance (Bar)**"))
-                                chart_bar_df = final_df.sort_values('Global Weight').copy()
-                                if is_english:
-                                    chart_bar_df.rename(columns={"중분류": "Sub-Criteria", "Global Weight": "Global Weight"}, inplace=True)
-                                    y_col = "Sub-Criteria"
-                                    x_col = "Global Weight"
-                                else:
-                                    y_col = "중분류"
-                                    x_col = "Global Weight"
-                                fig_bar = px.bar(chart_bar_df, y=y_col, x=x_col, orientation='h', text_auto='.3f')
-                                st.plotly_chart(fig_bar, use_container_width=True)
-                            with col_chart2:
-                                st.write(_("**그룹별 중요도 패턴 (Radar)**", "**Importance Pattern by Group (Radar)**"))
-                                indiv_global_radar = []
-                                all_ids_r = main_results_df['ID'].unique()
-                                for rid in all_ids_r:
-                                    m_row_rd = main_results_df[main_results_df['ID'] == rid].iloc[0]
-                                    rtype_rd = m_row_rd['Type']
-                                    grp_name_en = rtype_rd
+                                st.dataframe(disp_comparison_df.style.format(precision=4), use_container_width=True)
+                            with tab3:
+                                st.markdown(_("#### 집단 간 유의성 분석", "#### Analysis of Significance Between Groups"))
+                                if not anova_df.empty:
                                     if is_english:
-                                        grp_name_en = str(rtype_rd).replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
-                                    for m_f_rd in main_factors:
-                                        mw_indiv_rd = m_row_rd[f"Weight_{m_f_rd}"]
-                                        s_row_df_rd = sub_results_storage[m_f_rd]['df']
-                                        s_row_rd = s_row_df_rd[s_row_df_rd['ID'] == rid].iloc[0]
-                                        for s_f_rd in sub_results_storage[m_f_rd]['factors']:
-                                            indiv_global_radar.append({
-                                                "Type": grp_name_en, 
-                                                "Factor": s_f_rd, 
-                                                "Global_Weight": mw_indiv_rd * s_row_rd[f"Weight_{s_f_rd}"]
-                                            })
-                                radar_indiv_df = pd.DataFrame(indiv_global_radar)
-                                radar_plot_df = radar_indiv_df.groupby(['Type', 'Factor'])['Global_Weight'].mean().reset_index()
-                                fig_radar = go.Figure()
-                                for t in radar_plot_df['Type'].unique():
-                                    t_data = radar_plot_df[radar_plot_df['Type'] == t]
-                                    fig_radar.add_trace(go.Scatterpolar(r=t_data['Global_Weight'], theta=t_data['Factor'], fill='toself', name=t))
-                                st.plotly_chart(fig_radar, use_container_width=True)
+                                        disp_anova = anova_df.copy()
+                                        disp_anova.rename(columns={
+                                            "요인": "Factor/Criteria",
+                                            "F-값": "F-Value",
+                                            "P-Value": "P-Value",
+                                            "유의성": "Significance",
+                                            "사후검정(Tukey HSD)": "Post-Hoc (Tukey HSD)"
+                                        }, inplace=True)
+                                
+                                        # Map values in Significance
+                                        disp_anova["Significance"] = disp_anova["Significance"].map({
+                                            "유의함": "Significant",
+                                            "유의하지 않음": "Not Significant"
+                                        }).fillna(disp_anova["Significance"])
+                                
+                                        # Map values in Post-Hoc
+                                        def translate_posthoc(val):
+                                            if not isinstance(val, str):
+                                                return val
+                                            val = val.replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
+                                            val = val.replace(" 차이 있음", " (Diff exists)")
+                                            val = val.replace("집단 간 구체적 차이 발견 못함", "No significant pairwise difference found")
+                                            val = val.replace("계산 오류", "Calculation Error")
+                                            return val
+                                        disp_anova["Post-Hoc (Tukey HSD)"] = disp_anova["Post-Hoc (Tukey HSD)"].apply(translate_posthoc)
+                                    else:
+                                        disp_anova = anova_df
+                                    st.dataframe(disp_anova.style.format(precision=5), use_container_width=True)
+                                else:
+                                    st.info(_("통계 검정을 위해 2개 이상의 그룹 데이터가 필요합니다.", "At least 2 group datasets are required for statistical testing (ANOVA)."))
+                            with tab4:
+                                st.markdown(_("####  시각화 센터", "####  Visualization Center"))
+                                col_chart1, col_chart2 = st.columns(2)
+                                with col_chart1:
+                                    st.write(_("**종합 중요도 (Bar)**", "**Global Importance (Bar)**"))
+                                    chart_bar_df = final_df.sort_values('Global Weight').copy()
+                                    if is_english:
+                                        chart_bar_df.rename(columns={"중분류": "Sub-Criteria", "Global Weight": "Global Weight"}, inplace=True)
+                                        y_col = "Sub-Criteria"
+                                        x_col = "Global Weight"
+                                    else:
+                                        y_col = "중분류"
+                                        x_col = "Global Weight"
+                                    fig_bar = px.bar(chart_bar_df, y=y_col, x=x_col, orientation='h', text_auto='.3f')
+                                    st.plotly_chart(fig_bar, use_container_width=True)
+                                with col_chart2:
+                                    st.write(_("**그룹별 중요도 패턴 (Radar)**", "**Importance Pattern by Group (Radar)**"))
+                                    indiv_global_radar = []
+                                    all_ids_r = main_results_df['ID'].unique()
+                                    for rid in all_ids_r:
+                                        m_row_rd = main_results_df[main_results_df['ID'] == rid].iloc[0]
+                                        rtype_rd = m_row_rd['Type']
+                                        grp_name_en = rtype_rd
+                                        if is_english:
+                                            grp_name_en = str(rtype_rd).replace("전문가", "Expert").replace("일반", "General").replace("공무원", "Public Official")
+                                        for m_f_rd in main_factors:
+                                            mw_indiv_rd = m_row_rd[f"Weight_{m_f_rd}"]
+                                            s_row_df_rd = sub_results_storage[m_f_rd]['df']
+                                            s_row_rd = s_row_df_rd[s_row_df_rd['ID'] == rid].iloc[0]
+                                            for s_f_rd in sub_results_storage[m_f_rd]['factors']:
+                                                indiv_global_radar.append({
+                                                    "Type": grp_name_en, 
+                                                    "Factor": s_f_rd, 
+                                                    "Global_Weight": mw_indiv_rd * s_row_rd[f"Weight_{s_f_rd}"]
+                                                })
+                                    radar_indiv_df = pd.DataFrame(indiv_global_radar)
+                                    radar_plot_df = radar_indiv_df.groupby(['Type', 'Factor'])['Global_Weight'].mean().reset_index()
+                                    fig_radar = go.Figure()
+                                    for t in radar_plot_df['Type'].unique():
+                                        t_data = radar_plot_df[radar_plot_df['Type'] == t]
+                                        fig_radar.add_trace(go.Scatterpolar(r=t_data['Global_Weight'], theta=t_data['Factor'], fill='toself', name=t))
+                                    st.plotly_chart(fig_radar, use_container_width=True)
                         
-                            # [바이올린 플롯] CR 분포 시각화 — 드롭다운 계층 선택
-                            st.markdown("---")
-                            st.write(_("**일관성 비율(CR) 분포 (Violin Plot)**", "**Consistency Ratio (CR) Distribution (Violin Plot)**"))
-                            st.caption(_("계층을 선택하면 해당 수준 응답자들의 CR 분포를 표시합니다. 바이올린 폭 = 밀도, 내부 박스 = 중앙값·사분위수, 점 = 개별 응답자",
-                                         "Select a tier to view respondent CR distribution. Width = density, box = median/IQR, dots = individual respondents"))
-
-                            _t2_tier_opts_ko = ["대분류 (Main)", "중분류 (Sub)"]
-                            _t2_tier_opts_en = ["Main Criteria", "Sub-Criteria"]
-                            _t2_tier_opts = _t2_tier_opts_en if is_english else _t2_tier_opts_ko
-                            _t2_sel_tier = st.selectbox(
-                                _("📂 표시할 계층 선택", "📂 Select Tier to Display"),
-                                options=_t2_tier_opts,
-                                key="vio_tier_select_2tier"
-                            )
-
-                            _t2_vio_palette = [
-                                "rgba(70,130,180,0.65)",
-                                "rgba(205,92,92,0.65)",
-                                "rgba(255,182,193,0.65)",
-                                "rgba(60,179,113,0.65)",
-                                "rgba(255,165,0,0.65)",
-                                "rgba(147,112,219,0.65)",
-                                "rgba(72,209,204,0.65)",
-                                "rgba(255,215,0,0.65)",
-                            ]
-                            _t2_vio_line_pal = [
-                                "#4682B4","#CD5C5C","#FFB6C1","#3CB371",
-                                "#FFA500","#9370DB","#48D1CC","#FFD700"
-                            ]
-
-                            try:
-                                _fig_t2_vio = go.Figure()
-                                _t2_ci = 0
-
-                                # ── 선택: 대분류 ─────────────────────────────────
-                                if _t2_sel_tier == _t2_tier_opts[0]:
-                                    if not main_results_df.empty and "Final_CR" in main_results_df.columns:
-                                        _t2_main_cr = main_results_df["Final_CR"].dropna().tolist()
-                                        _t2_xlbl = _("대분류", "Main Criteria")
-                                        _fig_t2_vio.add_trace(go.Violin(
-                                            y=_t2_main_cr, x=[_t2_xlbl]*len(_t2_main_cr),
-                                            name=_t2_xlbl, box_visible=True, meanline_visible=True,
-                                            points="all", jitter=0.35, pointpos=0,
-                                            line_color=_t2_vio_line_pal[0],
-                                            fillcolor=_t2_vio_palette[0],
-                                            opacity=0.75,
-                                            hovertemplate="<b>" + _t2_xlbl + "</b><br>CR: %{y:.4f}<extra></extra>",
-                                            showlegend=True
-                                        ))
-                                    _t2_xaxis_title = _("대분류", "Main Criteria")
-                                    _t2_legend_title = _("대분류", "Main Criteria")
-
-                                # ── 선택: 중분류 ─────────────────────────────────
-                                else:
-                                    for _t2_mf, _t2_info in sub_results_storage.items():
-                                        _t2_sdf = _t2_info.get("df", None)
-                                        if _t2_sdf is None or _t2_sdf.empty or "Final_CR" not in _t2_sdf.columns:
-                                            continue
-                                        _t2_cr_vals = _t2_sdf["Final_CR"].dropna().tolist()
-                                        if len(_t2_cr_vals) < 2:
-                                            continue
-                                        _t2_xlbl = _(f"중분류({_t2_mf})", f"Sub({_t2_mf})")
-                                        _fig_t2_vio.add_trace(go.Violin(
-                                            y=_t2_cr_vals, x=[_t2_xlbl]*len(_t2_cr_vals),
-                                            name=_t2_xlbl, box_visible=True, meanline_visible=True,
-                                            points="all", jitter=0.35, pointpos=0,
-                                            line_color=_t2_vio_line_pal[_t2_ci % len(_t2_vio_line_pal)],
-                                            fillcolor=_t2_vio_palette[_t2_ci % len(_t2_vio_palette)],
-                                            opacity=0.75,
-                                            hovertemplate="<b>" + _t2_xlbl + "</b><br>CR: %{y:.4f}<extra></extra>",
-                                            showlegend=True
-                                        ))
-                                        _t2_ci += 1
-                                    _t2_xaxis_title = _("대분류 (중분류 비교 CR)", "Main Criteria (Sub-Criteria Comparison CR)")
-                                    _t2_legend_title = _("중분류", "Sub-Criteria")
-
-                                if len(_fig_t2_vio.data) == 0:
-                                    st.info(_("선택한 계층의 CR 데이터가 없거나 응답 수가 부족합니다.",
-                                              "No CR data available for the selected tier or insufficient responses."))
-                                else:
-                                    _fig_t2_vio.add_hline(
-                                        y=0.1, line_dash="dash", line_color="red",
-                                        annotation_text=_("CR 임계값 (0.1)", "CR Threshold (0.1)"),
-                                        annotation_position="top right"
-                                    )
-                                    _fig_t2_vio.update_layout(
-                                        title=_(
-                                            f"바이올린플롯 CR — {_t2_sel_tier}",
-                                            f"Violin Plot CR — {_t2_sel_tier}"
-                                        ),
-                                        xaxis_title=_t2_xaxis_title,
-                                        yaxis_title="Final_CR",
-                                        violinmode="overlay",
-                                        height=540,
-                                        legend_title_text=_t2_legend_title,
-                                        plot_bgcolor="white",
-                                        paper_bgcolor="white",
-                                        xaxis=dict(showgrid=False, tickangle=-20),
-                                        yaxis=dict(showgrid=True, gridcolor="#eeeeee", zeroline=False)
-                                    )
-                                    st.plotly_chart(_fig_t2_vio, use_container_width=True)
-                            except Exception as _e_t2_vio:
-                                st.warning(_(f"바이올린 플롯 생성 실패: {_e_t2_vio}", f"Violin plot generation failed: {_e_t2_vio}"))
-    
-                            # ── Fuzzy AHP TFN 삼각퍼지 그래프 (Tab1 결과 화면 직후) ──
-                            if ahp_method == 'fuzzy':
+                                # [바이올린 플롯] CR 분포 시각화 — 드롭다운 계층 선택
                                 st.markdown("---")
-                                st.subheader(_(" 삼각퍼지수(TFN) 가중치 분포", " Triangular Fuzzy Number (TFN) Weight Distribution"))
-                                st.caption(_("각 요인의 삼각퍼지수(L, M, U)와 비퍼지화된 Crisp 가중치를 시각화합니다.",
-                                             "Visualizes each factor's Triangular Fuzzy Numbers (L, M, U) and defuzzified Crisp weights."))
-    
-                                tfn_color_palette = [
-                                    '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
-                                    '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'
+                                st.write(_("**일관성 비율(CR) 분포 (Violin Plot)**", "**Consistency Ratio (CR) Distribution (Violin Plot)**"))
+                                st.caption(_("계층을 선택하면 해당 수준 응답자들의 CR 분포를 표시합니다. 바이올린 폭 = 밀도, 내부 박스 = 중앙값·사분위수, 점 = 개별 응답자",
+                                             "Select a tier to view respondent CR distribution. Width = density, box = median/IQR, dots = individual respondents"))
+
+                                _t2_tier_opts_ko = ["대분류 (Main)", "중분류 (Sub)"]
+                                _t2_tier_opts_en = ["Main Criteria", "Sub-Criteria"]
+                                _t2_tier_opts = _t2_tier_opts_en if is_english else _t2_tier_opts_ko
+                                _t2_sel_tier = st.selectbox(
+                                    _("📂 표시할 계층 선택", "📂 Select Tier to Display"),
+                                    options=_t2_tier_opts,
+                                    key="vio_tier_select_2tier"
+                                )
+
+                                _t2_vio_palette = [
+                                    "rgba(70,130,180,0.65)",
+                                    "rgba(205,92,92,0.65)",
+                                    "rgba(255,182,193,0.65)",
+                                    "rgba(60,179,113,0.65)",
+                                    "rgba(255,165,0,0.65)",
+                                    "rgba(147,112,219,0.65)",
+                                    "rgba(72,209,204,0.65)",
+                                    "rgba(255,215,0,0.65)",
                                 ]
-    
-                                def render_tfn_chart(tfn_Si_data, tfn_factors_data, chart_title):
-                                    fig = go.Figure()
-                                    for i, (l, m, u) in enumerate(tfn_Si_data):
-                                        color = tfn_color_palette[i % len(tfn_color_palette)]
-                                        crisp = (l * m * u) ** (1/3)
-                                        # 삼각형 채우기 (반투명)
-                                        fig.add_trace(go.Scatter(
-                                            x=[l, m, u, l],
-                                            y=[0, 1, 0, 0],
-                                            fill='toself',
-                                            fillcolor=f"rgba({int(color[1:3],16)}, {int(color[3:5],16)}, {int(color[5:7],16)}, 0.15)" if color.startswith('#') and len(color) == 7 else (color.replace(')', ', 0.15)').replace('rgb', 'rgba') if 'rgb' in color else color),
-                                            line=dict(color=color, width=2.5),
-                                            mode='lines',
-                                            name=f"{tfn_factors_data[i]}",
-                                            hovertemplate=(
-                                                f"<b>{tfn_factors_data[i]}</b><br>"
-                                                f"L={l:.4f}, M={m:.4f}, U={u:.4f}<br>"
-                                                f"Crisp={crisp:.4f}<extra></extra>"
+                                _t2_vio_line_pal = [
+                                    "#4682B4","#CD5C5C","#FFB6C1","#3CB371",
+                                    "#FFA500","#9370DB","#48D1CC","#FFD700"
+                                ]
+
+                                try:
+                                    _fig_t2_vio = go.Figure()
+                                    _t2_ci = 0
+
+                                    # ── 선택: 대분류 ─────────────────────────────────
+                                    if _t2_sel_tier == _t2_tier_opts[0]:
+                                        if not main_results_df.empty and "Final_CR" in main_results_df.columns:
+                                            _t2_main_cr = main_results_df["Final_CR"].dropna().tolist()
+                                            _t2_xlbl = _("대분류", "Main Criteria")
+                                            _fig_t2_vio.add_trace(go.Violin(
+                                                y=_t2_main_cr, x=[_t2_xlbl]*len(_t2_main_cr),
+                                                name=_t2_xlbl, box_visible=True, meanline_visible=True,
+                                                points="all", jitter=0.35, pointpos=0,
+                                                line_color=_t2_vio_line_pal[0],
+                                                fillcolor=_t2_vio_palette[0],
+                                                opacity=0.75,
+                                                hovertemplate="<b>" + _t2_xlbl + "</b><br>CR: %{y:.4f}<extra></extra>",
+                                                showlegend=True
+                                            ))
+                                        _t2_xaxis_title = _("대분류", "Main Criteria")
+                                        _t2_legend_title = _("대분류", "Main Criteria")
+
+                                    # ── 선택: 중분류 ─────────────────────────────────
+                                    else:
+                                        for _t2_mf, _t2_info in sub_results_storage.items():
+                                            _t2_sdf = _t2_info.get("df", None)
+                                            if _t2_sdf is None or _t2_sdf.empty or "Final_CR" not in _t2_sdf.columns:
+                                                continue
+                                            _t2_cr_vals = _t2_sdf["Final_CR"].dropna().tolist()
+                                            if len(_t2_cr_vals) < 2:
+                                                continue
+                                            _t2_xlbl = _(f"중분류({_t2_mf})", f"Sub({_t2_mf})")
+                                            _fig_t2_vio.add_trace(go.Violin(
+                                                y=_t2_cr_vals, x=[_t2_xlbl]*len(_t2_cr_vals),
+                                                name=_t2_xlbl, box_visible=True, meanline_visible=True,
+                                                points="all", jitter=0.35, pointpos=0,
+                                                line_color=_t2_vio_line_pal[_t2_ci % len(_t2_vio_line_pal)],
+                                                fillcolor=_t2_vio_palette[_t2_ci % len(_t2_vio_palette)],
+                                                opacity=0.75,
+                                                hovertemplate="<b>" + _t2_xlbl + "</b><br>CR: %{y:.4f}<extra></extra>",
+                                                showlegend=True
+                                            ))
+                                            _t2_ci += 1
+                                        _t2_xaxis_title = _("대분류 (중분류 비교 CR)", "Main Criteria (Sub-Criteria Comparison CR)")
+                                        _t2_legend_title = _("중분류", "Sub-Criteria")
+
+                                    if len(_fig_t2_vio.data) == 0:
+                                        st.info(_("선택한 계층의 CR 데이터가 없거나 응답 수가 부족합니다.",
+                                                  "No CR data available for the selected tier or insufficient responses."))
+                                    else:
+                                        _fig_t2_vio.add_hline(
+                                            y=0.1, line_dash="dash", line_color="red",
+                                            annotation_text=_("CR 임계값 (0.1)", "CR Threshold (0.1)"),
+                                            annotation_position="top right"
+                                        )
+                                        _fig_t2_vio.update_layout(
+                                            title=_(
+                                                f"바이올린플롯 CR — {_t2_sel_tier}",
+                                                f"Violin Plot CR — {_t2_sel_tier}"
                                             ),
-                                            showlegend=True
-                                        ))
-                                        # Crisp 가중치 수직 점선
-                                        fig.add_trace(go.Scatter(
-                                            x=[crisp, crisp],
-                                            y=[0, 0.85],
-                                            mode='lines',
-                                            line=dict(color=color, width=1.5, dash='dot'),
-                                            showlegend=False,
-                                            hoverinfo='skip'
-                                        ))
-                                        # Crisp 마커
-                                        fig.add_trace(go.Scatter(
-                                            x=[crisp],
-                                            y=[0.88],
-                                            mode='markers+text',
-                                            marker=dict(color=color, size=8, symbol='diamond'),
-                                            text=[f"{crisp:.3f}"],
-                                            textposition='top center',
-                                            textfont=dict(size=10, color=color),
-                                            showlegend=False,
-                                            hovertemplate=f"<b>{tfn_factors_data[i]}</b> Crisp={crisp:.4f}<extra></extra>"
-                                        ))
-                                    fig.update_layout(
-                                        title=dict(text=chart_title, font=dict(size=14)),
-                                        xaxis_title=_("가중치 값 (Weight Value)", "Weight Value"),
-                                        yaxis_title=_("소속도 (Membership Degree)", "Membership Degree"),
-                                        yaxis=dict(range=[-0.05, 1.25]),
-                                        height=420,
-                                        margin=dict(l=30, r=30, t=50, b=40),
-                                        hovermode="closest",
-                                        legend=dict(
-                                            orientation="h",
-                                            yanchor="bottom",
-                                            y=-0.25,
-                                            xanchor="center",
-                                            x=0.5
-                                        ),
-                                        plot_bgcolor='rgba(248,249,250,1)',
-                                        paper_bgcolor='rgba(255,255,255,1)'
-                                    )
-                                    fig.update_xaxes(gridcolor='rgba(200,200,200,0.3)', zeroline=True, zerolinecolor='rgba(150,150,150,0.5)')
-                                    fig.update_yaxes(gridcolor='rgba(200,200,200,0.3)')
-                                    return fig
+                                            xaxis_title=_t2_xaxis_title,
+                                            yaxis_title="Final_CR",
+                                            violinmode="overlay",
+                                            height=540,
+                                            legend_title_text=_t2_legend_title,
+                                            plot_bgcolor="white",
+                                            paper_bgcolor="white",
+                                            xaxis=dict(showgrid=False, tickangle=-20),
+                                            yaxis=dict(showgrid=True, gridcolor="#eeeeee", zeroline=False)
+                                        )
+                                        st.plotly_chart(_fig_t2_vio, use_container_width=True)
+                                except Exception as _e_t2_vio:
+                                    st.warning(_(f"바이올린 플롯 생성 실패: {_e_t2_vio}", f"Violin plot generation failed: {_e_t2_vio}"))
     
-                                # 1) 메인 기준 TFN 그래프
-                                if main_group_Si:
-                                    st.plotly_chart(
-                                        render_tfn_chart(main_group_Si, main_factors,
-                                            _("▶ 대분류 (Main Criteria) 삼각퍼지 분포", "▶ Main Criteria TFN Distribution")),
-                                        use_container_width=True
-                                    )
+                                # ── Fuzzy AHP TFN 삼각퍼지 그래프 (Tab1 결과 화면 직후) ──
+                                if ahp_method == 'fuzzy':
+                                    st.markdown("---")
+                                    st.subheader(_(" 삼각퍼지수(TFN) 가중치 분포", " Triangular Fuzzy Number (TFN) Weight Distribution"))
+                                    st.caption(_("각 요인의 삼각퍼지수(L, M, U)와 비퍼지화된 Crisp 가중치를 시각화합니다.",
+                                                 "Visualizes each factor's Triangular Fuzzy Numbers (L, M, U) and defuzzified Crisp weights."))
     
-                                    # TFN 수치 테이블
-                                    tfn_table_rows = []
-                                    for i, (l, m, u) in enumerate(main_group_Si):
-                                        crisp = (l * m * u) ** (1/3)
-                                        tfn_table_rows.append({
-                                            _("요인", "Factor"): main_factors[i],
-                                            "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
-                                            "Crisp Weight": crisp,
-                                            _("정규화 가중치", "Normalized Weight"): group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
-                                        })
-                                    st.dataframe(pd.DataFrame(tfn_table_rows).style.format(precision=4), use_container_width=True)
+                                    tfn_color_palette = [
+                                        '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
+                                        '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'
+                                    ]
     
-                                # 2) 세부 기준별 TFN 그래프
-                                for parent_f, sub_info in sub_results_storage.items():
-                                    if sub_info.get('group_Si'):
-                                        st.markdown("---")
+                                    def render_tfn_chart(tfn_Si_data, tfn_factors_data, chart_title):
+                                        fig = go.Figure()
+                                        for i, (l, m, u) in enumerate(tfn_Si_data):
+                                            color = tfn_color_palette[i % len(tfn_color_palette)]
+                                            crisp = (l * m * u) ** (1/3)
+                                            # 삼각형 채우기 (반투명)
+                                            fig.add_trace(go.Scatter(
+                                                x=[l, m, u, l],
+                                                y=[0, 1, 0, 0],
+                                                fill='toself',
+                                                fillcolor=f"rgba({int(color[1:3],16)}, {int(color[3:5],16)}, {int(color[5:7],16)}, 0.15)" if color.startswith('#') and len(color) == 7 else (color.replace(')', ', 0.15)').replace('rgb', 'rgba') if 'rgb' in color else color),
+                                                line=dict(color=color, width=2.5),
+                                                mode='lines',
+                                                name=f"{tfn_factors_data[i]}",
+                                                hovertemplate=(
+                                                    f"<b>{tfn_factors_data[i]}</b><br>"
+                                                    f"L={l:.4f}, M={m:.4f}, U={u:.4f}<br>"
+                                                    f"Crisp={crisp:.4f}<extra></extra>"
+                                                ),
+                                                showlegend=True
+                                            ))
+                                            # Crisp 가중치 수직 점선
+                                            fig.add_trace(go.Scatter(
+                                                x=[crisp, crisp],
+                                                y=[0, 0.85],
+                                                mode='lines',
+                                                line=dict(color=color, width=1.5, dash='dot'),
+                                                showlegend=False,
+                                                hoverinfo='skip'
+                                            ))
+                                            # Crisp 마커
+                                            fig.add_trace(go.Scatter(
+                                                x=[crisp],
+                                                y=[0.88],
+                                                mode='markers+text',
+                                                marker=dict(color=color, size=8, symbol='diamond'),
+                                                text=[f"{crisp:.3f}"],
+                                                textposition='top center',
+                                                textfont=dict(size=10, color=color),
+                                                showlegend=False,
+                                                hovertemplate=f"<b>{tfn_factors_data[i]}</b> Crisp={crisp:.4f}<extra></extra>"
+                                            ))
+                                        fig.update_layout(
+                                            title=dict(text=chart_title, font=dict(size=14)),
+                                            xaxis_title=_("가중치 값 (Weight Value)", "Weight Value"),
+                                            yaxis_title=_("소속도 (Membership Degree)", "Membership Degree"),
+                                            yaxis=dict(range=[-0.05, 1.25]),
+                                            height=420,
+                                            margin=dict(l=30, r=30, t=50, b=40),
+                                            hovermode="closest",
+                                            legend=dict(
+                                                orientation="h",
+                                                yanchor="bottom",
+                                                y=-0.25,
+                                                xanchor="center",
+                                                x=0.5
+                                            ),
+                                            plot_bgcolor='rgba(248,249,250,1)',
+                                            paper_bgcolor='rgba(255,255,255,1)'
+                                        )
+                                        fig.update_xaxes(gridcolor='rgba(200,200,200,0.3)', zeroline=True, zerolinecolor='rgba(150,150,150,0.5)')
+                                        fig.update_yaxes(gridcolor='rgba(200,200,200,0.3)')
+                                        return fig
+    
+                                    # 1) 메인 기준 TFN 그래프
+                                    if main_group_Si:
                                         st.plotly_chart(
-                                            render_tfn_chart(sub_info['group_Si'], sub_info['factors'],
-                                                _(f"▶ [{parent_f}] 세부항목 삼각퍼지 분포", f"▶ [{parent_f}] Sub-Criteria TFN Distribution")),
+                                            render_tfn_chart(main_group_Si, main_factors,
+                                                _("▶ 대분류 (Main Criteria) 삼각퍼지 분포", "▶ Main Criteria TFN Distribution")),
                                             use_container_width=True
                                         )
-                                        sub_tfn_rows = []
-                                        for i, (l, m, u) in enumerate(sub_info['group_Si']):
+    
+                                        # TFN 수치 테이블
+                                        tfn_table_rows = []
+                                        for i, (l, m, u) in enumerate(main_group_Si):
                                             crisp = (l * m * u) ** (1/3)
-                                            sub_tfn_rows.append({
-                                                _("요인", "Factor"): sub_info['factors'][i],
+                                            tfn_table_rows.append({
+                                                _("요인", "Factor"): main_factors[i],
                                                 "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
                                                 "Crisp Weight": crisp,
-                                                _("정규화 가중치", "Normalized Weight"): sub_info['weights'].iloc[i] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][i]
+                                                _("정규화 가중치", "Normalized Weight"): group_main_weights.iloc[i] if isinstance(group_main_weights, pd.Series) else group_main_weights[i]
                                             })
-                                        st.dataframe(pd.DataFrame(sub_tfn_rows).style.format(precision=4), use_container_width=True)
+                                        st.dataframe(pd.DataFrame(tfn_table_rows).style.format(precision=4), use_container_width=True)
     
-                        with tab5:
-                            st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;"> 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
-                                          '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
-                            st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary", on_click=lambda: __import__("survey_manager").log_user_action(st.session_state.get("user_id") or "Guest", "결과 엑셀 다운로드"))
-                            if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
-                                disp_radar_df = radar_indiv_df.copy()
-                                if is_english:
-                                    disp_radar_df.rename(columns={
-                                        "Type": "Group/Type",
-                                        "Factor": "Factor/Criteria",
-                                        "Global_Weight": "Global Weight"
-                                    }, inplace=True)
-                                st.dataframe(disp_radar_df.style.format(precision=4), use_container_width=True)
-                            else:
-                                st.dataframe(pd.DataFrame(), use_container_width=True)
+                                    # 2) 세부 기준별 TFN 그래프
+                                    for parent_f, sub_info in sub_results_storage.items():
+                                        if sub_info.get('group_Si'):
+                                            st.markdown("---")
+                                            st.plotly_chart(
+                                                render_tfn_chart(sub_info['group_Si'], sub_info['factors'],
+                                                    _(f"▶ [{parent_f}] 세부항목 삼각퍼지 분포", f"▶ [{parent_f}] Sub-Criteria TFN Distribution")),
+                                                use_container_width=True
+                                            )
+                                            sub_tfn_rows = []
+                                            for i, (l, m, u) in enumerate(sub_info['group_Si']):
+                                                crisp = (l * m * u) ** (1/3)
+                                                sub_tfn_rows.append({
+                                                    _("요인", "Factor"): sub_info['factors'][i],
+                                                    "L (Lower)": l, "M (Most Likely)": m, "U (Upper)": u,
+                                                    "Crisp Weight": crisp,
+                                                    _("정규화 가중치", "Normalized Weight"): sub_info['weights'].iloc[i] if isinstance(sub_info['weights'], pd.Series) else sub_info['weights'][i]
+                                                })
+                                            st.dataframe(pd.DataFrame(sub_tfn_rows).style.format(precision=4), use_container_width=True)
+    
+                            with tab5:
+                                st.markdown(_('<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;"> 주의: 분석 결과가 웹상에 영구 저장되지 않으므로, 아래 다운로드 버튼을 눌러 결과물 엑셀 파일을 컴퓨터에 반드시 저장해 주세요.</p>',
+                                              '<p style="color: red; font-weight: bold; font-size: 0.95rem; margin-bottom: 12px;">⚠️ Warning: Analysis results are not permanently stored on the web. Please make sure to click the download button below to save the Excel file to your computer.</p>'), unsafe_allow_html=True)
+                                st.download_button(_("📥 결과 파일 다운로드 (Excel)", "📥 Download Results File (Excel)"), data=output_res.getvalue(), file_name="AHP_Result.xlsx", type="primary", on_click=lambda: __import__("survey_manager").log_user_action(st.session_state.get("user_id") or "Guest", "결과 엑셀 다운로드"))
+                                if 'radar_indiv_df' in locals() and not radar_indiv_df.empty:
+                                    disp_radar_df = radar_indiv_df.copy()
+                                    if is_english:
+                                        disp_radar_df.rename(columns={
+                                            "Type": "Group/Type",
+                                            "Factor": "Factor/Criteria",
+                                            "Global_Weight": "Global Weight"
+                                        }, inplace=True)
+                                    st.dataframe(disp_radar_df.style.format(precision=4), use_container_width=True)
+                                else:
+                                    st.dataframe(pd.DataFrame(), use_container_width=True)
     
                     except Exception as e:
                         import traceback
