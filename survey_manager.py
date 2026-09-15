@@ -205,6 +205,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["Description", description],
         ["Admin_Email", admin_email],
         ["AHP_Model_JSON", json.dumps(ahp_model, ensure_ascii=False)],
+        ["Tier_Level", "2"], # 2계층 식별 플래그
         ["Scale_Type", scale_type],
         ["Demographics", json.dumps(demographics, ensure_ascii=False)],
         ["Definitions", json.dumps(definition_map, ensure_ascii=False)],
@@ -215,7 +216,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["Visit_Count", "0"],
         ["Abandoned_CR_Count", "0"]
     ]
-    meta_sheet.update(range_name="A1:B14", values=metadata)
+    meta_sheet.update(range_name="A1:B15", values=metadata)
     
     # 1. Raw_Data 헤더 구성: ID, Type, (Pairwise Combination Fields...), 제출시간
 
