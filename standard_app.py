@@ -3485,10 +3485,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
         else:
             combinations = generate_pairwise_combinations(ahp_model)
             
-        for comb in combinations:
-            for left_f, right_f in comb["pairs"]:
+        # 위젯 키에는 그룹/쌍의 위치를 포함해야 합니다. 같은 요인명이
+        # 서로 다른 부모 그룹에 반복되면 요인명만으로 만든 키가 충돌합니다.
+        for comb_idx, comb in enumerate(combinations):
+            for pair_idx, (left_f, right_f) in enumerate(comb["pairs"]):
                 pair_key = f"{left_f}_{right_f}"
-                st.session_state[f"pair_ans_{pair_key.replace(' ', '_')}"] = None
+                widget_key = f"pair_ans_{comb_idx}_{pair_idx}_{pair_key.replace(' ', '_')}"
+                if widget_key not in st.session_state:
+                    st.session_state[widget_key] = None
     
     # 단일 스크롤 폼 생성
     # respondent_survey_form context split - sections 1,2,3 are now outside the form
@@ -3741,7 +3745,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         
         with st.container(key="ahp_survey_matrix"):
             comp_idx = 1
-            for comb in combinations:
+            for comb_idx, comb in enumerate(combinations):
                 parent_trans = translate_factor_if_default(comb['parent'])
                 parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + (
                     _((f"[{parent_trans}] 하위 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
@@ -3937,9 +3941,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 survey_container.markdown(header_html, unsafe_allow_html=True)
 
                 # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
-                for left_f, right_f in comb["pairs"]:
+                for pair_idx, (left_f, right_f) in enumerate(comb["pairs"]):
                     pair_key = f"{left_f}_{right_f}"
-                    clean_id = pair_key.replace(" ", "_")
+                    # comb_idx/pair_idx를 포함해 동일한 요인명이 여러 그룹에
+                    # 존재해도 Streamlit 위젯 키가 절대 중복되지 않도록 합니다.
+                    clean_id = f"{comb_idx}_{pair_idx}_{pair_key.replace(' ', '_')}"
+                    ans_key = f"pair_ans_{clean_id}"
                     survey_container.markdown(f"<div id='anchor_{clean_id}'></div>", unsafe_allow_html=True)
                 
                     row_cols = survey_container.columns([15, 70, 15])
@@ -3972,9 +3979,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 group_factors = comb["factors"]
                                 group_answers = {}
                                 other_missing = False
-                                for p_left, p_right in comb["pairs"]:
+                                for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
                                     k = f"{p_left}_{p_right}"
-                                    val = st.session_state.get(f"pair_ans_{k.replace(' ', '_')}", None)
+                                    p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{k.replace(' ', '_')}"
+                                    val = st.session_state.get(p_widget_key, None)
                                     group_answers[k] = val
                                     if k != pair_key and val is None:
                                         other_missing = True
@@ -4000,7 +4008,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        ans_key = f"pair_ans_{pair_key.replace(' ', '_')}"
                         if should_show_guide and len(comb["factors"]) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
