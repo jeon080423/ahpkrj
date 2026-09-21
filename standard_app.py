@@ -1633,7 +1633,7 @@ def send_foreign_access_email(ip, country, region, kst_time):
 접속 지역: {region}
 접속 IP: {ip}
 """
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -1681,7 +1681,7 @@ def send_application_email(user_email):
     # [수정] 대한민국 시간 기준 신청일 설정
     kst_today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
     body = f"사용자가 정식 권한 신청.\nID: {user_email}\n신청일: {kst_today}"
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -1699,7 +1699,7 @@ def send_conversion_request_email(user_email):
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식사용자 전환 요청: {user_email}"
     body = f"임시 사용자가 정식사용자로 전환 요청 했습니다\nID: {user_email}"
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -1725,7 +1725,7 @@ def send_refund_request_email(request_type, user_email, opinion):
         f"■ 서비스 개선 의견:\n{opinion}\n\n"
         f"■ 신청 시간 (KST): {kst_now.strftime('%Y-%m-%d %H:%M:%S')}"
     )
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -1781,12 +1781,12 @@ def send_consulting_email(name, company, email, phone, inquiry_type, details, up
             msg.attach(part)
         except Exception as file_err:
             print(f"Error attaching file: {file_err}")
-            msg = MIMEText(body)
+            msg = MIMEText(body, 'plain', 'utf-8')
             msg['Subject'] = subject
             msg['From'] = sender_email
             msg['To'] = recipient_email
     else:
-        msg = MIMEText(body)
+        msg = MIMEText(body, 'plain', 'utf-8')
         msg['Subject'] = subject
         msg['From'] = sender_email
         msg['To'] = recipient_email
@@ -2005,7 +2005,7 @@ def send_approval_email(user_email):
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -2201,7 +2201,7 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
 - 신청 요금제: {plan_name}
 - 신청 시간: {datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m-%d %H:%M:%S')} (KST)
 """
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -2227,7 +2227,7 @@ ID: {user_email}
 로그인 후 즉시 비밀번호를 변경하시기를 권장합니다.
 감사합니다.
 """
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
