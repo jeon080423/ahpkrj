@@ -21,7 +21,7 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
 - 신청 요금제: {plan_name}
 - 신청 시간: {datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m-%d %H:%M:%S')} (KST)
 """
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -47,7 +47,7 @@ ID: {user_email}
 로그인 후 즉시 비밀번호를 변경하시기를 권장합니다.
 감사합니다.
 """
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
@@ -66,7 +66,7 @@ def send_approval_email(user_email):
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
-    msg = MIMEText(body)
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = recipient_email
