@@ -1795,10 +1795,10 @@ def send_consulting_email(name, company, email, phone, inquiry_type, details, up
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(sender_email, password)
             server.sendmail(sender_email, recipient_email, msg.as_string())
-        return True
+        return True, ""
     except Exception as e:
         print(f"send_consulting_email Error: {e}")
-        return False
+        return False, str(e)
 
 @st.dialog(_("환불 및 취소 신청서", "Refund & Cancellation Request Form"))
 def show_refund_dialog():
@@ -11108,7 +11108,7 @@ Thank you deeply for your valuable participation.
                     st.error(_("상세 문의 내용을 입력해 주세요.", "Please enter the detailed inquiry."))
                 else:
                     with st.spinner(_("문의 내용을 전송하는 중...", "Submitting inquiry...")):
-                        success = send_consulting_email(
+                        success, err_msg = send_consulting_email(
                             name=c_name.strip(),
                             company=c_company.strip(),
                             email=c_email.strip(),
@@ -11121,7 +11121,7 @@ Thank you deeply for your valuable participation.
                             st.success(_("문의 신청이 성공적으로 접수되었습니다. 담당자가 확인 후 신속하게 연락해 드리겠습니다.",
                                          "Your inquiry has been submitted successfully. We will get back to you shortly."))
                         else:
-                            st.error(_("문의 메일 전송 중 오류가 발생했습니다. 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.",
-                                       "An error occurred while sending the email. Please contact jeon080423@gmail.com directly."))
+                            st.error(_(f"문의 메일 전송 중 오류가 발생했습니다. (사유: {err_msg}) 관리자에게 이메일(jeon080423@gmail.com)로 직접 연락해 주세요.",
+                                       f"An error occurred while sending the email. (Reason: {err_msg}) Please contact jeon080423@gmail.com directly."))
 
 
