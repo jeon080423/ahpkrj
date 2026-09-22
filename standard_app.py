@@ -9731,10 +9731,10 @@ Thank you deeply for your valuable participation.
                     render_section_header(_("섹션 2: 설문 조사 설명 이미지 삽입", "Section 2: Survey Description Image Insertion"))
                     st.markdown(_("설문 응답자에게 보여줄 설명 이미지(예: 구조도, 안내문 등)가 있다면 아래에 업로드해 주세요. (선택사항)", "If you have a description image (e.g., structure diagram, guide) to show to the survey respondents, please upload it below. (Optional)"))
                     
-                    survey_image_file = st.file_uploader(_("설문 설명 이미지 업로드 (png, jpg, jpeg)", "Upload Survey Description Image (png, jpg, jpeg)"), type=["png", "jpg", "jpeg"])
+                    survey_image_file = st.file_uploader(_("설문 설명 이미지 업로드 (png, jpg, jpeg)", "Upload Survey Description Image (png, jpg, jpeg)"), type=["png", "jpg", "jpeg"], key="survey_image_uploader")
                     
                     if survey_image_file is not None:
-                        st.session_state.survey_image_data = survey_image_file.read()
+                        st.session_state.survey_image_data = survey_image_file.getvalue()
                         st.session_state.survey_image_mime = survey_image_file.type
                         import base64
                         encoded = base64.b64encode(st.session_state.survey_image_data).decode()
