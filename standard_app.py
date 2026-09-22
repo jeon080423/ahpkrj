@@ -568,22 +568,27 @@ div.stButton > button[data-testid="stBaseButton-primary"]:hover {
     border-color: #172554 !important;
 }
 
-/* --- 입력 필드 고급 스타일링 --- */
-/* --- 입력 필드 테두리 완전 제거 (미니멀 모던 플랫) --- */
+/* --- 입력 필드 테두리 완전 제거 및 배경색 통일 (미니멀 모던 플랫) --- */
 div.stTextInput > div,
 div.stTextInput div[data-baseweb="base-input"],
 div.stTextInput div[data-baseweb="input"],
-div.stTextInput > div > div {
+div.stTextInput > div > div,
+div.stTextArea > div,
+div.stTextArea div[data-baseweb="base-input"],
+div.stTextArea div[data-baseweb="input"],
+div.stTextArea > div > div {
     border: none !important;
     border-color: transparent !important;
     border-width: 0 !important;
     box-shadow: none !important;
     outline: none !important;
     border-radius: 6px !important;
-    background-color: #ffffff !important;
+    background-color: #f0f2f6 !important; /* 설문 설명 이미지 회색 배경과 동일 */
 }
 div.stTextInput > div > div > input,
-div.stTextInput input {
+div.stTextInput input,
+div.stTextArea > div > div > textarea,
+div.stTextArea textarea {
     border: none !important;
     border-color: transparent !important;
     border-width: 0 !important;
@@ -594,8 +599,11 @@ div.stTextInput input {
     outline: none !important;
 }
 div.stTextInput div[data-baseweb="base-input"]:focus-within,
-div.stTextInput div[data-baseweb="input"]:focus-within {
+div.stTextInput div[data-baseweb="input"]:focus-within,
+div.stTextArea div[data-baseweb="base-input"]:focus-within,
+div.stTextArea div[data-baseweb="input"]:focus-within {
     border: none !important;
+    background-color: #ffffff !important;
     box-shadow: 0 0 0 1.5px rgba(37, 99, 235, 0.45) !important;
 }
 
@@ -981,17 +989,7 @@ div[data-testid="stTabs"] div[data-testid="stTabs"] div[data-baseweb="tab-highli
     display: none !important;
 }
 
-/* 입력 필드 (섹션 3, 4 등) 연한 회색 배경 적용 */
-div[data-testid="stTextInput"] input, 
-div[data-testid="stTextArea"] textarea {
-    background-color: #f1f5f9 !important;
-    border: 1px solid #cbd5e1 !important;
-}
-div[data-testid="stTextInput"] input:focus, 
-div[data-testid="stTextArea"] textarea:focus {
-    background-color: #ffffff !important;
-    border: 1px solid #3b82f6 !important;
-}
+
 </style>
 """
 st.markdown(global_ahp_css, unsafe_allow_html=True)
