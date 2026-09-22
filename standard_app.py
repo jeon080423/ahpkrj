@@ -7176,50 +7176,72 @@ with contextlib.nullcontext():
                                             for j in range(i + 1, len(main_criteria)):
                                                 main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
                                         
-                                        # [수정] main_pairs가 raw_df에 없으면 컬럼에서 직접 추론 (예: 요인명에 공백/특수문자 차이)
-                                        matched_pairs = [p for p in main_pairs if p in raw_df.columns]
-                                        if not matched_pairs:
-                                            # Raw_Data 컬럼 중 'ID','Type','제출시간','답례품_연락처' 외의 컬럼을 비교쌍으로 간주
-                                            _skip = {"id", "type", "제출시간", "답례품_연락처"}
-                                            _all_raw_cols = [c for c in raw_df.columns if c.strip().lower() not in _skip and c.strip()]
-                                            _n_main = len(main_criteria)
-                                            _expected_pairs = _n_main * (_n_main - 1) // 2
-                                            # 컬럼 수가 예상 쌍 수와 일치하면 raw_df 컬럼을 직접 사용
-                                            matched_pairs = _all_raw_cols[:_expected_pairs]
+                                        # [수정] 위치 기반 컬럼 파싱 - 이름 불일치(공백·인코딩 차이)에 강인
+                                        _meta_skip = {"id", "type", "제출시간", "답례품_연락처"}
+                                        # raw_df에서 메타 컬럼 제외한 모든 비교 컬럼(순서 유지)
+                                        _all_comp_cols = [c for c in raw_df.columns
+                                                          if c.strip().lower() not in _meta_skip and c.strip()]
                                         
-                                        main_cols = [c for c in base_cols if c in raw_df.columns] + matched_pairs
+                                        # 대분류 쌍 수 = n*(n-1)/2
+                                        _n_main = len(main_criteria)
+                                        _n_main_pairs = _n_main * (_n_main - 1) // 2
+                                        
+                                        # 위치 기반으로 대분류 비교 컬럼 추출
+                                        _main_comp_cols = _all_comp_cols[:_n_main_pairs]
+                                        main_cols = [c for c in base_cols if c in raw_df.columns] + _main_comp_cols
+                                        
+                                        # df_main 컬럼명을 표준화: 요인명 기반으로 재명명
+                                        _df_main = raw_df[main_cols].copy()
+                                        if len(_main_comp_cols) == _n_main_pairs and _n_main_pairs > 0:
+                                            _col_rename = {_main_comp_cols[k]: main_pairs[k]
+                                                           for k in range(len(_main_comp_cols))
+                                                           if k < len(main_pairs)}
+                                            _df_main = _df_main.rename(columns=_col_rename)
+                                        st.session_state["ahp_df_main"] = _df_main
                                     
-                                        st.session_state["ahp_df_main"] = raw_df[main_cols].copy()
-                                    
+                                        # 중분류 데이터 위치 기반 파싱
                                         st.session_state["ahp_sub_dfs"] = {}
                                         sub_criteria_map = ahp_model.get("subs", {})
-                                        for main_c, subs in sub_criteria_map.items():
-                                            subs = [s.strip() for s in subs]
+                                        _col_pos = _n_main_pairs  # 대분류 쌍 다음부터 시작
+                                        for main_c in main_criteria:  # main_criteria 순서 유지
+                                            subs = [s.strip() for s in sub_criteria_map.get(main_c, [])]
                                             if len(subs) >= 2:
-                                                sub_pairs = []
-                                                for i in range(len(subs)):
-                                                    for j in range(i + 1, len(subs)):
-                                                        sub_pairs.append(f"{subs[i]}_{subs[j]}")
-                                                matched_sub_pairs = [p for p in sub_pairs if p in raw_df.columns]
-                                                if matched_sub_pairs:
-                                                    sub_cols = [c for c in base_cols if c in raw_df.columns] + matched_sub_pairs
-                                                    st.session_state["ahp_sub_dfs"][main_c.strip()] = raw_df[sub_cols].copy()
+                                                _n_sub_pairs = len(subs) * (len(subs) - 1) // 2
+                                                _sub_comp_cols = _all_comp_cols[_col_pos:_col_pos + _n_sub_pairs]
+                                                _col_pos += _n_sub_pairs
+                                                
+                                                # 표준 컬럼명으로 재명명
+                                                _sub_pairs_std = [f"{subs[i]}_{subs[j]}"
+                                                                   for i in range(len(subs))
+                                                                   for j in range(i + 1, len(subs))]
+                                                _df_sub = raw_df[[c for c in base_cols if c in raw_df.columns] + _sub_comp_cols].copy()
+                                                _sub_rename = {_sub_comp_cols[k]: _sub_pairs_std[k]
+                                                               for k in range(min(len(_sub_comp_cols), len(_sub_pairs_std)))}
+                                                _df_sub = _df_sub.rename(columns=_sub_rename)
+                                                st.session_state["ahp_sub_dfs"][main_c] = _df_sub
                                             
                                         # [신규] 3계층 모델인 경우 소분류(sub_subs) 데이터프레임 파싱
                                         tier_level = int(survey_meta.get("Tier_Level", 2))
                                         st.session_state["ahp_sub_sub_dfs"] = {}
                                         if tier_level == 3:
                                             sub_sub_map = ahp_model.get("sub_subs", {})
-                                            for main_c, subs in sub_criteria_map.items():
+                                            for main_c in main_criteria:
+                                                subs = [s.strip() for s in sub_criteria_map.get(main_c, [])]
                                                 for sub_c in subs:
-                                                    sub_subs = sub_sub_map.get(sub_c, [])
+                                                    sub_subs = [s.strip() for s in sub_sub_map.get(sub_c, [])]
                                                     if len(sub_subs) >= 2:
-                                                        sub_sub_pairs = []
-                                                        for i in range(len(sub_subs)):
-                                                            for j in range(i + 1, len(sub_subs)):
-                                                                sub_sub_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
-                                                        ss_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_sub_pairs if p in raw_df.columns]
-                                                        st.session_state["ahp_sub_sub_dfs"][sub_c] = raw_df[ss_cols].copy()
+                                                        _n_ss_pairs = len(sub_subs) * (len(sub_subs) - 1) // 2
+                                                        _ss_comp_cols = _all_comp_cols[_col_pos:_col_pos + _n_ss_pairs]
+                                                        _col_pos += _n_ss_pairs
+                                                        _ss_pairs_std = [f"{sub_subs[i]}_{sub_subs[j]}"
+                                                                          for i in range(len(sub_subs))
+                                                                          for j in range(i + 1, len(sub_subs))]
+                                                        _df_ss = raw_df[[c for c in base_cols if c in raw_df.columns] + _ss_comp_cols].copy()
+                                                        _ss_rename = {_ss_comp_cols[k]: _ss_pairs_std[k]
+                                                                       for k in range(min(len(_ss_comp_cols), len(_ss_pairs_std)))}
+                                                        _df_ss = _df_ss.rename(columns=_ss_rename)
+                                                        st.session_state["ahp_sub_sub_dfs"][sub_c] = _df_ss
+
 
                                         sheet_names_list = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
                                         if tier_level == 3:
