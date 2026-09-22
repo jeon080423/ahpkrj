@@ -980,6 +980,18 @@ div[data-testid="stTabs"] div[data-testid="stTabs"] button[data-baseweb="tab"][a
 div[data-testid="stTabs"] div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
     display: none !important;
 }
+
+/* 입력 필드 (섹션 3, 4 등) 연한 회색 배경 적용 */
+div[data-testid="stTextInput"] input, 
+div[data-testid="stTextArea"] textarea {
+    background-color: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+div[data-testid="stTextInput"] input:focus, 
+div[data-testid="stTextArea"] textarea:focus {
+    background-color: #ffffff !important;
+    border: 1px solid #3b82f6 !important;
+}
 </style>
 """
 st.markdown(global_ahp_css, unsafe_allow_html=True)
