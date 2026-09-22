@@ -10296,6 +10296,7 @@ Thank you deeply for your valuable participation.
                             _s_sheet_id = st.session_state.editing_survey_id
                             with st.spinner(_("저장 중...", "Saving...")):
                                 try:
+                                    import sqlite3
                                     # 이미지 보존 저장
                                     _s_img = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
                                     _s_mime = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
