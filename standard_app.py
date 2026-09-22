@@ -9890,9 +9890,19 @@ Thank you deeply for your valuable participation.
                     render_section_header(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
                     st.info(_("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.", "Please provide detailed descriptions so respondents can intuitively understand each criteria concept."))
                     definitions_map = {}
+                    # 대분류 (최상위) 설명 입력 추가
+                    st.markdown(_("##### 대분류(최상위 요인) 상세 설명", "##### Main Criteria Detailed Description"))
+                    global_main_def = st.session_state.get("edit_definitions", {}).get("대분류_전체설명", "")
+                    definitions_map["대분류_전체설명"] = st.text_area(
+                        _("👉 대분류 요인의 전체적인 설명 입력", "👉 Enter overall description for Main Criteria"),
+                        value=global_main_def,
+                        key="def_global_main"
+                    )
+                    st.write("")
+
                     for i, mc in enumerate(main_list):
-                        # 대분류명 파란색 볼드 및 이모티콘을 이용해 대조 설정
-                        st.markdown(_(f"####  :blue[**대분류: {mc}**]", f"####  :blue[**Main Criteria: {mc}**]"))
+                        # 대분류: -> 중분류: 로 변경
+                        st.markdown(_(f"####  :blue[**중분류: {mc}**]", f"####  :blue[**Sub Criteria: {mc}**]"))
                         default_main_def = ""
                         if mc in ["기술 요인", "Technological"]: default_main_def = _("협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인", "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.")
                         elif mc in ["조직 요인", "Organizational"]: default_main_def = _("협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인", "Factors related to the internal capabilities of the organization, top management support, financial and training status.")
@@ -9925,7 +9935,7 @@ Thank you deeply for your valuable participation.
                                 elif sc in ["정부지원", "Gov Support"]: default_def = _("협동로봇 도입을 활성화하기 위한 정부의 재정 지원 및 보조금 혜택 정도", "Degree of government financial support and subsidy benefits to promote the adoption of collaborative robots.")
                                 elif sc in ["경쟁압력", "Competitive Pressure"]: default_def = _("동종 업계 또는 경쟁사의 협동로봇 도입에 따른 경쟁적 압박 정도", "Degree of competitive pressure due to the adoption of collaborative robots by peers or competitors.")
                                 elif sc in ["인력난", "Labor Shortage"]: default_def = _("제조 현장의 구인난 및 생산 인력 수급의 어려움 수준", "Level of difficulty in finding labor and supplying production personnel at the manufacturing site.")
-                                elif sc in ["외부지원", "External Support"]: default_def = _("로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적/교육적 지원", "Technical/educational support from external consulting, research institutes, etc., other than the robot supplier.")
+                                elif sc in ["외부지원", "External Support"]: default_def = _("로봇 공급사 외의 외부 컨설팅, 연구기관 등의 기술적 지원", "Technical support from external consulting, research institutes, etc., other than the robot supplier.")
                                 elif sc in ["경영진의 혁신성", "Management Innovativeness"]: default_def = _("새로운 제조 기술 및 로봇 도입에 대한 최고경영자의 적극적인 의지", "The top management's active willingness to adopt new manufacturing technologies and robots.")
                                 elif sc in ["변화수용태도", "Change Acceptance"]: default_def = _("신규 장비 및 작업 프로세스 변화에 대한 구성원들의 수용 및 협조 태도", "Members' acceptance and cooperative attitude towards changes in new equipment and work processes.")
                                 elif sc in ["스마트팩토리수준", "Smart Factory Level"]: default_def = _("공장 내 디지털화, 정보시스템(MES 등) 및 자동화 기술의 현재 구축 수준", "Current level of implementation of digitalization, information systems (MES, etc.), and automation technology in the factory.")
@@ -9936,7 +9946,7 @@ Thank you deeply for your valuable participation.
                                 sub_val_to_use = translate_definition_if_default(sc, sub_val_to_use)
 
                                 definitions_map[sc] = st.text_input(
-                                    _(f"ㄴ 중분류 [{sc}] 설명 입력", f"👉 Enter description for sub-criteria [{sc}]"),
+                                    _(f"ㄴ 소분류 [{sc}] 설명 입력", f"👉 Enter description for sub-sub-criteria [{sc}]"),
                                     value=sub_val_to_use,
                                     key=f"def_sub_{mc}_{sc}_{j}"
                                 )
