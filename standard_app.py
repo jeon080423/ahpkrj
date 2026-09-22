@@ -7298,6 +7298,7 @@ with contextlib.nullcontext():
 
                             if not success_v3:
                                 st.error(msg_v3)
+                                tab1_main_col.__exit__(None, None, None)
                                 st.stop()
                             
                             if st.session_state.user_role == 'official':
@@ -7737,6 +7738,7 @@ with contextlib.nullcontext():
                                         2. Verify that pair-wise comparison data is correctly input after the 'ID' and 'Type' columns.
                                         3. If empty rows are included, delete them and try again.
                                         """))
+                                    tab1_main_col.__exit__(None, None, None)
                                     st.stop()
     
                                 # [방어 코드] 메인 결과 충분성 체크
@@ -7758,6 +7760,7 @@ with contextlib.nullcontext():
                                         2. Increase the **'Correction Intensity (Learning Rate)'** to 0.7 or higher.
                                         3. Ensure **'Max Correction Iterations'** is set to 500.
                                         """))
+                                    tab1_main_col.__exit__(None, None, None)
                                     st.stop()
     
                                 # --- Uploaded Data Matrix for CR Distortion Verification ---
@@ -7852,6 +7855,7 @@ with contextlib.nullcontext():
                                                 2. If factor names contain underscores (`_`), replace them with spaces or other separators.
                                                 3. Ensure sub-sheet names exactly match the factor names extracted from the main sheet columns.
                                                 """))
+                                            tab1_main_col.__exit__(None, None, None)
                                             st.stop()
                                 
                                         try:
@@ -7907,6 +7911,7 @@ with contextlib.nullcontext():
                                                 1. Check if there are empty cells or text mixed in the data of the detailed sheet.
                                                 2. Try analyzing again with a higher CR threshold.
                                                 """))
+                                            tab1_main_col.__exit__(None, None, None)
                                             st.stop()
     
                                 # 분석 헤더 윗쪽에 제외된 사례수 표시
@@ -8974,6 +8979,7 @@ with contextlib.nullcontext():
                         st.info(_(f"상세 에러 내용: {e}", f"Detailed error: {e}"))
                         with st.expander(_("🔍 상세 스택 트레이스", "🔍 Detailed Stack Trace")):
                             st.code(traceback.format_exc())
+                        tab1_main_col.__exit__(None, None, None)
                         st.stop()
                 else:
                     st.warning(message)
