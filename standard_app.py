@@ -3767,15 +3767,54 @@ if "preview_id" in q_params or "survey_id" in q_params:
             comp_idx = 1
             for comb_idx, comb in enumerate(combinations):
                 parent_trans = translate_factor_if_default(comb['parent'])
-                parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + (
-                    _((f"[{parent_trans}] 하위 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
-                    if comb['type'] == 'sub'
-                    else _("대분류(핵심) 요인 비교", "Main Criteria (Core) Comparison")
-                )
+                if comb['type'] == 'sub_sub':
+                    parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(소분류) 요인 비교"), f"Sub-sub-criteria Comparison under [{parent_trans}]")
+                elif comb['type'] == 'sub':
+                    parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(중분류) 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
+                else:
+                    parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _("대분류(핵심) 요인 비교", "Main Criteria (Core) Comparison")
                 st.markdown(f"#### {parent_lbl}")
                 
                 # [수정] 평가 요인 정의 및 설명을 각 척도 평가 바로 위쪽으로 이동
-                if comb['type'] == 'sub':
+                if comb['type'] == 'sub_sub':
+                    sc_factor = comb['parent']
+                    palette = PASTEL_PALETTES[1 % len(PASTEL_PALETTES)] # 중분류 느낌 색상
+                    bg = palette["bg"]
+                    text_color = palette["text"]
+                    border = palette["border"]
+                    
+                    sc_desc = translate_definition_if_default(sc_factor, definitions.get(sc_factor, "")) if definitions else ""
+                    sub_subs = ahp_model.get("sub_subs", {}).get(sc_factor, [])
+                    ssc_rows_html = ""
+                    if definitions:
+                        for ssc in sub_subs:
+                            ssc_desc = translate_definition_if_default(ssc, definitions.get(ssc, ""))
+                            ssc_trans = translate_factor_if_default(ssc)
+                            if ssc_desc:
+                                ssc_rows_html += f"""
+                                <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
+                                    <span style="color: {text_color}; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid {border}; padding-right: 8px; display: inline-block;">{ssc_trans}</span>
+                                    <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{ssc_desc}</span>
+                                </div>
+                                """
+                    
+                    sc_factor_trans = translate_factor_if_default(sc_factor)
+                    if sc_desc or ssc_rows_html:
+                        sc_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{sc_desc}</p>' if sc_desc else ""
+                        ssc_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{ssc_rows_html}</div>' if ssc_rows_html else ""
+                        
+                        card_html = f"""
+                        <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                                {sc_factor_trans}
+                            </h4>
+                            {sc_desc_html}
+                            {ssc_container_html}
+                        </div>
+                        """
+                        st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
+                
+                elif comb['type'] == 'sub':
                     # 해당 대분류(parent) 카드 출력
                     main_factor = comb['parent']
                     main_criteria = ahp_model.get("main", [])
@@ -9897,19 +9936,10 @@ Thank you deeply for your valuable participation.
                     render_section_header(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
                     st.info(_("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.", "Please provide detailed descriptions so respondents can intuitively understand each criteria concept."))
                     definitions_map = {}
-                    # 대분류 (최상위) 설명 입력 추가
-                    st.markdown(_("##### 대분류(최상위 요인) 상세 설명", "##### Main Criteria Detailed Description"))
-                    global_main_def = st.session_state.get("edit_definitions", {}).get("대분류_전체설명", "")
-                    definitions_map["대분류_전체설명"] = st.text_area(
-                        _("👉 대분류 요인의 전체적인 설명 입력", "👉 Enter overall description for Main Criteria"),
-                        value=global_main_def,
-                        key="def_global_main"
-                    )
-                    st.write("")
 
                     for i, mc in enumerate(main_list):
-                        # 대분류: -> 중분류: 로 변경
-                        st.markdown(_(f"####  :blue[**중분류: {mc}**]", f"####  :blue[**Sub Criteria: {mc}**]"))
+                        # 대분류명
+                        st.markdown(_(f"####  :blue[**대분류: {mc}**]", f"####  :blue[**Main Criteria: {mc}**]"))
                         default_main_def = ""
                         if mc in ["기술 요인", "Technological"]: default_main_def = _("협동로봇 도입 시 기술적 성능, 호환성, 안전성 및 기술 지원 등 기술 측면의 요인", "Factors related to the technological aspect such as technical performance, compatibility, safety, and technical support.")
                         elif mc in ["조직 요인", "Organizational"]: default_main_def = _("협동로봇 도입과 관련된 조직 내부의 역량, 경영진 지원, 재무 및 교육 상태 요인", "Factors related to the internal capabilities of the organization, top management support, financial and training status.")
@@ -9929,6 +9959,13 @@ Thank you deeply for your valuable participation.
                         # 중분류들은 연관 관계를 묶을 수 있도록 시각적으로 구분된 테두리 컨테이너 안에 배치
                         with st.container(border=True):
                             for j, sc in enumerate(model_structure["subs"].get(mc, [])):
+                                # 3계층일 때는 중분류 헤더를 넣어서 시각적 구분 강화
+                                if tier_level == 3:
+                                    st.markdown(_(f"#####  :blue[**중분류: {sc}**]", f"#####  :blue[**Sub Criteria: {sc}**]"))
+                                    sc_label = _(f"👉 [{sc}] 중분류의 전체적인 설명 입력", f"👉 Enter overall description for [{sc}]")
+                                else:
+                                    sc_label = _(f"ㄴ 중분류 [{sc}] 설명 입력", f"👉 Enter description for sub-criteria [{sc}]")
+
                                 # 기본 양승훈 설문 정의 적용
                                 default_def = ""
                                 if sc in ["상대적이점", "Relative Advantage"]: default_def = _("도입대상 협동로봇간의 상대적 이점", "Relative advantage among the collaborative robots targeted for adoption.")
@@ -9953,10 +9990,24 @@ Thank you deeply for your valuable participation.
                                 sub_val_to_use = translate_definition_if_default(sc, sub_val_to_use)
 
                                 definitions_map[sc] = st.text_input(
-                                    _(f"ㄴ 소분류 [{sc}] 설명 입력", f"👉 Enter description for sub-sub-criteria [{sc}]"),
+                                    sc_label,
                                     value=sub_val_to_use,
                                     key=f"def_sub_{mc}_{sc}_{j}"
                                 )
+
+                                # 3계층이면 소분류 루프 추가
+                                if tier_level == 3:
+                                    sub_subs = model_structure.get("sub_subs", {}).get(sc, [])
+                                    if sub_subs:
+                                        with st.container(border=True):
+                                            for k, ssc in enumerate(sub_subs):
+                                                edit_ssc_def_val = st.session_state.get("edit_definitions", {}).get(ssc)
+                                                ssc_val_to_use = edit_ssc_def_val if edit_ssc_def_val is not None else _(f"{ssc}에 대한 정의입니다.", f"Definition for {ssc}.")
+                                                definitions_map[ssc] = st.text_input(
+                                                    _(f"ㄴ 소분류 [{ssc}] 설명 입력", f"👉 Enter description for sub-sub-criteria [{ssc}]"),
+                                                    value=ssc_val_to_use,
+                                                    key=f"def_ssc_{sc}_{ssc}_{k}"
+                                                )
                         st.write("") # 섹션 간 시각적 여백 추가
 
 
