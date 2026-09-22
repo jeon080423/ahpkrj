@@ -1,0 +1,19 @@
+# Python Cache
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# Temporary/Scratch Files
+scratch*.py
+temp*.py
+test*.py
+scratch/
+patch*.py
+*backup.png
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
