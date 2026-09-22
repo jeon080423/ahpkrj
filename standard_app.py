@@ -3642,6 +3642,19 @@ if "preview_id" in q_params or "survey_id" in q_params:
     main_criteria = ahp_model.get("main", [])
     
     with st.container():
+        # [신규] 설문 설명 이미지 표시 (존재할 경우)
+        try:
+            conn_img = sqlite3.connect('users.db')
+            c_img = conn_img.cursor()
+            c_img.execute("SELECT image_data FROM survey_images WHERE survey_id=?", (survey_id_param,))
+            img_row = c_img.fetchone()
+            conn_img.close()
+            if img_row and img_row[0]:
+                st.image(img_row[0], use_container_width=True)
+                st.write("")
+        except Exception:
+            pass
+
         # 4. AHP 쌍대비교 문항 생성
         st.subheader(f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)"))
         ahp_section_prefix = f"{section_num}"
@@ -9377,6 +9390,23 @@ with contextlib.nullcontext():
                             st.session_state.edit_title = meta.get("Title", "")
                             st.session_state.edit_desc = meta.get("Description", "")
                             st.session_state.edit_admin_email = meta.get("Admin_Email", "")
+                            
+                            try:
+                                import sqlite3
+                                conn_img = sqlite3.connect('users.db')
+                                c_img = conn_img.cursor()
+                                c_img.execute("SELECT image_data, mime_type FROM survey_images WHERE survey_id=?", (sel_id,))
+                                img_row = c_img.fetchone()
+                                conn_img.close()
+                                if img_row and img_row[0]:
+                                    st.session_state.edit_survey_image = img_row[0]
+                                    st.session_state.edit_survey_image_mime = img_row[1]
+                                else:
+                                    st.session_state.pop("edit_survey_image", None)
+                                    st.session_state.pop("edit_survey_image_mime", None)
+                            except Exception:
+                                pass
+
 
                             demo = meta.get("Demographics", {})
                             st.session_state.edit_type_question = demo.get("type_question", "")
@@ -9690,8 +9720,27 @@ Thank you deeply for your valuable participation.
 
 
                 with st.container():
-                    # 섹션 2: AHP 모델 계층구조 입력 폼
-                    render_section_header(_("섹션 2: AHP 요인 계층구조 및 문항 설정", "Section 2: AHP Criteria Hierarchy & Question Setup"))
+                    # 섹션 2: 설문 조사 설명 이미지 삽입
+                    render_section_header(_("섹션 2: 설문 조사 설명 이미지 삽입", "Section 2: Survey Description Image Insertion"))
+                    st.markdown(_("설문 응답자에게 보여줄 설명 이미지(예: 구조도, 안내문 등)가 있다면 아래에 업로드해 주세요. (선택사항)", "If you have a description image (e.g., structure diagram, guide) to show to the survey respondents, please upload it below. (Optional)"))
+                    
+                    survey_image_file = st.file_uploader(_("설문 설명 이미지 업로드 (png, jpg, jpeg)", "Upload Survey Description Image (png, jpg, jpeg)"), type=["png", "jpg", "jpeg"])
+                    
+                    if survey_image_file is not None:
+                        st.session_state.survey_image_data = survey_image_file.read()
+                        st.session_state.survey_image_mime = survey_image_file.type
+                        st.image(st.session_state.survey_image_data, use_container_width=True, caption=_("업로드된 이미지 미리보기", "Uploaded Image Preview"))
+                    elif st.session_state.get('edit_survey_image'):
+                        st.session_state.survey_image_data = st.session_state.edit_survey_image
+                        st.session_state.survey_image_mime = st.session_state.get('edit_survey_image_mime', 'image/png')
+                        st.image(st.session_state.survey_image_data, use_container_width=True, caption=_("기존 등록된 이미지 미리보기", "Previously Registered Image Preview"))
+                    else:
+                        st.session_state.pop("survey_image_data", None)
+                        st.session_state.pop("survey_image_mime", None)
+
+                with st.container():
+                    # 섹션 3: AHP 모델 계층구조 입력 폼
+                    render_section_header(_("섹션 3: AHP 요인 계층구조 및 문항 설정", "Section 3: AHP Criteria Hierarchy & Question Setup"))
 
                     # 계층 구조 선택 (2계층 기준과 동일하게 전체 공개)
                     tier_choice_options = [
@@ -10197,6 +10246,21 @@ Thank you deeply for your valuable participation.
                                                 conn.close()
                                             except Exception as dbe:
                                                 pass
+
+                                            # 이미지 저장 로직
+                                            try:
+                                                conn_img = sqlite3.connect('users.db')
+                                                cur_img = conn_img.cursor()
+                                                if st.session_state.get('survey_image_data'):
+                                                    cur_img.execute("INSERT OR REPLACE INTO survey_images (survey_id, image_data, mime_type) VALUES (?, ?, ?)", 
+                                                                    (sheet_id, st.session_state.survey_image_data, st.session_state.get('survey_image_mime', 'image/png')))
+                                                else:
+                                                    cur_img.execute("DELETE FROM survey_images WHERE survey_id=?", (sheet_id,))
+                                                conn_img.commit()
+                                                conn_img.close()
+                                            except Exception as img_e:
+                                                pass
+
 
                                             # 배포 주소 생성
                                             base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
