@@ -2060,8 +2060,27 @@ section[data-testid="stSidebar"] > div:first-child {
                 
                 sub_input = st.text_input(f"'{mc}'의 하위 요인 (2계층)", value=st.session_state.get("edit_yeta_sub_inputs", {}).get(mc, default_sub_val))
                 subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
-                model_structure["subs"][mc] = subs_list
 
+                # [수정] "하위 요인 없음" 체크박스 - 단독 최하위 요인으로 처리
+                _no_sub_key_y = f"yeta_no_sub_{mc}"
+                no_sub_y = st.checkbox(
+                    f"'{mc}' — 하위 요인 없음 (이 항목을 단독 최하위 요인으로 처리)",
+                    value=st.session_state.get(_no_sub_key_y, False),
+                    key=_no_sub_key_y,
+                    help="체크 시 하위 요인 없이 이 항목의 가중치가 그대로 종합 중요도(Global Weight)로 사용됩니다."
+                )
+
+                if no_sub_y:
+                    st.caption(f"✅ '{mc}' 는 단독 최하위 요인으로 설정됩니다. 쌍대비교 없이 대항목 가중치가 종합 중요도가 됩니다.")
+                    model_structure["subs"][mc] = []
+                    subs_list = []
+                else:
+                    if len(subs_list) <= 1:
+                        st.markdown("🚨 :red[**경고:** 쌍대비교를 위해서는 하위 요인이 최소 2개 이상 입력되어야 합니다.]")
+                    model_structure["subs"][mc] = subs_list
+
+                # [수정] subs_list를 model_structure에서 안전하게 가져온 후 사용
+                subs_list = model_structure["subs"].get(mc, [])
                 if subs_list:
                     with st.expander(f"↳ '{mc}' 하위의 3계층 (소분류) 입력", expanded=False):
                         st.info("💡 소분류(3계층)가 없는 항목은 비워두시면 자동으로 2계층으로 처리됩니다.")
