@@ -10286,7 +10286,52 @@ Thank you deeply for your valuable participation.
                     except Exception:
                         pass
 
-                    col_p1, col_p2 = st.columns(2)
+                    col_save, col_p1, col_p2 = st.columns(3)
+
+                    # ── 버튼 1: 저장 ─────────────────────────────────────
+                    with col_save:
+                        _has_editing_id = bool(st.session_state.get("editing_survey_id"))
+                        save_btn_label = _("💾 설정 저장", "💾 Save Settings") if _has_editing_id else _("💾 저장 (배포 후 활성화)", "💾 Save (Active After Deploy)")
+                        if st.button(save_btn_label, use_container_width=True, disabled=not _has_editing_id, key="section6_save_btn"):
+                            _s_sheet_id = st.session_state.editing_survey_id
+                            with st.spinner(_("저장 중...", "Saving...")):
+                                try:
+                                    # 이미지 보존 저장
+                                    _s_img = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
+                                    _s_mime = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
+                                    if _s_img:
+                                        _s_conn = sqlite3.connect('users.db')
+                                        _s_cur = _s_conn.cursor()
+                                        _s_cur.execute("INSERT OR REPLACE INTO survey_images (survey_id, image_data, mime_type) VALUES (?, ?, ?)",
+                                                       (_s_sheet_id, _s_img, _s_mime))
+                                        _s_conn.commit()
+                                        _s_conn.close()
+                                    # 구글 시트 메타데이터 업데이트
+                                    if tier_level == 3:
+                                        from survey_manager_v3 import create_survey_sheet_v3
+                                        create_survey_sheet_v3(
+                                            title=survey_title, admin_email=survey_admin_email,
+                                            ahp_model=model_structure, scale_type=scale_option,
+                                            demographics=demographics_settings, definition_map=definitions_map,
+                                            cr_limit=cr_limit, cr_guide_method=cr_guide_method,
+                                            rewards_info=rewards_info, description=survey_desc,
+                                            existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id
+                                        )
+                                    else:
+                                        create_survey_sheet(
+                                            title=survey_title, admin_email=survey_admin_email,
+                                            ahp_model=model_structure, scale_type=scale_option,
+                                            demographics=demographics_settings, definition_map=definitions_map,
+                                            cr_limit=cr_limit, cr_guide_method=cr_guide_method,
+                                            rewards_info=rewards_info, description=survey_desc,
+                                            existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id
+                                        )
+                                    st.session_state._survey_cache_dirty = True
+                                    st.success(_("✅ 저장 완료!", "✅ Saved successfully!"))
+                                except Exception as _s_err:
+                                    st.error(_("저장 오류: ", "Save error: ") + str(_s_err))
+
+                    # ── 버튼 2: 미리보기 ──────────────────────────────────
                     with col_p1:
                         preview_link_html = f"""
                         <a href="/?preview_id={preview_id}" target="_blank" style="text-decoration: none;">
@@ -10311,12 +10356,13 @@ Thank you deeply for your valuable participation.
                             onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
                             onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
                             >
-                                {_("👁️ 설문지 응답 화면 미리보기", "👁️ Preview Survey Form")}
+                                {_("👁️ 설문지 미리보기", "👁️ Preview Survey Form")}
                             </div>
                         </a>
                         """
                         st.markdown(preview_link_html, unsafe_allow_html=True)
 
+                    # ── 버튼 3: 배포 ──────────────────────────────────────
                     with col_p2:
                         if st.session_state.user_id is None:
                             btn_label = _(" 무료 회원가입 후 배포하기", " Deploy after Free Sign Up")
