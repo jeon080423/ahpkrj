@@ -7804,6 +7804,18 @@ with contextlib.nullcontext():
                                             'group_ci': 0.0
                                         }
                                 else:
+                                    # [수정] infer_factors_from_columns 폴백(F1,F2...) 감지 시 서브시트 이름으로 보정
+                                    import re as _re
+                                    _fallback_pattern = _re.compile(r'^F\d+$')
+                                    _all_fallback = all(_fallback_pattern.match(str(f)) for f in main_factors)
+                                    _sub_sheet_names = [sn for sn in sheet_names[1:] if not sn.startswith('__') and sn != 'Main_Criteria']
+                                    if _all_fallback and len(_sub_sheet_names) == len(main_factors):
+                                        # 순서 기반 복원: 서브시트 순서를 실제 요인명으로 사용
+                                        main_factors = _sub_sheet_names[:len(main_factors)]
+                                        # main_results_df의 Weight_ 컬럼도 갱신
+                                        rename_map = {f"Weight_F{i+1}": f"Weight_{main_factors[i]}" for i in range(len(main_factors))}
+                                        main_results_df = main_results_df.rename(columns=rename_map)
+
                                     for parent_factor in main_factors:
                                         # 대분류 항목명과 일치하는 시트명 찾기 (대소문자, 공백 무시 및 31자 제한 고려)
                                         target_name = parent_factor.strip().lower()
@@ -7817,19 +7829,28 @@ with contextlib.nullcontext():
                                                 break
                                 
                                         if matched_sheet_name is None:
+                                            available = ", ".join(f"'{s}'" for s in sheet_names[1:])
                                             st.error(_(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.", f"❌ [Detailed Sheet: {parent_factor}] Sheet not found."))
                                             with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
                                                 st.markdown(_(f"""
                                                 **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 엑셀 파일 내에 존재하지 않거나 시트 이름이 다릅니다.
+
+                                                📋 **파일 내 실제 시트 목록:** {available}
+
                                                 **해결 방법:**
-                                                1. 업로드한 엑셀 파일 내에 **'{parent_factor}'** (또는 31자 이내로 앞부분이 일치하는 명칭)의 시트가 존재하는지 확인하세요.
-                                                2. 시트 이름의 앞뒤 공백이나 오탈자(예: '리드타임민감도'와 '리드타임 민감도')가 없는지 확인하고 시트명을 맞춰주세요.
+                                                1. 메인 기준 시트(첫 번째 시트)의 **컬럼 이름**이 `대분류A_대분류B` 형식인지 확인하세요.
+                                                2. 컬럼명에 밑줄(`_`)이 포함된 요인명이 있다면 공백이나 다른 구분자로 변경하세요.
+                                                3. 업로드한 파일 내 서브시트 이름이 메인 시트 컬럼에서 추출된 요인명과 정확히 일치하는지 확인하세요.
                                                 """,
                                                 f"""
                                                 **Cause:** The detailed survey response sheet corresponding to the main criteria category **'{parent_factor}'** does not exist in the Excel file or has a different name.
+
+                                                📋 **Available sheets in file:** {available}
+
                                                 **Solution:**
-                                                1. Check if a sheet named **'{parent_factor}'** (or a name matching the first 31 characters) exists in the uploaded Excel file.
-                                                2. Ensure there are no leading/trailing spaces or spelling discrepancies (e.g., 'Lead Time Sensitivity' vs 'LeadTime Sensitivity') and align the sheet names.
+                                                1. Check that column names in the main criteria sheet follow the `FactorA_FactorB` format.
+                                                2. If factor names contain underscores (`_`), replace them with spaces or other separators.
+                                                3. Ensure sub-sheet names exactly match the factor names extracted from the main sheet columns.
                                                 """))
                                             st.stop()
                                 
