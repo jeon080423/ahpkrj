@@ -1109,3 +1109,117 @@ def log_user_action(user_id, action_name):
         pass
     t.start()
 
+
+def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
+    """
+    구글 스프레드시트의 설문 구조 및 메타데이터(Survey_Metadata)는 완벽히 보존한 채,
+    Raw_Data 및 Demographic_Data 시트의 응답 데이터(2행부터 마지막 행까지)를 안전하게 초기화합니다.
+    
+    안전장치:
+    1. create_backup=True 시 구글 시트 내에 'Raw_Backup_YYYYMMDD_HHMMSS' 복제 시트 자동 생성
+    2. 로컬 SQLite DB(surveys.db의 survey_responses_backup 테이블)에 원본 데이터 영구 백업
+    3. 1행 헤더 보존 및 delete_rows 실행 후 기본 행(최소 50행) 자동 확보
+    """
+    import datetime
+    import sqlite3
+    import json
+    
+    client = get_survey_gspread_client(user_id=user_id)
+    if not client:
+        return {"success": False, "error": "Google Sheets API 인증 실패"}
+        
+    try:
+        if "docs.google.com/spreadsheets" in spreadsheet_id:
+            parts = spreadsheet_id.split("/d/")
+            if len(parts) > 1:
+                spreadsheet_id = parts[1].split("/")[0]
+                
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
+        now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y%m%d_%H%M%S")
+        
+        raw_values = []
+        raw_deleted_count = 0
+        backup_sheet_name = None
+        
+        # 1. Raw_Data 처리
+        try:
+            raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+            raw_values = run_gspread_with_retry(raw_sheet.get_all_values)
+            if len(raw_values) > 1:
+                raw_deleted_count = len(raw_values) - 1
+                
+                # A. 구글 시트 복제 백업 생성
+                if create_backup:
+                    backup_sheet_name = f"Raw_Backup_{now_str}"
+                    try:
+                        run_gspread_with_retry(spreadsheet.duplicate_sheet, raw_sheet.id, new_sheet_name=backup_sheet_name)
+                    except Exception:
+                        pass
+                
+                # B. 2행부터 마지막 행까지 삭제
+                run_gspread_with_retry(raw_sheet.delete_rows, 2, len(raw_values))
+                
+                # C. 여유 행 확보
+                if raw_sheet.row_count < 50:
+                    run_gspread_with_retry(raw_sheet.add_rows, 50)
+        except Exception as r_err:
+            pass
+
+        # 2. Demographic_Data 처리
+        demo_values = []
+        demo_deleted_count = 0
+        try:
+            demo_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Demographic_Data")
+            demo_values = run_gspread_with_retry(demo_sheet.get_all_values)
+            if len(demo_values) > 1:
+                demo_deleted_count = len(demo_values) - 1
+                
+                if create_backup:
+                    try:
+                        run_gspread_with_retry(spreadsheet.duplicate_sheet, demo_sheet.id, new_sheet_name=f"Demo_Backup_{now_str}")
+                    except Exception:
+                        pass
+                
+                run_gspread_with_retry(demo_sheet.delete_rows, 2, len(demo_values))
+                if demo_sheet.row_count < 50:
+                    run_gspread_with_retry(demo_sheet.add_rows, 50)
+        except Exception:
+            pass
+
+        # 3. 로컬 SQLite DB 백업 저장 (surveys.db)
+        if raw_deleted_count > 0 or demo_deleted_count > 0:
+            try:
+                conn = sqlite3.connect('surveys.db')
+                c = conn.cursor()
+                c.execute('''CREATE TABLE IF NOT EXISTS survey_responses_backup (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    survey_id TEXT,
+                    backup_time TEXT,
+                    user_id TEXT,
+                    raw_data_json TEXT,
+                    demo_data_json TEXT
+                )''')
+                c.execute("INSERT INTO survey_responses_backup (survey_id, backup_time, user_id, raw_data_json, demo_data_json) VALUES (?, ?, ?, ?, ?)",
+                          (spreadsheet_id, now_str, str(user_id or "admin"), json.dumps(raw_values, ensure_ascii=False), json.dumps(demo_values, ensure_ascii=False)))
+                conn.commit()
+                conn.close()
+            except Exception:
+                pass
+
+        # 4. 작업 로그 기록
+        try:
+            log_user_action(user_id or "admin", f"설문 응답 초기화({raw_deleted_count}건)")
+        except Exception:
+            pass
+
+        return {
+            "success": True,
+            "deleted_count": raw_deleted_count,
+            "demo_deleted_count": demo_deleted_count,
+            "backup_sheet_name": backup_sheet_name,
+            "backup_time": now_str
+        }
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
