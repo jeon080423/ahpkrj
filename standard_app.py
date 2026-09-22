@@ -3564,22 +3564,24 @@ if "preview_id" in q_params or "survey_id" in q_params:
         for i, tq in enumerate(type_questions_data):
             tq_q = tq.get("q", tq.get("question", ""))
             tq_opts = tq.get("opts", [])
+            tq_q_type = tq.get("q_type", "radio")  # 'radio' or 'text'
             if not tq_q or tq_q == "귀하의 소속은 어떻게 되십니까?":
                 tq_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
             else:
                 tq_q = _t(tq_q)
             
-            if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["전문가", "일반", "공무원", "기타"]:
-                if "opts" not in tq: # it was added via UI as short answer text
-                    tq_opts = []
-                else:
-                    tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
-            
-            if tq_opts:
+            # 주관식으로 명시된 경우 강제 텍스트 입력
+            if tq_q_type == "text":
+                ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"survey_resp_type_{i}")
+            else:
+                # 객관식: opts 유효성 확인
+                if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["전문가", "일반", "공무원", "기타"]:
+                    if not tq_opts:
+                        tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
+                    else:
+                        tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
                 tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
                 ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
-            else:
-                ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"survey_resp_type_{i}")
             resp_data["types"].append(ans)
             sq_idx += 1
     else:
@@ -9470,7 +9472,11 @@ with contextlib.nullcontext():
                             if "type_questions" in demo:
                                 tqs = []
                                 for tq in demo["type_questions"]:
-                                    tqs.append({"q": tq["q"], "opts": ", ".join(tq["opts"])})
+                                    tqs.append({
+                                        "q": tq.get("q", ""),
+                                        "opts": ", ".join(tq.get("opts", [])) if isinstance(tq.get("opts", []), list) else tq.get("opts", ""),
+                                        "q_type": tq.get("q_type", "radio")  # 객관식/주관식 복원
+                                    })
                                 st.session_state.edit_type_questions = tqs
                             st.session_state.edit_demo_gender = demo.get("gender", False)
                             st.session_state.edit_demo_aff = demo.get("affiliation", False)
@@ -9681,6 +9687,7 @@ Thank you deeply for your valuable participation.
 
                 # 그룹 분류 문항 설정
                 st.markdown(f"**{_('그룹 분류 문항 설정', 'Group Classification Setup')}**")
+                st.caption(_("📌 각 문항마다 객관식(보기 선택) 또는 주관식(직접 입력) 중 원하는 방식을 선택하세요. 최대 5개 문항을 추가할 수 있습니다.", "📌 Choose between multiple-choice (radio) or open-ended (text) format for each question. Up to 5 questions can be added."))
                 
                 default_type_q = _("귀하의 소속은 어떻게 되십니까?", "What is your affiliation?")
                 default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
@@ -9691,42 +9698,63 @@ Thank you deeply for your valuable participation.
                 
                     init_q = legacy_q if legacy_q and legacy_q != "귀하의 소속은 어떻게 되십니까?" else default_type_q
                     init_opts = legacy_opts if legacy_opts and legacy_opts != "전문가, 일반, 공무원, 기타" else default_type_opts
-                    st.session_state["edit_type_questions"] = [{"q": init_q, "opts": init_opts}]
+                    st.session_state["edit_type_questions"] = [{"q": init_q, "opts": init_opts, "q_type": "radio"}]
 
                 type_questions_state = st.session_state["edit_type_questions"]
                 num_types = len(type_questions_state)
                 
                 col1, col2, col3 = st.columns([6, 2, 2])
                 with col2:
-                    if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 3):
-                        st.session_state["edit_type_questions"].append({"q": "", "opts": ""})
+                    if st.button(_("➕ 문항 추가", "➕ Add Question"), use_container_width=True, disabled=num_types >= 5):
+                        st.session_state["edit_type_questions"].append({"q": "", "opts": "", "q_type": "radio"})
                         st.rerun()
                 with col3:
                     if st.button(_("➖ 문항 삭제", "➖ Remove"), use_container_width=True, disabled=num_types <= 1):
                         st.session_state["edit_type_questions"].pop()
                         st.rerun()
                 
-                
                 type_questions = []
                 for i in range(num_types):
-                    st.markdown(f"**{i+1}.**")
-                    if i == 0:
-                        q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
-                        opts_label = _("그룹 분류 보기 옵션 (쉼표로 구분)", "Group Classification Options (comma-separated)")
-                    else:
-                        q_label = _("추가 설문 문항", "Additional Survey Question")
-                        opts_label = _("추가 문항 보기 옵션 (쉼표로 구분)", "Additional Question Options (comma-separated)")
-                    
-                    q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i]["q"], key=f"tq_q_{i}")
-                    opts_val = st.text_input(opts_label + f" ({i+1})", value=type_questions_state[i]["opts"], key=f"tq_opts_{i}")
-                
-                    type_questions_state[i]["q"] = q_val
-                    type_questions_state[i]["opts"] = opts_val
-                
-                    type_questions.append({
-                        "q": q_val,
-                        "opts": [x.strip() for x in opts_val.split(",") if x.strip()]
-                    })
+                    with st.container(border=True):
+                        if i == 0:
+                            q_label = _("그룹 분류 질문 제목", "Group Classification Question Title")
+                        else:
+                            q_label = _("추가 설문 문항", "Additional Survey Question")
+                        
+                        # --- 객관식/주관식 선택 (직관적 토글) ---
+                        cur_q_type = type_questions_state[i].get("q_type", "radio")
+                        qtype_options = [_("📋 객관식 (보기 선택)", "📋 Multiple Choice (Radio)"), _("✏️ 주관식 (직접 입력)", "✏️ Open-ended (Text)")]
+                        qtype_default_idx = 1 if cur_q_type == "text" else 0
+                        q_type_sel = st.radio(
+                            _(f"문항 {i+1} 응답 방식", f"Question {i+1} Answer Type"),
+                            qtype_options,
+                            index=qtype_default_idx,
+                            horizontal=True,
+                            key=f"tq_qtype_{i}"
+                        )
+                        q_type_val = "text" if _("주관식", "Open-ended") in q_type_sel else "radio"
+                        type_questions_state[i]["q_type"] = q_type_val
+
+                        q_val = st.text_input(q_label + f" ({i+1})", value=type_questions_state[i].get("q", ""), key=f"tq_q_{i}")
+                        type_questions_state[i]["q"] = q_val
+
+                        if q_type_val == "radio":
+                            opts_label = _("보기 옵션 (쉼표로 구분)", "Options (comma-separated)")
+                            cur_opts = type_questions_state[i].get("opts", "")
+                            opts_val = st.text_input(opts_label + f" ({i+1})", value=cur_opts, key=f"tq_opts_{i}", placeholder=_("예: 전문가, 일반, 공무원, 기타", "e.g. Expert, General, Official, Other"))
+                            type_questions_state[i]["opts"] = opts_val
+                            opts_list = [x.strip() for x in opts_val.split(",") if x.strip()]
+                        else:
+                            # 주관식: 보기 입력란 숨김, opts를 빈 리스트로 저장
+                            type_questions_state[i]["opts"] = ""
+                            opts_list = []
+                            st.caption(_("💡 주관식: 응답자가 자유롭게 텍스트를 입력하는 방식입니다. 보기를 입력할 필요가 없습니다.", "💡 Open-ended: Respondents type their own answer freely. No options needed."))
+
+                        type_questions.append({
+                            "q": q_val,
+                            "opts": opts_list,
+                            "q_type": q_type_val
+                        })
                 
                 type_question = type_questions[0]["q"] if type_questions else ""
                 type_options = ", ".join(type_questions[0]["opts"]) if type_questions else ""
