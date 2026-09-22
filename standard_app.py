@@ -9899,13 +9899,29 @@ Thank you deeply for your valuable participation.
                         elif mc in ["디자인", "Design"]: default_sub_val = _("외관, 편의성", "Appearance, Usability")
                         elif mc in ["경제성", "Economy"]: default_sub_val = _("단말기가격, 유지비용", "Device Price, Maintenance Cost")
 
-                        sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
-                        subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
-                        if len(subs_list) <= 1:
-                            st.markdown(_("🚨 :red[**경고:** 쌍대비교를 위해서는 하위 요인이 최소 2개 이상 입력되어야 합니다.]", "🚨 :red[**Warning:** At least 2 sub-criteria are required for pairwise comparison.]"))
-                        model_structure["subs"][mc] = subs_list
+                        # "하위 요인 없음" 체크박스
+                        _no_sub_key = f"no_sub_{i}_{mc}"
+                        no_sub = st.checkbox(
+                            _(f"'{mc}' — 하위 요인 없음 (이 대분류를 단독 최하위 요인으로 처리)", f"'{mc}' — No sub-criteria (treat as standalone leaf node)"),
+                            value=st.session_state.get(_no_sub_key, False),
+                            key=_no_sub_key,
+                            help=_("체크 시 이 대분류에 중분류를 입력하지 않아도 되며, AHP 분석에서 대분류 가중치가 그대로 종합 중요도(Global Weight)로 사용됩니다.",
+                                   "When checked, no sub-criteria input is needed. The main criteria weight will be used directly as the Global Weight in AHP analysis.")
+                        )
+
+                        if no_sub:
+                            st.caption(_(f"✅ '{mc}' 는 단독 최하위 요인으로 설정됩니다. 하위 요인 입력이 필요 없으며, 대분류 가중치 = 종합 중요도가 됩니다.",
+                                         f"✅ '{mc}' is set as a standalone leaf node. No sub-criteria needed; its main weight equals Global Weight."))
+                            model_structure["subs"][mc] = []
+                        else:
+                            sub_input = st.text_input(_(f"'{mc}'의 하위 요인 (Sub-criteria)", f"Sub-criteria for '{mc}'"), value=st.session_state.get("edit_sub_inputs", {}).get(mc, default_sub_val))
+                            subs_list = [x.strip().replace("_", " ") for x in sub_input.split(",") if x.strip()]
+                            if len(subs_list) <= 1:
+                                st.markdown(_("🚨 :red[**경고:** 쌍대비교를 위해서는 하위 요인이 최소 2개 이상 입력되어야 합니다.]", "🚨 :red[**Warning:** At least 2 sub-criteria are required for pairwise comparison.]"))
+                            model_structure["subs"][mc] = subs_list
 
                         # [신규] 3계층 선택 시 소분류 입력 필드 동적 생성
+                        subs_list = model_structure["subs"].get(mc, [])
                         if tier_level == 3 and subs_list:
                             with st.expander(_(f"↳ '{mc}' 하위의 소분류 (Sub-sub-criteria) 입력", f"↳ Enter Sub-sub-criteria under '{mc}'"), expanded=True):
 
@@ -9943,6 +9959,11 @@ Thank you deeply for your valuable participation.
                             tree_lines.append(f"{prefix_main}[{mc}]")
                             
                             subs = model_structure.get("subs", {}).get(mc, [])
+                            # 하위 요인 없는 경우 → 단독 리프 노드 표시
+                            if not subs:
+                                branch_main = "    " if is_last_main else "│   "
+                                tree_lines.append(f"{branch_main}└── ⭐ (단독 최하위 요인 — 하위 요인 없음)")
+                                continue
                             sub_subs_map = model_structure.get("sub_subs", {})
                             for si, sc in enumerate(subs):
                                 is_last_sub = (si == len(subs) - 1)

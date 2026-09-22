@@ -611,7 +611,18 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
     summary_rows = []
     for idx, main_f in enumerate(main_factors):
         m_weight = group_main_weights.iloc[idx] if isinstance(group_main_weights, pd.Series) else group_main_weights[idx]
+
+        # [수정] 중분류가 없는 대분류 → 단일 리프 노드로 처리하여 가중치 보존 (버그 수정)
         if main_f not in sub_results_storage:
+            summary_rows.append({
+                "대분류": main_f, "대분류 가중치": m_weight,
+                "중분류": f"{main_f} (단독)", "중분류 가중치": 1.0,
+                "소분류": f"{main_f} (단독)", "소분류 가중치": 1.0,
+                "Global Weight": m_weight,
+                "CR(대분류)": main_grp_cr, "CI(대분류)": main_grp_ci,
+                "CR(중분류)": 0.0, "CI(중분류)": 0.0,
+                "CR(소분류)": 0.0, "CI(소분류)": 0.0
+            })
             continue
         
         s_info = sub_results_storage[main_f]
@@ -619,7 +630,17 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
             s_weight = s_info['weights'].iloc[s_idx] if isinstance(s_info['weights'], pd.Series) else s_info['weights'][s_idx]
             
             ss_info = sub_sub_results_storage.get(sub_f)
+            # [수정] 소분류 정보가 없는 중분류 → 단일 리프 노드로 처리
             if not ss_info:
+                summary_rows.append({
+                    "대분류": main_f, "대분류 가중치": m_weight,
+                    "중분류": sub_f, "중분류 가중치": s_weight,
+                    "소분류": f"{sub_f} (단독)", "소분류 가중치": 1.0,
+                    "Global Weight": m_weight * s_weight,
+                    "CR(대분류)": main_grp_cr, "CI(대분류)": main_grp_ci,
+                    "CR(중분류)": s_info['group_cr'], "CI(중분류)": s_info['group_ci'],
+                    "CR(소분류)": 0.0, "CI(소분류)": 0.0
+                })
                 continue
                 
             for ss_idx, sub_sub_f in enumerate(ss_info['factors']):
@@ -753,18 +774,45 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         grp_summary_rows = []
         for idx, main_f in enumerate(main_factors):
             m_weight = g_main_w.iloc[idx] if isinstance(g_main_w, pd.Series) else g_main_w[idx]
-            if main_f not in sub_results_storage: continue
+
+            # [수정] 중분류 없는 대분류 → 단일 리프 노드 처리 (그룹별)
+            if main_f not in sub_results_storage:
+                grp_summary_rows.append({
+                    "대분류": main_f, "대분류 가중치": m_weight,
+                    "중분류": f"{main_f} (단독)", "중분류 가중치": 1.0,
+                    "소분류": f"{main_f} (단독)", "소분류 가중치": 1.0,
+                    "Global Weight": m_weight,
+                    "CR(대분류)": g_main_cr, "CI(대분류)": g_main_ci,
+                    "CR(중분류)": 0.0, "CI(중분류)": 0.0,
+                    "CR(소분류)": 0.0, "CI(소분류)": 0.0
+                })
+                continue
             
             s_info = sub_results_storage[main_f]
-            s_w_series = grp_sub_weights[main_f]
+            s_w_series = grp_sub_weights.get(main_f)
+            if s_w_series is None:
+                continue
             
             for s_idx, sub_f in enumerate(s_info['factors']):
                 s_weight = s_w_series.iloc[s_idx] if isinstance(s_w_series, pd.Series) else s_w_series[s_idx]
                 
                 ss_info = sub_sub_results_storage.get(sub_f)
-                if not ss_info: continue
+                # [수정] 소분류 없는 중분류 → 단일 리프 노드 처리 (그룹별)
+                if not ss_info:
+                    grp_summary_rows.append({
+                        "대분류": main_f, "대분류 가중치": m_weight,
+                        "중분류": sub_f, "중분류 가중치": s_weight,
+                        "소분류": f"{sub_f} (단독)", "소분류 가중치": 1.0,
+                        "Global Weight": m_weight * s_weight,
+                        "CR(대분류)": g_main_cr, "CI(대분류)": g_main_ci,
+                        "CR(중분류)": grp_sub_cr_ci.get(main_f, (0.0, 0.0))[0], "CI(중분류)": grp_sub_cr_ci.get(main_f, (0.0, 0.0))[1],
+                        "CR(소분류)": 0.0, "CI(소분류)": 0.0
+                    })
+                    continue
                 
-                ss_w_series = grp_sub_sub_weights[sub_f]
+                ss_w_series = grp_sub_sub_weights.get(sub_f)
+                if ss_w_series is None:
+                    continue
                 for ss_idx, sub_sub_f in enumerate(ss_info['factors']):
                     ss_weight = ss_w_series.iloc[ss_idx] if isinstance(ss_w_series, pd.Series) else ss_w_series[ss_idx]
                     
@@ -775,8 +823,8 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
                         "소분류": sub_sub_f, "소분류 가중치": ss_weight,
                         "Global Weight": global_w,
                         "CR(대분류)": g_main_cr, "CI(대분류)": g_main_ci,
-                        "CR(중분류)": grp_sub_cr_ci[main_f][0], "CI(중분류)": grp_sub_cr_ci[main_f][1],
-                        "CR(소분류)": grp_sub_sub_cr_ci[sub_f][0], "CI(소분류)": grp_sub_sub_cr_ci[sub_f][1]
+                        "CR(중분류)": grp_sub_cr_ci.get(main_f, (0.0, 0.0))[0], "CI(중분류)": grp_sub_cr_ci.get(main_f, (0.0, 0.0))[1],
+                        "CR(소분류)": grp_sub_sub_cr_ci.get(sub_f, (0.0, 0.0))[0], "CI(소분류)": grp_sub_sub_cr_ci.get(sub_f, (0.0, 0.0))[1]
                     })
                     
         g_df = pd.DataFrame(grp_summary_rows)
@@ -797,7 +845,14 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
         
         for mf in main_factors:
             m_w = u_main[f"Weight_{mf}"].values[0]
-            if mf not in sub_results_storage: continue
+            # [수정] 중분류 없는 대분류 → ANOVA에서도 단일 리프 노드로 처리
+            if mf not in sub_results_storage:
+                indiv_global_data.append({
+                    "ID": uid, "Type": str(u_type), "Factor": mf, "Global_Weight": m_w,
+                    "Original_CR": u_main['Original_CR'].values[0],
+                    "Final_CR": u_main['Final_CR'].values[0]
+                })
+                continue
             
             s_row_df = sub_results_storage[mf]['df']
             u_sub = s_row_df[s_row_df['ID'] == uid]
