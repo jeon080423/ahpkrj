@@ -6457,6 +6457,82 @@ A composite index representing the overall distortion level.
         st.info(verdict)
 
 
+# ---------- Reset Survey Response Data Dialog ----------
+@st.dialog(_("🗑️ 설문 응답 로우데이터 초기화", "🗑️ Reset Survey Response Data"))
+def show_reset_survey_dialog(sheet_id, survey_title):
+    from survey_manager import reset_survey_responses
+    
+    st.markdown(_(
+        f"선택된 설문: **{survey_title}**\n\n"
+        "이 작업은 설문 문항 및 설정(Survey_Metadata)은 그대로 보존하고, **수집된 모든 응답 데이터(Raw_Data, Demographic_Data의 2행 이하)만 완전히 삭제**합니다.\n\n"
+        "💡 **언제 사용하나요?** 테스트 목적으로 입력한 가짜/테스트 응답을 깨끗이 비우고, 실제 대상자 모집을 시작하기 직전에 유용합니다.",
+        f"Selected Survey: **{survey_title}**\n\n"
+        "This will preserve survey structure and settings, but **permanently delete all collected response rows**.\n\n"
+        "💡 **When to use?** Useful for clearing test responses before officially launching the survey."
+    ))
+    
+    st.warning(_(
+        "⚠️ **주의**: 삭제된 데이터는 복구할 수 없습니다. 안전을 위해 '자동 백업 시트 생성' 옵션을 켜두시기를 강력히 권장합니다.",
+        "⚠️ **Warning**: Deleted data cannot be recovered. Enabling the 'Auto-backup Sheet' option is strongly recommended."
+    ))
+    
+    do_backup = st.checkbox(
+        _("🛡️ 초기화 전 구글 시트 내에 백업 시트('Raw_Backup_날짜시간') 자동 생성 (권장)",
+          "🛡️ Automatically create a backup sheet in Google Sheets before reset (Recommended)"),
+        value=True,
+        key="chk_reset_backup"
+    )
+    
+    agree = st.checkbox(
+        _("위 내용을 충분히 확인하였으며, 응답 데이터를 삭제하고 초기화하는 데 동의합니다.",
+          "I have read and understood the warning, and I agree to delete response data."),
+        value=False,
+        key="chk_reset_agree"
+    )
+    
+    confirm_text = st.text_input(
+        _("확인을 위해 아래에 **초기화** 또는 **RESET**을 직접 입력하세요:",
+          "Type **초기화** or **RESET** below to confirm:"),
+        key="txt_reset_confirm"
+    )
+    
+    is_confirmed = agree and (confirm_text.strip() in ["초기화", "RESET", "reset"])
+    
+    col_c1, col_c2 = st.columns(2)
+    with col_c1:
+        if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True, key="btn_cancel_reset"):
+            st.rerun()
+    with col_c2:
+        if st.button(
+            _("🗑️ 영구 초기화 실행", "🗑️ Execute Permanent Reset"),
+            type="primary",
+            use_container_width=True,
+            disabled=not is_confirmed,
+            key="btn_exec_reset"
+        ):
+            with st.spinner(_("구글 시트 응답 데이터를 안전하게 초기화 중입니다...", "Resetting survey response data safely...")):
+                res = reset_survey_responses(sheet_id, create_backup=do_backup, user_id=st.session_state.get("user_id"))
+                if res.get("success"):
+                    deleted_cnt = res.get("deleted_count", 0)
+                    backup_name = res.get("backup_sheet_name")
+                    msg_ko = f"✅ 총 {deleted_cnt}건의 응답 데이터가 성공적으로 초기화되었습니다!"
+                    if backup_name:
+                        msg_ko += f"\n(구글 시트에 백업 시트 '{backup_name}' 생성 완료)"
+                    msg_en = f"✅ Successfully cleared {deleted_cnt} responses!"
+                    if backup_name:
+                        msg_en += f"\n(Backup sheet '{backup_name}' created in Google Sheet)"
+                    st.success(_(msg_ko, msg_en))
+                    
+                    # 로컬 세션 상태 초기화
+                    for k in ["ahp_df_main", "ahp_sub_dfs", "ahp_sub_sub_dfs", "live_df", "demo_df", "survey_stats"]:
+                        st.session_state.pop(k, None)
+                    import time
+                    time.sleep(2.0)
+                    st.rerun()
+                else:
+                    st.error(_(f"초기화 실패: {res.get('error')}", f"Reset failed: {res.get('error')}"))
+
+
 def render_ahp_analysis_settings():
     ahp_method = 'traditional'
     mean_method = 'geometric'
@@ -7279,6 +7355,12 @@ with contextlib.nullcontext():
                                     st.error(f"구글 시트 로드 실패: {g_err}")
                             else:
                                 st.error(_("설문 메타데이터 또는 구글 API 클라이언트를 로드할 수 없습니다.", "Failed to load survey metadata or Google client."))
+
+                    with st.expander(_("⚙️ 설문 응답 데이터 초기화 및 백업 관리", "⚙️ Survey Response Data Reset & Backup"), expanded=False):
+                        st.caption(_("테스트로 수집된 응답을 비우고 본 조사를 새로 시작할 때 사용합니다. 설문 설정 및 문항은 유지됩니다.",
+                                     "Clears test submissions before starting the real survey. Settings and questions are preserved."))
+                        if st.button(_("🗑️ 응답 로우데이터 초기화 마법사 열기", "🗑️ Open Response Data Reset Wizard"), type="secondary", use_container_width=True, key="btn_open_reset_tab1"):
+                            show_reset_survey_dialog(selected_sheet_id, selected_survey_label)
                 
                     if "ahp_df_main" in st.session_state:
                         df_main = st.session_state["ahp_df_main"]
@@ -10759,7 +10841,14 @@ Thank you deeply for your valuable participation.
             # 대시보드 렌더링
             if selected_sheet_id:
 
-                if st.button("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", type="primary"):
+                col_dash_btn1, col_dash_btn2 = st.columns([3, 1])
+                with col_dash_btn1:
+                    do_load_dash = st.button(_("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", "🔄 Load/Refresh Live Survey Dashboard & Responses"), type="primary", use_container_width=True)
+                with col_dash_btn2:
+                    if st.button(_("🗑️ 응답 데이터 초기화", "🗑️ Reset Responses"), type="secondary", use_container_width=True, key="btn_open_reset_tab3"):
+                        show_reset_survey_dialog(selected_sheet_id, survey_title)
+
+                if do_load_dash:
                     from survey_manager import get_survey_stats, get_survey_gspread_client
                     with st.spinner("실시간 설문 현황 로딩 중..."):
                         # 1. Stats Loading
