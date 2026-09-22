@@ -50,6 +50,12 @@ def migrate_db():
                     mime_type TEXT)''')
     conn.commit()
     conn.close()
+    
+    try:
+        import coupon_manager
+        coupon_manager.init_coupon_db()
+    except Exception:
+        pass
 
 try:
     migrate_db()
