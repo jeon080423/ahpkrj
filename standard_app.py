@@ -9932,8 +9932,8 @@ Thank you deeply for your valuable participation.
 
 
                 with st.container():
-                    # 섹션 3: 요인 조작적 정의 설정
-                    render_section_header(_("섹션 3: 요인별 상세 설명 (조작적 정의)", "Section 3: Detailed Description per Criteria (Operational Definition)"))
+                    # 섹션 4: 요인 조작적 정의 설정
+                    render_section_header(_("섹션 4: 요인별 상세 설명 (조작적 정의)", "Section 4: Detailed Description per Criteria (Operational Definition)"))
                     st.info(_("응답자가 요인 개념을 직관적으로 파악할 수 있도록 상세 설명을 기술해 주십시오.", "Please provide detailed descriptions so respondents can intuitively understand each criteria concept."))
                     definitions_map = {}
 
@@ -10014,8 +10014,8 @@ Thank you deeply for your valuable participation.
 
 
                 with st.container():
-                    # 섹션 4: 척도 인터페이스 설정
-                    render_section_header(_("섹션 4: 쌍대비교 응답 척도 및 일관성(CR) 검증 레벨 설정", "Section 4: Scale Type & CR Validation Level Setup"))
+                    # 섹션 5: 척도 인터페이스 설정
+                    render_section_header(_("섹션 5: 쌍대비교 응답 척도 및 일관성(CR) 검증 레벨 설정", "Section 5: Scale Type & CR Validation Level Setup"))
                     scale_options = [
                         _("1-9 Continuous (1부터 9까지 연속형 스케일)", "1-9 Continuous Scale"),
                         _("1-5 Continuous (1부터 5까지 연속형 스케일)", "1-5 Continuous Scale"),
@@ -10132,8 +10132,8 @@ Thank you deeply for your valuable participation.
 
 
 
-                    # 섹션 7: 최종 미리보기 및 배포
-                    render_section_header(_("섹션 5: 저장 전 최종 미리보기 및 배포", "Section 5: Final Preview & Deployment Before Saving"))
+                    # 섹션 6: 최종 미리보기 및 배포
+                    render_section_header(_("섹션 6: 저장 전 최종 미리보기 및 배포", "Section 6: Final Preview & Deployment Before Saving"))
 
                     # [추가] 구글 스프레드시트 연동 설정
                     if st.session_state.get('editing_survey_id'):
