@@ -3646,12 +3646,19 @@ if "preview_id" in q_params or "survey_id" in q_params:
         try:
             conn_img = sqlite3.connect('users.db')
             c_img = conn_img.cursor()
-            c_img.execute("SELECT image_data FROM survey_images WHERE survey_id=?", (survey_id_param,))
+            c_img.execute("SELECT image_data, mime_type FROM survey_images WHERE survey_id=?", (survey_id_param,))
             img_row = c_img.fetchone()
             conn_img.close()
             if img_row and img_row[0]:
-                st.image(img_row[0], use_container_width=True)
-                st.write("")
+                import base64
+                encoded = base64.b64encode(img_row[0]).decode()
+                mime = img_row[1] if len(img_row) > 1 and img_row[1] else "image/png"
+                html_str = f'''
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
+                </div>
+                '''
+                st.markdown(html_str, unsafe_allow_html=True)
         except Exception:
             pass
 
@@ -9729,11 +9736,21 @@ Thank you deeply for your valuable participation.
                     if survey_image_file is not None:
                         st.session_state.survey_image_data = survey_image_file.read()
                         st.session_state.survey_image_mime = survey_image_file.type
-                        st.image(st.session_state.survey_image_data, use_container_width=True, caption=_("업로드된 이미지 미리보기", "Uploaded Image Preview"))
+                        import base64
+                        encoded = base64.b64encode(st.session_state.survey_image_data).decode()
+                        mime = st.session_state.survey_image_mime
+                        html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
+                        st.markdown(html_str, unsafe_allow_html=True)
+                        st.caption(_("업로드된 이미지 미리보기", "Uploaded Image Preview"))
                     elif st.session_state.get('edit_survey_image'):
                         st.session_state.survey_image_data = st.session_state.edit_survey_image
                         st.session_state.survey_image_mime = st.session_state.get('edit_survey_image_mime', 'image/png')
-                        st.image(st.session_state.survey_image_data, use_container_width=True, caption=_("기존 등록된 이미지 미리보기", "Previously Registered Image Preview"))
+                        import base64
+                        encoded = base64.b64encode(st.session_state.survey_image_data).decode()
+                        mime = st.session_state.survey_image_mime
+                        html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
+                        st.markdown(html_str, unsafe_allow_html=True)
+                        st.caption(_("기존 등록된 이미지 미리보기", "Previously Registered Image Preview"))
                     else:
                         st.session_state.pop("survey_image_data", None)
                         st.session_state.pop("survey_image_mime", None)
