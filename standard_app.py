@@ -9736,6 +9736,10 @@ Thank you deeply for your valuable participation.
                     if survey_image_file is not None:
                         st.session_state.survey_image_data = survey_image_file.getvalue()
                         st.session_state.survey_image_mime = survey_image_file.type
+                        if 'edit_survey_image' in st.session_state:
+                            del st.session_state['edit_survey_image']
+                        if 'edit_survey_image_mime' in st.session_state:
+                            del st.session_state['edit_survey_image_mime']
                         import base64
                         encoded = base64.b64encode(st.session_state.survey_image_data).decode()
                         mime = st.session_state.survey_image_mime
@@ -9751,6 +9755,12 @@ Thank you deeply for your valuable participation.
                         html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
                         st.markdown(html_str, unsafe_allow_html=True)
                         st.caption(_("기존 등록된 이미지 미리보기", "Previously Registered Image Preview"))
+                        if st.button(_("🗑️ 기존 이미지 삭제", "🗑️ Delete Existing Image")):
+                            st.session_state.pop('edit_survey_image', None)
+                            st.session_state.pop('edit_survey_image_mime', None)
+                            st.session_state.pop("survey_image_data", None)
+                            st.session_state.pop("survey_image_mime", None)
+                            st.rerun()
                     else:
                         st.session_state.pop("survey_image_data", None)
                         st.session_state.pop("survey_image_mime", None)
