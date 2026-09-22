@@ -7226,6 +7226,9 @@ with contextlib.nullcontext():
                                             sheet_names_list += list(st.session_state["ahp_sub_sub_dfs"].keys())
                                             
                                         st.session_state["ahp_sheet_names"] = sheet_names_list
+                                        # [수정] 실제 요인명 저장 (F1/F2 폴백 방지용)
+                                        st.session_state["ahp_main_criteria"] = [c.strip() for c in ahp_model.get("main", [])]
+                                        st.session_state["ahp_sub_criteria_map"] = {k.strip(): [s.strip() for s in v] for k, v in ahp_model.get("subs", {}).items()}
                                         st.success(_(f"✅ 구글 시트에서 총 {len(raw_df)}건의 응답 데이터를 성공적으로 가져왔습니다!", f"✅ Successfully fetched {len(raw_df)} responses!"))
                                     else:
                                         st.warning(_("가져올 설문 응답 데이터가 시트에 존재하지 않습니다 (헤더만 존재).", "No survey responses found in the sheet."))
@@ -7736,6 +7739,18 @@ with contextlib.nullcontext():
                                     main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(
                                         df_main, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
                                     )
+                                    
+                                    # [수정] F1..Fn 폴백 감지 시 설문 설정의 실제 요인명으로 교체
+                                    import re as _re
+                                    _stored_main = st.session_state.get("ahp_main_criteria", [])
+                                    if (_stored_main and len(_stored_main) == len(main_factors)
+                                            and all(_re.match(r'^F\d+$', str(f)) for f in main_factors)):
+                                        _rename_w = {f"Weight_F{i+1}": f"Weight_{_stored_main[i]}" for i in range(len(_stored_main))}
+                                        main_results_df = main_results_df.rename(columns=_rename_w)
+                                        main_factors = _stored_main
+                                        # Matrix_Object 컬럼이 있으면 Weight 컬럼 순서도 보정
+                                        if "Matrix_Object" in main_results_df.columns:
+                                            pass  # Matrix_Object는 이름 무관, 가중치만 교체됨
                                 except Exception as e:
                                     st.error(_("❌ [메인 시트] 분석 중 오류가 발생했습니다.", "❌ Error occurred during [Main Criteria] analysis."))
                                     with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
@@ -7883,6 +7898,17 @@ with contextlib.nullcontext():
                                             sub_res_df, sub_facts, sub_excl, sub_excl_df = process_single_sheet(
                                                 df_sub, cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method
                                             )
+                                            
+                                            # [수정] sub_facts가 F1..Fn 폴백이면 설문 설정 요인명으로 교체
+                                            _stored_subs_map = st.session_state.get("ahp_sub_criteria_map", {})
+                                            _real_subs = _stored_subs_map.get(parent_factor, [])
+                                            if (not _real_subs and parent_factor in _stored_subs_map):
+                                                _real_subs = _stored_subs_map[parent_factor]
+                                            if (_real_subs and len(_real_subs) == len(sub_facts)
+                                                    and all(_re.match(r'^F\d+$', str(f)) for f in sub_facts)):
+                                                _rename_sw = {f"Weight_F{i+1}": f"Weight_{_real_subs[i]}" for i in range(len(_real_subs))}
+                                                sub_res_df = sub_res_df.rename(columns=_rename_sw)
+                                                sub_facts = _real_subs
                                     
                                             if sub_res_df.empty:
                                                 raise ValueError(f"'{matched_sheet_name}' 시트에 유효한 분석 데이터가 없습니다.")
