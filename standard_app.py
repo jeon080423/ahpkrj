@@ -4009,6 +4009,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 """
                 survey_container.markdown(header_html, unsafe_allow_html=True)
 
+                # 그룹 내 미응답 문항 개수 및 전체 응답 현황 사전 확인
+                group_factors = comb["factors"]
+                comb_missing_count = 0
+                for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
+                    k = f"{p_left}_{p_right}"
+                    p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{k.replace(' ', '_')}"
+                    if st.session_state.get(p_widget_key, None) is None:
+                        comb_missing_count += 1
+
                 # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
                 for pair_idx, (left_f, right_f) in enumerate(comb["pairs"]):
                     pair_key = f"{left_f}_{right_f}"
@@ -4039,15 +4048,26 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     with row_cols[1]:
                         # 안전을 위해 options에서 중복 및 -1 값 명시적 제외
                         clean_options = [x for x in options if x != -1]
+                        current_val = st.session_state.get(ans_key, None)
                         
                         valid_options = set()
-                        is_highlight_target = st.session_state.get("highlight_target") == pair_key
-                        should_show_guide = (cr_guide_method == "realtime" or is_highlight_target) and cr_limit is not None
+                        is_highlight_target = (st.session_state.get("highlight_target") == clean_id) or (st.session_state.get("highlight_target") == pair_key)
+                        
+                        # 음영 표시 여부:
+                        # 1) 특정 문항이 수정 타깃으로 하이라이트된 경우
+                        # 2) realtime 모드일 때: 미응답 문항이 남아있고(comb_missing_count > 0), 이 문항 자체가 아직 미응답(current_val is None)인 경우에만 순차 가이드 제공
+                        # ※ 이미 응답한 문항(current_val is not None)이나 전체 완료 후에는 음영 난사를 방지하기 위해 음영을 띄우지 않습니다.
+                        should_show_guide = False
+                        if cr_limit is not None and len(group_factors) > 2:
+                            if is_highlight_target:
+                                should_show_guide = True
+                            elif cr_guide_method == "realtime" and comb_missing_count > 0 and current_val is None:
+                                should_show_guide = True
+
+                        other_missing = False
                         if should_show_guide:
                             try:
-                                group_factors = comb["factors"]
                                 group_answers = {}
-                                other_missing = False
                                 for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
                                     k = f"{p_left}_{p_right}"
                                     p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{k.replace(' ', '_')}"
@@ -4077,7 +4097,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             # Streamlit st.radio 라벨 중복(튕김 현상) 방지를 위해 음수 쪽에 보이지 않는 공백(Zero-width space) 추가
                             return str(abs(opt)) + "\u200B" if opt < 0 else str(opt)
 
-                        if should_show_guide and len(comb["factors"]) > 2:
+                        if should_show_guide and len(group_factors) > 2:
                             if not other_missing:
                                 valid_sorted = [x for x in clean_options if x in valid_options]
                                 if valid_sorted:
@@ -4099,7 +4119,6 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                         radius += "border-top-right-radius: 6px; border-bottom-right-radius: 6px; "
                                     bar_html += f'<div style="flex: 1 1 0%; background-color: {bg_color}; {radius}"></div>'
                                 bar_html += '</div>'
-                        current_val = st.session_state.get(ans_key, None)
                         current_idx = clean_options.index(current_val) if current_val in clean_options else None
 
                         ans_val = st.radio(
@@ -4111,7 +4130,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             horizontal=True,
                             label_visibility="collapsed"
                         )
-                        if should_show_guide and len(comb["factors"]) > 2:
+                        if should_show_guide and len(group_factors) > 2:
                             if not other_missing:
                                 st.markdown(bar_html, unsafe_allow_html=True)
                 
@@ -4131,6 +4150,104 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         """, unsafe_allow_html=True)
                 
                     ahp_answers[pair_key] = ans_val
+
+                # 해당 그룹(comb)의 모든 문항이 응답되었고 요인이 3개 이상인 경우 실시간 일관성(CR) 피드백 배너 렌더링
+                if len(group_factors) > 2 and cr_limit is not None:
+                    cur_group_answers = {}
+                    group_unanswered = 0
+                    for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
+                        k = f"{p_left}_{p_right}"
+                        p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{k.replace(' ', '_')}"
+                        val = st.session_state.get(p_widget_key, None)
+                        cur_group_answers[k] = val
+                        if val is None:
+                            group_unanswered += 1
+
+                    if group_unanswered == 0:
+                        group_cr = calculate_matrix_cr(group_factors, cur_group_answers)
+                        if group_cr <= cr_limit:
+                            st.markdown(f"""
+                            <div style="margin-top: 14px; margin-bottom: 24px; padding: 12px 18px; background-color: #f0fdf4; 
+                                        border: 1px solid #86efac; border-left: 5px solid #16a34a; border-radius: 6px; 
+                                        display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 18px;">✅</span>
+                                <span style="color: #166534; font-size: 13.5px; font-weight: 600;">
+                                    {_((f"[{parent_trans}] 일관성 기준 충족 (CR: {group_cr:.3f} ≤ {cr_limit}) — 논리적으로 매우 일관된 응답입니다."), (f"[{parent_trans}] Consistency satisfied (CR: {group_cr:.3f} ≤ {cr_limit}) — Highly consistent response."))}
+                                </span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            from survey_manager import get_cr_fix_suggestion
+                            worst_pair, cur_v, sug_v = get_cr_fix_suggestion(group_factors, cur_group_answers)
+                            
+                            def format_val_label(v, left_name, right_name):
+                                if v == 1:
+                                    return _("동등 (1)", "Equal (1)")
+                                elif v < 0:
+                                    return _(f"[{left_name}] 중요도 {abs(v)}", f"[{left_name}] Importance {abs(v)}")
+                                else:
+                                    return _(f"[{right_name}] 중요도 {v}", f"[{right_name}] Importance {v}")
+                            
+                            target_clean_id = None
+                            target_ans_key = None
+                            p1, p2 = worst_pair if worst_pair else ("", "")
+                            if worst_pair:
+                                for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
+                                    if p_left == p1 and p_right == p2:
+                                        pk = f"{p_left}_{p_right}"
+                                        target_clean_id = f"{comb_idx}_{p_idx}_{pk.replace(' ', '_')}"
+                                        target_ans_key = f"pair_ans_{target_clean_id}"
+                                        break
+                                    elif p_left == p2 and p_right == p1:
+                                        pk = f"{p_left}_{p_right}"
+                                        target_clean_id = f"{comb_idx}_{p_idx}_{pk.replace(' ', '_')}"
+                                        target_ans_key = f"pair_ans_{target_clean_id}"
+                                        if sug_v != 1: sug_v = -sug_v
+                                        if cur_v != 1: cur_v = -cur_v
+                                        p1, p2 = p_left, p_right
+                                        break
+                                
+                                p1_trans = translate_factor_if_default(p1)
+                                p2_trans = translate_factor_if_default(p2)
+                                cur_txt = format_val_label(cur_v, p1_trans, p2_trans)
+                                sug_txt = format_val_label(sug_v, p1_trans, p2_trans)
+                                
+                                st.markdown(f"""
+                                <div style="margin-top: 14px; margin-bottom: 12px; padding: 14px 18px; background-color: #fffbeb; 
+                                            border: 1px solid #fde68a; border-left: 5px solid #f59e0b; border-radius: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                        <span style="font-size: 16px;">⚠️</span>
+                                        <span style="color: #b45309; font-size: 14px; font-weight: bold;">
+                                            {_((f"[{parent_trans}] 일관성 비율(CR) 점검: 현재 CR {group_cr:.3f} (기준치 {cr_limit} 초과)"), (f"[{parent_trans}] CR Check: Current CR {group_cr:.3f} (Exceeds limit {cr_limit})"))}
+                                        </span>
+                                    </div>
+                                    <div style="color: #92400e; font-size: 13px; line-height: 1.5; margin-bottom: 10px;">
+                                        {_("응답 간에 논리적 차이가 있습니다. 설문을 정상 제출하시려면 아래 추천 조정을 적용해 주세요.", "There is a logical discrepancy. Please apply the suggested fix below to submit the survey.")}
+                                    </div>
+                                    <div style="background-color: #ffffff; padding: 10px 14px; border-radius: 6px; border: 1px dashed #fcd34d; font-size: 13px; color: #78350f;">
+                                        • <b>{_("개선 권장 문항", "Target Pair")}</b>: [{p1_trans}] vs [{p2_trans}]<br>
+                                        • <b>{_("현재 선택", "Current")}</b>: <span style="text-decoration: line-through; color: #dc2626;">{cur_txt}</span> 
+                                        &nbsp;➔&nbsp; <b>{_("추천 조정", "Suggested")}</b>: <span style="color: #1d4ed8; font-weight: bold;">{sug_txt}</span>
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                                
+                                col_adj1, col_adj2 = st.columns([1, 1])
+                                with col_adj1:
+                                    if st.button(_(f"💡 추천값으로 자동 조정 ({sug_txt})", f"💡 Auto-adjust to ({sug_txt})"), 
+                                                 key=f"btn_autoadjust_{comb_idx}", type="primary", use_container_width=True):
+                                        if target_ans_key:
+                                            st.session_state[target_ans_key] = sug_v
+                                            st.session_state["highlight_target"] = None
+                                            st.rerun()
+                                with col_adj2:
+                                    if st.button(_("🔍 해당 문항으로 이동 및 가이드 표시", "🔍 Go to Question & View Guide"), 
+                                                 key=f"btn_scrollto_{comb_idx}", use_container_width=True):
+                                        if target_clean_id:
+                                            st.session_state["scroll_target"] = target_clean_id
+                                            st.session_state["highlight_target"] = target_clean_id
+                                            st.rerun()
+                                st.markdown("<div style='margin-bottom: 24px;'></div>", unsafe_allow_html=True)
             st.divider()
             
             target = st.session_state.get("scroll_target")
@@ -4287,12 +4404,24 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 "suggested_val": suggested_val
                             }
                             st.rerun()
+                    elif cr_guide_method == "realtime":
+                        from survey_manager import get_cr_fix_suggestion
+                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers)
+                        if worst_pair:
+                            for comb_idx_t, comb_t in enumerate(combinations):
+                                for p_idx_t, (p_left_t, p_right_t) in enumerate(comb_t["pairs"]):
+                                    if (p_left_t == worst_pair[0] and p_right_t == worst_pair[1]) or (p_left_t == worst_pair[1] and p_right_t == worst_pair[0]):
+                                        pk_t = f"{p_left_t}_{p_right_t}"
+                                        target_clean_id = f"{comb_idx_t}_{p_idx_t}_{pk_t.replace(' ', '_')}"
+                                        st.session_state["scroll_target"] = target_clean_id
+                                        st.session_state["highlight_target"] = target_clean_id
+                                        break
                     
                     # 마법사가 없거나 마법사 제안을 계산할 수 없는 경우 (기존 로직)
                     if not is_preview_mode:
                         from survey_manager import increment_abandoned_cr
                         increment_abandoned_cr(survey_id_param)
-                    st.error(_(f"[{failed_group_name}] 항목의 응답 일관성이 부족합니다. (일관성 비율: {failed_cr:.3f} > 설정 임계값: {cr_limit}) 일부 문항을 다시 검토해 주십시오.", f"The consistency of your responses for [{failed_group_name}] is insufficient. (CR: {failed_cr:.3f} > threshold: {cr_limit}) Please review some questions again."))
+                    st.error(_(f"[{failed_group_name}] 항목의 응답 일관성이 부족합니다. (일관성 비율: {failed_cr:.3f} > 설정 임계값: {cr_limit}) 해당 영역의 추천 조정을 확인하여 검토해 주십시오.", f"The consistency of your responses for [{failed_group_name}] is insufficient. (CR: {failed_cr:.3f} > threshold: {cr_limit}) Please review the recommended adjustments in that section."))
                     st.stop()
             
             # 저장 진행
