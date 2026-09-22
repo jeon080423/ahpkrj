@@ -7884,31 +7884,65 @@ with contextlib.nullcontext():
                                                 break
                                 
                                         if matched_sheet_name is None:
-                                            available = ", ".join(f"'{s}'" for s in sheet_names[1:])
-                                            st.error(_(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.", f"❌ [Detailed Sheet: {parent_factor}] Sheet not found."))
-                                            with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
-                                                st.markdown(_(f"""
-                                                **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 엑셀 파일 내에 존재하지 않거나 시트 이름이 다릅니다.
+                                            # [수정] 하위 요인이 없는 대분류(리프 노드)이면 더미 처리 후 계속
+                                            # - sheet_names에 해당 시트가 없으면 하위 요인 없음으로 간주
+                                            # - 가중치 1.0 더미로 처리 (GW = 대분류 가중치 × 1.0)
+                                            _stored_subs_map_chk = st.session_state.get("ahp_sub_criteria_map", {})
+                                            _has_subs = (parent_factor in _stored_subs_map_chk and
+                                                         len(_stored_subs_map_chk.get(parent_factor, [])) >= 2)
+                                            
+                                            if not _has_subs:
+                                                # 하위 요인 없는 대분류 → 리프 노드 더미
+                                                _dummy_list = []
+                                                for _idx, _row in main_results_df.iterrows():
+                                                    _dummy_list.append({
+                                                        "ID": _row['ID'],
+                                                        "Type": _row['Type'],
+                                                        "Original_CI": 0.0, "Original_CR": 0.0,
+                                                        "Final_CI": 0.0, "Final_CR": 0.0,
+                                                        "Iterations": 0, "Corrected": False,
+                                                        "Matrix_Object": np.array([[1.0]]),
+                                                        f"Weight_{parent_factor}": 1.0
+                                                    })
+                                                _dummy_df = pd.DataFrame(_dummy_list)
+                                                sub_results_storage[parent_factor] = {
+                                                    'weights': np.array([1.0]),
+                                                    'factors': [parent_factor],
+                                                    'cr': 0.0, 'ci': 0.0,
+                                                    'df': _dummy_df,
+                                                    'group_matrix': np.array([[1.0]]),
+                                                    'group_cr': 0.0, 'group_ci': 0.0,
+                                                    'group_Si': None
+                                                }
+                                                continue  # 다음 대분류로
+                                            else:
+                                                # 하위 요인이 있어야 하는데 시트가 없음 → 실제 에러
+                                                available = ", ".join(f"'{s}'" for s in sheet_names[1:])
+                                                st.error(_(f"❌ [세부 시트: {parent_factor}] 시트를 찾을 수 없습니다.", f"❌ [Detailed Sheet: {parent_factor}] Sheet not found."))
+                                                with st.expander(_("💡 이유 및 해결 방법 보기", "💡 View Reason & Solution"), expanded=True):
+                                                    st.markdown(_(f"""
+                                                    **원인:** 메인 기준 시트에서 도출된 대분류 항목 **'{parent_factor}'**에 대응하는 세부 설문 응답 시트가 존재하지 않거나 시트 이름이 다릅니다.
 
-                                                📋 **파일 내 실제 시트 목록:** {available}
+                                                    📋 **파일 내 실제 시트 목록:** {available}
 
-                                                **해결 방법:**
-                                                1. 메인 기준 시트(첫 번째 시트)의 **컬럼 이름**이 `대분류A_대분류B` 형식인지 확인하세요.
-                                                2. 컬럼명에 밑줄(`_`)이 포함된 요인명이 있다면 공백이나 다른 구분자로 변경하세요.
-                                                3. 업로드한 파일 내 서브시트 이름이 메인 시트 컬럼에서 추출된 요인명과 정확히 일치하는지 확인하세요.
-                                                """,
-                                                f"""
-                                                **Cause:** The detailed survey response sheet corresponding to the main criteria category **'{parent_factor}'** does not exist in the Excel file or has a different name.
+                                                    **해결 방법:**
+                                                    1. 메인 기준 시트(첫 번째 시트)의 **컬럼 이름**이 `대분류A_대분류B` 형식인지 확인하세요.
+                                                    2. 컬럼명에 밑줄(`_`)이 포함된 요인명이 있다면 공백이나 다른 구분자로 변경하세요.
+                                                    3. 업로드한 파일 내 서브시트 이름이 메인 시트 컬럼에서 추출된 요인명과 정확히 일치하는지 확인하세요.
+                                                    """,
+                                                    f"""
+                                                    **Cause:** The detailed survey response sheet for **'{parent_factor}'** does not exist or has a different name.
 
-                                                📋 **Available sheets in file:** {available}
+                                                    📋 **Available sheets in file:** {available}
 
-                                                **Solution:**
-                                                1. Check that column names in the main criteria sheet follow the `FactorA_FactorB` format.
-                                                2. If factor names contain underscores (`_`), replace them with spaces or other separators.
-                                                3. Ensure sub-sheet names exactly match the factor names extracted from the main sheet columns.
-                                                """))
-                                            tab1_main_col.__exit__(None, None, None)
-                                            st.stop()
+                                                    **Solution:**
+                                                    1. Check that column names in the main criteria sheet follow the `FactorA_FactorB` format.
+                                                    2. If factor names contain underscores (`_`), replace them with spaces or other separators.
+                                                    3. Ensure sub-sheet names exactly match the factor names extracted from the main sheet columns.
+                                                    """))
+                                                tab1_main_col.__exit__(None, None, None)
+                                                st.stop()
+
                                 
                                         try:
                                             if data_source == _("🌐 배포된 온라인 설문 데이터 연동", "🌐 Connect Online Survey Data"):
