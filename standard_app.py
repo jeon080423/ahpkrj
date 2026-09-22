@@ -7106,6 +7106,17 @@ with contextlib.nullcontext():
                         col1 = df_main.columns[1]
                         if "_" not in col1 and col1 not in ["ID", "제출시간"]:
                             df_main.rename(columns={col1: "Type"}, inplace=True)
+
+                    # [신규] 엑셀 파일 내의 그룹 분석 후보 변수(ID/쌍대비교 제외 메타 컬럼) 감지
+                    excel_group_vars = {}
+                    meta_candidate_cols = [c for c in df_main.columns if '_' not in str(c) and str(c) not in ["ID", "제출시간", "timestamp"]]
+                    for mc in meta_candidate_cols:
+                        c_str = str(mc).strip()
+                        if "ID" in df_main.columns:
+                            excel_group_vars[c_str] = df_main.set_index("ID")[mc].to_dict()
+                        else:
+                            excel_group_vars[c_str] = {i: df_main.iloc[i][mc] for i in range(len(df_main))}
+                    st.session_state["available_group_vars"] = excel_group_vars
                             
                     # 3계층 식별 로직 (df_main 컬럼에서 _ 포함된 것으로 대분류 요인 도출)
                     main_criteria_infer = set()
@@ -7258,9 +7269,11 @@ with contextlib.nullcontext():
                                         total_expected_pairs = len(all_expected_pair_cols)
 
                                         # 2. 인구통계(Type) 질문 수 감지 및 행별 동적 파싱
-                                        tq_count = len(demographics.get("type_questions", [])) if demographics else 0
+                                        tq_list = demographics.get("type_questions", []) if demographics else []
+                                        tq_count = len(tq_list)
                                         if tq_count == 0 and demographics and demographics.get("type_options"):
                                             tq_count = 1
+                                        tq_names = [tq.get("q", f"인구통계 {i+1}").strip() for i, tq in enumerate(tq_list)] if tq_list else ["그룹 분류(Type)"]
 
                                         parsed_records = []
                                         for r_idx, row in enumerate(all_rows[1:]):
@@ -7288,7 +7301,13 @@ with contextlib.nullcontext():
                                                 comp_vals = r[1:comp_end] + [''] * max(0, total_expected_pairs - (comp_end - 1))
                                                 resp_type = r[1] if len(r) > 1 and r[1].strip() else "일반"
 
+                                            # 모든 인구통계 항목값 보존
+                                            t_vals = r[1:comp_start] if comp_start > 1 else []
                                             rec = {"ID": resp_id, "Type": resp_type}
+                                            for d_idx, d_name in enumerate(tq_names):
+                                                d_val = t_vals[d_idx].strip() if d_idx < len(t_vals) else ""
+                                                rec[f"DEMO_{d_name}"] = d_val if d_val else "미응답"
+
                                             for k, p_col in enumerate(all_expected_pair_cols):
                                                 v = comp_vals[k] if k < len(comp_vals) else np.nan
                                                 rec[p_col] = pd.to_numeric(v, errors='coerce')
@@ -7308,6 +7327,33 @@ with contextlib.nullcontext():
                                             raw_df = raw_df.head(10)
                                             st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
                                                          "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
+
+                                        # [신규] 그룹 분석 기준 변수 맵 구성 (인구통계 질문 + Demographic_Data 시트 항목)
+                                        group_vars_map = {}
+                                        for d_name in tq_names:
+                                            col_key = f"DEMO_{d_name}"
+                                            if col_key in raw_df.columns:
+                                                group_vars_map[d_name] = raw_df.set_index("ID")[col_key].to_dict()
+                                        if not group_vars_map and "Type" in raw_df.columns:
+                                            group_vars_map["그룹 분류(Type)"] = raw_df.set_index("ID")["Type"].to_dict()
+
+                                        # Demographic_Data 시트에서 추가 인구통계(성별, 경력 등) 병합
+                                        try:
+                                            demo_sheet = spreadsheet.worksheet("Demographic_Data")
+                                            demo_all_vals = demo_sheet.get_all_values()
+                                            if len(demo_all_vals) > 1:
+                                                demo_headers_raw = [h.strip() for h in demo_all_vals[0]]
+                                                demo_df_loaded = pd.DataFrame(demo_all_vals[1:], columns=demo_headers_raw)
+                                                st.session_state["demo_df"] = demo_df_loaded
+                                                for col in demo_df_loaded.columns:
+                                                    c_clean = col.strip()
+                                                    if c_clean and c_clean not in ["ID", "제출시간", "timestamp", "보상", "이메일", "전화번호"] and not c_clean.startswith("순위"):
+                                                        if c_clean not in group_vars_map:
+                                                            group_vars_map[c_clean] = demo_df_loaded.set_index("ID")[col].to_dict()
+                                        except Exception:
+                                            pass
+
+                                        st.session_state["available_group_vars"] = group_vars_map
 
                                         # 3. 대분류 데이터프레임 구성
                                         st.session_state["ahp_df_main"] = raw_df[["ID", "Type"] + main_pairs].copy()
@@ -7407,6 +7453,46 @@ with contextlib.nullcontext():
                                      f"⛔ **Free Users** can only analyze up to 3 samples per sheet. (Current: {len(df_main)} samples)")
             
                 if permission_granted:
+                    # [신규] 그룹 분석 기준 변수 선택 UI 및 동적 주입
+                    available_vars = st.session_state.get("available_group_vars", {})
+                    if available_vars and len(available_vars) > 1:
+                        var_options = list(available_vars.keys())
+                        saved_var = st.session_state.get("current_group_var_name")
+                        default_idx = var_options.index(saved_var) if saved_var in var_options else 0
+
+                        st.markdown(_("##### 👥 그룹 분석 기준 변수 설정", "##### 👥 Group Analysis Variable Settings"))
+                        col_g1, col_g2 = st.columns([3, 1])
+                        with col_g1:
+                            chosen_group_var = st.selectbox(
+                                _("그룹 분석(집단 비교/ANOVA/레이더 차트)에 사용할 기본 정보 변수를 선택하세요:",
+                                  "Select demographic variable for group comparison, ANOVA, and radar charts:"),
+                                var_options,
+                                index=default_idx,
+                                key="sb_group_analysis_var_choice",
+                                help=_("선택하신 기본 정보 문항의 응답값을 기준으로 집단별 가중치 비교, ANOVA 통계 검정, 레이더 차트가 수행됩니다.",
+                                       "Performs group comparisons, ANOVA tests, and radar charts based on the selected demographic variable.")
+                            )
+                        with col_g2:
+                            val_map = available_vars[chosen_group_var]
+                            distinct_groups = sorted(list(set(str(v).strip() for v in val_map.values() if v and pd.notna(v))))
+                            st.metric(_("구분 집단 수", "Group Count"), f"{len(distinct_groups)}개 집단")
+
+                        st.session_state["current_group_var_name"] = chosen_group_var
+
+                        # 선택된 변수 값으로 df_main, sub_dfs, sub_sub_dfs의 'Type' 열을 일괄 동적 갱신
+                        if "ID" in df_main.columns:
+                            df_main["Type"] = df_main["ID"].map(val_map).fillna(df_main.get("Type", "미응답"))
+                        for s_name, s_df in sub_dfs.items():
+                            if "ID" in s_df.columns:
+                                s_df["Type"] = s_df["ID"].map(val_map).fillna(s_df.get("Type", "미응답"))
+                        current_sub_subs = st.session_state.get("ahp_sub_sub_dfs", {})
+                        for ss_name, ss_df in current_sub_subs.items():
+                            if "ID" in ss_df.columns:
+                                ss_df["Type"] = ss_df["ID"].map(val_map).fillna(ss_df.get("Type", "미응답"))
+                        st.divider()
+                    elif available_vars and len(available_vars) == 1:
+                        st.session_state["current_group_var_name"] = list(available_vars.keys())[0]
+
                     tier = get_current_tier()
                     try:
                         if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
