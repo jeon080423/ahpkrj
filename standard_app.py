@@ -10396,12 +10396,20 @@ Thank you deeply for your valuable participation.
                                                 pass
 
                                             # 이미지 저장 로직
+                                            # survey_image_data: 새로 업로드한 이미지
+                                            # edit_survey_image: 기존에 저장된 이미지 (수정 없이 재저장할 때)
                                             try:
                                                 conn_img = sqlite3.connect('users.db')
                                                 cur_img = conn_img.cursor()
-                                                if st.session_state.get('survey_image_data'):
+                                                image_to_save = st.session_state.get('survey_image_data')
+                                                mime_to_save = st.session_state.get('survey_image_mime', 'image/png')
+                                                # 새 이미지가 없으면 기존 이미지(edit_survey_image)를 그대로 사용
+                                                if not image_to_save and st.session_state.get('edit_survey_image'):
+                                                    image_to_save = st.session_state.get('edit_survey_image')
+                                                    mime_to_save = st.session_state.get('edit_survey_image_mime', 'image/png')
+                                                if image_to_save:
                                                     cur_img.execute("INSERT OR REPLACE INTO survey_images (survey_id, image_data, mime_type) VALUES (?, ?, ?)", 
-                                                                    (sheet_id, st.session_state.survey_image_data, st.session_state.get('survey_image_mime', 'image/png')))
+                                                                    (sheet_id, image_to_save, mime_to_save))
                                                 else:
                                                     cur_img.execute("DELETE FROM survey_images WHERE survey_id=?", (sheet_id,))
                                                 conn_img.commit()
