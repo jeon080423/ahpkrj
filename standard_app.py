@@ -3773,6 +3773,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
         ahp_answers = {}
         
+        # 추천값 자동 조정 등으로 대기 중인 위젯 업데이트가 있다면 라디오 위젯 생성 전에 세션 스테이트에 선반영
+        pending_updates = st.session_state.get("pending_answers_update", {})
+        if pending_updates:
+            for pk_to_update, val_to_update in list(pending_updates.items()):
+                st.session_state[pk_to_update] = val_to_update
+            st.session_state["pending_answers_update"] = {}
+        
         with st.container(key="ahp_survey_matrix"):
             comp_idx = 1
             for comb_idx, comb in enumerate(combinations):
@@ -4237,7 +4244,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                     if st.button(_(f"💡 추천값으로 자동 조정 ({sug_txt})", f"💡 Auto-adjust to ({sug_txt})"), 
                                                  key=f"btn_autoadjust_{comb_idx}", type="primary", use_container_width=True):
                                         if target_ans_key:
-                                            st.session_state[target_ans_key] = sug_v
+                                            if "pending_answers_update" not in st.session_state:
+                                                st.session_state["pending_answers_update"] = {}
+                                            st.session_state["pending_answers_update"][target_ans_key] = sug_v
                                             st.session_state["highlight_target"] = None
                                             st.rerun()
                                 with col_adj2:
