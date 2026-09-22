@@ -10138,6 +10138,21 @@ Thank you deeply for your valuable participation.
                     with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as f:
                         json.dump(preview_data, f, ensure_ascii=False)
 
+                    # [추가] 미리보기 용으로 이미지 DB에 임시 저장 (Respondent UI는 f"preview_{preview_id}"로 조회함)
+                    try:
+                        conn_prev = sqlite3.connect('users.db')
+                        c_prev = conn_prev.cursor()
+                        preview_survey_id_param = f"preview_{preview_id}"
+                        if st.session_state.get('survey_image_data'):
+                            c_prev.execute("INSERT OR REPLACE INTO survey_images (survey_id, image_data, mime_type) VALUES (?, ?, ?)",
+                                            (preview_survey_id_param, st.session_state.survey_image_data, st.session_state.get('survey_image_mime', 'image/png')))
+                        else:
+                            c_prev.execute("DELETE FROM survey_images WHERE survey_id=?", (preview_survey_id_param,))
+                        conn_prev.commit()
+                        conn_prev.close()
+                    except Exception:
+                        pass
+
                     col_p1, col_p2 = st.columns(2)
                     with col_p1:
                         preview_link_html = f"""
