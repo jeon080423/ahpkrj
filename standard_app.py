@@ -7170,25 +7170,40 @@ with contextlib.nullcontext():
                                         ahp_model = survey_meta["AHP_Model_JSON"]
                                     
                                         base_cols = ["ID", "Type"]
-                                        main_criteria = ahp_model.get("main", [])
+                                        main_criteria = [c.strip() for c in ahp_model.get("main", [])]
                                         main_pairs = []
                                         for i in range(len(main_criteria)):
                                             for j in range(i + 1, len(main_criteria)):
                                                 main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
-                                        main_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in main_pairs if p in raw_df.columns]
+                                        
+                                        # [수정] main_pairs가 raw_df에 없으면 컬럼에서 직접 추론 (예: 요인명에 공백/특수문자 차이)
+                                        matched_pairs = [p for p in main_pairs if p in raw_df.columns]
+                                        if not matched_pairs:
+                                            # Raw_Data 컬럼 중 'ID','Type','제출시간','답례품_연락처' 외의 컬럼을 비교쌍으로 간주
+                                            _skip = {"id", "type", "제출시간", "답례품_연락처"}
+                                            _all_raw_cols = [c for c in raw_df.columns if c.strip().lower() not in _skip and c.strip()]
+                                            _n_main = len(main_criteria)
+                                            _expected_pairs = _n_main * (_n_main - 1) // 2
+                                            # 컬럼 수가 예상 쌍 수와 일치하면 raw_df 컬럼을 직접 사용
+                                            matched_pairs = _all_raw_cols[:_expected_pairs]
+                                        
+                                        main_cols = [c for c in base_cols if c in raw_df.columns] + matched_pairs
                                     
                                         st.session_state["ahp_df_main"] = raw_df[main_cols].copy()
                                     
                                         st.session_state["ahp_sub_dfs"] = {}
                                         sub_criteria_map = ahp_model.get("subs", {})
                                         for main_c, subs in sub_criteria_map.items():
+                                            subs = [s.strip() for s in subs]
                                             if len(subs) >= 2:
                                                 sub_pairs = []
                                                 for i in range(len(subs)):
                                                     for j in range(i + 1, len(subs)):
                                                         sub_pairs.append(f"{subs[i]}_{subs[j]}")
-                                                sub_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_pairs if p in raw_df.columns]
-                                                st.session_state["ahp_sub_dfs"][main_c] = raw_df[sub_cols].copy()
+                                                matched_sub_pairs = [p for p in sub_pairs if p in raw_df.columns]
+                                                if matched_sub_pairs:
+                                                    sub_cols = [c for c in base_cols if c in raw_df.columns] + matched_sub_pairs
+                                                    st.session_state["ahp_sub_dfs"][main_c.strip()] = raw_df[sub_cols].copy()
                                             
                                         # [신규] 3계층 모델인 경우 소분류(sub_subs) 데이터프레임 파싱
                                         tier_level = int(survey_meta.get("Tier_Level", 2))
