@@ -2759,13 +2759,8 @@ def improve_consistency(matrix, threshold, min_val, max_val, max_iter=500, learn
         # 범위 제한 (min_val, max_val)
         temp_raw = np.clip(temp_raw, min_val, max_val)
         
-        # 홀수 보정
-        abs_raw = np.abs(temp_raw)
-        signs = np.sign(temp_raw)
-        # 짝수인 경우 -1 (최소 1 유지)
-        abs_raw = np.where((abs_raw % 2 == 0) & (abs_raw != 0), np.maximum(1, abs_raw - 1), abs_raw)
-        # 0인 경우 1로 처리
-        temp_raw = np.where(temp_raw == 0, 1, (signs * abs_raw)).astype(int)
+        # 0인 경우 1(동등)로 처리
+        temp_raw = np.where(temp_raw == 0, 1, temp_raw).astype(int)
         
         # 정수화된 값을 다시 AHP 스케일로 변환하여 행렬에 일괄 반영
         final_vals = np.where(temp_raw == 0, 1.0,
@@ -2838,12 +2833,11 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
     # 시트 전체 데이터의 로우데이터 최대값/최솟값 계산
     all_comp_values = pd.to_numeric(df[comp_cols].values.flatten(), errors='coerce')
     valid_comp_values = all_comp_values[~np.isnan(all_comp_values)]
+    sheet_min = -9
+    sheet_max = 9
     if len(valid_comp_values) > 0:
-        sheet_min = int(np.min(valid_comp_values))
-        sheet_max = int(np.max(valid_comp_values))
-    else:
-        sheet_min = -9
-        sheet_max = 9
+        sheet_min = min(-9, int(np.min(valid_comp_values)))
+        sheet_max = max(9, int(np.max(valid_comp_values)))
     
     results_list = []
     excluded_list = []
@@ -2863,11 +2857,15 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
                     raw_val = row[comp_cols[col_idx]]
                     raw_values.append(raw_val)
                     
-                    if pd.isna(raw_val) or type(raw_val) == str or not (-9 <= float(raw_val) <= 9):
+                    try:
+                        num_val = float(raw_val)
+                        if pd.isna(num_val) or not (-9 <= num_val <= 9):
+                            has_format_error = True
+                    except (ValueError, TypeError):
                         has_format_error = True
                     
                     if not has_format_error:
-                        ahp_val = parse_input_value(float(raw_val))
+                        ahp_val = parse_input_value(num_val)
                         matrix[i, j] = ahp_val
                         matrix[j, i] = 1.0 / ahp_val
                     col_idx += 1
@@ -7143,114 +7141,137 @@ with contextlib.nullcontext():
                                     all_rows = raw_sheet.get_all_values()
                                 
                                     if len(all_rows) > 1:
-                                        headers = all_rows[0]
-                                        rows = all_rows[1:]
-                                        raw_df = pd.DataFrame(rows, columns=headers)
-                                        
-                                        if "Type" not in raw_df.columns and len(raw_df.columns) > 1:
-                                            col1 = raw_df.columns[1]
-                                            if "_" not in col1 and col1 not in ["ID", "제출시간"]:
-                                                raw_df.rename(columns={col1: "Type"}, inplace=True)
-                                                
-                                        # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 3표본)
-                                        if st.session_state.get('user_role') == 'free' and len(raw_df) > 3:
-                                            raw_df = raw_df.head(5)
-                                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 3표본까지만 분석할 수 있습니다. 처음 접수된 3명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 3 samples. Only the first 3 responses will be analyzed."))
-                                    
-                                        # [신규] Basic 요금제 표본 수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
-                                        if st.session_state.get('plan_type') == 'Basic' and len(raw_df) > 10:
-                                            raw_df = raw_df.head(10)
-                                            st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
-                                                         "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
-                                    
-                                        for col in raw_df.columns:
-                                            if col not in ["ID", "Type", "제출시간", "답례품_연락처"]:
-                                                raw_df[col] = pd.to_numeric(raw_df[col], errors='coerce')
-                                            
                                         ahp_model = survey_meta["AHP_Model_JSON"]
-                                    
-                                        base_cols = ["ID", "Type"]
+                                        tier_level = int(survey_meta.get("Tier_Level", 2))
+                                        demographics = survey_meta.get("Demographics", {})
+
+                                        # 1. 정규 쌍대비교 컬럼 목록 구성 (대분류 -> 중분류 -> 소분류)
                                         main_criteria = [c.strip() for c in ahp_model.get("main", [])]
-                                        main_pairs = []
-                                        for i in range(len(main_criteria)):
-                                            for j in range(i + 1, len(main_criteria)):
-                                                main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
-                                        
-                                        # [수정] 위치 기반 컬럼 파싱 - 이름 불일치(공백·인코딩 차이)에 강인
-                                        _meta_skip = {"id", "type", "제출시간", "답례품_연락처"}
-                                        # raw_df에서 메타 컬럼 제외한 모든 비교 컬럼(순서 유지)
-                                        _all_comp_cols = [c for c in raw_df.columns
-                                                          if c.strip().lower() not in _meta_skip and c.strip()]
-                                        
-                                        # 대분류 쌍 수 = n*(n-1)/2
-                                        _n_main = len(main_criteria)
-                                        _n_main_pairs = _n_main * (_n_main - 1) // 2
-                                        
-                                        # 위치 기반으로 대분류 비교 컬럼 추출
-                                        _main_comp_cols = _all_comp_cols[:_n_main_pairs]
-                                        main_cols = [c for c in base_cols if c in raw_df.columns] + _main_comp_cols
-                                        
-                                        # df_main 컬럼명을 표준화: 요인명 기반으로 재명명
-                                        _df_main = raw_df[main_cols].copy()
-                                        if len(_main_comp_cols) == _n_main_pairs and _n_main_pairs > 0:
-                                            _col_rename = {_main_comp_cols[k]: main_pairs[k]
-                                                           for k in range(len(_main_comp_cols))
-                                                           if k < len(main_pairs)}
-                                            _df_main = _df_main.rename(columns=_col_rename)
-                                        st.session_state["ahp_df_main"] = _df_main
-                                    
-                                        # 중분류 데이터 위치 기반 파싱
-                                        st.session_state["ahp_sub_dfs"] = {}
+                                        main_pairs = [f"{main_criteria[i]}_{main_criteria[j]}"
+                                                      for i in range(len(main_criteria))
+                                                      for j in range(i + 1, len(main_criteria))]
+
                                         sub_criteria_map = ahp_model.get("subs", {})
-                                        _col_pos = _n_main_pairs  # 대분류 쌍 다음부터 시작
-                                        for main_c in main_criteria:  # main_criteria 순서 유지
+                                        sub_pairs_by_main = {}
+                                        all_sub_pairs = []
+                                        for main_c in main_criteria:
                                             subs = [s.strip() for s in sub_criteria_map.get(main_c, [])]
                                             if len(subs) >= 2:
-                                                _n_sub_pairs = len(subs) * (len(subs) - 1) // 2
-                                                _sub_comp_cols = _all_comp_cols[_col_pos:_col_pos + _n_sub_pairs]
-                                                _col_pos += _n_sub_pairs
-                                                
-                                                # 표준 컬럼명으로 재명명
-                                                _sub_pairs_std = [f"{subs[i]}_{subs[j]}"
-                                                                   for i in range(len(subs))
-                                                                   for j in range(i + 1, len(subs))]
-                                                _df_sub = raw_df[[c for c in base_cols if c in raw_df.columns] + _sub_comp_cols].copy()
-                                                _sub_rename = {_sub_comp_cols[k]: _sub_pairs_std[k]
-                                                               for k in range(min(len(_sub_comp_cols), len(_sub_pairs_std)))}
-                                                _df_sub = _df_sub.rename(columns=_sub_rename)
-                                                st.session_state["ahp_sub_dfs"][main_c] = _df_sub
-                                            
-                                        # [신규] 3계층 모델인 경우 소분류(sub_subs) 데이터프레임 파싱
-                                        tier_level = int(survey_meta.get("Tier_Level", 2))
-                                        st.session_state["ahp_sub_sub_dfs"] = {}
+                                                pairs = [f"{subs[i]}_{subs[j]}"
+                                                         for i in range(len(subs))
+                                                         for j in range(i + 1, len(subs))]
+                                                sub_pairs_by_main[main_c] = pairs
+                                                all_sub_pairs.extend(pairs)
+
+                                        sub_sub_map = ahp_model.get("sub_subs", {}) if tier_level == 3 else {}
+                                        sub_sub_pairs_by_sub = {}
+                                        all_ss_pairs = []
                                         if tier_level == 3:
-                                            sub_sub_map = ahp_model.get("sub_subs", {})
                                             for main_c in main_criteria:
                                                 subs = [s.strip() for s in sub_criteria_map.get(main_c, [])]
                                                 for sub_c in subs:
                                                     sub_subs = [s.strip() for s in sub_sub_map.get(sub_c, [])]
                                                     if len(sub_subs) >= 2:
-                                                        _n_ss_pairs = len(sub_subs) * (len(sub_subs) - 1) // 2
-                                                        _ss_comp_cols = _all_comp_cols[_col_pos:_col_pos + _n_ss_pairs]
-                                                        _col_pos += _n_ss_pairs
-                                                        _ss_pairs_std = [f"{sub_subs[i]}_{sub_subs[j]}"
-                                                                          for i in range(len(sub_subs))
-                                                                          for j in range(i + 1, len(sub_subs))]
-                                                        _df_ss = raw_df[[c for c in base_cols if c in raw_df.columns] + _ss_comp_cols].copy()
-                                                        _ss_rename = {_ss_comp_cols[k]: _ss_pairs_std[k]
-                                                                       for k in range(min(len(_ss_comp_cols), len(_ss_pairs_std)))}
-                                                        _df_ss = _df_ss.rename(columns=_ss_rename)
-                                                        st.session_state["ahp_sub_sub_dfs"][sub_c] = _df_ss
+                                                        pairs = [f"{sub_subs[i]}_{sub_subs[j]}"
+                                                                 for i in range(len(sub_subs))
+                                                                 for j in range(i + 1, len(sub_subs))]
+                                                        sub_sub_pairs_by_sub[sub_c] = pairs
+                                                        all_ss_pairs.extend(pairs)
 
+                                        all_expected_pair_cols = main_pairs + all_sub_pairs + all_ss_pairs
+                                        total_expected_pairs = len(all_expected_pair_cols)
+
+                                        # 2. 인구통계(Type) 질문 수 감지 및 행별 동적 파싱
+                                        tq_count = len(demographics.get("type_questions", [])) if demographics else 0
+                                        if tq_count == 0 and demographics and demographics.get("type_options"):
+                                            tq_count = 1
+
+                                        parsed_records = []
+                                        for r_idx, row in enumerate(all_rows[1:]):
+                                            r = [str(c) for c in row]
+                                            while r and r[-1] == '':
+                                                r.pop()
+                                            if not r or not any(r):
+                                                continue
+
+                                            resp_id = r[0]
+                                            time_val = r[-1] if len(r) > 1 and ("-" in r[-1] and ":" in r[-1]) else ""
+                                            comp_end = len(r) - 1 if time_val else len(r)
+
+                                            # 인구통계 열이 여러 개이거나 시트 헤더와 불일치해도 실제 쌍대비교 위치를 정확히 탐색
+                                            comp_start = 1 + tq_count
+                                            if comp_end - comp_start == total_expected_pairs:
+                                                comp_vals = r[comp_start:comp_end]
+                                                resp_type = r[1] if len(r) > 1 and r[1].strip() else "일반"
+                                            elif comp_end >= total_expected_pairs + 1:
+                                                # 역방향 정렬: 제출시간 바로 앞의 total_expected_pairs 개를 쌍대비교값으로 취함
+                                                comp_start = comp_end - total_expected_pairs
+                                                comp_vals = r[comp_start:comp_end]
+                                                resp_type = r[1] if comp_start > 1 and r[1].strip() else "일반"
+                                            else:
+                                                comp_vals = r[1:comp_end] + [''] * max(0, total_expected_pairs - (comp_end - 1))
+                                                resp_type = r[1] if len(r) > 1 and r[1].strip() else "일반"
+
+                                            rec = {"ID": resp_id, "Type": resp_type}
+                                            for k, p_col in enumerate(all_expected_pair_cols):
+                                                v = comp_vals[k] if k < len(comp_vals) else np.nan
+                                                rec[p_col] = pd.to_numeric(v, errors='coerce')
+                                            if time_val:
+                                                rec["제출시간"] = time_val
+                                            parsed_records.append(rec)
+
+                                        raw_df = pd.DataFrame(parsed_records)
+
+                                        # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 3표본)
+                                        if st.session_state.get('user_role') == 'free' and len(raw_df) > 3:
+                                            raw_df = raw_df.head(3)
+                                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 3표본까지만 분석할 수 있습니다. 처음 접수된 3명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 3 samples. Only the first 3 responses will be analyzed."))
+
+                                        # [신규] Basic 요금제 표본 수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
+                                        if st.session_state.get('plan_type') == 'Basic' and len(raw_df) > 10:
+                                            raw_df = raw_df.head(10)
+                                            st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
+                                                         "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
+
+                                        # 3. 대분류 데이터프레임 구성
+                                        st.session_state["ahp_df_main"] = raw_df[["ID", "Type"] + main_pairs].copy()
+
+                                        # 4. 중분류 데이터프레임 구성
+                                        st.session_state["ahp_sub_dfs"] = {}
+                                        for main_c in main_criteria:
+                                            if main_c in sub_pairs_by_main:
+                                                pairs = sub_pairs_by_main[main_c]
+                                                st.session_state["ahp_sub_dfs"][main_c] = raw_df[["ID", "Type"] + pairs].copy()
+
+                                        # 5. 소분류 데이터프레임 구성 (3계층 모델인 경우)
+                                        st.session_state["ahp_sub_sub_dfs"] = {}
+                                        if tier_level == 3:
+                                            for sub_c, ss_pairs in sub_sub_pairs_by_sub.items():
+                                                st.session_state["ahp_sub_sub_dfs"][sub_c] = raw_df[["ID", "Type"] + ss_pairs].copy()
 
                                         sheet_names_list = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
                                         if tier_level == 3:
                                             sheet_names_list += list(st.session_state["ahp_sub_sub_dfs"].keys())
-                                            
+
                                         st.session_state["ahp_sheet_names"] = sheet_names_list
                                         # [수정] 실제 요인명 저장 (F1/F2 폴백 방지용)
-                                        st.session_state["ahp_main_criteria"] = [c.strip() for c in ahp_model.get("main", [])]
-                                        st.session_state["ahp_sub_criteria_map"] = {k.strip(): [s.strip() for s in v] for k, v in ahp_model.get("subs", {}).items()}
+                                        st.session_state["ahp_main_criteria"] = main_criteria
+                                        st.session_state["ahp_sub_criteria_map"] = {k.strip(): [s.strip() for s in v] for k, v in sub_criteria_map.items()}
+
+                                        # [헤더 자동 동기화] 구글 시트의 Raw_Data 헤더가 불일치할 경우 백그라운드 갱신
+                                        type_header_names = ["Type"]
+                                        if demographics and demographics.get("type_questions"):
+                                            tqs = demographics["type_questions"]
+                                            if len(tqs) > 1:
+                                                type_header_names = [f"Type {i+1}" for i in range(len(tqs))]
+                                        expected_headers = ["ID"] + type_header_names + all_expected_pair_cols + ["제출시간"]
+                                        try:
+                                            if all_rows and len(all_rows[0]) != len(expected_headers):
+                                                padded_headers = expected_headers + [''] * max(0, len(all_rows[0]) - len(expected_headers))
+                                                raw_sheet.update(range_name="A1", values=[padded_headers])
+                                        except Exception:
+                                            pass
+
                                         st.success(_(f"✅ 구글 시트에서 총 {len(raw_df)}건의 응답 데이터를 성공적으로 가져왔습니다!", f"✅ Successfully fetched {len(raw_df)} responses!"))
                                     else:
                                         st.warning(_("가져올 설문 응답 데이터가 시트에 존재하지 않습니다 (헤더만 존재).", "No survey responses found in the sheet."))
