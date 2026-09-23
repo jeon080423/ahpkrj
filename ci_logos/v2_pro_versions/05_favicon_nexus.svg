@@ -1,21 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
   <defs>
-    <filter id="favGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#2563EB" flood-opacity="0.22"/>
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#2563EB" flood-opacity="0.20"/>
     </filter>
+    <linearGradient id="topGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="sideGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="botGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#1E40AF"/>
+    </linearGradient>
   </defs>
-  <rect x="1.5" y="1.5" width="297" height="297" rx="64" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="3"/>
-  <g transform="translate(65, 45)" filter="url(#favGlow)">
-    <line x1="85" y1="35" x2="35" y2="85" stroke="#60A5FA" stroke-width="5" opacity="0.8"/>
-    <line x1="85" y1="35" x2="135" y2="85" stroke="#60A5FA" stroke-width="5" opacity="0.8"/>
-    <line x1="35" y1="85" x2="85" y2="135" stroke="#60A5FA" stroke-width="5" opacity="0.8"/>
-    <line x1="135" y1="85" x2="85" y2="135" stroke="#60A5FA" stroke-width="5" opacity="0.8"/>
-    <rect x="66" y="16" width="38" height="38" rx="10" transform="rotate(45 85 35)" fill="#2563EB"/>
-    <rect x="16" y="66" width="38" height="38" rx="10" transform="rotate(45 35 85)" fill="#3B82F6"/>
-    <rect x="116" y="66" width="38" height="38" rx="10" transform="rotate(45 135 85)" fill="#3B82F6"/>
-    <rect x="66" y="116" width="38" height="38" rx="10" transform="rotate(45 85 135)" fill="#1D4ED8"/>
+
+  <!-- 흰색 배경 (둥근 모서리) -->
+  <rect x="1.5" y="1.5" width="297" height="297" rx="60" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="3"/>
+
+  <!-- 심볼 그룹: 중심(150,150), 반지름 100px 다이아몬드 레이아웃 -->
+  <!-- 4개 노드 좌표: Top(150,42) Left(58,150) Right(242,150) Bottom(150,258) -->
+  <g filter="url(#glow)">
+
+    <!-- 연결선 (먼저 그려서 노드 뒤에 깔림) -->
+    <line x1="150" y1="52" x2="68" y2="150" stroke="#60A5FA" stroke-width="7" stroke-linecap="round" opacity="0.85"/>
+    <line x1="150" y1="52" x2="232" y2="150" stroke="#60A5FA" stroke-width="7" stroke-linecap="round" opacity="0.85"/>
+    <line x1="68" y1="150" x2="150" y2="248" stroke="#60A5FA" stroke-width="7" stroke-linecap="round" opacity="0.85"/>
+    <line x1="232" y1="150" x2="150" y2="248" stroke="#60A5FA" stroke-width="7" stroke-linecap="round" opacity="0.85"/>
+
+    <!-- Top 노드 (가장 밝음, 핵심 포인트) -->
+    <rect x="120" y="22" width="60" height="60" rx="14" transform="rotate(45 150 52)" fill="url(#topGrad)"/>
+
+    <!-- Left 노드 -->
+    <rect x="38" y="120" width="60" height="60" rx="14" transform="rotate(45 68 150)" fill="url(#sideGrad)"/>
+
+    <!-- Right 노드 -->
+    <rect x="202" y="120" width="60" height="60" rx="14" transform="rotate(45 232 150)" fill="url(#sideGrad)"/>
+
+    <!-- Bottom 노드 (가장 진함) -->
+    <rect x="120" y="218" width="60" height="60" rx="14" transform="rotate(45 150 248)" fill="url(#botGrad)"/>
+
   </g>
-  <text x="150" y="258" font-family="'Segoe UI', Roboto, -apple-system, sans-serif" font-size="24" font-weight="900" text-anchor="middle" letter-spacing="2">
-    <tspan fill="#0F172A">AHP </tspan><tspan fill="#2563EB">MASTER</tspan>
-  </text>
 </svg>
