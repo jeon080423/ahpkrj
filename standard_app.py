@@ -7049,7 +7049,7 @@ with contextlib.nullcontext():
         _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
         _("설문배포(무료)", "Survey Deploy (Free)"), 
         _("응답 현황", "Responses"),
-        _("서비스 안내", "Service Info"),
+        _("분석 요금제", "Pricing"),
         _("컨설팅 문의", "Consulting")
     ], default=_("AHP 분석 하기", "AHP Analysis"))
         
