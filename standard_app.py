@@ -6031,7 +6031,7 @@ with st.sidebar:
             with open("ahp_master_logo.svg", "r", encoding="utf-8") as f:
                 svg_markup = f.read()
             st.markdown(
-                f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; display: block; width: 100%; margin-top: -24px; margin-bottom: 12px;">'
+                f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; display: block; max-width: 200px; margin: 8px 0 24px 0;">'
                 f'{svg_markup}'
                 f'</a>',
                 unsafe_allow_html=True
@@ -6041,7 +6041,7 @@ with st.sidebar:
                 encoded_logo = base64.b64encode(f.read()).decode()
             st.markdown(
                 f'<a href="https://www.ahpmaster.com" target="_blank">'
-                f'<img src="data:image/png;base64,{encoded_logo}" style="width:100%; border-radius: 4px; display: block; margin-top: -24px; margin-bottom: 12px; image-rendering: -webkit-optimize-contrast;">'
+                f'<img src="data:image/png;base64,{encoded_logo}" style="max-width: 200px; border-radius: 4px; display: block; margin: 8px 0 24px 0; image-rendering: -webkit-optimize-contrast;">'
                 f'</a>',
                 unsafe_allow_html=True
             )
