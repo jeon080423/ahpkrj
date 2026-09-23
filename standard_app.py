@@ -6032,10 +6032,17 @@ with st.sidebar:
         if os.path.exists(logo_file):
             with open(logo_file, "r", encoding="utf-8") as f:
                 svg_markup = f.read()
+            # Streamlit의 st.markdown 컨테이너는 width 상속이 불안정하므로
+            # SVG 태그의 width 속성을 직접 100%로 강제 지정
+            import re as _re
+            svg_markup = _re.sub(r'\bwidth="[^"]*"', 'width="100%"', svg_markup, count=1)
+            svg_markup = _re.sub(r'\bheight="[^"]*"', 'height="auto"', svg_markup, count=1)
             st.markdown(
-                f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; display: block; max-width: 260px; width: 100%; margin: 8px 0 24px 0;">'
+                f'<div style="width:100%; margin: 8px 0 24px 0;">'
+                f'<a href="https://www.ahpmaster.com" target="_blank" '
+                f'   style="text-decoration:none; display:block; width:100%;">'
                 f'{svg_markup}'
-                f'</a>',
+                f'</a></div>',
                 unsafe_allow_html=True
             )
         else:
@@ -6043,10 +6050,12 @@ with st.sidebar:
                 encoded_logo = base64.b64encode(f.read()).decode()
             st.markdown(
                 f'<a href="https://www.ahpmaster.com" target="_blank">'
-                f'<img src="data:image/png;base64,{encoded_logo}" style="max-width: 260px; width: 100%; border-radius: 4px; display: block; margin: 8px 0 24px 0; image-rendering: -webkit-optimize-contrast;">'
+                f'<img src="data:image/png;base64,{encoded_logo}" '
+                f'     style="width:100%; border-radius:4px; display:block; margin:8px 0 24px 0; image-rendering:-webkit-optimize-contrast;">'
                 f'</a>',
                 unsafe_allow_html=True
             )
+
 
     except:
         st.markdown(
