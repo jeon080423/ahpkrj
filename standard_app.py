@@ -7045,13 +7045,13 @@ with contextlib.nullcontext():
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_service, main_tab_consulting = st.tabs([
-        _("엑셀 업로드 분석", "Upload & Analyze"), 
+        _("AHP 분석 하기", "AHP Analysis"), 
         _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
-        _("설문 배포", "Deploy Survey"), 
+        _("설문배포(무료)", "Survey Deploy (Free)"), 
         _("응답 현황", "Responses"),
         _("서비스 안내", "Service Info"),
         _("컨설팅 문의", "Consulting")
-    ], default=_("엑셀 업로드 분석", "Upload & Analyze"))
+    ], default=_("AHP 분석 하기", "AHP Analysis"))
         
     with main_tab1:
         tab1_main_col, tab1_settings_col = st.columns([3.0, 1.1], gap="large")
