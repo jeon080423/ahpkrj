@@ -6027,11 +6027,13 @@ with st.sidebar:
     try:
         import base64
         import os
-        if os.path.exists("ahp_master_logo.svg"):
-            with open("ahp_master_logo.svg", "r", encoding="utf-8") as f:
+        # Compact SVG 우선 사용 (서브텍스트 없는 사이드바 전용 버전)
+        logo_file = "ahp_master_logo_compact.svg" if os.path.exists("ahp_master_logo_compact.svg") else "ahp_master_logo.svg"
+        if os.path.exists(logo_file):
+            with open(logo_file, "r", encoding="utf-8") as f:
                 svg_markup = f.read()
             st.markdown(
-                f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; display: block; max-width: 200px; margin: 8px 0 24px 0;">'
+                f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; display: block; max-width: 260px; width: 100%; margin: 8px 0 24px 0;">'
                 f'{svg_markup}'
                 f'</a>',
                 unsafe_allow_html=True
@@ -6041,10 +6043,11 @@ with st.sidebar:
                 encoded_logo = base64.b64encode(f.read()).decode()
             st.markdown(
                 f'<a href="https://www.ahpmaster.com" target="_blank">'
-                f'<img src="data:image/png;base64,{encoded_logo}" style="max-width: 200px; border-radius: 4px; display: block; margin: 8px 0 24px 0; image-rendering: -webkit-optimize-contrast;">'
+                f'<img src="data:image/png;base64,{encoded_logo}" style="max-width: 260px; width: 100%; border-radius: 4px; display: block; margin: 8px 0 24px 0; image-rendering: -webkit-optimize-contrast;">'
                 f'</a>',
                 unsafe_allow_html=True
             )
+
     except:
         st.markdown(
             f'<a href="https://www.ahpmaster.com" target="_blank" style="text-decoration: none; color: inherit;">'
