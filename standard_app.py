@@ -5965,8 +5965,8 @@ def get_fee_info_text():
         return _(
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <div style="background-color: #f0fdf4; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 무료 회원가입 안내</span>
+  <div style="background-color: #FFFBEB; border: 1px solid #FDE68A; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <span style="font-size: 0.95rem; color: #B45309; font-weight: bold; display: block; margin-bottom: 6px;">🎁 무료 회원가입 안내</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       상단의 <strong>'회원가입'</strong> 탭에서 <strong>무료 회원가입</strong>이 가능합니다. 무료 회원에게는 아래 혜택이 제공됩니다:
     </span>
@@ -5993,8 +5993,8 @@ def get_fee_info_text():
 </div>""",
             """<div style="line-height: 1.4; font-size: 0.95rem;">
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
-  <div style="background-color: #f0fdf4; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <span style="font-size: 0.95rem; color: #15803d; font-weight: bold; display: block; margin-bottom: 6px;">🎁 Free Account Benefits</span>
+  <div style="background-color: #FFFBEB; border: 1px solid #FDE68A; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <span style="font-size: 0.95rem; color: #B45309; font-weight: bold; display: block; margin-bottom: 6px;">🎁 Free Account Benefits</span>
     <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
       You can sign up for a <strong>free account</strong> via the <strong>'Sign Up'</strong> tab at the top. Free members enjoy:
     </span>
@@ -6219,7 +6219,7 @@ with st.sidebar:
             expiry_label = _("만료일: ", "Expiry: ")
             expiry_info = f' | {expiry_label}{st.session_state.expiry_date}'
             
-        info_html = f"""<div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; color: #2e7d32; font-weight: bold; font-size: 0.85rem; padding: 8px 10px; text-align: center; margin-bottom: 8px;">
+        info_html = f"""<div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; color: #1D4ED8; font-weight: bold; font-size: 0.85rem; padding: 8px 10px; text-align: center; margin-bottom: 8px;">
 👤 {st.session_state.user_id} ({role_disp}{expiry_info})
 </div>"""
         st.markdown(info_html, unsafe_allow_html=True)
