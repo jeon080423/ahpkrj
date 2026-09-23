@@ -5972,7 +5972,7 @@ def get_fee_info_text():
       <li><span style="font-size: 0.85rem;">온라인 AHP 설문지 제작/배포 (무료)</span></li>
       <li><span style="font-size: 0.85rem;">실시간 설문 데이터 구글 시트 연동</span></li>
       <li><span style="font-size: 0.85rem;">설문 응답 모니터링 & 결과 다운로드</span></li>
-      <li><span style="font-size: 0.85rem;">AHP 분석 도구 무료 체험 (최대 3표본)</span></li>
+      <li><span style="font-size: 0.85rem;">AHP 무료 분석</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
@@ -5997,7 +5997,7 @@ def get_fee_info_text():
       <li><span style="font-size: 0.85rem;">Create and deploy online AHP surveys (Free)</span></li>
       <li><span style="font-size: 0.85rem;">Real-time data integration with Google Sheets</span></li>
       <li><span style="font-size: 0.85rem;">Monitor responses & download raw data</span></li>
-      <li><span style="font-size: 0.85rem;">Free trial of AHP analysis tools (up to 3 samples)</span></li>
+      <li><span style="font-size: 0.85rem;">Free AHP Analysis</span></li>
     </ul>
   </div>
   <div style="background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
