@@ -5967,9 +5967,6 @@ def get_fee_info_text():
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #FFFBEB; border: 1px solid #FDE68A; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #B45309; font-weight: bold; display: block; margin-bottom: 6px;">🎁 무료 회원가입 안내</span>
-    <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
-      상단의 <strong>'회원가입'</strong> 탭에서 <strong>무료 회원가입</strong>이 가능합니다. 무료 회원에게는 아래 혜택이 제공됩니다:
-    </span>
     <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li><span style="font-size: 0.85rem;">AHP 코딩 엑셀 양식 다운로드</span></li>
       <li><span style="font-size: 0.85rem;">온라인 AHP 설문지 제작/배포 (무료)</span></li>
@@ -5995,9 +5992,6 @@ def get_fee_info_text():
   <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
   <div style="background-color: #FFFBEB; border: 1px solid #FDE68A; padding: 12px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <span style="font-size: 0.95rem; color: #B45309; font-weight: bold; display: block; margin-bottom: 6px;">🎁 Free Account Benefits</span>
-    <span style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; display: block;">
-      You can sign up for a <strong>free account</strong> via the <strong>'Sign Up'</strong> tab at the top. Free members enjoy:
-    </span>
     <ul style="color: #334155; margin: 6px 0 0 0; padding-left: 9px; line-height: 1.45;">
       <li><span style="font-size: 0.85rem;">Download AHP coding Excel templates</span></li>
       <li><span style="font-size: 0.85rem;">Create and deploy online AHP surveys (Free)</span></li>
