@@ -10273,11 +10273,11 @@ Thank you deeply for your valuable participation.
                         elif st.session_state.user_id == "shjeon":
                             default_admin_email = "jeon080423@gmail.com"
                         else:
-                            default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
+                            default_admin_email = ""
                     else:
                         default_admin_email = ""
                     st.session_state["edit_admin_email"] = default_admin_email
-                elif str(st.session_state.get("edit_admin_email", "")).strip().lower() == "temp@ahpmaster.com":
+                elif str(st.session_state.get("edit_admin_email", "")).strip().lower().endswith("@ahpmaster.com"):
                     st.session_state["edit_admin_email"] = ""
 
                 st.write("")
