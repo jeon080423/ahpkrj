@@ -7610,8 +7610,8 @@ with contextlib.nullcontext():
                                             demo_sheet = spreadsheet.worksheet("Demographic_Data")
                                             demo_all_vals = demo_sheet.get_all_values()
                                             if len(demo_all_vals) > 1:
-                                                demo_headers_raw = [h.strip() for h in demo_all_vals[0]]
-                                                demo_df_loaded = pd.DataFrame(demo_all_vals[1:], columns=demo_headers_raw)
+                                                from survey_manager import clean_and_align_sheet_rows
+                                                demo_df_loaded, clean_demo_m, demo_rep = clean_and_align_sheet_rows(demo_all_vals, survey_meta=survey_meta, is_demo=True)
                                                 st.session_state["demo_df"] = demo_df_loaded
                                                 for col in demo_df_loaded.columns:
                                                     c_clean = col.strip()
@@ -11215,7 +11215,7 @@ Thank you deeply for your valuable participation.
                         show_reset_survey_dialog(selected_sheet_id, survey_title)
 
                 if do_load_dash:
-                    from survey_manager import get_survey_stats, get_survey_gspread_client
+                    from survey_manager import get_survey_stats, get_survey_gspread_client, load_survey_metadata, clean_and_align_sheet_rows
                     with st.spinner("실시간 설문 현황 로딩 중..."):
                         # 1. Stats Loading
                         st.session_state["survey_stats"] = get_survey_stats(selected_sheet_id.strip())
@@ -11224,6 +11224,7 @@ Thank you deeply for your valuable participation.
                         g_client = get_survey_gspread_client()
                         if g_client:
                             try:
+                                survey_meta = load_survey_metadata(selected_sheet_id.strip())
                                 spreadsheet = g_client.open_by_key(selected_sheet_id.strip())
                                 raw_sheet = spreadsheet.worksheet("Raw_Data")
                                 all_rows = raw_sheet.get_all_values()
@@ -11234,10 +11235,11 @@ Thank you deeply for your valuable participation.
                                 except Exception:
                                     demo_rows = []
 
-                                from survey_manager import clean_and_align_sheet_rows
+                                live_df, clean_raw_matrix, raw_needs_repair = clean_and_align_sheet_rows(all_rows, survey_meta=survey_meta, is_demo=False)
+                                demo_df, clean_demo_matrix, demo_needs_repair = clean_and_align_sheet_rows(demo_rows, survey_meta=survey_meta, is_demo=True)
 
-                                live_df, clean_raw_matrix, raw_needs_repair = clean_and_align_sheet_rows(all_rows)
-                                demo_df, clean_demo_matrix, demo_needs_repair = clean_and_align_sheet_rows(demo_rows)
+                                if "Type" not in live_df.columns and "Type 1" in live_df.columns:
+                                    live_df["Type"] = live_df["Type 1"]
 
                                 st.session_state["live_df"] = live_df
                                 st.session_state["demo_df"] = demo_df if not demo_df.empty else None
