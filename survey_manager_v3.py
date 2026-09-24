@@ -94,12 +94,20 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
     
     # Raw Data 헤더 생성 (대분류 -> 중분류 -> 소분류 쌍대비교 조합)
 
-    type_headers = ["Type"]
+    type_headers = []
     if demographics and demographics.get("type_questions"):
-        tq_count = len(demographics["type_questions"])
-        if tq_count > 0:
-            type_headers = [f"Type {i+1}" for i in range(tq_count)]
+        tq_list = demographics["type_questions"]
+        for i, tq in enumerate(tq_list):
+            q_name = f"Type {i+1}"
+            type_headers.append(q_name)
+            if tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", [])):
+                type_headers.append(f"{q_name}_기타")
+    else:
+        type_headers = ["Type"]
+        if demographics and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics.get("type_options", [])):
+            type_headers.append("Type_기타")
     raw_headers = ["ID"] + type_headers
+
     
     # 1. 대분류
     main_criteria = ahp_model.get("main", [])
@@ -486,9 +494,16 @@ def create_yeta_survey_sheet_v3(title, admin_email, ahp_model, demographics, def
     # Raw Data 헤더 생성
     type_headers = []
     if demographics and demographics.get("type_questions"):
-        tq_count = len(demographics["type_questions"])
-        for i in range(tq_count):
-            type_headers.append(f"Type {i+1}")
+        tq_list = demographics["type_questions"]
+        for i, tq in enumerate(tq_list):
+            t_col = f"Type {i+1}"
+            type_headers.append(t_col)
+            if tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", [])):
+                type_headers.append(f"{t_col}_기타")
+    else:
+        type_headers.append("Type")
+        if demographics and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics.get("type_options", [])):
+            type_headers.append("Type_기타")
             
     raw_headers = ["ID"] + type_headers
     

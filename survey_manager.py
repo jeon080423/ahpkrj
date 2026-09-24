@@ -220,12 +220,21 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     
     # 1. Raw_Data 헤더 구성: ID, Type, (Pairwise Combination Fields...), 제출시간
 
-    type_headers = ["그룹 분류"]
+    type_headers = []
     if demographics and demographics.get("type_questions"):
         tq_list = demographics["type_questions"]
-        if len(tq_list) > 0:
-            type_headers = [tq.get("q", f"추가 문항 {i}") if i > 0 else tq.get("q", "그룹 분류") for i, tq in enumerate(tq_list)]
+        for i, tq in enumerate(tq_list):
+            q_name = tq.get("q", f"추가 문항 {i}") if i > 0 else tq.get("q", "그룹 분류")
+            type_headers.append(q_name)
+            if tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", [])):
+                type_headers.append(f"{q_name}_기타")
+    else:
+        q_name = demographics.get("type_question", "그룹 분류") if demographics else "그룹 분류"
+        type_headers.append(q_name)
+        if demographics and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics.get("type_options", [])):
+            type_headers.append(f"{q_name}_기타")
     raw_headers = ["ID"] + type_headers
+
     
     # AHP 쌍대비교 필드명 목록 구성 (대분류 조합)
     main_criteria = ahp_model.get("main", [])
@@ -665,7 +674,19 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
             # 혹시 모를 오류 방지 (Demographic_Data 시트가 없으면 재생성)
             try:
                 demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
-                # 헤더 추가
+                type_headers = []
+                if demographics_settings and demographics_settings.get("type_questions"):
+                    tq_list = demographics_settings["type_questions"]
+                    for i, tq in enumerate(tq_list):
+                        q_name = tq.get("q", f"추가 문항 {i}") if i > 0 else tq.get("q", "그룹 분류")
+                        type_headers.append(q_name)
+                        if tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", [])):
+                            type_headers.append(f"{q_name}_기타")
+                else:
+                    q_name = demographics_settings.get("type_question", "그룹 분류") if demographics_settings else "그룹 분류"
+                    type_headers.append(q_name)
+                    if demographics_settings and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics_settings.get("type_options", [])):
+                        type_headers.append(f"{q_name}_기타")
                 demo_headers = ["ID"] + type_headers
                 demo_cols = []
                 if demographics_settings.get("name"): demo_cols.append("성명")
