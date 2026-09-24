@@ -124,48 +124,63 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                 parts = existing_sheet_id.split("/d/")
                 if len(parts) > 1:
                     existing_sheet_id = parts[1].split("/")[0]
-            spreadsheet = client.open_by_key(existing_sheet_id)
+            spreadsheet = run_gspread_with_retry(client.open_by_key, existing_sheet_id, max_retries=5, initial_backoff=3)
             # 링크가 있는 사용자에게 '조회자(reader)' 권한 부여 (권한 요청 팝업 방지 + 데이터 무단 훼손/수정 방지)
             try:
-                spreadsheet.share(None, perm_type='anyone', role='reader')
+                run_gspread_with_retry(spreadsheet.share, None, perm_type='anyone', role='reader')
             except Exception:
                 pass
         except Exception as e:
+            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e) or "Quota exceeded" in str(e):
+                raise Exception(f"구글 API 분당 요청 한도(429 Rate Limit)가 일시적으로 초과되었습니다. 약 1분 후 다시 시도해 주세요. ({e})")
             raise Exception(f"기존 구글 시트를 열 수 없습니다. ID와 서비스 계정 공유 설정을 확인해 주세요. (에러: {e})")
             
-        # Survey_Metadata 워크시트 설정
+        # 기존 워크시트 목록을 1번의 API 호출로 가져와 딕셔너리로 캐싱 (중복 API 호출 90% 이상 제거)
         try:
-            meta_sheet = spreadsheet.worksheet("Survey_Metadata")
-            meta_sheet.clear()
-        except gspread.WorksheetNotFound:
+            existing_worksheets = run_gspread_with_retry(spreadsheet.worksheets)
+            ws_map = {ws.title: ws for ws in existing_worksheets}
+        except Exception:
+            ws_map = {}
+
+        def get_or_create_ws(title, rows="1000", cols="50"):
+            if title in ws_map:
+                return ws_map[title], False
             try:
-                meta_sheet = spreadsheet.sheet1
-                meta_sheet.update_title("Survey_Metadata")
-                meta_sheet.clear()
-            except:
-                meta_sheet = spreadsheet.add_worksheet(title="Survey_Metadata", rows="100", cols="20")
+                new_ws = run_gspread_with_retry(spreadsheet.add_worksheet, title=title, rows=rows, cols=cols)
+                ws_map[title] = new_ws
+                return new_ws, True
+            except Exception:
+                try:
+                    fallback_ws = run_gspread_with_retry(spreadsheet.worksheet, title)
+                    ws_map[title] = fallback_ws
+                    return fallback_ws, False
+                except Exception:
+                    raise
+
+        # Survey_Metadata 워크시트 설정
+        if "Survey_Metadata" in ws_map:
+            meta_sheet = ws_map["Survey_Metadata"]
+            run_gspread_with_retry(meta_sheet.clear)
+        else:
+            try:
+                meta_sheet = run_gspread_with_retry(lambda: spreadsheet.sheet1)
+                run_gspread_with_retry(meta_sheet.update_title, "Survey_Metadata")
+                run_gspread_with_retry(meta_sheet.clear)
+                ws_map["Survey_Metadata"] = meta_sheet
+            except Exception:
+                meta_sheet, _ = get_or_create_ws("Survey_Metadata", rows="100", cols="20")
                 
         # Raw_Data 워크시트 설정
-        try:
-            raw_sheet = spreadsheet.worksheet("Raw_Data")
-            # 수정 시 기존 데이터 보존
-        except gspread.WorksheetNotFound:
-            raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")
+        raw_sheet, is_raw_new = get_or_create_ws("Raw_Data", rows="1000", cols="50")
 
         # Demographic_Data 워크시트 설정
-        try:
-            demo_sheet = spreadsheet.worksheet("Demographic_Data")
-            # 수정 시 기존 데이터 보존
-        except gspread.WorksheetNotFound:
-            demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
+        demo_sheet, is_demo_new = get_or_create_ws("Demographic_Data", rows="1000", cols="20")
             
     else:
         # [추가] 서비스 계정의 구글 드라이브 용량 초과 방지를 위한 사전 휴지통 비우기 및 오래된 파일 정리
         try:
-            # drive v3 서비스 빌드하여 휴지통 일괄 비우기 처리
             from googleapiclient.discovery import build
             drive_service = build('drive', 'v3', credentials=client.auth)
-            # 휴지통 완전 비우기
             drive_service.files().emptyTrash().execute()
         except Exception as e_trash:
             pass
@@ -175,7 +190,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         now_date = datetime.datetime.now().strftime("%Y-%m-%d")
         user_tag = user_id or admin_email or "User"
         sheet_title = f"[{user_tag}_{now_date}] {title}" if title else f"[{user_tag}_{now_date}] AHP 설문"
-        spreadsheet = client.create(sheet_title)
+        spreadsheet = run_gspread_with_retry(client.create, sheet_title)
         
         # 2. 담당자 이메일에 편집자 권한 부여 및 링크 전체 공개 편집자 설정
         if admin_email and "@" in admin_email:
@@ -183,7 +198,6 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                 spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
             except Exception as e:
                 st.warning(f"설문조사 담당자 이메일 공유 설정 중 문제 발생: {e}")
-        # 링크가 있는 사용자는 '조회자(reader)'로 팝업 없이 즉시 열람 가능하며, 무단 훼손 방지
         try:
             spreadsheet.share(None, perm_type='anyone', role='reader')
         except Exception:
@@ -191,13 +205,36 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
      
         # 3. Sheet 1: Survey_Metadata 생성 및 설정
         meta_sheet = spreadsheet.sheet1
-        meta_sheet.update_title("Survey_Metadata")
+        run_gspread_with_retry(meta_sheet.update_title, "Survey_Metadata")
         
         # 4. Sheet 2: Raw_Data 생성
-        raw_sheet = spreadsheet.add_worksheet(title="Raw_Data", rows="1000", cols="50")
+        raw_sheet = run_gspread_with_retry(spreadsheet.add_worksheet, title="Raw_Data", rows="1000", cols="50")
+        is_raw_new = True
 
         # 5. Sheet 3: Demographic_Data 생성
-        demo_sheet = spreadsheet.add_worksheet(title="Demographic_Data", rows="1000", cols="20")
+        demo_sheet = run_gspread_with_retry(spreadsheet.add_worksheet, title="Demographic_Data", rows="1000", cols="20")
+        is_demo_new = True
+
+        ws_map = {
+            "Survey_Metadata": meta_sheet,
+            "Raw_Data": raw_sheet,
+            "Demographic_Data": demo_sheet
+        }
+
+        def get_or_create_ws(title, rows="1000", cols="50"):
+            if title in ws_map:
+                return ws_map[title], False
+            try:
+                new_ws = run_gspread_with_retry(spreadsheet.add_worksheet, title=title, rows=rows, cols=cols)
+                ws_map[title] = new_ws
+                return new_ws, True
+            except Exception:
+                try:
+                    fallback_ws = run_gspread_with_retry(spreadsheet.worksheet, title)
+                    ws_map[title] = fallback_ws
+                    return fallback_ws, False
+                except Exception:
+                    raise
         
     metadata = [
         ["Field", "Value"],
@@ -271,16 +308,21 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     raw_headers.append("제출시간")
     
     # Raw_Data가 이미 존재하는지 (기존 연결 시) 확인 후 헤더 업데이트
-    if len(raw_sheet.get_all_values()) == 0:
-        raw_sheet.append_row(raw_headers)
+    if is_raw_new:
+        run_gspread_with_retry(raw_sheet.append_row, raw_headers)
+    else:
+        r1 = run_gspread_with_retry(raw_sheet.row_values, 1)
+        if not r1:
+            run_gspread_with_retry(raw_sheet.append_row, raw_headers)
         
-    # [신규] Main_Criteria 및 하위 시트들 동적 생성 및 헤더 구성
-    try:
-        main_sheet = spreadsheet.worksheet("Main_Criteria")
-    except gspread.WorksheetNotFound:
-        main_sheet = spreadsheet.add_worksheet(title="Main_Criteria", rows="1000", cols="20")
-    if len(main_sheet.get_all_values()) == 0:
-        main_sheet.append_row(["ID"] + type_headers + main_pairs + ["제출시간"])
+    # Main_Criteria 및 하위 시트들 동적 생성 및 헤더 구성
+    main_sheet, is_main_new = get_or_create_ws("Main_Criteria", rows="1000", cols="20")
+    if is_main_new:
+        run_gspread_with_retry(main_sheet.append_row, ["ID"] + type_headers + main_pairs + ["제출시간"])
+    else:
+        r1 = run_gspread_with_retry(main_sheet.row_values, 1)
+        if not r1:
+            run_gspread_with_retry(main_sheet.append_row, ["ID"] + type_headers + main_pairs + ["제출시간"])
         
     # 중분류 시트 생성
     for main_c in main_criteria:
@@ -291,12 +333,13 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                 for j in range(i + 1, len(subs)):
                     sub_pairs.append(f"{subs[i]}_{subs[j]}")
             safe_sheet_name = str(main_c)[:31]
-            try:
-                s_sheet = spreadsheet.worksheet(safe_sheet_name)
-            except gspread.WorksheetNotFound:
-                s_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
-            if len(s_sheet.get_all_values()) == 0:
-                s_sheet.append_row(["ID"] + type_headers + sub_pairs + ["제출시간"])
+            s_sheet, is_s_new = get_or_create_ws(safe_sheet_name, rows="1000", cols="20")
+            if is_s_new:
+                run_gspread_with_retry(s_sheet.append_row, ["ID"] + type_headers + sub_pairs + ["제출시간"])
+            else:
+                r1 = run_gspread_with_retry(s_sheet.row_values, 1)
+                if not r1:
+                    run_gspread_with_retry(s_sheet.append_row, ["ID"] + type_headers + sub_pairs + ["제출시간"])
                 
     # 소분류 시트 생성
     for main_c, subs in sub_criteria_map.items():
@@ -308,12 +351,13 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                     for j in range(i + 1, len(sub_subs)):
                         ss_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
                 safe_sheet_name = str(sub_c)[:31]
-                try:
-                    ss_sheet = spreadsheet.worksheet(safe_sheet_name)
-                except gspread.WorksheetNotFound:
-                    ss_sheet = spreadsheet.add_worksheet(title=safe_sheet_name, rows="1000", cols="20")
-                if len(ss_sheet.get_all_values()) == 0:
-                    ss_sheet.append_row(["ID"] + type_headers + ss_pairs + ["제출시간"])
+                ss_sheet, is_ss_new = get_or_create_ws(safe_sheet_name, rows="1000", cols="20")
+                if is_ss_new:
+                    run_gspread_with_retry(ss_sheet.append_row, ["ID"] + type_headers + ss_pairs + ["제출시간"])
+                else:
+                    r1 = run_gspread_with_retry(ss_sheet.row_values, 1)
+                    if not r1:
+                        run_gspread_with_retry(ss_sheet.append_row, ["ID"] + type_headers + ss_pairs + ["제출시간"])
 
 
     # 2. Demographic_Data 헤더 구성: ID, Type, (Demographic Fields...), 사전순위지정, (답례품_연락처...), 제출시간
@@ -337,7 +381,12 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         demo_headers.append("답례품_연락처")
         
     demo_headers.append("제출시간")
-    demo_sheet.append_row(demo_headers)
+    if is_demo_new:
+        run_gspread_with_retry(demo_sheet.append_row, demo_headers)
+    else:
+        r1 = run_gspread_with_retry(demo_sheet.row_values, 1)
+        if not r1:
+            run_gspread_with_retry(demo_sheet.append_row, demo_headers)
     
     # 로컬 SQLite 캐시에 백업 저장 및 Streamlit 캐시 비우기
     try:

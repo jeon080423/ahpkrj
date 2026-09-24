@@ -11103,7 +11103,10 @@ Thank you deeply for your valuable participation.
                                             st.error(f"구글 시트 연동 실패: {ex}")
                                             import streamlit.components.v1 as components
                                             error_msg = str(ex).replace("'", "\\'").replace("\\n", " ")
-                                            components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp2-75@ahp2-486703.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
+                                            if any(token in str(ex) for token in ["429", "RESOURCE_EXHAUSTED", "Quota exceeded", "Rate Limit"]):
+                                                components.html(f"<script>alert('⏳ 구글 API 분당 요청 한도(429 Rate Limit)가 일시적으로 초과되었습니다.\\n\\n구글 API 정책상 서비스 계정의 1분당 API 요청 횟수(분당 60회)가 일시적으로 초과되어 발생한 대기 현상입니다.\\n서비스 계정 편집자 공유 권한 문제는 아니오니 안심하시기 바랍니다.\\n\\n약 30초~1분 정도 잠시 기다리신 후 [구글 시트 연동] 버튼을 다시 클릭해 주시기 바랍니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
+                                            else:
+                                                components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp2-75@ahp2-486703.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
 
 
         _survey_setup_fragment()
