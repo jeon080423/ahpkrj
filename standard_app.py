@@ -2825,8 +2825,17 @@ def calculate_pairwise_ttest(df, factors):
 
 def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geometric', ahp_method='traditional'):
 
-    # ID와 인구통계(Type) 관련 컬럼을 제외한 나머지를 쌍대비교 컬럼으로 간주
-    comp_cols = [c for c in df.columns if str(c).strip().lower() != 'id' and not str(c).strip().lower().startswith('type')]
+    # ID와 인구통계(Type), 기타 직접입력 컬럼을 제외한 나머지를 쌍대비교 컬럼으로 간주
+    def _is_comp_col(col_name):
+        c_str = str(col_name).strip()
+        c_lower = c_str.lower()
+        if c_lower == 'id' or c_lower.startswith('type') or c_lower in ['제출시간', 'timestamp', '타임스탬프', '기타', 'other', '보상']:
+            return False
+        if c_str.endswith('_기타') or c_str.endswith('(기타)'):
+            return False
+        return True
+
+    comp_cols = [c for c in df.columns if _is_comp_col(c)]
     meta_cols = [c for c in df.columns if c not in comp_cols]
     factors, n = infer_factors_from_columns(comp_cols)
     
@@ -3568,9 +3577,36 @@ if "preview_id" in q_params or "survey_id" in q_params:
             else:
                 tq_q = _t(tq_q)
             
-            # 주관식으로 명시된 경우 강제 텍스트 입력
+            # 주관식으로 명시된 경우 직접 입력 칸과 함께 '모름/비해당' 라디오 버튼 제시
             if tq_q_type == "text":
-                ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"survey_resp_type_{i}")
+                text_mode_options = [_("직접 입력", "Enter directly"), _("모름/비해당", "Don't know / Not applicable")]
+                choice = st.radio(
+                    f"SQ{sq_idx}. {tq_q}",
+                    text_mode_options,
+                    index=0,
+                    key=f"survey_resp_type_mode_{i}",
+                    horizontal=True
+                )
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    if choice == text_mode_options[1]:  # 모름/비해당 선택 시
+                        ans = "모름/비해당"
+                        st.text_input(
+                            f"SQ{sq_idx}. {tq_q}",
+                            value=_("모름/비해당", "Don't know / Not applicable"),
+                            disabled=True,
+                            key=f"survey_resp_type_disabled_{i}",
+                            label_visibility="collapsed"
+                        )
+                    else:
+                        user_input = st.text_input(
+                            f"SQ{sq_idx}. {tq_q}",
+                            key=f"survey_resp_type_{i}",
+                            placeholder=_("내용을 직접 입력하세요", "Enter details directly"),
+                            label_visibility="collapsed"
+                        )
+                        ans = user_input.strip() if user_input else ""
+                resp_data["types"].append(ans)
             else:
                 # 객관식: opts 유효성 확인
                 if not isinstance(tq_opts, list) or not tq_opts or tq_opts == ["전문가", "일반", "공무원", "기타"]:
@@ -3579,8 +3615,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     else:
                         tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
                 tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
+                has_etc_opt = any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq_opts)
                 ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
-            resp_data["types"].append(ans)
+                resp_data["types"].append(ans)
+                if has_etc_opt:
+                    is_etc_chosen = "기타" in str(ans) or "other" in str(ans).lower()
+                    etc_text = ""
+                    if is_etc_chosen:
+                        col1, col2 = st.columns([1, 3])
+                        with col1:
+                            etc_text = st.text_input(
+                                _("↳ 기타 내용 직접 입력", "↳ Enter custom details"),
+                                key=f"survey_resp_type_etc_{i}",
+                                placeholder=_("세부 내용 직접 입력", "Enter specific details")
+                            )
+                    resp_data["types"].append(etc_text.strip() if etc_text else "")
             sq_idx += 1
     else:
         # 역방향 호환성
@@ -3596,8 +3645,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
         else:
             type_opts = [translate_factor_if_default(opt) for opt in type_opts]
             
+        has_etc_opt = any("기타" in str(opt) or "other" in str(opt).lower() for opt in type_opts)
         ans = st.radio(f"SQ{sq_idx}. {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
         resp_data["types"].append(ans)
+        if has_etc_opt:
+            is_etc_chosen = "기타" in str(ans) or "other" in str(ans).lower()
+            etc_text = ""
+            if is_etc_chosen:
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    etc_text = st.text_input(
+                        _("↳ 기타 내용 직접 입력", "↳ Enter custom details"),
+                        key="survey_resp_type_etc",
+                        placeholder=_("세부 내용 직접 입력", "Enter specific details")
+                    )
+            resp_data["types"].append(etc_text.strip() if etc_text else "")
         sq_idx += 1
         
     # 기존 코드와의 호환성을 위해 type 속성도 유지
@@ -7279,7 +7341,7 @@ with contextlib.nullcontext():
 
                     # [신규] 엑셀 파일 내의 그룹 분석 후보 변수(ID/쌍대비교 제외 메타 컬럼) 감지
                     excel_group_vars = {}
-                    meta_candidate_cols = [c for c in df_main.columns if '_' not in str(c) and str(c) not in ["ID", "제출시간", "timestamp"]]
+                    meta_candidate_cols = [c for c in df_main.columns if '_' not in str(c) and str(c) not in ["ID", "제출시간", "timestamp"] and not str(c).endswith('_기타') and not str(c).endswith('(기타)')]
                     for mc in meta_candidate_cols:
                         c_str = str(mc).strip()
                         if "ID" in df_main.columns:
@@ -7288,11 +7350,12 @@ with contextlib.nullcontext():
                             excel_group_vars[c_str] = {i: df_main.iloc[i][mc] for i in range(len(df_main))}
                     st.session_state["available_group_vars"] = excel_group_vars
                             
-                    # 3계층 식별 로직 (df_main 컬럼에서 _ 포함된 것으로 대분류 요인 도출)
+                    # 3계층 식별 로직 (df_main 컬럼에서 _ 포함된 것으로 대분류 요인 도출, _기타/Type 컬럼 제외)
                     main_criteria_infer = set()
                     for col in df_main.columns:
-                        if '_' in col:
-                            parts = col.split('_')
+                        c_str = str(col).strip()
+                        if '_' in c_str and not c_str.endswith('_기타') and not c_str.endswith('(기타)') and not c_str.lower().startswith('type'):
+                            parts = c_str.split('_')
                             if len(parts) == 2:
                                 main_criteria_infer.add(parts[0])
                                 main_criteria_infer.add(parts[1])
@@ -7443,7 +7506,21 @@ with contextlib.nullcontext():
                                         tq_count = len(tq_list)
                                         if tq_count == 0 and demographics and demographics.get("type_options"):
                                             tq_count = 1
-                                        tq_names = [tq.get("q", f"인구통계 {i+1}").strip() for i, tq in enumerate(tq_list)] if tq_list else ["그룹 분류(Type)"]
+                                            
+                                        # 각 질문별 컬럼 정의 (질문명, 기타컬럼 포함 여부)
+                                        tq_col_defs = []
+                                        if tq_list:
+                                            for i, tq in enumerate(tq_list):
+                                                q_name = tq.get("q", f"인구통계 {i+1}").strip()
+                                                has_etc = tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", []))
+                                                tq_col_defs.append((q_name, has_etc))
+                                        else:
+                                            q_name = demographics.get("type_question", "그룹 분류(Type)") if demographics else "그룹 분류(Type)"
+                                            has_etc = demographics and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics.get("type_options", []))
+                                            tq_col_defs.append((q_name, has_etc))
+
+                                        expected_type_col_count = sum(2 if has_etc else 1 for _, has_etc in tq_col_defs)
+                                        tq_names = [q_name for q_name, _ in tq_col_defs]
 
                                         parsed_records = []
                                         for r_idx, row in enumerate(all_rows[1:]):
@@ -7457,8 +7534,8 @@ with contextlib.nullcontext():
                                             time_val = r[-1] if len(r) > 1 and ("-" in r[-1] and ":" in r[-1]) else ""
                                             comp_end = len(r) - 1 if time_val else len(r)
 
-                                            # 인구통계 열이 여러 개이거나 시트 헤더와 불일치해도 실제 쌍대비교 위치를 정확히 탐색
-                                            comp_start = 1 + tq_count
+                                            # 인구통계 열이 여러 개이거나 기타 직접입력 열이 있어도 실제 쌍대비교 위치를 정확히 탐색
+                                            comp_start = 1 + expected_type_col_count
                                             if comp_end - comp_start == total_expected_pairs:
                                                 comp_vals = r[comp_start:comp_end]
                                                 resp_type = r[1] if len(r) > 1 and r[1].strip() else "일반"
@@ -7471,12 +7548,18 @@ with contextlib.nullcontext():
                                                 comp_vals = r[1:comp_end] + [''] * max(0, total_expected_pairs - (comp_end - 1))
                                                 resp_type = r[1] if len(r) > 1 and r[1].strip() else "일반"
 
-                                            # 모든 인구통계 항목값 보존
+                                            # 모든 인구통계 항목값 보존 (기타 직접입력값 포함)
                                             t_vals = r[1:comp_start] if comp_start > 1 else []
                                             rec = {"ID": resp_id, "Type": resp_type}
-                                            for d_idx, d_name in enumerate(tq_names):
-                                                d_val = t_vals[d_idx].strip() if d_idx < len(t_vals) else ""
-                                                rec[f"DEMO_{d_name}"] = d_val if d_val else "미응답"
+                                            val_ptr = 0
+                                            for q_name, has_etc in tq_col_defs:
+                                                q_val = t_vals[val_ptr].strip() if val_ptr < len(t_vals) else ""
+                                                val_ptr += 1
+                                                rec[f"DEMO_{q_name}"] = q_val if q_val else "미응답"
+                                                if has_etc:
+                                                    etc_val = t_vals[val_ptr].strip() if val_ptr < len(t_vals) else ""
+                                                    val_ptr += 1
+                                                    rec[f"DEMO_{q_name}_기타"] = etc_val
 
                                             for k, p_col in enumerate(all_expected_pair_cols):
                                                 v = comp_vals[k] if k < len(comp_vals) else np.nan
@@ -7498,7 +7581,7 @@ with contextlib.nullcontext():
                                             st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
                                                          "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
 
-                                        # [신규] 그룹 분석 기준 변수 맵 구성 (인구통계 질문 + Demographic_Data 시트 항목)
+                                        # [신규] 그룹 분석 기준 변수 맵 구성 (인구통계 질문 + Demographic_Data 시트 항목, 주관식 기타 입력값 제외)
                                         group_vars_map = {}
                                         for d_name in tq_names:
                                             col_key = f"DEMO_{d_name}"
@@ -7517,7 +7600,7 @@ with contextlib.nullcontext():
                                                 st.session_state["demo_df"] = demo_df_loaded
                                                 for col in demo_df_loaded.columns:
                                                     c_clean = col.strip()
-                                                    if c_clean and c_clean not in ["ID", "제출시간", "timestamp", "보상", "이메일", "전화번호"] and not c_clean.startswith("순위"):
+                                                    if c_clean and c_clean not in ["ID", "제출시간", "timestamp", "보상", "이메일", "전화번호"] and not c_clean.startswith("순위") and not c_clean.endswith("_기타") and not c_clean.endswith("(기타)"):
                                                         if c_clean not in group_vars_map:
                                                             group_vars_map[c_clean] = demo_df_loaded.set_index("ID")[col].to_dict()
                                         except Exception:
@@ -7551,11 +7634,18 @@ with contextlib.nullcontext():
                                         st.session_state["ahp_sub_criteria_map"] = {k.strip(): [s.strip() for s in v] for k, v in sub_criteria_map.items()}
 
                                         # [헤더 자동 동기화] 구글 시트의 Raw_Data 헤더가 불일치할 경우 백그라운드 갱신
-                                        type_header_names = ["Type"]
+                                        type_header_names = []
                                         if demographics and demographics.get("type_questions"):
                                             tqs = demographics["type_questions"]
-                                            if len(tqs) > 1:
-                                                type_header_names = [f"Type {i+1}" for i in range(len(tqs))]
+                                            for i, tq in enumerate(tqs):
+                                                t_col = f"Type {i+1}" if len(tqs) > 1 else "Type"
+                                                type_header_names.append(t_col)
+                                                if tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", [])):
+                                                    type_header_names.append(f"{t_col}_기타")
+                                        else:
+                                            type_header_names.append("Type")
+                                            if demographics and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics.get("type_options", [])):
+                                                type_header_names.append("Type_기타")
                                         expected_headers = ["ID"] + type_header_names + all_expected_pair_cols + ["제출시간"]
                                         try:
                                             if all_rows and len(all_rows[0]) != len(expected_headers):
@@ -10231,7 +10321,7 @@ Thank you deeply for your valuable participation.
                             # 주관식: 보기 입력란 숨김, opts를 빈 리스트로 저장
                             type_questions_state[i]["opts"] = ""
                             opts_list = []
-                            st.caption(_("💡 주관식: 응답자가 자유롭게 텍스트를 입력하는 방식입니다. 보기를 입력할 필요가 없습니다.", "💡 Open-ended: Respondents type their own answer freely. No options needed."))
+                            st.caption(_("💡 주관식: 응답자가 자유롭게 텍스트를 입력하는 방식입니다. 설문 응답 시 '모름/비해당' 라디오 버튼이 함께 제공됩니다.", "💡 Open-ended: Respondents type their own answer freely. A 'Don't know / Not applicable' option is also provided."))
 
                         type_questions.append({
                             "q": q_val,
@@ -11486,7 +11576,20 @@ Thank you deeply for your valuable participation.
                                     rewards_info = survey_meta.get("Rewards_Info", {})
                                     tier_level = str(survey_meta.get("Tier_Level", "2"))
                                 
-                                    raw_headers = ["ID", "Type"]
+                                    type_headers = []
+                                    if demographics and demographics.get("type_questions"):
+                                        tq_list = demographics["type_questions"]
+                                        for i, tq in enumerate(tq_list):
+                                            q_name = tq.get("q", f"추가 문항 {i}") if i > 0 else tq.get("q", "그룹 분류")
+                                            type_headers.append(q_name)
+                                            if tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", [])):
+                                                type_headers.append(f"{q_name}_기타")
+                                    else:
+                                        q_name = demographics.get("type_question", "그룹 분류") if demographics else "그룹 분류"
+                                        type_headers.append(q_name)
+                                        if demographics and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics.get("type_options", [])):
+                                            type_headers.append(f"{q_name}_기타")
+                                    raw_headers = ["ID"] + type_headers
                                     main_criteria = ahp_model.get("main", [])
                                     for i in range(len(main_criteria)):
                                         for j in range(i + 1, len(main_criteria)):
@@ -11510,7 +11613,7 @@ Thank you deeply for your valuable participation.
                                                             raw_headers.append(f"{sub_subs[i]}_{sub_subs[j]}")
                                     raw_headers.append("제출시간")
                                 
-                                    demo_headers = ["ID", "Type"]
+                                    demo_headers = ["ID"] + type_headers
                                     if demographics.get("name"): demo_headers.append("성명")
                                     if demographics.get("age"): demo_headers.append("연령")
                                     if demographics.get("gender"): demo_headers.append("성별")
