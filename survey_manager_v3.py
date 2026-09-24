@@ -188,6 +188,8 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         r1 = run_gspread_with_retry(raw_sheet.row_values, 1)
         if not r1:
             run_gspread_with_retry(raw_sheet.append_row, raw_headers)
+        elif len(raw_headers) > len(r1):
+            run_gspread_with_retry(raw_sheet.update, range_name="A1", values=[raw_headers])
         
     # Main_Criteria 시트 생성
     main_pairs = []
@@ -195,12 +197,15 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         for j in range(i + 1, len(main_criteria)):
             main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
     main_sheet, is_main_new = get_or_create_ws("Main_Criteria", rows="1000", cols="20")
+    main_hdr = ["ID"] + type_headers + main_pairs + ["제출시간"]
     if is_main_new:
-        run_gspread_with_retry(main_sheet.append_row, ["ID"] + type_headers + main_pairs + ["제출시간"])
+        run_gspread_with_retry(main_sheet.append_row, main_hdr)
     else:
         r1 = run_gspread_with_retry(main_sheet.row_values, 1)
         if not r1:
-            run_gspread_with_retry(main_sheet.append_row, ["ID"] + type_headers + main_pairs + ["제출시간"])
+            run_gspread_with_retry(main_sheet.append_row, main_hdr)
+        elif len(main_hdr) > len(r1):
+            run_gspread_with_retry(main_sheet.update, range_name="A1", values=[main_hdr])
         
     # 중분류 시트 생성
     for main_c in main_criteria:
@@ -256,6 +261,8 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         r1 = run_gspread_with_retry(demo_sheet.row_values, 1)
         if not r1:
             run_gspread_with_retry(demo_sheet.append_row, demo_headers)
+        elif len(demo_headers) > len(r1):
+            run_gspread_with_retry(demo_sheet.update, range_name="A1", values=[demo_headers])
     
     # 로컬 캐시 백업
     try:
