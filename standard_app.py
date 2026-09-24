@@ -3642,10 +3642,36 @@ if "preview_id" in q_params or "survey_id" in q_params:
     #     sq_idx += 1
         
     if demographics.get("email"):
+        email_label = f"SQ{sq_idx}. " + _("이메일 *", "Email *")
+        email_options = [_("직접 입력", "Enter directly"), _("응답거절", "Refuse to respond")]
+        email_choice = st.radio(
+            email_label,
+            email_options,
+            index=0,
+            key="survey_resp_email_choice",
+            horizontal=True
+        )
         col1, col2 = st.columns([1, 3])
         with col1:
-            resp_data["email"] = st.text_input(f"SQ{sq_idx}. " + _("이메일 *", "Email *"), key="survey_resp_email", value="", placeholder=_("예: user@example.com", "e.g. user@example.com"))
+            if email_choice == email_options[1]:  # 응답거절
+                resp_data["email"] = "응답거절"
+                st.text_input(
+                    _("이메일 주소", "Email Address"),
+                    value=_("응답거절", "Refuse to respond"),
+                    disabled=True,
+                    key="survey_resp_email_refused_display",
+                    label_visibility="collapsed"
+                )
+            else:
+                user_email_input = st.text_input(
+                    _("이메일 주소 직접 입력", "Enter Email Address"),
+                    key="survey_resp_email",
+                    placeholder=_("예: user@example.com", "e.g. user@example.com"),
+                    label_visibility="collapsed"
+                )
+                resp_data["email"] = user_email_input.strip() if user_email_input else ""
         sq_idx += 1
+
     
     st.divider()
     
@@ -10222,6 +10248,8 @@ Thank you deeply for your valuable participation.
                 demo_name = st.checkbox(_("이름 수집", "Collect Name"), value=st.session_state.get("edit_demo_name", False))
                 demo_gender = st.checkbox(_("성별 수집", "Collect Gender"), value=st.session_state.get("edit_demo_gender", True))
                 demo_email = st.checkbox(_("이메일 수집", "Collect Email"), value=st.session_state.get("edit_demo_email", True))
+                if demo_email:
+                    st.caption(_("💡 설문 응답자에게 '직접 입력' 및 '응답거절' 라디오 버튼이 제공되며, 거절 시 '응답거절'로 수집됩니다.", "💡 Respondents are provided with 'Enter directly' and 'Refuse to respond' options. Refusals will be collected as 'Refuse to respond'."))
 
 
 
