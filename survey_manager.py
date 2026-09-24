@@ -431,7 +431,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     # 스프레드시트 ID 반환
     return spreadsheet.id
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _fetch_survey_metadata_from_sheets(spreadsheet_id):
     """구글 시트에서 실시간으로 설문 데이터를 가져와서 데코딩하고 로컬 DB 캐시를 갱신합니다."""
     import time

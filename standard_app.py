@@ -10301,11 +10301,11 @@ Thank you deeply for your valuable participation.
                 default_type_opts = _("전문가, 일반, 공무원, 기타", "Expert, General, Public Official, Other")
                 
                 if "edit_type_questions" not in st.session_state:
-                    legacy_q = st.session_state.get("edit_type_question")
-                    legacy_opts = st.session_state.get("edit_type_options")
-                
-                    init_q = legacy_q if legacy_q and legacy_q != "귀하의 소속은 어떻게 되십니까?" else default_type_q
-                    init_opts = legacy_opts if legacy_opts and legacy_opts != "전문가, 일반, 공무원, 기타" else default_type_opts
+                    legacy_q = st.session_state.get("edit_type_question", "")
+                    legacy_opts = st.session_state.get("edit_type_options", "")
+                    # 저장된 값이 존재하면 그대로 사용 (문자열 동등 비교로 기본값 강제 교체하지 않음)
+                    init_q = legacy_q if legacy_q else default_type_q
+                    init_opts = legacy_opts if legacy_opts else default_type_opts
                     st.session_state["edit_type_questions"] = [{"q": init_q, "opts": init_opts, "q_type": "radio"}]
 
                 type_questions_state = st.session_state["edit_type_questions"]
