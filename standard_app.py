@@ -11234,20 +11234,28 @@ Thank you deeply for your valuable participation.
                                 except Exception:
                                     demo_rows = []
 
-                                if len(all_rows) > 0:
-                                    headers = all_rows[0]
-                                    rows = all_rows[1:]
-                                    st.session_state["live_df"] = pd.DataFrame(rows, columns=headers)
+                                from survey_manager import clean_and_align_sheet_rows
 
-                                    if len(demo_rows) > 0:
-                                        demo_headers = demo_rows[0]
-                                        demo_vals = demo_rows[1:]
-                                        st.session_state["demo_df"] = pd.DataFrame(demo_vals, columns=demo_headers)
-                                    else:
-                                        st.session_state["demo_df"] = None
-                                else:
-                                    st.session_state["live_df"] = pd.DataFrame()
-                                    st.session_state["demo_df"] = None
+                                live_df, clean_raw_matrix, raw_needs_repair = clean_and_align_sheet_rows(all_rows)
+                                demo_df, clean_demo_matrix, demo_needs_repair = clean_and_align_sheet_rows(demo_rows)
+
+                                st.session_state["live_df"] = live_df
+                                st.session_state["demo_df"] = demo_df if not demo_df.empty else None
+
+                                # 구글 시트에 중간에 삽입된 중복 헤더 행(ID)이 있거나 1행 헤더가 축소되어 있는 경우 자동 수복(Repair)
+                                if raw_needs_repair and clean_raw_matrix:
+                                    try:
+                                        raw_sheet.clear()
+                                        raw_sheet.update(range_name="A1", values=clean_raw_matrix)
+                                    except Exception:
+                                        pass
+
+                                if demo_needs_repair and clean_demo_matrix and demo_sheet is not None:
+                                    try:
+                                        demo_sheet.clear()
+                                        demo_sheet.update(range_name="A1", values=clean_demo_matrix)
+                                    except Exception:
+                                        pass
 
                             except Exception as g_err:
                                 st.error(f"구글 시트에서 데이터를 읽어오는 중 에러 발생: {g_err}")

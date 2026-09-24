@@ -1,5 +1,6 @@
 import gspread
 import numpy as np
+import pandas as pd
 import json
 import uuid
 import streamlit as st
@@ -314,15 +315,20 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         r1 = run_gspread_with_retry(raw_sheet.row_values, 1)
         if not r1:
             run_gspread_with_retry(raw_sheet.append_row, raw_headers)
+        elif len(raw_headers) > len(r1):
+            run_gspread_with_retry(raw_sheet.update, range_name="A1", values=[raw_headers])
         
     # Main_Criteria 및 하위 시트들 동적 생성 및 헤더 구성
     main_sheet, is_main_new = get_or_create_ws("Main_Criteria", rows="1000", cols="20")
+    main_hdr = ["ID"] + type_headers + main_pairs + ["제출시간"]
     if is_main_new:
-        run_gspread_with_retry(main_sheet.append_row, ["ID"] + type_headers + main_pairs + ["제출시간"])
+        run_gspread_with_retry(main_sheet.append_row, main_hdr)
     else:
         r1 = run_gspread_with_retry(main_sheet.row_values, 1)
         if not r1:
-            run_gspread_with_retry(main_sheet.append_row, ["ID"] + type_headers + main_pairs + ["제출시간"])
+            run_gspread_with_retry(main_sheet.append_row, main_hdr)
+        elif len(main_hdr) > len(r1):
+            run_gspread_with_retry(main_sheet.update, range_name="A1", values=[main_hdr])
         
     # 중분류 시트 생성
     for main_c in main_criteria:
@@ -387,6 +393,8 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         r1 = run_gspread_with_retry(demo_sheet.row_values, 1)
         if not r1:
             run_gspread_with_retry(demo_sheet.append_row, demo_headers)
+        elif len(demo_headers) > len(r1):
+            run_gspread_with_retry(demo_sheet.update, range_name="A1", values=[demo_headers])
     
     # 로컬 SQLite 캐시에 백업 저장 및 Streamlit 캐시 비우기
     try:
@@ -559,6 +567,76 @@ def get_survey_stats(spreadsheet_id):
         }
     except Exception as e:
         return {"completed": 0, "abandoned_cr": 0, "visits": 0, "abandoned_bounce": 0}
+
+def clean_and_align_sheet_rows(rows, expected_headers=None):
+    """
+    구글 시트의 Raw_Data 및 Demographic_Data에서
+    1) 중간에 누적 삽입된 중복 헤더 행(ID로 시작하는 행)들을 제거
+    2) 설문 문항 변경/추가로 인해 헤더 길이가 다를 때 가장 완전하고 최신인 헤더를 선택
+    3) 이전 설문 버전에서 응답한 행이 있을 경우 컬럼명 매핑을 통해 열 밀림 없이 완벽히 정렬
+    """
+    if not rows:
+        return pd.DataFrame(), [], False
+
+    header_candidates = []
+    data_rows = []
+
+    for r in rows:
+        if not r or all(str(cell).strip() == "" for cell in r):
+            continue
+        first_cell = str(r[0]).strip().upper() if len(r) > 0 else ""
+        if first_cell == "ID":
+            header_candidates.append([str(c).strip() for c in r])
+        else:
+            data_rows.append(r)
+
+    # 가장 컬럼 수가 많은 헤더를 최적 헤더로 선정
+    candidates_pool = list(header_candidates)
+    if expected_headers:
+        candidates_pool.append(list(expected_headers))
+
+    if candidates_pool:
+        best_header = max(candidates_pool, key=lambda h: len(h))
+    elif data_rows:
+        max_cols = max((len(r) for r in data_rows), default=1)
+        best_header = [f"Col_{i+1}" for i in range(max_cols)]
+    else:
+        best_header = []
+
+    # 중복 헤더명 방지 처리
+    unique_headers = []
+    seen = {}
+    for h in best_header:
+        h_str = str(h).strip() if str(h).strip() else "Unnamed"
+        if h_str in seen:
+            seen[h_str] += 1
+            unique_headers.append(f"{h_str}_{seen[h_str]}")
+        else:
+            seen[h_str] = 0
+            unique_headers.append(h_str)
+    best_header = unique_headers
+
+    target_len = len(best_header)
+    aligned_rows = []
+    for r in data_rows:
+        r_list = [str(c) for c in r]
+        if len(r_list) == target_len:
+            aligned_rows.append(r_list)
+        else:
+            # 일치하는 헤더 후보가 있는지 확인하여 컬럼명 기준으로 매핑
+            match_hdr = next((h for h in header_candidates if len(h) == len(r_list)), None)
+            if match_hdr:
+                col_map = dict(zip(match_hdr, r_list))
+                aligned_rows.append([col_map.get(col, "") for col in best_header])
+            elif len(r_list) < target_len:
+                aligned_rows.append(r_list + [""] * (target_len - len(r_list)))
+            else:
+                aligned_rows.append(r_list[:target_len])
+
+    df = pd.DataFrame(aligned_rows, columns=best_header) if best_header else pd.DataFrame(aligned_rows)
+    needs_repair = (len(header_candidates) > 1) or (len(rows) > 0 and len(rows[0]) < target_len)
+    clean_matrix = [best_header] + aligned_rows
+    return df, clean_matrix, needs_repair
 
 def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demographics_settings, model, rewards_info):
     """
