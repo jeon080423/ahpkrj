@@ -10266,18 +10266,18 @@ Thank you deeply for your valuable participation.
                     survey_desc = st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en))
                 st.session_state["edit_desc"] = survey_desc
                 
-                if "edit_admin_email" not in st.session_state:
-                    if st.session_state.user_id:
-                        if "@" in st.session_state.user_id:
-                            default_admin_email = st.session_state.user_id
-                        elif st.session_state.user_id == "shjeon":
-                            default_admin_email = "jeon080423@gmail.com"
-                        else:
-                            default_admin_email = ""
-                    else:
-                        default_admin_email = ""
-                    st.session_state["edit_admin_email"] = default_admin_email
-                elif str(st.session_state.get("edit_admin_email", "")).strip().lower().endswith("@ahpmaster.com"):
+                is_edit_mode = bool(st.session_state.get("editing_survey_id"))
+                if not is_edit_mode:
+                    if "edit_admin_email" not in st.session_state:
+                        st.session_state["edit_admin_email"] = ""
+                    elif st.session_state.get("edit_admin_email") in [st.session_state.user_id, "jeon080423@gmail.com"]:
+                        st.session_state["edit_admin_email"] = ""
+                else:
+                    if "edit_admin_email" not in st.session_state:
+                        st.session_state["edit_admin_email"] = ""
+
+                # 레거시 더미 이메일(@ahpmaster.com) 정리
+                if str(st.session_state.get("edit_admin_email", "")).strip().lower().endswith("@ahpmaster.com"):
                     st.session_state["edit_admin_email"] = ""
 
                 st.write("")
