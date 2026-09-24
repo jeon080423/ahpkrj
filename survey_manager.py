@@ -568,16 +568,22 @@ def get_survey_stats(spreadsheet_id):
     except Exception as e:
         return {"completed": 0, "abandoned_cr": 0, "visits": 0, "abandoned_bounce": 0}
 
-def clean_and_align_sheet_rows(rows, expected_headers=None):
+def clean_and_align_sheet_rows(rows, expected_headers=None, survey_meta=None, is_demo=False):
     """
     구글 시트의 Raw_Data 및 Demographic_Data에서
     1) 중간에 누적 삽입된 중복 헤더 행(ID로 시작하는 행)들을 제거
-    2) 설문 문항 변경/추가로 인해 헤더 길이가 다를 때 가장 완전하고 최신인 헤더를 선택
-    3) 이전 설문 버전에서 응답한 행이 있을 경우 컬럼명 매핑을 통해 열 밀림 없이 완벽히 정렬
+    2) survey_meta(설문 메타데이터)가 제공된 경우:
+       - AHP 쌍대비교 열 위치와 응답자 인구통계/그룹분류(Type) 열 위치를 역방향/정방향 탐색하여
+         과거 설문 버전(기타 별도열 미존재 등)과 신규 설문 버전 간의 컬럼 밀림을 완벽히 교정
+       - 최신 문항명/표준 헤더 기준으로 모든 행을 재정렬
+    3) survey_meta가 없는 경우:
+       - 빈 셀이 아닌 유효 헤더명이 가장 많은 후보 행을 최적 헤더로 선택하고
+         중복 ID 행을 제거한 후 열 정렬
     """
     if not rows:
         return pd.DataFrame(), [], False
 
+    # 1. 빈 행 및 헤더 행 분리
     header_candidates = []
     data_rows = []
 
@@ -586,28 +592,193 @@ def clean_and_align_sheet_rows(rows, expected_headers=None):
             continue
         first_cell = str(r[0]).strip().upper() if len(r) > 0 else ""
         if first_cell == "ID":
-            header_candidates.append([str(c).strip() for c in r])
+            clean_hdr = [str(c).strip() for c in r]
+            while clean_hdr and clean_hdr[-1] == "":
+                clean_hdr.pop()
+            if clean_hdr:
+                header_candidates.append(clean_hdr)
         else:
             data_rows.append(r)
 
-    # 가장 컬럼 수가 많은 헤더를 최적 헤더로 선정
+    # 2. survey_meta가 주어진 경우 구조 기반 정밀 복원
+    if survey_meta:
+        try:
+            ahp_model = survey_meta.get("AHP_Model_JSON", {})
+            tier_level = int(survey_meta.get("Tier_Level", 2))
+            main_criteria = [str(c).strip() for c in ahp_model.get("main", [])]
+            main_pairs = [f"{main_criteria[i]}_{main_criteria[j]}"
+                          for i in range(len(main_criteria))
+                          for j in range(i + 1, len(main_criteria))]
+            sub_criteria_map = ahp_model.get("subs", {})
+            all_sub_pairs = []
+            for main_c in main_criteria:
+                subs = [str(s).strip() for s in sub_criteria_map.get(main_c, [])]
+                for i in range(len(subs)):
+                    for j in range(i + 1, len(subs)):
+                        all_sub_pairs.append(f"{subs[i]}_{subs[j]}")
+            all_ss_pairs = []
+            if tier_level == 3:
+                sub_sub_map = ahp_model.get("sub_subs", {})
+                for main_c in main_criteria:
+                    subs = [str(s).strip() for s in sub_criteria_map.get(main_c, [])]
+                    for sub_c in subs:
+                        sub_subs = [str(ss).strip() for ss in sub_sub_map.get(sub_c, [])]
+                        for i in range(len(sub_subs)):
+                            for j in range(i + 1, len(sub_subs)):
+                                all_ss_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
+            all_pairs = main_pairs + all_sub_pairs + all_ss_pairs
+            total_pairs = len(all_pairs)
+
+            demographics = survey_meta.get("Demographics", {})
+            tq_list = demographics.get("type_questions", [])
+
+            max_t_count = 0
+            for r in data_rows:
+                t_idx = -1
+                for idx in range(len(r) - 1, 0, -1):
+                    c = str(r[idx]).strip()
+                    if "-" in c and ":" in c and len(c) >= 10:
+                        t_idx = idx
+                        break
+                if not is_demo and total_pairs > 0:
+                    comp_end = t_idx if t_idx != -1 else len(r)
+                    comp_start = comp_end - total_pairs
+                    t_count = max(0, comp_start - 1)
+                else:
+                    demo_field_count = (
+                        (1 if demographics.get("name") else 0) +
+                        (1 if demographics.get("age") else 0) +
+                        (1 if demographics.get("gender") else 0) +
+                        (1 if demographics.get("experience") else 0) +
+                        (1 if demographics.get("affiliation") else 0) +
+                        (1 if demographics.get("email") else 0) +
+                        1 +
+                        (1 if survey_meta.get("Rewards_Info", {}).get("enabled") else 0)
+                    )
+                    d_end = t_idx if t_idx != -1 else len(r)
+                    t_count = max(0, (d_end - demo_field_count) - 1)
+                if t_count > max_t_count:
+                    max_t_count = t_count
+
+            type_col_defs = []
+            if tq_list:
+                for i, tq in enumerate(tq_list):
+                    q_name = tq.get("q", f"Type {i+1}").strip()
+                    has_etc = tq.get("q_type", "radio") == "radio" and any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq.get("opts", []))
+                    type_col_defs.append((q_name, has_etc))
+            else:
+                q_name = demographics.get("type_question", "그룹 분류").strip() if demographics else "그룹 분류"
+                has_etc = demographics and any("기타" in str(opt) or "other" in str(opt).lower() for opt in demographics.get("type_options", []))
+                type_col_defs.append((q_name, has_etc))
+
+            base_t_count = sum(2 if h else 1 for _, h in type_col_defs)
+            if max_t_count > base_t_count and len(type_col_defs) > 0:
+                type_col_defs[0] = (type_col_defs[0][0], True)
+
+            expected_type_headers = []
+            demo_type_headers = []
+            for i, (q_name, has_etc) in enumerate(type_col_defs):
+                expected_type_headers.append(f"Type {i+1}")
+                demo_type_headers.append(q_name)
+                if has_etc:
+                    expected_type_headers.append(f"Type {i+1}_기타")
+                    demo_type_headers.append(f"{q_name}_기타")
+
+            if not is_demo:
+                best_header = ["ID"] + expected_type_headers + all_pairs + ["제출시간"]
+                aligned_rows = []
+                for r in data_rows:
+                    resp_id = str(r[0]).strip()
+                    t_idx = -1
+                    for idx in range(len(r) - 1, 0, -1):
+                        c = str(r[idx]).strip()
+                        if "-" in c and ":" in c and len(c) >= 10:
+                            t_idx = idx
+                            break
+                    timestamp = str(r[t_idx]).strip() if t_idx != -1 else ""
+                    comp_end = t_idx if t_idx != -1 else len(r)
+                    comp_start = comp_end - total_pairs
+                    comp_vals = [str(r[k]).strip() if k < len(r) else "" for k in range(comp_start, comp_end)]
+                    t_vals = [str(r[k]).strip() for k in range(1, comp_start)]
+                    
+                    if len(t_vals) == len(expected_type_headers):
+                        aligned_t = t_vals
+                    elif len(t_vals) == len(expected_type_headers) - 1:
+                        aligned_t = [t_vals[0], ""] + t_vals[1:]
+                    elif len(t_vals) < len(expected_type_headers):
+                        aligned_t = t_vals + [""] * (len(expected_type_headers) - len(t_vals))
+                    else:
+                        aligned_t = t_vals[:len(expected_type_headers)]
+                    aligned_rows.append([resp_id] + aligned_t + comp_vals + [timestamp])
+
+            else:
+                demo_fields = []
+                if demographics.get("name"): demo_fields.append("성명")
+                if demographics.get("age"): demo_fields.append("연령")
+                if demographics.get("gender"): demo_fields.append("성별")
+                if demographics.get("experience"): demo_fields.append("경력년수")
+                if demographics.get("affiliation"): demo_fields.append("소속")
+                if demographics.get("email"): demo_fields.append("이메일")
+
+                best_header = ["ID"] + demo_type_headers + demo_fields + ["사전순위지정"]
+                if survey_meta.get("Rewards_Info", {}).get("enabled"):
+                    best_header.append("답례품_연락처")
+                best_header.append("제출시간")
+
+                expected_demo_field_count = len(demo_fields) + 1
+                if survey_meta.get("Rewards_Info", {}).get("enabled"):
+                    expected_demo_field_count += 1
+
+                aligned_rows = []
+                for r in data_rows:
+                    resp_id = str(r[0]).strip()
+                    t_idx = -1
+                    for idx in range(len(r) - 1, 0, -1):
+                        c = str(r[idx]).strip()
+                        if "-" in c and ":" in c and len(c) >= 10:
+                            t_idx = idx
+                            break
+                    timestamp = str(r[t_idx]).strip() if t_idx != -1 else ""
+                    d_end = t_idx if t_idx != -1 else len(r)
+                    d_start = d_end - expected_demo_field_count
+                    d_vals = [str(r[k]).strip() if k < len(r) else "" for k in range(d_start, d_end)]
+                    t_vals = [str(r[k]).strip() for k in range(1, d_start)]
+                    
+                    if len(t_vals) == len(demo_type_headers):
+                        aligned_t = t_vals
+                    elif len(t_vals) == len(demo_type_headers) - 1:
+                        aligned_t = [t_vals[0], ""] + t_vals[1:]
+                    elif len(t_vals) < len(demo_type_headers):
+                        aligned_t = t_vals + [""] * (len(demo_type_headers) - len(t_vals))
+                    else:
+                        aligned_t = t_vals[:len(demo_type_headers)]
+                    aligned_rows.append([resp_id] + aligned_t + d_vals + [timestamp])
+
+            df = pd.DataFrame(aligned_rows, columns=best_header)
+            clean_matrix = [best_header] + aligned_rows
+            needs_repair = (len(header_candidates) != 1) or (len(rows) > 0 and [str(c).strip() for c in rows[0] if str(c).strip() != ""] != best_header)
+            return df, clean_matrix, needs_repair
+
+        except Exception as meta_align_err:
+            pass
+
+    # 3. 휴리스틱 헤더 후보 풀에서 최적 헤더 선정 (fallback)
     candidates_pool = list(header_candidates)
     if expected_headers:
-        candidates_pool.append(list(expected_headers))
+        candidates_pool.append([str(c).strip() for c in expected_headers if str(c).strip() != ""])
 
     if candidates_pool:
-        best_header = max(candidates_pool, key=lambda h: len(h))
+        best_header = max(candidates_pool, key=lambda h: len([c for c in h if str(c).strip() != ""]))
     elif data_rows:
         max_cols = max((len(r) for r in data_rows), default=1)
         best_header = [f"Col_{i+1}" for i in range(max_cols)]
     else:
         best_header = []
 
-    # 중복 헤더명 방지 처리
     unique_headers = []
     seen = {}
-    for h in best_header:
-        h_str = str(h).strip() if str(h).strip() else "Unnamed"
+    for i, h in enumerate(best_header):
+        h_str = str(h).strip() if str(h).strip() else f"Col_{i+1}"
         if h_str in seen:
             seen[h_str] += 1
             unique_headers.append(f"{h_str}_{seen[h_str]}")
@@ -619,12 +790,13 @@ def clean_and_align_sheet_rows(rows, expected_headers=None):
     target_len = len(best_header)
     aligned_rows = []
     for r in data_rows:
-        r_list = [str(c) for c in r]
+        r_list = [str(c).strip() for c in r]
+        while len(r_list) > target_len and r_list[-1] == "":
+            r_list.pop()
         if len(r_list) == target_len:
             aligned_rows.append(r_list)
         else:
-            # 일치하는 헤더 후보가 있는지 확인하여 컬럼명 기준으로 매핑
-            match_hdr = next((h for h in header_candidates if len(h) == len(r_list)), None)
+            match_hdr = next((h for h in header_candidates if len([c for c in h if str(c).strip() != ""]) == len(r_list)), None)
             if match_hdr:
                 col_map = dict(zip(match_hdr, r_list))
                 aligned_rows.append([col_map.get(col, "") for col in best_header])
@@ -775,6 +947,10 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
         # 1) Raw_Data에 추가
         try:
             raw_sheet = spreadsheet.worksheet("Raw_Data")
+            r_hdr = run_gspread_with_retry(raw_sheet.row_values, 1)
+            if r_hdr and len(r_hdr) > len(raw_row_data):
+                diff = len(r_hdr) - len(raw_row_data)
+                raw_row_data = raw_row_data[:2] + [""] * diff + raw_row_data[2:]
             raw_sheet.append_row(raw_row_data)
         except Exception as e:
             st.warning(f"Raw_Data 시트 기록 실패: {e}")
@@ -796,6 +972,10 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
         # 2) Demographic_Data에 추가
         try:
             demo_sheet = spreadsheet.worksheet("Demographic_Data")
+            d_hdr = run_gspread_with_retry(demo_sheet.row_values, 1)
+            if d_hdr and len(d_hdr) > len(demo_row_data):
+                diff = len(d_hdr) - len(demo_row_data)
+                demo_row_data = demo_row_data[:2] + [""] * diff + demo_row_data[2:]
             demo_sheet.append_row(demo_row_data)
         except Exception:
             # 혹시 모를 오류 방지 (Demographic_Data 시트가 없으면 재생성)

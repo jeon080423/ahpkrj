@@ -439,6 +439,10 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
         
         try:
             raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+            r_hdr = run_gspread_with_retry(raw_sheet.row_values, 1)
+            if r_hdr and len(r_hdr) > len(raw_row_data):
+                diff = len(r_hdr) - len(raw_row_data)
+                raw_row_data = raw_row_data[:2] + [""] * diff + raw_row_data[2:]
             run_gspread_with_retry(raw_sheet.append_row, raw_row_data)
         except Exception:
             pass
@@ -456,8 +460,15 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
             except Exception:
                 pass
         
-        demo_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Demographic_Data")
-        run_gspread_with_retry(demo_sheet.append_row, demo_row_data)
+        try:
+            demo_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Demographic_Data")
+            d_hdr = run_gspread_with_retry(demo_sheet.row_values, 1)
+            if d_hdr and len(d_hdr) > len(demo_row_data):
+                diff = len(d_hdr) - len(demo_row_data)
+                demo_row_data = demo_row_data[:2] + [""] * diff + demo_row_data[2:]
+            run_gspread_with_retry(demo_sheet.append_row, demo_row_data)
+        except Exception:
+            pass
         
         try:
             conn = sqlite3.connect('users.db')
