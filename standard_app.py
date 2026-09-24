@@ -3466,9 +3466,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
     survey_desc = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', survey_desc)
     survey_desc = re.sub(r'__(.*?)__', r'<u>\1</u>', survey_desc)
     
-    survey_email = survey_meta.get("Admin_Email", "temp@ahpmaster.com")
-    if not survey_email or str(survey_email).strip() == "":
-        survey_email = "temp@ahpmaster.com"
+    survey_email = str(survey_meta.get("Admin_Email", "")).strip()
+    if survey_email.lower() == "temp@ahpmaster.com":
+        survey_email = ""
     
     if survey_desc or survey_email:
         email_html = (
@@ -3484,8 +3484,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
             f"</div>"
         )
         
+        parts = [survey_desc] if survey_desc else []
+        if email_html:
+            parts.append(email_html)
+        if mobile_hint_html:
+            parts.append(mobile_hint_html)
+        inner_content = "\n".join(parts)
+        
         # 사용자 입력 레이아웃(줄바꿈 및 띄어쓰기)을 그대로 유지하기 위해 white-space: pre-wrap 적용
-        box_html = f'<div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{survey_desc}\n{email_html}\n{mobile_hint_html}</div>'
+        box_html = f'<div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; background-color: #ffffff; color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap;">{inner_content}</div>'
         st.markdown(box_html, unsafe_allow_html=True)
 
     
@@ -10259,16 +10266,29 @@ Thank you deeply for your valuable participation.
                     survey_desc = st.session_state.get("edit_desc", _(default_survey_desc_ko, default_survey_desc_en))
                 st.session_state["edit_desc"] = survey_desc
                 
-                if st.session_state.user_id:
-                    if "@" in st.session_state.user_id:
-                        default_admin_email = st.session_state.user_id
-                    elif st.session_state.user_id == "shjeon":
-                        default_admin_email = "jeon080423@gmail.com"
+                if "edit_admin_email" not in st.session_state:
+                    if st.session_state.user_id:
+                        if "@" in st.session_state.user_id:
+                            default_admin_email = st.session_state.user_id
+                        elif st.session_state.user_id == "shjeon":
+                            default_admin_email = "jeon080423@gmail.com"
+                        else:
+                            default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
                     else:
-                        default_admin_email = f"{st.session_state.user_id}@ahpmaster.com"
-                else:
-                    default_admin_email = "temp@ahpmaster.com"
-                survey_admin_email = default_admin_email
+                        default_admin_email = ""
+                    st.session_state["edit_admin_email"] = default_admin_email
+                elif str(st.session_state.get("edit_admin_email", "")).strip().lower() == "temp@ahpmaster.com":
+                    st.session_state["edit_admin_email"] = ""
+
+                st.write("")
+                st.markdown(f"**{_('설문 담당자 문의 이메일', 'Survey Administrator Contact Email')}**")
+                survey_admin_email = st.text_input(
+                    _('설문 담당자 문의 이메일', 'Survey Administrator Contact Email'),
+                    value=st.session_state.get("edit_admin_email", ""),
+                    placeholder=_("예: researcher@university.ac.kr (미입력 시 설문지에 문의처가 표시되지 않습니다)", "e.g., researcher@university.ac.kr (Leave blank to hide)"),
+                    label_visibility="collapsed"
+                )
+                st.session_state["edit_admin_email"] = survey_admin_email
 
                 st.write("")
                 # 응답자 수집 정보 및 그룹 분류 설정 (섹션 1로 통합)
@@ -10791,12 +10811,14 @@ Thank you deeply for your valuable participation.
                         existing_sheet_id_input = st.session_state.editing_survey_id
                     else:
                         past_surveys = []
-                        if survey_admin_email and "@" in survey_admin_email:
+                        valid_ids = list(set(filter(None, [st.session_state.user_id, survey_admin_email])))
+                        if valid_ids:
                             import sqlite3
                             try:
                                 conn = sqlite3.connect('users.db')
                                 c = conn.cursor()
-                                c.execute("SELECT title, survey_id, created_at FROM admin_surveys WHERE admin_id=? ORDER BY created_at DESC", (survey_admin_email,))
+                                placeholders = ','.join(['?'] * len(valid_ids))
+                                c.execute(f"SELECT DISTINCT title, survey_id, created_at FROM admin_surveys WHERE admin_id IN ({placeholders}) ORDER BY created_at DESC", valid_ids)
                                 past_surveys = c.fetchall()
                                 conn.close()
                             except Exception:
