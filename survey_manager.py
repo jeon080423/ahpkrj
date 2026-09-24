@@ -1057,74 +1057,106 @@ def generate_pairwise_combinations(model):
             
     return combinations
 
-def get_cr_fix_suggestion(factors, answers):
+def get_cr_fix_suggestion(factors, answers, cr_limit=0.1):
     """
-    CR이 한계치를 초과할 때 가장 모순이 큰 쌍(pair)과 추천 값을 반환합니다.
-    반환값: (최악의 쌍 튜플 (factor_i, factor_j), 현재 값, 추천 값)
+    CR이 한계치를 초과할 때 수정 시 CR을 가장 낮추는 쌍(pair)과 추천 값을 반환합니다.
+    - 1순위: 해당 쌍 하나를 수정해서 CR <= cr_limit를 달성 가능한 쌍+값
+    - 2순위: CR을 가장 크게 낮추는 쌍+값 (단 한 쌍 수정으로 limit 달성 불가 시)
+    반환값: (쌍 튜플 (factor_i, factor_j), 현재 값, 추천 값)
     """
     n = len(factors)
     if n <= 2:
         return None, None, None
 
-    # 행렬 구축
     import numpy as np
-    matrix = np.eye(n)
+
+    # RI 테이블
+    ri_table = {1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49}
+    ri = ri_table.get(n, 1.49)
+
+    def build_matrix(ans):
+        m = np.eye(n)
+        for ii in range(n):
+            for jj in range(ii + 1, n):
+                pk = f"{factors[ii]}_{factors[jj]}"
+                r = ans.get(pk, 1)
+                if r == 1:
+                    v = 1.0
+                elif r < 0:
+                    v = float(abs(r))
+                else:
+                    v = 1.0 / float(r)
+                m[ii, jj] = v
+                m[jj, ii] = 1.0 / v
+        return m
+
+    def calc_cr_from_matrix(m):
+        ev = np.linalg.eigvals(m)
+        lmax = float(np.max(np.real(ev)))
+        ci = (lmax - n) / (n - 1) if n > 1 else 0.0
+        return ci / ri if ri > 0 else 0.0
+
+    valid_raw_vals = list(range(-9, -1)) + [1] + list(range(2, 10))
+
+    cur_cr = calc_cr_from_matrix(build_matrix(answers))
+
+    # 각 쌍 × 각 후보 값에 대해 실제 CR 시뮬레이션
+    best_pair = None       # CR <= limit 달성 가능한 최선 쌍
+    best_val = None
+    best_cr_result = float('inf')
+    fallback_pair = None   # limit 달성 불가 시 CR 최소화 쌍
+    fallback_val = None
+    fallback_cr = cur_cr   # 현재보다 나아야 함
+
     for i in range(n):
         for j in range(i + 1, n):
             pair_key = f"{factors[i]}_{factors[j]}"
-            raw_val = answers.get(pair_key, 1)
-            
-            if raw_val == 1:
-                val = 1.0
-            elif raw_val < 0:
-                val = float(abs(raw_val))
-            else:
-                val = 1.0 / float(raw_val)
-                
-            matrix[i, j] = val
-            matrix[j, i] = 1.0 / val
+            cur_raw = answers.get(pair_key, 1)
 
-    # 고유값 계산 및 주요 고유벡터 (가중치) 도출
-    eigenvalues, eigenvectors = np.linalg.eig(matrix)
-    max_index = np.argmax(np.real(eigenvalues))
-    w = np.real(eigenvectors[:, max_index])
-    w = w / np.sum(w) # 정규화
+            pair_best_val = None
+            pair_best_cr = float('inf')
+            pair_best_cr_nolimit = float('inf')  # limit 미달 시 fallback용
+            pair_best_val_nolimit = None
 
-    max_inconsistency = -1.0
-    worst_pair = None
-    worst_current_val = None
-    suggested_val = None
+            for r in valid_raw_vals:
+                if r == cur_raw:
+                    continue  # 현재 값은 건너뜀
+                test_ans = answers.copy()
+                test_ans[pair_key] = r
+                test_cr = calc_cr_from_matrix(build_matrix(test_ans))
 
-    valid_raw_vals = list(range(-9, -1)) + [1] + list(range(2, 10))
-    def raw_to_ratio(r):
-        if r == 1: return 1.0
-        if r < 0: return float(abs(r))
-        return 1.0 / float(r)
+                if test_cr <= cr_limit:
+                    if test_cr < pair_best_cr:
+                        pair_best_cr = test_cr
+                        pair_best_val = r
+                else:
+                    if test_cr < pair_best_cr_nolimit:
+                        pair_best_cr_nolimit = test_cr
+                        pair_best_val_nolimit = r
 
-    for i in range(n):
-        for j in range(i + 1, n):
-            expected_ratio = w[i] / w[j]
-            actual_ratio = matrix[i, j]
-            
-            diff = max(actual_ratio / expected_ratio, expected_ratio / actual_ratio)
-            
-            if diff > max_inconsistency:
-                max_inconsistency = diff
-                worst_pair = (factors[i], factors[j])
-                
-                best_raw = 1
-                min_dist = float('inf')
-                for r in valid_raw_vals:
-                    ratio = raw_to_ratio(r)
-                    dist = abs(np.log(ratio) - np.log(expected_ratio))
-                    if dist < min_dist:
-                        min_dist = dist
-                        best_raw = r
-                
-                suggested_val = best_raw
-                worst_current_val = answers.get(f"{factors[i]}_{factors[j]}", 1)
+            if pair_best_val is not None:
+                # 이 쌍으로 limit 달성 가능
+                if pair_best_cr < best_cr_result:
+                    best_cr_result = pair_best_cr
+                    best_pair = (factors[i], factors[j])
+                    best_val = pair_best_val
+            elif pair_best_val_nolimit is not None:
+                # limit 달성 불가 - fallback: 가장 CR을 낮추는 쌍
+                if pair_best_cr_nolimit < fallback_cr:
+                    fallback_cr = pair_best_cr_nolimit
+                    fallback_pair = (factors[i], factors[j])
+                    fallback_val = pair_best_val_nolimit
 
-    return worst_pair, worst_current_val, suggested_val
+    # 결과: 1순위(limit 달성) > 2순위(fallback)
+    if best_pair is not None:
+        target_pair, target_val = best_pair, best_val
+    elif fallback_pair is not None:
+        target_pair, target_val = fallback_pair, fallback_val
+    else:
+        return None, None, None
+
+    cur_raw = answers.get(f"{target_pair[0]}_{target_pair[1]}", 1)
+    return target_pair, cur_raw, target_val
 
 def calculate_matrix_cr(factors, answers):
     """지정된 요인과 응답값을 바탕으로 일관성 비율(CR)을 계산합니다."""

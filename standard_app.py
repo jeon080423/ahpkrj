@@ -4295,7 +4295,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             """, unsafe_allow_html=True)
                         else:
                             from survey_manager import get_cr_fix_suggestion
-                            worst_pair, cur_v, sug_v = get_cr_fix_suggestion(group_factors, cur_group_answers)
+                            worst_pair, cur_v, sug_v = get_cr_fix_suggestion(group_factors, cur_group_answers, cr_limit=cr_limit)
                             
                             def format_val_label(v, left_name, right_name):
                                 if v == 1:
@@ -4511,7 +4511,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 if cr_failed:
                     if cr_guide_method == "post_wizard":
                         from survey_manager import get_cr_fix_suggestion
-                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers)
+                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers, cr_limit=cr_limit)
                         
                         if worst_pair:
                             st.session_state[f"cr_wizard_state_{survey_id_param}"] = {
@@ -4525,7 +4525,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             st.rerun()
                     elif cr_guide_method == "realtime":
                         from survey_manager import get_cr_fix_suggestion
-                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers)
+                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers, cr_limit=cr_limit)
                         if worst_pair:
                             for comb_idx_t, comb_t in enumerate(combinations):
                                 for p_idx_t, (p_left_t, p_right_t) in enumerate(comb_t["pairs"]):
