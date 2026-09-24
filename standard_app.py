@@ -989,6 +989,22 @@ div[data-testid="stTabs"] div[data-testid="stTabs"] div[data-baseweb="tab-highli
     display: none !important;
 }
 
+/* ── 주관식 문항 '모름/비해당' 라디오 버튼 스타일링 (원형 외관 및 수직 정렬) ── */
+div[class*="st-key-survey_resp_type_unknown_"],
+div[class*="st-key-yeta_survey_resp_type_unknown_"] {
+    display: flex !important;
+    align-items: center !important;
+    padding-top: 6px !important;
+}
+div[class*="st-key-survey_resp_type_unknown_"] div[data-testid="stCheckbox"] label > span:first-child,
+div[class*="st-key-survey_resp_type_unknown_"] div[data-testid="stCheckbox"] [role="checkbox"],
+div[class*="st-key-survey_resp_type_unknown_"] div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > div,
+div[class*="st-key-yeta_survey_resp_type_unknown_"] div[data-testid="stCheckbox"] label > span:first-child,
+div[class*="st-key-yeta_survey_resp_type_unknown_"] div[data-testid="stCheckbox"] [role="checkbox"],
+div[class*="st-key-yeta_survey_resp_type_unknown_"] div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > div {
+    border-radius: 50% !important;
+}
+
 
 </style>
 """
@@ -3577,20 +3593,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
             else:
                 tq_q = _t(tq_q)
             
-            # 주관식으로 명시된 경우 직접 입력 칸과 함께 '모름/비해당' 라디오 버튼 제시
+            # 주관식으로 명시된 경우: 직접 입력 칸 오른쪽에 '모름/비해당' 라디오 버튼 제시
             if tq_q_type == "text":
-                text_mode_options = [_("직접 입력", "Enter directly"), _("모름/비해당", "Don't know / Not applicable")]
-                choice = st.radio(
-                    f"SQ{sq_idx}. {tq_q}",
-                    text_mode_options,
-                    index=0,
-                    key=f"survey_resp_type_mode_{i}",
-                    horizontal=True
-                )
-                col1, col2 = st.columns([1, 3])
-                with col1:
-                    if choice == text_mode_options[1]:  # 모름/비해당 선택 시
-                        ans = "모름/비해당"
+                st.markdown(f"**SQ{sq_idx}. {tq_q}**")
+                col_input, col_opt = st.columns([3, 1])
+                is_unknown = st.session_state.get(f"survey_resp_type_unknown_{i}", False)
+                with col_input:
+                    if is_unknown:
                         st.text_input(
                             f"SQ{sq_idx}. {tq_q}",
                             value=_("모름/비해당", "Don't know / Not applicable"),
@@ -3598,6 +3607,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             key=f"survey_resp_type_disabled_{i}",
                             label_visibility="collapsed"
                         )
+                        ans = "모름/비해당"
                     else:
                         user_input = st.text_input(
                             f"SQ{sq_idx}. {tq_q}",
@@ -3606,6 +3616,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             label_visibility="collapsed"
                         )
                         ans = user_input.strip() if user_input else ""
+                with col_opt:
+                    st.checkbox(
+                        _("모름/비해당", "Don't know / Not applicable"),
+                        key=f"survey_resp_type_unknown_{i}"
+                    )
                 resp_data["types"].append(ans)
             else:
                 # 객관식: opts 유효성 확인
@@ -10321,7 +10336,7 @@ Thank you deeply for your valuable participation.
                             # 주관식: 보기 입력란 숨김, opts를 빈 리스트로 저장
                             type_questions_state[i]["opts"] = ""
                             opts_list = []
-                            st.caption(_("💡 주관식: 응답자가 자유롭게 텍스트를 입력하는 방식입니다. 설문 응답 시 '모름/비해당' 라디오 버튼이 함께 제공됩니다.", "💡 Open-ended: Respondents type their own answer freely. A 'Don't know / Not applicable' option is also provided."))
+                            st.caption(_("💡 주관식: 응답자가 자유롭게 텍스트를 입력하는 방식입니다. 설문 응답 시 내용 입력칸 오른쪽에 '모름/비해당' 라디오 버튼이 함께 제공됩니다.", "💡 Open-ended: Respondents type their own answer freely. A 'Don't know / Not applicable' option is provided to the right of the input box."))
 
                         type_questions.append({
                             "q": q_val,

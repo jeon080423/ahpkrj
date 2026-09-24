@@ -457,11 +457,38 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
             sq_idx = i + 1
             tq_q = tq.get("q", "")
             tq_opts = tq.get("opts", [])
-            if tq_opts:
-                ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"yeta_survey_resp_type_{i}", horizontal=True)
+            tq_q_type = tq.get("q_type", "radio")
+            if tq_q_type == "text" or not tq_opts:
+                st.markdown(f"**SQ{sq_idx}. {tq_q}**")
+                col_input, col_opt = st.columns([3, 1])
+                is_unknown = st.session_state.get(f"yeta_survey_resp_type_unknown_{i}", False)
+                with col_input:
+                    if is_unknown:
+                        st.text_input(
+                            f"SQ{sq_idx}. {tq_q}",
+                            value="모름/비해당",
+                            disabled=True,
+                            key=f"yeta_survey_resp_type_disabled_{i}",
+                            label_visibility="collapsed"
+                        )
+                        ans = "모름/비해당"
+                    else:
+                        user_input = st.text_input(
+                            f"SQ{sq_idx}. {tq_q}",
+                            key=f"yeta_survey_resp_type_{i}",
+                            placeholder="내용을 직접 입력하세요",
+                            label_visibility="collapsed"
+                        )
+                        ans = user_input.strip() if user_input else ""
+                with col_opt:
+                    st.checkbox(
+                        "모름/비해당",
+                        key=f"yeta_survey_resp_type_unknown_{i}"
+                    )
+                resp_data["types"].append(ans)
             else:
-                ans = st.text_input(f"SQ{sq_idx}. {tq_q}", key=f"yeta_survey_resp_type_{i}")
-            resp_data["types"].append(ans)
+                ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"yeta_survey_resp_type_{i}", horizontal=True)
+                resp_data["types"].append(ans)
     st.subheader("2. " + "제1계층 평가: 상수합법 (100점 배분)")
     st.caption("아래 1계층 평가항목의 합이 정확히 100이 되도록 중요도를 직접 분배해주십시오.")
     
