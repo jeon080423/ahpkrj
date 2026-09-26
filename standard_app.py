@@ -8476,10 +8476,7 @@ with contextlib.nullcontext():
                                             tab1_main_col.__exit__(None, None, None)
                                             st.stop()
     
-                                # 분석 헤더 윗쪽에 제외된 사례수 표시
-                                total_excluded = main_excluded
-                                st.markdown(f"**" + _(f"분석 제외: {total_excluded}건", f"Excluded from Analysis: {total_excluded} cases") + "**")
-    
+
                                 main_sig_df = calculate_pairwise_ttest(main_results_df, main_factors)
                                 main_weight_cols = [f"Weight_{f}" for f in main_factors]
                         
@@ -9157,10 +9154,6 @@ with contextlib.nullcontext():
                                                 ws_cr.write(cr_row_idx, 4, status, formats['body'])
                                                 cr_row_idx += 1
     
-                            st.success(_("분석이 완료되었습니다.", "Analysis completed successfully."))
-                            if st.session_state.get('plan_type') == 'Basic':
-                                st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
-                                          "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
                             if st.session_state.user_role == 'official':
                                 if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
                                     save_data = uploaded_file.getvalue()
@@ -9178,9 +9171,6 @@ with contextlib.nullcontext():
                                     save_data = uploadable_io.getvalue()
                                     save_filename = f"{filename_base}_Raw.xlsx"
                                 save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
-    
-                            st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
-                                         "⚠️ Results reset on refresh. Download via the Results tab."))
     
                             tab1, tab2, tab3, tab4, tab5 = st.tabs([
                                 _("종합 분석 (Global)", "Global Comprehensive Analysis"),
