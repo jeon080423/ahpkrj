@@ -11319,50 +11319,6 @@ Thank you deeply for your valuable participation.
                         if not live_df.empty:
                             st.success(f"구글 스프레드시트에서 실시간 응답 데이터를 성공적으로 불러왔습니다. (Raw_Data: {len(live_df)}건" + (f", Demographic_Data: {len(demo_df)}건" if demo_df is not None else "") + ")")
                         
-                            # 📊 AHP 분석 연동 단축 버튼 추가
-                            if st.button(_("📊 이 온라인 설문 데이터로 즉시 AHP 분석 수행하기 (분석 도구로 연동)", "📊 Perform AHP Analysis Instantly with this Online Survey Data"), type="primary", use_container_width=True):
-                                import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "온라인 설문 데이터 연동")
-                                st.session_state["selected_survey_for_analysis"] = selected_sheet_id
-                                from survey_manager import load_survey_metadata
-                                survey_meta = load_survey_metadata(selected_sheet_id)
-                                if survey_meta:
-                                    ahp_model = survey_meta["AHP_Model_JSON"]
-                                    base_cols = ["ID", "Type"]
-                                    main_criteria = ahp_model.get("main", [])
-                                    main_pairs = []
-                                    for i in range(len(main_criteria)):
-                                        for j in range(i + 1, len(main_criteria)):
-                                            main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
-                                    main_cols = [c for c in base_cols if c in live_df.columns] + [p for p in main_pairs if p in live_df.columns]
-                                    st.session_state["ahp_df_main"] = live_df[main_cols].copy()
-                                    for col in st.session_state["ahp_df_main"].columns:
-                                        if col not in ["ID", "Type"]:
-                                            st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce')
-                                    # 중분류 복사
-                                    st.session_state["ahp_sub_dfs"] = {}
-                                    sub_criteria_map = ahp_model.get("subs", {})
-                                    for main_c, subs in sub_criteria_map.items():
-                                        if len(subs) >= 2:
-                                            sub_pairs = []
-                                            for i in range(len(subs)):
-                                                for j in range(i + 1, len(subs)):
-                                                    sub_pairs.append(f"{subs[i]}_{subs[j]}")
-                                            sub_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_pairs if p in live_df.columns]
-                                            st.session_state["ahp_sub_dfs"][main_c] = live_df[sub_cols].copy()
-                                            for col in st.session_state["ahp_sub_dfs"][main_c].columns:
-                                                if col not in ["ID", "Type"]:
-                                                    st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
-                                    st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                else:
-                                    # survey_meta 없어도 live_df 전체를 fallback으로 세팅
-                                    st.session_state["ahp_df_main"] = live_df.copy()
-                                    st.session_state["ahp_sub_dfs"] = {}
-                                    st.session_state["ahp_sheet_names"] = ["Main_Criteria"]
-                                # 항상 AHP 분석 하기 탭으로 이동 (survey_meta 성공 여부 무관)
-                                st.session_state["_auto_switch_to_online"] = True
-                                st.session_state.pop("_run_inline_analysis", None)
-                                st.session_state["_goto_tab"] = _("AHP 분석 하기", "AHP Analysis")
-                                st.rerun()
 
                             # ── 인라인 AHP 분석 결과 표시 ──
                             if st.session_state.get("_run_inline_analysis") and st.session_state.get("ahp_df_main") is not None:
