@@ -11334,13 +11334,11 @@ Thank you deeply for your valuable participation.
                                         for j in range(i + 1, len(main_criteria)):
                                             main_pairs.append(f"{main_criteria[i]}_{main_criteria[j]}")
                                     main_cols = [c for c in base_cols if c in live_df.columns] + [p for p in main_pairs if p in live_df.columns]
-                                
                                     st.session_state["ahp_df_main"] = live_df[main_cols].copy()
                                     for col in st.session_state["ahp_df_main"].columns:
                                         if col not in ["ID", "Type"]:
                                             st.session_state["ahp_df_main"][col] = pd.to_numeric(st.session_state["ahp_df_main"][col], errors='coerce')
-                                
-                                     # 중분류 복사
+                                    # 중분류 복사
                                     st.session_state["ahp_sub_dfs"] = {}
                                     sub_criteria_map = ahp_model.get("subs", {})
                                     for main_c, subs in sub_criteria_map.items():
@@ -11354,12 +11352,17 @@ Thank you deeply for your valuable participation.
                                             for col in st.session_state["ahp_sub_dfs"][main_c].columns:
                                                 if col not in ["ID", "Type"]:
                                                     st.session_state["ahp_sub_dfs"][main_c][col] = pd.to_numeric(st.session_state["ahp_sub_dfs"][main_c][col], errors='coerce')
-                                                
                                     st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
-                                    st.session_state["_auto_switch_to_online"] = True
-                                    # 인라인 분석 없이 'AHP 분석 하기' 탭으로 이동
-                                    st.session_state.pop("_run_inline_analysis", None)
-                                    st.rerun()
+                                else:
+                                    # survey_meta 없어도 live_df 전체를 fallback으로 세팅
+                                    st.session_state["ahp_df_main"] = live_df.copy()
+                                    st.session_state["ahp_sub_dfs"] = {}
+                                    st.session_state["ahp_sheet_names"] = ["Main_Criteria"]
+                                # 항상 AHP 분석 하기 탭으로 이동 (survey_meta 성공 여부 무관)
+                                st.session_state["_auto_switch_to_online"] = True
+                                st.session_state.pop("_run_inline_analysis", None)
+                                st.session_state["_goto_tab"] = _("AHP 분석 하기", "AHP Analysis")
+                                st.rerun()
 
                             # ── 인라인 AHP 분석 결과 표시 ──
                             if st.session_state.get("_run_inline_analysis") and st.session_state.get("ahp_df_main") is not None:
