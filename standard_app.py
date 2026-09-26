@@ -6390,18 +6390,9 @@ with st.sidebar:
 
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         if st.button(_("⭐ 정식 사용자로 전환하기", "⭐ Upgrade to Paid License Now"), key="sidebar_upgrade_btn", use_container_width=True):
-            st.components.v1.html("""
-                <script>
-                    const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
-                    for (let i = 0; i < tabs.length; i++) {
-                        if (tabs[i].innerText.includes('서비스 안내') || tabs[i].innerText.includes('Service Info')) {
-                            tabs[i].click();
-                            window.parent.scrollTo(0, 0);
-                            break;
-                        }
-                    }
-                </script>
-            """, height=0, width=0)
+            # '분석 요금제' 탭으로 이동 (로그인 상태 유지)
+            st.session_state["_goto_tab"] = _("분석 요금제", "Pricing")
+            st.rerun()
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
@@ -7148,6 +7139,8 @@ with contextlib.nullcontext():
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
+    # [수정] _goto_tab 세션 스테이트로 동적 탭 전환 지원
+    _tab_default = st.session_state.pop("_goto_tab", _("AHP 분석 하기", "AHP Analysis"))
     main_tab1, main_tab_coding, main_tab2, main_tab3, main_tab_service, main_tab_consulting = st.tabs([
         _("AHP 분석 하기", "AHP Analysis"), 
         _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
@@ -7155,7 +7148,7 @@ with contextlib.nullcontext():
         _("응답 현황", "Responses"),
         _("분석 요금제", "Pricing"),
         _("컨설팅 문의", "Consulting")
-    ], default=_("AHP 분석 하기", "AHP Analysis"))
+    ], default=_tab_default)
         
     with main_tab1:
         tab1_main_col, tab1_settings_col = st.columns([3.0, 1.1], gap="large")
@@ -7717,22 +7710,24 @@ with contextlib.nullcontext():
                         
 
                 else: 
-                    rows_ok = True
+                    # [수정] 무료 사용자: 차단 대신 처음 3개 표본으로 슬라이싱하여 분석 허용
                     if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File"):
-                        for sn in sheet_names:
-                            if len(pd.read_excel(uploaded_file, sheet_name=sn)) > 3:
-                                rows_ok = False
-                                break
+                        if len(df_main) > 3:
+                            df_main = df_main.head(3)
+                            st.warning(_("⚠️ 무료 사용자는 엑셀 업로드 시 최대 3표본까지 분석할 수 있습니다. 처음 3개 표본만 분석에 사용됩니다.",
+                                         "⚠️ Free users can analyze up to 3 samples. Only the first 3 samples will be used."))
+                        for sn in list(sub_dfs.keys()):
+                            if len(sub_dfs[sn]) > 3:
+                                sub_dfs[sn] = sub_dfs[sn].head(3)
                     else:
                         if len(df_main) > 3:
-                            rows_ok = False
-                        for sn, sdf in sub_dfs.items():
-                            if len(sdf) > 3:
-                                rows_ok = False
-                                break
-                    if rows_ok: permission_granted = True
-                    else: message = _(f"⛔ **무료사용자**는 시트당 최대 3개 표본까지만 분석 가능합니다. (현재: {len(df_main)}개 표본)",
-                                     f"⛔ **Free Users** can only analyze up to 3 samples per sheet. (Current: {len(df_main)} samples)")
+                            df_main = df_main.head(3)
+                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 3표본까지 분석할 수 있습니다. 처음 3개 표본만 분석에 사용됩니다.",
+                                         "⚠️ Free users can analyze up to 3 samples. Only the first 3 responses will be used."))
+                        for sn in list(sub_dfs.keys()):
+                            if len(sub_dfs[sn]) > 3:
+                                sub_dfs[sn] = sub_dfs[sn].head(3)
+                    permission_granted = True
             
                 if permission_granted:
                     # [신규] 그룹 분석 기준 변수 선택 UI 및 동적 주입
@@ -9605,18 +9600,9 @@ with contextlib.nullcontext():
                                 st.markdown("정식 사용자로 승격하시면 **표본 수 제한(3개)이 즉시 해제**되며 모든 분석 기능을 무제한으로 사용하실 수 있습니다.")
                                 st.error("⛔ **현재 데이터는 3표본을 초과하여 분석이 차단되었습니다.**\n\n지금 바로 업그레이드하고 끊김 없이 분석을 이어가세요!")
                                 if st.button("🚀 지금 업그레이드하고 무제한 분석하기", type="primary", use_container_width=True):
-                                    st.components.v1.html("""
-                                        <script>
-                                            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
-                                            for (let i = 0; i < tabs.length; i++) {
-                                                if (tabs[i].innerText.includes('서비스 안내') || tabs[i].innerText.includes('Service Info')) {
-                                                    tabs[i].click();
-                                                    window.parent.scrollTo(0, 0);
-                                                    break;
-                                                }
-                                            }
-                                        </script>
-                                    """, height=0, width=0)
+                                    # '분석 요금제' 탭으로 이동 (로그인 상태 유지)
+                                    st.session_state["_goto_tab"] = _("분석 요금제", "Pricing")
+                                    st.rerun()
             except Exception as e:
                 st.error(f"파일 처리 오류 발생: {e}")
             
@@ -11371,7 +11357,8 @@ Thank you deeply for your valuable participation.
                                                 
                                     st.session_state["ahp_sheet_names"] = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
                                     st.session_state["_auto_switch_to_online"] = True
-                                    st.session_state["_run_inline_analysis"] = True
+                                    # 인라인 분석 없이 'AHP 분석 하기' 탭으로 이동
+                                    st.session_state.pop("_run_inline_analysis", None)
                                     st.rerun()
 
                             # ── 인라인 AHP 분석 결과 표시 ──
