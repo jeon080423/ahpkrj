@@ -7687,7 +7687,6 @@ with contextlib.nullcontext():
                         df_main = st.session_state["ahp_df_main"]
                         sub_dfs = st.session_state["ahp_sub_dfs"]
                         sheet_names = st.session_state["ahp_sheet_names"]
-                        st.info(_("구글 시트에서 로드된 실시간 데이터 분석 모드입니다. (새 데이터를 가져오려면 위 버튼을 클릭해 주세요)", "Live data analysis mode. Click the button above to refresh data."))
 
         if df_main is not None:
             try:
