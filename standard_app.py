@@ -3790,17 +3790,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
         st.info(_("더 중요한 방향으로 숫자를 선택하세요. **1**=동등, 숫자가 클수록 해당 방향의 요인이 더 중요합니다.",
                   "Select the number toward the more important factor. **1**=Equal, larger number = more important."))
         if cr_guide_method == "realtime":
-            st.markdown(_(":blue[**파란색 배경**]: 일관성(CR)을 최적으로 유지하는 :red[**권장 선택 구간**]입니다.",
-                          ":blue[**Blue background**]: :red[**recommended range**] to maintain optimal consistency (CR)."))
+            st.markdown(_(
+                ":blue[**💡 실시간 가이드 안내 (파란색 배경)**]: 앞선 응답들과의 논리적 연관성(CR)을 분석하여, 각 평가 영역의 **마지막 연계 문항**에서 :red[**권장 선택 구간**]이 파란색으로 자동 표시됩니다. (초반 문항은 본인의 판단에 따라 자유롭게 선택하시면 됩니다.)",
+                ":blue[**💡 Real-time Guide (Blue Background)**]: Analyzes consistency (CR) with previous answers, automatically highlighting the :red[**recommended range**] in blue on the **final linked question** of each evaluation group. (Feel free to select initial questions based on your judgment.)"
+            ))
         with st.expander(_("상세 응답 가이드", "Detailed Response Guide"), expanded=False):
             st.markdown(_("""
 - **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
 - **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
 - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
+- **실시간 일관성(CR) 가이드**: 일관성은 최소 3개 이상의 비교 쌍이 연계되어야 계산되므로, 각 비교 그룹의 **마지막 판단 문항**에서 파란색 배경으로 권장 범위가 자동 안내됩니다.
             """, """
 - **Equal (1)**: Choose the middle **1** when both factors are equally important.
 - **Left factor more important**: Choose a number on the left (←). Larger = much more important.
 - **Right factor more important**: Choose a number on the right (→). Larger = much more important.
+- **Real-time Consistency (CR) Guide**: Consistency requires at least 3 linked pairs to calculate, so the recommended range is automatically displayed in blue on the **final decision question** of each group.
             """))
         
         # 모바일 가로 모드 강제 전환 오버레이
@@ -10765,7 +10769,7 @@ Thank you deeply for your valuable participation.
                         cr_guide_method = list(options_kr.keys())[selected_idx]
             
                         if cr_guide_method == "realtime":
-                            st.info(_("**실시간 안내**: 응답자가 설문 중 일관성을 유지할 수 있도록 파란색 배경으로 권장되는 허용 범위를 안내합니다. 편의성이 높고 이탈률을 크게 낮출 수 있습니다.", "**Real-time Guide**: Highlights the recommended range with a blue background to help respondents maintain consistency. Highly convenient and reduces dropouts."))
+                            st.info(_("**실시간 안내**: 응답자가 설문 중 일관성을 유지할 수 있도록 각 비교 그룹의 마지막 연계 문항에서 파란색 배경으로 권장 범위를 안내합니다. 초반 문항은 자유롭게 응답하며, 이탈률을 크게 낮출 수 있습니다.", "**Real-time Guide**: Highlights the recommended range with a blue background on the final linked question of each comparison group to help respondents maintain consistency. Reduces dropouts."))
                         elif cr_guide_method == "post_wizard":
                             st.success(_("💡 **지능형 수정 제안 (추천)**: 응답 중에는 아무런 가이드를 주지 않아 응답자의 진짜 생각을 편향 없이 수집합니다. 제출 버튼을 눌렀을 때 CR이 초과하면, 가장 모순이 큰 딱 1개 문항을 찾아내어 수정을 권고하는 마법사를 띄웁니다.", "💡 **Smart Fix Wizard (Recommended)**: Collects true thoughts without bias by providing no guide during response. If CR exceeds the limit upon submission, a wizard will appear to suggest fixing the single most contradictory question."))
                         else:
