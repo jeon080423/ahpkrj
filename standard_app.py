@@ -1312,6 +1312,22 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS tax_invoice_requests
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, biz_num TEXT, biz_name TEXT, rep_name TEXT, address TEXT, biz_type TEXT, email TEXT, plan_name TEXT, request_date TEXT, status TEXT)''')
     
+    # [추가] 설문 설명 이미지 테이블 (최대 3개 이미지)
+    c.execute('''CREATE TABLE IF NOT EXISTS survey_images (
+                    survey_id TEXT PRIMARY KEY,
+                    image_data BLOB,
+                    mime_type TEXT,
+                    image_data2 BLOB,
+                    mime_type2 TEXT,
+                    image_data3 BLOB,
+                    mime_type3 TEXT)''')
+    for col_name, col_type in [("image_data2", "BLOB"), ("mime_type2", "TEXT"), ("image_data3", "BLOB"), ("mime_type3", "TEXT")]:
+        try:
+            c.execute(f"ALTER TABLE survey_images ADD COLUMN {col_name} {col_type}")
+            conn.commit()
+        except Exception:
+            pass
+
     # 관리자 계정 생성
     try:
         # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
@@ -3762,23 +3778,29 @@ if "preview_id" in q_params or "survey_id" in q_params:
     main_criteria = ahp_model.get("main", [])
     
     with st.container():
-        # [신규] 설문 설명 이미지 표시 (존재할 경우)
+        # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개)
         try:
             conn_img = sqlite3.connect('users.db')
             c_img = conn_img.cursor()
-            c_img.execute("SELECT image_data, mime_type FROM survey_images WHERE survey_id=?", (survey_id_param,))
+            c_img.execute("PRAGMA table_info(survey_images)")
+            cols_info = [ci[1] for ci in c_img.fetchall()]
+            c_img.execute("SELECT * FROM survey_images WHERE survey_id=?", (survey_id_param,))
             img_row = c_img.fetchone()
             conn_img.close()
-            if img_row and img_row[0]:
+            if img_row:
+                row_map = dict(zip(cols_info, img_row))
                 import base64
-                encoded = base64.b64encode(img_row[0]).decode()
-                mime = img_row[1] if len(img_row) > 1 and img_row[1] else "image/png"
-                html_str = f'''
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
-                </div>
-                '''
-                st.markdown(html_str, unsafe_allow_html=True)
+                for suf in ["", "2", "3"]:
+                    data_val = row_map.get(f"image_data{suf}")
+                    mime_val = row_map.get(f"mime_type{suf}") or "image/png"
+                    if data_val:
+                        encoded = base64.b64encode(data_val).decode()
+                        html_str = f'''
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <img src="data:{mime_val};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
+                        </div>
+                        '''
+                        st.markdown(html_str, unsafe_allow_html=True)
         except Exception:
             pass
 
@@ -9976,7 +9998,7 @@ with contextlib.nullcontext():
                         st.session_state.survey_auto_loaded = False
                         st.session_state.editing_survey_id = None
                         st.session_state.pop('tab2_tier_choice', None)
-                        for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_') or k.startswith('sub_sub_')]:
+                        for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_')]:
                             del st.session_state[k]
 
                     if '_cached_user_surveys' not in st.session_state or st.session_state.get('_survey_cache_dirty'):
@@ -10027,15 +10049,26 @@ with contextlib.nullcontext():
                                 import sqlite3
                                 conn_img = sqlite3.connect('users.db')
                                 c_img = conn_img.cursor()
-                                c_img.execute("SELECT image_data, mime_type FROM survey_images WHERE survey_id=?", (sel_id,))
+                                c_img.execute("PRAGMA table_info(survey_images)")
+                                img_cols = [ci[1] for ci in c_img.fetchall()]
+                                c_img.execute("SELECT * FROM survey_images WHERE survey_id=?", (sel_id,))
                                 img_row = c_img.fetchone()
                                 conn_img.close()
-                                if img_row and img_row[0]:
-                                    st.session_state.edit_survey_image = img_row[0]
-                                    st.session_state.edit_survey_image_mime = img_row[1]
+                                if img_row:
+                                    r_dict = dict(zip(img_cols, img_row))
+                                    for suf in ["", "2", "3"]:
+                                        d = r_dict.get(f"image_data{suf}")
+                                        m = r_dict.get(f"mime_type{suf}") or "image/png"
+                                        if d:
+                                            st.session_state[f"edit_survey_image{suf}"] = d
+                                            st.session_state[f"edit_survey_image_mime{suf}"] = m
+                                        else:
+                                            st.session_state.pop(f"edit_survey_image{suf}", None)
+                                            st.session_state.pop(f"edit_survey_image_mime{suf}", None)
                                 else:
-                                    st.session_state.pop("edit_survey_image", None)
-                                    st.session_state.pop("edit_survey_image_mime", None)
+                                    for suf in ["", "2", "3"]:
+                                        st.session_state.pop(f"edit_survey_image{suf}", None)
+                                        st.session_state.pop(f"edit_survey_image_mime{suf}", None)
                             except Exception:
                                 pass
 
@@ -10116,7 +10149,7 @@ with contextlib.nullcontext():
                                         delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
                                     st.session_state.editing_survey_id = None
                                     st.session_state.pop('tab2_tier_choice', None)
-                                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_')]
+                                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_')]
                                     for k in keys_to_clear:
                                         del st.session_state[k]
                                     st.session_state.survey_auto_loaded = True
@@ -10393,43 +10426,67 @@ Thank you deeply for your valuable participation.
 
 
                 with st.container():
-                    # 섹션 2: 설문 조사 설명 이미지 삽입
+                    # 섹션 2: 설문 조사 설명 이미지 삽입 (최대 3개, 선택사항)
                     render_section_header(_("섹션 2: 설문 조사 설명 이미지 삽입", "Section 2: Survey Description Image Insertion"))
-                    st.markdown(_("설문 응답자에게 보여줄 설명 이미지(예: 구조도, 안내문 등)가 있다면 아래에 업로드해 주세요. (선택사항)", "If you have a description image (e.g., structure diagram, guide) to show to the survey respondents, please upload it below. (Optional)"))
+                    st.markdown(_("설문 응답자에게 보여줄 설명 이미지(예: 구조도, 안내문 등)가 있다면 아래에 업로드해 주세요. (선택사항, 최대 3개)", "If you have description images (e.g., structure diagram, guide) to show to the survey respondents, please upload them below. (Optional, up to 3)"))
                     
-                    survey_image_file = st.file_uploader(_("설문 설명 이미지 업로드 (png, jpg, jpeg)", "Upload Survey Description Image (png, jpg, jpeg)"), type=["png", "jpg", "jpeg"], key="survey_image_uploader")
-                    
-                    if survey_image_file is not None:
-                        st.session_state.survey_image_data = survey_image_file.getvalue()
-                        st.session_state.survey_image_mime = survey_image_file.type
-                        if 'edit_survey_image' in st.session_state:
-                            del st.session_state['edit_survey_image']
-                        if 'edit_survey_image_mime' in st.session_state:
-                            del st.session_state['edit_survey_image_mime']
-                        import base64
-                        encoded = base64.b64encode(st.session_state.survey_image_data).decode()
-                        mime = st.session_state.survey_image_mime
-                        html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
-                        st.markdown(html_str, unsafe_allow_html=True)
-                        st.caption(_("업로드된 이미지 미리보기", "Uploaded Image Preview"))
-                    elif st.session_state.get('edit_survey_image'):
-                        st.session_state.survey_image_data = st.session_state.edit_survey_image
-                        st.session_state.survey_image_mime = st.session_state.get('edit_survey_image_mime', 'image/png')
-                        import base64
-                        encoded = base64.b64encode(st.session_state.survey_image_data).decode()
-                        mime = st.session_state.survey_image_mime
-                        html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
-                        st.markdown(html_str, unsafe_allow_html=True)
-                        st.caption(_("기존 등록된 이미지 미리보기", "Previously Registered Image Preview"))
-                        if st.button(_("🗑️ 기존 이미지 삭제", "🗑️ Delete Existing Image")):
-                            st.session_state.pop('edit_survey_image', None)
-                            st.session_state.pop('edit_survey_image_mime', None)
-                            st.session_state.pop("survey_image_data", None)
-                            st.session_state.pop("survey_image_mime", None)
-                            st.rerun()
-                    else:
-                        st.session_state.pop("survey_image_data", None)
-                        st.session_state.pop("survey_image_mime", None)
+                    has_img1 = bool(st.session_state.get("survey_image_data") or st.session_state.get("edit_survey_image"))
+                    has_img2 = bool(st.session_state.get("survey_image_data2") or st.session_state.get("edit_survey_image2"))
+                    has_img3 = bool(st.session_state.get("survey_image_data3") or st.session_state.get("edit_survey_image3"))
+
+                    tag1 = _(" (등록됨)", " (Uploaded)") if has_img1 else _(" (선택)", " (Optional)")
+                    tag2 = _(" (등록됨)", " (Uploaded)") if has_img2 else _(" (선택)", " (Optional)")
+                    tag3 = _(" (등록됨)", " (Uploaded)") if has_img3 else _(" (선택)", " (Optional)")
+
+                    img_tabs = st.tabs([
+                        _("📷 설명 이미지 1", "📷 Image 1") + tag1,
+                        _("📷 설명 이미지 2", "📷 Image 2") + tag2,
+                        _("📷 설명 이미지 3", "📷 Image 3") + tag3
+                    ])
+
+                    for idx_num, cur_tab in enumerate(img_tabs, 1):
+                        suf = "" if idx_num == 1 else str(idx_num)
+                        data_key = f"survey_image_data{suf}"
+                        mime_key = f"survey_image_mime{suf}"
+                        edit_key = f"edit_survey_image{suf}"
+                        edit_mime_key = f"edit_survey_image_mime{suf}"
+                        uploader_key = f"survey_image_uploader_{idx_num}"
+
+                        with cur_tab:
+                            f_up = st.file_uploader(
+                                _(f"설문 설명 이미지 {idx_num} 업로드 (png, jpg, jpeg)", f"Upload Survey Description Image {idx_num} (png, jpg, jpeg)"),
+                                type=["png", "jpg", "jpeg"],
+                                key=uploader_key
+                            )
+                            if f_up is not None:
+                                st.session_state[data_key] = f_up.getvalue()
+                                st.session_state[mime_key] = f_up.type
+                                st.session_state.pop(edit_key, None)
+                                st.session_state.pop(edit_mime_key, None)
+                                import base64
+                                encoded = base64.b64encode(st.session_state[data_key]).decode()
+                                mime = st.session_state[mime_key]
+                                html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
+                                st.markdown(html_str, unsafe_allow_html=True)
+                                st.caption(_(f"업로드된 이미지 {idx_num} 미리보기", f"Uploaded Image {idx_num} Preview"))
+                            elif st.session_state.get(edit_key):
+                                st.session_state[data_key] = st.session_state[edit_key]
+                                st.session_state[mime_key] = st.session_state.get(edit_mime_key, 'image/png')
+                                import base64
+                                encoded = base64.b64encode(st.session_state[data_key]).decode()
+                                mime = st.session_state[mime_key]
+                                html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
+                                st.markdown(html_str, unsafe_allow_html=True)
+                                st.caption(_(f"기존 등록된 이미지 {idx_num} 미리보기", f"Previously Registered Image {idx_num} Preview"))
+                                if st.button(_(f"🗑️ 기존 이미지 {idx_num} 삭제", f"🗑️ Delete Existing Image {idx_num}"), key=f"del_img_btn_{idx_num}"):
+                                    st.session_state.pop(edit_key, None)
+                                    st.session_state.pop(edit_mime_key, None)
+                                    st.session_state.pop(data_key, None)
+                                    st.session_state.pop(mime_key, None)
+                                    st.rerun()
+                            else:
+                                st.session_state.pop(data_key, None)
+                                st.session_state.pop(mime_key, None)
 
                 with st.container():
                     # 섹션 3: AHP 모델 계층구조 입력 폼
@@ -10883,14 +10940,23 @@ Thank you deeply for your valuable participation.
                     with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as f:
                         json.dump(preview_data, f, ensure_ascii=False)
 
-                    # [추가] 미리보기 용으로 이미지 DB에 임시 저장 (Respondent UI는 f"preview_{preview_id}"로 조회함)
+                    # [추가] 미리보기 용으로 이미지 DB에 임시 저장 (Respondent UI는 f"preview_{preview_id}"로 조회함, 최대 3개)
                     try:
                         conn_prev = sqlite3.connect('users.db')
                         c_prev = conn_prev.cursor()
                         preview_survey_id_param = f"preview_{preview_id}"
-                        if st.session_state.get('survey_image_data'):
-                            c_prev.execute("INSERT OR REPLACE INTO survey_images (survey_id, image_data, mime_type) VALUES (?, ?, ?)",
-                                            (preview_survey_id_param, st.session_state.survey_image_data, st.session_state.get('survey_image_mime', 'image/png')))
+                        prev_img1 = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
+                        prev_mime1 = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
+                        prev_img2 = st.session_state.get('survey_image_data2') or st.session_state.get('edit_survey_image2')
+                        prev_mime2 = st.session_state.get('survey_image_mime2') or st.session_state.get('edit_survey_image_mime2', 'image/png')
+                        prev_img3 = st.session_state.get('survey_image_data3') or st.session_state.get('edit_survey_image3')
+                        prev_mime3 = st.session_state.get('survey_image_mime3') or st.session_state.get('edit_survey_image_mime3', 'image/png')
+
+                        if prev_img1 or prev_img2 or prev_img3:
+                            c_prev.execute("""INSERT OR REPLACE INTO survey_images 
+                                            (survey_id, image_data, mime_type, image_data2, mime_type2, image_data3, mime_type3) 
+                                            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                                            (preview_survey_id_param, prev_img1, prev_mime1, prev_img2, prev_mime2, prev_img3, prev_mime3))
                         else:
                             c_prev.execute("DELETE FROM survey_images WHERE survey_id=?", (preview_survey_id_param,))
                         conn_prev.commit()
@@ -10909,16 +10975,25 @@ Thank you deeply for your valuable participation.
                             with st.spinner(_("저장 중...", "Saving...")):
                                 try:
                                     import sqlite3
-                                    # 이미지 보존 저장
-                                    _s_img = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
-                                    _s_mime = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
-                                    if _s_img:
-                                        _s_conn = sqlite3.connect('users.db')
-                                        _s_cur = _s_conn.cursor()
-                                        _s_cur.execute("INSERT OR REPLACE INTO survey_images (survey_id, image_data, mime_type) VALUES (?, ?, ?)",
-                                                       (_s_sheet_id, _s_img, _s_mime))
-                                        _s_conn.commit()
-                                        _s_conn.close()
+                                    # 이미지 보존 저장 (최대 3개)
+                                    _s_img1 = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
+                                    _s_mime1 = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
+                                    _s_img2 = st.session_state.get('survey_image_data2') or st.session_state.get('edit_survey_image2')
+                                    _s_mime2 = st.session_state.get('survey_image_mime2') or st.session_state.get('edit_survey_image_mime2', 'image/png')
+                                    _s_img3 = st.session_state.get('survey_image_data3') or st.session_state.get('edit_survey_image3')
+                                    _s_mime3 = st.session_state.get('survey_image_mime3') or st.session_state.get('edit_survey_image_mime3', 'image/png')
+
+                                    _s_conn = sqlite3.connect('users.db')
+                                    _s_cur = _s_conn.cursor()
+                                    if _s_img1 or _s_img2 or _s_img3:
+                                        _s_cur.execute("""INSERT OR REPLACE INTO survey_images 
+                                                       (survey_id, image_data, mime_type, image_data2, mime_type2, image_data3, mime_type3) 
+                                                       VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                                                       (_s_sheet_id, _s_img1, _s_mime1, _s_img2, _s_mime2, _s_img3, _s_mime3))
+                                    else:
+                                        _s_cur.execute("DELETE FROM survey_images WHERE survey_id=?", (_s_sheet_id,))
+                                    _s_conn.commit()
+                                    _s_conn.close()
                                     # 구글 시트 메타데이터 업데이트
                                     if tier_level == 3:
                                         from survey_manager_v3 import create_survey_sheet_v3
@@ -11054,21 +11129,24 @@ Thank you deeply for your valuable participation.
                                             except Exception as dbe:
                                                 pass
 
-                                            # 이미지 저장 로직
-                                            # survey_image_data: 새로 업로드한 이미지
-                                            # edit_survey_image: 기존에 저장된 이미지 (수정 없이 재저장할 때)
+                                            # 이미지 저장 로직 (최대 3개)
+                                            # survey_image_data(2,3): 새로 업로드한 이미지
+                                            # edit_survey_image(2,3): 기존에 저장된 이미지 (수정 없이 재저장할 때)
                                             try:
                                                 conn_img = sqlite3.connect('users.db')
                                                 cur_img = conn_img.cursor()
-                                                image_to_save = st.session_state.get('survey_image_data')
-                                                mime_to_save = st.session_state.get('survey_image_mime', 'image/png')
-                                                # 새 이미지가 없으면 기존 이미지(edit_survey_image)를 그대로 사용
-                                                if not image_to_save and st.session_state.get('edit_survey_image'):
-                                                    image_to_save = st.session_state.get('edit_survey_image')
-                                                    mime_to_save = st.session_state.get('edit_survey_image_mime', 'image/png')
-                                                if image_to_save:
-                                                    cur_img.execute("INSERT OR REPLACE INTO survey_images (survey_id, image_data, mime_type) VALUES (?, ?, ?)", 
-                                                                    (sheet_id, image_to_save, mime_to_save))
+                                                img_to_save1 = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
+                                                mime_to_save1 = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
+                                                img_to_save2 = st.session_state.get('survey_image_data2') or st.session_state.get('edit_survey_image2')
+                                                mime_to_save2 = st.session_state.get('survey_image_mime2') or st.session_state.get('edit_survey_image_mime2', 'image/png')
+                                                img_to_save3 = st.session_state.get('survey_image_data3') or st.session_state.get('edit_survey_image3')
+                                                mime_to_save3 = st.session_state.get('survey_image_mime3') or st.session_state.get('edit_survey_image_mime3', 'image/png')
+
+                                                if img_to_save1 or img_to_save2 or img_to_save3:
+                                                    cur_img.execute("""INSERT OR REPLACE INTO survey_images 
+                                                                    (survey_id, image_data, mime_type, image_data2, mime_type2, image_data3, mime_type3) 
+                                                                    VALUES (?, ?, ?, ?, ?, ?, ?)""", 
+                                                                    (sheet_id, img_to_save1, mime_to_save1, img_to_save2, mime_to_save2, img_to_save3, mime_to_save3))
                                                 else:
                                                     cur_img.execute("DELETE FROM survey_images WHERE survey_id=?", (sheet_id,))
                                                 conn_img.commit()

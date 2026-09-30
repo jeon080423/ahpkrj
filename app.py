@@ -43,11 +43,21 @@ def migrate_db():
         except Exception:
             pass
             
-    # Add survey_images table for Section 2 Image Upload feature
+    # Add survey_images table for Section 2 Image Upload feature (up to 3 images)
     c.execute('''CREATE TABLE IF NOT EXISTS survey_images (
                     survey_id TEXT PRIMARY KEY,
                     image_data BLOB,
-                    mime_type TEXT)''')
+                    mime_type TEXT,
+                    image_data2 BLOB,
+                    mime_type2 TEXT,
+                    image_data3 BLOB,
+                    mime_type3 TEXT)''')
+    for col_name, col_type in [("image_data2", "BLOB"), ("mime_type2", "TEXT"), ("image_data3", "BLOB"), ("mime_type3", "TEXT")]:
+        try:
+            c.execute(f"ALTER TABLE survey_images ADD COLUMN {col_name} {col_type}")
+            conn.commit()
+        except Exception:
+            pass
     conn.commit()
     conn.close()
     
