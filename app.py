@@ -86,32 +86,46 @@ except:
 
 import extra_streamlit_components as stx
 import sqlite3
+# [보안 패치] 쿠키 자동 로그인 토큰 검증용 (yeta_db의 검증된 헬퍼 재사용)
+from yeta_db import verify_login_token as _verify_login_token, issue_login_token as _issue_login_token, downgrade_if_expired as _downgrade_if_expired
 
 cookie_manager = stx.CookieManager(key="global_cookie_manager")
 st.session_state.cookie_manager = cookie_manager
 
-# auto-login based on cookie
+# auto-login based on cookie (쿠키 값 형식: "user_id|||login_token")
 saved_user = None
+saved_token = None
+_had_cookie = False
 try:
-    saved_user = cookie_manager.get(cookie="ahp_user_id")
+    _saved_val = cookie_manager.get(cookie="ahp_user_id")
+    if _saved_val:
+        _had_cookie = True
+        # [보안 패치] 구 형식(평문 ID) 쿠키는 토큰이 없어 무효 처리됨
+        if "|||" in str(_saved_val):
+            saved_user, saved_token = str(_saved_val).rsplit("|||", 1)
 except Exception:
     pass
 
 need_delete_cookie = False
 if st.session_state.get("logout_requested"):
     saved_user = None
+    saved_token = None
     need_delete_cookie = True
 
-if saved_user and not st.session_state.get('user_id') and not st.session_state.get('logout_requested'):
+# [보안 패치] DB 저장 랜덤 토큰과 일치할 때만 자동 로그인 허용 (쿠키 위조 차단)
+if (saved_user and saved_token and _verify_login_token(saved_user, saved_token)
+        and not st.session_state.get('user_id') and not st.session_state.get('logout_requested')):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("SELECT role, expiry_date, plan_type FROM users WHERE id=?", (saved_user,))
     db_user = c.fetchone()
     conn.close()
     if db_user:
+        # [보안 패치] 쿠키 자동 로그인 경로에서도 만료 체크 (만료 official 강등)
+        _sess_role, _sess_expiry = _downgrade_if_expired(saved_user, db_user[0], db_user[1])
         st.session_state.user_id = saved_user
-        st.session_state.user_role = db_user[0]
-        st.session_state.expiry_date = db_user[1]
+        st.session_state.user_role = _sess_role
+        st.session_state.expiry_date = _sess_expiry
         st.session_state.plan_type = db_user[2] if len(db_user) > 2 else None
         try:
             import survey_manager
@@ -120,16 +134,22 @@ if saved_user and not st.session_state.get('user_id') and not st.session_state.g
             pass
     else:
         need_delete_cookie = True
+elif _had_cookie:
+    # [보안 패치] 토큰 검증 실패/위조/구 형식 쿠키는 삭제하고 재로그인 유도
+    need_delete_cookie = True
 
 # Sync state to cookie (sliding expiration: 1 hour)
 SESSION_TIMEOUT = 3600  # 1 hour
 current_user = st.session_state.get('user_id')
 if current_user and not st.session_state.get('logout_requested'):
     try:
-        cookie_manager.set("ahp_user_id", current_user, max_age=SESSION_TIMEOUT, key="set_ahp_user_cookie")
+        # [보안 패치] 쿠키에 user_id 단독이 아닌 검증용 랜덤 토큰을 함께 저장
+        _ctok = _issue_login_token(current_user, force_new=False)
+        if _ctok:
+            cookie_manager.set("ahp_user_id", f"{current_user}|||{_ctok}", max_age=SESSION_TIMEOUT, key="set_ahp_user_cookie")
     except Exception:
         pass
-elif (not current_user and saved_user) or need_delete_cookie or st.session_state.get('logout_requested'):
+elif (not current_user and _had_cookie) or need_delete_cookie or st.session_state.get('logout_requested'):
     try:
         cookie_manager.delete("ahp_user_id", key="del_ahp_user_cookie")
     except Exception:

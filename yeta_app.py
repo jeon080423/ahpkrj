@@ -28,7 +28,8 @@ from yeta_db import (
     upgrade_user_password_to_hash, get_gspread_client, run_gspread_with_retry,
     get_cached_visit_logs, get_event_settings, sync_db_from_sheets,
     get_all_users, delete_user, add_user, log_to_sheets, restore_from_deleted_sheet,
-    update_user_full_info, get_db_connection
+    update_user_full_info, get_db_connection,
+    issue_login_token, verify_login_token, clear_login_token, downgrade_if_expired
 )
 from yeta_email import (
     send_tax_invoice_request_email, send_password_recovery_email, send_approval_email
@@ -138,18 +139,20 @@ def run():
         login_token_val = q_params["login_token"]
         if isinstance(login_token_val, list): login_token_val = login_token_val[0]
         
-        expected_token = hashlib.sha256(f"{login_user_val}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
-        if login_token_val == expected_token:
+        # 토큰 검증 (DB 저장 랜덤 토큰과 비교)
+        if verify_login_token(login_user_val, login_token_val):
             conn = get_db_connection('users.db')
             c = conn.cursor()
             c.execute("SELECT role, expiry_date FROM users WHERE id=?", (login_user_val,))
             db_user = c.fetchone()
             conn.close()
             if db_user:
-                role_changed = (st.session_state.user_id != login_user_val) or (st.session_state.user_role != db_user[0])
+                # [보안 패치] 자동 로그인 경로에서도 만료 체크 (북마크 만료 우회 방지)
+                sess_role, sess_expiry = downgrade_if_expired(login_user_val, db_user[0], db_user[1])
+                role_changed = (st.session_state.user_id != login_user_val) or (st.session_state.user_role != sess_role)
                 st.session_state.user_id = login_user_val
-                st.session_state.user_role = db_user[0]
-                st.session_state.expiry_date = db_user[1]
+                st.session_state.user_role = sess_role
+                st.session_state.expiry_date = sess_expiry
                 
                 st.query_params.pop("login_user", None)
                 st.query_params.pop("login_token", None)
@@ -776,7 +779,7 @@ section[data-testid="stSidebar"] > div:first-child {
                                     st.session_state.user_role = "temp"
                                     st.session_state.expiry_date = "9999-12-31"
                                     st.query_params["login_user"] = l_id.strip()
-                                    st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+                                    st.query_params["login_token"] = issue_login_token(l_id.strip())
                                     st.query_params["last_activity"] = str(int(time.time()))
                                     st.toast("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.")
                                     st.rerun()
@@ -790,7 +793,7 @@ section[data-testid="stSidebar"] > div:first-child {
                             st.session_state.expiry_date = result[1]
                             st.session_state.plan_type = result[2] if len(result) > 2 else None
                             st.query_params["login_user"] = l_id.strip()
-                            st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+                            st.query_params["login_token"] = issue_login_token(l_id.strip())
                             st.query_params["last_activity"] = str(int(time.time()))
                             st.success(f"환영합니다, {l_id}님!")
                             st.rerun()
@@ -893,6 +896,7 @@ section[data-testid="stSidebar"] > div:first-child {
                             st.error("현재 비밀번호가 올바르지 않습니다.")
 
             if st.button("로그아웃", key="btn_logout_yeta"):
+                clear_login_token(st.session_state.get("user_id"))  # [보안 패치]
                 st.session_state.user_id = None
                 st.session_state.user_role = None
                 st.session_state.expiry_date = None
