@@ -3877,29 +3877,22 @@ if "preview_id" in q_params or "survey_id" in q_params:
     main_criteria = ahp_model.get("main", [])
     
     with st.container():
-        # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개)
+        # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개 - SQLite 및 구글 시트 영구 연동)
         try:
-            conn_img = sqlite3.connect('users.db')
-            c_img = conn_img.cursor()
-            c_img.execute("PRAGMA table_info(survey_images)")
-            cols_info = [ci[1] for ci in c_img.fetchall()]
-            c_img.execute("SELECT * FROM survey_images WHERE survey_id=?", (survey_id_param,))
-            img_row = c_img.fetchone()
-            conn_img.close()
-            if img_row:
-                row_map = dict(zip(cols_info, img_row))
-                import base64
-                for suf in ["", "2", "3"]:
-                    data_val = row_map.get(f"image_data{suf}")
-                    mime_val = row_map.get(f"mime_type{suf}") or "image/png"
-                    if data_val:
-                        encoded = base64.b64encode(data_val).decode()
-                        html_str = f'''
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <img src="data:{mime_val};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
-                        </div>
-                        '''
-                        st.markdown(html_str, unsafe_allow_html=True)
+            from survey_manager import get_survey_images_with_fallback
+            imgs_dict = get_survey_images_with_fallback(survey_id_param)
+            import base64
+            for s_idx in [1, 2, 3]:
+                d_val, m_val = imgs_dict.get(s_idx, (None, None))
+                if d_val:
+                    encoded = base64.b64encode(d_val).decode()
+                    m_type = m_val or "image/png"
+                    html_str = f'''
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="data:{m_type};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
+                    </div>
+                    '''
+                    st.markdown(html_str, unsafe_allow_html=True)
         except Exception:
             pass
 
@@ -10162,31 +10155,20 @@ with contextlib.nullcontext():
                             st.session_state.edit_admin_email = meta.get("Admin_Email", "")
                             
                             try:
-                                import sqlite3
-                                conn_img = sqlite3.connect('users.db')
-                                c_img = conn_img.cursor()
-                                c_img.execute("PRAGMA table_info(survey_images)")
-                                img_cols = [ci[1] for ci in c_img.fetchall()]
-                                c_img.execute("SELECT * FROM survey_images WHERE survey_id=?", (sel_id,))
-                                img_row = c_img.fetchone()
-                                conn_img.close()
-                                if img_row:
-                                    r_dict = dict(zip(img_cols, img_row))
-                                    for suf in ["", "2", "3"]:
-                                        d = r_dict.get(f"image_data{suf}")
-                                        m = r_dict.get(f"mime_type{suf}") or "image/png"
-                                        if d:
-                                            st.session_state[f"edit_survey_image{suf}"] = d
-                                            st.session_state[f"edit_survey_image_mime{suf}"] = m
-                                        else:
-                                            st.session_state.pop(f"edit_survey_image{suf}", None)
-                                            st.session_state.pop(f"edit_survey_image_mime{suf}", None)
-                                else:
-                                    for suf in ["", "2", "3"]:
+                                from survey_manager import get_survey_images_with_fallback
+                                imgs_loaded = get_survey_images_with_fallback(sel_id, user_id=st.session_state.user_id)
+                                for idx_num, suf in [(1, ""), (2, "2"), (3, "3")]:
+                                    d, m = imgs_loaded.get(idx_num, (None, None))
+                                    if d:
+                                        st.session_state[f"edit_survey_image{suf}"] = d
+                                        st.session_state[f"edit_survey_image_mime{suf}"] = m or "image/png"
+                                    else:
                                         st.session_state.pop(f"edit_survey_image{suf}", None)
                                         st.session_state.pop(f"edit_survey_image_mime{suf}", None)
                             except Exception:
-                                pass
+                                for suf in ["", "2", "3"]:
+                                    st.session_state.pop(f"edit_survey_image{suf}", None)
+                                    st.session_state.pop(f"edit_survey_image_mime{suf}", None)
 
 
                             demo = meta.get("Demographics", {})
@@ -10313,7 +10295,7 @@ with contextlib.nullcontext():
                         if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary", use_container_width=True):
                             st.session_state.editing_survey_id = None
                             st.session_state.pop('tab2_tier_choice', None)
-                            keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_')]
+                            keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_')]
                             for k in keys_to_clear:
                                 del st.session_state[k]
                             st.rerun()
@@ -11110,6 +11092,18 @@ Thank you deeply for your valuable participation.
                                         _s_cur.execute("DELETE FROM survey_images WHERE survey_id=?", (_s_sheet_id,))
                                     _s_conn.commit()
                                     _s_conn.close()
+
+                                    # 구글 시트에 이미지 영구 저장 동기화 (클라우드 재배포 시 보존)
+                                    try:
+                                        from survey_manager import save_survey_images_to_gsheet
+                                        save_survey_images_to_gsheet(_s_sheet_id, {
+                                            1: (_s_img1, _s_mime1),
+                                            2: (_s_img2, _s_mime2),
+                                            3: (_s_img3, _s_mime3)
+                                        }, user_id=st.session_state.user_id)
+                                    except Exception:
+                                        pass
+
                                     # 구글 시트 메타데이터 업데이트
                                     if tier_level == 3:
                                         from survey_manager_v3 import create_survey_sheet_v3
@@ -11267,6 +11261,17 @@ Thank you deeply for your valuable participation.
                                                     cur_img.execute("DELETE FROM survey_images WHERE survey_id=?", (sheet_id,))
                                                 conn_img.commit()
                                                 conn_img.close()
+
+                                                # 구글 시트에 이미지 영구 저장 동기화 (클라우드 재배포 시 보존)
+                                                try:
+                                                    from survey_manager import save_survey_images_to_gsheet
+                                                    save_survey_images_to_gsheet(sheet_id, {
+                                                        1: (img_to_save1, mime_to_save1),
+                                                        2: (img_to_save2, mime_to_save2),
+                                                        3: (img_to_save3, mime_to_save3)
+                                                    }, user_id=st.session_state.user_id)
+                                                except Exception:
+                                                    pass
                                             except Exception as img_e:
                                                 pass
 
