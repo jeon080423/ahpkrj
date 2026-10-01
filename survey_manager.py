@@ -508,6 +508,238 @@ def load_survey_metadata(spreadsheet_id):
         st.error(f"설문 메타데이터 로드 실패: {e}")
         return None
 
+def save_survey_images_to_gsheet(spreadsheet_id, images_dict, user_id=None):
+    """
+    설문 설명 이미지(최대 3개)를 연동된 구글 스프레드시트의 'Survey_Images' 워크시트에 Base64 청크 단위로 영구 저장합니다.
+    images_dict: {1: (data_bytes, mime_type), 2: (data_bytes2, mime_type2), 3: (data_bytes3, mime_type3)}
+    """
+    if not spreadsheet_id:
+        return False
+    # URL 형식인 경우 ID만 추출
+    if "docs.google.com/spreadsheets" in str(spreadsheet_id):
+        parts = str(spreadsheet_id).split("/d/")
+        if len(parts) > 1:
+            spreadsheet_id = parts[1].split("/")[0]
+
+    client = get_survey_gspread_client(user_id=user_id)
+    if not client:
+        return False
+
+    import base64
+    import math
+
+    valid_images = {}
+    for slot in [1, 2, 3]:
+        item = images_dict.get(slot)
+        if item and item[0]:
+            valid_images[slot] = (item[0], item[1] or "image/png")
+
+    try:
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id, max_retries=3)
+    except Exception as e:
+        import logging
+        logging.error(f"save_survey_images_to_gsheet 시트 열기 실패 ({spreadsheet_id}): {e}")
+        return False
+
+    try:
+        ws_list = run_gspread_with_retry(spreadsheet.worksheets, max_retries=2)
+        ws_map = {ws.title: ws for ws in ws_list}
+    except Exception:
+        ws_map = {}
+
+    CHUNK_SIZE = 30000
+    rows = [["slot", "mime_type", "chunk_seq", "chunk_data"]]
+
+    for slot, (img_val, mime) in valid_images.items():
+        if hasattr(img_val, "getvalue"):
+            img_bytes = img_val.getvalue()
+        elif hasattr(img_val, "read"):
+            img_bytes = img_val.read()
+        elif isinstance(img_val, (bytes, bytearray, memoryview)):
+            img_bytes = bytes(img_val)
+        elif isinstance(img_val, str):
+            try:
+                img_bytes = base64.b64decode(img_val)
+            except Exception:
+                img_bytes = img_val.encode('utf-8')
+        else:
+            continue
+
+        b64_str = base64.b64encode(img_bytes).decode('ascii')
+        total_chunks = math.ceil(len(b64_str) / CHUNK_SIZE) if b64_str else 0
+        for seq in range(total_chunks):
+            chunk = b64_str[seq * CHUNK_SIZE:(seq + 1) * CHUNK_SIZE]
+            rows.append([slot, mime, seq, chunk])
+
+    try:
+        if "Survey_Images" in ws_map:
+            ws = ws_map["Survey_Images"]
+            run_gspread_with_retry(ws.clear, max_retries=2)
+        else:
+            needed_rows = max(100, len(rows) + 20)
+            ws = run_gspread_with_retry(spreadsheet.add_worksheet, title="Survey_Images", rows=str(needed_rows), cols="6", max_retries=2)
+
+        if len(rows) > 0:
+            if ws.row_count < len(rows):
+                run_gspread_with_retry(ws.add_rows, len(rows) - ws.row_count + 20, max_retries=2)
+            run_gspread_with_retry(ws.update, range_name=f"A1:D{len(rows)}", values=rows, max_retries=2)
+
+        # 탭 숨김(hidden) 설정 시도하여 시트 사용자 UI 정리
+        try:
+            run_gspread_with_retry(spreadsheet.batch_update, {
+                "requests": [{
+                    "updateSheetProperties": {
+                        "properties": {
+                            "sheetId": ws.id,
+                            "hidden": True
+                        },
+                        "fields": "hidden"
+                    }
+                }]
+            }, max_retries=1)
+        except Exception:
+            pass
+
+        # 캐시 무효화
+        try:
+            load_survey_images_from_gsheet.clear()
+        except Exception:
+            pass
+
+        return True
+    except Exception as e:
+        import logging
+        logging.error(f"save_survey_images_to_gsheet 저장 실패 ({spreadsheet_id}): {e}")
+        return False
+
+
+@st.cache_data(ttl=120, show_spinner=False)
+def load_survey_images_from_gsheet(spreadsheet_id, user_id=None):
+    """
+    구글 스프레드시트의 'Survey_Images' 워크시트에서 분할 저장된 이미지들을 로드하여 복원합니다.
+    반환값: {1: {"data": bytes, "mime": str}, 2: ..., 3: ...} 또는 None
+    """
+    if not spreadsheet_id:
+        return None
+    if "docs.google.com/spreadsheets" in str(spreadsheet_id):
+        parts = str(spreadsheet_id).split("/d/")
+        if len(parts) > 1:
+            spreadsheet_id = parts[1].split("/")[0]
+
+    client = get_survey_gspread_client(user_id=user_id)
+    if not client:
+        return None
+
+    try:
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id, max_retries=3)
+        try:
+            ws = run_gspread_with_retry(spreadsheet.worksheet, "Survey_Images", max_retries=2)
+        except Exception:
+            return None # 시트가 없으면 이미지가 등록되지 않은 설문
+
+        all_vals = run_gspread_with_retry(ws.get_all_values, max_retries=2)
+        if not all_vals or len(all_vals) <= 1:
+            return None
+
+        chunks_by_slot = {}
+        for row in all_vals[1:]:
+            if len(row) >= 4:
+                try:
+                    slot = int(row[0])
+                    mime = str(row[1]).strip()
+                    seq = int(row[2])
+                    chunk = str(row[3])
+                    if slot not in chunks_by_slot:
+                        chunks_by_slot[slot] = {"mime": mime, "chunks": []}
+                    chunks_by_slot[slot]["chunks"].append((seq, chunk))
+                except Exception:
+                    continue
+
+        import base64
+        result = {}
+        for slot, info in chunks_by_slot.items():
+            info["chunks"].sort(key=lambda x: x[0])
+            full_b64 = "".join([c[1] for c in info["chunks"]])
+            if full_b64:
+                try:
+                    img_bytes = base64.b64decode(full_b64.encode('ascii'))
+                    result[slot] = {
+                        "data": img_bytes,
+                        "mime": info["mime"] or "image/png"
+                    }
+                except Exception:
+                    pass
+        return result if result else None
+    except Exception as e:
+        import logging
+        logging.error(f"load_survey_images_from_gsheet 로드 실패 ({spreadsheet_id}): {e}")
+        return None
+
+
+def get_survey_images_with_fallback(survey_id, user_id=None):
+    """
+    로컬 SQLite(users.db)에서 이미지를 먼저 조회하고,
+    서버 재배포 등으로 로컬 DB에 이미지가 없을 경우 구글 시트에서 복원하여 로컬 DB에 자동 캐시합니다.
+    반환값: {1: (data1, mime1), 2: (data2, mime2), 3: (data3, mime3)}
+    """
+    import sqlite3
+    local_found = False
+    result = {1: (None, None), 2: (None, None), 3: (None, None)}
+
+    try:
+        conn = sqlite3.connect('users.db', timeout=10.0)
+        c = conn.cursor()
+        c.execute("PRAGMA table_info(survey_images)")
+        cols = [ci[1] for ci in c.fetchall()]
+        if cols:
+            c.execute("SELECT * FROM survey_images WHERE survey_id=?", (survey_id,))
+            row = c.fetchone()
+            if row:
+                row_map = dict(zip(cols, row))
+                for idx, suf in [(1, ""), (2, "2"), (3, "3")]:
+                    d = row_map.get(f"image_data{suf}")
+                    m = row_map.get(f"mime_type{suf}") or "image/png"
+                    if d:
+                        result[idx] = (d, m)
+                        local_found = True
+        conn.close()
+    except Exception:
+        pass
+
+    if local_found:
+        return result
+
+    # 로컬에 없고 preview 모드가 아닌 경우 구글 시트에서 복원 시도
+    if not str(survey_id).startswith("preview_"):
+        gs_images = load_survey_images_from_gsheet(survey_id, user_id=user_id)
+        if gs_images:
+            for idx in [1, 2, 3]:
+                if idx in gs_images:
+                    result[idx] = (gs_images[idx]["data"], gs_images[idx]["mime"])
+
+            # 로컬 SQLite에 캐시 동기화 (다음 조회 시 빠른 속도 보장)
+            try:
+                conn = sqlite3.connect('users.db', timeout=10.0)
+                c = conn.cursor()
+                c.execute('''CREATE TABLE IF NOT EXISTS survey_images (
+                                survey_id TEXT PRIMARY KEY,
+                                image_data BLOB,
+                                mime_type TEXT,
+                                image_data2 BLOB,
+                                mime_type2 TEXT,
+                                image_data3 BLOB,
+                                mime_type3 TEXT)''')
+                c.execute("""INSERT OR REPLACE INTO survey_images 
+                             (survey_id, image_data, mime_type, image_data2, mime_type2, image_data3, mime_type3) 
+                             VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                          (survey_id, result[1][0], result[1][1], result[2][0], result[2][1], result[3][0], result[3][1]))
+                conn.commit()
+                conn.close()
+            except Exception:
+                pass
+
+    return result
+
 def increment_survey_visit(spreadsheet_id):
     """설문 페이지 접속 시 방문 카운트를 1 증가시킵니다."""
     client = get_survey_gspread_client()
