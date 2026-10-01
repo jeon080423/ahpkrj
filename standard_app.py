@@ -3879,8 +3879,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
     with st.container():
         # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개 - 미리보기/SQLite/구글시트 통합)
         try:
-            rendered_images = False
-            # 1. 미리보기 모드일 때: survey_meta에 직접 포함된 Preview_Images 우선 렌더링 (배포 전 즉시 표시)
+            display_images = []
+            # 1. 미리보기 모드일 때: survey_meta에 직접 포함된 Preview_Images 우선 확인 (배포 전 즉시 표시)
             if is_preview_mode and survey_meta.get("Preview_Images"):
                 p_imgs = survey_meta["Preview_Images"]
                 for s_key in ["1", "2", "3"]:
@@ -3888,16 +3888,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         b64_val = p_imgs[s_key].get("data_b64")
                         m_type = p_imgs[s_key].get("mime") or "image/png"
                         if b64_val:
-                            html_str = f'''
-                            <div style="text-align: center; margin-bottom: 20px;">
-                                <img src="data:{m_type};base64,{b64_val}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
-                            </div>
-                            '''
-                            st.markdown(html_str, unsafe_allow_html=True)
-                            rendered_images = True
+                            display_images.append((b64_val, m_type))
 
-            # 2. 미리보기에서 직접 렌더링되지 않았거나 일반 배포 응답 모드인 경우
-            if not rendered_images:
+            # 2. 미리보기에서 가져오지 못했거나 일반 배포 응답 모드인 경우
+            if not display_images:
                 from survey_manager import get_survey_images_with_fallback
                 target_id_for_images = survey_id_param
                 # 미리보기 모드인데 Preview_Images가 비어있고 연동된 구글 시트 ID가 있는 경우
@@ -3910,12 +3904,29 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     if d_val:
                         encoded = base64.b64encode(d_val).decode()
                         m_type = m_val or "image/png"
-                        html_str = f'''
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <img src="data:{m_type};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
-                        </div>
-                        '''
-                        st.markdown(html_str, unsafe_allow_html=True)
+                        display_images.append((encoded, m_type))
+
+            # 3. 이미지 렌더링: 이미지와 이미지 사이에 심플한 회색 구분선 표시
+            if display_images:
+                for idx, (b64_val, m_type) in enumerate(display_images):
+                    if idx > 0:
+                        # 이미지와 이미지 사이의 심플한 회색 구분선
+                        st.markdown(
+                            '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
+                            unsafe_allow_html=True
+                        )
+                    html_str = f'''
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="data:{m_type};base64,{b64_val}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
+                    </div>
+                    '''
+                    st.markdown(html_str, unsafe_allow_html=True)
+
+                # 마지막 이미지와 아래 문항 사이의 깔끔한 분리선
+                st.markdown(
+                    '<div style="margin: 28px auto 24px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
+                    unsafe_allow_html=True
+                )
         except Exception:
             pass
 
