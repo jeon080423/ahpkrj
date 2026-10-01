@@ -3877,22 +3877,45 @@ if "preview_id" in q_params or "survey_id" in q_params:
     main_criteria = ahp_model.get("main", [])
     
     with st.container():
-        # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개 - SQLite 및 구글 시트 영구 연동)
+        # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개 - 미리보기/SQLite/구글시트 통합)
         try:
-            from survey_manager import get_survey_images_with_fallback
-            imgs_dict = get_survey_images_with_fallback(survey_id_param)
-            import base64
-            for s_idx in [1, 2, 3]:
-                d_val, m_val = imgs_dict.get(s_idx, (None, None))
-                if d_val:
-                    encoded = base64.b64encode(d_val).decode()
-                    m_type = m_val or "image/png"
-                    html_str = f'''
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <img src="data:{m_type};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
-                    </div>
-                    '''
-                    st.markdown(html_str, unsafe_allow_html=True)
+            rendered_images = False
+            # 1. 미리보기 모드일 때: survey_meta에 직접 포함된 Preview_Images 우선 렌더링 (배포 전 즉시 표시)
+            if is_preview_mode and survey_meta.get("Preview_Images"):
+                p_imgs = survey_meta["Preview_Images"]
+                for s_key in ["1", "2", "3"]:
+                    if s_key in p_imgs:
+                        b64_val = p_imgs[s_key].get("data_b64")
+                        m_type = p_imgs[s_key].get("mime") or "image/png"
+                        if b64_val:
+                            html_str = f'''
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <img src="data:{m_type};base64,{b64_val}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
+                            </div>
+                            '''
+                            st.markdown(html_str, unsafe_allow_html=True)
+                            rendered_images = True
+
+            # 2. 미리보기에서 직접 렌더링되지 않았거나 일반 배포 응답 모드인 경우
+            if not rendered_images:
+                from survey_manager import get_survey_images_with_fallback
+                target_id_for_images = survey_id_param
+                # 미리보기 모드인데 Preview_Images가 비어있고 연동된 구글 시트 ID가 있는 경우
+                if is_preview_mode and survey_meta.get("Sheet_ID"):
+                    target_id_for_images = survey_meta.get("Sheet_ID")
+                imgs_dict = get_survey_images_with_fallback(target_id_for_images)
+                import base64
+                for s_idx in [1, 2, 3]:
+                    d_val, m_val = imgs_dict.get(s_idx, (None, None))
+                    if d_val:
+                        encoded = base64.b64encode(d_val).decode()
+                        m_type = m_val or "image/png"
+                        html_str = f'''
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <img src="data:{m_type};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
+                        </div>
+                        '''
+                        st.markdown(html_str, unsafe_allow_html=True)
         except Exception:
             pass
 
@@ -11017,6 +11040,26 @@ Thank you deeply for your valuable participation.
 
                     # Save current state for preview tab
                     preview_id = f"preview_{st.session_state.user_id if st.session_state.user_id else 'guest'}"
+                    
+                    # [신규] 미리보기용 이미지 데이터 준비 (Base64 인코딩)
+                    preview_imgs_dict = {}
+                    import base64
+                    for idx_num, suf in [(1, ""), (2, "2"), (3, "3")]:
+                        cur_img = st.session_state.get(f'survey_image_data{suf}') or st.session_state.get(f'edit_survey_image{suf}')
+                        cur_mime = st.session_state.get(f'survey_image_mime{suf}') or st.session_state.get(f'edit_survey_image_mime{suf}', 'image/png')
+                        if cur_img:
+                            if isinstance(cur_img, bytes):
+                                b64_str = base64.b64encode(cur_img).decode('ascii')
+                            elif isinstance(cur_img, str):
+                                b64_str = cur_img
+                            else:
+                                b64_str = ""
+                            if b64_str:
+                                preview_imgs_dict[str(idx_num)] = {
+                                    "data_b64": b64_str,
+                                    "mime": cur_mime or "image/png"
+                                }
+
                     preview_data = {
                         "Title": survey_title,
                         "Description": survey_desc,
@@ -11028,7 +11071,9 @@ Thank you deeply for your valuable participation.
                         "Definitions": definitions_map,
                         "CR_Limit": cr_limit,
                         "CR_Guide_Method": cr_guide_method,
-                        "Rewards_Info": rewards_info
+                        "Rewards_Info": rewards_info,
+                        "Preview_Images": preview_imgs_dict,
+                        "Sheet_ID": st.session_state.get("editing_survey_id", "")
                     }
 
                     st.session_state[f"_preview_data_{preview_id}"] = preview_data
@@ -11042,6 +11087,15 @@ Thank you deeply for your valuable participation.
                     try:
                         conn_prev = sqlite3.connect('users.db')
                         c_prev = conn_prev.cursor()
+                        c_prev.execute('''CREATE TABLE IF NOT EXISTS survey_images (
+                                            survey_id TEXT PRIMARY KEY,
+                                            image_data BLOB,
+                                            mime_type TEXT,
+                                            image_data2 BLOB,
+                                            mime_type2 TEXT,
+                                            image_data3 BLOB,
+                                            mime_type3 TEXT
+                                        )''')
                         preview_survey_id_param = f"preview_{preview_id}"
                         prev_img1 = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
                         prev_mime1 = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
@@ -11051,12 +11105,14 @@ Thank you deeply for your valuable participation.
                         prev_mime3 = st.session_state.get('survey_image_mime3') or st.session_state.get('edit_survey_image_mime3', 'image/png')
 
                         if prev_img1 or prev_img2 or prev_img3:
-                            c_prev.execute("""INSERT OR REPLACE INTO survey_images 
-                                            (survey_id, image_data, mime_type, image_data2, mime_type2, image_data3, mime_type3) 
-                                            VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                                            (preview_survey_id_param, prev_img1, prev_mime1, prev_img2, prev_mime2, prev_img3, prev_mime3))
+                            for pid in [preview_id, preview_survey_id_param]:
+                                c_prev.execute("""INSERT OR REPLACE INTO survey_images 
+                                                (survey_id, image_data, mime_type, image_data2, mime_type2, image_data3, mime_type3) 
+                                                VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                                                (pid, prev_img1, prev_mime1, prev_img2, prev_mime2, prev_img3, prev_mime3))
                         else:
-                            c_prev.execute("DELETE FROM survey_images WHERE survey_id=?", (preview_survey_id_param,))
+                            for pid in [preview_id, preview_survey_id_param]:
+                                c_prev.execute("DELETE FROM survey_images WHERE survey_id=?", (pid,))
                         conn_prev.commit()
                         conn_prev.close()
                     except Exception:
@@ -11083,6 +11139,15 @@ Thank you deeply for your valuable participation.
 
                                     _s_conn = sqlite3.connect('users.db')
                                     _s_cur = _s_conn.cursor()
+                                    _s_cur.execute('''CREATE TABLE IF NOT EXISTS survey_images (
+                                                    survey_id TEXT PRIMARY KEY,
+                                                    image_data BLOB,
+                                                    mime_type TEXT,
+                                                    image_data2 BLOB,
+                                                    mime_type2 TEXT,
+                                                    image_data3 BLOB,
+                                                    mime_type3 TEXT
+                                                )''')
                                     if _s_img1 or _s_img2 or _s_img3:
                                         _s_cur.execute("""INSERT OR REPLACE INTO survey_images 
                                                        (survey_id, image_data, mime_type, image_data2, mime_type2, image_data3, mime_type3) 
@@ -11092,6 +11157,30 @@ Thank you deeply for your valuable participation.
                                         _s_cur.execute("DELETE FROM survey_images WHERE survey_id=?", (_s_sheet_id,))
                                     _s_conn.commit()
                                     _s_conn.close()
+
+                                    # 세션 상태 및 미리보기 JSON 파일 동기화
+                                    if _s_img1:
+                                        st.session_state['edit_survey_image'] = _s_img1
+                                        st.session_state['edit_survey_image_mime'] = _s_mime1
+                                    if _s_img2:
+                                        st.session_state['edit_survey_image2'] = _s_img2
+                                        st.session_state['edit_survey_image_mime2'] = _s_mime2
+                                    if _s_img3:
+                                        st.session_state['edit_survey_image3'] = _s_img3
+                                        st.session_state['edit_survey_image_mime3'] = _s_mime3
+
+                                    try:
+                                        _s_p_imgs = {}
+                                        for _idx, (_im, _mi) in [(1, (_s_img1, _s_mime1)), (2, (_s_img2, _s_mime2)), (3, (_s_img3, _s_mime3))]:
+                                            if _im:
+                                                _b64 = base64.b64encode(_im).decode('ascii') if isinstance(_im, bytes) else str(_im)
+                                                _s_p_imgs[str(_idx)] = {"data_b64": _b64, "mime": _mi or "image/png"}
+                                        preview_data["Preview_Images"] = _s_p_imgs
+                                        preview_data["Sheet_ID"] = _s_sheet_id
+                                        with open(f"temp_previews/{preview_id}.json", "w", encoding="utf-8") as _pf:
+                                            json.dump(preview_data, _pf, ensure_ascii=False)
+                                    except Exception:
+                                        pass
 
                                     # 구글 시트에 이미지 영구 저장 동기화 (클라우드 재배포 시 보존)
                                     try:
@@ -11245,6 +11334,15 @@ Thank you deeply for your valuable participation.
                                             try:
                                                 conn_img = sqlite3.connect('users.db')
                                                 cur_img = conn_img.cursor()
+                                                cur_img.execute('''CREATE TABLE IF NOT EXISTS survey_images (
+                                                                survey_id TEXT PRIMARY KEY,
+                                                                image_data BLOB,
+                                                                mime_type TEXT,
+                                                                image_data2 BLOB,
+                                                                mime_type2 TEXT,
+                                                                image_data3 BLOB,
+                                                                mime_type3 TEXT
+                                                            )''')
                                                 img_to_save1 = st.session_state.get('survey_image_data') or st.session_state.get('edit_survey_image')
                                                 mime_to_save1 = st.session_state.get('survey_image_mime') or st.session_state.get('edit_survey_image_mime', 'image/png')
                                                 img_to_save2 = st.session_state.get('survey_image_data2') or st.session_state.get('edit_survey_image2')
@@ -11261,6 +11359,16 @@ Thank you deeply for your valuable participation.
                                                     cur_img.execute("DELETE FROM survey_images WHERE survey_id=?", (sheet_id,))
                                                 conn_img.commit()
                                                 conn_img.close()
+
+                                                if img_to_save1:
+                                                    st.session_state['edit_survey_image'] = img_to_save1
+                                                    st.session_state['edit_survey_image_mime'] = mime_to_save1
+                                                if img_to_save2:
+                                                    st.session_state['edit_survey_image2'] = img_to_save2
+                                                    st.session_state['edit_survey_image_mime2'] = mime_to_save2
+                                                if img_to_save3:
+                                                    st.session_state['edit_survey_image3'] = img_to_save3
+                                                    st.session_state['edit_survey_image_mime3'] = mime_to_save3
 
                                                 # 구글 시트에 이미지 영구 저장 동기화 (클라우드 재배포 시 보존)
                                                 try:

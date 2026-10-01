@@ -689,19 +689,37 @@ def get_survey_images_with_fallback(survey_id, user_id=None):
     try:
         conn = sqlite3.connect('users.db', timeout=10.0)
         c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS survey_images (
+                        survey_id TEXT PRIMARY KEY,
+                        image_data BLOB,
+                        mime_type TEXT,
+                        image_data2 BLOB,
+                        mime_type2 TEXT,
+                        image_data3 BLOB,
+                        mime_type3 TEXT)''')
         c.execute("PRAGMA table_info(survey_images)")
         cols = [ci[1] for ci in c.fetchall()]
         if cols:
-            c.execute("SELECT * FROM survey_images WHERE survey_id=?", (survey_id,))
-            row = c.fetchone()
-            if row:
-                row_map = dict(zip(cols, row))
-                for idx, suf in [(1, ""), (2, "2"), (3, "3")]:
-                    d = row_map.get(f"image_data{suf}")
-                    m = row_map.get(f"mime_type{suf}") or "image/png"
-                    if d:
-                        result[idx] = (d, m)
-                        local_found = True
+            candidates = [survey_id]
+            s_str = str(survey_id)
+            if s_str.startswith("preview_preview_"):
+                candidates.append(s_str[8:])  # preview_xxx
+            elif s_str.startswith("preview_"):
+                candidates.append(f"preview_{s_str}")
+
+            for cid in candidates:
+                c.execute("SELECT * FROM survey_images WHERE survey_id=?", (cid,))
+                row = c.fetchone()
+                if row:
+                    row_map = dict(zip(cols, row))
+                    for idx, suf in [(1, ""), (2, "2"), (3, "3")]:
+                        d = row_map.get(f"image_data{suf}")
+                        m = row_map.get(f"mime_type{suf}") or "image/png"
+                        if d:
+                            result[idx] = (d, m)
+                            local_found = True
+                    if local_found:
+                        break
         conn.close()
     except Exception:
         pass
