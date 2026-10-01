@@ -1263,6 +1263,11 @@ def init_db():
         conn.commit()
     except Exception:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN login_token TEXT")
+        conn.commit()
+    except Exception:
+        pass
 
     c.execute('''CREATE TABLE IF NOT EXISTS saved_analyses
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, filename TEXT, save_date TEXT, file_data BLOB)''')
@@ -2401,6 +2406,99 @@ def upgrade_user_password_to_hash(user_id, pw):
     except Exception:
         pass
 
+
+# -----------------------------------------------------------------------------
+# 로그인 토큰 (랜덤, DB 저장) - 북마크/결제 후 자동 로그인용
+# [보안 패치 2026-10-01] 기존 SHA256(이메일:고정솔트) 방식은 솔트가 공개 저장소에
+# 있어 토큰 위조가 가능했음. 이제 매 로그인마다 새로운 랜덤 토큰을 발급해 DB에
+# 저장하고, 자동 로그인 시 DB 값과 비교 검증한다.
+# -----------------------------------------------------------------------------
+def _ensure_login_token_column():
+    try:
+        conn = sqlite3.connect('users.db', timeout=15)
+        c = conn.cursor()
+        c.execute("ALTER TABLE users ADD COLUMN login_token TEXT")
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+def issue_login_token(user_id, force_new=True):
+    """새 랜덤 로그인 토큰을 발급해 DB에 저장하고 반환.
+    force_new=False면 기존 토큰이 있을 때 재사용 (결제창 렌더링 등 매 rerun 호출 지점용)."""
+    import secrets
+    if not user_id or not str(user_id).strip():
+        return ""
+    _ensure_login_token_column()
+    try:
+        conn = sqlite3.connect('users.db', timeout=15)
+        c = conn.cursor()
+        if not force_new:
+            c.execute("SELECT login_token FROM users WHERE id=?", (str(user_id).strip(),))
+            row = c.fetchone()
+            if row and row[0]:
+                conn.close()
+                return row[0]
+        token = secrets.token_urlsafe(32)
+        c.execute("UPDATE users SET login_token=? WHERE id=?", (token, str(user_id).strip()))
+        conn.commit()
+        conn.close()
+        return token
+    except Exception as e:
+        import logging
+        logging.error(f"issue_login_token 오류 ({user_id}): {e}")
+        return ""
+
+def verify_login_token(user_id, token):
+    """URL 토큰이 DB에 저장된 토큰과 일치하는지 상수시간 비교."""
+    import hmac
+    if not user_id or not token:
+        return False
+    _ensure_login_token_column()
+    try:
+        conn = sqlite3.connect('users.db', timeout=15)
+        c = conn.cursor()
+        c.execute("SELECT login_token FROM users WHERE id=?", (user_id,))
+        row = c.fetchone()
+        conn.close()
+        if row and row[0]:
+            return hmac.compare_digest(str(row[0]), str(token))
+    except Exception as e:
+        import logging
+        logging.error(f"verify_login_token 오류 ({user_id}): {e}")
+    return False
+
+def clear_login_token(user_id):
+    """로그아웃/비밀번호 변경 시 토큰 무효화."""
+    if not user_id:
+        return
+    _ensure_login_token_column()
+    try:
+        conn = sqlite3.connect('users.db', timeout=15)
+        c = conn.cursor()
+        c.execute("UPDATE users SET login_token=NULL WHERE id=?", (user_id,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        import logging
+        logging.error(f"clear_login_token 오류 ({user_id}): {e}")
+
+def downgrade_if_expired(user_id, role, expiry_date):
+    """official 회원의 만료일이 지났으면 temp(무료)로 강등. (role, expiry_date) 반환."""
+    if role == 'official' and expiry_date:
+        try:
+            today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
+            exp = datetime.datetime.strptime(str(expiry_date), "%Y-%m-%d").date()
+            if today > exp:
+                update_user_full_info(user_id, None, "temp", "9999-12-31")
+                import logging
+                logging.info(f"만료 회원 자동 강등: {user_id} (만료일 {expiry_date})")
+                return "temp", "9999-12-31"
+        except Exception as e:
+            import logging
+            logging.error(f"downgrade_if_expired 오류 ({user_id}): {e}")
+    return role, expiry_date
+
 def check_login(user_id, pw):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -2448,7 +2546,8 @@ def change_user_password(user_id, new_pw):
     c.execute("UPDATE users SET pw=? WHERE id=?", (hashed_pw, user_id))
     conn.commit()
     conn.close()
- 
+    clear_login_token(user_id)  # [보안 패치] 비번 변경 시 기존 북마크 토큰 무효화
+
     try:
         client = get_gspread_client()
         if client and get_main_spreadsheet_id():
@@ -4602,18 +4701,20 @@ if "login_user" in q_params and "login_token" in q_params:
     if isinstance(login_token_val, list): login_token_val = login_token_val[0]
     
     # 토큰 검증
-    expected_token = hashlib.sha256(f"{login_user_val}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
-    if login_token_val == expected_token:
+    token_ok = verify_login_token(login_user_val, login_token_val)
+    if token_ok:
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         c.execute("SELECT role, expiry_date FROM users WHERE id=?", (login_user_val,))
         db_user = c.fetchone()
         conn.close()
         if db_user:
-            role_changed = (st.session_state.user_id != login_user_val) or (st.session_state.user_role != db_user[0])
+            # [보안 패치] 자동 로그인 경로에서도 만료 체크 (북마크 만료 우회 방지)
+            sess_role, sess_expiry = downgrade_if_expired(login_user_val, db_user[0], db_user[1])
+            role_changed = (st.session_state.user_id != login_user_val) or (st.session_state.user_role != sess_role)
             st.session_state.user_id = login_user_val
-            st.session_state.user_role = db_user[0]
-            st.session_state.expiry_date = db_user[1]
+            st.session_state.user_role = sess_role
+            st.session_state.expiry_date = sess_expiry
             try:
                 import survey_manager
                 survey_manager.log_user_action(login_user_val, "로그인 (URL 파라미터)")
@@ -4717,7 +4818,7 @@ if "portone_paid" in q_params and "user_id" in q_params:
         )
         
         import hashlib
-        login_token = hashlib.sha256(f"{user_id_param}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+        login_token = issue_login_token(user_id_param)
         html_code = f"""
         <!DOCTYPE html>
         <html>
@@ -4824,8 +4925,9 @@ if st.session_state.get('user_id') is not None and st.session_state.get('user_ro
             st.session_state.expiry_date = "9999-12-31"
             st.toast("📅 Subscription expired. Automatically downgraded to Free User.")
             st.rerun()
-    except Exception:
-        pass
+    except Exception as _e:
+        import logging
+        logging.error(f"정식 회원 자동 만료 체크 오류 ({st.session_state.get('user_id')}): {_e}")
 
 # =============================================================================
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
@@ -4931,7 +5033,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
 def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2, inner_html="", is_best=False):
     import hashlib
     import datetime
-    login_token = hashlib.sha256(f"{user_id}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+    login_token = issue_login_token(user_id, force_new=False)
     is_logged_in_js = "true" if user_id and str(user_id).strip() else "false"
     if user_id and str(user_id).strip():
         u_str = str(user_id).strip()
@@ -5174,7 +5276,7 @@ def get_portone_custom_services_html(user_id=None):
     safe_email = "customer@ahp.kr"
     if user_id and str(user_id).strip():
         u_str = str(user_id).strip()
-        login_token = hashlib.sha256(f"{u_str}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+        login_token = issue_login_token(u_str, force_new=False)
         safe_email = u_str if "@" in u_str else f"{u_str}@ahp.kr"
 
     is_logged_in = "true" if user_id else "false"
@@ -6222,7 +6324,7 @@ with st.sidebar:
                                 except:
                                     pass
                                 st.query_params["login_user"] = l_id.strip()
-                                st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+                                st.query_params["login_token"] = issue_login_token(l_id.strip())
                                 st.query_params["last_activity"] = str(int(time.time()))
                                 st.toast(_("📅 정식 이용 기간이 만료되어 무료사용자 권한으로 자동 전환되었습니다.", "📅 Subscription expired. Automatically downgraded to Free User."))
                                 st.success(_(f"환영합니다, {l_id}님! 정식 이용 기간이 만료되어 무료사용자(3표본 분석 가능) 권한으로 자동 전환되었습니다. 사이드바에서 언제든 연장 결제하실 수 있습니다!",
@@ -6247,7 +6349,7 @@ with st.sidebar:
                             pass
                         st.session_state.plan_type = result[2] if len(result) > 2 else None
                         st.query_params["login_user"] = l_id.strip()
-                        st.query_params["login_token"] = hashlib.sha256(f"{l_id.strip()}:AHP_MASTER_SECURE_SALT_2026_!@#".encode()).hexdigest()
+                        st.query_params["login_token"] = issue_login_token(l_id.strip())
                         st.query_params["last_activity"] = str(int(time.time()))
                         if 'signup_paypal_user' in st.session_state:
                             del st.session_state.signup_paypal_user
@@ -6362,6 +6464,7 @@ with st.sidebar:
 
         # [위치 이동] 2. 로그아웃 버튼
         if st.button(_("로그아웃", "Log Out"), key="btn_logout_new"):
+            clear_login_token(st.session_state.get("user_id"))  # [보안 패치]
             st.session_state.user_id = None
             st.session_state.user_role = None
             st.session_state.expiry_date = None
@@ -7049,6 +7152,18 @@ with contextlib.nullcontext():
         
         # 컬럼 순서 및 구성 재조정하여 데이터프레임으로 출력
         display_df = users_df[['id', 'role', 'signup_date', 'pw', 'survey_count', 'last_survey_link', 'expiry_date', 'agree_info']].copy()
+        # [보안 패치] DB role이 official이어도 만료일이 지났으면 상태에 표시
+        def _disp_status(r):
+            try:
+                if r['role'] == 'official':
+                    _exp = datetime.datetime.strptime(str(r['expiry_date']), "%Y-%m-%d").date()
+                    _today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
+                    if _today > _exp:
+                        return "⚠️ 만료됨 (다음 방문 시 무료 전환)"
+            except Exception:
+                pass
+            return r['role']
+        display_df["상태"] = display_df.apply(_disp_status, axis=1)
         st.dataframe(
             display_df,
             column_config={
@@ -7059,7 +7174,8 @@ with contextlib.nullcontext():
                 "survey_count": "배포 횟수",
                 "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
                 "expiry_date": "만료일",
-                "agree_info": "동의여부"
+                "agree_info": "동의여부",
+                "상태": "상태"
             },
             hide_index=True,
             use_container_width=True

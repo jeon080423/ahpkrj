@@ -35,6 +35,97 @@ def generate_temp_password() -> str:
     random.shuffle(temp)
     return "".join(temp)
 
+
+# -----------------------------------------------------------------------------
+# 로그인 토큰 (랜덤, DB 저장) - 북마크 자동 로그인용
+# [보안 패치 2026-10-01] 기존 SHA256(이메일:고정솔트) 방식은 솔트가 공개 저장소에
+# 있어 토큰 위조가 가능했음. 매 로그인마다 새로운 랜덤 토큰을 발급해 DB에 저장.
+# -----------------------------------------------------------------------------
+def _ensure_login_token_column():
+    try:
+        conn = get_db_connection('users.db')
+        c = conn.cursor()
+        c.execute("ALTER TABLE users ADD COLUMN login_token TEXT")
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+def issue_login_token(user_id, force_new=True):
+    """새 랜덤 로그인 토큰을 발급해 DB에 저장하고 반환."""
+    import secrets
+    if not user_id or not str(user_id).strip():
+        return ""
+    _ensure_login_token_column()
+    try:
+        conn = get_db_connection('users.db')
+        c = conn.cursor()
+        if not force_new:
+            c.execute("SELECT login_token FROM users WHERE id=?", (str(user_id).strip(),))
+            row = c.fetchone()
+            if row and row[0]:
+                conn.close()
+                return row[0]
+        token = secrets.token_urlsafe(32)
+        c.execute("UPDATE users SET login_token=? WHERE id=?", (token, str(user_id).strip()))
+        conn.commit()
+        conn.close()
+        return token
+    except Exception as e:
+        import logging
+        logging.error(f"issue_login_token 오류 ({user_id}): {e}")
+        return ""
+
+def verify_login_token(user_id, token):
+    """URL 토큰이 DB에 저장된 토큰과 일치하는지 상수시간 비교."""
+    import hmac
+    if not user_id or not token:
+        return False
+    _ensure_login_token_column()
+    try:
+        conn = get_db_connection('users.db')
+        c = conn.cursor()
+        c.execute("SELECT login_token FROM users WHERE id=?", (user_id,))
+        row = c.fetchone()
+        conn.close()
+        if row and row[0]:
+            return hmac.compare_digest(str(row[0]), str(token))
+    except Exception as e:
+        import logging
+        logging.error(f"verify_login_token 오류 ({user_id}): {e}")
+    return False
+
+def clear_login_token(user_id):
+    """로그아웃/비밀번호 변경 시 토큰 무효화."""
+    if not user_id:
+        return
+    _ensure_login_token_column()
+    try:
+        conn = get_db_connection('users.db')
+        c = conn.cursor()
+        c.execute("UPDATE users SET login_token=NULL WHERE id=?", (user_id,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        import logging
+        logging.error(f"clear_login_token 오류 ({user_id}): {e}")
+
+def downgrade_if_expired(user_id, role, expiry_date):
+    """official 회원의 만료일이 지났으면 temp(무료)로 강등. (role, expiry_date) 반환."""
+    if role == 'official' and expiry_date:
+        try:
+            today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
+            exp = datetime.datetime.strptime(str(expiry_date), "%Y-%m-%d").date()
+            if today > exp:
+                update_user_full_info(user_id, None, "temp", "9999-12-31")
+                import logging
+                logging.info(f"만료 회원 자동 강등: {user_id} (만료일 {expiry_date})")
+                return "temp", "9999-12-31"
+        except Exception as e:
+            import logging
+            logging.error(f"downgrade_if_expired 오류 ({user_id}): {e}")
+    return role, expiry_date
+
 def check_login(user_id, pw):
     conn = get_db_connection('users.db')
     c = conn.cursor()
@@ -74,7 +165,8 @@ def change_user_password(user_id, new_pw):
     c.execute("UPDATE users SET pw=? WHERE id=?", (hashed_pw, user_id))
     conn.commit()
     conn.close()
-    
+    clear_login_token(user_id)  # [보안 패치] 비번 변경 시 기존 북마크 토큰 무효화
+
     try:
         client = get_gspread_client()
         spreadsheet_id = st.secrets.get("SPREADSHEET_ID")
