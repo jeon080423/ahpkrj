@@ -3938,7 +3938,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         if _sw > 0:
                             _img_style = f"width: {_sw}px; max-width: 100%; height: auto; border-radius: 8px;"
                         if _debug_scale:
-                            _dbg_msg = f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px)"
+                            try:
+                                from image_text_scale import diagnose_ocr as _its_diag
+                                _di = _its_diag(_raw)
+                                _dbg_msg = (
+                                    f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px) "
+                                    f"[OCR: bin={'Y' if _di['tesseract_bin'] else 'N'}, "
+                                    f"lang={_di['lang_used']}, 줄수={_di['lines']}, "
+                                    f"중앙값={_di['median_h']}px]"
+                                )
+                            except Exception:
+                                _dbg_msg = f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px)"
                     except Exception:
                         pass
                     html_str = f'''
