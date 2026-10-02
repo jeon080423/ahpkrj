@@ -69,6 +69,67 @@ def _median(values):
     return s[len(s) // 2]
 
 
+def diagnose_ocr(image_bytes):
+    """
+    진단용: OCR 파이프라인 각 단계의 상태를 반환한다.
+    반환 dict: {
+      "tesseract_bin": bool,   # tesseract 바이너리+kor+eng 사용 가능 여부
+      "lines": int,            # 감지된 텍스트 줄 수 (실패 시 -1)
+      "median_h": float|None,  # 중앙값 줄 높이(px)
+      "lang_used": str,        # 실제 사용된 lang ("kor+eng" / "eng" / "-")
+    }
+    """
+    info = {"tesseract_bin": False, "lines": -1, "median_h": None, "lang_used": "-"}
+    try:
+        import pytesseract
+
+        try:
+            pytesseract.get_tesseract_version()
+            info["tesseract_bin"] = True
+        except Exception:
+            return info
+        from PIL import Image
+
+        img = Image.open(io.BytesIO(bytes(image_bytes))).convert("RGB")
+        w, h = img.size
+        work, ws = img, 1.0
+        if max(w, h) > OCR_MAX_DIM:
+            ws = OCR_MAX_DIM / float(max(w, h))
+            work = img.resize((max(1, int(w * ws)), max(1, int(h * ws))), Image.LANCZOS)
+        last_err = None
+        for lang in ("kor+eng", "eng"):
+            try:
+                data = pytesseract.image_to_data(work, lang=lang, output_type=pytesseract.Output.DICT)
+                info["lang_used"] = lang
+                break
+            except Exception as e:
+                last_err = e
+                continue
+        else:
+            return info
+        heights = []
+        n = len(data.get("text", []))
+        for i in range(n):
+            try:
+                if int(data["level"][i]) != 4:
+                    continue
+                if not (data["text"][i] or "").strip():
+                    continue
+                if float(data["conf"][i]) < MIN_CONFIDENCE:
+                    continue
+                bh = int(data["height"][i])
+                if bh >= MIN_TEXT_HEIGHT_PX:
+                    heights.append(bh / ws)
+            except Exception:
+                continue
+        info["lines"] = len(heights)
+        if heights:
+            info["median_h"] = round(_median(heights), 1)
+        return info
+    except Exception:
+        return info
+
+
 def detect_text_scale(image_bytes, target_font_px=TARGET_FONT_PX):
     """
     이미지 속 대표 글자 높이를 측정해 목표 크기에 맞추는 배율을 반환한다.
@@ -109,9 +170,17 @@ def _detect_uncached(image_bytes, target_font_px):
                 Image.LANCZOS,
             )
 
-        data = pytesseract.image_to_data(
-            work_img, lang="kor+eng", output_type=pytesseract.Output.DICT
-        )
+        data = None
+        for _lang in ("kor+eng", "eng"):
+            try:
+                data = pytesseract.image_to_data(
+                    work_img, lang=_lang, output_type=pytesseract.Output.DICT
+                )
+                break
+            except Exception:
+                continue
+        if data is None:
+            return 1.0
         heights = []
         n = len(data.get("text", []))
         for i in range(n):
