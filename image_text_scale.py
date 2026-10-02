@@ -25,8 +25,10 @@ logger = logging.getLogger(__name__)
 
 # 설문 본문 기본 폰트 크기(px). 앱 CSS에서 본문을 0.95rem으로 지정 (루트 16px 기준 약 15.2px).
 TARGET_FONT_PX = 15.2
-# OCR로 측정한 텍스트 줄 박스 높이 ≈ font-size × 1.25 (상·하단 여백 포함)
-LINE_HEIGHT_RATIO = 1.25
+# OCR로 측정한 단어 박스 높이 ≈ font-size × 1.12 (한글 글리프 + Tesseract 박스 여백)
+# 중요: Tesseract TSV 출력은 인식 텍스트를 단어 레벨(level 5)에만 기록하므로,
+# 텍스트 감지는 반드시 단어 레벨에서 수행해야 한다 (줄 레벨의 text 필드는 비어 있음).
+WORD_HEIGHT_RATIO = 1.12
 # 배율 제한: 너무 작아지거나 흐려질 정도로 커지는 것을 방지
 MIN_SCALE = 0.35
 MAX_SCALE = 2.0
@@ -67,6 +69,59 @@ def tesseract_available():
 def _median(values):
     s = sorted(values)
     return s[len(s) // 2]
+
+
+def _collect_word_heights(data, work_scale):
+    """
+    Tesseract TSV dict에서 단어 레벨(level 5)의 텍스트 박스 높이들을 수집한다.
+    TSV의 text 필드는 단어 레벨에만 값이 있으므로 줄 레벨(level 4)에서는
+    텍스트 유무를 판단할 수 없다. (2026-10-02 진단에서 줄수=0 원인으로 확인)
+    반환: 원본 이미지 기준 높이(px) 리스트
+    """
+    heights = []
+    n = len(data.get("text", []))
+    for i in range(n):
+        try:
+            if int(data["level"][i]) != 5:
+                continue
+            if not (data["text"][i] or "").strip():
+                continue
+            if float(data["conf"][i]) < MIN_CONFIDENCE:
+                continue
+            bh = int(data["height"][i])
+            if bh >= MIN_TEXT_HEIGHT_PX:
+                heights.append(bh / work_scale)
+        except Exception:
+            continue
+    return heights
+
+
+def _ocr_data_for(image_bytes):
+    """OCR 실행 후 (work_scale, data dict, 사용 lang) 반환. 실패 시 (None, None, None)."""
+    from PIL import Image
+    import pytesseract
+
+    img = Image.open(io.BytesIO(bytes(image_bytes))).convert("RGB")
+    w, h = img.size
+    if w <= 0 or h <= 0:
+        return None, None, None
+    work_scale = 1.0
+    work_img = img
+    if max(w, h) > OCR_MAX_DIM:
+        work_scale = OCR_MAX_DIM / float(max(w, h))
+        work_img = img.resize(
+            (max(1, int(w * work_scale)), max(1, int(h * work_scale))),
+            Image.LANCZOS,
+        )
+    for _lang in ("kor+eng", "eng"):
+        try:
+            data = pytesseract.image_to_data(
+                work_img, lang=_lang, output_type=pytesseract.Output.DICT
+            )
+            return work_scale, data, _lang
+        except Exception:
+            continue
+    return None, None, None
 
 
 def diagnose_ocr(image_bytes):
@@ -128,7 +183,7 @@ def diagnose_ocr(image_bytes):
                         info["sample"].append(
                             f"L{lv}/c{data['conf'][i]}/h{data['height'][i]}/{txt_raw[:12]}"
                         )
-                if int(data["level"][i]) != 4:
+                if int(data["level"][i]) != 5:
                     continue
                 if not txt_raw:
                     continue
@@ -169,60 +224,14 @@ def detect_text_scale(image_bytes, target_font_px=TARGET_FONT_PX):
 
 def _detect_uncached(image_bytes, target_font_px):
     try:
-        from PIL import Image
-        import pytesseract
-
-        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        w, h = img.size
-        if w <= 0 or h <= 0:
-            return 1.0
-
-        # OCR 속도 확보를 위해 큰 이미지는 축소 (측정값은 원본 기준으로 환산)
-        work_scale = 1.0
-        work_img = img
-        if max(w, h) > OCR_MAX_DIM:
-            work_scale = OCR_MAX_DIM / float(max(w, h))
-            work_img = img.resize(
-                (max(1, int(w * work_scale)), max(1, int(h * work_scale))),
-                Image.LANCZOS,
-            )
-
-        data = None
-        for _lang in ("kor+eng", "eng"):
-            try:
-                data = pytesseract.image_to_data(
-                    work_img, lang=_lang, output_type=pytesseract.Output.DICT
-                )
-                break
-            except Exception:
-                continue
+        work_scale, data, _lang = _ocr_data_for(image_bytes)
         if data is None:
             return 1.0
-        heights = []
-        n = len(data.get("text", []))
-        for i in range(n):
-            try:
-                # level 4 = 텍스트 줄 단위
-                if int(data["level"][i]) != 4:
-                    continue
-                text = (data["text"][i] or "").strip()
-                if not text:
-                    continue
-                if float(data["conf"][i]) < MIN_CONFIDENCE:
-                    continue
-                box_h = int(data["height"][i])
-                if box_h < MIN_TEXT_HEIGHT_PX:
-                    continue
-                # 작업 이미지 기준 높이를 원본 이미지 기준으로 환산
-                heights.append(box_h / work_scale)
-            except Exception:
-                continue
-
+        heights = _collect_word_heights(data, work_scale)
         if not heights:
             return 1.0
-
         median_h = _median(heights)
-        target_h = float(target_font_px) * LINE_HEIGHT_RATIO
+        target_h = float(target_font_px) * WORD_HEIGHT_RATIO
         scale = target_h / median_h if median_h > 0 else 1.0
         return max(MIN_SCALE, min(MAX_SCALE, scale))
     except Exception as e:
