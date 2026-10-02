@@ -3941,11 +3941,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             try:
                                 from image_text_scale import diagnose_ocr as _its_diag
                                 _di = _its_diag(_raw)
+                                _lv = ",".join(f"{k}:{v}" for k, v in sorted(_di["level_counts"].items()))
+                                _smp = " | ".join(_di["sample"]) if _di["sample"] else "-"
                                 _dbg_msg = (
                                     f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px) "
-                                    f"[OCR: bin={'Y' if _di['tesseract_bin'] else 'N'}, "
-                                    f"lang={_di['lang_used']}, 줄수={_di['lines']}, "
-                                    f"중앙값={_di['median_h']}px]"
+                                    f"[OCR bin={'Y' if _di['tesseract_bin'] else 'N'} "
+                                    f"lang={_di['lang_used']} rows={_di['total_rows']} "
+                                    f"lv={{{_lv}}} txt={_di['nonempty']} c30={_di['conf_ge30']} "
+                                    f"줄수={_di['lines']} 중앙값={_di['median_h']}px :: {_smp}]"
                                 )
                             except Exception:
                                 _dbg_msg = f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px)"

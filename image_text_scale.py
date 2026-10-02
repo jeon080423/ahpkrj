@@ -79,7 +79,8 @@ def diagnose_ocr(image_bytes):
       "lang_used": str,        # 실제 사용된 lang ("kor+eng" / "eng" / "-")
     }
     """
-    info = {"tesseract_bin": False, "lines": -1, "median_h": None, "lang_used": "-"}
+    info = {"tesseract_bin": False, "lines": -1, "median_h": None, "lang_used": "-",
+            "total_rows": 0, "level_counts": {}, "nonempty": 0, "conf_ge30": 0, "sample": []}
     try:
         import pytesseract
 
@@ -109,11 +110,27 @@ def diagnose_ocr(image_bytes):
             return info
         heights = []
         n = len(data.get("text", []))
+        info["total_rows"] = n
         for i in range(n):
             try:
+                lv = str(data["level"][i])
+                info["level_counts"][lv] = info["level_counts"].get(lv, 0) + 1
+                txt_raw = (data["text"][i] or "").strip()
+                if txt_raw:
+                    info["nonempty"] += 1
+                    try:
+                        _cf = float(data["conf"][i])
+                    except Exception:
+                        _cf = -1.0
+                    if _cf >= MIN_CONFIDENCE:
+                        info["conf_ge30"] += 1
+                    if len(info["sample"]) < 3:
+                        info["sample"].append(
+                            f"L{lv}/c{data['conf'][i]}/h{data['height'][i]}/{txt_raw[:12]}"
+                        )
                 if int(data["level"][i]) != 4:
                     continue
-                if not (data["text"][i] or "").strip():
+                if not txt_raw:
                     continue
                 if float(data["conf"][i]) < MIN_CONFIDENCE:
                     continue
