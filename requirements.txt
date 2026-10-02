@@ -20,5 +20,6 @@ streamlit-javascript
 requests
 python-dateutil
 Pillow
+pytesseract
 deep-translator
 streamlit-quill

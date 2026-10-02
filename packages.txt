@@ -1,0 +1,4 @@
+# 설문 설명 이미지 글자 크기 자동 맞춤용 OCR 엔진 (image_text_scale.py)
+tesseract-ocr
+tesseract-ocr-kor
+tesseract-ocr-eng
