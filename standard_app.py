@@ -3915,6 +3915,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
                             unsafe_allow_html=True
                         )
+                    # [신규] 이미지 속 글자 크기를 설문 본문 텍스트 크기에 자동 맞춤
+                    # (이미 배포된 설문의 기존 이미지도 재배포 없이 자동 보정됨)
+                    try:
+                        from image_text_scale import apply_text_size_match as _its_match
+                        import base64 as _b64m
+                        _raw = _b64m.b64decode(b64_val)
+                        _scaled, _mtype = _its_match(_raw, manual_mult=1.0)
+                        b64_val = _b64m.b64encode(_scaled).decode("ascii")
+                        m_type = _mtype or m_type
+                    except Exception:
+                        pass
                     html_str = f'''
                     <div style="text-align: center; margin-bottom: 20px;">
                         <img src="data:{m_type};base64,{b64_val}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
@@ -10591,16 +10602,37 @@ Thank you deeply for your valuable participation.
                                 key=uploader_key
                             )
                             if f_up is not None:
-                                st.session_state[data_key] = f_up.getvalue()
-                                st.session_state[mime_key] = f_up.type
+                                # 원본 보관 (자동 크기 맞춤의 기준 이미지)
+                                _raw_bytes = f_up.getvalue()
+                                st.session_state[f"survey_image_raw{suf}"] = _raw_bytes
                                 st.session_state.pop(edit_key, None)
                                 st.session_state.pop(edit_mime_key, None)
+                                # 수동 미세조정 배율 (자동 감지 결과에 곱해져 저장됨)
+                                _manual_key = f"survey_image_manual{suf}"
+                                _manual = st.slider(
+                                    _("🔍 이미지 크기 미세조정 (1.0 = 자동 감지 크기 그대로)", "🔍 Fine-tune image size (1.0 = auto-detected size)"),
+                                    min_value=0.70, max_value=1.30,
+                                    value=float(st.session_state.get(_manual_key, 1.0)),
+                                    step=0.05, key=_manual_key,
+                                )
+                                # 자동 감지 배율 × 수동 배율로 리사이즈 후 저장.
+                                # 응답자 화면 표시 시점에도 자동 감지가 적용되나,
+                                # 이미 맞춰진 이미지라 배율이 ≈1.0으로 수렴해 이중 적용되지 않음.
+                                try:
+                                    from image_text_scale import apply_text_size_match as _its_apply
+                                    from image_text_scale import detect_text_scale as _its_detect
+                                    _baked, _baked_mime = _its_apply(_raw_bytes, manual_mult=_manual)
+                                    _auto_scale = _its_detect(_raw_bytes)
+                                except Exception:
+                                    _baked, _baked_mime = _raw_bytes, (f_up.type or "image/png")
+                                    _auto_scale = 1.0
+                                st.session_state[data_key] = _baked
+                                st.session_state[mime_key] = _baked_mime
                                 import base64
-                                encoded = base64.b64encode(st.session_state[data_key]).decode()
-                                mime = st.session_state[mime_key]
-                                html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
+                                encoded = base64.b64encode(_baked).decode()
+                                html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{_baked_mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
                                 st.markdown(html_str, unsafe_allow_html=True)
-                                st.caption(_(f"업로드된 이미지 {idx_num} 미리보기", f"Uploaded Image {idx_num} Preview"))
+                                st.caption(_(f"업로드된 이미지 {idx_num} 미리보기 — 응답자에게 보이는 크기와 동일 (자동 조정 배율 {_auto_scale:.2f}×)", f"Uploaded image {idx_num} preview — same size respondents will see (auto scale {_auto_scale:.2f}×)"))
                             elif st.session_state.get(edit_key):
                                 st.session_state[data_key] = st.session_state[edit_key]
                                 st.session_state[mime_key] = st.session_state.get(edit_mime_key, 'image/png')
@@ -10615,10 +10647,12 @@ Thank you deeply for your valuable participation.
                                     st.session_state.pop(edit_mime_key, None)
                                     st.session_state.pop(data_key, None)
                                     st.session_state.pop(mime_key, None)
+                                    st.session_state.pop(f"survey_image_raw{suf}", None)
                                     st.rerun()
                             else:
                                 st.session_state.pop(data_key, None)
                                 st.session_state.pop(mime_key, None)
+                                st.session_state.pop(f"survey_image_raw{suf}", None)
 
                 with st.container():
                     # 섹션 3: AHP 모델 계층구조 입력 폼
