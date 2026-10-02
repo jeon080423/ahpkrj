@@ -3907,6 +3907,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         display_images.append((encoded, m_type))
 
             # 3. 이미지 렌더링: 이미지와 이미지 사이에 심플한 회색 구분선 표시
+            # [신규] ?debug_scale=1 쿼리 파라미터로 이미지별 자동 감지 배율을 화면에 표시 (진단용)
+            _debug_scale = False
+            try:
+                _debug_scale = st.query_params.get("debug_scale", "0") == "1"
+            except Exception:
+                pass
             if display_images:
                 for idx, (b64_val, m_type) in enumerate(display_images):
                     if idx > 0:
@@ -3917,21 +3923,32 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         )
                     # [신규] 이미지 속 글자 크기를 설문 본문 텍스트 크기에 자동 맞춤
                     # (이미 배포된 설문의 기존 이미지도 재배포 없이 자동 보정됨)
+                    # - 조정된 이미지의 실제 픽셀 너비를 width로 지정해 브라우저가
+                    #   임의로 축소(max-height 등)하지 못하게 함. max-width:100%는
+                    #   모바일 등 좁은 화면에서만 안전장치로 동작.
+                    _img_style = "max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;"
+                    _dbg_msg = ""
                     try:
                         from image_text_scale import apply_text_size_match as _its_match
                         import base64 as _b64m
                         _raw = _b64m.b64decode(b64_val)
-                        _scaled, _mtype = _its_match(_raw, manual_mult=1.0)
+                        _scaled, _mtype, _sw, _sh, _sc = _its_match(_raw, manual_mult=1.0)
                         b64_val = _b64m.b64encode(_scaled).decode("ascii")
                         m_type = _mtype or m_type
+                        if _sw > 0:
+                            _img_style = f"width: {_sw}px; max-width: 100%; height: auto; border-radius: 8px;"
+                        if _debug_scale:
+                            _dbg_msg = f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px)"
                     except Exception:
                         pass
                     html_str = f'''
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <img src="data:{m_type};base64,{b64_val}" style="max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;">
+                        <img src="data:{m_type};base64,{b64_val}" style="{_img_style}">
                     </div>
                     '''
                     st.markdown(html_str, unsafe_allow_html=True)
+                    if _dbg_msg:
+                        st.caption("🔍 " + _dbg_msg)
 
                 # 마지막 이미지와 아래 문항 사이의 깔끔한 분리선
                 st.markdown(
@@ -10621,16 +10638,17 @@ Thank you deeply for your valuable participation.
                                 try:
                                     from image_text_scale import apply_text_size_match as _its_apply
                                     from image_text_scale import detect_text_scale as _its_detect
-                                    _baked, _baked_mime = _its_apply(_raw_bytes, manual_mult=_manual)
+                                    _baked, _baked_mime, _bw, _bh, _bs = _its_apply(_raw_bytes, manual_mult=_manual)
                                     _auto_scale = _its_detect(_raw_bytes)
                                 except Exception:
-                                    _baked, _baked_mime = _raw_bytes, (f_up.type or "image/png")
+                                    _baked, _baked_mime, _bw, _bh = _raw_bytes, (f_up.type or "image/png"), 0, 0
                                     _auto_scale = 1.0
                                 st.session_state[data_key] = _baked
                                 st.session_state[mime_key] = _baked_mime
                                 import base64
                                 encoded = base64.b64encode(_baked).decode()
-                                html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{_baked_mime};base64,{encoded}" style="max-width: 100%; height: auto; max-height: 400px; width: auto; border-radius: 8px;"></div>'
+                                _pv_style = f"width: {_bw}px; max-width: 100%; height: auto; border-radius: 8px;" if _bw > 0 else "max-width: 100%; height: auto; border-radius: 8px;"
+                                html_str = f'<div style="text-align: center; margin-bottom: 10px;"><img src="data:{_baked_mime};base64,{encoded}" style="{_pv_style}"></div>'
                                 st.markdown(html_str, unsafe_allow_html=True)
                                 st.caption(_(f"업로드된 이미지 {idx_num} 미리보기 — 응답자에게 보이는 크기와 동일 (자동 조정 배율 {_auto_scale:.2f}×)", f"Uploaded image {idx_num} preview — same size respondents will see (auto scale {_auto_scale:.2f}×)"))
                             elif st.session_state.get(edit_key):

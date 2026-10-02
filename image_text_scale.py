@@ -23,8 +23,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# 설문 본문 기본 폰트 크기(px). Streamlit 기본 본문 크기와 동일.
-TARGET_FONT_PX = 16.0
+# 설문 본문 기본 폰트 크기(px). 앱 CSS에서 본문을 0.95rem으로 지정 (루트 16px 기준 약 15.2px).
+TARGET_FONT_PX = 15.2
 # OCR로 측정한 텍스트 줄 박스 높이 ≈ font-size × 1.25 (상·하단 여백 포함)
 LINE_HEIGHT_RATIO = 1.25
 # 배율 제한: 너무 작아지거나 흐려질 정도로 커지는 것을 방지
@@ -147,13 +147,13 @@ def _detect_uncached(image_bytes, target_font_px):
 def apply_text_size_match(image_bytes, manual_mult=1.0, target_font_px=TARGET_FONT_PX):
     """
     자동 감지 배율 × 수동 배율로 이미지를 리사이즈한다.
-    반환: (리사이즈된 이미지 bytes, mime_type)
+    반환: (리사이즈된 이미지 bytes, mime_type, 너비(px), 높이(px), 적용된 최종 배율)
     - 배율이 1.0에 근접하면 원본을 그대로 반환한다.
     - 원본 포맷(PNG/JPEG)을 유지한다.
     - 어떤 경우에도 예외를 밖으로 던지지 않고 원본을 반환한다.
     """
     if not image_bytes:
-        return image_bytes, "image/png"
+        return image_bytes, "image/png", 0, 0, 1.0
     try:
         manual_mult = float(manual_mult) if manual_mult else 1.0
     except Exception:
@@ -164,7 +164,8 @@ def apply_text_size_match(image_bytes, manual_mult=1.0, target_font_px=TARGET_FO
         scale = detect_text_scale(raw, target_font_px) * manual_mult
         scale = max(MIN_SCALE, min(MAX_SCALE, scale))
         if abs(scale - 1.0) < 0.02:
-            return raw, _guess_mime(raw)
+            w0, h0 = _image_size(raw)
+            return raw, _guess_mime(raw), w0, h0, 1.0
 
         from PIL import Image
 
@@ -179,18 +180,30 @@ def apply_text_size_match(image_bytes, manual_mult=1.0, target_font_px=TARGET_FO
         fmt = str(orig_format).upper()
         if fmt in ("JPG", "JPEG"):
             resized.save(buf, format="JPEG", quality=92)
-            return buf.getvalue(), "image/jpeg"
+            return buf.getvalue(), "image/jpeg", new_size[0], new_size[1], scale
         if fmt == "WEBP":
             resized.save(buf, format="WEBP", quality=92)
-            return buf.getvalue(), "image/webp"
+            return buf.getvalue(), "image/webp", new_size[0], new_size[1], scale
         resized.save(buf, format="PNG")
-        return buf.getvalue(), "image/png"
+        return buf.getvalue(), "image/png", new_size[0], new_size[1], scale
     except Exception as e:
         logger.debug("apply_text_size_match 실패, 원본 유지: %s", e)
         try:
-            return bytes(image_bytes), _guess_mime(image_bytes)
+            raw = bytes(image_bytes)
+            w0, h0 = _image_size(raw)
+            return raw, _guess_mime(raw), w0, h0, 1.0
         except Exception:
-            return image_bytes, "image/png"
+            return image_bytes, "image/png", 0, 0, 1.0
+
+
+def _image_size(image_bytes):
+    try:
+        from PIL import Image
+
+        with Image.open(io.BytesIO(bytes(image_bytes))) as im:
+            return im.size[0], im.size[1]
+    except Exception:
+        return 0, 0
 
 
 def _guess_mime(image_bytes):
