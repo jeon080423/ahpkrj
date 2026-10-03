@@ -28,10 +28,12 @@ logger = logging.getLogger(__name__)
 # 렌더링되며 별도 CSS 지정이 없어 기본 1rem = 16px이 적용된다.
 # (이전에는 본문 0.95rem ≈ 15.2px 기준이었으나, 2026-10-03 사용자 요청으로 문항 기준으로 변경)
 TARGET_FONT_PX = 16.0
-# OCR로 측정한 단어 박스 높이 ≈ font-size × 1.12 (한글 글리프 + Tesseract 박스 여백)
+# OCR로 측정한 단어 박스 높이 ≈ font-size × 1.0
+# (2026-10-03 태블릿 실측: 1.12로 설정 시 이미지 글자가 문항보다 약 12% 크게 표시됨.
+#  한글 Tesseract 단어 박스 높이는 font-size와 거의 동일하므로 1.0으로 바로잡음)
 # 중요: Tesseract TSV 출력은 인식 텍스트를 단어 레벨(level 5)에만 기록하므로,
 # 텍스트 감지는 반드시 단어 레벨에서 수행해야 한다 (줄 레벨의 text 필드는 비어 있음).
-WORD_HEIGHT_RATIO = 1.12
+WORD_HEIGHT_RATIO = 1.0
 # 배율 제한: 너무 작아지거나 흐려질 정도로 커지는 것을 방지
 MIN_SCALE = 0.35
 MAX_SCALE = 2.0
