@@ -76,6 +76,23 @@ def _median(values):
     return s[len(s) // 2]
 
 
+def _percentile(values, p):
+    """p 백분위수 (0~100). 이미지 내 큰 글자 기준으로 맞추기 위해 사용."""
+    s = sorted(values)
+    if not s:
+        return 0
+    k = (len(s) - 1) * (p / 100.0)
+    f = int(k)
+    c = min(f + 1, len(s) - 1)
+    return s[f] + (s[c] - s[f]) * (k - f)
+
+
+# 스케일 계산에 사용하는 백분위수. 이미지 안에 제목(큰 글자)+본문(작은 글자)이
+# 섞여 있을 때, 눈에 띄는 큰 글자가 문항 크기와 맞도록 75 백분위수 사용.
+# (2026-10-03: median 기준으로는 큰 글자가 여전히 커 보인다는 사용자 피드백 반영)
+SCALE_PERCENTILE = 75
+
+
 def _collect_word_heights(data, work_scale):
     """
     Tesseract TSV dict에서 단어 레벨(level 5)의 텍스트 박스 높이들을 수집한다.
@@ -235,9 +252,9 @@ def _detect_uncached(image_bytes, target_font_px):
         heights = _collect_word_heights(data, work_scale)
         if not heights:
             return 1.0
-        median_h = _median(heights)
+        ref_h = _percentile(heights, SCALE_PERCENTILE)
         target_h = float(target_font_px) * WORD_HEIGHT_RATIO
-        scale = target_h / median_h if median_h > 0 else 1.0
+        scale = target_h / ref_h if ref_h > 0 else 1.0
         return max(MIN_SCALE, min(MAX_SCALE, scale))
     except Exception as e:
         logger.debug("detect_text_scale 실패, 원본 유지: %s", e)
