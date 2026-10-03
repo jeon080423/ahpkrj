@@ -730,7 +730,7 @@ def init_db():
         signup_date_str = kst_now.strftime("%Y-%m-%d")
         # 컬럼 순서: id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link
         c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                  ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
+                  ('shjeon', 'admin', signup_date_str, hash_password(st.secrets["ADMIN_PASSWORD"]), '9999-12-31', 'Y', 0, ''))
         conn.commit()
 
         # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (세션당 1회, 설문/미리보기 페이지 제외)
@@ -747,7 +747,7 @@ def init_db():
                     
                     cell = sheet.find('shjeon')
                     if not cell:
-                        sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''])
+                        sheet.append_row(['shjeon', 'admin', signup_date_str, '', '9999-12-31', 'Y', 0, ''])
             except Exception:
                 pass
     except sqlite3.IntegrityError:
@@ -1072,7 +1072,7 @@ def validate_password(password):
 
 def send_foreign_access_email(ip, country, region, kst_time):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] ⚠️ 해외 접속 감지: {country}"
     
@@ -1125,7 +1125,7 @@ def check_foreign_access():
 def send_application_email(user_email):
     sender_email = "jeon080423@gmail.com"
     # secrets.toml에서 이메일 비밀번호를 안전하게 로드합니다.
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식 사용자 승인 요청: {user_email}"
     # [수정] 대한민국 시간 기준 신청일 설정
@@ -1145,7 +1145,7 @@ def send_application_email(user_email):
 # [추가 요청사항 반영] 전환 요청 이메일 발송 함수
 def send_conversion_request_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식사용자 전환 요청: {user_email}"
     body = f"임시 사용자가 정식사용자로 전환 요청 했습니다\nID: {user_email}"
@@ -1164,7 +1164,7 @@ def send_conversion_request_email(user_email):
 
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 3개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
@@ -1183,7 +1183,7 @@ def send_approval_email(user_email):
 
 def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = user_email
     subject = "[AHP 마스터] 임시 비밀번호 안내"
     body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
