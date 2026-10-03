@@ -87,11 +87,20 @@ def _percentile(values, p):
     return s[f] + (s[c] - s[f]) * (k - f)
 
 
-# 스케일 계산에 사용하는 백분위수. 이미지 안에 제목(큰 글자)+본문(작은 글자)이
-# 섞여 있을 때, 눈에 띄는 큰 글자가 문항 크기와 맞도록 백분위수 기준 사용.
-# (2026-10-03: median(50)으로는 큰 글자가 여전히 커 보였고, 75로는 과하게 작아져
-#  사용자 확인 후 60으로 조정)
-SCALE_PERCENTILE = 60
+def _mode_height(values, bin_px=2.0):
+    """
+    이미지 안에서 가장 빈번한 글자 높이(본문 글자)를 반환한다.
+    높이를 bin_px 단위로 묶어 최빈 bin을 찾고, 그 bin 안 값들의 중앙값을 반환.
+    (2026-10-03: 이미지 내 텍스트 크기가 여러 가지일 때 기준 텍스트를
+    명시적으로 정하기 위해 도입 — 백분위수 방식 대체)
+    """
+    if not values:
+        return 0
+    from collections import Counter
+    binned = Counter(int(round(v / bin_px)) for v in values)
+    top_bin, _ = binned.most_common(1)[0]
+    in_bin = sorted(v for v in values if int(round(v / bin_px)) == top_bin)
+    return in_bin[len(in_bin) // 2]
 
 
 def _collect_word_heights(data, work_scale):
@@ -220,6 +229,7 @@ def diagnose_ocr(image_bytes):
         info["lines"] = len(heights)
         if heights:
             info["median_h"] = round(_median(heights), 1)
+            info["mode_h"] = round(_mode_height(heights), 1)
         return info
     except Exception:
         return info
@@ -253,7 +263,9 @@ def _detect_uncached(image_bytes, target_font_px):
         heights = _collect_word_heights(data, work_scale)
         if not heights:
             return 1.0
-        ref_h = _percentile(heights, SCALE_PERCENTILE)
+        # 기준: 이미지 내 최빈 글자 높이(본문 글자). 이 크기가 목표 폰트 크기와
+        # 같아지도록 조정하고, 제목 등 다른 크기 글자는 비례를 유지한다.
+        ref_h = _mode_height(heights)
         target_h = float(target_font_px) * WORD_HEIGHT_RATIO
         scale = target_h / ref_h if ref_h > 0 else 1.0
         return max(MIN_SCALE, min(MAX_SCALE, scale))

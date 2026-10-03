@@ -3953,7 +3953,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                     f"[OCR bin={'Y' if _di['tesseract_bin'] else 'N'} "
                                     f"lang={_di['lang_used']} rows={_di['total_rows']} "
                                     f"lv={{{_lv}}} txt={_di['nonempty']} c30={_di['conf_ge30']} "
-                                    f"줄수={_di['lines']} 중앙값={_di['median_h']}px :: {_smp}]"
+                                    f"줄수={_di['lines']} 중앙값={_di['median_h']}px 최빈값={_di.get('mode_h')}px :: {_smp}]"
                                 )
                             except Exception:
                                 _dbg_msg = f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px)"
