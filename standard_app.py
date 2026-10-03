@@ -3934,7 +3934,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .lvl3sub .conn-v2 { align-self: center; width: 2px; height: 24px; background: #333; }
 .shjeon-desc .diag .lvl3 { flex: 1; border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; box-sizing: border-box; text-align: center; }
 </style>
-<div class="shjeon-desc"><h3 class="shj-title">응답 일관성</h3><p>AHP에서는 응답자의 쌍대비교 판단이 얼마나 일관적인지를 일관성 비율(Consistency Ratio: CR)을 통해 확인할 수 있습니다. 일반적으로 CR이 0.10 이하인 경우 판단의 일관성이 확보된 것으로 간주합니다. 본 설문의 응답 과정에서 일관성 기준을 벗어나는 응답이 있는 경우, 응답자가 기존 판단을 확인하고 필요한 경우 수정할 수 있도록 설계하였습니다.</p><div class="cause-title">[원인1] 순위 일관성 결여</div><div class="cause-box">예) A가 B보다 중요하다고 응답하고, B가 C보다 중요하다고 응답했다면, A가 C보다 중요하다고 응답해야 함에도 불구하고 C가 A보다 중요하다고 응답한 경우</div><div class="cause-title">[원인2] 가중치 일관성 결여</div><div class="cause-box">예) A가 B보다 2배 중요하다고 응답하고, A가 C보다 4배 중요하다고 응답했다면, B가 C보다 2배 중요하다고 응답해야 함에도 불구하고 B가 C보다 9배 중요하다고 응답한 경우</div></div>"""
+<div class="shjeon-desc"><h3 class="shj-title">나. 응답 일관성</h3><p>AHP에서는 응답 간 논리적 일관성을 확인합니다. 응답 과정에서 일관성 기준을 벗어나는 경우 시스템에서 해당 내용을 안내하며, 응답자는 필요한 경우 기존 응답을 다시 확인하거나 수정할 수 있습니다.</p><div class="cause-title">[원인1] 순위 일관성 결여</div><div class="cause-box">예) A가 B보다 중요하다고 응답하고, B가 C보다 중요하다고 응답했다면, A가 C보다 중요하다고 응답해야 함에도 불구하고 C가 A보다 중요하다고 응답한 경우</div><div class="cause-title">[원인2] 가중치 일관성 결여</div><div class="cause-box">예) A가 B보다 2배 중요하다고 응답하고, A가 C보다 4배 중요하다고 응답했다면, B가 C보다 2배 중요하다고 응답해야 함에도 불구하고 B가 C보다 9배 중요하다고 응답한 경우</div></div>"""
     _SHJEON_HTML_3 = """
 <style>
 .shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
