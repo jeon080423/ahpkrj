@@ -3949,7 +3949,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
 .shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
 .hier td.concept2 { font-weight: 700; }
-.hier .inset { border-left: 1px solid #333; margin-left: 8px; padding-left: 10px; }
+.hier .inset { position: relative; border-left: 1px solid #333; margin-left: 8px; padding-left: 10px; }
+.hier tr:has(.concept2) + tr .inset { margin-top: -10px; padding-top: 10px; }
+.hier tr:has(.concept2) + tr .inset::before { content: ""; position: absolute; top: 0; left: -12px; width: 9px; height: 1px; background: #333; }
 .shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
 .shjeon-desc .diag .lvl1 { display: inline-block; border: 2px solid #333; padding: 12px 40px; font-size: 16px; margin-bottom: 0; }
 .shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
