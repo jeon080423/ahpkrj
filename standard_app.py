@@ -1339,9 +1339,14 @@ def init_db():
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         signup_date_str = kst_now.strftime("%Y-%m-%d")
         # 컬럼 순서: id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link
-        c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                  ('shjeon', 'admin', signup_date_str, hash_password(st.secrets["ADMIN_PASSWORD"]), '9999-12-31', 'Y', 0, ''))
-        conn.commit()
+        # [수정] 관리자 계정이 이미 존재하면 스킵 (Secrets 없어도 크래시 방지)
+        c.execute("SELECT id FROM users WHERE id = 'shjeon'")
+        if not c.fetchone():
+            _admin_pw = st.secrets.get("ADMIN_PASSWORD")
+            if _admin_pw:
+                c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                          ('shjeon', 'admin', signup_date_str, hash_password(_admin_pw), '9999-12-31', 'Y', 0, ''))
+                conn.commit()
 
         # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (세션당 1회, 설문/미리보기 페이지 제외)
         if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
