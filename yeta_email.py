@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 
 def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 계산서/현금영수증 신청 접수 ({biz_name})"
     body = f"""
@@ -36,7 +36,7 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
 
 def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = user_email
     subject = "[AHP 마스터] 임시 비밀번호 안내"
     body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
@@ -62,7 +62,7 @@ ID: {user_email}
 
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
