@@ -3953,8 +3953,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
 .shjeon-desc .diag .lvl1 { display: inline-block; border: 2px solid #333; padding: 12px 40px; font-size: 16px; margin-bottom: 0; }
 .shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
-.shjeon-desc .diag .lvl2row { display: flex; justify-content: center; gap: 18px; margin: 0 auto; max-width: 1100px; }
-.shjeon-desc .diag .lvl2col { flex: 1; display: flex; flex-direction: column; align-items: stretch; }
+.shjeon-desc .diag .lvl2row { display: flex; justify-content: center; margin: 0 auto; max-width: 1100px; }
+.shjeon-desc .diag .lvl2col { flex: 1; display: flex; flex-direction: column; align-items: stretch; padding: 0 9px; box-sizing: border-box; }
 .shjeon-desc .diag .lvl2 { border: 2px solid #333; padding: 10px 6px; font-size: 15px; text-align: center; }
 .shjeon-desc .diag .conn-v-lvl2 { width: 2px; height: 24px; background: #333; margin: 0 auto; }
 .shjeon-desc .diag .conn-h { height: 2px; background: #333; width: 60%; margin: 0 auto; }
