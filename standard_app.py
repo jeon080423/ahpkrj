@@ -1339,14 +1339,9 @@ def init_db():
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         signup_date_str = kst_now.strftime("%Y-%m-%d")
         # 컬럼 순서: id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link
-        # [수정] 관리자 계정이 이미 존재하면 스킵 (Secrets 없어도 크래시 방지)
-        c.execute("SELECT id FROM users WHERE id = 'shjeon'")
-        if not c.fetchone():
-            _admin_pw = st.secrets.get("ADMIN_PASSWORD")
-            if _admin_pw:
-                c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                          ('shjeon', 'admin', signup_date_str, hash_password(_admin_pw), '9999-12-31', 'Y', 0, ''))
-                conn.commit()
+        c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                  ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
+        conn.commit()
 
         # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (세션당 1회, 설문/미리보기 페이지 제외)
         if not _is_survey_or_preview and not st.session_state.get('_init_gs_done'):
@@ -1362,7 +1357,7 @@ def init_db():
                     
                     cell = sheet.find('shjeon')
                     if not cell:
-                        sheet.append_row(['shjeon', 'admin', signup_date_str, '', '9999-12-31', 'Y', 0, ''])
+                        sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''])
             except Exception:
                 pass
     except sqlite3.IntegrityError:
@@ -1674,7 +1669,7 @@ def validate_password(password):
 
 def send_foreign_access_email(ip, country, region, kst_time):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] ⚠️ 해외 접속 감지: {country}"
     
@@ -1727,7 +1722,7 @@ def check_foreign_access():
 def send_application_email(user_email):
     sender_email = "jeon080423@gmail.com"
     # secrets.toml에서 이메일 비밀번호를 안전하게 로드합니다.
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식 사용자 승인 요청: {user_email}"
     # [수정] 대한민국 시간 기준 신청일 설정
@@ -1747,7 +1742,7 @@ def send_application_email(user_email):
 # [추가 요청사항 반영] 전환 요청 이메일 발송 함수
 def send_conversion_request_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식사용자 전환 요청: {user_email}"
     body = f"임시 사용자가 정식사용자로 전환 요청 했습니다\nID: {user_email}"
@@ -1766,7 +1761,7 @@ def send_conversion_request_email(user_email):
 
 def send_refund_request_email(request_type, user_email, opinion):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 취소/환불 신청: {user_email}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -1792,7 +1787,7 @@ def send_refund_request_email(request_type, user_email, opinion):
 
 def send_consulting_email(name, company, email, phone, inquiry_type, details, uploaded_file=None):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[분석문의] {name}님 / {company or '개인'}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -2053,7 +2048,7 @@ def render_refund_form(is_standalone=False, show_header=True):
 
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
@@ -2237,7 +2232,7 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
 # 계산서 신청 알림 메일 전송
 def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 계산서/현금영수증 신청 접수 ({biz_name})"
     body = f"""
@@ -2268,7 +2263,7 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
 
 def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
     recipient_email = user_email
     subject = "[AHP 마스터] 임시 비밀번호 안내"
     body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
@@ -3881,100 +3876,202 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     main_criteria = ahp_model.get("main", [])
     
+    # [shjeon 전용] 특정 설문 HTML 설명 (이미지 대신 렌더링)
+    _SHJEON_HTML_1 = """
+<style>
+.shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
+.shjeon-desc p { margin: 0 0 12px 0; }
+.shjeon-desc .ex { font-weight: 700; margin: 18px 0 10px 0; }
+.shjeon-desc table.scale { border-collapse: collapse; width: 100%; margin: 12px 0 20px 0; font-size: 13px; }
+.shjeon-desc table.scale th, .shjeon-desc table.scale td { border: 1px solid #333; padding: 6px 4px; text-align: center; vertical-align: middle; }
+.shjeon-desc table.scale th { background: #f7f7f7; font-weight: 600; }
+.shjeon-desc .cause-box { border: 2px solid #333; padding: 14px 18px; margin: 10px 0 24px 20px; }
+.shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
+.shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
+.shjeon-desc table.hier { border-collapse: collapse; width: 100%; margin: 16px 0 0 0; font-size: 14px; }
+.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 10px 12px; text-align: left; vertical-align: top; }
+.shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
+.shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
+.shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
+.shjeon-desc .diag .lvl1 { display: inline-block; border: 2px solid #333; padding: 12px 40px; font-size: 16px; margin-bottom: 0; }
+.shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
+.shjeon-desc .diag .lvl2row { display: flex; justify-content: center; gap: 18px; margin: 0 auto; max-width: 900px; }
+.shjeon-desc .diag .lvl2 { flex: 1; border: 2px solid #333; padding: 10px 6px; font-size: 15px; }
+.shjeon-desc .diag .lvl3row { display: flex; justify-content: center; gap: 10px; margin: 0 auto; max-width: 1100px; }
+.shjeon-desc .diag .lvl3grp { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.shjeon-desc .diag .lvl3 { border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; width: 100%; box-sizing: border-box; margin-top: 0; }
+.shjeon-desc .diag .conn-h { height: 2px; background: #333; width: 60%; margin: 0 auto; }
+.shjeon-desc .diag .conn-v2 { width: 2px; height: 24px; background: #333; margin: 0 auto; }
+</style>
+<div class="shjeon-desc"><p>보상위원회 특성을 1:1로 비교하실 때, 두 특성 중 상대적으로 더 중요한 요소에 선택하고, 선택한 특성이 중요한 정도를 1~9점 척도에서 체크(√)해 주시면 됩니다.</p><p class="ex">예시1: 「외형적 독립성」과「실질적 독립성」을 비교할 때, 「실질적 독립성」이「외형적 독립성」보다 중요하다고 생각하시면 평가항목「실질적 독립성」을 선택합니다. 「실질적 독립성」이 「외형적 독립성」에 비해 중요한 정도가 '아주 많이' 라고 생각하시면, 아래와 같이 「실질적 독립성」 쪽의 7번에 체크(√)합니다.</p><table class="scale"><tr><th rowspan="2" style="width:70px;">평가<br>항목</th><th>극히<br>많이</th><th>대단히<br>많이</th><th>아주<br>많이</th><th>매우<br>많이</th><th>많이</th><th>상당히</th><th>약간</th><th>조금</th><th>동등</th><th>조금</th><th>약간</th><th>상당히</th><th>많이</th><th>매우<br>많이</th><th>아주<br>많이</th><th>대단히<br>많이</th><th>극히<br>많이</th><th rowspan="2" style="width:70px;">평가<br>항목</th></tr><tr><td>9</td><td>8</td><td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr><tr><td>외형적<br>독립성</td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;">√</td><td style="font-size:18px;"></td><td>실질적<br>독립성</td></tr></table><p class="ex">예시2: 「외형적 독립성」과「전문성」을 비교할 때, 「외형적 독립성」이「전문성」보다 중요하다고 생각하시면 평가항목 「외형적 독립성」을 선택합니다. 「외형적 독립성」이「전문성」에 비해 중요한 정도가 '조금' 이라고 생각하시면, 아래와 같이 「외형적 독립성」쪽의 2번에 체크(√)합니다.</p><table class="scale"><tr><th rowspan="2" style="width:70px;">평가<br>항목</th><th>극히<br>많이</th><th>대단히<br>많이</th><th>아주<br>많이</th><th>매우<br>많이</th><th>많이</th><th>상당히</th><th>약간</th><th>조금</th><th>동등</th><th>조금</th><th>약간</th><th>상당히</th><th>많이</th><th>매우<br>많이</th><th>아주<br>많이</th><th>대단히<br>많이</th><th>극히<br>많이</th><th rowspan="2" style="width:70px;">평가<br>항목</th></tr><tr><td>9</td><td>8</td><td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr><tr><td>외형적<br>독립성</td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;">√</td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td>전문성</td></tr></table></div>"""
+    _SHJEON_HTML_2 = """
+<style>
+.shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
+.shjeon-desc p { margin: 0 0 12px 0; }
+.shjeon-desc .ex { font-weight: 700; margin: 18px 0 10px 0; }
+.shjeon-desc table.scale { border-collapse: collapse; width: 100%; margin: 12px 0 20px 0; font-size: 13px; }
+.shjeon-desc table.scale th, .shjeon-desc table.scale td { border: 1px solid #333; padding: 6px 4px; text-align: center; vertical-align: middle; }
+.shjeon-desc table.scale th { background: #f7f7f7; font-weight: 600; }
+.shjeon-desc .cause-box { border: 2px solid #333; padding: 14px 18px; margin: 10px 0 24px 20px; }
+.shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
+.shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
+.shjeon-desc table.hier { border-collapse: collapse; width: 100%; margin: 16px 0 0 0; font-size: 14px; }
+.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 10px 12px; text-align: left; vertical-align: top; }
+.shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
+.shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
+.shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
+.shjeon-desc .diag .lvl1 { display: inline-block; border: 2px solid #333; padding: 12px 40px; font-size: 16px; margin-bottom: 0; }
+.shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
+.shjeon-desc .diag .lvl2row { display: flex; justify-content: center; gap: 18px; margin: 0 auto; max-width: 900px; }
+.shjeon-desc .diag .lvl2 { flex: 1; border: 2px solid #333; padding: 10px 6px; font-size: 15px; }
+.shjeon-desc .diag .lvl3row { display: flex; justify-content: center; gap: 10px; margin: 0 auto; max-width: 1100px; }
+.shjeon-desc .diag .lvl3grp { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.shjeon-desc .diag .lvl3 { border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; width: 100%; box-sizing: border-box; margin-top: 0; }
+.shjeon-desc .diag .conn-h { height: 2px; background: #333; width: 60%; margin: 0 auto; }
+.shjeon-desc .diag .conn-v2 { width: 2px; height: 24px; background: #333; margin: 0 auto; }
+</style>
+<div class="shjeon-desc"><h3 class="shj-title">응답 일관성</h3><p>AHP에서는 응답자의 쌍대비교 판단이 얼마나 일관적인지를 일관성 비율(Consistency Ratio: CR)을 통해 확인할 수 있습니다. 일반적으로 CR이 0.10 이하인 경우 판단의 일관성이 확보된 것으로 간주합니다. 본 설문의 응답 과정에서 일관성 기준을 벗어나는 응답이 있는 경우, 응답자가 기존 판단을 확인하고 필요한 경우 수정할 수 있도록 설계하였습니다.</p><div class="cause-title">[원인1] 순위 일관성 결여</div><div class="cause-box">예) A가 B보다 중요하다고 응답하고, B가 C보다 중요하다고 응답했다면, A가 C보다 중요하다고 응답해야 함에도 불구하고 C가 A보다 중요하다고 응답한 경우</div><div class="cause-title">[원인2] 가중치 일관성 결여</div><div class="cause-box">예) A가 B보다 2배 중요하다고 응답하고, A가 C보다 4배 중요하다고 응답했다면, B가 C보다 2배 중요하다고 응답해야 함에도 불구하고 B가 C보다 9배 중요하다고 응답한 경우</div></div>"""
+    _SHJEON_HTML_3 = """
+<style>
+.shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
+.shjeon-desc p { margin: 0 0 12px 0; }
+.shjeon-desc .ex { font-weight: 700; margin: 18px 0 10px 0; }
+.shjeon-desc table.scale { border-collapse: collapse; width: 100%; margin: 12px 0 20px 0; font-size: 13px; }
+.shjeon-desc table.scale th, .shjeon-desc table.scale td { border: 1px solid #333; padding: 6px 4px; text-align: center; vertical-align: middle; }
+.shjeon-desc table.scale th { background: #f7f7f7; font-weight: 600; }
+.shjeon-desc .cause-box { border: 2px solid #333; padding: 14px 18px; margin: 10px 0 24px 20px; }
+.shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
+.shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
+.shjeon-desc table.hier { border-collapse: collapse; width: 100%; margin: 16px 0 0 0; font-size: 14px; }
+.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 10px 12px; text-align: left; vertical-align: top; }
+.shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
+.shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
+.shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
+.shjeon-desc .diag .lvl1 { display: inline-block; border: 2px solid #333; padding: 12px 40px; font-size: 16px; margin-bottom: 0; }
+.shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
+.shjeon-desc .diag .lvl2row { display: flex; justify-content: center; gap: 18px; margin: 0 auto; max-width: 900px; }
+.shjeon-desc .diag .lvl2 { flex: 1; border: 2px solid #333; padding: 10px 6px; font-size: 15px; }
+.shjeon-desc .diag .lvl3row { display: flex; justify-content: center; gap: 10px; margin: 0 auto; max-width: 1100px; }
+.shjeon-desc .diag .lvl3grp { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.shjeon-desc .diag .lvl3 { border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; width: 100%; box-sizing: border-box; margin-top: 0; }
+.shjeon-desc .diag .conn-h { height: 2px; background: #333; width: 60%; margin: 0 auto; }
+.shjeon-desc .diag .conn-v2 { width: 2px; height: 24px; background: #333; margin: 0 auto; }
+</style>
+<div class="shjeon-desc"><h3 class="shj-title">AHP 계층 구조</h3><div class="diag"><div class="lvl1">보상위원회 품질의 상대적 중요성</div><div class="conn-v"></div><div class="lvl2row"><div class="lvl2">외형적 독립성</div><div class="lvl2">실질적 독립성</div><div class="lvl2">전문성</div><div class="lvl2">활동성</div></div><div class="lvl3row"><div class="lvl3grp"><div class="conn-h"></div><div style="display:flex;gap:10px;width:100%;justify-content:center;"><div class="conn-v2"></div><div class="conn-v2"></div></div><div style="display:flex;gap:10px;width:100%;"><div class="lvl3">보상위원회<br>사외이사<br>비율</div><div class="lvl3">CEO<br>참여<br>여부</div></div></div><div class="lvl3grp"><div class="conn-h"></div><div style="display:flex;gap:10px;width:100%;justify-content:center;"><div class="conn-v2"></div><div class="conn-v2"></div></div><div style="display:flex;gap:10px;width:100%;"><div class="lvl3">회색<br>사외이사<br>비율</div><div class="lvl3">타사<br>경영진<br>비율</div></div></div><div class="lvl3grp"><div class="conn-h"></div><div style="display:flex;gap:10px;width:100%;justify-content:center;"><div class="conn-v2"></div><div class="conn-v2"></div></div><div style="display:flex;gap:10px;width:100%;"><div class="lvl3">보상위원<br>회계/재무<br>/인사<br>전공위원 비율</div><div class="lvl3">보상위원장이<br>회계/재무<br>/인사<br>전공자 여부</div></div></div><div class="lvl3grp"><div class="conn-h"></div><div style="display:flex;gap:10px;width:100%;justify-content:center;"><div class="conn-v2"></div><div class="conn-v2"></div></div><div style="display:flex;gap:10px;width:100%;"><div class="lvl3">보상위원회<br>참석률</div><div class="lvl3">보상위원회<br>개최횟수</div></div></div></div></div><table class="hier"><tr><th style="width:15%;">개념</th><th style="width:25%;">변수</th><th>설명</th></tr><tr><td class="concept" rowspan="2">외형적 독립성</td><td>보상위원회<br>사외이사비율</td><td>보상위원회 전체 위원 중 사외이사가 차지하는 비율</td></tr><tr><td>CEO 참여 여부</td><td>보상위원회에 CEO가 참가하는지 여부</td></tr><tr><td class="concept" rowspan="2">실질적 독립성</td><td>회색 사외이사비율</td><td>해당 기업 혹은 해당 기업과 계열 관계에 있는 기업의 임원이 이사회에 사외이사로 참가하는 경우를 회색 사외이사로 정의하고, 보상위원회 전체 위원 중 회색 사외이사가 차지하는 비율</td></tr><tr><td>타 기업 경영진 비율</td><td>보상위원회 전체 위원 가운데 타 기업의 경영진이 차지하는 비율</td></tr><tr><td class="concept" rowspan="2">전문성</td><td>보상위원의<br>회계·재무·인사조직<br>전문가 비율</td><td>보상위원회 위원 가운데 회계, 재무 또는 인사조직 전문가가 차지하는 비율</td></tr><tr><td>보상위원장이<br>회계·재무·인사조직<br>전문가인 여부</td><td>보상위원회 위원장이 회계, 재무 또는 인사조직 전문가인지 여부</td></tr><tr><td class="concept" rowspan="2">활동성</td><td>보상위원회 참석률</td><td>보상위원회 위원의 보상위원회 평균 회의 참석률</td></tr><tr><td>보상위원회 개최횟수</td><td>보상위원회 회의가 개최된 횟수</td></tr></table></div>"""
+    _SHJEON_HTML_SURVEY_IDS = ["1NkDZ2NEirWepjTPubG1DZ4weR0wbrWX_GfZwS0mAKl8"]
+
     with st.container():
-        # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개 - 미리보기/SQLite/구글시트 통합)
-        try:
-            display_images = []
-            # 1. 미리보기 모드일 때: survey_meta에 직접 포함된 Preview_Images 우선 확인 (배포 전 즉시 표시)
-            if is_preview_mode and survey_meta.get("Preview_Images"):
-                p_imgs = survey_meta["Preview_Images"]
-                for s_key in ["1", "2", "3"]:
-                    if s_key in p_imgs:
-                        b64_val = p_imgs[s_key].get("data_b64")
-                        m_type = p_imgs[s_key].get("mime") or "image/png"
-                        if b64_val:
-                            display_images.append((b64_val, m_type))
-
-            # 2. 미리보기에서 가져오지 못했거나 일반 배포 응답 모드인 경우
-            if not display_images:
-                from survey_manager import get_survey_images_with_fallback
-                target_id_for_images = survey_id_param
-                # 미리보기 모드인데 Preview_Images가 비어있고 연동된 구글 시트 ID가 있는 경우
-                if is_preview_mode and survey_meta.get("Sheet_ID"):
-                    target_id_for_images = survey_meta.get("Sheet_ID")
-                imgs_dict = get_survey_images_with_fallback(target_id_for_images)
-                import base64
-                for s_idx in [1, 2, 3]:
-                    d_val, m_val = imgs_dict.get(s_idx, (None, None))
-                    if d_val:
-                        encoded = base64.b64encode(d_val).decode()
-                        m_type = m_val or "image/png"
-                        display_images.append((encoded, m_type))
-
-            # 3. 이미지 렌더링: 이미지와 이미지 사이에 심플한 회색 구분선 표시
-            # [신규] ?debug_scale=1 쿼리 파라미터로 이미지별 자동 감지 배율을 화면에 표시 (진단용)
-            _debug_scale = False
+        # [shjeon 전용] 특정 설문은 HTML 설명으로 렌더링 (이미지 대신)
+        if survey_id_param in _SHJEON_HTML_SURVEY_IDS:
+            st.markdown(_SHJEON_HTML_1, unsafe_allow_html=True)
+            st.markdown(
+                '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
+                unsafe_allow_html=True
+            )
+            st.markdown(_SHJEON_HTML_2, unsafe_allow_html=True)
+            st.markdown(
+                '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
+                unsafe_allow_html=True
+            )
+            st.markdown(_SHJEON_HTML_3, unsafe_allow_html=True)
+            st.markdown(
+                '<div style="margin: 28px auto 24px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
+                unsafe_allow_html=True
+            )
+        else:
+            # [신규] 설문 설명 이미지 표시 (존재할 경우, 최대 3개 - 미리보기/SQLite/구글시트 통합)
             try:
-                _debug_scale = st.query_params.get("debug_scale", "0") == "1"
+                display_images = []
+                # 1. 미리보기 모드일 때: survey_meta에 직접 포함된 Preview_Images 우선 확인 (배포 전 즉시 표시)
+                if is_preview_mode and survey_meta.get("Preview_Images"):
+                    p_imgs = survey_meta["Preview_Images"]
+                    for s_key in ["1", "2", "3"]:
+                        if s_key in p_imgs:
+                            b64_val = p_imgs[s_key].get("data_b64")
+                            m_type = p_imgs[s_key].get("mime") or "image/png"
+                            if b64_val:
+                                display_images.append((b64_val, m_type))
+
+                # 2. 미리보기에서 가져오지 못했거나 일반 배포 응답 모드인 경우
+                if not display_images:
+                    from survey_manager import get_survey_images_with_fallback
+                    target_id_for_images = survey_id_param
+                    # 미리보기 모드인데 Preview_Images가 비어있고 연동된 구글 시트 ID가 있는 경우
+                    if is_preview_mode and survey_meta.get("Sheet_ID"):
+                        target_id_for_images = survey_meta.get("Sheet_ID")
+                    imgs_dict = get_survey_images_with_fallback(target_id_for_images)
+                    import base64
+                    for s_idx in [1, 2, 3]:
+                        d_val, m_val = imgs_dict.get(s_idx, (None, None))
+                        if d_val:
+                            encoded = base64.b64encode(d_val).decode()
+                            m_type = m_val or "image/png"
+                            display_images.append((encoded, m_type))
+
+                # 3. 이미지 렌더링: 이미지와 이미지 사이에 심플한 회색 구분선 표시
+                # [신규] ?debug_scale=1 쿼리 파라미터로 이미지별 자동 감지 배율을 화면에 표시 (진단용)
+                _debug_scale = False
+                try:
+                    _debug_scale = st.query_params.get("debug_scale", "0") == "1"
+                except Exception:
+                    pass
+                if display_images:
+                    for idx, (b64_val, m_type) in enumerate(display_images):
+                        if idx > 0:
+                            # 이미지와 이미지 사이의 심플한 회색 구분선
+                            st.markdown(
+                                '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
+                                unsafe_allow_html=True
+                            )
+                        # [신규] 이미지 속 글자 크기를 설문 본문 텍스트 크기에 자동 맞춤
+                        # (이미 배포된 설문의 기존 이미지도 재배포 없이 자동 보정됨)
+                        # - 조정된 이미지의 실제 픽셀 너비를 width로 지정해 브라우저가
+                        #   임의로 축소(max-height 등)하지 못하게 함. max-width:100%는
+                        #   모바일 등 좁은 화면에서만 안전장치로 동작.
+                        _img_style = "max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;"
+                        _dbg_msg = ""
+                        try:
+                            from image_text_scale import apply_text_size_match as _its_match
+                            import base64 as _b64m
+                            _raw = _b64m.b64decode(b64_val)
+                            _scaled, _mtype, _sw, _sh, _sc = _its_match(_raw, manual_mult=1.0)
+                            b64_val = _b64m.b64encode(_scaled).decode("ascii")
+                            m_type = _mtype or m_type
+                            if _sw > 0:
+                                _img_style = f"width: {_sw}px; max-width: 100%; height: auto; border-radius: 8px;"
+                            if _debug_scale:
+                                try:
+                                    from image_text_scale import diagnose_ocr as _its_diag
+                                    _di = _its_diag(_raw)
+                                    _lv = ",".join(f"{k}:{v}" for k, v in sorted(_di["level_counts"].items()))
+                                    _smp = " | ".join(_di["sample"]) if _di["sample"] else "-"
+                                    _dbg_msg = (
+                                        f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px) "
+                                        f"[OCR bin={'Y' if _di['tesseract_bin'] else 'N'} "
+                                        f"lang={_di['lang_used']} rows={_di['total_rows']} "
+                                        f"lv={{{_lv}}} txt={_di['nonempty']} c30={_di['conf_ge30']} "
+                                        f"줄수={_di['lines']} 중앙값={_di['median_h']}px :: {_smp}]"
+                                    )
+                                except Exception:
+                                    _dbg_msg = f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px)"
+                        except Exception:
+                            pass
+                        html_str = f'''
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <img src="data:{m_type};base64,{b64_val}" style="{_img_style}">
+                        </div>
+                        '''
+                        st.markdown(html_str, unsafe_allow_html=True)
+                        if _dbg_msg:
+                            st.caption("🔍 " + _dbg_msg)
+
+                    # 마지막 이미지와 아래 문항 사이의 깔끔한 분리선
+                    st.markdown(
+                        '<div style="margin: 28px auto 24px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
+                        unsafe_allow_html=True
+                    )
             except Exception:
                 pass
-            if display_images:
-                for idx, (b64_val, m_type) in enumerate(display_images):
-                    if idx > 0:
-                        # 이미지와 이미지 사이의 심플한 회색 구분선
-                        st.markdown(
-                            '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
-                            unsafe_allow_html=True
-                        )
-                    # [신규] 이미지 속 글자 크기를 설문 본문 텍스트 크기에 자동 맞춤
-                    # (이미 배포된 설문의 기존 이미지도 재배포 없이 자동 보정됨)
-                    # - 조정된 이미지의 실제 픽셀 너비를 width로 지정해 브라우저가
-                    #   임의로 축소(max-height 등)하지 못하게 함. max-width:100%는
-                    #   모바일 등 좁은 화면에서만 안전장치로 동작.
-                    _img_style = "max-width: 100%; height: auto; max-height: 500px; width: auto; border-radius: 8px;"
-                    _dbg_msg = ""
-                    try:
-                        from image_text_scale import apply_text_size_match as _its_match
-                        import base64 as _b64m
-                        _raw = _b64m.b64decode(b64_val)
-                        _scaled, _mtype, _sw, _sh, _sc = _its_match(_raw, manual_mult=1.0)
-                        b64_val = _b64m.b64encode(_scaled).decode("ascii")
-                        m_type = _mtype or m_type
-                        if _sw > 0:
-                            _img_style = f"width: {_sw}px; max-width: 100%; height: auto; border-radius: 8px;"
-                        if _debug_scale:
-                            try:
-                                from image_text_scale import diagnose_ocr as _its_diag
-                                _di = _its_diag(_raw)
-                                _lv = ",".join(f"{k}:{v}" for k, v in sorted(_di["level_counts"].items()))
-                                _smp = " | ".join(_di["sample"]) if _di["sample"] else "-"
-                                _dbg_msg = (
-                                    f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px) "
-                                    f"[OCR bin={'Y' if _di['tesseract_bin'] else 'N'} "
-                                    f"lang={_di['lang_used']} rows={_di['total_rows']} "
-                                    f"lv={{{_lv}}} txt={_di['nonempty']} c30={_di['conf_ge30']} "
-                                    f"줄수={_di['lines']} 중앙값={_di['median_h']}px 최빈값={_di.get('mode_h')}px :: {_smp}]"
-                                )
-                            except Exception:
-                                _dbg_msg = f"자동 조정 배율: {_sc:.2f}× (조정 후 {_sw}×{_sh}px)"
-                    except Exception:
-                        pass
-                    html_str = f'''
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <img src="data:{m_type};base64,{b64_val}" style="{_img_style}">
-                    </div>
-                    '''
-                    st.markdown(html_str, unsafe_allow_html=True)
-                    if _dbg_msg:
-                        st.caption("🔍 " + _dbg_msg)
-
-                # 마지막 이미지와 아래 문항 사이의 깔끔한 분리선
-                st.markdown(
-                    '<div style="margin: 28px auto 24px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
-                    unsafe_allow_html=True
-                )
-        except Exception:
-            pass
 
         # 4. AHP 쌍대비교 문항 생성
         st.subheader(f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)"))
