@@ -1356,6 +1356,57 @@ def generate_hierarchy_tree_text(ahp_model, tier_level=2, lang="ko", translator=
                 
     return "\n".join(tree_lines)
 
+def generate_hierarchy_tree_html(ahp_model, tier_level=2, lang="ko", translator=None):
+    """AHP 모델을 기반으로 대분류가 볼드(진하게) 처리된 계층 구조 HTML 다이어그램을 생성합니다."""
+    if not ahp_model:
+        return ""
+    main_list = ahp_model.get("main", [])
+    if not main_list:
+        return ""
+    
+    tier_level = int(tier_level or 2)
+    subs_map = ahp_model.get("subs", {})
+    sub_subs_map = ahp_model.get("sub_subs", {})
+    
+    def _t(name):
+        return translator(name) if translator else name
+
+    tree_lines = []
+    for mi, mc in enumerate(main_list):
+        is_last_main = (mi == len(main_list) - 1)
+        prefix_main = "└── " if is_last_main else "├── "
+        mc_name = _t(mc)
+        # 대분류 볼드(진하게) 강조
+        tree_lines.append(f"{prefix_main}<strong style='font-weight: 700; color: #0f172a;'>[{mc_name}]</strong>")
+        
+        subs = subs_map.get(mc, [])
+        if not subs:
+            branch_main = "    " if is_last_main else "│   "
+            leaf_note = "⭐ (단독 최하위 요인 — 하위 요인 없음)" if lang == "ko" else "⭐ (Single leaf factor — No sub-factors)"
+            tree_lines.append(f"{branch_main}└── {leaf_note}")
+            continue
+            
+        for si, sc in enumerate(subs):
+            is_last_sub = (si == len(subs) - 1)
+            branch_main = "    " if is_last_main else "│   "
+            prefix_sub = "└── " if is_last_sub else "├── "
+            sc_name = _t(sc)
+            
+            sub_subs = sub_subs_map.get(sc, []) if tier_level == 3 else []
+            if sub_subs:
+                tree_lines.append(f"{branch_main}{prefix_sub}{sc_name}")
+                for ssi, ssc in enumerate(sub_subs):
+                    is_last_ss = (ssi == len(sub_subs) - 1)
+                    branch_sub = "    " if is_last_sub else "│   "
+                    prefix_ss = "└── " if is_last_ss else "├── "
+                    ssc_name = _t(ssc)
+                    tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{ssc_name}")
+            else:
+                tree_lines.append(f"{branch_main}{prefix_sub}{sc_name}")
+                
+    content_html = "\n".join(tree_lines)
+    return f"""<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; font-family: 'Consolas', 'Courier New', Menlo, Monaco, monospace; font-size: 0.92rem; line-height: 1.65; color: #334155; white-space: pre-wrap; margin-top: 8px; margin-bottom: 20px;">{content_html}</div>"""
+
 def get_cr_fix_suggestion(factors, answers, cr_limit=0.1):
     """
     CR이 한계치를 초과할 때 수정 시 CR을 가장 낮추는 쌍(pair)과 추천 값을 반환합니다.

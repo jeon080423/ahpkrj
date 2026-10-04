@@ -3406,7 +3406,7 @@ if "code" in q_params and st.session_state.get('user_id'):
 if "preview_id" in q_params or "survey_id" in q_params:
     is_preview_mode = "preview_id" in q_params
     
-    from survey_manager import load_survey_metadata, save_response_to_sheet, generate_pairwise_combinations, calculate_matrix_cr, generate_hierarchy_tree_text
+    from survey_manager import load_survey_metadata, save_response_to_sheet, generate_pairwise_combinations, calculate_matrix_cr, generate_hierarchy_tree_text, generate_hierarchy_tree_html
     
     if is_preview_mode:
         preview_id_param = q_params["preview_id"]
@@ -4201,16 +4201,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 show_hierarchy_val = (show_hierarchy_val.lower() != "false")
 
             if show_hierarchy_val:
-                tree_text = generate_hierarchy_tree_text(
+                tree_html = generate_hierarchy_tree_html(
                     ahp_model,
                     tier_level=tier_level,
                     lang=st.session_state.get('lang', 'ko'),
                     translator=translate_factor_if_default
                 )
-                if tree_text:
+                if tree_html:
                     st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
-                    st.code(tree_text, language=None)
-                    st.markdown("<div style='margin-bottom: 24px;'></div>", unsafe_allow_html=True)
+                    st.markdown(tree_html, unsafe_allow_html=True)
 
             comp_idx = 1
             for comb_idx, comb in enumerate(combinations):
@@ -10092,31 +10091,15 @@ with contextlib.nullcontext():
             if main_criteria_list:
                 st.markdown("---")
                 st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
-                tree_lines = []
-                for mi, mc in enumerate(main_criteria_list):
-                    is_last_main = (mi == len(main_criteria_list) - 1)
-                    prefix_main = "└── " if is_last_main else "├── "
-                    tree_lines.append(f"{prefix_main}[{mc}]")
-                    
-                    subs = model_structure.get(mc, [])
-                    for si, sc in enumerate(subs):
-                        is_last_sub = (si == len(subs) - 1)
-                        branch_main = "    " if is_last_main else "│   "
-                        prefix_sub = "└── " if is_last_sub else "├── "
-                        
-                        sub_subs = sub_sub_structure.get(sc, []) if tier_level == 3 else []
-                        if sub_subs:
-                            tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
-                            for ssi, ssc in enumerate(sub_subs):
-                                is_last_ss = (ssi == len(sub_subs) - 1)
-                                branch_sub = "    " if is_last_sub else "│   "
-                                prefix_ss = "└── " if is_last_ss else "├── "
-                                tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{ssc}")
-                        else:
-                            tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
-                
-                tree_text = "\n".join(tree_lines)
-                st.code(tree_text, language=None)
+                from survey_manager import generate_hierarchy_tree_html
+                tab1_model_dict = {
+                    "main": main_criteria_list,
+                    "subs": model_structure,
+                    "sub_subs": sub_sub_structure if tier_level == 3 else {}
+                }
+                tree_html = generate_hierarchy_tree_html(tab1_model_dict, tier_level=tier_level, lang=st.session_state.get('lang', 'ko'))
+                if tree_html:
+                    st.markdown(tree_html, unsafe_allow_html=True)
             # ─────────────────────────────────────────────────────────────
 
             # ── 데이터 입력 가이드 (항상 노출) ────────────────────────────
@@ -10936,37 +10919,14 @@ Thank you deeply for your valuable participation.
                     if main_list:
                         st.markdown("---")
                         st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
-                        tree_lines = []
-                        for mi, mc in enumerate(main_list):
-                            is_last_main = (mi == len(main_list) - 1)
-                            prefix_main = "└── " if is_last_main else "├── "
-                            tree_lines.append(f"{prefix_main}[{mc}]")
-                            
-                            subs = model_structure.get("subs", {}).get(mc, [])
-                            # 하위 요인 없는 경우 → 단독 리프 노드 표시
-                            if not subs:
-                                branch_main = "    " if is_last_main else "│   "
-                                tree_lines.append(f"{branch_main}└── ⭐ (단독 최하위 요인 — 하위 요인 없음)")
-                                continue
-                            sub_subs_map = model_structure.get("sub_subs", {})
-                            for si, sc in enumerate(subs):
-                                is_last_sub = (si == len(subs) - 1)
-                                branch_main = "    " if is_last_main else "│   "
-                                prefix_sub = "└── " if is_last_sub else "├── "
-                                
-                                sub_subs = sub_subs_map.get(sc, []) if tier_level == 3 else []
-                                if sub_subs:
-                                    tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
-                                    for ssi, ssc in enumerate(sub_subs):
-                                        is_last_ss = (ssi == len(sub_subs) - 1)
-                                        branch_sub = "    " if is_last_sub else "│   "
-                                        prefix_ss = "└── " if is_last_ss else "├── "
-                                        tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{ssc}")
-                                else:
-                                    tree_lines.append(f"{branch_main}{prefix_sub}{sc}")
-                        
-                        tree_text = "\n".join(tree_lines)
-                        st.code(tree_text, language=None)
+                        from survey_manager import generate_hierarchy_tree_html
+                        tree_html = generate_hierarchy_tree_html(
+                            model_structure,
+                            tier_level=tier_level,
+                            lang=st.session_state.get('lang', 'ko')
+                        )
+                        if tree_html:
+                            st.markdown(tree_html, unsafe_allow_html=True)
 
                         # 배포 설문지 내 계층구조 다이어그램 표시 옵션 (라디오 버튼)
                         st.markdown(_("**📊 배포 설문지 내 계층 구조 다이어그램 표시 여부**", "**📊 Display Hierarchy Diagram in Deployed Survey Option**"))
