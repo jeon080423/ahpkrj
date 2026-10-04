@@ -3399,6 +3399,203 @@ if "code" in q_params and st.session_state.get('user_id'):
 
 
 # -----------------------------------------------------------------------------
+# [신규] 동적 라우팅 - 설문 실시간 진행 현황 모니터링 전용 대시보드 (mode=status, 로그인 불필요)
+# -----------------------------------------------------------------------------
+def render_survey_status_dashboard(survey_id):
+    from survey_manager import (
+        load_survey_metadata, get_survey_stats, get_survey_gspread_client, clean_and_align_sheet_rows
+    )
+    import pandas as pd
+    import plotly.express as px
+    import io
+
+    # 1. 메타데이터 조회
+    survey_meta = load_survey_metadata(survey_id)
+    survey_title = survey_meta.get("Title", "AHP 설문조사") if survey_meta else "AHP 설문조사"
+    admin_email = survey_meta.get("Admin_Email", "") if survey_meta else ""
+
+    # 상단 헤더
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: 26px 30px; border-radius: 12px; margin-bottom: 22px; color: #ffffff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);">
+        <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; margin-bottom: 6px;">
+            AHP Master &bull; Live Status Dashboard
+        </div>
+        <h2 style="color: #ffffff !important; font-size: 24px; font-weight: 700; margin: 0 0 10px 0; border: none; padding: 0;">
+            📊 {survey_title}
+        </h2>
+        <div style="font-size: 14px; opacity: 0.9;">
+            본 페이지는 로그인 없이 실시간 설문 응답 현황을 확인하는 <strong>모니터링 전용 대시보드</strong>입니다.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 2. 액션 바 (새로고침 버튼)
+    col_act1, col_act2 = st.columns([3, 1])
+    with col_act1:
+        st.caption(f"📍 대상 설문 ID: `{survey_id}`" + (f" | 담당자: `{admin_email}`" if admin_email else ""))
+    with col_act2:
+        if st.button("🔄 실시간 현황 새로고침", type="primary", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
+
+    # 3. 실시간 통계 (Stats)
+    stats = get_survey_stats(survey_id)
+    visits = stats.get("visits", 0)
+    completed = stats.get("completed", 0)
+    abandoned_cr = stats.get("abandoned_cr", 0)
+    abandoned_bounce = stats.get("abandoned_bounce", 0)
+    completion_rate = f"{(completed / visits * 100):.1f}%" if visits > 0 else "0.0%"
+
+    # 메트릭 카드
+    m1, m2, m3, m4, m5 = st.columns(5)
+    with m1:
+        st.metric("👥 총 접속자 수 (Visits)", f"{visits}명")
+    with m2:
+        st.metric("✅ 완료 응답자 (Completed)", f"{completed}명", delta=f"{completion_rate} 완료")
+    with m3:
+        st.metric("⚠️ CR 초과 중단", f"{abandoned_cr}건")
+    with m4:
+        st.metric("🚪 단순 이탈 (Bounce)", f"{abandoned_bounce}명")
+    with m5:
+        st.metric("📈 실시간 완료율", completion_rate)
+
+    st.markdown('<div style="margin: 18px 0;"></div>', unsafe_allow_html=True)
+
+    # 4. 차트 섹션
+    chart_col1, chart_col2 = st.columns(2)
+    with chart_col1:
+        chart_data = pd.DataFrame({
+            "구분": ["응답 완료", "일관성(CR) 초과 중단", "단순 페이지 이탈"],
+            "인원수": [completed, abandoned_cr, abandoned_bounce]
+        })
+        fig_stats = px.bar(
+            chart_data,
+            x="구분",
+            y="인원수",
+            text="인원수",
+            color="구분",
+            color_discrete_map={
+                "응답 완료": "#10b981",
+                "일관성(CR) 초과 중단": "#ef4444",
+                "단순 페이지 이탈": "#f59e0b"
+            },
+            title="📌 설문 참여 상태별 분포"
+        )
+        fig_stats.update_traces(textposition="outside", cliponaxis=False)
+        fig_stats.update_layout(showlegend=False, height=320, margin=dict(l=20, r=20, t=40, b=20))
+        st.plotly_chart(fig_stats, use_container_width=True)
+
+    # 5. 구글 시트에서 응답 데이터 로드
+    demo_df = None
+    live_df = None
+    g_client = get_survey_gspread_client()
+    if g_client:
+        try:
+            spreadsheet = g_client.open_by_key(survey_id)
+            try:
+                demo_sheet = spreadsheet.worksheet("Demographic_Data")
+                demo_rows = demo_sheet.get_all_values()
+                if demo_rows:
+                    demo_df, _, _ = clean_and_align_sheet_rows(demo_rows, survey_meta=survey_meta, is_demo=True)
+            except Exception:
+                pass
+
+            try:
+                raw_sheet = spreadsheet.worksheet("Raw_Data")
+                raw_rows = raw_sheet.get_all_values()
+                if raw_rows:
+                    live_df, _, _ = clean_and_align_sheet_rows(raw_rows, survey_meta=survey_meta, is_demo=False)
+            except Exception:
+                pass
+        except Exception as e:
+            st.warning(f"구글 시트 데이터 로드 중: {e}")
+
+    with chart_col2:
+        if demo_df is not None and not demo_df.empty:
+            type_col = None
+            for c in demo_df.columns:
+                if "소속" in c or "Type" in c or "type" in c.lower():
+                    type_col = c
+                    break
+            if type_col:
+                type_counts = demo_df[type_col].value_counts().reset_index()
+                type_counts.columns = ["소속 구분", "인원수"]
+                fig_type = px.pie(
+                    type_counts,
+                    names="소속 구분",
+                    values="인원수",
+                    title="🏢 응답자 소속별 분포",
+                    hole=0.4,
+                    color_discrete_sequence=px.colors.qualitative.Set2
+                )
+                fig_type.update_layout(height=320, margin=dict(l=20, r=20, t=40, b=20))
+                st.plotly_chart(fig_type, use_container_width=True)
+            else:
+                st.info("소속 정보 컬럼을 분석 중입니다.")
+        else:
+            st.info("수집된 응답자 상세 정보가 없습니다.")
+
+    # 6. 응답자 목록 및 데이터 다운로드
+    st.markdown('<div style="margin: 20px 0;"></div>', unsafe_allow_html=True)
+    st.subheader("📋 실시간 응답자 목록 및 데이터")
+
+    if demo_df is not None and not demo_df.empty:
+        # 개인정보 보호: 성명 또는 이메일 마스킹
+        display_df = demo_df.copy()
+        for col in display_df.columns:
+            if "성명" in col or "이름" in col or "Name" in col:
+                display_df[col] = display_df[col].apply(
+                    lambda v: v[0] + "*" + v[2:] if isinstance(v, str) and len(v) >= 3 else (v[0] + "*" if isinstance(v, str) and len(v) == 2 else v)
+                )
+            elif "이메일" in col or "Email" in col:
+                display_df[col] = display_df[col].apply(
+                    lambda v: (v[:2] + "****@" + v.split("@")[1]) if isinstance(v, str) and "@" in v else v
+                )
+
+        st.dataframe(display_df, use_container_width=True, height=280)
+
+        # 엑셀 다운로드
+        excel_buffer = io.BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            display_df.to_excel(writer, index=False, sheet_name="Demographic_Data")
+            if live_df is not None and not live_df.empty:
+                live_df.to_excel(writer, index=False, sheet_name="Raw_Data")
+
+        col_dl1, col_dl2 = st.columns([1, 3])
+        with col_dl1:
+            st.download_button(
+                "📥 실시간 응답 엑셀(.xlsx) 다운로드",
+                data=excel_buffer.getvalue(),
+                file_name=f"Survey_Live_Status_{survey_id[:8]}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                type="secondary"
+            )
+    else:
+        st.info("현재까지 수집된 완료 응답자가 없습니다.")
+
+    # 7. 하단 안내
+    st.markdown("""
+    <div style="text-align: center; color: #64748b; font-size: 13px; margin-top: 40px; padding: 20px 0 10px 0; border-top: 1px solid #e2e8f0;">
+        🔒 <strong>AHP Master 실시간 모니터링 대시보드</strong> &bull; 본 페이지는 읽기 전용으로 설문 진행 상황을 실시간 확인할 수 있습니다.
+    </div>
+    """, unsafe_allow_html=True)
+
+
+_raw_mode = q_params.get("mode", "")
+if isinstance(_raw_mode, list):
+    _raw_mode = _raw_mode[0] if _raw_mode else ""
+_is_status_mode = str(_raw_mode).strip().lower() in ["status", "progress"] or str(st.session_state.get("mode", "")).strip().lower() in ["status", "progress"]
+
+if _is_status_mode and "survey_id" in q_params:
+    _status_survey_id = q_params["survey_id"]
+    if isinstance(_status_survey_id, list):
+        _status_survey_id = _status_survey_id[0]
+    render_survey_status_dashboard(_status_survey_id.strip())
+    st.stop()
+
+
+# -----------------------------------------------------------------------------
 # [신규] 동적 라우팅 - 응답자 설문 참여 SPA (Single Page Application)
 # -----------------------------------------------------------------------------
 
