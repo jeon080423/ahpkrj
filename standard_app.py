@@ -10293,7 +10293,7 @@ with contextlib.nullcontext():
                         st.session_state.survey_auto_loaded = False
                         st.session_state.editing_survey_id = None
                         st.session_state.pop('tab2_tier_choice', None)
-                        for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_')]:
+                        for k in [k for k in list(st.session_state.keys()) if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_') or k.startswith('tq_')]:
                             del st.session_state[k]
 
                     if '_cached_user_surveys' not in st.session_state or st.session_state.get('_survey_cache_dirty'):
@@ -10362,12 +10362,18 @@ with contextlib.nullcontext():
                             st.session_state.edit_type_options = ", ".join(demo.get("type_options", []))
                             if "type_questions" in demo:
                                 tqs = []
-                                for tq in demo["type_questions"]:
+                                for idx_tq, tq in enumerate(demo["type_questions"]):
+                                    opts_str = ", ".join(tq.get("opts", [])) if isinstance(tq.get("opts", []), list) else tq.get("opts", "")
+                                    q_str = tq.get("q", "")
+                                    qtype_str = tq.get("q_type", "radio")
                                     tqs.append({
-                                        "q": tq.get("q", ""),
-                                        "opts": ", ".join(tq.get("opts", [])) if isinstance(tq.get("opts", []), list) else tq.get("opts", ""),
-                                        "q_type": tq.get("q_type", "radio")  # 객관식/주관식 복원
+                                        "q": q_str,
+                                        "opts": opts_str,
+                                        "q_type": qtype_str  # 객관식/주관식 복원
                                     })
+                                    st.session_state[f"tq_q_{idx_tq}"] = q_str
+                                    st.session_state[f"tq_opts_{idx_tq}"] = opts_str
+                                    st.session_state[f"tq_qtype_{idx_tq}"] = _("✏️ 주관식 (직접 입력)", "✏️ Open-ended (Text)") if qtype_str == "text" else _("📋 객관식 (보기 선택)", "📋 Multiple Choice (Radio)")
                                 st.session_state.edit_type_questions = tqs
                             st.session_state.edit_demo_gender = demo.get("gender", False)
                             st.session_state.edit_demo_aff = demo.get("affiliation", False)
@@ -10440,7 +10446,7 @@ with contextlib.nullcontext():
                                         delete_admin_survey(user_surveys[0][0], st.session_state.user_id)
                                     st.session_state.editing_survey_id = None
                                     st.session_state.pop('tab2_tier_choice', None)
-                                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_')]
+                                    keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_') or k.startswith('tq_')]
                                     for k in keys_to_clear:
                                         del st.session_state[k]
                                     st.session_state.survey_auto_loaded = True
@@ -10488,7 +10494,7 @@ with contextlib.nullcontext():
                         if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary", use_container_width=True):
                             st.session_state.editing_survey_id = None
                             st.session_state.pop('tab2_tier_choice', None)
-                            keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_')]
+                            keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_') or k.startswith('tq_')]
                             for k in keys_to_clear:
                                 del st.session_state[k]
                             st.rerun()
