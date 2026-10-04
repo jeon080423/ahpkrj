@@ -459,7 +459,7 @@ div[class*="st-key-ahp_survey_matrix"] label:hover {
             tq_opts = tq.get("opts", [])
             tq_q_type = tq.get("q_type", "radio")
             if tq_q_type == "text" or not tq_opts:
-                st.markdown(f"<div style='font-size: 0.875rem; font-weight: 400; margin-bottom: 4px; line-height: 1.5;'>{curr_sq_idx}) {tq_q}</div>", unsafe_allow_html=True)
+                st.markdown(f"{curr_sq_idx}) {tq_q}")
                 col_input, col_opt = st.columns([3, 1])
                 is_unknown = st.session_state.get(f"yeta_survey_resp_type_unknown_{i}", False)
                 with col_input:

@@ -3717,7 +3717,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
             # 주관식으로 명시된 경우: 직접 입력 칸 오른쪽에 '모름/비해당' 라디오 버튼 제시
             if tq_q_type == "text":
-                st.markdown(f"<div style='font-size: 0.875rem; font-weight: 400; margin-bottom: 4px; line-height: 1.5;'>{sq_idx}) {tq_q}</div>", unsafe_allow_html=True)
+                st.markdown(f"{sq_idx}) {tq_q}")
                 col_input, col_opt = st.columns([3, 1])
                 is_unknown = st.session_state.get(f"survey_resp_type_unknown_{i}", False)
                 with col_input:
