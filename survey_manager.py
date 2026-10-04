@@ -1405,7 +1405,7 @@ def generate_hierarchy_tree_html(ahp_model, tier_level=2, lang="ko", translator=
                 tree_lines.append(f"{branch_main}{prefix_sub}{sc_name}")
                 
     content_html = "\n".join(tree_lines)
-    return f"""<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; font-family: 'Consolas', 'Courier New', Menlo, Monaco, monospace; font-size: 0.92rem; line-height: 1.3; color: #334155; white-space: pre-wrap; margin-top: 8px; margin-bottom: 18px;">{content_html}</div>"""
+    return f"""<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; font-family: 'Consolas', 'Courier New', Menlo, Monaco, monospace; font-size: 0.92rem; line-height: 1.15; color: #334155; white-space: pre-wrap; margin-top: 8px; margin-bottom: 18px;">{content_html}</div>"""
 
 def get_cr_fix_suggestion(factors, answers, cr_limit=0.1):
     """
