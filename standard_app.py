@@ -3401,16 +3401,95 @@ if "code" in q_params and st.session_state.get('user_id'):
 # -----------------------------------------------------------------------------
 # [신규] 동적 라우팅 - 설문 실시간 진행 현황 모니터링 전용 대시보드 (mode=status, 로그인 불필요)
 # -----------------------------------------------------------------------------
-def render_survey_status_dashboard(survey_id):
+@st.cache_data(ttl=25, show_spinner=False)
+def fetch_survey_live_dashboard_payload(survey_id):
+    """
+    구글 시트 API 429 Quota Exceeded를 원천 방지하기 위해
+    대시보드에 필요한 모든 데이터(Stats, Demo rows, Raw rows, Meta)를
+    단 한 번의 연결로 묶어서 조회하고 25초간 캐싱합니다.
+    """
     from survey_manager import (
-        load_survey_metadata, get_survey_stats, get_survey_gspread_client, clean_and_align_sheet_rows
+        get_survey_gspread_client, 
+        run_gspread_with_retry, 
+        load_survey_metadata
     )
+    meta = {}
+    try:
+        meta = load_survey_metadata(survey_id) or {}
+    except Exception:
+        pass
+
+    stats = {"completed": 0, "abandoned_cr": 0, "visits": 0, "abandoned_bounce": 0}
+    raw_rows = []
+    demo_rows = []
+    error = None
+
+    client = get_survey_gspread_client()
+    if not client:
+        return {"meta": meta, "stats": stats, "raw_rows": [], "demo_rows": [], "error": "구글 시트 인증 클라이언트를 생성할 수 없습니다."}
+
+    try:
+        sh = run_gspread_with_retry(client.open_by_key, survey_id)
+
+        # 1. Raw_Data
+        try:
+            raw_ws = run_gspread_with_retry(sh.worksheet, "Raw_Data")
+            raw_rows = run_gspread_with_retry(raw_ws.get_all_values)
+        except Exception:
+            raw_rows = []
+
+        # 2. Demographic_Data
+        try:
+            demo_ws = run_gspread_with_retry(sh.worksheet, "Demographic_Data")
+            demo_rows = run_gspread_with_retry(demo_ws.get_all_values)
+        except Exception:
+            demo_rows = []
+
+        # 3. Survey_Metadata
+        visits = 0
+        abandoned_cr = 0
+        try:
+            meta_ws = run_gspread_with_retry(sh.worksheet, "Survey_Metadata")
+            meta_records = run_gspread_with_retry(meta_ws.get_all_records)
+            meta_dict = {row.get("Field"): row.get("Value") for row in meta_records if isinstance(row, dict)}
+            visits = int(meta_dict.get("Visit_Count", 0))
+            abandoned_cr = int(meta_dict.get("Abandoned_CR_Count", 0))
+        except Exception:
+            pass
+
+        completed = max(0, len(raw_rows) - 1)
+        abandoned_bounce = max(0, visits - completed)
+        stats = {
+            "completed": completed,
+            "abandoned_cr": abandoned_cr,
+            "visits": visits,
+            "abandoned_bounce": abandoned_bounce
+        }
+    except Exception as e:
+        err_msg = str(e)
+        if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg or "RATE_LIMIT_EXCEEDED" in err_msg:
+            error = "구글 시트 API 일시적 호출 한도(429)로 잠시 대기 중입니다. 20~30초 후 새로고침해 주세요."
+        else:
+            error = err_msg
+
+    return {
+        "meta": meta,
+        "stats": stats,
+        "raw_rows": raw_rows,
+        "demo_rows": demo_rows,
+        "error": error
+    }
+
+
+def render_survey_status_dashboard(survey_id):
+    from survey_manager import clean_and_align_sheet_rows
     import pandas as pd
     import plotly.express as px
     import io
 
-    # 1. 메타데이터 조회
-    survey_meta = load_survey_metadata(survey_id)
+    # 1. 일괄 캐시 데이터 로드
+    payload = fetch_survey_live_dashboard_payload(survey_id)
+    survey_meta = payload.get("meta", {})
     survey_title = survey_meta.get("Title", "AHP 설문조사") if survey_meta else "AHP 설문조사"
     admin_email = survey_meta.get("Admin_Email", "") if survey_meta else ""
 
@@ -3435,11 +3514,14 @@ def render_survey_status_dashboard(survey_id):
         st.caption(f"📍 대상 설문 ID: `{survey_id}`" + (f" | 담당자: `{admin_email}`" if admin_email else ""))
     with col_act2:
         if st.button("🔄 실시간 현황 새로고침", type="primary", use_container_width=True):
-            st.cache_data.clear()
+            fetch_survey_live_dashboard_payload.clear(survey_id)
             st.rerun()
 
+    if payload.get("error"):
+        st.warning(f"⚠️ {payload['error']}")
+
     # 3. 실시간 통계 (Stats)
-    stats = get_survey_stats(survey_id)
+    stats = payload.get("stats", {})
     visits = stats.get("visits", 0)
     completed = stats.get("completed", 0)
     abandoned_cr = stats.get("abandoned_cr", 0)
@@ -3461,7 +3543,23 @@ def render_survey_status_dashboard(survey_id):
 
     st.markdown('<div style="margin: 18px 0;"></div>', unsafe_allow_html=True)
 
-    # 4. 차트 섹션
+    # 4. 데이터프레임 파싱
+    demo_df = None
+    live_df = None
+    demo_rows = payload.get("demo_rows", [])
+    raw_rows = payload.get("raw_rows", [])
+    if demo_rows:
+        try:
+            demo_df, _, _ = clean_and_align_sheet_rows(demo_rows, survey_meta=survey_meta, is_demo=True)
+        except Exception:
+            pass
+    if raw_rows:
+        try:
+            live_df, _, _ = clean_and_align_sheet_rows(raw_rows, survey_meta=survey_meta, is_demo=False)
+        except Exception:
+            pass
+
+    # 5. 차트 섹션
     chart_col1, chart_col2 = st.columns(2)
     with chart_col1:
         chart_data = pd.DataFrame({
@@ -3484,31 +3582,6 @@ def render_survey_status_dashboard(survey_id):
         fig_stats.update_traces(textposition="outside", cliponaxis=False)
         fig_stats.update_layout(showlegend=False, height=320, margin=dict(l=20, r=20, t=40, b=20))
         st.plotly_chart(fig_stats, use_container_width=True)
-
-    # 5. 구글 시트에서 응답 데이터 로드
-    demo_df = None
-    live_df = None
-    g_client = get_survey_gspread_client()
-    if g_client:
-        try:
-            spreadsheet = g_client.open_by_key(survey_id)
-            try:
-                demo_sheet = spreadsheet.worksheet("Demographic_Data")
-                demo_rows = demo_sheet.get_all_values()
-                if demo_rows:
-                    demo_df, _, _ = clean_and_align_sheet_rows(demo_rows, survey_meta=survey_meta, is_demo=True)
-            except Exception:
-                pass
-
-            try:
-                raw_sheet = spreadsheet.worksheet("Raw_Data")
-                raw_rows = raw_sheet.get_all_values()
-                if raw_rows:
-                    live_df, _, _ = clean_and_align_sheet_rows(raw_rows, survey_meta=survey_meta, is_demo=False)
-            except Exception:
-                pass
-        except Exception as e:
-            st.warning(f"구글 시트 데이터 로드 중: {e}")
 
     with chart_col2:
         if demo_df is not None and not demo_df.empty:
