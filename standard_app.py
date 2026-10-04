@@ -3694,7 +3694,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     # 성명
     if demographics.get("name"):
-        name_label = f"SQ{sq_idx}. " + _("성명 *", "Name *")
+        name_label = f"{sq_idx}) " + _("성명 *", "Name *")
         sq_idx += 1
         col1, col2 = st.columns([1, 3])
         with col1:
@@ -3717,13 +3717,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
             # 주관식으로 명시된 경우: 직접 입력 칸 오른쪽에 '모름/비해당' 라디오 버튼 제시
             if tq_q_type == "text":
-                st.markdown(f"**SQ{sq_idx}. {tq_q}**")
+                st.markdown(f"**{sq_idx}) {tq_q}**")
                 col_input, col_opt = st.columns([3, 1])
                 is_unknown = st.session_state.get(f"survey_resp_type_unknown_{i}", False)
                 with col_input:
                     if is_unknown:
                         st.text_input(
-                            f"SQ{sq_idx}. {tq_q}",
+                            f"{sq_idx}) {tq_q}",
                             value=_("모름/비해당", "Don't know / Not applicable"),
                             disabled=True,
                             key=f"survey_resp_type_disabled_{i}",
@@ -3732,7 +3732,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         ans = "모름/비해당"
                     else:
                         user_input = st.text_input(
-                            f"SQ{sq_idx}. {tq_q}",
+                            f"{sq_idx}) {tq_q}",
                             key=f"survey_resp_type_{i}",
                             placeholder=_("내용을 직접 입력하세요", "Enter details directly"),
                             label_visibility="collapsed"
@@ -3753,7 +3753,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
                 tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
                 has_etc_opt = any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq_opts)
-                ans = st.radio(f"SQ{sq_idx}. {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
+                ans = st.radio(f"{sq_idx}) {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
                 resp_data["types"].append(ans)
                 if has_etc_opt:
                     is_etc_chosen = "기타" in str(ans) or "other" in str(ans).lower()
@@ -3783,7 +3783,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             type_opts = [translate_factor_if_default(opt) for opt in type_opts]
             
         has_etc_opt = any("기타" in str(opt) or "other" in str(opt).lower() for opt in type_opts)
-        ans = st.radio(f"SQ{sq_idx}. {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
+        ans = st.radio(f"{sq_idx}) {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
         resp_data["types"].append(ans)
         if has_etc_opt:
             is_etc_chosen = "기타" in str(ans) or "other" in str(ans).lower()
@@ -3807,7 +3807,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     
     # 연령: 개방형 vs 10세 단위 선택형
     if demographics.get("age"):
-        age_label = f"SQ{sq_idx}. " + _("연령 *", "Age *")
+        age_label = f"{sq_idx}) " + _("연령 *", "Age *")
         sq_idx += 1
         age_type = demographics.get("age_type", "개방형 (숫자 직접 입력)")
         if age_type == "10세 단위 선택형":
@@ -3819,12 +3819,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 resp_data["age"] = st.text_input(f"{age_label} " + _("(세)", "(Years)"), value="", placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_text")
             
     if demographics.get("gender"):
-        resp_data["gender"] = st.radio(f"SQ{sq_idx}. " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
+        resp_data["gender"] = st.radio(f"{sq_idx}) " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
         sq_idx += 1
     
     # 경력년수: 개방형 vs 5년 단위 선택형
     if demographics.get("experience"):
-        exp_label = f"SQ{sq_idx}. " + _("경력년수 *", "Years of Experience *")
+        exp_label = f"{sq_idx}) " + _("경력년수 *", "Years of Experience *")
         sq_idx += 1
         exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
         if exp_type == "5년 단위 선택형":
@@ -3841,7 +3841,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     #     sq_idx += 1
         
     if demographics.get("email"):
-        email_label = f"SQ{sq_idx}. " + _("이메일 *", "Email *")
+        email_label = f"{sq_idx}) " + _("이메일 *", "Email *")
         email_options = [_("직접 입력", "Enter directly"), _("응답거절", "Refuse to respond")]
         email_choice = st.radio(
             email_label,
@@ -3881,9 +3881,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
 .shjeon-desc p { margin: 0 0 12px 0; }
 .shjeon-desc .ex { font-weight: 400; margin: 18px 0 10px 0; }
-.shjeon-desc table.scale { border-collapse: collapse; width: 100%; margin: 12px 0 20px 0; font-size: 13px; }
-.shjeon-desc table.scale th, .shjeon-desc table.scale td { border: 1px solid #333; padding: 6px 4px; text-align: center; vertical-align: middle; }
+.shjeon-desc table.scale { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 14px 0 22px 0; font-size: 12px; }
+.shjeon-desc table.scale th, .shjeon-desc table.scale td { border: 1px solid #333; padding: 6px 1px; text-align: center; vertical-align: middle; box-sizing: border-box; line-height: 1.25; }
 .shjeon-desc table.scale th { background: #f7f7f7; font-weight: 600; }
+.shjeon-desc table.scale .scale-item { width: 72px; min-width: 68px; max-width: 76px; font-size: 12.5px; font-weight: 600; padding: 6px 2px; }
+.shjeon-desc table.scale .scale-col { width: calc((100% - 144px) / 17); font-size: 11.5px; }
 .shjeon-desc .cause-box { border: 2px solid #333; padding: 14px 18px; margin: 10px 0 24px 20px; }
 .shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
 .shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
@@ -3903,7 +3905,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .lvl3sub { flex: 1; display: flex; flex-direction: column; }
 .shjeon-desc .diag .lvl3sub .conn-v2 { align-self: center; width: 2px; height: 24px; background: #333; }
 .shjeon-desc .diag .lvl3 { flex: 1; border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; box-sizing: border-box; text-align: center; }
-</style><div class="shjeon-desc"><h3 class="shj-title">가. 응답 방법 및 응답 예</h3><p>보상위원회 특성을 1:1로 비교하실 때, 두 특성 중 상대적으로 더 중요한 요소에 선택하고, 선택한 특성이 중요한 정도를 1~9점 척도에서 체크(√)해 주시면 됩니다.</p><p><strong>예시:</strong> 「외형적 독립성」과 「실질적 독립성」을 비교할 때, <strong>「실질적 독립성」이</strong> 「외형적 독립성」보다 중요하다고 생각하시면 평가항목<strong>「실질적 독립성」</strong>을 선택합니다. <strong>「실질적 독립성」이</strong> 「외형적 독립성」에 비해 중요한 정도가 <strong>'아주 많이'</strong>라고 생각하시면, 아래와 같이 <strong>「실질적 독립성」 쪽의 7번</strong>에 체크(√)합니다.</p><table class="scale"><tr><th rowspan="2" style="width:70px;">평가<br>항목</th><th>극히<br>많이</th><th>대단히<br>많이</th><th>아주<br>많이</th><th>매우<br>많이</th><th>많이</th><th>상당히</th><th>약간</th><th>조금</th><th>동등</th><th>조금</th><th>약간</th><th>상당히</th><th>많이</th><th>매우<br>많이</th><th>아주<br>많이</th><th>대단히<br>많이</th><th>극히<br>많이</th><th rowspan="2" style="width:70px;">평가<br>항목</th></tr><tr><td>9</td><td>8</td><td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr><tr><td>외형적<br>독립성</td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td style="font-size:18px;">√</td><td style="font-size:18px;"></td><td style="font-size:18px;"></td><td>실질적<br>독립성</td></tr></table></div>"""
+</style><div class="shjeon-desc"><h3 class="shj-title">가. 응답 방법 및 응답 예</h3><p>보상위원회 특성을 1:1로 비교하실 때, 두 특성 중 상대적으로 더 중요한 요소에 선택하고, 선택한 특성이 중요한 정도를 1~9점 척도에서 체크(√)해 주시면 됩니다.</p><p><strong>예시:</strong> 「외형적 독립성」과 「실질적 독립성」을 비교할 때, <strong>「실질적 독립성」이</strong> 「외형적 독립성」보다 중요하다고 생각하시면 평가항목<strong>「실질적 독립성」</strong>을 선택합니다. <strong>「실질적 독립성」이</strong> 「외형적 독립성」에 비해 중요한 정도가 <strong>'아주 많이'</strong>라고 생각하시면, 아래와 같이 <strong>「실질적 독립성」 쪽의 7번</strong>에 체크(√)합니다.</p><table class="scale"><colgroup><col class="scale-item"><col span="17" class="scale-col"><col class="scale-item"></colgroup><tr><th rowspan="2" class="scale-item">평가<br>항목</th><th class="scale-col">극히<br>많이</th><th class="scale-col">대단히<br>많이</th><th class="scale-col">아주<br>많이</th><th class="scale-col">매우<br>많이</th><th class="scale-col">많이</th><th class="scale-col">상당히</th><th class="scale-col">약간</th><th class="scale-col">조금</th><th class="scale-col">동등</th><th class="scale-col">조금</th><th class="scale-col">약간</th><th class="scale-col">상당히</th><th class="scale-col">많이</th><th class="scale-col">매우<br>많이</th><th class="scale-col">아주<br>많이</th><th class="scale-col">대단히<br>많이</th><th class="scale-col">극히<br>많이</th><th rowspan="2" class="scale-item">평가<br>항목</th></tr><tr style="background:#fafafa; font-weight:600;"><td class="scale-col">9</td><td class="scale-col">8</td><td class="scale-col">7</td><td class="scale-col">6</td><td class="scale-col">5</td><td class="scale-col">4</td><td class="scale-col">3</td><td class="scale-col">2</td><td class="scale-col">1</td><td class="scale-col">2</td><td class="scale-col">3</td><td class="scale-col">4</td><td class="scale-col">5</td><td class="scale-col">6</td><td class="scale-col">7</td><td class="scale-col">8</td><td class="scale-col">9</td></tr><tr><td class="scale-item">외형적<br>독립성</td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col" style="font-size:18px; font-weight:bold; color:#1e40af;">√</td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-item">실질적<br>독립성</td></tr></table></div>"""
     _SHJEON_HTML_2 = """
 <style>
 .shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
