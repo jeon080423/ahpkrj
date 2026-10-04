@@ -3417,13 +3417,13 @@ def render_survey_status_dashboard(survey_id):
     # 상단 헤더
     st.markdown(f"""
     <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: 26px 30px; border-radius: 12px; margin-bottom: 22px; color: #ffffff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);">
-        <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; margin-bottom: 6px;">
+        <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; margin-bottom: 6px; color: #ffffff;">
             AHP Master &bull; Live Status Dashboard
         </div>
-        <h2 style="color: #ffffff !important; font-size: 24px; font-weight: 700; margin: 0 0 10px 0; border: none; padding: 0;">
-            📊 {survey_title}
-        </h2>
-        <div style="font-size: 14px; opacity: 0.9;">
+        <div style="color: #ffffff !important; font-size: 24px; font-weight: 700; margin: 0 0 10px 0; padding: 0; line-height: 1.35;">
+            {survey_title}
+        </div>
+        <div style="font-size: 14px; opacity: 0.95; color: #ffffff;">
             본 페이지는 로그인 없이 실시간 설문 응답 현황을 확인하는 <strong>모니터링 전용 대시보드</strong>입니다.
         </div>
     </div>
