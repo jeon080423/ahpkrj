@@ -3985,15 +3985,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
             else:
                 tq_q = _t(tq_q)
             
+            import re
+            clean_q = re.sub(r'^\d+[\.\)]\s*', '', tq_q)
+
             # 주관식으로 명시된 경우: 직접 입력 칸 오른쪽에 '모름/비해당' 라디오 버튼 제시
             if tq_q_type == "text":
-                st.markdown(f"{sq_idx}) {tq_q}")
+                st.markdown(f'<div style="font-size: 14px; font-weight: 400; line-height: 1.5; margin-bottom: 4px; color: inherit;">{sq_idx}) {clean_q}</div>', unsafe_allow_html=True)
                 col_input, col_opt = st.columns([3, 1])
                 is_unknown = st.session_state.get(f"survey_resp_type_unknown_{i}", False)
                 with col_input:
                     if is_unknown:
                         st.text_input(
-                            f"{sq_idx}) {tq_q}",
+                            f"{sq_idx}) {clean_q}",
                             value=_("모름/비해당", "Don't know / Not applicable"),
                             disabled=True,
                             key=f"survey_resp_type_disabled_{i}",
@@ -4002,7 +4005,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         ans = "모름/비해당"
                     else:
                         user_input = st.text_input(
-                            f"{sq_idx}) {tq_q}",
+                            f"{sq_idx}) {clean_q}",
                             key=f"survey_resp_type_{i}",
                             placeholder=_("내용을 직접 입력하세요", "Enter details directly"),
                             label_visibility="collapsed"
@@ -4023,7 +4026,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
                 tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
                 has_etc_opt = any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq_opts)
-                ans = st.radio(f"{sq_idx}) {tq_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
+                ans = st.radio(f"{sq_idx}) {clean_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
                 resp_data["types"].append(ans)
                 if has_etc_opt:
                     is_etc_chosen = "기타" in str(ans) or "other" in str(ans).lower()
