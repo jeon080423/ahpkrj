@@ -3885,7 +3885,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc table.scale th, .shjeon-desc table.scale td { border: 1px solid #333; padding: 6px 1px; text-align: center; vertical-align: middle; box-sizing: border-box; line-height: 1.25; }
 .shjeon-desc table.scale th { background: #f7f7f7; font-weight: 600; }
 .shjeon-desc table.scale .scale-item { width: 72px; min-width: 68px; max-width: 76px; font-size: 12.5px; font-weight: 600; padding: 6px 2px; }
-.shjeon-desc table.scale .scale-col { width: calc((100% - 144px) / 17); font-size: 11.5px; }
+.shjeon-desc table.scale .scale-col { width: calc((100% - 144px) / 17); font-size: 12.5px; }
 .shjeon-desc .cause-box { border: 2px solid #333; padding: 14px 18px; margin: 10px 0 24px 20px; }
 .shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
 .shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
