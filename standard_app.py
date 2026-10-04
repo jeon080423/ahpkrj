@@ -3406,7 +3406,7 @@ if "code" in q_params and st.session_state.get('user_id'):
 if "preview_id" in q_params or "survey_id" in q_params:
     is_preview_mode = "preview_id" in q_params
     
-    from survey_manager import load_survey_metadata, save_response_to_sheet, generate_pairwise_combinations, calculate_matrix_cr
+    from survey_manager import load_survey_metadata, save_response_to_sheet, generate_pairwise_combinations, calculate_matrix_cr, generate_hierarchy_tree_text
     
     if is_preview_mode:
         preview_id_param = q_params["preview_id"]
@@ -4195,6 +4195,23 @@ if "preview_id" in q_params or "survey_id" in q_params:
             st.session_state["pending_answers_update"] = {}
         
         with st.container(key="ahp_survey_matrix"):
+            # 전체 계층 구조 다이어그램 제시 (설문 옵션이 True일 때, 기본값: True)
+            show_hierarchy_val = survey_meta.get("Show_Hierarchy", True)
+            if isinstance(show_hierarchy_val, str):
+                show_hierarchy_val = (show_hierarchy_val.lower() != "false")
+
+            if show_hierarchy_val:
+                tree_text = generate_hierarchy_tree_text(
+                    ahp_model,
+                    tier_level=tier_level,
+                    lang=st.session_state.get('lang', 'ko'),
+                    translator=translate_factor_if_default
+                )
+                if tree_text:
+                    st.markdown(_("##### 📐 계층 구조 미리보기", "##### 📐 Hierarchy Preview"))
+                    st.code(tree_text, language=None)
+                    st.markdown("<div style='margin-bottom: 24px;'></div>", unsafe_allow_html=True)
+
             comp_idx = 1
             for comb_idx, comb in enumerate(combinations):
                 parent_trans = translate_factor_if_default(comb['parent'])
@@ -10384,6 +10401,13 @@ with contextlib.nullcontext():
                             cr_guide_raw = meta.get("CR_Guide_Method", "realtime" if str(meta.get("CR_Guide_Enabled", "False")).lower() == "true" else "none")
                             st.session_state.edit_cr_guide_method = cr_guide_raw
 
+                            # [신규] 계층 구조 다이어그램 표시 옵션 복원
+                            show_h_raw = meta.get("Show_Hierarchy", True)
+                            if isinstance(show_h_raw, str):
+                                show_h_raw = (show_h_raw.lower() != "false")
+                            st.session_state.edit_show_hierarchy = bool(show_h_raw)
+                            st.session_state.pop("tab2_show_hierarchy_choice", None)
+
                             ahp_model = meta.get("AHP_Model_JSON", {})
                             st.session_state.edit_main_input = ", ".join(ahp_model.get("main", []))
                             st.session_state.edit_sub_inputs = {}
@@ -10902,6 +10926,12 @@ Thank you deeply for your valuable participation.
                                     if parsed_sub_subs:
                                         model_structure["sub_subs"][sub_c] = parsed_sub_subs
 
+                    # 기본값: 표시함 (True)
+                    saved_show_h = st.session_state.get("edit_show_hierarchy", True)
+                    if isinstance(saved_show_h, str):
+                        saved_show_h = (saved_show_h.lower() != "false")
+                    show_hierarchy = bool(saved_show_h)
+
                     # ── 계층 구조 트리 시각화 ──────────────────────────────
                     if main_list:
                         st.markdown("---")
@@ -10937,6 +10967,25 @@ Thank you deeply for your valuable participation.
                         
                         tree_text = "\n".join(tree_lines)
                         st.code(tree_text, language=None)
+
+                        # 배포 설문지 내 계층구조 다이어그램 표시 옵션 (라디오 버튼)
+                        st.markdown(_("**📊 배포 설문지 내 계층 구조 다이어그램 표시 여부**", "**📊 Display Hierarchy Diagram in Deployed Survey Option**"))
+                        show_h_options = [
+                            _("표시함 (보이기, 기본값)", "Show (Default)"),
+                            _("표시 안 함 (숨기기)", "Do not show (Hide)")
+                        ]
+                        default_show_h_idx = 0 if saved_show_h else 1
+                        if "tab2_show_hierarchy_choice" in st.session_state and st.session_state["tab2_show_hierarchy_choice"] not in show_h_options:
+                            del st.session_state["tab2_show_hierarchy_choice"]
+
+                        show_h_selected = st.radio(
+                            _("배포된 설문지(쌍대비교 시작 전)에 위 계층구조 다이어그램을 제시할지 여부를 설정합니다.", "Choose whether to display the hierarchy diagram above in the deployed survey before pairwise comparison."),
+                            options=show_h_options,
+                            index=default_show_h_idx,
+                            key="tab2_show_hierarchy_choice",
+                            horizontal=True
+                        )
+                        show_hierarchy = (show_h_selected == show_h_options[0])
                     # ──────────────────────────────────────────────────────
 
                     st.caption(_("※ 쌍대비교 시작 전 응답자가 전반적 요인 순위를 매기는 '사전 중요도 순위 지정 문항'은 자동으로 설문에 포함됩니다.", "※ A 'Prior Importance Ranking Question', where respondents rank the overall criteria before starting pairwise comparisons, is automatically included in the survey."))
@@ -11258,6 +11307,7 @@ Thank you deeply for your valuable participation.
                         "Definitions": definitions_map,
                         "CR_Limit": cr_limit,
                         "CR_Guide_Method": cr_guide_method,
+                        "Show_Hierarchy": show_hierarchy,
                         "Rewards_Info": rewards_info,
                         "Preview_Images": preview_imgs_dict,
                         "Sheet_ID": st.session_state.get("editing_survey_id", "")
@@ -11389,7 +11439,8 @@ Thank you deeply for your valuable participation.
                                             demographics=demographics_settings, definition_map=definitions_map,
                                             cr_limit=cr_limit, cr_guide_method=cr_guide_method,
                                             rewards_info=rewards_info, description=survey_desc,
-                                            existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id
+                                            existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id,
+                                            show_hierarchy=show_hierarchy
                                         )
                                     else:
                                         create_survey_sheet(
@@ -11398,7 +11449,8 @@ Thank you deeply for your valuable participation.
                                             demographics=demographics_settings, definition_map=definitions_map,
                                             cr_limit=cr_limit, cr_guide_method=cr_guide_method,
                                             rewards_info=rewards_info, description=survey_desc,
-                                            existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id
+                                            existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id,
+                                            show_hierarchy=show_hierarchy
                                         )
                                     st.session_state._survey_cache_dirty = True
                                     st.success(_("✅ 저장 완료!", "✅ Saved successfully!"))
@@ -11481,7 +11533,8 @@ Thank you deeply for your valuable participation.
                                                     rewards_info=rewards_info,
                                                     description=survey_desc,
                                                     existing_sheet_id=target_sheet_id,
-                                                    user_id=st.session_state.user_id
+                                                    user_id=st.session_state.user_id,
+                                                    show_hierarchy=show_hierarchy
                                                 )
                                             else:
                                                 sheet_id = create_survey_sheet(
@@ -11496,7 +11549,8 @@ Thank you deeply for your valuable participation.
                                                     rewards_info=rewards_info,
                                                     description=survey_desc,
                                                     existing_sheet_id=target_sheet_id,
-                                                    user_id=st.session_state.user_id
+                                                    user_id=st.session_state.user_id,
+                                                    show_hierarchy=show_hierarchy
                                                 )
 
 

@@ -108,7 +108,7 @@ def get_survey_gspread_client(user_id=None):
         st.error(f"gspread 인증 에러: {e}")
         return None
 
-def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_method, rewards_info, description="", existing_sheet_id=None, user_id=None):
+def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_method, rewards_info, description="", existing_sheet_id=None, user_id=None, show_hierarchy=True):
     """
     고유한 Google Sheet를 동적으로 신규 생성하고 관리자 계정에 쓰기 권한을 부여하거나,
     사용자가 전달한 기존 구글 시트 ID를 기반으로 설문지를 연동합니다.
@@ -250,11 +250,12 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["CR_Limit", str(cr_limit)],
         ["CR_Guide_Enabled", str(cr_guide_method == "realtime")],
         ["CR_Guide_Method", str(cr_guide_method)],
+        ["Show_Hierarchy", str(show_hierarchy)],
         ["Rewards_Info", json.dumps(rewards_info, ensure_ascii=False)],
         ["Visit_Count", "0"],
         ["Abandoned_CR_Count", "0"]
     ]
-    meta_sheet.update(range_name="A1:B15", values=metadata)
+    meta_sheet.update(range_name=f"A1:B{len(metadata)}", values=metadata)
     
     # 1. Raw_Data 헤더 구성: ID, Type, (Pairwise Combination Fields...), 제출시간
 
@@ -414,6 +415,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
             "CR_Limit": float(cr_limit) if cr_limit is not None and str(cr_limit) != "None" else None,
             "CR_Guide_Enabled": bool(cr_guide_method == "realtime"),
             "CR_Guide_Method": str(cr_guide_method),
+            "Show_Hierarchy": bool(show_hierarchy),
             "Rewards_Info": rewards_info
         }
         c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
@@ -466,6 +468,7 @@ def _fetch_survey_metadata_from_sheets(spreadsheet_id):
     meta_dict["CR_Limit"] = float(meta_dict.get("CR_Limit", "None")) if meta_dict.get("CR_Limit", "None") != "None" else None
     meta_dict["CR_Guide_Enabled"] = str(meta_dict.get("CR_Guide_Enabled", "False")).lower() == "true"
     meta_dict["CR_Guide_Method"] = str(meta_dict.get("CR_Guide_Method", "realtime" if meta_dict["CR_Guide_Enabled"] else "none"))
+    meta_dict["Show_Hierarchy"] = str(meta_dict.get("Show_Hierarchy", "True")).lower() != "false"
     
     # 로컬 SQLite 캐시에 백업/동기화 저장
     try:
@@ -1306,6 +1309,52 @@ def generate_pairwise_combinations(model):
             })
             
     return combinations
+
+def generate_hierarchy_tree_text(ahp_model, tier_level=2, lang="ko", translator=None):
+    """AHP 모델을 기반으로 계층 구조 텍스트 다이어그램(트리)을 생성합니다."""
+    if not ahp_model:
+        return ""
+    main_list = ahp_model.get("main", [])
+    if not main_list:
+        return ""
+    
+    tier_level = int(tier_level or 2)
+    subs_map = ahp_model.get("subs", {})
+    sub_subs_map = ahp_model.get("sub_subs", {})
+    
+    def _t(name):
+        return translator(name) if translator else name
+
+    tree_lines = []
+    for mi, mc in enumerate(main_list):
+        is_last_main = (mi == len(main_list) - 1)
+        prefix_main = "└── " if is_last_main else "├── "
+        tree_lines.append(f"{prefix_main}[{_t(mc)}]")
+        
+        subs = subs_map.get(mc, [])
+        if not subs:
+            branch_main = "    " if is_last_main else "│   "
+            leaf_note = "⭐ (단독 최하위 요인 — 하위 요인 없음)" if lang == "ko" else "⭐ (Single leaf factor — No sub-factors)"
+            tree_lines.append(f"{branch_main}└── {leaf_note}")
+            continue
+            
+        for si, sc in enumerate(subs):
+            is_last_sub = (si == len(subs) - 1)
+            branch_main = "    " if is_last_main else "│   "
+            prefix_sub = "└── " if is_last_sub else "├── "
+            
+            sub_subs = sub_subs_map.get(sc, []) if tier_level == 3 else []
+            if sub_subs:
+                tree_lines.append(f"{branch_main}{prefix_sub}{_t(sc)}")
+                for ssi, ssc in enumerate(sub_subs):
+                    is_last_ss = (ssi == len(sub_subs) - 1)
+                    branch_sub = "    " if is_last_sub else "│   "
+                    prefix_ss = "└── " if is_last_ss else "├── "
+                    tree_lines.append(f"{branch_main}{branch_sub}{prefix_ss}{_t(ssc)}")
+            else:
+                tree_lines.append(f"{branch_main}{prefix_sub}{_t(sc)}")
+                
+    return "\n".join(tree_lines)
 
 def get_cr_fix_suggestion(factors, answers, cr_limit=0.1):
     """
