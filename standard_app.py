@@ -11920,35 +11920,30 @@ Thank you deeply for your valuable participation.
 
             # 대시보드 렌더링
             if selected_sheet_id:
-                tab3_main_col, tab3_side_col = st.columns([3.0, 1.15], gap="large")
+                tab3_main_col, tab3_side_col = st.columns([3.0, 1.1], gap="large")
                 with tab3_side_col:
                     _status_url = f"https://ahpkrj.streamlit.app/?mode=status&survey_id={selected_sheet_id.strip()}"
-                    
-                    st.markdown("""
-                    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: 14px 16px; border-radius: 10px; color: #ffffff; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);">
-                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">
-                            AHP Live Monitoring
-                        </div>
-                        <div style="font-size: 15px; font-weight: 700; margin-top: 2px;">
-                            📡 실시간 모니터링 메뉴
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    st.markdown("""
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;">
-                        <div style="color: #1e3a8a; font-weight: 700; font-size: 13.5px; margin-bottom: 4px;">
-                            🔗 실시간 현황 링크 (조회 전용)
-                        </div>
-                        <div style="color: #64748b; font-size: 11.5px; line-height: 1.45;">
-                            로그인 없이 외부 공동연구자나 의뢰인이 진행 현황을 실시간으로 확인할 수 있는 전용 링크입니다.
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    st.caption("📋 클릭 시 복사 (우측 상단 복사 아이콘):")
-                    st.code(_status_url, language="text")
-                    st.link_button("↗️ 실시간 링크 바로 열기", _status_url, use_container_width=True)
+                    with st.container(border=True):
+                        st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("실시간 모니터링", "Live Monitoring")}</h4>', unsafe_allow_html=True)
+                        st.markdown(
+                            f'<p style="color:#4b5563; font-size:0.875rem; line-height:1.5; margin-bottom:12px;">'
+                            f'{_("로그인 없이 외부 공동연구자나 의뢰인이 설문 응답 현황을 실시간으로 확인할 수 있는 전용 링크입니다.", "Dedicated real-time link for external collaborators or clients to view survey progress without login.")}'
+                            f'</p>',
+                            unsafe_allow_html=True
+                        )
+                        st.caption(_("실시간 현황 링크 (우측 상단 복사 아이콘):", "Live Status Link (Click top-right icon to copy):"))
+                        st.code(_status_url, language="text")
+                        st.link_button(_("↗️ 실시간 링크 바로 열기", "↗️ Open Live Link"), _status_url, use_container_width=True)
+
+                    with st.expander(_("실시간 링크 안내", "Live Link Guide"), expanded=False):
+                        st.markdown(_(
+                            "- **비회원 열람**: 로그인 없이 실시간 응답 통계 및 진행률을 확인할 수 있습니다.\n"
+                            "- **조회 전용**: 응답 데이터 수정 권한 없이 안전하게 대시보드만 조회됩니다.\n"
+                            "- **실시간 자동 반영**: 새로운 응답이 제출되면 링크 화면에서도 최신 데이터가 반영됩니다.",
+                            "- **Public View**: View response stats and progress without logging in.\n"
+                            "- **Read-Only**: Secure dashboard view without editing permissions.\n"
+                            "- **Auto-Sync**: Automatically reflects new responses as they arrive."
+                        ))
 
                 tab3_main_col.__enter__()
 
