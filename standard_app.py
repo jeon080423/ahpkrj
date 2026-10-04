@@ -3451,7 +3451,7 @@ def render_survey_status_dashboard(survey_id):
     with m1:
         st.metric("👥 총 접속자 수 (Visits)", f"{visits}명")
     with m2:
-        st.metric("✅ 완료 응답자 (Completed)", f"{completed}명", delta=f"{completion_rate} 완료")
+        st.metric("✅ 완료 응답자 (Completed)", f"{completed}명 ({completion_rate})")
     with m3:
         st.metric("⚠️ CR 초과 중단", f"{abandoned_cr}건")
     with m4:
@@ -12010,15 +12010,18 @@ Thank you deeply for your valuable participation.
 
                 if "survey_stats" in st.session_state:
                     stats = st.session_state["survey_stats"]
+                    _t_visits = stats.get('visits', 0)
+                    _t_comp = stats.get('completed', 0)
+                    _t_crate = f" ({(_t_comp / _t_visits * 100):.1f}%)" if _t_visits > 0 else ""
                     col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                     with col_stat1:
-                        st.metric(_("총 접속자 수 (Visits)", "Total Visits"), f"{stats['visits']}" + _("명", ""))
+                        st.metric(_("총 접속자 수 (Visits)", "Total Visits"), f"{_t_visits}" + _("명", ""))
                     with col_stat2:
-                        st.metric(_("완료 응답자 수 (Completed)", "Completed Responses"), f"{stats['completed']}" + _("명", ""))
+                        st.metric(_("완료 응답자 수 (Completed)", "Completed Responses"), f"{_t_comp}" + _("명", "") + _t_crate)
                     with col_stat3:
-                        st.metric(_("일관성 초과 중단자 (CR Fail)", "CR Fail Abandonments"), f"{stats['abandoned_cr']}" + _("회", " times"))
+                        st.metric(_("일관성 초과 중단자 (CR Fail)", "CR Fail Abandonments"), f"{stats.get('abandoned_cr', 0)}" + _("회", " times"))
                     with col_stat4:
-                        st.metric(_("단순 이탈 중단자 (Bounce)", "Bounced Visitors"), f"{stats['abandoned_bounce']}" + _("명", ""))
+                        st.metric(_("단순 이탈 중단자 (Bounce)", "Bounced Visitors"), f"{stats.get('abandoned_bounce', 0)}" + _("명", ""))
 
                     # 시각화 차트 추가
                     import plotly.express as px
