@@ -1329,7 +1329,7 @@ def generate_hierarchy_tree_text(ahp_model, tier_level=2, lang="ko", translator=
     for mi, mc in enumerate(main_list):
         is_last_main = (mi == len(main_list) - 1)
         prefix_main = "└── " if is_last_main else "├── "
-        tree_lines.append(f"{prefix_main}[{_t(mc)}]")
+        tree_lines.append(f"{prefix_main}{_t(mc)}")
         
         subs = subs_map.get(mc, [])
         if not subs:
@@ -1376,8 +1376,8 @@ def generate_hierarchy_tree_html(ahp_model, tier_level=2, lang="ko", translator=
         is_last_main = (mi == len(main_list) - 1)
         prefix_main = "└── " if is_last_main else "├── "
         mc_name = _t(mc)
-        # 대분류 볼드(진하게) 강조
-        tree_lines.append(f"{prefix_main}<strong style='font-weight: 700; color: #0f172a;'>[{mc_name}]</strong>")
+        # 대분류 볼드(진하게) 강조 (대괄호 제거)
+        tree_lines.append(f"{prefix_main}<strong style='font-weight: 700; color: #0f172a;'>{mc_name}</strong>")
         
         subs = subs_map.get(mc, [])
         if not subs:
