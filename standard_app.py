@@ -11902,49 +11902,51 @@ Thank you deeply for your valuable participation.
                 if not admin_surveys:
                     st.warning("배포된 설문지가 존재하지 않습니다. '온라인 설문지 제작' 탭에서 설문을 먼저 배포해 주세요.")
                 else:
-                    # 로그인한 아이디에 맞춰 본인의 설문들만 드롭다운에 노출시킵니다.
-                    survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
-                    selected_label = st.selectbox(
-                        "실시간 현황을 확인할 설문 선택",
-                        list(survey_options.keys()),
-                        key="tab3_survey_select"
-                    )
-                    selected_sheet_id = survey_options[selected_label]
-                
-                    selected_survey_info = next(s for s in admin_surveys if s[0] == selected_sheet_id)
-                    survey_title = selected_survey_info[1]
-                    created_at = selected_survey_info[2]
-                
-                    st.success(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
-                    st.divider()
+                    tab3_main_col, tab3_side_col = st.columns([3.0, 1.1], gap="large")
+                    with tab3_main_col:
+                        # 로그인한 아이디에 맞춰 본인의 설문들만 드롭다운에 노출시킵니다.
+                        survey_options = {f"{row[1]} ({row[2]})": row[0] for row in admin_surveys}
+                        selected_label = st.selectbox(
+                            "실시간 현황을 확인할 설문 선택",
+                            list(survey_options.keys()),
+                            key="tab3_survey_select"
+                        )
+                        selected_sheet_id = survey_options[selected_label]
+                    
+                        selected_survey_info = next(s for s in admin_surveys if s[0] == selected_sheet_id)
+                        survey_title = selected_survey_info[1]
+                        created_at = selected_survey_info[2]
+                    
+                        st.success(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
+                        st.divider()
+
+                    with tab3_side_col:
+                        if selected_sheet_id:
+                            _status_url = f"https://ahpkrj.streamlit.app/?mode=status&survey_id={selected_sheet_id.strip()}"
+                            with st.container(border=True):
+                                st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("실시간 모니터링", "Live Monitoring")}</h4>', unsafe_allow_html=True)
+                                st.markdown(
+                                    f'<p style="color:#4b5563; font-size:0.875rem; line-height:1.5; margin-bottom:12px;">'
+                                    f'{_("로그인 없이 외부 공동연구자나 의뢰인이 설문 응답 현황을 실시간으로 확인할 수 있는 전용 링크입니다.", "Dedicated real-time link for external collaborators or clients to view survey progress without login.")}'
+                                    f'</p>',
+                                    unsafe_allow_html=True
+                                )
+                                st.caption(_("실시간 현황 링크 (우측 상단 복사 아이콘):", "Live Status Link (Click top-right icon to copy):"))
+                                st.code(_status_url, language="text")
+                                st.link_button(_("↗️ 실시간 링크 바로 열기", "↗️ Open Live Link"), _status_url, use_container_width=True)
+
+                            with st.expander(_("실시간 링크 안내", "Live Link Guide"), expanded=False):
+                                st.markdown(_(
+                                    "- **비회원 열람**: 로그인 없이 실시간 응답 통계 및 진행률을 확인할 수 있습니다.\n"
+                                    "- **조회 전용**: 응답 데이터 수정 권한 없이 안전하게 대시보드만 조회됩니다.\n"
+                                    "- **실시간 자동 반영**: 새로운 응답이 제출되면 링크 화면에서도 최신 데이터가 반영됩니다.",
+                                    "- **Public View**: View response stats and progress without logging in.\n"
+                                    "- **Read-Only**: Secure dashboard view without editing permissions.\n"
+                                    "- **Auto-Sync**: Automatically reflects new responses as they arrive."
+                                ))
 
             # 대시보드 렌더링
             if selected_sheet_id:
-                tab3_main_col, tab3_side_col = st.columns([3.0, 1.1], gap="large")
-                with tab3_side_col:
-                    _status_url = f"https://ahpkrj.streamlit.app/?mode=status&survey_id={selected_sheet_id.strip()}"
-                    with st.container(border=True):
-                        st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("실시간 모니터링", "Live Monitoring")}</h4>', unsafe_allow_html=True)
-                        st.markdown(
-                            f'<p style="color:#4b5563; font-size:0.875rem; line-height:1.5; margin-bottom:12px;">'
-                            f'{_("로그인 없이 외부 공동연구자나 의뢰인이 설문 응답 현황을 실시간으로 확인할 수 있는 전용 링크입니다.", "Dedicated real-time link for external collaborators or clients to view survey progress without login.")}'
-                            f'</p>',
-                            unsafe_allow_html=True
-                        )
-                        st.caption(_("실시간 현황 링크 (우측 상단 복사 아이콘):", "Live Status Link (Click top-right icon to copy):"))
-                        st.code(_status_url, language="text")
-                        st.link_button(_("↗️ 실시간 링크 바로 열기", "↗️ Open Live Link"), _status_url, use_container_width=True)
-
-                    with st.expander(_("실시간 링크 안내", "Live Link Guide"), expanded=False):
-                        st.markdown(_(
-                            "- **비회원 열람**: 로그인 없이 실시간 응답 통계 및 진행률을 확인할 수 있습니다.\n"
-                            "- **조회 전용**: 응답 데이터 수정 권한 없이 안전하게 대시보드만 조회됩니다.\n"
-                            "- **실시간 자동 반영**: 새로운 응답이 제출되면 링크 화면에서도 최신 데이터가 반영됩니다.",
-                            "- **Public View**: View response stats and progress without logging in.\n"
-                            "- **Read-Only**: Secure dashboard view without editing permissions.\n"
-                            "- **Auto-Sync**: Automatically reflects new responses as they arrive."
-                        ))
-
                 tab3_main_col.__enter__()
 
                 col_dash_btn1, col_dash_btn2 = st.columns([3, 1])
