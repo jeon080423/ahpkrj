@@ -9516,125 +9516,159 @@ with contextlib.nullcontext():
                                             current_row_comp += 2
     
 
-                                    # [2026-10-05 추가] 전문가 의견 일치도 시트
-                                    try:
-                                        _consensus = calculate_expert_consensus(main_results_df, main_factors)
-                                    except Exception:
-                                        _consensus = None
-                                    if _consensus is not None:
-                                        ws_con = workbook.add_worksheet('Expert_Consensus')
-                                        writer.sheets['Expert_Consensus'] = ws_con
-                                        _fmt_title = workbook.add_format({'bold': True, 'font_size': 14, 'font_color': '#1F3864'})
-                                        _fmt_section = workbook.add_format({'bold': True, 'font_size': 12, 'bg_color': '#D9D9D9', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
-                                        _fmt_header = workbook.add_format({'bold': True, 'bg_color': '#1F3864', 'font_color': '#FFFFFF', 'border': 1, 'align': 'center', 'valign': 'vcenter', 'text_wrap': True})
-                                        _fmt_body = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter'})
-                                        _fmt_num = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '0.000'})
-                                        _fmt_pct = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '0.0%'})
-                                        _fmt_interp = workbook.add_format({'text_wrap': True, 'valign': 'top', 'align': 'left', 'font_size': 10})
-                                        _fmt_criteria_h = workbook.add_format({'bold': True, 'bg_color': '#EAEFF7', 'border': 1, 'align': 'center'})
-                                        _fmt_criteria_b = workbook.add_format({'border': 1, 'align': 'center', 'font_size': 10})
-                                        _fmt_src = workbook.add_format({'italic': True, 'font_size': 9, 'font_color': '#595959', 'text_wrap': True, 'valign': 'top'})
-                                        _fmt_high = workbook.add_format({'border': 1, 'align': 'center', 'bg_color': '#C6EFCE', 'font_color': '#006100'})
-                                        _fmt_mid = workbook.add_format({'border': 1, 'align': 'center', 'bg_color': '#FFEB9C', 'font_color': '#9C6500'})
-                                        _fmt_low = workbook.add_format({'border': 1, 'align': 'center', 'bg_color': '#FFC7CE', 'font_color': '#9C0006'})
-                                        _cr = 0
-                                        ws_con.write_string(_cr, 0, "전문가 의견 일치도 분석 (Expert Consensus)", _fmt_title)
-                                        _cr += 1
-                                        ws_con.write_string(_cr, 0, f"분석 대상: 유효 응답자 {_consensus['n_resp']}명 / 평가기준 {len(main_factors)}개", _fmt_interp)
-                                        _cr += 1
-                                        ws_con.write_string(_cr, 0, "CR은 개인의 일관성, 아래 지표는 전문가 간 합의를 측정합니다.", _fmt_interp)
-                                        _cr += 2
+                                    # [2026-10-05 추가] 전문가 의견 일치도 시트 (대/중/세분류 통합)
+                                    _fmt_title = workbook.add_format({'bold': True, 'font_size': 14, 'font_color': '#1F3864'})
+                                    _fmt_level = workbook.add_format({'bold': True, 'font_size': 13, 'bg_color': '#1F3864', 'font_color': '#FFFFFF', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+                                    _fmt_section = workbook.add_format({'bold': True, 'font_size': 12, 'bg_color': '#D9D9D9', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+                                    _fmt_header = workbook.add_format({'bold': True, 'bg_color': '#1F3864', 'font_color': '#FFFFFF', 'border': 1, 'align': 'center', 'valign': 'vcenter', 'text_wrap': True})
+                                    _fmt_body = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter'})
+                                    _fmt_num = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '0.000'})
+                                    _fmt_pct = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '0.0%'})
+                                    _fmt_interp = workbook.add_format({'text_wrap': True, 'valign': 'top', 'align': 'left', 'font_size': 10})
+                                    _fmt_criteria_h = workbook.add_format({'bold': True, 'bg_color': '#EAEFF7', 'border': 1, 'align': 'center'})
+                                    _fmt_criteria_b = workbook.add_format({'border': 1, 'align': 'center', 'font_size': 10})
+                                    _fmt_src = workbook.add_format({'italic': True, 'font_size': 9, 'font_color': '#595959', 'text_wrap': True, 'valign': 'top'})
+                                    _fmt_high = workbook.add_format({'border': 1, 'align': 'center', 'bg_color': '#C6EFCE', 'font_color': '#006100'})
+                                    _fmt_mid = workbook.add_format({'border': 1, 'align': 'center', 'bg_color': '#FFEB9C', 'font_color': '#9C6500'})
+                                    _fmt_low = workbook.add_format({'border': 1, 'align': 'center', 'bg_color': '#FFC7CE', 'font_color': '#9C0006'})
+
+                                    def _write_consensus_block(ws_con, _cr, _consensus, _F):
+                                        """일치도 4개 섹션을 시트에 기록. _cr(다음 행)을 반환."""
                                         # 섹션 1: 항목별 일치도
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "1. 항목별 가중치 일치도", _fmt_section)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "1. 항목별 가중치 일치도", _F['section'])
                                         _cr += 1
-                                        _s1_headers = ["평가기준", "평균 가중치", "표준편차", "변이계수(CV)", "최고값", "최저값", "범위", "일치도 판정"]
-                                        for _ci, _h in enumerate(_s1_headers):
-                                            ws_con.write_string(_cr, _ci, _h, _fmt_header)
+                                        for _ci, _h in enumerate(["평가기준", "평균 가중치", "표준편차", "변이계수(CV)", "최고값", "최저값", "범위", "일치도 판정"]):
+                                            ws_con.write_string(_cr, _ci, _h, _F['header'])
                                         _cr += 1
                                         for _row in _consensus["summary"]:
-                                            ws_con.write_string(_cr, 0, str(_row["평가기준"]), _fmt_body)
-                                            ws_con.write_number(_cr, 1, _row["평균 가중치"], _fmt_num)
-                                            ws_con.write_number(_cr, 2, _row["표준편차"], _fmt_num)
-                                            ws_con.write_number(_cr, 3, _row["변이계수(CV)"], _fmt_num)
-                                            ws_con.write_number(_cr, 4, _row["최고값"], _fmt_num)
-                                            ws_con.write_number(_cr, 5, _row["최저값"], _fmt_num)
-                                            ws_con.write_number(_cr, 6, _row["범위"], _fmt_num)
-                                            _jf = _fmt_high if _row["일치도 판정"] == "높음" else (_fmt_mid if _row["일치도 판정"] == "보통" else _fmt_low)
+                                            ws_con.write_string(_cr, 0, str(_row["평가기준"]), _F['body'])
+                                            ws_con.write_number(_cr, 1, _row["평균 가중치"], _F['num'])
+                                            ws_con.write_number(_cr, 2, _row["표준편차"], _F['num'])
+                                            ws_con.write_number(_cr, 3, _row["변이계수(CV)"], _F['num'])
+                                            ws_con.write_number(_cr, 4, _row["최고값"], _F['num'])
+                                            ws_con.write_number(_cr, 5, _row["최저값"], _F['num'])
+                                            ws_con.write_number(_cr, 6, _row["범위"], _F['num'])
+                                            _jf = _F['high'] if _row["일치도 판정"] == "높음" else (_F['mid'] if _row["일치도 판정"] == "보통" else _F['low'])
                                             ws_con.write_string(_cr, 7, _row["일치도 판정"], _jf)
                                             _cr += 1
                                         _cr += 1
-                                        ws_con.merge_range(_cr, 0, _cr, 7, f"[해석] {_consensus['s1']}", _fmt_interp)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, f"[해석] {_consensus['s1']}", _F['interp'])
                                         ws_con.set_row(_cr, 30)
                                         _cr += 2
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "변이계수(CV) 해석 기준", _fmt_criteria_h)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "변이계수(CV) 해석 기준", _F['criteria_h'])
                                         _cr += 1
                                         for _crit, _desc in [("CV < 0.15", "합의 높음"), ("0.15 ≤ CV < 0.30", "보통"), ("CV ≥ 0.30", "의견 분산 (주의)")]:
-                                            ws_con.write_string(_cr, 0, _crit, _fmt_criteria_b)
-                                            ws_con.merge_range(_cr, 1, _cr, 7, _desc, _fmt_criteria_b)
+                                            ws_con.write_string(_cr, 0, _crit, _F['criteria_b'])
+                                            ws_con.merge_range(_cr, 1, _cr, 7, _desc, _F['criteria_b'])
                                             _cr += 1
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "이론적 근거: 기술통계량(표준편차·변이계수)을 이용한 전문가 의견 분산 측정", _fmt_src)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "이론적 근거: 기술통계량(표준편차·변이계수)을 이용한 전문가 의견 분산 측정", _F['src'])
                                         _cr += 2
                                         # 섹션 2: 1위 득표율
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "2. 1위 항목 득표율", _fmt_section)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "2. 1위 항목 득표율", _F['section'])
                                         _cr += 1
-                                        _s2_headers = ["순위", "평가기준", "1위 선택 인원", "득표율"]
-                                        for _ci, _h in enumerate(_s2_headers):
-                                            ws_con.write_string(_cr, _ci, _h, _fmt_header)
+                                        for _ci, _h in enumerate(["순위", "평가기준", "1위 선택 인원", "득표율"]):
+                                            ws_con.write_string(_cr, _ci, _h, _F['header'])
                                         _cr += 1
                                         _s2_start = _cr
                                         for _row in _consensus["top_votes"]:
-                                            ws_con.write_number(_cr, 0, _row["순위"], _fmt_body)
-                                            ws_con.write_string(_cr, 1, str(_row["평가기준"]), _fmt_body)
-                                            ws_con.write_number(_cr, 2, _row["1위 선택 인원"], _fmt_body)
-                                            ws_con.write_number(_cr, 3, _row["득표율"], _fmt_pct)
+                                            ws_con.write_number(_cr, 0, _row["순위"], _F['body'])
+                                            ws_con.write_string(_cr, 1, str(_row["평가기준"]), _F['body'])
+                                            ws_con.write_number(_cr, 2, _row["1위 선택 인원"], _F['body'])
+                                            ws_con.write_number(_cr, 3, _row["득표율"], _F['pct'])
                                             _cr += 1
-                                        _s2_end = _cr - 1
-                                        ws_con.conditional_format(_s2_start, 3, _s2_end, 3, {'type': 'data_bar', 'bar_color': '#5B9BD5'})
+                                        ws_con.conditional_format(_s2_start, 3, _cr - 1, 3, {'type': 'data_bar', 'bar_color': '#5B9BD5'})
                                         _cr += 1
-                                        ws_con.merge_range(_cr, 0, _cr, 7, f"[해석] {_consensus['s2']}", _fmt_interp)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, f"[해석] {_consensus['s2']}", _F['interp'])
                                         ws_con.set_row(_cr, 30)
                                         _cr += 2
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "이론적 근거: 최빈값 기준 합의도 측정 (실무 관행)", _fmt_src)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "이론적 근거: 최빈값 기준 합의도 측정 (실무 관행)", _F['src'])
                                         _cr += 2
                                         # 섹션 3: Kendall's W
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "3. 켄달의 일치계수 (Kendall's W)", _fmt_section)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "3. 켄달의 일치계수 (Kendall's W)", _F['section'])
                                         _cr += 1
                                         for _ci, _h in enumerate(["지표", "값", "해석"]):
-                                            ws_con.write_string(_cr, _ci, _h, _fmt_header)
+                                            ws_con.write_string(_cr, _ci, _h, _F['header'])
                                         _cr += 1
-                                        ws_con.write_string(_cr, 0, "Kendall's W", _fmt_body)
-                                        ws_con.write_number(_cr, 1, _consensus["kendall_w"], _fmt_num)
-                                        ws_con.write_string(_cr, 2, _consensus["w_judge"], _fmt_body)
+                                        ws_con.write_string(_cr, 0, "Kendall's W", _F['body'])
+                                        ws_con.write_number(_cr, 1, _consensus["kendall_w"], _F['num'])
+                                        ws_con.write_string(_cr, 2, _consensus["w_judge"], _F['body'])
                                         _cr += 1
-                                        ws_con.write_string(_cr, 0, "p-value", _fmt_body)
+                                        ws_con.write_string(_cr, 0, "p-value", _F['body'])
                                         if _consensus["kendall_p"] is not None:
-                                            ws_con.write_number(_cr, 1, _consensus["kendall_p"], _fmt_num)
+                                            ws_con.write_number(_cr, 1, _consensus["kendall_p"], _F['num'])
                                         else:
-                                            ws_con.write_string(_cr, 1, "-", _fmt_body)
-                                        ws_con.write_string(_cr, 2, "유의함" if (_consensus["kendall_p"] is not None and _consensus["kendall_p"] < 0.05) else "-", _fmt_body)
+                                            ws_con.write_string(_cr, 1, "-", _F['body'])
+                                        ws_con.write_string(_cr, 2, "유의함" if (_consensus["kendall_p"] is not None and _consensus["kendall_p"] < 0.05) else "-", _F['body'])
                                         _cr += 2
-                                        ws_con.merge_range(_cr, 0, _cr, 7, f"[해석] {_consensus['s3']}", _fmt_interp)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, f"[해석] {_consensus['s3']}", _F['interp'])
                                         ws_con.set_row(_cr, 30)
                                         _cr += 2
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "Kendall's W 해석 기준", _fmt_criteria_h)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "Kendall's W 해석 기준", _F['criteria_h'])
                                         _cr += 1
                                         for _crit, _desc in [("W ≥ 0.7", "상당한 합의"), ("0.5 ≤ W < 0.7", "중간 수준 합의"), ("0.3 ≤ W < 0.5", "약한 합의"), ("W < 0.3", "합의 부족")]:
-                                            ws_con.write_string(_cr, 0, _crit, _fmt_criteria_b)
-                                            ws_con.merge_range(_cr, 1, _cr, 7, _desc, _fmt_criteria_b)
+                                            ws_con.write_string(_cr, 0, _crit, _F['criteria_b'])
+                                            ws_con.merge_range(_cr, 1, _cr, 7, _desc, _F['criteria_b'])
                                             _cr += 1
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "이론적 근거: Kendall & Babington Smith (1939), \"The Problem of m Rankings\", Annals of Mathematical Statistics, 10(3), 275-287.", _fmt_src)
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "이론적 근거: Kendall & Babington Smith (1939), \"The Problem of m Rankings\", Annals of Mathematical Statistics, 10(3), 275-287.", _F['src'])
                                         ws_con.set_row(_cr, 30)
                                         _cr += 2
-                                        # 섹션 4: 해석 가이드
-                                        ws_con.merge_range(_cr, 0, _cr, 7, "4. 해석 가이드", _fmt_section)
+                                        return _cr
+
+                                    # --- 시트 생성 및 계층별 블록 기록 ---
+                                    _F = {'title': _fmt_title, 'level': _fmt_level, 'section': _fmt_section,
+                                          'header': _fmt_header, 'body': _fmt_body, 'num': _fmt_num, 'pct': _fmt_pct,
+                                          'interp': _fmt_interp, 'criteria_h': _fmt_criteria_h, 'criteria_b': _fmt_criteria_b,
+                                          'src': _fmt_src, 'high': _fmt_high, 'mid': _fmt_mid, 'low': _fmt_low}
+                                    _has_consensus = False
+                                    try:
+                                        _main_con = calculate_expert_consensus(main_results_df, main_factors)
+                                    except Exception:
+                                        _main_con = None
+                                    # 중분류 데이터 수집
+                                    _sub_consensus_map = {}
+                                    try:
+                                        for _mf in main_factors:
+                                            _sdf = sub_results_storage.get(_mf, {}).get('df')
+                                            _sfs = sub_results_storage.get(_mf, {}).get('factors', [])
+                                            if _sdf is not None and len(_sfs) >= 2:
+                                                _sc = calculate_expert_consensus(_sdf, _sfs)
+                                                if _sc is not None:
+                                                    _sub_consensus_map[_mf] = (_sfs, _sc)
+                                    except Exception:
+                                        pass
+                                    if _main_con is not None or _sub_consensus_map:
+                                        _has_consensus = True
+                                        ws_con = workbook.add_worksheet('Expert_Consensus')
+                                        writer.sheets['Expert_Consensus'] = ws_con
+                                        _cr = 0
+                                        ws_con.write_string(_cr, 0, "전문가 의견 일치도 분석 (Expert Consensus)", _fmt_title)
                                         _cr += 1
-                                        _guide_lines = [
+                                        _n_resp_show = _main_con["n_resp"] if _main_con else list(_sub_consensus_map.values())[0][1]["n_resp"]
+                                        ws_con.write_string(_cr, 0, f"분석 대상: 유효 응답자 {_n_resp_show}명", _fmt_interp)
+                                        _cr += 1
+                                        ws_con.write_string(_cr, 0, "CR은 개인의 일관성, 아래 지표는 전문가 간 합의를 측정합니다.", _fmt_interp)
+                                        _cr += 2
+                                        # Part A: 대분류
+                                        if _main_con is not None:
+                                            ws_con.merge_range(_cr, 0, _cr, 7, "■ 대분류 일치도", _fmt_level)
+                                            _cr += 1
+                                            _cr = _write_consensus_block(ws_con, _cr, _main_con, _F)
+                                        # Part B: 중분류 (대분류별)
+                                        for _mf in main_factors:
+                                            if _mf in _sub_consensus_map:
+                                                _sfs, _sc = _sub_consensus_map[_mf]
+                                                ws_con.merge_range(_cr, 0, _cr, 7, f"■ 중분류 일치도 — [{_mf}]", _fmt_level)
+                                                _cr += 1
+                                                _cr = _write_consensus_block(ws_con, _cr, _sc, _F)
+                                        # Part C: 해석 가이드
+                                        ws_con.merge_range(_cr, 0, _cr, 7, "■ 해석 가이드", _fmt_level)
+                                        _cr += 1
+                                        for _gl in [
                                             "· CV가 0.30 이상인 항목은 전문가 의견이 갈리는 영역입니다.",
                                             "· 이는 설문 오류가 아니라 정책적으로 논쟁적인 지점일 수 있습니다.",
                                             "· 보고서에는 \"추가 논의가 필요한 쟁점\"으로 명시하는 것을 권장합니다.",
                                             "· CR 통과 ≠ 의견 일치: 개인의 일관성과 집단의 합의는 별개로 점검해야 합니다.",
-                                        ]
-                                        for _gl in _guide_lines:
+                                        ]:
                                             ws_con.merge_range(_cr, 0, _cr, 7, _gl, _fmt_interp)
                                             _cr += 1
                                         ws_con.set_column('A:A', 22)
