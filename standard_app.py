@@ -1071,10 +1071,28 @@ def set_font_config():
         pass
     plt.rcParams['axes.unicode_minus'] = False
 
-# [2026-10-05 첫화면 로딩 개선] set_font_config() 호출 제거
-# - 차트는 Plotly로 렌더링하며 matplotlib는 실제 사용되지 않음
-# - 기존 호출 시 GitHub 폰트 다운로드 + matplotlib import로 첫화면 2~4초 지연 발생
-# set_font_config()
+# [2026-10-05 첫화면 로딩 개선] 폰트 설정을 matplotlib 첫 사용 시로 지연
+# - 차트는 Plotly로 렌더링하며 matplotlib는 현재 미사용
+# - 기존 모듈 레벨 호출 시 GitHub 폰트 다운로드 + matplotlib import로 첫화면 2~4초 지연 발생
+# - 아래 후크로 matplotlib(plt/fm) 첫 접근 시 자동 실행되므로 향후 사용해도 폰트 깨짐 없음
+_font_hook_done = False
+def _lazy_font_hook(loader):
+    _orig_load = loader._load
+    def _load_with_font():
+        global _font_hook_done
+        mod = _orig_load()
+        if not _font_hook_done:
+            _font_hook_done = True
+            try:
+                set_font_config()
+            except Exception:
+                pass
+        return mod
+    loader._load = _load_with_font
+    return loader
+
+_ = _lazy_font_hook(plt)
+_ = _lazy_font_hook(fm)
 
 # [중요 수정] 구글 시트 ID 및 연결 헬퍼 함수
 def get_main_spreadsheet_id():
