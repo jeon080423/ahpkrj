@@ -3856,21 +3856,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
     else:
         survey_title = _t(survey_title)
         
-    # --- Survey Language Switcher (현재 언어의 반대 언어 전환 버튼만 표시) ---
-    lang_col1, lang_col2 = st.columns([8, 2])
-    with lang_col1:
-        st.title(survey_title)
-    with lang_col2:
-        st.write("") # Add some vertical padding
-        current_survey_lang = "en" if st.session_state.get('lang', 'ko') == 'en' else "ko"
-        if current_survey_lang == 'ko':
-            if st.button("🌐 English", key=f"survey_lang_toggle_{survey_id_param}"):
-                st.session_state.lang = 'en'
-                st.rerun()
-        else:
-            if st.button("🌐 한국어", key=f"survey_lang_toggle_{survey_id_param}"):
-                st.session_state.lang = 'ko'
-                st.rerun()
+    st.session_state.lang = 'ko'  # 설문 응답 화면은 한국어 전용 (영어 번역 기능 삭제)
+    st.title(survey_title)
     # --------------------------------
     
     # 조사 목적 및 안내문, 설문 담당자 이메일 표시 (깔끔한 디자인 적용)
@@ -4277,33 +4264,18 @@ if "preview_id" in q_params or "survey_id" in q_params:
 
     with st.container():
         # [shjeon 전용] 특정 설문은 HTML 설명으로 렌더링 (이미지 대신)
-        # 영어 모드에서는 HTML 블록 본문만 번역해서 표시 (<style> CSS는 번역 제외)
-        _is_en_mode = st.session_state.get('lang', 'ko') == 'en'
-        def _translate_shjeon_html(html):
-            if not _is_en_mode:
-                return html
-            import re as _re2
-            # <style>...</style> 구간은 분리해서 CSS가 번역으로 깨지지 않도록 보호
-            m = _re2.search(r'(<style>.*?</style>)(.*)', html, _re2.DOTALL)
-            if m:
-                _style, _body = m.group(1), m.group(2)
-                return _style + translate_dynamic_text(_body, 'en')
-            return translate_dynamic_text(html, 'en')
         if survey_id_param in _SHJEON_HTML_SURVEY_IDS:
-            _html1 = _translate_shjeon_html(_SHJEON_HTML_1)
-            _html2 = _translate_shjeon_html(_SHJEON_HTML_2)
-            _html3 = _translate_shjeon_html(_SHJEON_HTML_3)
-            st.markdown(_html1, unsafe_allow_html=True)
+            st.markdown(_SHJEON_HTML_1, unsafe_allow_html=True)
             st.markdown(
                 '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
                 unsafe_allow_html=True
             )
-            st.markdown(_html2, unsafe_allow_html=True)
+            st.markdown(_SHJEON_HTML_2, unsafe_allow_html=True)
             st.markdown(
                 '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
                 unsafe_allow_html=True
             )
-            st.markdown(_html3, unsafe_allow_html=True)
+            st.markdown(_SHJEON_HTML_3, unsafe_allow_html=True)
             st.markdown(
                 '<div style="margin: 28px auto 24px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
                 unsafe_allow_html=True
