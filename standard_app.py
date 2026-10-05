@@ -132,15 +132,50 @@ def _(ko_text, en_text):
     return ko_text
 
 @st.cache_data(show_spinner=False)
-def translate_dynamic_text(text, target_lang='en'):
-    if not text or not str(text).strip():
-        return text
+def _translate_single_chunk(text, target_lang='en', _retry=0):
+    """단일 청크 번역 (내부용). 실패 시 원문 반환. 429 rate limit 시 재시도."""
     try:
         from deep_translator import GoogleTranslator
         translator = GoogleTranslator(source='ko', target=target_lang)
         return translator.translate(str(text))
-    except Exception:
+    except Exception as e:
+        err = str(e).lower()
+        # Rate limit(429/TooManyRequests)이면 잠시 대기 후 재시도 (최대 3회)
+        if ('toomanyrequests' in err or '429' in err or 'too many requests' in err) and _retry < 3:
+            import time
+            time.sleep(2 * (_retry + 1))
+            return _translate_single_chunk(text, target_lang, _retry + 1)
         return text
+
+@st.cache_data(show_spinner=False)
+def translate_dynamic_text(text, target_lang='en'):
+    if not text or not str(text).strip():
+        return text
+    text = str(text)
+    # 긴 텍스트는 문단 단위로 나눠서 번역 (구글 번역 1회 요청 길이 제한 회피)
+    # 1500자 이하이면 그대로 번역
+    if len(text) <= 1500:
+        return _translate_single_chunk(text, target_lang)
+    chunks = []
+    current = []
+    current_len = 0
+    for para in text.split('\n'):
+        # 문단이 너무 길면 문장 단위로 추가 분할
+        sub_paras = [para]
+        if len(para) > 1500:
+            import re as _re
+            sub_paras = _re.split(r'(?<=[.!?。！？])\s+', para)
+        for sp in sub_paras:
+            if current_len + len(sp) + 1 > 1500 and current:
+                chunks.append('\n'.join(current))
+                current = []
+                current_len = 0
+            current.append(sp)
+            current_len += len(sp) + 1
+    if current:
+        chunks.append('\n'.join(current))
+    translated = [_translate_single_chunk(c, target_lang) for c in chunks if c.strip()]
+    return '\n'.join(translated) if translated else text
 
 @st.cache_data(show_spinner=False)
 def _load_example_file(path):
@@ -3821,25 +3856,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
     else:
         survey_title = _t(survey_title)
         
-    # --- Survey Language Switcher ---
+    # --- Survey Language Switcher (현재 언어의 반대 언어 전환 버튼만 표시) ---
     lang_col1, lang_col2 = st.columns([8, 2])
     with lang_col1:
         st.title(survey_title)
     with lang_col2:
         st.write("") # Add some vertical padding
-        lang_options = {"한국어 (Korean)": "ko", "English (영어)": "en"}
         current_survey_lang = "en" if st.session_state.get('lang', 'ko') == 'en' else "ko"
-        selected_lang_label = st.selectbox(
-            "Language / 언어", 
-            options=list(lang_options.keys()), 
-            index=0 if current_survey_lang == 'ko' else 1,
-            key=f"survey_lang_selector_{survey_id_param}",
-            label_visibility="collapsed"
-        )
-        new_lang = lang_options[selected_lang_label]
-        if new_lang != current_survey_lang:
-            st.session_state.lang = new_lang
-            st.rerun()
+        if current_survey_lang == 'ko':
+            if st.button("🌐 English", key=f"survey_lang_toggle_{survey_id_param}"):
+                st.session_state.lang = 'en'
+                st.rerun()
+        else:
+            if st.button("🌐 한국어", key=f"survey_lang_toggle_{survey_id_param}"):
+                st.session_state.lang = 'ko'
+                st.rerun()
     # --------------------------------
     
     # 조사 목적 및 안내문, 설문 담당자 이메일 표시 (깔끔한 디자인 적용)
@@ -4246,18 +4277,33 @@ if "preview_id" in q_params or "survey_id" in q_params:
 
     with st.container():
         # [shjeon 전용] 특정 설문은 HTML 설명으로 렌더링 (이미지 대신)
+        # 영어 모드에서는 HTML 블록 본문만 번역해서 표시 (<style> CSS는 번역 제외)
+        _is_en_mode = st.session_state.get('lang', 'ko') == 'en'
+        def _translate_shjeon_html(html):
+            if not _is_en_mode:
+                return html
+            import re as _re2
+            # <style>...</style> 구간은 분리해서 CSS가 번역으로 깨지지 않도록 보호
+            m = _re2.search(r'(<style>.*?</style>)(.*)', html, _re2.DOTALL)
+            if m:
+                _style, _body = m.group(1), m.group(2)
+                return _style + translate_dynamic_text(_body, 'en')
+            return translate_dynamic_text(html, 'en')
         if survey_id_param in _SHJEON_HTML_SURVEY_IDS:
-            st.markdown(_SHJEON_HTML_1, unsafe_allow_html=True)
+            _html1 = _translate_shjeon_html(_SHJEON_HTML_1)
+            _html2 = _translate_shjeon_html(_SHJEON_HTML_2)
+            _html3 = _translate_shjeon_html(_SHJEON_HTML_3)
+            st.markdown(_html1, unsafe_allow_html=True)
             st.markdown(
                 '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
                 unsafe_allow_html=True
             )
-            st.markdown(_SHJEON_HTML_2, unsafe_allow_html=True)
+            st.markdown(_html2, unsafe_allow_html=True)
             st.markdown(
                 '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
                 unsafe_allow_html=True
             )
-            st.markdown(_SHJEON_HTML_3, unsafe_allow_html=True)
+            st.markdown(_html3, unsafe_allow_html=True)
             st.markdown(
                 '<div style="margin: 28px auto 24px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
                 unsafe_allow_html=True
