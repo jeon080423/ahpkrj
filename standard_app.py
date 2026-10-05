@@ -1069,9 +1069,12 @@ def set_font_config():
             rc('font', family=font_prop.get_name())
     except Exception as e:
         pass
-    plt.rcParams['axes.unicode_minus'] = False 
+    plt.rcParams['axes.unicode_minus'] = False
 
-set_font_config()
+# [2026-10-05 첫화면 로딩 개선] set_font_config() 호출 제거
+# - 차트는 Plotly로 렌더링하며 matplotlib는 실제 사용되지 않음
+# - 기존 호출 시 GitHub 폰트 다운로드 + matplotlib import로 첫화면 2~4초 지연 발생
+# set_font_config()
 
 # [중요 수정] 구글 시트 ID 및 연결 헬퍼 함수
 def get_main_spreadsheet_id():
