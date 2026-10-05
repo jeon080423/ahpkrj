@@ -3129,9 +3129,6 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
     excluded_df = pd.DataFrame(excluded_list)
     return results_df, factors, excluded_count, excluded_df
 
-import itertools
-import numpy as np
-
 def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2):
     import io
     import pandas as pd
