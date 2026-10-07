@@ -8263,7 +8263,7 @@ with contextlib.nullcontext():
                     df_main = preprocess_uploaded_df(df_main)
                     
                     # [신규] Basic 요금제 표본수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
-                    if st.session_state.get('plan_type') == 'Basic' and len(df_main) > 10:
+                    if get_current_tier() == 'Basic' and len(df_main) > 10:
                         df_main = df_main.head(10)
                         st.warning(_("⚠️ 베이직 요금제는 엑셀 업로드 시 최대 10표본까지만 분석할 수 있습니다. 처음 10개 표본만 분석에 사용됩니다.",
                                      "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 samples will be analyzed."))
@@ -8303,14 +8303,14 @@ with contextlib.nullcontext():
                             if "demographic" in sn_lower:
                                 demo_df = pd.read_excel(uploaded_file, sheet_name=sn)
                                 demo_df = preprocess_uploaded_df(demo_df)
-                                if st.session_state.get('plan_type') == 'Basic' and len(demo_df) > 10:
+                                if get_current_tier() == 'Basic' and len(demo_df) > 10:
                                     demo_df = demo_df.head(10)
                                 st.session_state["demo_df"] = demo_df
                             continue
                             
                         df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
                         df_sheet = preprocess_uploaded_df(df_sheet)
-                        if st.session_state.get('plan_type') == 'Basic' and len(df_sheet) > 10:
+                        if get_current_tier() == 'Basic' and len(df_sheet) > 10:
                             df_sheet = df_sheet.head(10)
                             
                         if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
@@ -8510,7 +8510,7 @@ with contextlib.nullcontext():
                                             st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 3표본까지만 분석할 수 있습니다. 처음 접수된 3명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 3 samples. Only the first 3 responses will be analyzed."))
 
                                         # [신규] Basic 요금제 표본 수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
-                                        if st.session_state.get('plan_type') == 'Basic' and len(raw_df) > 10:
+                                        if get_current_tier() == 'Basic' and len(raw_df) > 10:
                                             raw_df = raw_df.head(10)
                                             st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
                                                          "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
@@ -8744,7 +8744,7 @@ with contextlib.nullcontext():
                                 save_analysis_to_db(st.session_state.user_id, save_filename, save_data)
 
                             st.success(_("✅ 3계층 AHP 분석이 성공적으로 완료되었습니다!", "✅ 3-Tier AHP Analysis successfully completed!"))
-                            if st.session_state.get('plan_type') == 'Basic':
+                            if get_current_tier() == 'Basic':
                                 st.info(_("**Basic 제한**: 표본 10개로 제한됩니다. Standard 이상으로 업그레이드하세요.",
                                           "💡 **Basic Limit**: Limited to 10 samples. Please upgrade to Standard or higher."))
                             st.caption(_("⚠️ 새로고침 시 결과가 리셋됩니다. 결과 다운로드 탭에서 반드시 저장하세요.",
@@ -9417,6 +9417,7 @@ with contextlib.nullcontext():
                                 main_cr_final_avg = main_results_df['Final_CR'].mean()
                         
                                 # --- 다중 인구통계 변수 처리 UI ---
+                                tier = get_current_tier()
                                 demo_cols = [c for c in main_results_df.columns if str(c).strip().lower() == 'type' or str(c).strip().lower().startswith('type ')]
                                 if len(demo_cols) > 1 and tier in ['Standard', 'Pro']:
                                     selected_demo = st.selectbox(_("📊 교차분석 그룹 기준 변수 선택", "📊 Select Grouping Variable for Analysis"), demo_cols)
