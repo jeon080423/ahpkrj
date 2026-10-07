@@ -5456,8 +5456,14 @@ if "login_user" in q_params and "login_token" in q_params:
     if token_ok:
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
-        c.execute("SELECT role, expiry_date FROM users WHERE id=?", (login_user_val,))
-        db_user = c.fetchone()
+        try:
+            c.execute("SELECT role, expiry_date, plan_type FROM users WHERE id=?", (login_user_val,))
+            db_user = c.fetchone()
+            _db_plan = db_user[2] if db_user and len(db_user) > 2 else None
+        except Exception:
+            c.execute("SELECT role, expiry_date FROM users WHERE id=?", (login_user_val,))
+            db_user = c.fetchone()
+            _db_plan = None
         conn.close()
         if db_user:
             # [보안 패치] 자동 로그인 경로에서도 만료 체크 (북마크 만료 우회 방지)
@@ -5466,6 +5472,7 @@ if "login_user" in q_params and "login_token" in q_params:
             st.session_state.user_id = login_user_val
             st.session_state.user_role = sess_role
             st.session_state.expiry_date = sess_expiry
+            st.session_state.plan_type = _db_plan
             try:
                 import survey_manager
                 survey_manager.log_user_action(login_user_val, "로그인 (URL 파라미터)")
@@ -5658,6 +5665,7 @@ if "paypal_order_id" in q_params:
             if st.session_state.get("user_id") == target_user:
                 st.session_state.user_role = target_role
                 st.session_state.expiry_date = new_expiry_date
+                st.session_state.plan_type = plan_name_param
             st.toast("🎉 PayPal Payment successful! Account upgraded/updated.")
     else:
         st.error(f"Payment verification failed: {msg}")
