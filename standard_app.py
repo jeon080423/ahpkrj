@@ -3546,107 +3546,6 @@ except AttributeError:
         q_params = {}
 
 # -----------------------------------------------------------------------------
-# 구글 로그인 콜백 처리 (로그인 안 된 상태에서 code가 오면 구글 로그인 시도)
-# -----------------------------------------------------------------------------
-if "code" in q_params and not st.session_state.get('user_id'):
-    import os
-    if os.name == 'nt':
-        _cb_redirect = "http://localhost:8501/"
-    else:
-        _cb_redirect = "https://ahpkrj.streamlit.app/"
-
-    _code_val = q_params["code"]
-    if isinstance(_code_val, list):
-        _code_val = _code_val[0]
-
-    from survey_manager import get_google_login_flow
-    _login_flow = get_google_login_flow(_cb_redirect)
-    if _login_flow:
-        try:
-            _login_flow.fetch_token(code=_code_val)
-            _creds = _login_flow.credentials
-
-            # ID 토큰 검증 → 구글 인증 이메일 확보
-            from google.oauth2 import id_token as _id_token
-            from google.auth.transport import requests as _grequests
-            _client_id = _creds.client_id
-            _idinfo = _id_token.verify_oauth2_token(
-                _creds.id_token, _grequests.Request(), _client_id
-            )
-            _g_email = _idinfo.get('email', '').strip().lower()
-            if not _g_email or not _idinfo.get('email_verified', False):
-                raise ValueError("구글 이메일 인증 실패")
-
-            import sqlite3
-            _conn = sqlite3.connect('users.db')
-            _c = _conn.cursor()
-            try:
-                _c.execute(
-                    "SELECT role, expiry_date, plan_type, customer_type FROM users WHERE id=?",
-                    (_g_email,)
-                )
-            except sqlite3.OperationalError:
-                _c.execute(
-                    "SELECT role, expiry_date, plan_type FROM users WHERE id=?",
-                    (_g_email,)
-                )
-            _row = _c.fetchone()
-            _conn.close()
-
-            if _row:
-                # 기존 회원 → 이메일 매핑으로 그대로 로그인 (결제·권한 유지)
-                _role = _row[0]
-                _expiry = _row[1]
-                _plan = _row[2] if len(_row) > 2 else None
-            else:
-                # 신규 회원 → 무료 사용자(temp)로 생성 (비밀번호는 랜덤, 구글 로그인 전용)
-                import secrets as _secrets
-                import string as _string
-                _rand_pw = ''.join(_secrets.choice(_string.ascii_letters + _string.digits) for _ in range(32))
-                add_user(_g_email, _rand_pw, "temp", agree_info="Y", customer_type="standard")
-                _role, _expiry, _plan = "temp", "9999-12-31", "free"
-                try:
-                    import survey_manager
-                    survey_manager.log_user_action(_g_email, "구글 로그인 (신규 가입)")
-                except:
-                    pass
-
-            # 만료 체크 (일반 로그인과 동일)
-            _today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
-            _exp_date = datetime.datetime.strptime(_expiry, "%Y-%m-%d").date()
-            if _today > _exp_date and _role == 'official':
-                update_user_full_info(_g_email, None, "temp", "9999-12-31")
-                _role, _expiry = "temp", "9999-12-31"
-
-            st.session_state.user_id = _g_email
-            st.session_state.user_role = _role
-            st.session_state.expiry_date = _expiry
-            st.session_state.logout_requested = False
-            st.session_state._survey_cache_dirty = True
-            st.session_state.pop('_cached_user_surveys', None)
-            st.session_state.survey_auto_loaded = False
-            st.session_state.plan_type = _plan
-            try:
-                import survey_manager
-                survey_manager.log_user_action(_g_email, "구글 로그인")
-            except:
-                pass
-            st.query_params["login_user"] = _g_email
-            st.query_params["login_token"] = issue_login_token(_g_email)
-            st.query_params["last_activity"] = str(int(time.time()))
-            # code 파라미터만 제거 (로그인 파라미터는 유지해야 함)
-            try:
-                del st.query_params["code"]
-            except KeyError:
-                pass
-            st.success(f"환영합니다, {_g_email}님! (Google 계정으로 로그인)")
-            st.rerun()
-        except Exception as _g_err:
-            st.error(f"구글 로그인 실패: {_g_err}")
-            st.query_params.clear()
-
-
-# -----------------------------------------------------------------------------
 # 구글 OAuth 2.0 콜백 처리
 # -----------------------------------------------------------------------------
 if "code" in q_params and st.session_state.get('user_id'):
@@ -7110,34 +7009,8 @@ with st.sidebar:
                         st.rerun()
                 else:
                     st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
-
-            # -----------------------------------------------------------------
-            # 구글 로그인
-            # -----------------------------------------------------------------
-            st.divider()
-            try:
-                from survey_manager import get_google_login_flow
-                import os
-                if os.name == 'nt':
-                    _login_redirect = "http://localhost:8501/"
-                else:
-                    _login_redirect = "https://ahpkrj.streamlit.app/"
-                _login_flow = get_google_login_flow(_login_redirect)
-                if _login_flow:
-                    _auth_url, _ = _login_flow.authorization_url(
-                        access_type='offline',
-                        include_granted_scopes='false',
-                        prompt='select_account'
-                    )
-                    st.link_button(
-                        _("🔵 Google 계정으로 로그인", "🔵 Sign in with Google"),
-                        _auth_url,
-                        use_container_width=True
-                    )
-            except Exception:
-                pass
-
-
+            
+            
         with tab_find_pw:
             st.write(_("가입 시 사용한 이메일 주소를 입력해주세요. 이메일로 새로운 임시 비밀번호가 발송됩니다.",
                        "Please enter the email address used at registration. A new temporary password will be sent to your email."))
