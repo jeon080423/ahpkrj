@@ -7134,10 +7134,8 @@ with st.sidebar:
                         _auth_url,
                         use_container_width=True
                     )
-                else:
-                    st.caption("DEBUG: get_google_login_flow returned None (secrets missing?)")
-            except Exception as _ge:
-                st.caption(f"DEBUG: 구글 로그인 버튼 오류: {_ge}")
+            except Exception:
+                pass
 
 
         with tab_find_pw:
