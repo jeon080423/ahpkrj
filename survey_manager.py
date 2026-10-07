@@ -1634,6 +1634,39 @@ def get_google_oauth_flow(redirect_uri):
     return flow
 
 
+def get_google_login_flow(redirect_uri):
+    """구글 로그인(인증)용 OAuth 2.0 Flow 객체를 반환합니다. Drive 연동용과 분리."""
+    import streamlit as st
+    client_id = st.secrets.get("GOOGLE_CLIENT_ID") or st.secrets.get("google_oauth", {}).get("client_id")
+    client_secret = st.secrets.get("GOOGLE_CLIENT_SECRET") or st.secrets.get("google_oauth", {}).get("client_secret")
+
+    if not client_id or not client_secret:
+        return None
+
+    client_config = {
+        "web": {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
+        }
+    }
+
+    from google_auth_oauthlib.flow import Flow
+    scopes = [
+        'openid',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+    ]
+    flow = Flow.from_client_config(
+        client_config,
+        scopes=scopes,
+        redirect_uri=redirect_uri
+    )
+    return flow
+
+
 
 def save_admin_survey_to_gsheet(survey_id, title, admin_id):
     import datetime
