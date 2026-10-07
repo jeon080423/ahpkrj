@@ -7112,13 +7112,13 @@ with st.sidebar:
                     st.error(_("아이디 또는 비밀번호가 일치하지 않습니다.", "Incorrect username or password."))
 
             # -----------------------------------------------------------------
-            # 구글 로그인
+            # 구글 로그인 (공식 브랜딩 가이드 준수 버튼 - Light 테마)
             # -----------------------------------------------------------------
             st.divider()
             try:
                 from survey_manager import get_google_login_flow
-                import os
-                if os.name == 'nt':
+                import os as _os_mod
+                if _os_mod.name == 'nt':
                     _login_redirect = "http://localhost:8501/"
                 else:
                     _login_redirect = "https://ahpkrj.streamlit.app/"
@@ -7129,11 +7129,29 @@ with st.sidebar:
                         include_granted_scopes='false',
                         prompt='select_account'
                     )
-                    st.link_button(
-                        _("🔵 Google 계정으로 로그인", "🔵 Sign in with Google"),
-                        _auth_url,
-                        use_container_width=True
+                    # 공식 G 로고 로드 (실패 시 로고 없이 텍스트만)
+                    import base64 as _b64_mod, html as _html_mod
+                    try:
+                        with open("assets/g-logo.png", "rb") as _lf:
+                            _g_logo_b64 = _b64_mod.b64encode(_lf.read()).decode()
+                        _g_logo_tag = f'<img src="data:image/png;base64,{_g_logo_b64}" alt="Google" style="width:18px;height:18px;flex-shrink:0;" />'
+                    except Exception:
+                        _g_logo_tag = ""
+                    _g_btn_text = _("Google 계정으로 로그인", "Sign in with Google")
+                    _g_btn_html = (
+                        f'<a href="{_html_mod.escape(_auth_url, quote=True)}" target="_self" '
+                        'style="display:flex;align-items:center;justify-content:center;gap:10px;'
+                        'width:100%;height:44px;background:#FFFFFF;'
+                        'border:1px solid #747775;border-radius:4px;'
+                        'text-decoration:none;cursor:pointer;box-sizing:border-box;'
+                        'font-family:Roboto,Arial,sans-serif;font-size:14px;font-weight:500;'
+                        'color:#1F1F1F;padding:0 12px;" '
+                        'onmouseover="this.style.backgroundColor=\'#F6F6F6\';" '
+                        'onmouseout="this.style.backgroundColor=\'#FFFFFF\';">'
+                        f'{_g_logo_tag}<span>{_html_mod.escape(_g_btn_text)}</span></a>'
                     )
+                    import streamlit.components.v1 as _components
+                    _components.html(_g_btn_html, height=52, scrolling=False)
             except Exception:
                 pass
 
