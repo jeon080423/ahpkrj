@@ -58,10 +58,39 @@ ttest_rel = LazyFunction('scipy.stats', 'ttest_rel')
 f_oneway = LazyFunction('scipy.stats', 'f_oneway')
 # ---------------------------------------------------------------
 
-def hash_password(password: str) -> str:
-    """SHA-256 Hash a password with a fixed salt for security."""
+def _legacy_sha256_hash(password: str) -> str:
+    """기존 SHA-256+고정솔트 해시 (하위 호환용, 신규 사용 금지)."""
     salt = "ahp_master_secure_salt_2026"
     return hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
+
+def hash_password(password: str) -> str:
+    """bcrypt로 비밀번호를 해시합니다 (개별 랜덤 솔트, cost=12)."""
+    import bcrypt
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12)).decode('utf-8')
+
+def verify_password(password: str, stored_hash: str) -> str:
+    """비밀번호를 검증합니다.
+    반환값: "bcrypt" (bcrypt 일치), "legacy" (구방식 일치→bcrypt로 승급 필요),
+             "plaintext" (평문 일치→bcrypt로 승급 필요), None (불일치)
+    """
+    if not stored_hash:
+        return None
+    # 1) bcrypt 해시
+    if stored_hash.startswith("$2b$") or stored_hash.startswith("$2a$"):
+        try:
+            import bcrypt
+            if bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
+                return "bcrypt"
+        except Exception:
+            pass
+        return None
+    # 2) 기존 SHA-256+고정솔트 해시
+    if stored_hash == _legacy_sha256_hash(password):
+        return "legacy"
+    # 3) 평문 (구 계정)
+    if stored_hash == password:
+        return "plaintext"
+    return None
 
 def generate_temp_password() -> str:
     """가입 시 비밀번호 유효성 검사를 통과하는 8자리 임시 비밀번호를 생성합니다."""
@@ -2559,15 +2588,14 @@ def check_login(user_id, pw):
     
     if row:
         stored_role, stored_expiry, stored_pw, stored_plan, stored_customer = row
-        hashed_pw = hash_password(pw)
-        
-        # 평문 패스워드가 정확히 일치하거나 해시 패스워드가 일치하는 경우
-        if stored_pw == pw or stored_pw == hashed_pw:
-            # 평문 패스워드로 로그인 성공한 경우, 즉시 해시 패스워드로 업데이트 (보안 승급)
-            if stored_pw == pw:
+        match = verify_password(pw, stored_pw)
+
+        if match:
+            # 구방식(평문/SHA-256) 해시로 로그인 성공한 경우, 즉시 bcrypt로 승급
+            if match in ("legacy", "plaintext"):
                 upgrade_user_password_to_hash(user_id, pw)
             return stored_role, stored_expiry, stored_plan, stored_customer
-            
+
     return None
 
 def get_user_password(user_id):
