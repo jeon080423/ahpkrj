@@ -7124,7 +7124,7 @@ with st.sidebar:
                     _login_redirect = "https://ahpkrj.streamlit.app/"
                 _login_flow = get_google_login_flow(_login_redirect)
                 if _login_flow:
-                    _auth_url, _ = _login_flow.authorization_url(
+                    _auth_url, _g_state = _login_flow.authorization_url(
                         access_type='offline',
                         include_granted_scopes='false',
                         prompt='select_account'
