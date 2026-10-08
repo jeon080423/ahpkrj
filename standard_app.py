@@ -4680,7 +4680,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
         if not _is_shjeon_survey:
             st.info(_("더 중요한 방향으로 숫자를 선택하세요. **1**=동등, 숫자가 클수록 해당 방향의 요인이 더 중요합니다.",
                       "Select the number toward the more important factor. **1**=Equal, larger number = more important."))
-        if cr_guide_method == "realtime":
+        # [2026-10-09] 박한라 요청: shjeon 설문에서는 실시간 가이드 안내 삭제
+        if cr_guide_method == "realtime" and not _is_shjeon_survey:
             st.markdown(_(
                 ":blue[**💡 실시간 가이드 안내 (파란색 배경)**]: 앞선 응답들과의 논리적 연관성(CR)을 분석하여, 각 평가 영역의 **마지막 연계 문항**에서 :red[**권장 선택 구간**]이 파란색으로 자동 표시됩니다. (초반 문항은 본인의 판단에 따라 자유롭게 선택하시면 됩니다.)",
                 ":blue[**💡 Real-time Guide (Blue Background)**]: Analyzes consistency (CR) with previous answers, automatically highlighting the :red[**recommended range**] in blue on the **final linked question** of each evaluation group. (Feel free to select initial questions based on your judgment.)"
@@ -4813,7 +4814,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(중분류) 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
                 else:
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _("대분류(핵심) 요인 비교", "Main Criteria (Core) Comparison")
-                st.markdown(f"#### {parent_lbl}")
+                # [2026-10-09] 박한라 요청: shjeon 설문에서는 소제목 숨김
+                if not _is_shjeon_survey:
+                    st.markdown(f"#### {parent_lbl}")
                 
                 # [수정] 평가 요인 정의 및 설명을 각 척도 평가 바로 위쪽으로 이동
                 if comb['type'] == 'sub_sub':
