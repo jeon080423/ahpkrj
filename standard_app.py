@@ -4531,8 +4531,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 5px 12px; text-align: left; vertical-align: top; }
 .shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
 .shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
-.hier td.concept2 { font-weight: 700; }
-.hier .inset { margin-left: 8px; padding-left: 10px; }
+.shjeon-desc .hier td.concept2 { font-weight: 700; }
+.shjeon-desc .hier .inset { margin-left: 8px; padding-left: 10px; }
 .shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
 .shjeon-desc .diag .lvl1 { display: inline-block; border: 2px solid #333; padding: 12px 40px; font-size: 16px; margin-bottom: 0; }
 .shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
@@ -4685,8 +4685,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 ":blue[**💡 실시간 가이드 안내 (파란색 배경)**]: 앞선 응답들과의 논리적 연관성(CR)을 분석하여, 각 평가 영역의 **마지막 연계 문항**에서 :red[**권장 선택 구간**]이 파란색으로 자동 표시됩니다. (초반 문항은 본인의 판단에 따라 자유롭게 선택하시면 됩니다.)",
                 ":blue[**💡 Real-time Guide (Blue Background)**]: Analyzes consistency (CR) with previous answers, automatically highlighting the :red[**recommended range**] in blue on the **final linked question** of each evaluation group. (Feel free to select initial questions based on your judgment.)"
             ))
-        with st.expander(_("상세 응답 가이드", "Detailed Response Guide"), expanded=False):
-            st.markdown(_("""
+        # [2026-10-09] 박한라 요청: shjeon 설문에서는 상세 응답 가이드 삭제
+        if not _is_shjeon_survey:
+            with st.expander(_("상세 응답 가이드", "Detailed Response Guide"), expanded=False):
+                st.markdown(_("""
 - **동등(1)**: 양쪽 요인이 똑같이 중요할 때 가운데 **1**을 선택하세요.
 - **왼쪽 요인이 더 중요할 때**: 왼쪽 방향(← )의 숫자를 선택하세요. 숫자가 클수록 왼쪽 요인이 훨씬 중요함을 나타냅니다.
 - **오른쪽 요인이 더 중요할 때**: 오른쪽 방향( →)의 숫자를 선택하세요. 숫자가 클수록 오른쪽 요인이 훨씬 중요함을 나타냅니다.
