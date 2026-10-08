@@ -1737,7 +1737,7 @@ def validate_password(password):
 
 def send_foreign_access_email(ip, country, region, kst_time):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] ⚠️ 해외 접속 감지: {country}"
     
@@ -1790,7 +1790,7 @@ def check_foreign_access():
 def send_application_email(user_email):
     sender_email = "jeon080423@gmail.com"
     # secrets.toml에서 이메일 비밀번호를 안전하게 로드합니다.
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식 사용자 승인 요청: {user_email}"
     # [수정] 대한민국 시간 기준 신청일 설정
@@ -1810,7 +1810,7 @@ def send_application_email(user_email):
 # [추가 요청사항 반영] 전환 요청 이메일 발송 함수
 def send_conversion_request_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식사용자 전환 요청: {user_email}"
     body = f"임시 사용자가 정식사용자로 전환 요청 했습니다\nID: {user_email}"
@@ -1829,7 +1829,7 @@ def send_conversion_request_email(user_email):
 
 def send_refund_request_email(request_type, user_email, opinion):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 취소/환불 신청: {user_email}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -1855,7 +1855,7 @@ def send_refund_request_email(request_type, user_email, opinion):
 
 def send_consulting_email(name, company, email, phone, inquiry_type, details, uploaded_file=None):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[분석문의] {name}님 / {company or '개인'}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -2116,7 +2116,7 @@ def render_refund_form(is_standalone=False, show_header=True):
 
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
@@ -2300,7 +2300,7 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
 # 계산서 신청 알림 메일 전송
 def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 계산서/현금영수증 신청 접수 ({biz_name})"
     body = f"""
@@ -2331,7 +2331,7 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
 
 def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets.get("EMAIL_PASSWORD", "REMOVED")
+    password = st.secrets["EMAIL_PASSWORD"]
     recipient_email = user_email
     subject = "[AHP 마스터] 임시 비밀번호 안내"
     body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
