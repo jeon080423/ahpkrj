@@ -4905,12 +4905,16 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         _var_def_lbl = f'<h5 style="margin: 14px 0 8px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("변수의 정의", "Variable Definitions")}</h5>' if (_is_shjeon_survey and sub_rows_html) else ""
                         sub_container_html = f'{_var_def_lbl}<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
                         
-                        card_html = f"""
-                        <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                        # [2026-10-09] 박한라 요청: shjeon 4-n 카드에서는 개념명·개념설명 숨김
+                        _shjeon_h4 = "" if _is_shjeon_survey else f"""
                             <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
                                 {main_factor_trans}
-                            </h4>
-                            {main_desc_html}
+                            </h4>"""
+                        _shjeon_desc = "" if _is_shjeon_survey else main_desc_html
+                        card_html = f"""
+                        <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                            {_shjeon_h4}
+                            {_shjeon_desc}
                             {sub_container_html}
                         </div>
                         """
