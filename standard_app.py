@@ -4536,6 +4536,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
         # [shjeon 전용] 특정 설문은 HTML 설명으로 렌더링 (이미지 대신)
         if survey_id_param in _SHJEON_HTML_SURVEY_IDS:
             # [2026-10-09] 박한라 요청: 2. 설문 방법 및 유의사항 상단 네모박스 안내문
+            # [2026-10-09] 박한라 요청: '2. 설문 방법 및 유의사항' 섹션 제목 ('1. 응답자 기본 정보'와 동일 폰트)
+            st.subheader("2. " + _("설문 방법 및 유의사항", "Survey Method and Notes"))
             _SHJEON_NOTICE = """<div class="shjeon-desc"><div style="border:2px solid #333; padding:14px 18px; margin:0 0 24px 0;"><p style="margin:0;">본 설문은 「보상위원회의 특성의 중요성」을 대상으로 AHP(Analytic Hierarchy Process)기법을 활용하여 상대적 중요도를 파악하기 위해 작성되었습니다. 보상위원회 특성들을 쌍으로 묶어 1:1 비교 평가를 진행합니다. 1:1 비교 평가 시 두 특성 중 상대적으로 '더 중요한 특성'에 대해 1~9점을 척도로 '더 중요한 정도'를 선택하시면 됩니다. 평가 진행 중 평가의 논리적 일관성이 기준치에서 벗어날 경우 평가를 다시 살펴보는 절차를 거치도록 하였습니다. 응답의 일관성이 낮은 경우 마지막 응답에 음영표시를 통해 안내드리오니 다시한번 검토 부탁드립니다.</p></div></div>"""
             st.markdown(_SHJEON_NOTICE, unsafe_allow_html=True)
             st.markdown(_SHJEON_HTML_1, unsafe_allow_html=True)
