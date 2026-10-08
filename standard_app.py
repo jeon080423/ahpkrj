@@ -4901,7 +4901,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     main_factor_trans = _shjeon_add_numeral(translate_factor_if_default(main_factor), is_main=True)
                     if main_desc or sub_rows_html:
                         main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
-                        sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
+                        # [2026-10-09] 박한라 요청: shjeon 설문 4-n 섹션에 '변수의 정의' 라벨
+                        _var_def_lbl = f'<h5 style="margin: 14px 0 8px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("변수의 정의", "Variable Definitions")}</h5>' if (_is_shjeon_survey and sub_rows_html) else ""
+                        sub_container_html = f'{_var_def_lbl}<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
                         
                         card_html = f"""
                         <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
