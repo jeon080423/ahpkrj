@@ -4018,6 +4018,30 @@ if "preview_id" in q_params or "survey_id" in q_params:
     _SHJEON_SURVEY_ID = "1NkDZ2NEirWepjTPubG1DZ4weR0wbrWX_GfZwS0mAKl8"
     _is_shjeon_survey = (survey_id_param == _SHJEON_SURVEY_ID)
 
+    # [2026-10-09] 박한라 요청: 개념/변수명에 로마숫자·원문자 표기 추가 (shjeon 설문만)
+    def _shjeon_add_numeral(name, is_main=True):
+        if not _is_shjeon_survey or not name:
+            return name
+        # 이미 표기가 있으면 중복 추가 방지
+        if name[:1] in "ⅠⅡⅢⅣ" or name[:1] in "①②③④⑤⑥⑦⑧":
+            return name
+        if is_main:
+            mapping = [("외형적 독립성", "Ⅰ. "), ("실질적 독립성", "Ⅱ. "),
+                       ("전문성", "Ⅲ. "), ("활동성", "Ⅳ. ")]
+        else:
+            mapping = [("사외이사비율", "①"), ("CEO", "②"), ("회색", "③"),
+                       ("타사", "④"), ("전공자 비율", "⑤"), ("전공자 여부", "⑥"),
+                       ("참석률", "⑦"), ("개최횟수", "⑧")]
+            # 더 구체적인 매칭을 위해 순서 조정 (긴 이름 우선)
+            mapping = [("보상위원회 사외이사비율", "①"), ("CEO", "②"),
+                       ("회색 사외이사비율", "③"), ("타사 경영진비율", "④"),
+                       ("전공자 비율", "⑤"), ("전공자 여부", "⑥"),
+                       ("참석률", "⑦"), ("개최횟수", "⑧")]
+        for keyword, prefix in mapping:
+            if keyword in name:
+                return prefix + name
+        return name
+
     submitted_key = f"survey_submitted_{survey_id_param}"
     if st.session_state.get(submitted_key):
         # 1. HTML/CSS를 이용한 모던하고 수려한 감사 카드 UI 렌더링
@@ -4851,7 +4875,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     if definitions:
                         for sub_factor in subs:
                             sub_desc = translate_definition_if_default(sub_factor, definitions.get(sub_factor, ""))
-                            sub_factor_trans = translate_factor_if_default(sub_factor)
+                            sub_factor_trans = _shjeon_add_numeral(translate_factor_if_default(sub_factor), is_main=False)
                             if sub_desc:
                                 sub_rows_html += f"""
                                 <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
@@ -4860,7 +4884,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 </div>
                                 """
                     
-                    main_factor_trans = translate_factor_if_default(main_factor)
+                    main_factor_trans = _shjeon_add_numeral(translate_factor_if_default(main_factor), is_main=True)
                     if main_desc or sub_rows_html:
                         main_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{main_desc}</p>' if main_desc else ""
                         sub_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if sub_rows_html else ""
@@ -4882,7 +4906,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             text_color = "#334155"
                             border = "#cbd5e1"
                             mc_desc = translate_definition_if_default(mc, definitions.get(mc, ""))
-                            mc_trans = translate_factor_if_default(mc)
+                            mc_trans = _shjeon_add_numeral(translate_factor_if_default(mc), is_main=True)
                             if mc_desc:
                                 main_rows_html += f"""
                                 <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px dashed #f1f5f9;">
