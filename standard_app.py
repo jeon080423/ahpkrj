@@ -4806,16 +4806,29 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     st.markdown(tree_html, unsafe_allow_html=True)
 
             comp_idx = 1
+            _shjeon_sec4_shown = False
+            _shjeon_sec4_idx = 0
             for comb_idx, comb in enumerate(combinations):
                 parent_trans = translate_factor_if_default(comb['parent'])
+                # [2026-10-09] 박한라 요청: shjeon 설문 4. 변수간 중요도 평가 헤더
+                if _is_shjeon_survey and comb['type'] in ('sub', 'sub_sub') and not _shjeon_sec4_shown:
+                    st.subheader(_("4. 보상위원회 특성-변수간 중요도 평가", "4. Evaluation of Relative Importance between Variables"))
+                    _shjeon_sec4_shown = True
                 if comb['type'] == 'sub_sub':
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(소분류) 요인 비교"), f"Sub-sub-criteria Comparison under [{parent_trans}]")
                 elif comb['type'] == 'sub':
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(중분류) 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
                 else:
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _("대분류(핵심) 요인 비교", "Main Criteria (Core) Comparison")
-                # [2026-10-09] 박한라 요청: shjeon 설문에서는 소제목 숨김
-                if not _is_shjeon_survey:
+                # [2026-10-09] 박한라 요청: shjeon 설문에서는 4-n. 형식 소제목
+                if _is_shjeon_survey and comb['type'] in ('sub', 'sub_sub'):
+                    _shjeon_sec4_idx += 1
+                    # 로마숫자 제거하고 개념명만 사용
+                    _clean = parent_trans
+                    for _rn in ["Ⅰ. ", "Ⅱ. ", "Ⅲ. ", "Ⅳ. "]:
+                        _clean = _clean.replace(_rn, "")
+                    st.markdown(f"#### 4-{_shjeon_sec4_idx}. {_clean} 비교")
+                elif not _is_shjeon_survey:
                     st.markdown(f"#### {parent_lbl}")
                 
                 # [수정] 평가 요인 정의 및 설명을 각 척도 평가 바로 위쪽으로 이동
