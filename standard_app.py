@@ -1345,6 +1345,19 @@ def init_db():
                   (ip_address TEXT, visit_date TEXT, PRIMARY KEY (ip_address, visit_date))''')
     c.execute('''CREATE TABLE IF NOT EXISTS admin_surveys
                   (survey_id TEXT PRIMARY KEY, title TEXT, admin_id TEXT, created_at TEXT, short_code TEXT)''')
+
+    # [2026-10-09] 설문 소유권 일회성 이전: → hanla0116@naver.com
+    # 박한라 학위논문 설문을 박한라 계정으로 이관 (스프레드시트 ID/링크 유지)
+    try:
+        c.execute("SELECT admin_id FROM admin_surveys WHERE survey_id = ?",
+                  ("1NkDZ2NEirWepjTPubG1DZ4weR0wbrWX_GfZwS0mAKl8",))
+        _row = c.fetchone()
+        if _row and _row[0] != "hanla0116@naver.com":
+            c.execute("UPDATE admin_surveys SET admin_id = ? WHERE survey_id = ?",
+                      ("hanla0116@naver.com", "1NkDZ2NEirWepjTPubG1DZ4weR0wbrWX_GfZwS0mAKl8"))
+            conn.commit()
+    except Exception:
+        pass
     try:
         c.execute("ALTER TABLE admin_surveys ADD COLUMN short_code TEXT")
         conn.commit()
