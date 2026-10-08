@@ -17,3 +17,8 @@ patch*.py
 .vscode/
 .idea/
 .DS_Store
+
+# Secrets - never commit
+.streamlit/secrets.toml
+client_secret*.json
+.env
