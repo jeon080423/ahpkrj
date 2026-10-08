@@ -1737,7 +1737,7 @@ def validate_password(password):
 
 def send_foreign_access_email(ip, country, region, kst_time):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] ⚠️ 해외 접속 감지: {country}"
     
@@ -1790,7 +1790,7 @@ def check_foreign_access():
 def send_application_email(user_email):
     sender_email = "jeon080423@gmail.com"
     # secrets.toml에서 이메일 비밀번호를 안전하게 로드합니다.
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식 사용자 승인 요청: {user_email}"
     # [수정] 대한민국 시간 기준 신청일 설정
@@ -1810,7 +1810,7 @@ def send_application_email(user_email):
 # [추가 요청사항 반영] 전환 요청 이메일 발송 함수
 def send_conversion_request_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 정식사용자 전환 요청: {user_email}"
     body = f"임시 사용자가 정식사용자로 전환 요청 했습니다\nID: {user_email}"
@@ -1829,7 +1829,7 @@ def send_conversion_request_email(user_email):
 
 def send_refund_request_email(request_type, user_email, opinion):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 취소/환불 신청: {user_email}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -1855,7 +1855,7 @@ def send_refund_request_email(request_type, user_email, opinion):
 
 def send_consulting_email(name, company, email, phone, inquiry_type, details, uploaded_file=None):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[분석문의] {name}님 / {company or '개인'}"
     kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -2116,7 +2116,7 @@ def render_refund_form(is_standalone=False, show_header=True):
 
 def send_approval_email(user_email):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
     subject = "[AHP 마스터] 정식 사용자 승인 완료"
     body = f"{user_email}님, 정식 사용자로 승인되었습니다. 오늘부터 2개월간 모든 기능을 무제한으로 사용하실 수 있습니다."
@@ -2300,7 +2300,7 @@ def get_quotation_html(client_name, project_name, amount, plan_name):
 # 계산서 신청 알림 메일 전송
 def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address, biz_type, email, plan_name):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = "jeon080423@gmail.com"
     subject = f"[AHP 마스터] 계산서/현금영수증 신청 접수 ({biz_name})"
     body = f"""
@@ -2331,7 +2331,7 @@ def send_tax_invoice_request_email(user_id, biz_num, biz_name, rep_name, address
 
 def send_password_recovery_email(user_email, temp_pw):
     sender_email = "jeon080423@gmail.com"
-    password = st.secrets["EMAIL_PASSWORD"]
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
     subject = "[AHP 마스터] 임시 비밀번호 안내"
     body = f"""안녕하세요. 요청하신 계정의 임시 비밀번호를 안내해 드립니다.
@@ -4014,6 +4014,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
         if isinstance(survey_id_param, list):
             survey_id_param = survey_id_param[0]
 
+    # [shjeon 전용] 박한라 설문 ID 판별 (2026-10-09 수정 반영용)
+    _SHJEON_SURVEY_ID = "1NkDZ2NEirWepjTPubG1DZ4weR0wbrWX_GfZwS0mAKl8"
+    _is_shjeon_survey = (survey_id_param == _SHJEON_SURVEY_ID)
+
     submitted_key = f"survey_submitted_{survey_id_param}"
     if st.session_state.get(submitted_key):
         # 1. HTML/CSS를 이용한 모던하고 수려한 감사 카드 UI 렌더링
@@ -4373,12 +4377,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 resp_data["age"] = st.text_input(f"{age_label} " + _("(세)", "(Years)"), value="", placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_text")
             
     if demographics.get("gender"):
-        resp_data["gender"] = st.radio(f"{sq_idx}) " + _("성별 *", "Gender *"), [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
+        _gender_lbl = _("성별", "Gender") if _is_shjeon_survey else _("성별 *", "Gender *")
+        resp_data["gender"] = st.radio(f"{sq_idx}) " + _gender_lbl, [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
         sq_idx += 1
     
     # 경력년수: 개방형 vs 5년 단위 선택형
     if demographics.get("experience"):
-        exp_label = f"{sq_idx}) " + _("경력년수 *", "Years of Experience *")
+        _exp_lbl = _("경력년수", "Years of Experience") if _is_shjeon_survey else _("경력년수 *", "Years of Experience *")
+        exp_label = f"{sq_idx}) " + _exp_lbl
         sq_idx += 1
         exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
         if exp_type == "5년 단위 선택형":
@@ -4395,7 +4401,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
     #     sq_idx += 1
         
     if demographics.get("email"):
-        email_label = f"{sq_idx}) " + _("이메일 *", "Email *")
+        _email_lbl = _("이메일", "Email") if _is_shjeon_survey else _("이메일 *", "Email *")
+        email_label = f"{sq_idx}) " + _email_lbl
         email_options = [_("직접 입력", "Enter directly"), _("응답거절", "Refuse to respond")]
         email_choice = st.radio(
             email_label,
@@ -4459,7 +4466,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .lvl3sub { flex: 1; display: flex; flex-direction: column; }
 .shjeon-desc .diag .lvl3sub .conn-v2 { align-self: center; width: 2px; height: 24px; background: #333; }
 .shjeon-desc .diag .lvl3 { flex: 1; border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; box-sizing: border-box; text-align: center; }
-</style><div class="shjeon-desc"><h3 class="shj-title">가. 응답 방법 및 응답 예</h3><p>보상위원회 특성을 1:1로 비교하실 때, 두 특성 중 상대적으로 더 중요한 요소에 선택하고, 선택한 특성이 중요한 정도를 1~9점 척도에서 체크(√)해 주시면 됩니다.</p><p><strong>예시:</strong> 「외형적 독립성」과 「실질적 독립성」을 비교할 때, <strong>「실질적 독립성」이</strong> 「외형적 독립성」보다 중요하다고 생각하시면 평가항목<strong>「실질적 독립성」</strong>을 선택합니다. <strong>「실질적 독립성」이</strong> 「외형적 독립성」에 비해 중요한 정도가 <strong>'아주 많이'</strong>라고 생각하시면, 아래와 같이 <strong>「실질적 독립성」 쪽의 7번</strong>에 체크(√)합니다.</p><table class="scale"><colgroup><col class="scale-item"><col span="17" class="scale-col"><col class="scale-item"></colgroup><tr><th rowspan="2" class="scale-item">평가<br>항목</th><th class="scale-col">극히<br>많이</th><th class="scale-col">대단히<br>많이</th><th class="scale-col">아주<br>많이</th><th class="scale-col">매우<br>많이</th><th class="scale-col">많이</th><th class="scale-col">상당히</th><th class="scale-col">약간</th><th class="scale-col">조금</th><th class="scale-col">동등</th><th class="scale-col">조금</th><th class="scale-col">약간</th><th class="scale-col">상당히</th><th class="scale-col">많이</th><th class="scale-col">매우<br>많이</th><th class="scale-col">아주<br>많이</th><th class="scale-col">대단히<br>많이</th><th class="scale-col">극히<br>많이</th><th rowspan="2" class="scale-item">평가<br>항목</th></tr><tr style="background:#fafafa; font-weight:600;"><td class="scale-col">9</td><td class="scale-col">8</td><td class="scale-col">7</td><td class="scale-col">6</td><td class="scale-col">5</td><td class="scale-col">4</td><td class="scale-col">3</td><td class="scale-col">2</td><td class="scale-col">1</td><td class="scale-col">2</td><td class="scale-col">3</td><td class="scale-col">4</td><td class="scale-col">5</td><td class="scale-col">6</td><td class="scale-col">7</td><td class="scale-col">8</td><td class="scale-col">9</td></tr><tr><td class="scale-item">외형적<br>독립성</td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col" style="font-size:18px; font-weight:bold; color:#1e40af;">√</td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-item">실질적<br>독립성</td></tr></table></div>"""
+</style><div class="shjeon-desc"><h3 class="shj-title">가. 응답 방법 및 응답 예</h3><p>보상위원회 특성을 1:1로 비교하실 때, 두 특성 중 상대적으로 더 중요한 요소에 선택하고, 선택한 특성이 중요한 정도를 1~9점 척도에서 체크(√)해 주시면 됩니다.</p><p><strong>예시:</strong> 「외형적 독립성」과 「실질적 독립성」을 비교할 때, <strong>「실질적 독립성」</strong>이 「외형적 독립성」보다 중요하다고 생각하시면 평가항목<strong>「실질적 독립성」</strong>을 선택합니다. <strong>「실질적 독립성」</strong>이 「외형적 독립성」에 비해 중요한 정도가 <strong>'아주 많이'</strong>라고 생각하시면, 아래와 같이 <strong>「실질적 독립성」 쪽의 7번</strong>에 체크(√)합니다.</p><table class="scale"><colgroup><col class="scale-item"><col span="17" class="scale-col"><col class="scale-item"></colgroup><tr><th rowspan="2" class="scale-item">평가<br>항목</th><th class="scale-col">극히<br>많이</th><th class="scale-col">대단히<br>많이</th><th class="scale-col">아주<br>많이</th><th class="scale-col">매우<br>많이</th><th class="scale-col">많이</th><th class="scale-col">상당히</th><th class="scale-col">약간</th><th class="scale-col">조금</th><th class="scale-col">동등</th><th class="scale-col">조금</th><th class="scale-col">약간</th><th class="scale-col">상당히</th><th class="scale-col">많이</th><th class="scale-col">매우<br>많이</th><th class="scale-col">아주<br>많이</th><th class="scale-col">대단히<br>많이</th><th class="scale-col">극히<br>많이</th><th rowspan="2" class="scale-item">평가<br>항목</th></tr><tr style="background:#fafafa; font-weight:600;"><td class="scale-col">9</td><td class="scale-col">8</td><td class="scale-col">7</td><td class="scale-col">6</td><td class="scale-col">5</td><td class="scale-col">4</td><td class="scale-col">3</td><td class="scale-col">2</td><td class="scale-col">1</td><td class="scale-col">2</td><td class="scale-col">3</td><td class="scale-col">4</td><td class="scale-col">5</td><td class="scale-col">6</td><td class="scale-col">7</td><td class="scale-col">8</td><td class="scale-col">9</td></tr><tr><td class="scale-item">외형적<br>독립성</td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-col" style="font-size:18px; font-weight:bold; color:#1e40af;">√</td><td class="scale-col"></td><td class="scale-col"></td><td class="scale-item">실질적<br>독립성</td></tr></table></div>"""
     _SHJEON_HTML_2 = """
 <style>
 .shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
@@ -4488,7 +4495,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .lvl3sub .conn-v2 { align-self: center; width: 2px; height: 24px; background: #333; }
 .shjeon-desc .diag .lvl3 { flex: 1; border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; box-sizing: border-box; text-align: center; }
 </style>
-<div class="shjeon-desc"><h3 class="shj-title">나. 응답 일관성</h3><p>AHP에서는 응답 간 논리적 일관성을 확인합니다. 응답 과정에서 일관성 기준을 벗어나는 경우 시스템에서 해당 내용을 안내하며, 응답자는 필요한 경우 기존 응답을 다시 확인하거나 수정할 수 있습니다.</p><div class="cause-title">[원인1] 순위 일관성 결여</div><div class="cause-box">예) A가 B보다 중요하다고 응답하고, B가 C보다 중요하다고 응답했다면, A가 C보다 중요하다고 응답해야 함에도 불구하고 C가 A보다 중요하다고 응답한 경우</div><div class="cause-title">[원인2] 가중치 일관성 결여</div><div class="cause-box">예) A가 B보다 2배 중요하다고 응답하고, A가 C보다 4배 중요하다고 응답했다면, B가 C보다 2배 중요하다고 응답해야 함에도 불구하고 B가 C보다 9배 중요하다고 응답한 경우</div></div>"""
+<div class="shjeon-desc"><h3 class="shj-title">나. 응답 일관성</h3><p>AHP에서는 응답 간 논리적 일관성을 확인합니다. 평가 진행 중 평가의 논리적 일관성이 기준치에서 벗어날 경우 평가를 다시 살펴보는 절차를 거치도록 하였습니다. 응답의 일관성이 낮은 경우 마지막 응답에 음영표시를 통해 안내드리오니 다시한번 검토 부탁드립니다. 응답자는 필요한 경우 기존 응답을 다시 확인하거나 수정할 수 있습니다.</p><div class="cause-title">[원인1] 순위 일관성 결여</div><div class="cause-box">예) A가 B보다 중요하다고 응답하고, B가 C보다 중요하다고 응답했다면, A가 C보다 중요하다고 응답해야 함에도 불구하고 C가 A보다 중요하다고 응답한 경우</div><div class="cause-title">[원인2] 가중치 일관성 결여</div><div class="cause-box">예) A가 B보다 2배 중요하다고 응답하고, A가 C보다 4배 중요하다고 응답했다면, B가 C보다 2배 중요하다고 응답해야 함에도 불구하고 B가 C보다 9배 중요하다고 응답한 경우</div></div>"""
     _SHJEON_HTML_3 = """
 <style>
 .shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
@@ -4522,12 +4529,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .lvl3sub .t-conn { margin: 0 -15px; }
 .shjeon-desc .diag .lvl3 { flex: 1; border: 2px solid #333; padding: 10px 4px; font-size: 13.5px; box-sizing: border-box; text-align: center; min-height: 100px; display: flex; align-items: center; justify-content: center; }
 </style>
-<div class="shjeon-desc"><h3 class="shj-title">다. AHP 평가구조 및 평가 내용</h3><div class="diag"><div class="lvl1">보상위원회 품질의 상대적 중요성</div><div class="conn-v"></div><div class="lvl2row"><div class="lvl2col"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl2">외형적 독립성</div><div class="conn-v-lvl2"></div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">보상위원회<br>사외이사<br>비율</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">CEO<br>참여<br>여부</div></div></div></div><div class="lvl2col"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl2">실질적 독립성</div><div class="conn-v-lvl2"></div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">회색<br>사외이사<br>비율</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">타사<br>경영진<br>비율</div></div></div></div><div class="lvl2col"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl2">전문성</div><div class="conn-v-lvl2"></div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">보상위원의<br>회계·재무·인사<br>전문가 비율</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">보상위원장이<br>회계·재무·인사<br>전문가 여부</div></div></div></div><div class="lvl2col"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl2">활동성</div><div class="conn-v-lvl2"></div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">보상위원회<br>참석률</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">보상위원회<br>개최횟수</div></div></div></div></div><table class="hier"><tr><th style="width:30%;">변수</th><th>설명</th></tr><tr><td class="concept2">외형적 독립성</td><td>보상위원회가 경영진으로부터 제도적, 구조적으로 분리되어 있는 정도로서 보상위원회의 구성원 중 사외이사가 차지하는 비율, 내부 경영진 또는 CEO의 위원회 참여 여부 등 객관적으로 관찰가능한 위원회의 특성을 의미함</td></tr><tr><td><div class="inset">보상위원회 사외이사비율</div></td><td>보상위원회 전체 위원 중 사외이사가 차지하는 비율</td></tr><tr><td><div class="inset">CEO 참여여부</div></td><td>보상위원회에 CEO가 참여하는지 여부</td></tr><tr><td class="concept2">실질적 독립성</td><td>보상위원이 경영진과의 경제적, 사회적, 인적관계 등의 영향으로부터 벗어나 경영진의 보상에 대하여 객관적이고 독립적인 판단과 감시를 수행할 수 있는 능력과 상태를 의미 함</td></tr><tr><td><div class="inset">회색 사외이사비율</div></td><td>해당 기업 혹은 해당 기업과 계열관계에 있는 기업의 임원이 이사회에 사외이사로 참여하는 경우를 회색사외이사로 정의하고, 보상위원회 전체 위원 중 회색사외이사가 차지하는 비율</td></tr><tr><td><div class="inset">타 기업 경영진비율</div></td><td>보상위원회 전체 위원 가운데 타 기업의 경영진이 차지하는 비율</td></tr><tr><td class="concept2">전문성</td><td>보상위원회 구성원이 기업의 보상철학 및 보상의 유형별 특성과 효과를 이해할 수 있는 전문적 지식과 능력, 경험을 의미 함</td></tr><tr><td><div class="inset">보상위원의 회계·재무·인사조직 전공자 비율</div></td><td>보상위원회 위원 가운데 회계, 재무 또는 인사조직 전문가가 차지하는 비율</td></tr><tr><td><div class="inset">보상위원장이회계·재무·인사조직 전공자 여부</div></td><td>보상위원회 위원장이 회계, 재무 또는 인사조직 전문가인지 여부</td></tr><tr><td class="concept2">활동성</td><td>보상위원회가 경영자 보상을 결정하기 위한 기능을 수행하기 위하여 회의를 개최하고, 위원들이 이에 지속적으로 참여하는 등 위원회 업무에 실제로 시간과 노력을 투입하는 정도를 의미함</td></tr><tr><td><div class="inset">보상위원회 참석률</div></td><td>보상위원회 위원의 보상위원회 평균 회의 참석률</td></tr><tr><td><div class="inset">보상위원회 개최횟수</div></td><td>보상위원회 회의가 개최된 횟수</td></tr></table></div>"""
+<div class="shjeon-desc"><h3 class="shj-title">다. AHP 평가구조 및 평가 내용</h3><div class="diag"><div class="lvl1">보상위원회 품질의 상대적 중요성</div><div class="conn-v"></div><div style="text-align:left; font-weight:700; font-size:15px; margin:0 0 6px 0;">개념:</div><div class="lvl2row"><div class="lvl2col"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl2">Ⅰ. 외형적 독립성</div><div class="conn-v-lvl2"></div><div style="text-align:left; font-weight:700; font-size:13px; margin:0 0 4px 5px;">변수:</div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">① 보상위원회<br>사외이사비율</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">② CEO참여여부</div></div></div></div><div class="lvl2col"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl2">Ⅱ. 실질적 독립성</div><div class="conn-v-lvl2"></div><div style="text-align:left; font-weight:700; font-size:13px; margin:0 0 4px 5px;">변수:</div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">③ 회색<br>사외이사비율</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">④ 타사경영진비율</div></div></div></div><div class="lvl2col"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl2">Ⅲ. 전문성</div><div class="conn-v-lvl2"></div><div style="text-align:left; font-weight:700; font-size:13px; margin:0 0 4px 5px;">변수:</div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">⑤ 보상위원<br>회계·재무·인사<br>전공위원 비율</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">⑥ 보상위원장이<br>회계·재무·인사<br>전공자 여부</div></div></div></div><div class="lvl2col"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl2">Ⅳ. 활동성</div><div class="conn-v-lvl2"></div><div style="text-align:left; font-weight:700; font-size:13px; margin:0 0 4px 5px;">변수:</div><div class="lvl3pair"><div class="lvl3sub"><div class="t-conn"><div class="t-h off"></div><div class="t-v"></div><div class="t-h"></div></div><div class="lvl3">⑦ 보상위원회<br>참석률</div></div><div class="lvl3sub"><div class="t-conn"><div class="t-h"></div><div class="t-v"></div><div class="t-h off"></div></div><div class="lvl3">⑧ 보상위원회<br>개최횟수</div></div></div></div></div><table class="hier"><tr><th colspan="2" style="text-align:center;">개념의 정의</th></tr><tr><td class="concept2" style="width:30%;">Ⅰ. 외형적 독립성</td><td>보상위원회 구성, 위원 자격 및 선임 절차 등 공식적인 지배구조 체계에 의해 경영진 및 지배주주로부터의 독립성이 제도적으로 확보된 정도</td></tr><tr><td class="concept2">Ⅱ. 실질적 독립성</td><td>경영자 보상에 관한 심의 및 의사결정 과정에서 경영진과 지배주주의 영향력에 종속되지 않고, 보상위원회가 독자적인 판단과 재량권을 실제로 행사하는 정도</td></tr><tr><td class="concept2">Ⅲ. 전문성</td><td>보상위원회 위원들이 경영성과의 측정과 평가, 경영자 보상체계의 설계, 보상수준의 적정성 판단 및 보상계약의 유인효과 분석에 필요한 전문지식과 실무경험을 보유한 정도</td></tr><tr><td class="concept2">Ⅳ. 활동성</td><td>보상위원회가 경영자 보상에 관한 심의 및 감독기능을 수행하기 위해 회의를 개최하고, 보상관련 안건을 검토하며, 위원들이 이러한 활동에 참여하는 정도</td></tr><tr><th colspan="2" style="text-align:center;">변수의 정의</th></tr><tr><td><div class="inset">① 보상위원회 사외이사비율</div></td><td>보상위원회 전체 위원 중 사외이사가 차지하는 비율</td></tr><tr><td><div class="inset">② CEO 참여여부</div></td><td>보상위원회에 CEO가 참여하는지 여부</td></tr><tr><td><div class="inset">③ 회색 사외이사비율</div></td><td>해당 기업 혹은 해당 기업과 계열관계에 있는 기업의 임원이 이사회에 사외이사로 참여하는 경우를 회색사외이사로 정의하고, 보상위원회 전체 위원 중 회색사외이사가 차지하는 비율</td></tr><tr><td><div class="inset">④ 타사 경영진비율</div></td><td>보상위원회 전체 위원 가운데 타 기업의 경영진이 차지하는 비율</td></tr><tr><td><div class="inset">⑤ 보상위원의 회계·재무·인사조직 전공자 비율</div></td><td>보상위원회 위원 가운데 회계, 재무 또는 인사조직 전공자가 차지하는 비율</td></tr><tr><td><div class="inset">⑥ 보상위원장이 회계·재무·인사조직 전공자 여부</div></td><td>보상위원회 위원장이 회계, 재무 또는 인사조직 전공자인지 여부</td></tr><tr><td><div class="inset">⑦ 보상위원회 참석률</div></td><td>보상위원회 위원의 보상위원회 평균 회의 참석률</td></tr><tr><td><div class="inset">⑧ 보상위원회 개최횟수</div></td><td>보상위원회 회의가 개최된 횟수</td></tr></table></div>"""
     _SHJEON_HTML_SURVEY_IDS = ["1NkDZ2NEirWepjTPubG1DZ4weR0wbrWX_GfZwS0mAKl8"]
 
     with st.container():
         # [shjeon 전용] 특정 설문은 HTML 설명으로 렌더링 (이미지 대신)
         if survey_id_param in _SHJEON_HTML_SURVEY_IDS:
+            # [2026-10-09] 박한라 요청: 2. 설문 방법 및 유의사항 상단 네모박스 안내문
+            _SHJEON_NOTICE = """<div class="shjeon-desc"><div style="border:2px solid #333; padding:14px 18px; margin:0 0 24px 0;"><p style="margin:0;">본 설문은 「보상위원회의 특성의 중요성」을 대상으로 AHP(Analytic Hierarchy Process)기법을 활용하여 상대적 중요도를 파악하기 위해 작성되었습니다. 보상위원회 특성들을 쌍으로 묶어 1:1 비교 평가를 진행합니다. 1:1 비교 평가 시 두 특성 중 상대적으로 '더 중요한 특성'에 대해 1~9점을 척도로 '더 중요한 정도'를 선택하시면 됩니다. 평가 진행 중 평가의 논리적 일관성이 기준치에서 벗어날 경우 평가를 다시 살펴보는 절차를 거치도록 하였습니다. 응답의 일관성이 낮은 경우 마지막 응답에 음영표시를 통해 안내드리오니 다시한번 검토 부탁드립니다.</p></div></div>"""
+            st.markdown(_SHJEON_NOTICE, unsafe_allow_html=True)
             st.markdown(_SHJEON_HTML_1, unsafe_allow_html=True)
             st.markdown(
                 '<div style="margin: 28px auto; width: 100%; border-top: 1px solid #e2e8f0;"></div>',
@@ -4639,12 +4649,15 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 pass
 
         # 4. AHP 쌍대비교 문항 생성
-        st.subheader(f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)"))
+        _pairwise_title = _("3. 보상위원회 특성-개념의 상대적 중요도 평가", "3. Evaluation of Relative Importance between Concepts (Pairwise Comparison)") if _is_shjeon_survey else f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)")
+        st.subheader(_pairwise_title)
         ahp_section_prefix = f"{section_num}"
         section_num += 1
         
-        st.info(_("더 중요한 방향으로 숫자를 선택하세요. **1**=동등, 숫자가 클수록 해당 방향의 요인이 더 중요합니다.",
-                  "Select the number toward the more important factor. **1**=Equal, larger number = more important."))
+        # [2026-10-09] 박한라 요청: shjeon 설문에서는 '더 중요한 방향으로~' 안내문 삭제
+        if not _is_shjeon_survey:
+            st.info(_("더 중요한 방향으로 숫자를 선택하세요. **1**=동등, 숫자가 클수록 해당 방향의 요인이 더 중요합니다.",
+                      "Select the number toward the more important factor. **1**=Equal, larger number = more important."))
         if cr_guide_method == "realtime":
             st.markdown(_(
                 ":blue[**💡 실시간 가이드 안내 (파란색 배경)**]: 앞선 응답들과의 논리적 연관성(CR)을 분석하여, 각 평가 영역의 **마지막 연계 문항**에서 :red[**권장 선택 구간**]이 파란색으로 자동 표시됩니다. (초반 문항은 본인의 판단에 따라 자유롭게 선택하시면 됩니다.)",
@@ -4878,7 +4891,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     if main_rows_html:
                         card_html = f"""
                         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-top: 0px; margin-bottom: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("대분류 요인 정의", "Main Criteria Definitions")}</h5>
+                            <h5 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("개념의 정의", "Main Criteria Definitions") if _is_shjeon_survey else _("대분류 요인 정의", "Main Criteria Definitions")}</h5>
                             <div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                                 {main_rows_html}
                             </div>
