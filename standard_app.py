@@ -4471,7 +4471,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
 .shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
 .shjeon-desc table.hier { border-collapse: collapse; width: 100%; margin: 16px 0 0 0; font-size: 14px; }
-.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 10px 12px; text-align: left; vertical-align: top; }
+.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 5px 12px; text-align: left; vertical-align: top; }
 .shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
 .shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
 .shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
@@ -4499,7 +4499,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
 .shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
 .shjeon-desc table.hier { border-collapse: collapse; width: 100%; margin: 16px 0 0 0; font-size: 14px; }
-.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 10px 12px; text-align: left; vertical-align: top; }
+.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 5px 12px; text-align: left; vertical-align: top; }
 .shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
 .shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
 .shjeon-desc .diag { text-align: center; margin: 10px 0 20px 0; }
@@ -4528,7 +4528,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .cause-title { font-size: 16px; margin: 18px 0 8px 20px; }
 .shjeon-desc h3.shj-title { font-size: 20px; font-weight: 700; margin: 0 0 14px 0; }
 .shjeon-desc table.hier { border-collapse: collapse; width: 100%; margin: 16px 0 0 0; font-size: 14px; }
-.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 10px 12px; text-align: left; vertical-align: top; }
+.shjeon-desc table.hier th, .shjeon-desc table.hier td { border: 1px solid #333; padding: 5px 12px; text-align: left; vertical-align: top; }
 .shjeon-desc table.hier th { background: #f7f7f7; font-weight: 700; text-align: center; }
 .shjeon-desc table.hier td.concept { text-align: center; vertical-align: middle; font-weight: 600; }
 .hier td.concept2 { font-weight: 700; }
