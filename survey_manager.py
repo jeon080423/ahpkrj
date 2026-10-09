@@ -794,20 +794,31 @@ def get_survey_stats(spreadsheet_id):
     client = get_survey_gspread_client()
     if not client:
         return {"completed": 0, "abandoned_cr": 0, "visits": 0, "abandoned_bounce": 0}
+    
+    completed_count = 0
+    visits = 0
+    abandoned_cr = 0
         
     try:
         spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
-        # 1. 완료자 수 (Raw_Data 행 개수 - 헤더행 1)
-        raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
-        completed_count = max(0, len(run_gspread_with_retry(raw_sheet.get_all_values)) - 1)
+        # 1. 완료자 수 (Raw_Data 행 개수 - 헤더행 1) - 핵심 지표, 실패해도 계속 진행
+        try:
+            raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+            completed_count = max(0, len(run_gspread_with_retry(raw_sheet.get_all_values)) - 1)
+        except Exception:
+            completed_count = 0
         
-        # 2. 메타데이터 조회 (방문 및 CR 실패 횟수)
-        meta_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Survey_Metadata")
-        records = run_gspread_with_retry(meta_sheet.get_all_records)
-        meta_dict = {row["Field"]: row["Value"] for row in records}
-        
-        visits = int(meta_dict.get("Visit_Count", 0))
-        abandoned_cr = int(meta_dict.get("Abandoned_CR_Count", 0))
+        # 2. 메타데이터 조회 (방문 및 CR 실패 횟수) - 실패해도 완료자 수는 유지
+        try:
+            meta_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Survey_Metadata")
+            records = run_gspread_with_retry(meta_sheet.get_all_records)
+            meta_dict = {row["Field"]: row["Value"] for row in records if "Field" in row and "Value" in row}
+            
+            visits = int(meta_dict.get("Visit_Count", 0))
+            abandoned_cr = int(meta_dict.get("Abandoned_CR_Count", 0))
+        except Exception:
+            # 메타데이터 실패 시 기본값 유지
+            pass
         
         # 조기 이탈 중단자 = 방문 수 - 완료 수 (음수가 되지 않도록 방어 코드 추가)
         abandoned_bounce = max(0, visits - completed_count)
