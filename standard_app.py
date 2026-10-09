@@ -4492,7 +4492,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
 .shjeon-desc .diag .lvl2row { display: flex; justify-content: center; gap: 18px; margin: 0 auto; max-width: 1100px; }
 .shjeon-desc .diag .lvl2col { flex: 1; display: flex; flex-direction: column; align-items: stretch; }
-.shjeon-desc .diag .lvl2 { border: 2px solid #333; padding: 10px 6px; font-size: 15px; text-align: center; margin: 0 5px; }
+.shjeon-desc .diag .lvl2 { border: 2px solid #333; padding: 12px 16px; font-size: 15px; text-align: center; margin: 0 5px; flex: 1; min-width: 140px; white-space: nowrap; }
 .shjeon-desc .diag .conn-v-lvl2 { width: 2px; height: 24px; background: #333; margin: 0 auto; }
 .shjeon-desc .diag .conn-h { height: 2px; background: #333; width: 60%; margin: 0 auto; }
 .shjeon-desc .diag .lvl3pair { display: flex; gap: 10px; width: 100%; }
@@ -4520,7 +4520,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .conn-v { width: 2px; height: 28px; background: #333; margin: 0 auto; }
 .shjeon-desc .diag .lvl2row { display: flex; justify-content: center; gap: 18px; margin: 0 auto; max-width: 1100px; }
 .shjeon-desc .diag .lvl2col { flex: 1; display: flex; flex-direction: column; align-items: stretch; }
-.shjeon-desc .diag .lvl2 { border: 2px solid #333; padding: 10px 6px; font-size: 15px; text-align: center; margin: 0 5px; }
+.shjeon-desc .diag .lvl2 { border: 2px solid #333; padding: 12px 16px; font-size: 15px; text-align: center; margin: 0 5px; flex: 1; min-width: 140px; white-space: nowrap; }
 .shjeon-desc .diag .conn-v-lvl2 { width: 2px; height: 24px; background: #333; margin: 0 auto; }
 .shjeon-desc .diag .conn-h { height: 2px; background: #333; width: 60%; margin: 0 auto; }
 .shjeon-desc .diag .lvl3pair { display: flex; gap: 10px; width: 100%; }
@@ -4555,7 +4555,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .t-h { flex: 1; height: 2px; background: #333; }
 .shjeon-desc .diag .t-h.off { background: transparent; }
 .shjeon-desc .diag .t-v { width: 2px; height: 20px; background: #333; flex-shrink: 0; margin: 0 -1px; }
-.shjeon-desc .diag .lvl2 { border: 2px solid #333; padding: 10px 6px; font-size: 15px; text-align: center; margin: 0 5px; }
+.shjeon-desc .diag .lvl2 { border: 2px solid #333; padding: 12px 16px; font-size: 15px; text-align: center; margin: 0 5px; flex: 1; min-width: 140px; white-space: nowrap; }
 .shjeon-desc .diag .conn-v-lvl2 { width: 2px; height: 24px; background: #333; margin: 0 auto; }
 .shjeon-desc .diag .lvl3pair { display: flex; width: 100%; }
 .shjeon-desc .diag .lvl3sub { flex: 1; display: flex; flex-direction: column; padding: 0 5px; box-sizing: border-box; }
