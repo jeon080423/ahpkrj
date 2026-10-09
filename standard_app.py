@@ -4684,7 +4684,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 pass
 
         # 4. AHP 쌍대비교 문항 생성
-        _pairwise_title = _("3. 보상위원회 특성-개념의 상대적 중요도 평가", "3. Evaluation of Relative Importance between Concepts (Pairwise Comparison)") if _is_shjeon_survey else f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)")
+        _pairwise_title = _("3. 보상위원회 특성-개념 간 상대적 중요도 평가", "3. Evaluation of Relative Importance between Concepts (Pairwise Comparison)") if _is_shjeon_survey else f"{section_num}. " + _("요인 간 상대적 중요도 평가 (쌍대비교)", "Evaluation of Relative Importance between Factors (Pairwise Comparison)")
         st.subheader(_pairwise_title)
         ahp_section_prefix = f"{section_num}"
         section_num += 1
