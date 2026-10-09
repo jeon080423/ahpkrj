@@ -2270,7 +2270,7 @@ section[data-testid="stSidebar"] > div:first-child {
                         **💡 연동 방법:**
                         1. 본인의 구글 드라이브에서 **새 구글 스프레드시트**를 하나 생성합니다.
                         2. 우측 상단의 '공유' 버튼을 눌러 아래의 서비스 계정 이메일을 **편집자** (Editor)로 추가합니다.
-                           * 서비스 계정 이메일: `ahp2-75@ahp2-486703.iam.gserviceaccount.com`
+                           * 서비스 계정 이메일: `ahp-master-v2@ahp-login.iam.gserviceaccount.com`
                         3. 생성한 스프레드시트의 **URL 주소** 또는 **시트 ID**를 복사하여 아래에 붙여넣어 주세요.
                         """)
                         col1, col2 = st.columns([1, 2])
