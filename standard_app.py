@@ -4825,7 +4825,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 parent_trans = translate_factor_if_default(comb['parent'])
                 # [2026-10-09] 박한라 요청: shjeon 설문 4. 변수간 중요도 평가 헤더
                 if _is_shjeon_survey and comb['type'] in ('sub', 'sub_sub') and not _shjeon_sec4_shown:
-                    st.subheader(_("4. 보상위원회 특성-변수간 중요도 평가", "4. Evaluation of Relative Importance between Variables"))
+                    st.subheader(_("4. 보상위원회 특성-변수간 상대적 중요도 평가", "4. Evaluation of Relative Importance between Variables"))
                     _shjeon_sec4_shown = True
                 if comb['type'] == 'sub_sub':
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(소분류) 요인 비교"), f"Sub-sub-criteria Comparison under [{parent_trans}]")
@@ -4840,7 +4840,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     _clean = parent_trans
                     for _rn in ["Ⅰ. ", "Ⅱ. ", "Ⅲ. ", "Ⅳ. "]:
                         _clean = _clean.replace(_rn, "")
-                    st.markdown(f"#### 4-{_shjeon_sec4_idx}. {_clean} 비교")
+                    st.markdown(f"#### 4-{_shjeon_sec4_idx}. {_clean} 상대적 중요도 평가")
                 elif not _is_shjeon_survey:
                     st.markdown(f"#### {parent_lbl}")
                 
