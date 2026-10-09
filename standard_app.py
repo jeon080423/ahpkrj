@@ -5347,7 +5347,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 subheader_text = f"{section_num}. " + _("개인정보 수집 및 답례품", "Personal Information Collection & Reward")
                 radio_label = _("개인정보 수집 및 답례품 지급을 위한 이용 동의에 동의하십니까? *", "Do you agree to the collection of personal information and use for reward distribution? *")
             else:
-                subheader_text = f"{section_num}. " + _("개인정보 수집 동의", "Consent to Personal Information Collection")
+                _pi_num = "5" if _is_shjeon_survey else section_num
+                subheader_text = f"{_pi_num}. " + _("개인정보 수집 동의", "Consent to Personal Information Collection")
                 radio_label = _("개인정보 수집 및 이용에 동의하십니까?", "Do you agree to the collection and use of personal information?")
                 
             st.subheader(subheader_text)
