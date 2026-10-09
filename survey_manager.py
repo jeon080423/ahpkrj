@@ -1508,8 +1508,21 @@ def get_cr_fix_suggestion(factors, answers, cr_limit=0.1):
     cur_raw = answers.get(f"{target_pair[0]}_{target_pair[1]}", 1)
     return target_pair, cur_raw, target_val
 
+# CR 계산 결과 캐시 (Streamlit 재실행 시 중복 계산 방지)
+_cr_cache = {}
+
 def calculate_matrix_cr(factors, answers):
-    """지정된 요인과 응답값을 바탕으로 일관성 비율(CR)을 계산합니다."""
+    """지정된 요인과 응답값을 바탕으로 일관성 비율(CR)을 계산합니다. (결과 캐싱됨)"""
+    # 캐시 키 생성 (해시 가능한 문자열)
+    try:
+        factors_key = tuple(factors)
+        answers_key = tuple(sorted((k, str(v)) for k, v in answers.items()))
+        cache_key = (factors_key, answers_key)
+        if cache_key in _cr_cache:
+            return _cr_cache[cache_key]
+    except Exception:
+        cache_key = None
+    
     n = len(factors)
     if n <= 2:
         return 0.0  # 1x1 또는 2x2 행렬은 일관성 비율이 항상 0에 수렴
@@ -1548,6 +1561,15 @@ def calculate_matrix_cr(factors, answers):
     
     ci = (max_eigenval - n) / (n - 1) if n > 1 else 0.0
     cr = ci / ri if ri > 0 else 0.0
+    # 계산 결과를 캐시에 저장
+    try:
+        if cache_key is not None:
+            # 캐시 크기 제한 (메모리 방지): 1000개 초과 시 초기화
+            if len(_cr_cache) > 1000:
+                _cr_cache.clear()
+            _cr_cache[cache_key] = cr
+    except Exception:
+        pass
     return cr
 
 def get_user_gspread_client(user_id):
