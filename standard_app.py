@@ -4528,7 +4528,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 .shjeon-desc .diag .lvl3sub .conn-v2 { align-self: center; width: 2px; height: 24px; background: #333; }
 .shjeon-desc .diag .lvl3 { flex: 1 1 0; border: 2px solid #333; padding: 8px 12px; font-size: 13.5px; box-sizing: border-box; text-align: center; min-height: 125px; display: flex; align-items: flex-start; justify-content: center; min-width: 0; }
 </style>
-<div class="shjeon-desc"><h3 class="shj-title">나. 응답 일관성</h3><p>AHP에서는 응답 간 논리적 일관성을 확인합니다. 평가 진행 중 평가의 논리적 일관성이 기준치에서 벗어날 경우 평가를 다시 살펴보는 절차를 거치도록 하였습니다. 응답의 일관성이 낮은 경우 마지막 응답에 음영표시를 통해 안내드리오니 다시한번 검토 부탁드립니다. 응답자는 필요한 경우 기존 응답을 다시 확인하거나 수정할 수 있습니다.</p><div class="cause-title">[원인1] 순위 일관성 결여</div><div class="cause-box">예) A가 B보다 중요하다고 응답하고, B가 C보다 중요하다고 응답했다면, A가 C보다 중요하다고 응답해야 함에도 불구하고 C가 A보다 중요하다고 응답한 경우</div><div class="cause-title">[원인2] 가중치 일관성 결여</div><div class="cause-box">예) A가 B보다 2배 중요하다고 응답하고, A가 C보다 4배 중요하다고 응답했다면, B가 C보다 2배 중요하다고 응답해야 함에도 불구하고 B가 C보다 9배 중요하다고 응답한 경우</div></div>"""
+<div class="shjeon-desc"><h3 class="shj-title">나. 응답 일관성</h3><p>AHP에서는 응답 간 논리적 일관성을 확인합니다. 평가 진행 중 평가의 논리적 일관성이 기준치에서 벗어날 경우 평가를 다시 살펴보는 절차를 거치도록 설계 되었습니다. 응답의 일관성이 낮은 경우 마지막 응답에 음영표시를 통해 안내드리오니 다시한번 검토 부탁드립니다. 응답자는 필요한 경우 기존 응답을 다시 확인하거나 수정할 수 있습니다.</p><div class="cause-title">[원인1] 순위 일관성 결여</div><div class="cause-box">예) A가 B보다 중요하다고 응답하고, B가 C보다 중요하다고 응답했다면, A가 C보다 중요하다고 응답해야 함에도 불구하고 C가 A보다 중요하다고 응답한 경우</div><div class="cause-title">[원인2] 가중치 일관성 결여</div><div class="cause-box">예) A가 B보다 2배 중요하다고 응답하고, A가 C보다 4배 중요하다고 응답했다면, B가 C보다 2배 중요하다고 응답해야 함에도 불구하고 B가 C보다 9배 중요하다고 응답한 경우</div></div>"""
     _SHJEON_HTML_3 = """
 <style>
 .shjeon-desc { font-size: 15px; line-height: 1.7; color: #1a1a1a; max-width: 100%; }
@@ -4569,7 +4569,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         # [shjeon 전용] 특정 설문은 HTML 설명으로 렌더링 (이미지 대신)
         if survey_id_param in _SHJEON_HTML_SURVEY_IDS:
             # [2026-10-09] 박한라 요청: 2. 설문 방법 및 유의사항 상단 네모박스 안내문
-            _SHJEON_NOTICE = """<div class="shjeon-desc"><div style="border:2px solid #333; padding:14px 18px; margin:0 0 24px 0;"><p style="margin:0;">본 설문은 「보상위원회의 특성의 중요성」을 대상으로 AHP(Analytic Hierarchy Process)기법을 활용하여 상대적 중요도를 파악하기 위해 작성되었습니다. 보상위원회 특성들을 쌍으로 묶어 1:1 비교 평가를 진행합니다. 1:1 비교 평가 시 두 특성 중 상대적으로 '더 중요한 특성'에 대해 1~9점을 척도로 '더 중요한 정도'를 선택하시면 됩니다. 평가 진행 중 평가의 논리적 일관성이 기준치에서 벗어날 경우 평가를 다시 살펴보는 절차를 거치도록 하였습니다. 응답의 일관성이 낮은 경우 마지막 응답에 음영표시를 통해 안내드리오니 다시한번 검토 부탁드립니다.</p></div></div>"""
+            _SHJEON_NOTICE = """<div class="shjeon-desc"><div style="border:2px solid #333; padding:14px 18px; margin:0 0 24px 0;"><p style="margin:0;">본 설문은 「보상위원회의 특성」을 대상으로 AHP(Analytic Hierarchy Process)기법을 활용하여 상대적 중요도를 파악하기 위해 작성되었습니다. 보상위원회 특성들을 쌍으로 묶어 1:1 비교 평가를 진행합니다. 1:1 비교 평가 시 두 특성 중 상대적으로 '더 중요한 특성'에 대해 1~9점을 척도로 '더 중요한 정도'를 선택하시면 됩니다. 평가 진행 중 평가의 논리적 일관성이 기준치에서 벗어날 경우 평가를 다시 살펴보는 절차를 거치도록 설계 되었습니다. 응답의 일관성이 낮은 경우 마지막 응답에 음영표시를 통해 안내드리오니 다시한번 검토 부탁드립니다.</p></div></div>"""
             st.markdown(_SHJEON_NOTICE, unsafe_allow_html=True)
             # [2026-10-09] 박한라 요청: '2. 설문 방법 및 유의사항' 섹션 제목 ('1. 응답자 기본 정보'와 동일 폰트)
             st.subheader("2. " + _("설문 방법 및 유의사항", "Survey Method and Notes"))
