@@ -1418,9 +1418,42 @@ def generate_hierarchy_tree_html(ahp_model, tier_level=2, lang="ko", translator=
     content_html = "\n".join(tree_lines)
     return f"""<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; font-family: 'Consolas', 'Courier New', Menlo, Monaco, monospace; font-size: 0.92rem; line-height: 1.15; color: #334155; white-space: pre-wrap; margin-top: 8px; margin-bottom: 18px;">{content_html}</div>"""
 
+# CR 수정 제안 캐시
+_cr_suggestion_cache = {}
+
 def get_cr_fix_suggestion(factors, answers, cr_limit=0.1):
     """
     CR이 한계치를 초과할 때 수정 시 CR을 가장 낮추는 쌍(pair)과 추천 값을 반환합니다.
+    (결과 캐싱됨)
+    - 1순위: 해당 쌍 하나를 수정해서 CR <= cr_limit를 달성 가능한 쌍+값
+    - 2순위: CR을 가장 크게 낮추는 쌍+값 (단 한 쌍 수정으로 limit 달성 불가 시)
+    반환값: (쌍 튜플 (factor_i, factor_j), 현재 값, 추천 값)
+    """
+    # 캐시 키 생성
+    try:
+        factors_key = tuple(factors)
+        answers_key = tuple(sorted((k, str(v)) for k, v in answers.items()))
+        cache_key = (factors_key, answers_key, str(cr_limit))
+        if cache_key in _cr_suggestion_cache:
+            return _cr_suggestion_cache[cache_key]
+    except Exception:
+        cache_key = None
+    
+    result = _get_cr_fix_suggestion_impl(factors, answers, cr_limit)
+    
+    # 캐시 저장
+    try:
+        if cache_key is not None:
+            if len(_cr_suggestion_cache) > 500:
+                _cr_suggestion_cache.clear()
+            _cr_suggestion_cache[cache_key] = result
+    except Exception:
+        pass
+    return result
+
+def _get_cr_fix_suggestion_impl(factors, answers, cr_limit=0.1):
+    """
+    CR이 한계치를 초과할 때 수정 시 CR을 가장 낮추는 쌍(pair)과 추천 값을 반환합니다. (내부 구현)
     - 1순위: 해당 쌍 하나를 수정해서 CR <= cr_limit를 달성 가능한 쌍+값
     - 2순위: CR을 가장 크게 낮추는 쌍+값 (단 한 쌍 수정으로 limit 달성 불가 시)
     반환값: (쌍 튜플 (factor_i, factor_j), 현재 값, 추천 값)
