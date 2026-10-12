@@ -12281,10 +12281,16 @@ with contextlib.nullcontext():
                         st.markdown("""
                         <style>
                         div[data-testid="column"] a[data-testid="stLinkButton"] {
-                            min-height: 38px;
+                            border-radius: 0.5rem !important;
+                            min-height: 2.5rem !important;
+                            padding: 0 !important;
                         }
                         div[data-testid="column"] a[data-testid="stLinkButton"] > div {
-                            font-weight: 400;
+                            border-radius: 0.5rem !important;
+                            min-height: 2.5rem !important;
+                            font-weight: 400 !important;
+                            padding-top: 0.25rem !important;
+                            padding-bottom: 0.25rem !important;
                         }
                         </style>
                         """, unsafe_allow_html=True)
