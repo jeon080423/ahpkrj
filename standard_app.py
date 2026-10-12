@@ -12381,34 +12381,7 @@ with contextlib.nullcontext():
 
                         # ── 버튼 2: 미리보기 ──────────────────────────────────
                         with col_p1:
-                            preview_link_html = f"""
-                            <a href="/?preview_id={preview_id}" target="_blank" style="text-decoration: none;">
-                                <div style="
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    width: 100%;
-                                    padding: 0.375rem 0.75rem;
-                                    border: 1px solid rgba(49, 51, 63, 0.2);
-                                    border-radius: 4px;
-                                    background-color: #ffffff;
-                                    color: #31333f;
-                                    font-size: 14px;
-                                    font-weight: 400;
-                                    line-height: 1.6;
-                                    cursor: pointer;
-                                    text-align: center;
-                                    box-sizing: border-box;
-                                    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
-                                "
-                                onmouseover="this.style.borderColor='#ff4b4b'; this.style.color='#ff4b4b';"
-                                onmouseout="this.style.borderColor='rgba(49, 51, 63, 0.2)'; this.style.color='#31333f';"
-                                >
-                                    {_("👁️ 설문지 미리보기", "👁️ Preview Survey Form")}
-                                </div>
-                            </a>
-                            """
-                            st.markdown(preview_link_html, unsafe_allow_html=True)
+                            st.link_button(_("👁️ 설문지 미리보기", "👁️ Preview Survey Form"), f"/?preview_id={preview_id}", use_container_width=True)
 
                         # ── 버튼 3: 배포 ──────────────────────────────────────
                         with col_p2:
