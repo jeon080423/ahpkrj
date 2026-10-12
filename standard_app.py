@@ -6235,30 +6235,12 @@ def get_portone_custom_services_html(user_id=None):
           <p class="desc" id="statusDesc">필요한 서비스를 선택해 주세요.</p>
           <hr class="divider">
           
-          <ul class="svc-list">
+          <ul class="svc-list" style="max-height: 220px; overflow-y: auto;">
+              <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 4px 0 2px 0; list-style: none;">[설문 구축]</li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅" onchange="updatePrice()">
-                      <span>AHP 온라인 설문 셋팅 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
-                  </label>
-              </li>
-              <li class="svc-item">
-                  <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_2" value="50000" data-name="결과 분석 대행" onchange="updatePrice()">
-                      <span>AHP 결과 분석 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원)</span></span>
-                  </label>
-              </li>
-              <li class="svc-item">
-                  <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 엑셀 양식 설정 대행" onchange="updatePrice()">
-                      <span>AHP 코딩 엑셀 설정 대행 <span style="color: #666; font-size: 0.75rem;">(30,000원)</span></span>
-                  </label>
-              </li>
-          
-              <li class="svc-item">
-                  <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_ext" value="100000" data-name="1개월 이용 연장" onchange="updatePrice()">
-                      <span>1개월 이용 연장 <span style="color: #666; font-size: 0.75rem;">(100,000원)</span></span>
+                      <span>AHP 온라인 설문 셋팅 <span style="color: #666; font-size: 0.75rem;">(50,000원/건)</span></span>
                   </label>
               </li>
               <li class="svc-item">
@@ -6273,10 +6255,30 @@ def get_portone_custom_services_html(user_id=None):
                       <span>웹설문 구조/기능 수정 <span style="color: #666; font-size: 0.75rem;">(100,000원/회)</span></span>
                   </label>
               </li>
+              <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[분석]</li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_2" value="50000" data-name="기본 결과 분석 대행" onchange="updatePrice()">
+                      <span>AHP 기본 결과 분석 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원/건)</span></span>
+                  </label>
+              </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_6" value="100000" data-name="기본 분석 외 추가 분석" onchange="updatePrice()">
                       <span>기본 분석 외 추가 분석 <span style="color: #666; font-size: 0.75rem;">(100,000원/건)</span></span>
+                  </label>
+              </li>
+              <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[기타]</li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 엑셀 양식 설정 대행" onchange="updatePrice()">
+                      <span>AHP 코딩 엑셀 설정 대행 <span style="color: #666; font-size: 0.75rem;">(30,000원/건)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_ext" value="100000" data-name="1개월 이용 연장" onchange="updatePrice()">
+                      <span>1개월 이용 연장 <span style="color: #666; font-size: 0.75rem;">(100,000원/월)</span></span>
                   </label>
               </li>
           </ul>
@@ -6574,29 +6576,12 @@ def get_unified_english_pricing_html(user_id):
               <h2 class="price" id="totalPriceDisplay">$0 USD</h2>
               <p class="desc" id="statusDesc" style="margin-bottom:0;">Please select the proxy services you need.</p>
               <hr>
-              <ul class="svc-list">
+              <ul class="svc-list" style="max-height: 220px; overflow-y: auto;">
+                  <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 4px 0 2px 0; list-style: none;">[Survey Setup]</li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
                           <input type="checkbox" id="svc_opt_1" value="33" data-name="Online Survey Setup" onchange="updatePrice()">
                           <span>AHP Online Survey Setup<br><span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
-                      </label>
-                  </li>
-                  <li class="svc-item">
-                      <label style="display: flex; align-items: flex-start;">
-                          <input type="checkbox" id="svc_opt_2" value="33" data-name="Result Analysis Proxy" onchange="updatePrice()">
-                          <span>AHP Result Analysis Proxy <span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
-                      </label>
-                  </li>
-                  <li class="svc-item">
-                      <label style="display: flex; align-items: flex-start;">
-                          <input type="checkbox" id="svc_opt_3" value="20" data-name="Coding Excel Sheet Setup" onchange="updatePrice()">
-                          <span>AHP Coding Excel Sheet Setup<br><span style="color: #666; font-size: 0.75rem;">($20 USD)</span></span>
-                      </label>
-                  </li>
-                  <li class="svc-item">
-                      <label style="display: flex; align-items: flex-start;">
-                          <input type="checkbox" id="svc_opt_ext" value="74" data-name="1 Month Extension" onchange="updatePrice()">
-                          <span>1 Month Extension <span style="color: #666; font-size: 0.75rem;">($74 USD)</span></span>
                       </label>
                   </li>
                   <li class="svc-item">
@@ -6611,10 +6596,30 @@ def get_unified_english_pricing_html(user_id):
                           <span>Web Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
                       </label>
                   </li>
+                  <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[Analysis]</li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_2" value="33" data-name="Basic Result Analysis Proxy" onchange="updatePrice()">
+                          <span>AHP Basic Result Analysis Proxy <span style="color: #666; font-size: 0.75rem;">($33 USD)</span></span>
+                      </label>
+                  </li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
                           <input type="checkbox" id="svc_opt_6" value="74" data-name="Additional Analysis Beyond Basic" onchange="updatePrice()">
                           <span>Additional Analysis Beyond Basic <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
+                      </label>
+                  </li>
+                  <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[Others]</li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_3" value="20" data-name="Coding Excel Sheet Setup" onchange="updatePrice()">
+                          <span>AHP Coding Excel Sheet Setup<br><span style="color: #666; font-size: 0.75rem;">($20 USD)</span></span>
+                      </label>
+                  </li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_ext" value="74" data-name="1 Month Extension" onchange="updatePrice()">
+                          <span>1 Month Extension <span style="color: #666; font-size: 0.75rem;">($74 USD)</span></span>
                       </label>
                   </li>
               </ul>
