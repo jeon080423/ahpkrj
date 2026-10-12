@@ -6261,6 +6261,18 @@ def get_portone_custom_services_html(user_id=None):
                       <span>1개월 이용 연장 <span style="color: #666; font-size: 0.75rem;">(100,000원)</span></span>
                   </label>
               </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_4" value="50000" data-name="설문 문구 수정" onchange="updatePrice()">
+                      <span>설문 문구 수정 <span style="color: #666; font-size: 0.75rem;">(50,000원/회)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_5" value="100000" data-name="설문 구조/기능 수정" onchange="updatePrice()">
+                      <span>설문 구조/기능 수정 <span style="color: #666; font-size: 0.75rem;">(100,000원/회)</span></span>
+                  </label>
+              </li>
           </ul>
           
           <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
@@ -6275,12 +6287,16 @@ def get_portone_custom_services_html(user_id=None):
             const opt1 = document.getElementById("svc_opt_1");
             const opt2 = document.getElementById("svc_opt_2");
             const opt3 = document.getElementById("svc_opt_3");
+            const opt4 = document.getElementById("svc_opt_4");
+            const opt5 = document.getElementById("svc_opt_5");
             
             let total = 0;
             let count = 0;
             if (opt1.checked) {{ total += parseInt(opt1.value); count++; }}
             if (opt2.checked) {{ total += parseInt(opt2.value); count++; }}
             if (opt3.checked) {{ total += parseInt(opt3.value); count++; }}
+            if (opt4.checked) {{ total += parseInt(opt4.value); count++; }}
+            if (opt5.checked) {{ total += parseInt(opt5.value); count++; }}
             
             document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + "원";
             if (count > 0) {{
@@ -6300,12 +6316,16 @@ def get_portone_custom_services_html(user_id=None):
             const opt1 = document.getElementById("svc_opt_1");
             const opt2 = document.getElementById("svc_opt_2");
             const opt3 = document.getElementById("svc_opt_3");
+            const opt4 = document.getElementById("svc_opt_4");
+            const opt5 = document.getElementById("svc_opt_5");
             
             let total = 0;
             let items = [];
             if (opt1.checked) {{ total += parseInt(opt1.value); items.push(opt1.getAttribute("data-name")); }}
             if (opt2.checked) {{ total += parseInt(opt2.value); items.push(opt2.getAttribute("data-name")); }}
             if (opt3.checked) {{ total += parseInt(opt3.value); items.push(opt3.getAttribute("data-name")); }}
+            if (opt4.checked) {{ total += parseInt(opt4.value); items.push(opt4.getAttribute("data-name")); }}
+            if (opt5.checked) {{ total += parseInt(opt5.value); items.push(opt5.getAttribute("data-name")); }}
             
             if (total === 0) {{
                 alert("결제하실 부가 서비스 대행 옵션을 하나 이상 선택해주세요.");
@@ -6571,6 +6591,18 @@ def get_unified_english_pricing_html(user_id):
                           <span>1 Month Extension <span style="color: #666; font-size: 0.75rem;">($74 USD)</span></span>
                       </label>
                   </li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_4" value="33" data-name="Survey Text Revision" onchange="updatePrice()">
+                          <span>Survey Text Revision <span style="color: #666; font-size: 0.75rem;">($33 USD/session)</span></span>
+                      </label>
+                  </li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_5" value="74" data-name="Survey Structure/Feature Revision" onchange="updatePrice()">
+                          <span>Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
+                      </label>
+                  </li>
               </ul>
               <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
                   Proxy Request/Inquiry : <br>Email: <b>jeon080423@gmail.com</b>
@@ -6658,6 +6690,8 @@ def get_unified_english_pricing_html(user_id):
             const opt2 = document.getElementById("svc_opt_2");
             const opt3 = document.getElementById("svc_opt_3");
             const optExt = document.getElementById("svc_opt_ext");
+            const opt4 = document.getElementById("svc_opt_4");
+            const opt5 = document.getElementById("svc_opt_5");
             
             let total = 0;
             let count = 0;
@@ -6666,6 +6700,8 @@ def get_unified_english_pricing_html(user_id):
             if (opt2 && opt2.checked) {{ total += parseInt(opt2.value); count++; items.push(opt2.getAttribute("data-name")); }}
             if (opt3 && opt3.checked) {{ total += parseInt(opt3.value); count++; items.push(opt3.getAttribute("data-name")); }}
             if (optExt && optExt.checked) {{ total += parseInt(optExt.value); count++; items.push(optExt.getAttribute("data-name")); }}
+            if (opt4 && opt4.checked) {{ total += parseInt(opt4.value); count++; items.push(opt4.getAttribute("data-name")); }}
+            if (opt5 && opt5.checked) {{ total += parseInt(opt5.value); count++; items.push(opt5.getAttribute("data-name")); }}
             
             document.getElementById("totalPriceDisplay").innerText = "$" + total.toLocaleString() + " USD";
             
@@ -6901,6 +6937,18 @@ def get_paypal_custom_services_html(user_id=None):
                       <span>1 Month Extension <span style="color: #666; font-size: 0.75rem;">($74 USD)</span></span>
                   </label>
               </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_4" value="33" data-name="Survey Text Revision" onchange="updatePrice()">
+                      <span>Survey Text Revision <span style="color: #666; font-size: 0.75rem;">($33 USD/session)</span></span>
+                  </label>
+              </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_5" value="74" data-name="Survey Structure/Feature Revision" onchange="updatePrice()">
+                      <span>Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
+                  </label>
+              </li>
           </ul>
           
           <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
@@ -6926,6 +6974,8 @@ def get_paypal_custom_services_html(user_id=None):
             const opt1 = document.getElementById("svc_opt_1");
             const opt2 = document.getElementById("svc_opt_2");
             const opt3 = document.getElementById("svc_opt_3");
+            const opt4 = document.getElementById("svc_opt_4");
+            const opt5 = document.getElementById("svc_opt_5");
             
             let total = 0;
             let count = 0;
@@ -6933,6 +6983,8 @@ def get_paypal_custom_services_html(user_id=None):
             if (opt1.checked) {{ total += parseInt(opt1.value); count++; items.push(opt1.getAttribute("data-name")); }}
             if (opt2.checked) {{ total += parseInt(opt2.value); count++; items.push(opt2.getAttribute("data-name")); }}
             if (opt3.checked) {{ total += parseInt(opt3.value); count++; items.push(opt3.getAttribute("data-name")); }}
+            if (opt4.checked) {{ total += parseInt(opt4.value); count++; items.push(opt4.getAttribute("data-name")); }}
+            if (opt5.checked) {{ total += parseInt(opt5.value); count++; items.push(opt5.getAttribute("data-name")); }}
             
             document.getElementById("totalPriceDisplay").innerText = "$" + total.toLocaleString() + " USD";
             
