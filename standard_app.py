@@ -6275,8 +6275,8 @@ def get_portone_custom_services_html(user_id=None):
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_6" value="100000" data-name="웹설문 심층 분석 대행" onchange="updatePrice()">
-                      <span>웹설문 심층 분석 대행 <span style="color: #666; font-size: 0.75rem;">(100,000원/건)</span></span>
+                      <input type="checkbox" id="svc_opt_6" value="100000" data-name="기본 분석 외 추가 분석" onchange="updatePrice()">
+                      <span>기본 분석 외 추가 분석 <span style="color: #666; font-size: 0.75rem;">(100,000원/건)</span></span>
                   </label>
               </li>
           </ul>
@@ -6613,8 +6613,8 @@ def get_unified_english_pricing_html(user_id):
                   </li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
-                          <input type="checkbox" id="svc_opt_6" value="74" data-name="Web Survey In-depth Analysis" onchange="updatePrice()">
-                          <span>Web Survey In-depth Analysis <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
+                          <input type="checkbox" id="svc_opt_6" value="74" data-name="Additional Analysis Beyond Basic" onchange="updatePrice()">
+                          <span>Additional Analysis Beyond Basic <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
                       </label>
                   </li>
               </ul>
@@ -6965,8 +6965,8 @@ def get_paypal_custom_services_html(user_id=None):
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_6" value="74" data-name="Web Survey In-depth Analysis" onchange="updatePrice()">
-                      <span>Web Survey In-depth Analysis <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
+                      <input type="checkbox" id="svc_opt_6" value="74" data-name="Additional Analysis Beyond Basic" onchange="updatePrice()">
+                      <span>Additional Analysis Beyond Basic <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
                   </label>
               </li>
           </ul>
