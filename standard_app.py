@@ -5649,6 +5649,61 @@ if "lang" in q_params:
         st.session_state.lang = "ko"
 
 # PortOne 자동 결제 승격 처리
+def verify_portone_payment(payment_id, expected_amount=None):
+    """PortOne API로 결제 검증 (모니터링 모드: 실패해도 차단하지 않고 로그만 남김)
+    Returns: (is_valid, message)
+    """
+    import urllib.request
+    import urllib.error
+    
+    # API 시크릿 확인
+    api_secret = None
+    try:
+        api_secret = st.secrets.get("PORTONE_API_SECRET", None)
+    except Exception:
+        pass
+    
+    if not api_secret:
+        # 시크릿 없으면 검증 스킵 (모니터링 모드)
+        print(f"[PortOne] API 시크릿 없음 - 검증 스킵 (payment_id={payment_id})")
+        return True, "API 시크릿 미설정으로 검증 스킵"
+    
+    if not payment_id:
+        print(f"[PortOne] payment_id 없음 - 검증 스킵")
+        return True, "payment_id 없음으로 검증 스킵"
+    
+    try:
+        url = f"https://api.portone.io/payments/{payment_id}"
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", f"PortOne {api_secret}")
+        req.add_header("Content-Type", "application/json")
+        
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            import json as _json
+            data = _json.loads(resp.read().decode('utf-8'))
+        
+        status = data.get("status", "")
+        amount_data = data.get("amount", {})
+        paid_amount = amount_data.get("total", 0) if isinstance(amount_data, dict) else 0
+        
+        print(f"[PortOne] 검증 결과: payment_id={payment_id}, status={status}, amount={paid_amount}, expected={expected_amount}")
+        
+        if status != "PAID":
+            return True, f"결제 상태가 PAID가 아님 ({status}) - 모니터링 모드로 통과"
+        
+        if expected_amount and int(paid_amount) != int(expected_amount):
+            return True, f"금액 불일치 (실제:{paid_amount}, 예상:{expected_amount}) - 모니터링 모드로 통과"
+        
+        return True, "검증 성공"
+        
+    except urllib.error.HTTPError as e:
+        print(f"[PortOne] API 오류: {e.code} - payment_id={payment_id}")
+        return True, f"API 오류 ({e.code}) - 모니터링 모드로 통과"
+    except Exception as e:
+        print(f"[PortOne] 검증 예외: {str(e)} - payment_id={payment_id}")
+        return True, f"검증 예외 ({str(e)}) - 모니터링 모드로 통과"
+
+
 if "portone_paid" in q_params and "user_id" in q_params:
     user_id_param = q_params.get("user_id", [""])[0] if isinstance(q_params.get("user_id"), list) else q_params.get("user_id", "")
     months_param = int(q_params.get("months", ["2"])[0] if isinstance(q_params.get("months"), list) else q_params.get("months", 2))
@@ -5658,6 +5713,11 @@ if "portone_paid" in q_params and "user_id" in q_params:
     event_applied_param = q_params.get("event_applied", ["N"])[0] if isinstance(q_params.get("event_applied"), list) else q_params.get("event_applied", "N")
     university_param = q_params.get("university", [""])[0] if isinstance(q_params.get("university"), list) else q_params.get("university", "")
     thesis_title_param = q_params.get("thesis_title", [""])[0] if isinstance(q_params.get("thesis_title"), list) else q_params.get("thesis_title", "")
+    payment_id_param = q_params.get("payment_id", [""])[0] if isinstance(q_params.get("payment_id"), list) else q_params.get("payment_id", "")
+    
+    # [보안] PortOne 결제 검증 (모니터링 모드: 실패해도 차단하지 않음)
+    _verify_ok, _verify_msg = verify_portone_payment(payment_id_param)
+    print(f"[PortOne] 결제 검증: user={user_id_param}, payment_id={payment_id_param}, result={_verify_ok}, msg={_verify_msg}")
     
     if user_id_param:
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -6108,10 +6168,13 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
           script.onload = function() {{
             win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
             const r = Math.random().toString(36).substring(2, 15);
+            const _payId = "pay-" + r;
+            // returnUrl에 paymentId 포함 (서버 검증용)
+            const returnUrlWithPayId = returnUrl + "&payment_id=" + encodeURIComponent(_payId);
             win.PortOne.requestPayment({{
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-              paymentId: "pay-" + r,
+              paymentId: _payId,
               orderName: "{order_name}",
               totalAmount: finalAmount,
               currency: "CURRENCY_KRW",
@@ -6127,7 +6190,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
                 alert("결제 실패: " + response.message);
                 win.close();
               }} else {{
-                win.location.href = returnUrl;
+                win.location.href = returnUrlWithPayId;
               }}
             }}).catch(function(error) {{
               alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
@@ -6402,10 +6465,13 @@ def get_portone_custom_services_html(user_id=None):
           script.onload = function() {{
             win.document.getElementById("statusMsg").innerText = "결제창을 띄우는 중입니다...";
             const r = Math.random().toString(36).substring(2, 15);
+            const _payId = "pay-" + r;
+            // returnUrl에 paymentId 포함 (서버 검증용)
+            const returnUrlWithPayId = returnUrl + "&payment_id=" + encodeURIComponent(_payId);
             win.PortOne.requestPayment({{
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
-              paymentId: "pay-" + r,
+              paymentId: _payId,
               orderName: "부가 서비스: " + planName + " - {safe_email}",
               totalAmount: amount,
               currency: "CURRENCY_KRW",
@@ -6421,7 +6487,7 @@ def get_portone_custom_services_html(user_id=None):
                 alert("결제 실패: " + response.message);
                 win.close();
               }} else {{
-                win.location.href = returnUrl;
+                win.location.href = returnUrlWithPayId;
               }}
             }}).catch(function(error) {{
               alert("결제 창 호출 중 오류가 발생했습니다: " + error.message);
