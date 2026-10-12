@@ -4924,14 +4924,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 {main_factor_trans}
                             </h4>"""
                         _shjeon_desc = "" if _is_shjeon_survey else main_desc_html
-                        card_html = f"""
-                        <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
-                            {_shjeon_h4}
-                            {_shjeon_desc}
-                            {sub_container_html}
-                        </div>
-                        """
-                        st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
+                        # [2026-10-12] 박한라 요청: shjeon 설문에서 정의 카드 도형도 모두 삭제
+                        _shjeon_card_empty = _is_shjeon_survey and not _shjeon_h4 and not _shjeon_desc and not sub_container_html
+                        if not _shjeon_card_empty:
+                            card_html = f"""
+                            <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                                {_shjeon_h4}
+                                {_shjeon_desc}
+                                {sub_container_html}
+                            </div>
+                            """
+                            st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
                 else:
                     main_rows_html = ""
                     if definitions:
