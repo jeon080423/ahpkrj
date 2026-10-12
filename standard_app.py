@@ -3920,12 +3920,35 @@ def render_survey_status_dashboard(survey_id):
             st.info("수집된 응답자 상세 정보가 없습니다.")
 
     # 6. 응답자 목록 및 데이터 다운로드
+    # NOTE (2026-10-13): 상단 "완료 응답자" 수는 Raw_Data 기준이므로, 목록도 Raw_Data(live_df)를
+    # 기준으로 삼고 인구통계 정보는 ID로 left-join 한다.
+    # (Demographic_Data 쓰기 누락 시 목록이 실제보다 적게 표시되던 불일치 수정)
     st.markdown('<div style="margin: 20px 0;"></div>', unsafe_allow_html=True)
     st.subheader("📋 실시간 응답자 목록 및 데이터")
 
-    if demo_df is not None and not demo_df.empty:
+    if live_df is not None and not live_df.empty:
+        # 기준: Raw_Data의 응답자 ID (완료 응답자 수와 일치 보장)
+        list_df = live_df[["ID"]].copy()
+        for _ts_col in ["제출시간", "제출 시간", "Timestamp"]:
+            if _ts_col in live_df.columns:
+                list_df[_ts_col] = live_df[_ts_col].values
+                break
+        # 인구통계 left-join (ID 기준, Demographic_Data 누락 행은 빈칸으로 표시)
+        if demo_df is not None and not demo_df.empty and "ID" in demo_df.columns:
+            _demo_unique = demo_df.drop_duplicates(subset=["ID"], keep="first").copy()
+            list_df["_join_id"] = list_df["ID"].astype(str).str.strip()
+            _demo_unique["_join_id"] = _demo_unique["ID"].astype(str).str.strip()
+            _merge_cols = [c for c in _demo_unique.columns if c not in ("ID", "_join_id")]
+            if _merge_cols:
+                list_df = list_df.merge(
+                    _demo_unique[["_join_id"] + _merge_cols],
+                    on="_join_id", how="left"
+                )
+            list_df = list_df.drop(columns=["_join_id"])
+        st.caption(f"총 {len(list_df)}명의 응답자 (상단 완료 응답자 수와 일치)")
+
         # 개인정보 보호: 성명 또는 이메일 마스킹
-        display_df = demo_df.copy()
+        display_df = list_df.copy()
         for col in display_df.columns:
             if "성명" in col or "이름" in col or "Name" in col:
                 display_df[col] = display_df[col].apply(
@@ -3942,8 +3965,7 @@ def render_survey_status_dashboard(survey_id):
         excel_buffer = io.BytesIO()
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
             display_df.to_excel(writer, index=False, sheet_name="Demographic_Data")
-            if live_df is not None and not live_df.empty:
-                live_df.to_excel(writer, index=False, sheet_name="Raw_Data")
+            live_df.to_excel(writer, index=False, sheet_name="Raw_Data")
 
         col_dl1, col_dl2 = st.columns([1, 3])
         with col_dl1:
