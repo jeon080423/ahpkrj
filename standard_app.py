@@ -11460,6 +11460,8 @@ with contextlib.nullcontext():
                                 for k in keys_to_clear:
                                     del st.session_state[k]
                                 st.rerun()
+                            if linked_sheet_id and st.button(_("🗑️ 응답 데이터 초기화", "🗑️ Reset Response Data"), type="secondary", use_container_width=True):
+                                show_reset_survey_dialog(linked_sheet_id, survey_title_display)
 
                         st.divider()
 
