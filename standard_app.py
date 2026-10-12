@@ -4051,6 +4051,28 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 return prefix + name
         return name
 
+    def _shjeon_two_line_label(name):
+        """[2026-10-12] 박한라 요청: 4번 섹션 쌍대비교 라벨을 두 줄로 표시"""
+        if not _is_shjeon_survey or not name:
+            return name
+        # ①~⑧ 변수 라벨을 의미 단위로 줄바꿈
+        breaks = [
+            ("① 보상위원회 사외이사비율", "① 보상위원회<br>사외이사비율"),
+            ("② CEO참여여부", "② CEO<br>참여여부"),
+            ("② CEO 참여여부", "② CEO<br>참여여부"),
+            ("③ 회색 사외이사비율", "③ 회색<br>사외이사비율"),
+            ("④ 타 기업 경영진 비율", "④ 타 기업<br>경영진 비율"),
+            ("④ 타사경영진비율", "④ 타 기업<br>경영진 비율"),
+            ("⑤ 보상위원의 회계·재무·인사조직 전공자 비율", "⑤ 보상위원의<br>회계·재무·인사조직 전공자 비율"),
+            ("⑥ 보상위원장이 회계·재무·인사조직 전공자 여부", "⑥ 보상위원장이<br>회계·재무·인사조직 전공자 여부"),
+            ("⑦ 보상위원회 참석률", "⑦ 보상위원회<br>참석률"),
+            ("⑧ 보상위원회 개최횟수", "⑧ 보상위원회<br>개최횟수"),
+        ]
+        for old, new in breaks:
+            if old in name:
+                return name.replace(old, new)
+        return name
+
     submitted_key = f"survey_submitted_{survey_id_param}"
     if st.session_state.get(submitted_key):
         # 1. HTML/CSS를 이용한 모던하고 수려한 감사 카드 UI 렌더링
@@ -5103,6 +5125,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         left_desc = translate_definition_if_default(left_f, definitions.get(left_f, "")) if definitions else ""
                         left_desc_esc = left_desc.replace('"', '&quot;')
                         left_trans = translate_factor_if_default(left_f)
+                        # [2026-10-12] 박한라 요청: 4번 섹션 라벨 두 줄 표시
+                        if _is_shjeon_survey and comb.get('type') in ('sub', 'sub_sub'):
+                            left_trans = _shjeon_add_numeral(left_trans, is_main=False)
+                            left_trans = _shjeon_two_line_label(left_trans)
                         st.markdown(f"""
                         <div title="{left_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {left_style["border"]}; 
                                     padding: 0px 8px; background-color: {left_style["bg"]}; color: {left_style["text"]}; 
@@ -5208,6 +5234,10 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         right_desc = translate_definition_if_default(right_f, definitions.get(right_f, "")) if definitions else ""
                         right_desc_esc = right_desc.replace('"', '&quot;')
                         right_trans = translate_factor_if_default(right_f)
+                        # [2026-10-12] 박한라 요청: 4번 섹션 라벨 두 줄 표시
+                        if _is_shjeon_survey and comb.get('type') in ('sub', 'sub_sub'):
+                            right_trans = _shjeon_add_numeral(right_trans, is_main=False)
+                            right_trans = _shjeon_two_line_label(right_trans)
                         st.markdown(f"""
                         <div title="{right_desc_esc}" style='text-align:center; font-weight:600; border: 1px solid {right_style["border"]}; 
                                     padding: 0px 8px; background-color: {right_style["bg"]}; color: {right_style["text"]}; 
