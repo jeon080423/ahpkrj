@@ -11525,7 +11525,10 @@ with contextlib.nullcontext():
                             st.markdown(_("##### 🌐 온라인 설문지 링크 (응답자 배포용)", "##### 🌐 Online Survey Link (For Distribution)"))
                             st.code(active_survey_url, language="text")
                             st.caption(_("💡 위 설문 링크를 복사하여 이메일이나 메신저로 응답 대상자에게 전달하세요.", "💡 Copy the survey link above and send it to respondents via email or messenger."))
-                            st.caption(_("💡 실제 조사 배포 전 테스트 응답을 **반드시 삭제**하세요.", "💡 Before distributing for actual survey, **be sure to delete** test responses."))
+                            st.markdown(_(
+                                "<span style='font-size:14px; color:rgba(49,51,63,0.6);'>💡 실제 조사 배포 전 테스트 응답을 <b style='color:#d32f2f;'>반드시 삭제</b>하세요.</span>",
+                                "<span style='font-size:14px; color:rgba(49,51,63,0.6);'>💡 Before distributing for actual survey, <b style='color:#d32f2f;'>be sure to delete</b> test responses.</span>"
+                            ), unsafe_allow_html=True)
 
                             gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
                             btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
