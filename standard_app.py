@@ -11452,7 +11452,7 @@ with contextlib.nullcontext():
 
                         if st.button(_("✨ 처음부터 새 설문 작성하기", "✨ Start a new survey from scratch"), type="secondary", use_container_width=True):
                             confirm_new_survey()
-                        if linked_sheet_id and st.button(_("🗑️ 응답 데이터 초기화", "🗑️ Reset Response Data"), type="secondary", use_container_width=True):
+                        if linked_sheet_id and st.button(_("🗑️ 응답 데이터만 초기화", "🗑️ Reset Response Data Only"), type="secondary", use_container_width=True):
                             show_reset_survey_dialog(linked_sheet_id, survey_title_display)
 
                         st.divider()
