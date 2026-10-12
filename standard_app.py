@@ -11451,17 +11451,9 @@ with contextlib.nullcontext():
                             ''', unsafe_allow_html=True)
 
                         if st.button(_("✨ 처음부터 새 설문 작성하기", "✨ Start a new survey from scratch"), type="secondary", use_container_width=True):
-                             confirm_new_survey()
-                        else:
-                            if st.button(_("✨ 폼 내용 모두 지우기 (초기화)", "✨ Clear all form contents (Initialize)"), type="secondary", use_container_width=True):
-                                st.session_state.editing_survey_id = None
-                                st.session_state.pop('tab2_tier_choice', None)
-                                keys_to_clear = [k for k in st.session_state.keys() if k.startswith('edit_') or k.startswith('sub_sub_') or k.startswith('survey_image_') or k.startswith('tq_')]
-                                for k in keys_to_clear:
-                                    del st.session_state[k]
-                                st.rerun()
-                            if linked_sheet_id and st.button(_("🗑️ 응답 데이터 초기화", "🗑️ Reset Response Data"), type="secondary", use_container_width=True):
-                                show_reset_survey_dialog(linked_sheet_id, survey_title_display)
+                            confirm_new_survey()
+                        if linked_sheet_id and st.button(_("🗑️ 응답 데이터 초기화", "🗑️ Reset Response Data"), type="secondary", use_container_width=True):
+                            show_reset_survey_dialog(linked_sheet_id, survey_title_display)
 
                         st.divider()
 
