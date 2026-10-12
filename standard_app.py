@@ -12277,6 +12277,18 @@ with contextlib.nullcontext():
                         except Exception:
                             pass
 
+                        # 미리보기 link_button과 일반 button의 모양을 완전히 통일
+                        st.markdown("""
+                        <style>
+                        div[data-testid="column"] a[data-testid="stLinkButton"] {
+                            min-height: 38px;
+                        }
+                        div[data-testid="column"] a[data-testid="stLinkButton"] > div {
+                            font-weight: 400;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+
                         col_save, col_p1, col_p2 = st.columns(3)
 
                         # ── 버튼 1: 저장 ─────────────────────────────────────
