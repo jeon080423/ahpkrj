@@ -7512,7 +7512,7 @@ with st.sidebar:
     if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
         if st.button(_("⭐ 정식 사용자로 전환하기", "⭐ Upgrade to Paid License Now"), key="sidebar_upgrade_btn", use_container_width=True):
             # '분석 요금제' 탭으로 이동 (로그인 상태 유지)
-            st.session_state["_goto_tab"] = _("분석 요금제", "Pricing")
+            st.session_state["_goto_tab"] = _("요금제", "Pricing")
             st.rerun()
     st.markdown("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
@@ -8280,7 +8280,7 @@ with contextlib.nullcontext():
         _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
         _("설문배포(무료)", "Survey Deploy (Free)"), 
         _("응답 현황", "Responses"),
-        _("분석 요금제", "Pricing"),
+        _("요금제", "Pricing"),
         _("컨설팅 문의", "Consulting")
     ], default=_tab_default)
         
@@ -10885,7 +10885,7 @@ with contextlib.nullcontext():
                                 st.error("⛔ **현재 데이터는 3표본을 초과하여 분석이 차단되었습니다.**\n\n지금 바로 업그레이드하고 끊김 없이 분석을 이어가세요!")
                                 if st.button("🚀 지금 업그레이드하고 무제한 분석하기", type="primary", use_container_width=True):
                                     # '분석 요금제' 탭으로 이동 (로그인 상태 유지)
-                                    st.session_state["_goto_tab"] = _("분석 요금제", "Pricing")
+                                    st.session_state["_goto_tab"] = _("요금제", "Pricing")
                                     st.rerun()
             except Exception as e:
                 st.error(f"파일 처리 오류 발생: {e}")
@@ -13178,7 +13178,6 @@ Thank you deeply for your valuable participation.
         ])
 
         with svc_tab_pricing:
-            st.markdown(_("## 서비스 요금 안내 <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 연구비/법인카드 및 계산서 지원</span>", "## Service Pricing <span style='font-size: 0.95rem; font-weight: 500; color: #0284c7; margin-left: 16px; background: #e0f2fe; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>💳 Research Cards & Invoices Supported</span>"), unsafe_allow_html=True)
 
             if st.session_state.lang == 'en':
                 st.components.v1.html(get_unified_english_pricing_html(st.session_state.user_id), height=560)
