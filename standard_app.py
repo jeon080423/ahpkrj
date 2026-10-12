@@ -6226,17 +6226,16 @@ def get_portone_custom_services_html(user_id=None):
     </head>
     <body>
       <div class="pricing-box">
-          <h3 class="title">부가 서비스 대행</h3>
-          <span class="subtitle">Custom Services</span>
-          <div class="price-container">
-              <h2 class="price" id="totalPriceDisplay">0원</h2>
+          <h3 class="title" style="margin-bottom: 2px;">부가 서비스 대행</h3>
+          <span class="subtitle" style="font-size: 0.75rem;">Custom Services</span>
+          <div class="price-container" style="margin: 4px 0;">
+              <h2 class="price" id="totalPriceDisplay" style="font-size: 1.4rem; margin: 0;">0원</h2>
           </div>
-          <p class="period">선택된 서비스 합계 금액</p>
-          <p class="desc" id="statusDesc">필요한 서비스를 선택해 주세요.</p>
-          <hr class="divider">
+          <p class="desc" id="statusDesc" style="font-size: 0.75rem; margin: 0 0 6px 0;">필요한 서비스를 선택해 주세요.</p>
+          <hr class="divider" style="margin: 6px 0;">
           
-          <ul class="svc-list" style="max-height: 220px; overflow-y: auto;">
-              <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 4px 0 2px 0; list-style: none;">[설문 구축]</li>
+          <ul class="svc-list" style="font-size: 0.8rem; line-height: 1.5;">
+              <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 2px 0 1px 0; list-style: none;">[설문 구축]</li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅" onchange="updatePrice()">
@@ -6255,7 +6254,7 @@ def get_portone_custom_services_html(user_id=None):
                       <span>웹설문 구조/기능 수정 <span style="color: #666; font-size: 0.75rem;">(100,000원/회)</span></span>
                   </label>
               </li>
-              <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[분석]</li>
+              <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 4px 0 1px 0; list-style: none;">[분석]</li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_2" value="50000" data-name="기본 결과 분석 대행" onchange="updatePrice()">
@@ -6268,7 +6267,7 @@ def get_portone_custom_services_html(user_id=None):
                       <span>기본 분석 외 추가 분석 <span style="color: #666; font-size: 0.75rem;">(100,000원/건)</span></span>
                   </label>
               </li>
-              <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[기타]</li>
+              <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 4px 0 1px 0; list-style: none;">[기타]</li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_3" value="30000" data-name="코딩 엑셀 양식 설정 대행" onchange="updatePrice()">
@@ -6576,8 +6575,8 @@ def get_unified_english_pricing_html(user_id):
               <h2 class="price" id="totalPriceDisplay">$0 USD</h2>
               <p class="desc" id="statusDesc" style="margin-bottom:0;">Please select the proxy services you need.</p>
               <hr>
-              <ul class="svc-list" style="max-height: 220px; overflow-y: auto;">
-                  <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 4px 0 2px 0; list-style: none;">[Survey Setup]</li>
+              <ul class="svc-list" style="font-size: 0.8rem; line-height: 1.5;">
+                  <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 2px 0 1px 0; list-style: none;">[Survey Setup]</li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
                           <input type="checkbox" id="svc_opt_1" value="33" data-name="Online Survey Setup" onchange="updatePrice()">
@@ -6596,7 +6595,7 @@ def get_unified_english_pricing_html(user_id):
                           <span>Web Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
                       </label>
                   </li>
-                  <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[Analysis]</li>
+                  <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 4px 0 1px 0; list-style: none;">[Analysis]</li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
                           <input type="checkbox" id="svc_opt_2" value="33" data-name="Basic Result Analysis Proxy" onchange="updatePrice()">
@@ -6609,7 +6608,7 @@ def get_unified_english_pricing_html(user_id):
                           <span>Additional Analysis Beyond Basic <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
                       </label>
                   </li>
-                  <li style="font-size: 0.75rem; font-weight: 700; color: #999; margin: 8px 0 2px 0; list-style: none;">[Others]</li>
+                  <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 4px 0 1px 0; list-style: none;">[Others]</li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
                           <input type="checkbox" id="svc_opt_3" value="20" data-name="Coding Excel Sheet Setup" onchange="updatePrice()">
