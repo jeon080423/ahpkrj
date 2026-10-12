@@ -4059,22 +4059,28 @@ if "preview_id" in q_params or "survey_id" in q_params:
         for numeral in "①②③④⑤⑥⑦⑧":
             name = name.replace(numeral + " ", "").replace(numeral, "")
         name = name.strip()
-        # 변수 라벨을 의미 단위로 줄바꿈
+        # 비교용 정규화 (공백 제거)
+        norm = name.replace(" ", "").replace("\u00a0", "")
+        # 변수 라벨을 의미 단위로 줄바꿈 (정규화된 키로 매칭)
         breaks = [
-            ("보상위원회 사외이사비율", "보상위원회<br>사외이사비율"),
+            ("보상위원회사외이사비율", "보상위원회<br>사외이사비율"),
             ("CEO참여여부", "CEO<br>참여여부"),
-            ("CEO 참여여부", "CEO<br>참여여부"),
-            ("회색 사외이사비율", "회색<br>사외이사비율"),
-            ("타 기업 경영진 비율", "타 기업<br>경영진 비율"),
-            ("타사경영진비율", "타 기업<br>경영진 비율"),
-            ("보상위원의 회계·재무·인사조직 전공자 비율", "보상위원의 회계·재무·인사조직/<br>전공자비율"),
-            ("보상위원장이 회계·재무·인사조직 전공자 여부", "보상위원장이<br>회계·재무·인사조직 전공자 여부"),
-            ("보상위원회 참석률", "보상위원회<br>참석률"),
-            ("보상위원회 개최횟수", "보상위원회<br>개최횟수"),
+            ("회색사외이사비율", "회색<br>사외이사비율"),
+            ("타기업경영진비율", "타 기업<br>경영진 비율"),
+            ("보상위원의회계·재무·인사조직전공자비율", "보상위원의 회계·재무·인사조직/<br>전공자비율"),
+            ("보상위원장이회계·재무·인사조직전공자여부", "보상위원장이<br>회계·재무·인사조직 전공자 여부"),
+            ("보상위원장이회계·재무·인사조직전공자인지여부", "보상위원장이<br>회계·재무·인사조직 전공자 여부"),
+            ("보상위원회참석률", "보상위원회<br>참석률"),
+            ("보상위원회개최횟수", "보상위원회<br>개최횟수"),
         ]
-        for old, new in breaks:
-            if old in name:
-                return name.replace(old, new)
+        for key, new in breaks:
+            if key in norm:
+                # 원본에서 해당 부분을 찾아 교체 (공백 변형 대응)
+                import re
+                # 키의 각 글자 사이에 \s* 허용하는 패턴
+                pattern = r"\s*".join(re.escape(c) for c in key)
+                # new에서 <br> 앞뒤 공백 정리 후 원본에 적용
+                return re.sub(pattern, new, name, count=1)
         return name
 
     submitted_key = f"survey_submitted_{survey_id_param}"
