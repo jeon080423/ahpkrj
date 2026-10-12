@@ -6281,10 +6281,8 @@ def get_portone_custom_services_html(user_id=None):
               </li>
           </ul>
           
-          <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
-              견적서 발급 및 부가서비스 문의: <br>카톡아이디: <b>AHPkr</b>
-          </div>
           
+
           <button class="btn" id="payBtn" onclick="handlePayAction()">결제하기</button>
       </div>
       
@@ -6620,10 +6618,8 @@ def get_unified_english_pricing_html(user_id):
                       </label>
                   </li>
               </ul>
-              <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
-                  Proxy Request/Inquiry : <br>Email: <b>jeon080423@gmail.com</b>
-              </div>
-              <div class="btn-container" id="paypal-btn-custom"></div>
+              
+<div class="btn-container" id="paypal-btn-custom"></div>
           </div>
       </div>
       
@@ -6975,9 +6971,6 @@ def get_paypal_custom_services_html(user_id=None):
               </li>
           </ul>
           
-          <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
-              Proxy Request/Inquiry : <br>Email: <b>jeon080423@gmail.com</b>
-          </div>
           
           <div class="paypal-btn-container" id="paypal-button-container"></div>
       </div>
