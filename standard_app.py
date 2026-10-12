@@ -6273,6 +6273,12 @@ def get_portone_custom_services_html(user_id=None):
                       <span>웹설문 구조/기능 수정 <span style="color: #666; font-size: 0.75rem;">(100,000원/회)</span></span>
                   </label>
               </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_6" value="100000" data-name="웹설문 심층 분석 대행" onchange="updatePrice()">
+                      <span>웹설문 심층 분석 대행 <span style="color: #666; font-size: 0.75rem;">(100,000원/건)</span></span>
+                  </label>
+              </li>
           </ul>
           
           <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
@@ -6289,6 +6295,7 @@ def get_portone_custom_services_html(user_id=None):
             const opt3 = document.getElementById("svc_opt_3");
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
+            const opt6 = document.getElementById("svc_opt_6");
             
             let total = 0;
             let count = 0;
@@ -6297,6 +6304,7 @@ def get_portone_custom_services_html(user_id=None):
             if (opt3.checked) {{ total += parseInt(opt3.value); count++; }}
             if (opt4.checked) {{ total += parseInt(opt4.value); count++; }}
             if (opt5.checked) {{ total += parseInt(opt5.value); count++; }}
+            if (opt6.checked) {{ total += parseInt(opt6.value); count++; }}
             
             document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + "원";
             if (count > 0) {{
@@ -6318,6 +6326,7 @@ def get_portone_custom_services_html(user_id=None):
             const opt3 = document.getElementById("svc_opt_3");
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
+            const opt6 = document.getElementById("svc_opt_6");
             
             let total = 0;
             let items = [];
@@ -6326,6 +6335,7 @@ def get_portone_custom_services_html(user_id=None):
             if (opt3.checked) {{ total += parseInt(opt3.value); items.push(opt3.getAttribute("data-name")); }}
             if (opt4.checked) {{ total += parseInt(opt4.value); items.push(opt4.getAttribute("data-name")); }}
             if (opt5.checked) {{ total += parseInt(opt5.value); items.push(opt5.getAttribute("data-name")); }}
+            if (opt6.checked) {{ total += parseInt(opt6.value); items.push(opt6.getAttribute("data-name")); }}
             
             if (total === 0) {{
                 alert("결제하실 부가 서비스 대행 옵션을 하나 이상 선택해주세요.");
@@ -6603,6 +6613,12 @@ def get_unified_english_pricing_html(user_id):
                           <span>Web Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
                       </label>
                   </li>
+                  <li class="svc-item">
+                      <label style="display: flex; align-items: flex-start;">
+                          <input type="checkbox" id="svc_opt_6" value="74" data-name="Web Survey In-depth Analysis" onchange="updatePrice()">
+                          <span>Web Survey In-depth Analysis <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
+                      </label>
+                  </li>
               </ul>
               <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
                   Proxy Request/Inquiry : <br>Email: <b>jeon080423@gmail.com</b>
@@ -6692,6 +6708,7 @@ def get_unified_english_pricing_html(user_id):
             const optExt = document.getElementById("svc_opt_ext");
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
+            const opt6 = document.getElementById("svc_opt_6");
             
             let total = 0;
             let count = 0;
@@ -6702,6 +6719,7 @@ def get_unified_english_pricing_html(user_id):
             if (optExt && optExt.checked) {{ total += parseInt(optExt.value); count++; items.push(optExt.getAttribute("data-name")); }}
             if (opt4 && opt4.checked) {{ total += parseInt(opt4.value); count++; items.push(opt4.getAttribute("data-name")); }}
             if (opt5 && opt5.checked) {{ total += parseInt(opt5.value); count++; items.push(opt5.getAttribute("data-name")); }}
+            if (opt6 && opt6.checked) {{ total += parseInt(opt6.value); count++; items.push(opt6.getAttribute("data-name")); }}
             
             document.getElementById("totalPriceDisplay").innerText = "$" + total.toLocaleString() + " USD";
             
@@ -6949,6 +6967,12 @@ def get_paypal_custom_services_html(user_id=None):
                       <span>Web Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
                   </label>
               </li>
+              <li class="svc-item">
+                  <label style="display: flex; align-items: flex-start;">
+                      <input type="checkbox" id="svc_opt_6" value="74" data-name="Web Survey In-depth Analysis" onchange="updatePrice()">
+                      <span>Web Survey In-depth Analysis <span style="color: #666; font-size: 0.75rem;">($74 USD/case)</span></span>
+                  </label>
+              </li>
           </ul>
           
           <div style="font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 12px; background: #fafafa; padding: 6px; border-radius: 5px; border: 1px dashed #ccc; line-height: 1.4;">
@@ -6976,6 +7000,7 @@ def get_paypal_custom_services_html(user_id=None):
             const opt3 = document.getElementById("svc_opt_3");
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
+            const opt6 = document.getElementById("svc_opt_6");
             
             let total = 0;
             let count = 0;
