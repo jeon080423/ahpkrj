@@ -12280,17 +12280,23 @@ with contextlib.nullcontext():
                         # 미리보기 link_button과 일반 button의 모양을 완전히 통일
                         st.markdown("""
                         <style>
-                        div[data-testid="column"] a[data-testid="stLinkButton"] {
+                        div[data-testid="stLinkButton"] > a {
                             border-radius: 0.5rem !important;
-                            min-height: 2.5rem !important;
-                            padding: 0 !important;
+                            min-height: 38px !important;
+                            height: 38px !important;
+                            padding: 0 12px !important;
+                            border: 1px solid rgba(49, 51, 63, 0.2) !important;
+                            background-color: #ffffff !important;
+                            display: inline-flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            width: 100% !important;
+                            box-sizing: border-box !important;
                         }
-                        div[data-testid="column"] a[data-testid="stLinkButton"] > div {
-                            border-radius: 0.5rem !important;
-                            min-height: 2.5rem !important;
+                        div[data-testid="stLinkButton"] > a > div {
+                            font-size: 14px !important;
                             font-weight: 400 !important;
-                            padding-top: 0.25rem !important;
-                            padding-bottom: 0.25rem !important;
+                            line-height: 1.6 !important;
                         }
                         </style>
                         """, unsafe_allow_html=True)
