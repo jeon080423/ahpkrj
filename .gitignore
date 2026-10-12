@@ -22,3 +22,4 @@ patch*.py
 .streamlit/secrets.toml
 client_secret*.json
 .env
+github_token.txt
