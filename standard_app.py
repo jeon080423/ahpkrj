@@ -6301,8 +6301,8 @@ def get_portone_custom_services_html(user_id=None):
               <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 2px 0 1px 0; list-style: none;">[설문 구축]</li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅" onchange="updatePrice()">
-                      <span>AHP 온라인 설문 셋팅 <span style="color: #666; font-size: 0.75rem;">(50,000원/건)</span></span>
+                      <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅(수정 2회차 포함)" onchange="updatePrice()">
+                      <span>AHP 온라인 설문 셋팅(수정 2회차 포함) <span style="color: #666; font-size: 0.75rem;">(50,000원/건)</span></span>
                   </label>
               </li>
               <li class="svc-item">
