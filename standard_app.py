@@ -11514,8 +11514,7 @@ with contextlib.nullcontext():
                                     survey_title_display = s[1]
                                     break
                             st.success(_(f" 현재 배포된 설문을 불러왔습니다: **{survey_title_display}**", f" Loaded deployed survey: **{survey_title_display}**"))
-                            st.info(_("아래 폼에서 내용을 수정하신 뒤 하단의 **[배포 및 DB 연동 (수정 내용 적용)]** 버튼을 누르시면 기존 시트에 내용이 덮어씌워집니다.", "If you modify the form below and click the **[Deploy & Link DB (Apply Modifications)]** button at the bottom, the existing sheet will be overwritten."))
-                        
+
                             # [신규] 연동된 구글 스프레드시트 바로가기 및 온라인 설문 링크 제시
                             base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                             if "localhost" in base_url or "127.0.0.1" in base_url:
