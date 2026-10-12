@@ -11526,8 +11526,8 @@ with contextlib.nullcontext():
                             st.code(active_survey_url, language="text")
                             st.caption(_("💡 위 설문 링크를 복사하여 이메일이나 메신저로 응답 대상자에게 전달하세요.", "💡 Copy the survey link above and send it to respondents via email or messenger."))
                             st.markdown(_(
-                                "<p style='font-size:0.875rem; color:#6b7280; margin-top:0.25rem;'>실제 조사 배포 전 테스트 응답을 <b style='color:#d32f2f;'>반드시 삭제</b>하세요. (응답 현황 탭 → 응답 데이터 초기화)</p>",
-                                "<p style='font-size:0.875rem; color:#6b7280; margin-top:0.25rem;'>Before distributing for actual survey, <b style='color:#d32f2f;'>be sure to delete</b> test responses. (Responses tab → Reset Responses)</p>"
+                                "<p style='font-size:0.875rem; color:rgba(49,51,63,0.6); margin:0;'>실제 조사 배포 전 테스트 응답을 <b style='color:#d32f2f;'>반드시 삭제</b>하세요. (응답 현황 탭 → 응답 데이터 초기화)</p>",
+                                "<p style='font-size:0.875rem; color:rgba(49,51,63,0.6); margin:0;'>Before distributing for actual survey, <b style='color:#d32f2f;'>be sure to delete</b> test responses. (Responses tab → Reset Responses)</p>"
                             ), unsafe_allow_html=True)
 
                             gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
