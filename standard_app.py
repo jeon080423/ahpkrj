@@ -12280,23 +12280,44 @@ with contextlib.nullcontext():
                         # 미리보기 link_button과 일반 button의 모양을 완전히 통일
                         st.markdown("""
                         <style>
+                        section[data-testid="stSidebar"] ~ div div[data-testid="stLinkButton"],
+                        div[data-testid="stLinkButton"] {
+                            width: 100% !important;
+                        }
+                        div[data-testid="stLinkButton"] a,
                         div[data-testid="stLinkButton"] > a {
-                            border-radius: 0.5rem !important;
-                            min-height: 38px !important;
-                            height: 38px !important;
-                            padding: 0 12px !important;
-                            border: 1px solid rgba(49, 51, 63, 0.2) !important;
-                            background-color: #ffffff !important;
+                            border-radius: 8px !important;
+                            -webkit-border-radius: 8px !important;
+                            min-height: 40px !important;
+                            height: 40px !important;
+                            max-height: 40px !important;
+                            padding: 4px 12px !important;
+                            border-width: 1px !important;
+                            border-style: solid !important;
+                            border-color: rgba(49, 51, 63, 0.2) !important;
+                            background-color: rgb(255, 255, 255) !important;
                             display: inline-flex !important;
                             align-items: center !important;
                             justify-content: center !important;
                             width: 100% !important;
                             box-sizing: border-box !important;
+                            text-decoration: none !important;
                         }
+                        div[data-testid="stLinkButton"] a > div,
                         div[data-testid="stLinkButton"] > a > div {
                             font-size: 14px !important;
                             font-weight: 400 !important;
                             line-height: 1.6 !important;
+                            color: rgb(49, 51, 63) !important;
+                        }
+                        div[data-testid="stLinkButton"] a:hover,
+                        div[data-testid="stLinkButton"] > a:hover {
+                            border-color: rgb(255, 75, 75) !important;
+                            color: rgb(255, 75, 75) !important;
+                        }
+                        div[data-testid="stLinkButton"] a:hover > div,
+                        div[data-testid="stLinkButton"] > a:hover > div {
+                            color: rgb(255, 75, 75) !important;
                         }
                         </style>
                         """, unsafe_allow_html=True)
