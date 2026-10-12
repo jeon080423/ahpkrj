@@ -6263,14 +6263,14 @@ def get_portone_custom_services_html(user_id=None):
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_4" value="50000" data-name="설문 문구 수정" onchange="updatePrice()">
-                      <span>설문 문구 수정 <span style="color: #666; font-size: 0.75rem;">(50,000원/회)</span></span>
+                      <input type="checkbox" id="svc_opt_4" value="50000" data-name="웹설문 문구 수정 대행" onchange="updatePrice()">
+                      <span>웹설문 문구 수정 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원/회)</span></span>
                   </label>
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_5" value="100000" data-name="설문 구조/기능 수정" onchange="updatePrice()">
-                      <span>설문 구조/기능 수정 <span style="color: #666; font-size: 0.75rem;">(100,000원/회)</span></span>
+                      <input type="checkbox" id="svc_opt_5" value="100000" data-name="웹설문 구조/기능 수정" onchange="updatePrice()">
+                      <span>웹설문 구조/기능 수정 <span style="color: #666; font-size: 0.75rem;">(100,000원/회)</span></span>
                   </label>
               </li>
           </ul>
@@ -6593,14 +6593,14 @@ def get_unified_english_pricing_html(user_id):
                   </li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
-                          <input type="checkbox" id="svc_opt_4" value="33" data-name="Survey Text Revision" onchange="updatePrice()">
-                          <span>Survey Text Revision <span style="color: #666; font-size: 0.75rem;">($33 USD/session)</span></span>
+                          <input type="checkbox" id="svc_opt_4" value="33" data-name="Web Survey Text Revision" onchange="updatePrice()">
+                          <span>Web Survey Text Revision <span style="color: #666; font-size: 0.75rem;">($33 USD/session)</span></span>
                       </label>
                   </li>
                   <li class="svc-item">
                       <label style="display: flex; align-items: flex-start;">
-                          <input type="checkbox" id="svc_opt_5" value="74" data-name="Survey Structure/Feature Revision" onchange="updatePrice()">
-                          <span>Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
+                          <input type="checkbox" id="svc_opt_5" value="74" data-name="Web Survey Structure/Feature Revision" onchange="updatePrice()">
+                          <span>Web Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
                       </label>
                   </li>
               </ul>
@@ -6939,14 +6939,14 @@ def get_paypal_custom_services_html(user_id=None):
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_4" value="33" data-name="Survey Text Revision" onchange="updatePrice()">
-                      <span>Survey Text Revision <span style="color: #666; font-size: 0.75rem;">($33 USD/session)</span></span>
+                      <input type="checkbox" id="svc_opt_4" value="33" data-name="Web Survey Text Revision" onchange="updatePrice()">
+                      <span>Web Survey Text Revision <span style="color: #666; font-size: 0.75rem;">($33 USD/session)</span></span>
                   </label>
               </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_5" value="74" data-name="Survey Structure/Feature Revision" onchange="updatePrice()">
-                      <span>Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
+                      <input type="checkbox" id="svc_opt_5" value="74" data-name="Web Survey Structure/Feature Revision" onchange="updatePrice()">
+                      <span>Web Survey Structure/Feature Revision <span style="color: #666; font-size: 0.75rem;">($74 USD/session)</span></span>
                   </label>
               </li>
           </ul>
