@@ -8278,7 +8278,7 @@ with contextlib.nullcontext():
     main_tab1, main_tab_coding, main_tab_survey, main_tab_service, main_tab_consulting = st.tabs([
         _("AHP 분석 하기", "AHP Analysis"), 
         _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
-        _("설문 관리", "Survey Management"),
+        _("AHP 설문지 작성·배포(무료)", "Free AHP Survey Creation & Deploy"),
         _("요금제", "Pricing"),
         _("컨설팅 문의", "Consulting")
     ], default=_tab_default)
