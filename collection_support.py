@@ -230,7 +230,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
             st.progress(pct)
         else:
             st.metric("완료 응답", f"{completed_count}명")
-            st.caption("목표 응답 수가 설정되지 않았습니다. 배포 화면에서 설정할 수 있습니다.")
+            st.caption("목표 응답 수가 설정되지 않았습니다. 아래에서 설정할 수 있습니다.")
     with p2:
         days = _days_remaining(deadline_str)
         if days is None:
@@ -245,6 +245,32 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         rate = (completed_count / visit_count * 100) if visit_count else 0
         st.metric("방문 대비 완료율", f"{rate:.1f}%", f"방문 {visit_count}명")
 
+    # ---- 목표 설정 (기존 설문용) ----
+    if target == 0:
+        with st.expander("🎯 수집 목표 설정하기", expanded=False):
+            from survey_manager import update_survey_collection_goals
+            c1, c2 = st.columns(2)
+            with c1:
+                new_target = st.number_input("목표 응답 수", min_value=1, max_value=100000,
+                                             value=30, step=1,
+                                             key=f"cs_ptarget_{sheet_id}")
+            with c2:
+                new_deadline = st.date_input("응답 마감일", value=None,
+                                             key=f"cs_pdeadline_{sheet_id}")
+            if st.button("💾 목표 저장", key=f"cs_psave_{sheet_id}",
+                         use_container_width=True):
+                res = update_survey_collection_goals(
+                    sheet_id,
+                    target_count=int(new_target),
+                    deadline=new_deadline,
+                    user_id=st.session_state.get("user_id"),
+                )
+                if res.get("success"):
+                    st.success("수집 목표가 저장되었습니다. 페이지를 새로고침하세요.")
+                    st.rerun()
+                else:
+                    st.error(f"저장 실패: {res.get('error')}")
+
     # ---- 상태별 다음 행동 카드 ----
     st.markdown("**📌 다음 행동**")
     action_title, action_desc, action_hint = _next_action_card(
@@ -253,6 +279,47 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         st.markdown(f"**{action_title}**")
         st.write(action_desc)
         st.caption(action_hint)
+
+    # ---- 공유 도구 (기존 설문용) ----
+    with st.expander("📢 공유 도구 (QR·초대 문구)", expanded=False):
+        # 설문 URL 구성
+        try:
+            from survey_manager import get_survey_short_url
+            survey_url = get_survey_short_url(sheet_id) or ""
+        except Exception:
+            survey_url = ""
+        if not survey_url:
+            # 폴백: 기본 URL 패턴
+            survey_url = f"https://ahpkrj.streamlit.app/?survey={sheet_id[:8]}"
+        st.code(survey_url, language="text")
+
+        # QR 코드
+        try:
+            import qrcode
+            qr = qrcode.QRCode(box_size=6, border=2)
+            qr.add_data(survey_url)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            buf.seek(0)
+            st.image(buf, width=150)
+            st.download_button("⬇️ QR 다운로드", data=buf.getvalue(),
+                               file_name=f"survey_qr_{sheet_id[:8]}.png",
+                               mime="image/png",
+                               key=f"cs_pqr_dl_{sheet_id}")
+            _log_share(sheet_id, "qr", "qr_view")
+        except Exception:
+            st.link_button("↗️ QR 만들기 (qr.naver.com)", "https://qr.naver.com/")
+
+        # 초대 문구
+        st.markdown("**💬 초대 문구**")
+        for ch, text in _invite_templates("", survey_url).items():
+            with st.expander(ch, expanded=False):
+                st.code(text, language="text")
+                if st.button(f"📋 복사 기록", key=f"cs_pinv_{ch}_{sheet_id}"):
+                    _log_share(sheet_id, ch, "invite_copy")
+                    st.toast("기록되었습니다.")
 
 
 def _next_action_card(completed, visits, target, days_left):
