@@ -221,6 +221,52 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         target = 0
     deadline_str = str(meta.get("Collection_Deadline") or "").strip()
 
+    # ---- 목표/마감일 설정 (페이지 최상단) ----
+    with st.container(border=True):
+        st.markdown("**🎯 수집 목표 설정**")
+        sc1, sc2, sc3 = st.columns([1, 1, 1])
+        with sc1:
+            new_target = st.number_input(
+                "목표 응답 수", min_value=0, max_value=100000,
+                value=target, step=1,
+                key=f"cs_ptarget_{sheet_id}",
+                help="0이면 목표 미설정 상태입니다.")
+        with sc2:
+            try:
+                default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
+                              if deadline_str else None)
+            except Exception:
+                default_dl = None
+            new_deadline = st.date_input("응답 마감일", value=default_dl,
+                                         key=f"cs_pdeadline_{sheet_id}")
+        with sc3:
+            st.write("")
+            st.write("")
+            if st.button("💾 목표 저장", key=f"cs_psave_{sheet_id}",
+                         use_container_width=True, type="primary"):
+                from survey_manager import update_survey_collection_goals
+                res = update_survey_collection_goals(
+                    sheet_id,
+                    target_count=int(new_target) if new_target else None,
+                    deadline=new_deadline,
+                    user_id=st.session_state.get("user_id"),
+                )
+                if res.get("success"):
+                    st.success("✅ 저장됐습니다.")
+                    # 메타 캐시 무효화 후 값 다시 읽기
+                    st.session_state.pop(f"_cs_meta_{sheet_id}", None)
+                    try:
+                        from survey_manager import load_survey_metadata
+                        fresh = load_survey_metadata(sheet_id) or {}
+                        target = int(fresh.get("Target_Response_Count") or 0)
+                        deadline_str = str(fresh.get("Collection_Deadline") or "").strip()
+                        st.caption(f"확인: 목표 {target}명 / 마감일 {deadline_str or '미설정'}")
+                    except Exception:
+                        pass
+                    st.rerun()
+                else:
+                    st.error(f"저장 실패: {res.get('error')}")
+
     st.markdown("### 🎯 수집 진행 현황")
     p1, p2, p3 = st.columns(3)
     with p1:
@@ -230,7 +276,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
             st.progress(pct)
         else:
             st.metric("완료 응답", f"{completed_count}명")
-            st.caption("목표 응답 수가 설정되지 않았습니다. 아래에서 설정할 수 있습니다.")
+            st.caption("위에서 목표 응답 수를 설정하세요.")
     with p2:
         days = _days_remaining(deadline_str)
         if days is None:
@@ -244,32 +290,6 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
     with p3:
         rate = (completed_count / visit_count * 100) if visit_count else 0
         st.metric("방문 대비 완료율", f"{rate:.1f}%", f"방문 {visit_count}명")
-
-    # ---- 목표 설정 (기존 설문용) ----
-    if target == 0:
-        with st.expander("🎯 수집 목표 설정하기", expanded=False):
-            from survey_manager import update_survey_collection_goals
-            c1, c2 = st.columns(2)
-            with c1:
-                new_target = st.number_input("목표 응답 수", min_value=1, max_value=100000,
-                                             value=30, step=1,
-                                             key=f"cs_ptarget_{sheet_id}")
-            with c2:
-                new_deadline = st.date_input("응답 마감일", value=None,
-                                             key=f"cs_pdeadline_{sheet_id}")
-            if st.button("💾 목표 저장", key=f"cs_psave_{sheet_id}",
-                         use_container_width=True):
-                res = update_survey_collection_goals(
-                    sheet_id,
-                    target_count=int(new_target),
-                    deadline=new_deadline,
-                    user_id=st.session_state.get("user_id"),
-                )
-                if res.get("success"):
-                    st.success("수집 목표가 저장되었습니다. 페이지를 새로고침하세요.")
-                    st.rerun()
-                else:
-                    st.error(f"저장 실패: {res.get('error')}")
 
     # ---- 상태별 다음 행동 카드 ----
     st.markdown("**📌 다음 행동**")
