@@ -253,7 +253,9 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["Show_Hierarchy", str(show_hierarchy)],
         ["Rewards_Info", json.dumps(rewards_info, ensure_ascii=False)],
         ["Visit_Count", "0"],
-        ["Abandoned_CR_Count", "0"]
+        ["Abandoned_CR_Count", "0"],
+        ["Target_Response_Count", ""],
+        ["Collection_Deadline", ""]
     ]
     meta_sheet.update(range_name=f"A1:B{len(metadata)}", values=metadata)
     
@@ -469,6 +471,14 @@ def _fetch_survey_metadata_from_sheets(spreadsheet_id):
     meta_dict["CR_Guide_Enabled"] = str(meta_dict.get("CR_Guide_Enabled", "False")).lower() == "true"
     meta_dict["CR_Guide_Method"] = str(meta_dict.get("CR_Guide_Method", "realtime" if meta_dict["CR_Guide_Enabled"] else "none"))
     meta_dict["Show_Hierarchy"] = str(meta_dict.get("Show_Hierarchy", "True")).lower() != "false"
+
+    # 1단계: 응답 수집 목표 (없으면 기본값)
+    try:
+        _trc = str(meta_dict.get("Target_Response_Count", "") or "").strip()
+        meta_dict["Target_Response_Count"] = int(_trc) if _trc else 0
+    except (ValueError, TypeError):
+        meta_dict["Target_Response_Count"] = 0
+    meta_dict["Collection_Deadline"] = str(meta_dict.get("Collection_Deadline", "") or "").strip()
     
     # 로컬 SQLite 캐시에 백업/동기화 저장
     try:
@@ -1926,6 +1936,195 @@ def log_user_action(user_id, action_name):
     except Exception as e:
         pass
     t.start()
+
+
+# ============================================================================
+# 구조화 이벤트 로그 (1단계: 응답 수집 지원)
+# - 기존 구글 시트 쉼표 연결 로그와 별도, 행 단위 SQLite 저장
+# - 이메일/이름/전화번호/원응답 값을 properties에 저장하지 않음
+# - 사용자·설문·세션은 익명 ID로만 연결
+# ============================================================================
+import hashlib as _hashlib
+
+STRUCTURED_EVENT_DB = 'structured_events.db'
+STRUCTURED_EVENT_APP_VERSION = "1.0.0"
+
+# 이벤트 이름 상수
+EVENT_SURVEY_DEPLOYED = "survey_deployed"
+EVENT_SHARE_ACTION = "share_action"
+EVENT_SURVEY_VISIT = "survey_visit"
+EVENT_RESPONDENT_STARTED = "respondent_started"
+EVENT_SURVEY_SUBMITTED = "survey_submitted"
+EVENT_OWNER_DASHBOARD_VIEWED = "owner_dashboard_viewed"
+EVENT_ANALYSIS_READINESS_VIEWED = "analysis_readiness_viewed"
+EVENT_ANALYSIS_STARTED = "analysis_started"
+EVENT_PRICING_VIEWED = "pricing_viewed"
+EVENT_CHECKOUT_STARTED = "checkout_started"
+EVENT_PAYMENT_SUCCEEDED = "payment_succeeded"
+
+
+def _get_structured_event_conn():
+    """구조화 이벤트 로그용 SQLite 연결 (테이블 자동 생성)."""
+    import sqlite3
+    conn = sqlite3.connect(STRUCTURED_EVENT_DB)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS structured_event_log
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  event_time TEXT NOT NULL,
+                  anonymous_user_id TEXT,
+                  anonymous_survey_id TEXT,
+                  anonymous_session_id TEXT,
+                  event_name TEXT NOT NULL,
+                  properties_json TEXT,
+                  app_version TEXT)''')
+    c.execute('''CREATE INDEX IF NOT EXISTS idx_event_survey
+                 ON structured_event_log(anonymous_survey_id, event_name)''')
+    c.execute('''CREATE INDEX IF NOT EXISTS idx_event_time
+                 ON structured_event_log(event_time)''')
+    conn.commit()
+    return conn
+
+
+def get_anonymous_user_id(user_id):
+    """사용자 ID를 익명 해시로 변환 (원본 저장 없음)."""
+    if not user_id:
+        user_id = "guest"
+    return _hashlib.sha256(str(user_id).encode('utf-8')).hexdigest()[:16]
+
+
+def get_anonymous_session_id():
+    """세션당 1회 생성되는 익명 세션 ID."""
+    import streamlit as st
+    import uuid
+    key = "_anon_session_id"
+    if key not in st.session_state:
+        st.session_state[key] = uuid.uuid4().hex[:16]
+    return st.session_state[key]
+
+
+def get_anonymous_survey_id(survey_id):
+    """설문 ID를 익명 해시로 변환 (내부 연결용)."""
+    if not survey_id:
+        return ""
+    return _hashlib.sha256(str(survey_id).encode('utf-8')).hexdigest()[:16]
+
+
+def log_structured_event(event_name, anonymous_user_id=None, anonymous_survey_id=None,
+                         anonymous_session_id=None, properties=None, app_version=None):
+    """구조화 이벤트 1건을 행 단위로 기록. 실패해도 호출자에게 예외를 전파하지 않음."""
+    import datetime
+    try:
+        import streamlit as st
+        # 세션에서 자동 보완
+        if anonymous_session_id is None:
+            try:
+                anonymous_session_id = get_anonymous_session_id()
+            except Exception:
+                anonymous_session_id = ""
+        if anonymous_user_id is None:
+            try:
+                raw_uid = st.session_state.get("user_id") or "guest"
+                anonymous_user_id = get_anonymous_user_id(raw_uid)
+            except Exception:
+                anonymous_user_id = get_anonymous_user_id("guest")
+    except Exception:
+        if anonymous_user_id is None:
+            anonymous_user_id = get_anonymous_user_id("guest")
+        if anonymous_session_id is None:
+            anonymous_session_id = ""
+
+    try:
+        conn = _get_structured_event_conn()
+        c = conn.cursor()
+        now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")
+        props_json = json.dumps(properties or {}, ensure_ascii=False)
+        c.execute(
+            """INSERT INTO structured_event_log
+               (event_time, anonymous_user_id, anonymous_survey_id, anonymous_session_id,
+                event_name, properties_json, app_version)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (now_str, anonymous_user_id, anonymous_survey_id or "",
+             anonymous_session_id or "", event_name, props_json,
+             app_version or STRUCTURED_EVENT_APP_VERSION)
+        )
+        conn.commit()
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+
+def get_survey_event_counts(anonymous_survey_id):
+    """설문별 이벤트 카운트 집계 (대시보드용)."""
+    try:
+        conn = _get_structured_event_conn()
+        c = conn.cursor()
+        c.execute(
+            """SELECT event_name, COUNT(*) FROM structured_event_log
+               WHERE anonymous_survey_id = ? GROUP BY event_name""",
+            (anonymous_survey_id,)
+        )
+        result = dict(c.fetchall())
+        conn.close()
+        return result
+    except Exception:
+        return {}
+
+
+def update_survey_collection_goals(spreadsheet_id, target_count=None, deadline=None, user_id=None):
+    """설문 메타데이터에 목표 응답 수·수집 마감일을 저장/갱신한다.
+
+    deadline: "YYYY-MM-DD" 문자열 또는 datetime.date
+    """
+    client = get_survey_gspread_client(user_id=user_id)
+    if not client:
+        return {"success": False, "error": "Google Sheets API 인증 실패"}
+    try:
+        spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
+        meta_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Survey_Metadata")
+        records = run_gspread_with_retry(meta_sheet.get_all_records)
+
+        deadline_str = ""
+        if deadline:
+            deadline_str = deadline.strftime("%Y-%m-%d") if hasattr(deadline, "strftime") else str(deadline).strip()
+
+        updates = {}
+        if target_count is not None:
+            try:
+                _tc = int(target_count)
+                updates["Target_Response_Count"] = str(_tc) if _tc > 0 else ""
+            except (ValueError, TypeError):
+                updates["Target_Response_Count"] = ""
+        if deadline is not None:
+            updates["Collection_Deadline"] = deadline_str
+
+        # 기존 행 위치 파악 (1-based, 헤더 제외)
+        field_rows = {}
+        for idx, row in enumerate(records):
+            f = str(row.get("Field", "")).strip()
+            if f:
+                field_rows[f] = idx + 2
+
+        for field, value in updates.items():
+            if field in field_rows:
+                run_gspread_with_retry(meta_sheet.update_cell, field_rows[field], 2, value)
+            else:
+                run_gspread_with_retry(meta_sheet.append_row, [field, value])
+
+        # 로컬 캐시 무효화 (다음 로드 시 최신값 반영)
+        try:
+            import sqlite3
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("DELETE FROM survey_metadata_cache WHERE survey_id = ?", (spreadsheet_id,))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):

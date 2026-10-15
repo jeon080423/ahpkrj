@@ -1934,6 +1934,17 @@ def show_refund_dialog():
 
 @st.dialog(_("정식(유료) 라이선스 업그레이드", "Upgrade to Official/Paid License"), width="large")
 def show_upgrade_dialog():
+    # [1단계] 요금 화면 조회 이벤트
+    try:
+        from survey_manager import log_structured_event, get_anonymous_user_id, EVENT_PRICING_VIEWED
+        _pv_flag = "_pricing_viewed_logged"
+        if not st.session_state.get(_pv_flag):
+            log_structured_event(EVENT_PRICING_VIEWED,
+                anonymous_user_id=get_anonymous_user_id(st.session_state.get("user_id") or "guest"),
+                properties={"context": "upgrade_dialog"})
+            st.session_state[_pv_flag] = True
+    except Exception:
+        pass
     st.write(_("사용 목적에 맞는 요금제를 선택해 주세요. 결제 완료 즉시 정식 라이선스로 전환됩니다.", 
                "Please choose a plan that fits your research. Your account will be upgraded instantly after payment."))
     
@@ -4198,6 +4209,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
             from survey_manager import increment_survey_visit
             increment_survey_visit(survey_id_param)
             st.session_state[f"visited_survey_{survey_id_param}"] = True
+            # [1단계] 설문 방문 구조화 이벤트
+            try:
+                from survey_manager import log_structured_event, get_anonymous_survey_id, EVENT_SURVEY_VISIT
+                log_structured_event(EVENT_SURVEY_VISIT,
+                    anonymous_survey_id=get_anonymous_survey_id(survey_id_param),
+                    properties={"is_preview": bool(is_preview_mode)})
+            except Exception:
+                pass
             
     # [YETA 전용 라우팅] 예타 모드인 경우 예타 전용 렌더러 호출
     if survey_meta.get("Is_Yeta") == "True" or survey_meta.get("Is_Yeta") is True:
@@ -5467,6 +5486,31 @@ if "preview_id" in q_params or "survey_id" in q_params:
             submit_btn = False # 마법사 표시 중에는 일반 제출 안함
         else:
             # 제출 버튼
+            # [1단계] 응답 시작 이벤트 (1회): 이름 입력 또는 쌍대비교 응답 감지
+            try:
+                _started_flag = f"_resp_started_{survey_id_param}"
+                if not st.session_state.get(_started_flag):
+                    _interacted = False
+                    _nm = st.session_state.get("survey_resp_name", "")
+                    if isinstance(_nm, str) and _nm.strip():
+                        _interacted = True
+                    if not _interacted:
+                        _rc = st.session_state.get("survey_reward_contact", "")
+                        if isinstance(_rc, str) and _rc.strip():
+                            _interacted = True
+                    if not _interacted:
+                        for _k, _v in st.session_state.items():
+                            if isinstance(_k, str) and _k.startswith("pair_ans_") and _v is not None:
+                                _interacted = True
+                                break
+                    if _interacted:
+                        from survey_manager import log_structured_event, get_anonymous_survey_id, EVENT_RESPONDENT_STARTED
+                        log_structured_event(EVENT_RESPONDENT_STARTED,
+                            anonymous_survey_id=get_anonymous_survey_id(survey_id_param),
+                            properties={"is_preview": bool(is_preview_mode)})
+                        st.session_state[_started_flag] = True
+            except Exception:
+                pass
             submit_btn = st.button(_("설문지 제출하기", "Submit Survey"), type="primary")
         if submit_btn:
             # 필수값 유효성 검증
@@ -5575,6 +5619,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         )
                     if success:
                         st.session_state[f"survey_submitted_{survey_id_param}"] = True
+                        # [1단계] 설문 제출 이벤트
+                        try:
+                            from survey_manager import log_structured_event, get_anonymous_survey_id, EVENT_SURVEY_SUBMITTED
+                            log_structured_event(EVENT_SURVEY_SUBMITTED,
+                                anonymous_survey_id=get_anonymous_survey_id(survey_id_param),
+                                properties={"is_preview": bool(is_preview_mode)})
+                        except Exception:
+                            pass
                         st.rerun()
                     else:
                         st.error(_("데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.", "A server error occurred while saving data. Please try again later."))
@@ -5740,6 +5792,16 @@ if "portone_paid" in q_params and "user_id" in q_params:
     # [보안] PortOne 결제 검증 (모니터링 모드: 실패해도 차단하지 않음)
     _verify_ok, _verify_msg = verify_portone_payment(payment_id_param)
     print(f"[PortOne] 결제 검증: user={user_id_param}, payment_id={payment_id_param}, result={_verify_ok}, msg={_verify_msg}")
+
+    # [1단계] 결제 성공 구조화 이벤트 (서버 검증 통과 시에만 기록)
+    try:
+        if payment_id_param and _verify_ok:
+            from survey_manager import log_structured_event, get_anonymous_user_id, EVENT_PAYMENT_SUCCEEDED
+            log_structured_event(EVENT_PAYMENT_SUCCEEDED,
+                anonymous_user_id=get_anonymous_user_id(user_id_param or "guest"),
+                properties={"plan": plan_name_param, "months": months_param})
+    except Exception:
+        pass
     
     if user_id_param:
         kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -8685,6 +8747,14 @@ with contextlib.nullcontext():
                 
                     if st.button(_("🔄 구글 시트에서 실시간 응답 가져오기", "🔄 Fetch Live Responses from Google Sheet"), type="primary", use_container_width=True):
                         import survey_manager; survey_manager.log_user_action(st.session_state.get("user_id") or "Guest", "실시간 응답 가져오기")
+                        # [1단계] 분석 시작 이벤트
+                        try:
+                            from survey_manager import log_structured_event, get_anonymous_user_id, get_anonymous_survey_id, EVENT_ANALYSIS_STARTED
+                            log_structured_event(EVENT_ANALYSIS_STARTED,
+                                anonymous_user_id=get_anonymous_user_id(st.session_state.get("user_id") or "guest"),
+                                anonymous_survey_id=get_anonymous_survey_id(selected_sheet_id))
+                        except Exception:
+                            pass
                         st.session_state["selected_survey_for_analysis"] = selected_sheet_id
                         from survey_manager import load_survey_metadata, get_survey_gspread_client
                         with st.spinner(_("구글 시트에서 설문 데이터 및 구조를 가져오는 중...", "Fetching survey structure and responses...")):
@@ -12678,6 +12748,13 @@ with contextlib.nullcontext():
 
                                                 st.code(short_url, language="text")
                                                 st.info(_("**설문 전달 안내:** 생성된 설문조사 링크를 복사하여 이메일이나 메신저(카카오톡 등)로 응답 대상자에게 전달해 주세요.", "**Survey Sharing Guide:** Please copy the generated survey link and send it to respondents via email or messenger."))
+
+                                                # [1단계] 응답 수집 시작하기 (목표 설정·QR·초대/리마인드 문구)
+                                                try:
+                                                    from collection_support import render_collection_kickoff
+                                                    render_collection_kickoff(sheet_id, short_url, survey_title)
+                                                except Exception as _cs_err:
+                                                    pass
                                             
                                                 sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
                                                 st.write("")
@@ -12878,6 +12955,28 @@ with contextlib.nullcontext():
                         stats = st.session_state["survey_stats"]
                         _t_visits = stats.get('visits', 0)
                         _t_comp = stats.get('completed', 0)
+                        # [1단계] 현황판 조회 이벤트 (대시보드 로드 1회)
+                        try:
+                            _dash_flag = f"_dash_viewed_{selected_sheet_id}"
+                            if not st.session_state.get(_dash_flag):
+                                from survey_manager import log_structured_event, get_anonymous_user_id, get_anonymous_survey_id, EVENT_OWNER_DASHBOARD_VIEWED
+                                log_structured_event(EVENT_OWNER_DASHBOARD_VIEWED,
+                                    anonymous_user_id=get_anonymous_user_id(st.session_state.get("user_id") or "guest"),
+                                    anonymous_survey_id=get_anonymous_survey_id(selected_sheet_id),
+                                    properties={"completed": _t_comp, "visits": _t_visits})
+                                st.session_state[_dash_flag] = True
+                        except Exception:
+                            pass
+                        # [1단계] 수집 진행 현황 (목표 대비 진행률·마감일·다음 행동) + 분석 준비 리포트
+                        try:
+                            from collection_support import render_collection_progress, render_analysis_readiness_entry
+                            from survey_manager import load_survey_metadata as _load_meta_cs
+                            _cs_meta = _load_meta_cs(selected_sheet_id.strip()) or {}
+                            render_collection_progress(selected_sheet_id.strip(), _cs_meta, _t_comp, _t_visits)
+                            render_analysis_readiness_entry(selected_sheet_id.strip(), _t_comp)
+                            st.divider()
+                        except Exception:
+                            pass
                         _t_crate = f" ({(_t_comp / _t_visits * 100):.1f}%)" if _t_visits > 0 else ""
                         col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                         with col_stat1:

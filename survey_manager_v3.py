@@ -134,7 +134,9 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         ["Show_Hierarchy", str(show_hierarchy)],
         ["Rewards_Info", json.dumps(rewards_info, ensure_ascii=False)],
         ["Visit_Count", "0"],
-        ["Abandoned_CR_Count", "0"]
+        ["Abandoned_CR_Count", "0"],
+        ["Target_Response_Count", ""],
+        ["Collection_Deadline", ""]
     ]
     run_gspread_with_retry(meta_sheet.update, range_name=f"A1:B{len(metadata)}", values=metadata)
     
