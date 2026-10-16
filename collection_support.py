@@ -264,18 +264,18 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         st.caption(action_hint)
 
     # ---- 4. 공유 도구 (QR·초대·리마인드 문구) ----
-    with st.expander("4. 공유 도구 (QR·초대·리마인드 문구)", expanded=False):
-        # 설문 URL 구성
-        try:
-            from survey_manager import get_survey_short_url
-            survey_url = get_survey_short_url(sheet_id) or ""
-        except Exception:
-            survey_url = ""
-        if not survey_url:
-            # 폴백: 기본 URL 패턴
-            survey_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
-        _survey_title = str(meta.get("Survey_Title") or meta.get("Title") or "")
-        render_sharing_tools(sheet_id, survey_url, _survey_title, key_prefix="cs_p")
+    section_title("4. 공유 도구")
+    # 설문 URL 구성
+    try:
+        from survey_manager import get_survey_short_url
+        survey_url = get_survey_short_url(sheet_id) or ""
+    except Exception:
+        survey_url = ""
+    if not survey_url:
+        # 폴백: 기본 URL 패턴
+        survey_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
+    _survey_title = str(meta.get("Survey_Title") or meta.get("Title") or "")
+    render_sharing_tools(sheet_id, survey_url, _survey_title, key_prefix="cs_p")
 
 
 def _next_action_card(completed, visits, target, days_left):
