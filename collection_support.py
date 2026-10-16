@@ -101,42 +101,37 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
         st.session_state[deploy_flag] = True
 
     st.divider()
-    section_title("응답 수집 시작하기", "📢")
-    st.caption("목표를 설정하고, 아래 도구를 복사해 응답자에게 전달하세요. "
-               "복사·다운로드 활동은 익명으로 기록되어 수집 현황 분석에 사용됩니다.")
+    section_title("응답 수집 시작하기")
+    hint("목표를 설정하고, 아래 도구를 복사해 응답자에게 전달하세요.")
 
     # ---- 목표/마감일 설정 ----
     with st.container(border=True):
-        st.markdown("**🎯 수집 목표 설정**")
-        c1, c2, c3 = st.columns([1, 1, 1])
-        with c1:
-            target_n = st.number_input("목표 응답 수", min_value=0, max_value=100000,
-                                       value=0, step=1,
-                                       key=f"cs_target_{sheet_id}",
-                                       help="0이면 목표 미설정 상태로 유지됩니다.")
-        with c2:
-            deadline = st.date_input("응답 마감일", value=None,
-                                     key=f"cs_deadline_{sheet_id}")
-        with c3:
-            st.write("")
-            st.write("")
-            if st.button("💾 목표 저장", key=f"cs_save_{sheet_id}",
-                         use_container_width=True):
+        section_title("수집 목표 설정")
+        with st.form(key=f"cs_kickoff_form_{sheet_id}", clear_on_submit=False):
+            kc1, kc2 = st.columns(2)
+            with kc1:
+                k_target = st.number_input("목표 응답 수", min_value=0, max_value=100000,
+                                           value=0, step=1,
+                                           help="0이면 목표 미설정 상태로 유지됩니다.")
+            with kc2:
+                k_deadline = st.date_input("응답 마감일", value=None)
+            k_submitted = st.form_submit_button("목표 저장", use_container_width=True,
+                                                type="primary")
+            if k_submitted:
                 res = update_survey_collection_goals(
                     sheet_id,
-                    target_count=int(target_n) if target_n else None,
-                    deadline=deadline,
+                    target_count=int(k_target) if k_target else None,
+                    deadline=k_deadline,
                     user_id=st.session_state.get("user_id"),
                 )
                 if res.get("success"):
                     st.success("수집 목표가 저장되었습니다.")
-                    st.session_state.pop(f"_cs_meta_{sheet_id}", None)
                 else:
                     st.error(f"저장 실패: {res.get('error')}")
 
     # ---- QR 코드 ----
     with st.container(border=True):
-        st.markdown("**📷 설문 QR 코드**")
+        st.markdown("설문 QR 코드")
         qr_ok = False
         try:
             import qrcode
@@ -151,53 +146,45 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
             with qc1:
                 st.image(buf, width=180)
             with qc2:
-                st.download_button("⬇️ QR 코드 다운로드 (PNG)",
+                st.download_button("QR 코드 다운로드 (PNG)",
                                    data=buf.getvalue(),
                                    file_name=f"survey_qr_{sheet_id[:8]}.png",
                                    mime="image/png",
                                    key=f"cs_qr_dl_{sheet_id}")
-                if st.button("📋 QR 다운로드 기록하기", key=f"cs_qr_log_{sheet_id}"):
+                if st.button("QR 다운로드 기록하기", key=f"cs_qr_log_{sheet_id}"):
                     _log_share(sheet_id, "qr", "qr_download")
                     st.toast("기록되었습니다.")
             qr_ok = True
         except Exception:
             qr_ok = False
         if not qr_ok:
-            st.link_button("↗️ QR 코드 만들기 (qr.naver.com)",
+            st.link_button("QR 코드 만들기 (qr.naver.com)",
                            "https://qr.naver.com/", use_container_width=False)
             st.caption("QR 라이브러리를 불러오지 못해 외부 생성기로 연결합니다.")
 
     # ---- 초대 문구 ----
     with st.container(border=True):
-        st.markdown("**💬 채널별 초대 문구**")
+        st.markdown("채널별 초대 문구")
         tabs = st.tabs(list(_invite_templates(survey_title, short_url).keys()))
         for tab, (ch, text) in zip(tabs, _invite_templates(survey_title, short_url).items()):
             with tab:
                 st.code(text, language="text")
-                if st.button(f"📋 '{ch}' 문구 사용 기록하기",
+                if st.button(f"{ch} 문구 사용 기록하기",
                              key=f"cs_invite_{ch}_{sheet_id}"):
                     _log_share(sheet_id, ch, "invite_copy")
                     st.toast("기록되었습니다.")
 
     # ---- 리마인드 문구 ----
-    with st.expander("🔔 리마인드 문구 (1차·2차)", expanded=False):
-        deadline_str = ""
-        try:
-            dl = st.session_state.get(f"cs_deadline_{sheet_id}")
-            if dl:
-                deadline_str = dl.strftime("%Y-%m-%d")
-        except Exception:
-            pass
-        rtabs = st.tabs(list(_reminder_templates(survey_title, short_url, deadline_str).keys()))
-        for tab, (name, text) in zip(rtabs, _reminder_templates(survey_title, short_url, deadline_str).items()):
+    with st.expander("리마인드 문구 (1차·2차)", expanded=False):
+        rtabs = st.tabs(list(_reminder_templates(survey_title, short_url, "").keys()))
+        for tab, (name, text) in zip(rtabs, _reminder_templates(survey_title, short_url, "").items()):
             with tab:
                 st.code(text, language="text")
-                if st.button(f"📋 '{name}' 사용 기록하기",
+                if st.button(f"'{name}' 사용 기록하기",
                              key=f"cs_remind_{name}_{sheet_id}"):
                     _log_share(sheet_id, "reminder", name)
                     st.toast("기록되었습니다.")
-        st.caption("💡 자동 발송은 개인정보 처리 설계 이후 단계에서 제공될 예정입니다. "
-                   "우선 문구를 복사해 직접 발송해 주세요.")
+        hint("자동 발송은 추후 제공 예정입니다. 문구를 복사해 직접 발송해 주세요.")
 
 
 # ----------------------------------------------------------------------------
@@ -224,7 +211,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
 
     # ---- 목표/마감일 설정 (페이지 최상단, 항상 표시) ----
     with st.container(border=True):
-        section_title("수집 목표 설정", "🎯")
+        section_title("수집 목표 설정")
         try:
             default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
                           if deadline_str else None)
@@ -259,7 +246,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         else:
             hint("목표가 설정되지 않았습니다.")
 
-    section_title("수집 진행 현황", "📊")
+    section_title("수집 진행 현황")
     p1, p2, p3 = st.columns(3)
     with p1:
         if target > 0:
@@ -316,20 +303,20 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
             img.save(buf, format="PNG")
             buf.seek(0)
             st.image(buf, width=150)
-            st.download_button("⬇️ QR 다운로드", data=buf.getvalue(),
+            st.download_button("QR 다운로드", data=buf.getvalue(),
                                file_name=f"survey_qr_{sheet_id[:8]}.png",
                                mime="image/png",
                                key=f"cs_pqr_dl_{sheet_id}")
             _log_share(sheet_id, "qr", "qr_view")
         except Exception:
-            st.link_button("↗️ QR 만들기 (qr.naver.com)", "https://qr.naver.com/")
+            st.link_button("QR 만들기 (qr.naver.com)", "https://qr.naver.com/")
 
         # 초대 문구
-        st.markdown("**💬 초대 문구**")
+        st.markdown("초대 문구")
         for ch, text in _invite_templates("", survey_url).items():
             with st.expander(ch, expanded=False):
                 st.code(text, language="text")
-                if st.button(f"📋 복사 기록", key=f"cs_pinv_{ch}_{sheet_id}"):
+                if st.button(f"복사 기록", key=f"cs_pinv_{ch}_{sheet_id}"):
                     _log_share(sheet_id, ch, "invite_copy")
                     st.toast("기록되었습니다.")
 
