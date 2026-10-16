@@ -221,51 +221,42 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         target = 0
     deadline_str = str(meta.get("Collection_Deadline") or "").strip()
 
-    # ---- 목표/마감일 설정 (페이지 최상단) ----
+    # ---- 목표/마감일 설정 (페이지 최상단, 항상 표시) ----
     with st.container(border=True):
         st.markdown("**🎯 수집 목표 설정**")
-        sc1, sc2, sc3 = st.columns([1, 1, 1])
-        with sc1:
-            new_target = st.number_input(
-                "목표 응답 수", min_value=0, max_value=100000,
-                value=target, step=1,
-                key=f"cs_ptarget_{sheet_id}",
-                help="0이면 목표 미설정 상태입니다.")
-        with sc2:
-            try:
-                default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
-                              if deadline_str else None)
-            except Exception:
-                default_dl = None
-            new_deadline = st.date_input("응답 마감일", value=default_dl,
-                                         key=f"cs_pdeadline_{sheet_id}")
-        with sc3:
-            st.write("")
-            st.write("")
-            if st.button("💾 목표 저장", key=f"cs_psave_{sheet_id}",
-                         use_container_width=True, type="primary"):
+        try:
+            default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
+                          if deadline_str else None)
+        except Exception:
+            default_dl = None
+        with st.form(key=f"cs_goal_form_{sheet_id}", clear_on_submit=False):
+            fc1, fc2 = st.columns(2)
+            with fc1:
+                form_target = st.number_input(
+                    "목표 응답 수", min_value=0, max_value=100000,
+                    value=target, step=1,
+                    help="0이면 목표 미설정 상태입니다.")
+            with fc2:
+                form_deadline = st.date_input("응답 마감일", value=default_dl)
+            submitted = st.form_submit_button("💾 목표 저장", use_container_width=True,
+                                              type="primary")
+            if submitted:
                 from survey_manager import update_survey_collection_goals
                 res = update_survey_collection_goals(
                     sheet_id,
-                    target_count=int(new_target) if new_target else None,
-                    deadline=new_deadline,
+                    target_count=int(form_target) if form_target else None,
+                    deadline=form_deadline,
                     user_id=st.session_state.get("user_id"),
                 )
                 if res.get("success"):
-                    st.success("✅ 저장됐습니다.")
-                    # 메타 캐시 무효화 후 값 다시 읽기
-                    st.session_state.pop(f"_cs_meta_{sheet_id}", None)
-                    try:
-                        from survey_manager import load_survey_metadata
-                        fresh = load_survey_metadata(sheet_id) or {}
-                        target = int(fresh.get("Target_Response_Count") or 0)
-                        deadline_str = str(fresh.get("Collection_Deadline") or "").strip()
-                        st.caption(f"확인: 목표 {target}명 / 마감일 {deadline_str or '미설정'}")
-                    except Exception:
-                        pass
-                    st.rerun()
+                    st.success("✅ 저장됐습니다. 아래에 저장된 값이 표시됩니다.")
                 else:
                     st.error(f"저장 실패: {res.get('error')}")
+        # 저장된 값 확인 표시 (폼과 분리되어 항상 보임)
+        if target > 0 or deadline_str:
+            st.caption(f"현재 설정: 목표 {target}명 / 마감일 {deadline_str or '미설정'}")
+        else:
+            st.caption("현재 목표가 설정되지 않았습니다. 위 폼에서 설정하세요.")
 
     st.markdown("### 🎯 수집 진행 현황")
     p1, p2, p3 = st.columns(3)
