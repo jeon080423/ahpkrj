@@ -3905,7 +3905,7 @@ def render_survey_status_dashboard(survey_id):
         fig_stats.update_layout(
             showlegend=False, height=340,
             margin=dict(l=20, r=20, t=40, b=80),
-            xaxis=dict(tickangle=-15, tickmode="array",
+            xaxis=dict(tickmode="array",
                        tickvals=["응답 완료", "일관성(CR) 초과 중단", "단순 페이지 이탈"],
                        ticktext=["응답 완료", "일관성(CR)<br>초과 중단", "단순 페이지 이탈"]),
         )
