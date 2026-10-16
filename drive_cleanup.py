@@ -75,15 +75,15 @@ def render_drive_cleanup():
         st.error(err)
         return
 
-    # 파일 목록 조회
+    # 파일 목록 조회 (서비스 계정이 소유한 파일만)
     with st.spinner("드라이브 파일 목록을 조회하는 중..."):
         try:
             files = []
             page_token = None
             while True:
                 resp = service.files().list(
-                    q="mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
-                    fields="files(id, name, createdTime, modifiedTime, size, quotaBytesUsed), nextPageToken",
+                    q="mimeType='application/vnd.google-apps.spreadsheet' and trashed=false and 'me' in owners",
+                    fields="files(id, name, createdTime, modifiedTime, size, quotaBytesUsed, owners), nextPageToken",
                     pageSize=100,
                     pageToken=page_token,
                 ).execute()
@@ -96,7 +96,8 @@ def render_drive_cleanup():
             return
 
     if not files:
-        st.info("스프레드시트가 없습니다.")
+        st.info("서비스 계정이 소유한 스프레드시트가 없습니다. 용량 부족의 원인이 다른 곳에 있을 수 있습니다.")
+        st.caption("참고: 서비스 계정과 공유된 파일(소유자 아님)은 목록에 표시되지 않습니다.")
         return
 
     registered = _get_registered_sheet_ids()
