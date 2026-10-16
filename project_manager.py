@@ -14,10 +14,20 @@ from ui_style import section_title, hint
 
 def get_my_projects(admin_id):
     """현재 관리자의 프로젝트 목록을 반환한다. [(survey_id, title, created_at), ...]
-    survey_id 기준 중복 제거."""
+    survey_id 기준 중복 제거. (구글 시트 + SQLite 병합)"""
     try:
         from survey_manager import get_admin_surveys_from_gsheet
         raw = get_admin_surveys_from_gsheet(admin_id) or []
+        # SQLite admin_surveys도 병합 (설문 ID로 가져오기 지원)
+        try:
+            import sqlite3
+            conn = sqlite3.connect('users.db')
+            cur = conn.cursor()
+            cur.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (admin_id,))
+            raw = raw + cur.fetchall()
+            conn.close()
+        except Exception:
+            pass
         seen = set()
         unique = []
         for sid, title, created_at in raw:
