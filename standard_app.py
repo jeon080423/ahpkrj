@@ -3902,7 +3902,13 @@ def render_survey_status_dashboard(survey_id):
             title="📌 설문 참여 상태별 분포"
         )
         fig_stats.update_traces(textposition="outside", cliponaxis=False)
-        fig_stats.update_layout(showlegend=False, height=320, margin=dict(l=20, r=20, t=40, b=20))
+        fig_stats.update_layout(
+            showlegend=False, height=340,
+            margin=dict(l=20, r=20, t=40, b=80),
+            xaxis=dict(tickangle=-15, tickmode="array",
+                       tickvals=["응답 완료", "일관성(CR) 초과 중단", "단순 페이지 이탈"],
+                       ticktext=["응답 완료", "일관성(CR)<br>초과 중단", "단순 페이지 이탈"]),
+        )
         st.plotly_chart(fig_stats, use_container_width=True)
 
     with chart_col2:
