@@ -11343,7 +11343,7 @@ with contextlib.nullcontext():
         survey_sub_deploy, survey_sub_status, survey_sub_projects = st.tabs([
             _("설문 작성 및 배포", "Create & Deploy Survey"),
             _("응답 현황", "Responses"),
-            _("📁 프로젝트 관리", "Projects")
+            _("프로젝트 관리", "Projects")
         ])
         with survey_sub_projects:
             try:
