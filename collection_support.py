@@ -180,7 +180,7 @@ def _days_remaining(deadline_str):
 
 
 def render_collection_progress(sheet_id, survey_meta, completed_count, visit_count=0):
-    """대시보드에 진행률/마감일/다음 행동 카드를 표시한다."""
+    """응답 현황 탭: 수집 진행 현황(지표)만 표시한다."""
     meta = survey_meta or {}
     try:
         target = int(meta.get("Target_Response_Count") or 0)
@@ -188,7 +188,41 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         target = 0
     deadline_str = str(meta.get("Collection_Deadline") or "").strip()
 
-    # ---- 1. 목표/마감일 설정 (페이지 최상단, 항상 표시) ----
+    section_title("수집 진행 현황")
+    p1, p2, p3 = st.columns(3)
+    with p1:
+        if target > 0:
+            pct = min(completed_count / target, 1.0)
+            st.metric("진행률", f"{completed_count} / {target}명", f"{pct*100:.0f}%")
+            st.progress(pct)
+        else:
+            st.metric("완료 응답", f"{completed_count}명")
+            st.caption("자료수집 도구 탭에서 목표를 설정하세요.")
+    with p2:
+        days = _days_remaining(deadline_str)
+        if days is None:
+            st.metric("마감일", "미설정")
+        elif days < 0:
+            st.metric("마감일", deadline_str, f"{abs(days)}일 지남", delta_color="inverse")
+        elif days == 0:
+            st.metric("마감일", deadline_str, "오늘 마감!")
+        else:
+            st.metric("마감일", deadline_str, f"{days}일 남음")
+    with p3:
+        rate = (completed_count / visit_count * 100) if visit_count else 0
+        st.metric("방문 대비 완료율", f"{rate:.1f}%", f"방문 {visit_count}명")
+
+
+def render_collection_tools(sheet_id, survey_meta, completed_count, visit_count=0):
+    """자료수집 도구 탭: 1. 목표 설정, 3. 다음 행동, 4. 공유 도구."""
+    meta = survey_meta or {}
+    try:
+        target = int(meta.get("Target_Response_Count") or 0)
+    except (ValueError, TypeError):
+        target = 0
+    deadline_str = str(meta.get("Collection_Deadline") or "").strip()
+
+    # ---- 1. 수집 목표 설정 ----
     section_title("1. 수집 목표 설정")
     try:
         default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
@@ -215,46 +249,22 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
                 user_id=st.session_state.get("user_id"),
             )
             if res.get("success"):
-                # 캐시 무효화 → 다음 로드 시 최신값 표시
                 try:
                     from survey_manager import _fetch_survey_metadata_from_sheets
                     _fetch_survey_metadata_from_sheets.clear()
                 except Exception:
                     pass
-                st.success("저장됐습니다. 아래에 저장된 값이 표시됩니다.")
+                st.success("저장됐습니다.")
             else:
                 st.error(f"저장 실패: {res.get('error')}")
-    # 저장된 값 확인 표시 (폼과 분리되어 항상 보임)
     if target > 0 or deadline_str:
         hint(f"현재 설정: 목표 {target}명 / 마감일 {deadline_str or '미설정'}")
     else:
         hint("목표가 설정되지 않았습니다.")
 
-    section_title("2. 수집 진행 현황")
-    p1, p2, p3 = st.columns(3)
-    with p1:
-        if target > 0:
-            pct = min(completed_count / target, 1.0)
-            st.metric("진행률", f"{completed_count} / {target}명", f"{pct*100:.0f}%")
-            st.progress(pct)
-        else:
-            st.metric("완료 응답", f"{completed_count}명")
-            st.caption("위에서 목표 응답 수를 설정하세요.")
-    with p2:
-        days = _days_remaining(deadline_str)
-        if days is None:
-            st.metric("마감일", "미설정")
-        elif days < 0:
-            st.metric("마감일", deadline_str, f"{abs(days)}일 지남", delta_color="inverse")
-        elif days == 0:
-            st.metric("마감일", deadline_str, "오늘 마감!")
-        else:
-            st.metric("마감일", deadline_str, f"{days}일 남음")
-    with p3:
-        rate = (completed_count / visit_count * 100) if visit_count else 0
-        st.metric("방문 대비 완료율", f"{rate:.1f}%", f"방문 {visit_count}명")
+    st.divider()
 
-    # ---- 상태별 다음 행동 카드 ----
+    # ---- 3. 다음 행동 ----
     section_title("3. 다음 행동")
     action_title, action_desc, action_hint = _next_action_card(
         completed_count, visit_count, target, _days_remaining(deadline_str))
@@ -262,6 +272,8 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         st.markdown(f"**{action_title}**")
         st.write(action_desc)
         st.caption(action_hint)
+
+    st.divider()
 
     # ---- 4. 공유 도구 (QR·초대·리마인드 문구) ----
     section_title("4. 공유 도구")

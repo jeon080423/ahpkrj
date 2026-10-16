@@ -11340,9 +11340,10 @@ with contextlib.nullcontext():
     
 
     with main_tab_survey:
-        survey_sub_deploy, survey_sub_status, survey_sub_projects = st.tabs([
+        survey_sub_deploy, survey_sub_status, survey_sub_tools, survey_sub_projects = st.tabs([
             _("설문 작성 및 배포", "Create & Deploy Survey"),
             _("응답 현황", "Responses"),
+            _("자료수집 도구", "Collection Tools"),
             _("프로젝트 관리", "Projects")
         ])
         with survey_sub_projects:
@@ -11351,6 +11352,29 @@ with contextlib.nullcontext():
                 render_project_manager()
             except Exception as e:
                 st.error(f"프로젝트 관리 로드 실패: {e}")
+        with survey_sub_tools:
+            try:
+                from collection_support import render_collection_tools
+                from survey_manager import load_survey_metadata as _load_meta_tool
+                # 도구 탭용 설문 선택 (응답 현황과 동일한 설문 사용)
+                _tool_surveys = []
+                try:
+                    from survey_manager import get_admin_surveys_from_gsheet
+                    _tool_surveys = get_admin_surveys_from_gsheet(st.session_state.get("user_id")) or []
+                except Exception:
+                    pass
+                if not _tool_surveys:
+                    st.info("도구를 사용할 설문이 없습니다. 먼저 설문을 배포해 주세요.")
+                else:
+                    _tool_options = {f"{r[1]} ({r[2]})": r[0] for r in _tool_surveys}
+                    _tool_label = st.selectbox("설문 선택", list(_tool_options.keys()),
+                                               key="tool_survey_select")
+                    _tool_sid = _tool_options[_tool_label].strip()
+                    _tool_meta = _load_meta_tool(_tool_sid) or {}
+                    # 완료/방문 수는 응답 현황과 동일한 로직으로 조회 (간단히 0으로)
+                    render_collection_tools(_tool_sid, _tool_meta, 0, 0)
+            except Exception as e:
+                st.error(f"자료수집 도구 로드 실패: {e}")
         with survey_sub_deploy:
             @st.fragment
             def _survey_setup_fragment():
