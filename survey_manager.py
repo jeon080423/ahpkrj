@@ -191,7 +191,12 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         now_date = datetime.datetime.now().strftime("%Y-%m-%d")
         user_tag = user_id or admin_email or "User"
         sheet_title = f"[{user_tag}_{now_date}] {title}" if title else f"[{user_tag}_{now_date}] AHP 설문"
-        spreadsheet = run_gspread_with_retry(client.create, sheet_title)
+        try:
+            spreadsheet = run_gspread_with_retry(client.create, sheet_title)
+        except Exception as e:
+            # 진단: 어떤 계정으로 생성을 시도했는지 표시
+            _diag = "서비스 계정" if not user_id else f"사용자 OAuth({user_id})"
+            raise Exception(f"[{_diag}로 시트 생성 시도] {e}")
         
         # 2. 담당자 이메일에 편집자 권한 부여 및 링크 전체 공개 편집자 설정
         if admin_email and "@" in admin_email:
