@@ -2111,12 +2111,35 @@ def update_survey_collection_goals(spreadsheet_id, target_count=None, deadline=N
             else:
                 run_gspread_with_retry(meta_sheet.append_row, [field, value])
 
-        # 로컬 캐시 무효화 (다음 로드 시 최신값 반영)
+        # 로컬 캐시 갱신: 기존 캐시 메타데이터에 새 목표/마감일 반영
+        # (시트 조회 실패 시 폴백용)
         try:
-            import sqlite3
+            import sqlite3, json
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
-            c.execute("DELETE FROM survey_metadata_cache WHERE survey_id = ?", (spreadsheet_id,))
+            c.execute('''CREATE TABLE IF NOT EXISTS survey_metadata_cache
+                          (survey_id TEXT PRIMARY KEY, metadata_json TEXT, updated_at TEXT)''')
+            c.execute("SELECT metadata_json FROM survey_metadata_cache WHERE survey_id = ?",
+                      (spreadsheet_id,))
+            row = c.fetchone()
+            if row:
+                try:
+                    cached = json.loads(row[0])
+                except Exception:
+                    cached = {}
+                for field, value in updates.items():
+                    cached[field] = value
+                # Target_Response_Count는 int로 정규화
+                try:
+                    _trc = str(cached.get("Target_Response_Count", "") or "").strip()
+                    cached["Target_Response_Count"] = int(_trc) if _trc else 0
+                except (ValueError, TypeError):
+                    cached["Target_Response_Count"] = 0
+                c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",
+                          (spreadsheet_id, json.dumps(cached, ensure_ascii=False)))
+            else:
+                # 캐시 없음: 삭제만 (다음 로드 시 시트에서 새로 가져옴)
+                c.execute("DELETE FROM survey_metadata_cache WHERE survey_id = ?", (spreadsheet_id,))
             conn.commit()
             conn.close()
         except Exception:
