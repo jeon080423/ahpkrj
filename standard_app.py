@@ -3888,26 +3888,23 @@ def render_survey_status_dashboard(survey_id):
             "구분": ["응답 완료", "일관성(CR) 초과 중단", "단순 페이지 이탈"],
             "인원수": [completed, abandoned_cr, abandoned_bounce]
         })
-        fig_stats = px.bar(
-            chart_data,
-            x="구분",
-            y="인원수",
-            text="인원수",
-            color="구분",
-            color_discrete_map={
-                "응답 완료": "#10b981",
-                "일관성(CR) 초과 중단": "#ef4444",
-                "단순 페이지 이탈": "#f59e0b"
-            },
-            title="📌 설문 참여 상태별 분포"
-        )
-        fig_stats.update_traces(textposition="outside", cliponaxis=False)
+        import plotly.graph_objects as go
+        fig_stats = go.Figure(data=[
+            go.Bar(
+                x=["응답 완료", "일관성(CR)<br>초과 중단", "단순 페이지 이탈"],
+                y=[completed, abandoned_cr, abandoned_bounce],
+                text=[completed, abandoned_cr, abandoned_bounce],
+                textposition="outside",
+                marker_color=["#10b981", "#ef4444", "#f59e0b"],
+                cliponaxis=False,
+            )
+        ])
         fig_stats.update_layout(
+            title="설문 참여 상태별 분포",
             showlegend=False, height=340,
             margin=dict(l=20, r=20, t=40, b=80),
-            xaxis=dict(tickmode="array",
-                       tickvals=["응답 완료", "일관성(CR) 초과 중단", "단순 페이지 이탈"],
-                       ticktext=["응답 완료", "일관성(CR)<br>초과 중단", "단순 페이지 이탈"]),
+            xaxis=dict(title="구분"),
+            yaxis=dict(title="인원수"),
         )
         st.plotly_chart(fig_stats, use_container_width=True)
 
