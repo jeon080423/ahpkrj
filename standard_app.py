@@ -8582,6 +8582,34 @@ with contextlib.nullcontext():
                 return None
                 
             summary_rows = []
+            # _기타 컬럼의 부모 질문 매핑 (비율 계산용)
+            _etc_parent_counts = {}
+            for col in target_cols:
+                col_str = str(col).strip()
+                if col_str.endswith('_기타') or col_str.endswith('(기타)'):
+                    # 부모 컬럼 찾기 (예: "소속_기타" -> "소속")
+                    parent_col = None
+                    base_name = col_str[:-3] if col_str.endswith('_기타') else col_str[:-4]
+                    for pc in target_cols:
+                        pc_str = str(pc).strip()
+                        if pc_str == base_name or pc_str.startswith(base_name):
+                            # 정확히 일치하거나, 부모가 base_name으로 시작하고 _기타가 아닌 경우
+                            if not (pc_str.endswith('_기타') or pc_str.endswith('(기타)')):
+                                parent_col = pc
+                                break
+                    if parent_col is not None:
+                        # 부모에서 "기타"를 선택한 응답자 수 계산
+                        parent_data = working_df[parent_col]
+                        etc_count = 0
+                        for val in parent_data:
+                            if pd.isna(val):
+                                continue
+                            val_str = str(val).strip()
+                            if val_str == "기타" or "기타" in val_str:
+                                etc_count += 1
+                        if etc_count > 0:
+                            _etc_parent_counts[col_str] = etc_count
+            
             for col in target_cols:
                 col_str = str(col).strip()
                 col_data = working_df[col]
@@ -8605,8 +8633,12 @@ with contextlib.nullcontext():
                 series_valid = pd.Series(valid_items)
                 counts = series_valid.value_counts()
                 total = len(valid_items)
+                # _기타 컬럼인 경우: 부모의 "기타" 응답자 수를 분모로 사용하여 비율 계산
+                # (예: 기타 3명 중 1명이 "개인사업가" 입력 → 33.3%)
+                is_etc_col = col_str.endswith('_기타') or col_str.endswith('(기타)')
+                denom = _etc_parent_counts.get(col_str, total) if is_etc_col else total
                 for val, count in counts.items():
-                    pct = (count / total) * 100 if total > 0 else 0
+                    pct = (count / denom) * 100 if denom > 0 else 0
                     summary_rows.append({
                         "인구통계 항목 (Demographic Field)": col,
                         "응답 보기 (Value)": val,
