@@ -11519,6 +11519,38 @@ with contextlib.nullcontext():
                     with st.container(border=True):
                         st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("내 설문 관리", "My Survey Management")}</h4>', unsafe_allow_html=True)
 
+                        # 설문 ID로 가져오기 (공유받은 설문 연결)
+                        with st.expander(_("🔗 설문 ID로 가져오기", "Import Survey by ID")):
+                            _import_sid = st.text_input(_("설문 ID 입력", "Enter Survey ID"), key="import_survey_id_input", placeholder="예: 1NkDZ2NEirWepjTPubG1DZ4weR0wbrWX_GfZwS0mAKl8")
+                            if st.button(_("가져오기", "Import"), key="import_survey_btn"):
+                                if _import_sid and _import_sid.strip():
+                                    _import_sid = _import_sid.strip()
+                                    try:
+                                        import sqlite3
+                                        from datetime import datetime
+                                        # 설문 존재 여부 확인 (구글 시트 메타데이터)
+                                        from survey_manager import load_survey_metadata
+                                        _meta = load_survey_metadata(_import_sid)
+                                        if _meta:
+                                            _title = _meta.get("Title", _import_sid[:8])
+                                            conn = sqlite3.connect('users.db')
+                                            cur = conn.cursor()
+                                            cur.execute("CREATE TABLE IF NOT EXISTS admin_surveys (survey_id TEXT PRIMARY KEY, admin_id TEXT, title TEXT, created_at TEXT)")
+                                            cur.execute("INSERT OR REPLACE INTO admin_surveys (survey_id, admin_id, title, created_at) VALUES (?, ?, ?, ?)",
+                                                        (_import_sid, st.session_state.user_id, _title, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                                            conn.commit()
+                                            conn.close()
+                                            st.session_state._survey_cache_dirty = True
+                                            st.session_state.pop('_cached_user_surveys', None)
+                                            st.success(_("설문을 가져왔습니다.", "Survey imported."))
+                                            st.rerun()
+                                        else:
+                                            st.error(_("설문을 찾을 수 없습니다. ID를 확인해주세요.", "Survey not found. Please check the ID."))
+                                    except Exception as e:
+                                        st.error(f"{_('오류 발생', 'Error')}: {e}")
+                                else:
+                                    st.warning(_("설문 ID를 입력해주세요.", "Please enter a survey ID."))
+
                         # Initialize states
                         if 'editing_survey_id' not in st.session_state:
                             st.session_state.editing_survey_id = None
