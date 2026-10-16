@@ -12982,8 +12982,8 @@ with contextlib.nullcontext():
                             render_collection_progress(selected_sheet_id.strip(), _cs_meta, _t_comp, _t_visits)
                             render_analysis_readiness_entry(selected_sheet_id.strip(), _t_comp)
                             st.divider()
-                        except Exception:
-                            pass
+                        except Exception as _cs_e:
+                            st.error(f"수집 현황 로드 실패: {_cs_e}")
                         _t_crate = f" ({(_t_comp / _t_visits * 100):.1f}%)" if _t_visits > 0 else ""
                         col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                         with col_stat1:
