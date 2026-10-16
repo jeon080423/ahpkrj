@@ -114,6 +114,19 @@ def _collection_kickoff_dialog(sheet_id, short_url, survey_title=""):
 
     hint("목표를 설정하고, 아래 도구를 복사해 응답자에게 전달하세요.")
 
+    # 기존 저장값 불러오기 (연동)
+    _k_target_val = 0
+    _k_deadline_val = None
+    try:
+        from survey_manager import load_survey_metadata as _k_load_meta
+        _k_meta = _k_load_meta(sheet_id) or {}
+        _k_target_val = int(_k_meta.get("Target_Response_Count") or 0)
+        _k_dl_str = str(_k_meta.get("Collection_Deadline") or "").strip()
+        if _k_dl_str:
+            _k_deadline_val = datetime.datetime.strptime(_k_dl_str, "%Y-%m-%d").date()
+    except Exception:
+        pass
+
     # ---- 목표/마감일 설정 ----
     with st.container(border=True):
         section_title("수집 목표 설정")
@@ -121,10 +134,10 @@ def _collection_kickoff_dialog(sheet_id, short_url, survey_title=""):
             kc1, kc2 = st.columns(2)
             with kc1:
                 k_target = st.number_input("목표 응답 수", min_value=0, max_value=100000,
-                                           value=0, step=1,
+                                           value=_k_target_val, step=1,
                                            help="0이면 목표 미설정 상태로 유지됩니다.")
             with kc2:
-                k_deadline = st.date_input("응답 마감일", value=None)
+                k_deadline = st.date_input("응답 마감일", value=_k_deadline_val)
             k_submitted = st.form_submit_button("목표 저장", use_container_width=True,
                                                 type="primary")
             if k_submitted:
@@ -135,6 +148,12 @@ def _collection_kickoff_dialog(sheet_id, short_url, survey_title=""):
                     user_id=st.session_state.get("user_id"),
                 )
                 if res.get("success"):
+                    # 캐시 무효화 → 진행현황에서 최신값 표시
+                    try:
+                        from survey_manager import _fetch_survey_metadata_from_sheets
+                        _fetch_survey_metadata_from_sheets.clear()
+                    except Exception:
+                        pass
                     st.success("수집 목표가 저장되었습니다.")
                 else:
                     st.error(f"저장 실패: {res.get('error')}")
@@ -252,7 +271,13 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
                     user_id=st.session_state.get("user_id"),
                 )
                 if res.get("success"):
-                    st.success("✅ 저장됐습니다. 아래에 저장된 값이 표시됩니다.")
+                    # 캐시 무효화 → 다음 로드 시 최신값 표시
+                    try:
+                        from survey_manager import _fetch_survey_metadata_from_sheets
+                        _fetch_survey_metadata_from_sheets.clear()
+                    except Exception:
+                        pass
+                    st.success("저장됐습니다. 아래에 저장된 값이 표시됩니다.")
                 else:
                     st.error(f"저장 실패: {res.get('error')}")
         # 저장된 값 확인 표시 (폼과 분리되어 항상 보임)
