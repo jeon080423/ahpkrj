@@ -106,11 +106,71 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
         _render_kickoff_content(sheet_id, short_url, survey_title)
 
 
+def render_sharing_tools(sheet_id, short_url, survey_title="", key_prefix="cs"):
+    """QR 코드·초대 문구·리마인드 문구를 표시한다. 진행현황과 배포 화면에서 공유."""
+    # ---- QR 코드 ----
+    with st.container(border=True):
+        section_title("설문 QR 코드")
+        qr_ok = False
+        try:
+            import qrcode
+            qr = qrcode.QRCode(box_size=8, border=2)
+            qr.add_data(short_url)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            buf.seek(0)
+            qc1, qc2 = st.columns([1, 2])
+            with qc1:
+                st.image(buf, width=180)
+            with qc2:
+                st.download_button("QR 코드 다운로드 (PNG)",
+                                   data=buf.getvalue(),
+                                   file_name=f"survey_qr_{sheet_id[:8]}.png",
+                                   mime="image/png",
+                                   key=f"{key_prefix}_qr_dl_{sheet_id}")
+                if st.button("QR 다운로드 기록하기", key=f"{key_prefix}_qr_log_{sheet_id}"):
+                    _log_share(sheet_id, "qr", "qr_download")
+                    st.toast("기록되었습니다.")
+            qr_ok = True
+        except Exception:
+            qr_ok = False
+        if not qr_ok:
+            st.link_button("QR 코드 만들기 (qr.naver.com)",
+                           "https://qr.naver.com/", use_container_width=False)
+            hint("QR 라이브러리를 불러오지 못해 외부 생성기로 연결합니다.")
+
+    # ---- 초대 문구 ----
+    with st.container(border=True):
+        section_title("채널별 초대 문구")
+        tabs = st.tabs(list(_invite_templates(survey_title, short_url).keys()))
+        for tab, (ch, text) in zip(tabs, _invite_templates(survey_title, short_url).items()):
+            with tab:
+                st.code(text, language="text")
+                if st.button(f"{ch} 문구 사용 기록하기",
+                             key=f"{key_prefix}_invite_{ch}_{sheet_id}"):
+                    _log_share(sheet_id, ch, "invite_copy")
+                    st.toast("기록되었습니다.")
+
+    # ---- 리마인드 문구 ----
+    with st.expander("리마인드 문구 (1차·2차)", expanded=False):
+        rtabs = st.tabs(list(_reminder_templates(survey_title, short_url, "").keys()))
+        for tab, (name, text) in zip(rtabs, _reminder_templates(survey_title, short_url, "").items()):
+            with tab:
+                st.code(text, language="text")
+                if st.button(f"'{name}' 사용 기록하기",
+                             key=f"{key_prefix}_remind_{name}_{sheet_id}"):
+                    _log_share(sheet_id, "reminder", name)
+                    st.toast("기록되었습니다.")
+        hint("자동 발송은 추후 제공 예정입니다. 문구를 복사해 직접 발송해 주세요.")
+
+
 def _render_kickoff_content(sheet_id, short_url, survey_title=""):
-    """응답 수집 도구의 실제 내용."""
+    """배포 직후 화면: 목표 설정만 표시. 공유 도구는 진행현황에서 확인."""
     from survey_manager import update_survey_collection_goals
 
-    hint("목표를 설정하고, 아래 도구를 복사해 응답자에게 전달하세요.")
+    hint("목표를 설정하세요. QR 코드와 초대 문구는 진행현황에서 확인할 수 있습니다.")
 
     # 기존 저장값 불러오기 (연동)
     _k_target_val = 0
@@ -155,64 +215,6 @@ def _render_kickoff_content(sheet_id, short_url, survey_title=""):
                     st.success("수집 목표가 저장되었습니다.")
                 else:
                     st.error(f"저장 실패: {res.get('error')}")
-
-    # ---- QR 코드 ----
-    with st.container(border=True):
-        st.markdown("설문 QR 코드")
-        qr_ok = False
-        try:
-            import qrcode
-            qr = qrcode.QRCode(box_size=8, border=2)
-            qr.add_data(short_url)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="black", back_color="white")
-            buf = io.BytesIO()
-            img.save(buf, format="PNG")
-            buf.seek(0)
-            qc1, qc2 = st.columns([1, 2])
-            with qc1:
-                st.image(buf, width=180)
-            with qc2:
-                st.download_button("QR 코드 다운로드 (PNG)",
-                                   data=buf.getvalue(),
-                                   file_name=f"survey_qr_{sheet_id[:8]}.png",
-                                   mime="image/png",
-                                   key=f"cs_qr_dl_{sheet_id}")
-                if st.button("QR 다운로드 기록하기", key=f"cs_qr_log_{sheet_id}"):
-                    _log_share(sheet_id, "qr", "qr_download")
-                    st.toast("기록되었습니다.")
-            qr_ok = True
-        except Exception:
-            qr_ok = False
-        if not qr_ok:
-            st.link_button("QR 코드 만들기 (qr.naver.com)",
-                           "https://qr.naver.com/", use_container_width=False)
-            st.caption("QR 라이브러리를 불러오지 못해 외부 생성기로 연결합니다.")
-
-    # ---- 초대 문구 ----
-    with st.container(border=True):
-        st.markdown("채널별 초대 문구")
-        tabs = st.tabs(list(_invite_templates(survey_title, short_url).keys()))
-        for tab, (ch, text) in zip(tabs, _invite_templates(survey_title, short_url).items()):
-            with tab:
-                st.code(text, language="text")
-                if st.button(f"{ch} 문구 사용 기록하기",
-                             key=f"cs_invite_{ch}_{sheet_id}"):
-                    _log_share(sheet_id, ch, "invite_copy")
-                    st.toast("기록되었습니다.")
-
-    # ---- 리마인드 문구 ----
-    with st.expander("리마인드 문구 (1차·2차)", expanded=False):
-        rtabs = st.tabs(list(_reminder_templates(survey_title, short_url, "").keys()))
-        for tab, (name, text) in zip(rtabs, _reminder_templates(survey_title, short_url, "").items()):
-            with tab:
-                st.code(text, language="text")
-                if st.button(f"'{name}' 사용 기록하기",
-                             key=f"cs_remind_{name}_{sheet_id}"):
-                    _log_share(sheet_id, "reminder", name)
-                    st.toast("기록되었습니다.")
-        hint("자동 발송은 추후 제공 예정입니다. 문구를 복사해 직접 발송해 주세요.")
-
 
 # ----------------------------------------------------------------------------
 # 현황판: 진행률·남은 일수·상태별 다음 행동 카드
@@ -312,8 +314,8 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         st.write(action_desc)
         st.caption(action_hint)
 
-    # ---- 공유 도구 (기존 설문용) ----
-    with st.expander("📢 공유 도구 (QR·초대 문구)", expanded=False):
+    # ---- 공유 도구 (QR·초대·리마인드 문구) ----
+    with st.expander("공유 도구 (QR·초대·리마인드 문구)", expanded=False):
         # 설문 URL 구성
         try:
             from survey_manager import get_survey_short_url
@@ -322,36 +324,9 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
             survey_url = ""
         if not survey_url:
             # 폴백: 기본 URL 패턴
-            survey_url = f"https://ahpkrj.streamlit.app/?survey={sheet_id[:8]}"
-        st.code(survey_url, language="text")
-
-        # QR 코드
-        try:
-            import qrcode
-            qr = qrcode.QRCode(box_size=6, border=2)
-            qr.add_data(survey_url)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="black", back_color="white")
-            buf = io.BytesIO()
-            img.save(buf, format="PNG")
-            buf.seek(0)
-            st.image(buf, width=150)
-            st.download_button("QR 다운로드", data=buf.getvalue(),
-                               file_name=f"survey_qr_{sheet_id[:8]}.png",
-                               mime="image/png",
-                               key=f"cs_pqr_dl_{sheet_id}")
-            _log_share(sheet_id, "qr", "qr_view")
-        except Exception:
-            st.link_button("QR 만들기 (qr.naver.com)", "https://qr.naver.com/")
-
-        # 초대 문구
-        st.markdown("초대 문구")
-        for ch, text in _invite_templates("", survey_url).items():
-            with st.expander(ch, expanded=False):
-                st.code(text, language="text")
-                if st.button(f"복사 기록", key=f"cs_pinv_{ch}_{sheet_id}"):
-                    _log_share(sheet_id, ch, "invite_copy")
-                    st.toast("기록되었습니다.")
+            survey_url = f"https://ahpkrj.streamlit.app/?survey_id={sheet_id}"
+        _survey_title = str(meta.get("Survey_Title") or meta.get("Title") or "")
+        render_sharing_tools(sheet_id, survey_url, _survey_title, key_prefix="cs_p")
 
 
 def _next_action_card(completed, visits, target, days_left):
