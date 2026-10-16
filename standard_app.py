@@ -11452,6 +11452,22 @@ with contextlib.nullcontext():
                     _tool_surveys = get_admin_surveys_from_gsheet(st.session_state.get("user_id")) or []
                 except Exception:
                     pass
+                # SQLite admin_surveys도 병합 (설문 ID로 가져오기 지원)
+                try:
+                    import sqlite3
+                    _conn_t = sqlite3.connect('users.db')
+                    _cur_t = _conn_t.cursor()
+                    _cur_t.execute("SELECT survey_id, title, created_at FROM admin_surveys WHERE admin_id = ? ORDER BY created_at DESC", (st.session_state.get("user_id"),))
+                    _sqlite_tool_surveys = _cur_t.fetchall()
+                    _conn_t.close()
+                    _merged_tool = {}
+                    for s in _tool_surveys + _sqlite_tool_surveys:
+                        if s[0] not in _merged_tool:
+                            _merged_tool[s[0]] = s
+                    _tool_surveys = list(_merged_tool.values())
+                    _tool_surveys.sort(key=lambda x: x[2], reverse=True)
+                except Exception:
+                    pass
                 if not _tool_surveys:
                     st.info("도구를 사용할 설문이 없습니다. 먼저 설문을 배포해 주세요.")
                 else:
