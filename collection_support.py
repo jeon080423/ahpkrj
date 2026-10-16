@@ -8,6 +8,7 @@ import datetime
 import io
 
 import streamlit as st
+from ui_style import section_title, hint
 
 
 # ----------------------------------------------------------------------------
@@ -100,7 +101,7 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
         st.session_state[deploy_flag] = True
 
     st.divider()
-    st.markdown("### 📢 응답 수집 시작하기")
+    section_title("응답 수집 시작하기", "📢")
     st.caption("목표를 설정하고, 아래 도구를 복사해 응답자에게 전달하세요. "
                "복사·다운로드 활동은 익명으로 기록되어 수집 현황 분석에 사용됩니다.")
 
@@ -223,7 +224,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
 
     # ---- 목표/마감일 설정 (페이지 최상단, 항상 표시) ----
     with st.container(border=True):
-        st.markdown("**🎯 수집 목표 설정**")
+        section_title("수집 목표 설정", "🎯")
         try:
             default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
                           if deadline_str else None)
@@ -238,7 +239,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
                     help="0이면 목표 미설정 상태입니다.")
             with fc2:
                 form_deadline = st.date_input("응답 마감일", value=default_dl)
-            submitted = st.form_submit_button("💾 목표 저장", use_container_width=True,
+            submitted = st.form_submit_button("목표 저장", use_container_width=True,
                                               type="primary")
             if submitted:
                 from survey_manager import update_survey_collection_goals
@@ -254,11 +255,11 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
                     st.error(f"저장 실패: {res.get('error')}")
         # 저장된 값 확인 표시 (폼과 분리되어 항상 보임)
         if target > 0 or deadline_str:
-            st.caption(f"현재 설정: 목표 {target}명 / 마감일 {deadline_str or '미설정'}")
+            hint(f"현재 설정: 목표 {target}명 / 마감일 {deadline_str or '미설정'}")
         else:
-            st.caption("현재 목표가 설정되지 않았습니다. 위 폼에서 설정하세요.")
+            hint("목표가 설정되지 않았습니다.")
 
-    st.markdown("### 🎯 수집 진행 현황")
+    section_title("수집 진행 현황", "📊")
     p1, p2, p3 = st.columns(3)
     with p1:
         if target > 0:

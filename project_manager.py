@@ -9,6 +9,7 @@ project_manager.py — 프로젝트(설문) 생성·목록·전환·삭제 관�
 standard_app.py에서 가볍게 import하여 사용한다.
 """
 import streamlit as st
+from ui_style import section_title, hint
 
 
 def get_my_projects(admin_id):
@@ -27,15 +28,15 @@ def render_project_manager():
         st.warning("로그인이 필요합니다.")
         return
 
-    st.markdown("### 📁 프로젝트 관리")
+    section_title("프로젝트 관리", "📁")
 
     projects = get_my_projects(user_id)
 
     # ---- 프로젝트 목록 ----
     with st.container(border=True):
-        st.markdown(f"**내 프로젝트 ({len(projects)}개)**")
+        section_title(f"내 프로젝트 ({len(projects)}개)")
         if not projects:
-            st.caption("생성된 프로젝트가 없습니다. 아래에서 새 프로젝트를 만드세요.")
+            hint("생성된 프로젝트가 없습니다. 아래에서 새 프로젝트를 만드세요.")
         else:
             for sid, title, created_at in projects:
                 c1, c2, c3 = st.columns([3, 2, 1])
@@ -64,11 +65,11 @@ def render_project_manager():
 
     # ---- 새 프로젝트 생성 ----
     with st.container(border=True):
-        st.markdown("**➕ 새 프로젝트 만들기**")
-        st.caption("기존 프로젝트는 그대로 유지되고, 새 시트로 추가 프로젝트가 생성됩니다.")
+        section_title("새 프로젝트 만들기", "➕")
+        hint("기존 프로젝트는 그대로 유지됩니다.")
         new_title = st.text_input("프로젝트 이름", key="pm_new_title",
                                   placeholder="예: 2026년 고객만족도 조사")
-        if st.button("🚀 새 프로젝트 생성", key="pm_create",
+        if st.button("새 프로젝트 생성", key="pm_create",
                      type="primary", use_container_width=True):
             if not new_title or not new_title.strip():
                 st.error("프로젝트 이름을 입력하세요.")
