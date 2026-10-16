@@ -3970,6 +3970,7 @@ def render_survey_status_dashboard(survey_id):
                     lambda v: (v[:2] + "****@" + v.split("@")[1]) if isinstance(v, str) and "@" in v else v
                 )
 
+        display_df.index = range(1, len(display_df) + 1)
         st.dataframe(display_df, use_container_width=True, height=280)
 
         # 엑셀 다운로드
