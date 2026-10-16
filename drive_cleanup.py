@@ -68,22 +68,22 @@ def render_drive_cleanup():
     from ui_style import section_title, hint
 
     section_title("드라이브 정리 (관리자)")
-    hint("서비스 계정 드라이브의 스프레드시트 목록이다. 등록된 설문과 연결된 시트는 삭제할 수 없다.")
+    hint("서비스 계정 드라이브의 파일 목록이다. 등록된 설문과 연결된 시트는 삭제할 수 없다.")
 
     service, err = _get_drive_service()
     if err:
         st.error(err)
         return
 
-    # 파일 목록 조회 (서비스 계정이 소유한 파일만)
+    # 파일 목록 조회 (서비스 계정이 소유한 모든 파일)
     with st.spinner("드라이브 파일 목록을 조회하는 중..."):
         try:
             files = []
             page_token = None
             while True:
                 resp = service.files().list(
-                    q="mimeType='application/vnd.google-apps.spreadsheet' and trashed=false and 'me' in owners",
-                    fields="files(id, name, createdTime, modifiedTime, size, quotaBytesUsed, owners), nextPageToken",
+                    q="trashed=false and 'me' in owners",
+                    fields="files(id, name, mimeType, createdTime, modifiedTime, size, quotaBytesUsed, owners), nextPageToken",
                     pageSize=100,
                     pageToken=page_token,
                 ).execute()
@@ -96,28 +96,35 @@ def render_drive_cleanup():
             return
 
     if not files:
-        st.info("서비스 계정이 소유한 스프레드시트가 없습니다. 용량 부족의 원인이 다른 곳에 있을 수 있습니다.")
-        st.caption("참고: 서비스 계정과 공유된 파일(소유자 아님)은 목록에 표시되지 않습니다.")
+        st.info("서비스 계정이 소유한 파일이 없습니다. 용량 부족의 원인이 다른 곳에 있을 수 있습니다.")
         return
 
     registered = _get_registered_sheet_ids()
 
     # 용량 계산
     total_bytes = sum(int(f.get("quotaBytesUsed") or 0) for f in files)
-    st.metric("스프레드시트 수", f"{len(files)}개")
+    st.metric("파일 수", f"{len(files)}개")
     st.metric("사용 용량", f"{total_bytes / (1024**2):.1f} MB")
 
     # 테이블 구성
     import pandas as pd
+    _mime_short = {
+        "application/vnd.google-apps.spreadsheet": "시트",
+        "application/vnd.google-apps.document": "문서",
+        "application/vnd.google-apps.presentation": "프레젠테이션",
+        "application/pdf": "PDF",
+    }
     rows = []
     for f in files:
         fid = f["id"]
         is_registered = fid in registered
+        mime = f.get("mimeType", "")
         rows.append({
             "선택": False,
             "파일명": f.get("name", "(제목 없음)"),
+            "종류": _mime_short.get(mime, mime.split("/")[-1][:10]),
             "생성일": (f.get("createdTime") or "")[:10],
-            "용량(KB)": round(int(f.get("quotaBytesUsed") or 0) / 1024, 1),
+            "용량": f"{round(int(f.get('quotaBytesUsed') or 0) / 1024, 1)} KB",
             "등록됨": "예" if is_registered else "아니오",
             "_id": fid,
             "_safe": not is_registered,
@@ -135,15 +142,17 @@ def render_drive_cleanup():
 
     st.subheader(f"삭제 후보 ({len(deletable)}개)")
     for idx, row in deletable.iterrows():
-        c1, c2, c3, c4 = st.columns([1, 4, 2, 2])
+        c1, c2, c3, c4, c5 = st.columns([1, 4, 1.5, 2, 2])
         with c1:
             checked = st.checkbox("", key=f"dc_sel_{row['_id']}", label_visibility="collapsed")
         with c2:
             st.write(row["파일명"])
         with c3:
-            st.caption(row["생성일"])
+            st.caption(row["종류"])
         with c4:
-            st.caption(f"{row['용량(KB)']} KB")
+            st.caption(row["생성일"])
+        with c5:
+            st.caption(row["용량"])
         if checked:
             st.session_state[f"dc_checked_{row['_id']}"] = True
         else:
