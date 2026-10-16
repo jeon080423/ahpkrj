@@ -101,9 +101,9 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
         st.session_state[deploy_flag] = True
 
     st.divider()
-    # expander로 접었다 펼 수 있게 (기본 펼침)
+    # 배포 직후 안내: 목표 설정과 공유 도구는 진행현황 탭에서
     with st.expander("응답 수집 시작하기", expanded=True):
-        _render_kickoff_content(sheet_id, short_url, survey_title)
+        hint("수집 목표 설정·QR 코드·초대 문구는 '응답 현황' 탭에서 확인할 수 있습니다.")
 
 
 def render_sharing_tools(sheet_id, short_url, survey_title="", key_prefix="cs"):
@@ -165,56 +165,6 @@ def render_sharing_tools(sheet_id, short_url, survey_title="", key_prefix="cs"):
                     st.toast("기록되었습니다.")
         hint("자동 발송은 추후 제공 예정입니다. 문구를 복사해 직접 발송해 주세요.")
 
-
-def _render_kickoff_content(sheet_id, short_url, survey_title=""):
-    """배포 직후 화면: 목표 설정만 표시. 공유 도구는 진행현황에서 확인."""
-    from survey_manager import update_survey_collection_goals
-
-    hint("목표를 설정하세요. QR 코드와 초대 문구는 진행현황에서 확인할 수 있습니다.")
-
-    # 기존 저장값 불러오기 (연동)
-    _k_target_val = 0
-    _k_deadline_val = None
-    try:
-        from survey_manager import load_survey_metadata as _k_load_meta
-        _k_meta = _k_load_meta(sheet_id) or {}
-        _k_target_val = int(_k_meta.get("Target_Response_Count") or 0)
-        _k_dl_str = str(_k_meta.get("Collection_Deadline") or "").strip()
-        if _k_dl_str:
-            _k_deadline_val = datetime.datetime.strptime(_k_dl_str, "%Y-%m-%d").date()
-    except Exception:
-        pass
-
-    # ---- 목표/마감일 설정 ----
-    with st.container(border=True):
-        section_title("수집 목표 설정")
-        with st.form(key=f"cs_kickoff_form_{sheet_id}", clear_on_submit=False):
-            kc1, kc2 = st.columns(2)
-            with kc1:
-                k_target = st.number_input("목표 응답 수", min_value=0, max_value=100000,
-                                           value=_k_target_val, step=1,
-                                           help="0이면 목표 미설정 상태로 유지됩니다.")
-            with kc2:
-                k_deadline = st.date_input("응답 마감일", value=_k_deadline_val)
-            k_submitted = st.form_submit_button("목표 저장", use_container_width=True,
-                                                type="primary")
-            if k_submitted:
-                res = update_survey_collection_goals(
-                    sheet_id,
-                    target_count=int(k_target) if k_target else None,
-                    deadline=k_deadline,
-                    user_id=st.session_state.get("user_id"),
-                )
-                if res.get("success"):
-                    # 캐시 무효화 → 진행현황에서 최신값 표시
-                    try:
-                        from survey_manager import _fetch_survey_metadata_from_sheets
-                        _fetch_survey_metadata_from_sheets.clear()
-                    except Exception:
-                        pass
-                    st.success("수집 목표가 저장되었습니다.")
-                else:
-                    st.error(f"저장 실패: {res.get('error')}")
 
 # ----------------------------------------------------------------------------
 # 현황판: 진행률·남은 일수·상태별 다음 행동 카드
