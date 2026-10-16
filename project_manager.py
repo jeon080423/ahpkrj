@@ -36,7 +36,7 @@ def render_project_manager():
         st.warning("로그인이 필요합니다.")
         return
 
-    section_title("프로젝트 관리", "📁")
+    section_title("프로젝트 관리")
 
     projects = get_my_projects(user_id)
 
@@ -49,11 +49,11 @@ def render_project_manager():
             for sid, title, created_at in projects:
                 c1, c2, c3 = st.columns([3, 2, 1])
                 with c1:
-                    st.write(f"📋 {title}")
+                    st.write(title)
                 with c2:
                     st.caption(created_at)
                 with c3:
-                    if st.button("🗑️", key=f"pm_del_{sid}", help="이 프로젝트 삭제"):
+                    if st.button("삭제", key=f"pm_del_{sid}", help="이 프로젝트 삭제"):
                         st.session_state[f"pm_confirm_del_{sid}"] = True
                 # 삭제 확인
                 if st.session_state.get(f"pm_confirm_del_{sid}"):
@@ -73,7 +73,7 @@ def render_project_manager():
 
     # ---- 새 프로젝트 생성 ----
     with st.container(border=True):
-        section_title("새 프로젝트 만들기", "➕")
+        section_title("새 프로젝트 만들기")
         hint("기존 프로젝트는 그대로 유지됩니다.")
         new_title = st.text_input("프로젝트 이름", key="pm_new_title",
                                   placeholder="예: 2026년 고객만족도 조사")
