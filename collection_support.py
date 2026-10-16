@@ -110,7 +110,7 @@ def render_sharing_tools(sheet_id, short_url, survey_title="", key_prefix="cs"):
     """QR 코드·초대 문구·리마인드 문구를 표시한다. 진행현황과 배포 화면에서 공유."""
     # ---- QR 코드 ----
     with st.container(border=True):
-        section_title("설문 QR 코드")
+        section_title("1) 설문 QR 코드")
         qr_ok = False
         try:
             import qrcode
@@ -143,7 +143,7 @@ def render_sharing_tools(sheet_id, short_url, survey_title="", key_prefix="cs"):
 
     # ---- 초대 문구 ----
     with st.container(border=True):
-        section_title("채널별 초대 문구")
+        section_title("2) 채널별 초대 문구")
         tabs = st.tabs(list(_invite_templates(survey_title, short_url).keys()))
         for tab, (ch, text) in zip(tabs, _invite_templates(survey_title, short_url).items()):
             with tab:
@@ -154,7 +154,7 @@ def render_sharing_tools(sheet_id, short_url, survey_title="", key_prefix="cs"):
                     st.toast("기록되었습니다.")
 
     # ---- 리마인드 문구 ----
-    with st.expander("리마인드 문구 (1차·2차)", expanded=False):
+    with st.expander("3) 리마인드 문구 (1차·2차)", expanded=False):
         rtabs = st.tabs(list(_reminder_templates(survey_title, short_url, "").keys()))
         for tab, (name, text) in zip(rtabs, _reminder_templates(survey_title, short_url, "").items()):
             with tab:
@@ -188,9 +188,9 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         target = 0
     deadline_str = str(meta.get("Collection_Deadline") or "").strip()
 
-    # ---- 목표/마감일 설정 (페이지 최상단, 항상 표시) ----
+    # ---- 1. 목표/마감일 설정 (페이지 최상단, 항상 표시) ----
     with st.container(border=True):
-        section_title("수집 목표 설정")
+        section_title("1. 수집 목표 설정")
         try:
             default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
                           if deadline_str else None)
@@ -231,7 +231,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         else:
             hint("목표가 설정되지 않았습니다.")
 
-    section_title("수집 진행 현황")
+    section_title("2. 수집 진행 현황")
     p1, p2, p3 = st.columns(3)
     with p1:
         if target > 0:
@@ -256,7 +256,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         st.metric("방문 대비 완료율", f"{rate:.1f}%", f"방문 {visit_count}명")
 
     # ---- 상태별 다음 행동 카드 ----
-    st.markdown("**📌 다음 행동**")
+    section_title("3. 다음 행동")
     action_title, action_desc, action_hint = _next_action_card(
         completed_count, visit_count, target, _days_remaining(deadline_str))
     with st.container(border=True):
@@ -264,8 +264,8 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         st.write(action_desc)
         st.caption(action_hint)
 
-    # ---- 공유 도구 (QR·초대·리마인드 문구) ----
-    with st.expander("공유 도구 (QR·초대·리마인드 문구)", expanded=False):
+    # ---- 4. 공유 도구 (QR·초대·리마인드 문구) ----
+    with st.expander("4. 공유 도구 (QR·초대·리마인드 문구)", expanded=False):
         # 설문 URL 구성
         try:
             from survey_manager import get_survey_short_url
