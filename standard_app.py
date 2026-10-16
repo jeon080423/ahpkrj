@@ -4488,13 +4488,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 resp_data["age"] = st.text_input(f"{age_label} " + _("(세)", "(Years)"), value="", placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_text")
             
     if demographics.get("gender"):
-        _gender_lbl = _("성별", "Gender") if _is_shjeon_survey else _("성별 *", "Gender *")
+        _gender_lbl = _("성별 *", "Gender *")
         resp_data["gender"] = st.radio(f"{sq_idx}) " + _gender_lbl, [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
         sq_idx += 1
     
     # 경력년수: 개방형 vs 5년 단위 선택형
     if demographics.get("experience"):
-        _exp_lbl = _("경력년수", "Years of Experience") if _is_shjeon_survey else _("경력년수 *", "Years of Experience *")
+        _exp_lbl = _("경력년수 *", "Years of Experience *")
         exp_label = f"{sq_idx}) " + _exp_lbl
         sq_idx += 1
         exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
@@ -4512,7 +4512,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     #     sq_idx += 1
         
     if demographics.get("email"):
-        _email_lbl = _("이메일", "Email") if _is_shjeon_survey else _("이메일 *", "Email *")
+        _email_lbl = _("이메일 *", "Email *")
         email_label = f"{sq_idx}) " + _email_lbl
         email_options = [_("직접 입력", "Enter directly"), _("응답거절", "Refuse to respond")]
         email_choice = st.radio(
@@ -5523,11 +5523,21 @@ if "preview_id" in q_params or "survey_id" in q_params:
             # AHP 응답 누락 검증
             missing_ahp = [k for k, v in ahp_answers.items() if v is None]
             
-            # 인구통계 필수값
+            # 인구통계 필수값 (응답자 기본정보의 모든 문항을 필수로 설정)
             if demographics.get("name") and not resp_data.get("name"): missing = True
             if demographics.get("age") and resp_data.get("age") is None: missing = True
+            if demographics.get("gender") and not resp_data.get("gender"): missing = True
             if demographics.get("experience") and resp_data.get("experience") is None: missing = True
             if demographics.get("email") and not resp_data.get("email"): missing = True
+            # 유형 질문(소속 등) 필수값
+            _type_qs = demographics.get("type_questions", [])
+            _resp_types = resp_data.get("types", [])
+            if _type_qs:
+                for _ti, _tq in enumerate(_type_qs):
+                    _ans = _resp_types[_ti] if _ti < len(_resp_types) else ""
+                    if not _ans or (isinstance(_ans, str) and not _ans.strip()):
+                        missing = True
+                        break
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
             if agree_check not in ["동의", "Agree"]:
