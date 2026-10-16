@@ -12773,11 +12773,6 @@ with contextlib.nullcontext():
                                                     </a>
                                                 </div>
                                                 ''', unsafe_allow_html=True)
-                                            
-                                                st.info(f"""**구글 시트 및 데이터 확인 안내:**
-    1. **즉시 확인:** 위의 **[📊 연동된 구글 스프레드시트 바로가기]** 버튼을 클릭하면 생성된 시트로 바로 이동합니다.
-    2. **이메일 알림:** 귀하의 구글 계정({survey_admin_email})으로 '편집자 권한 공유' 초대 메일이 발송되었습니다. 메일의 링크를 통해서도 언제든 접속할 수 있습니다.
-    3. **구글 드라이브:** 본인의 구글 드라이브 좌측 메뉴 중 **[공유 문서함 (Shared with me)]**에서 언제든 해당 설문 시트를 찾고 데이터(Sheet 2: Raw_Data, Sheet 3: Demographic_Data)를 확인하거나 다운로드할 수 있습니다.""")
                                             except Exception as ex:
                                                 st.error(f"구글 시트 연동 실패: {ex}")
                                                 import streamlit.components.v1 as components
