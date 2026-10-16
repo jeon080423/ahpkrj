@@ -84,6 +84,16 @@ def render_project_manager():
             else:
                 _create_new_project(new_title.strip(), user_id)
 
+    st.divider()
+
+    # ---- 드라이브 정리 (임시 관리자 도구) ----
+    with st.expander("드라이브 정리 (용량 부족 해결용)", expanded=False):
+        try:
+            from drive_cleanup import render_drive_cleanup
+            render_drive_cleanup()
+        except Exception as e:
+            st.error(f"드라이브 정리 로드 실패: {e}")
+
 
 def _create_new_project(title, admin_id):
     """기존 프로젝트를 건드리지 않고 새 Google Sheet로 프로젝트를 생성한다."""
