@@ -79,7 +79,19 @@ def _log_share(sheet_id, channel, action_type):
 # 배포 완료 화면: 응답 수집 시작하기
 # ----------------------------------------------------------------------------
 def render_collection_kickoff(sheet_id, short_url, survey_title=""):
-    """배포 성공 직후 표시되는 '응답 수집 시작하기' 섹션."""
+    """배포 성공 직후 표시되는 '응답 수집 시작하기' 섹션. 팝업 다이얼로그로 표시."""
+    # 다이얼로그 열기 버튼
+    if st.button("응답 수집 도구 열기", key=f"cs_kickoff_open_{sheet_id}",
+                 type="primary", use_container_width=True):
+        st.session_state[f"cs_kickoff_show_{sheet_id}"] = True
+
+    if st.session_state.get(f"cs_kickoff_show_{sheet_id}"):
+        _collection_kickoff_dialog(sheet_id, short_url, survey_title)
+
+
+@st.dialog("응답 수집 시작하기", width="large")
+def _collection_kickoff_dialog(sheet_id, short_url, survey_title=""):
+    """응답 수집 도구를 팝업 다이얼로그로 표시한다."""
     from survey_manager import (
         log_structured_event, get_anonymous_user_id, get_anonymous_survey_id,
         update_survey_collection_goals, EVENT_SURVEY_DEPLOYED,
@@ -100,8 +112,6 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
             pass
         st.session_state[deploy_flag] = True
 
-    st.divider()
-    section_title("응답 수집 시작하기")
     hint("목표를 설정하고, 아래 도구를 복사해 응답자에게 전달하세요.")
 
     # ---- 목표/마감일 설정 ----
@@ -185,6 +195,11 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
                     _log_share(sheet_id, "reminder", name)
                     st.toast("기록되었습니다.")
         hint("자동 발송은 추후 제공 예정입니다. 문구를 복사해 직접 발송해 주세요.")
+
+    st.divider()
+    if st.button("닫기", key=f"cs_kickoff_close_{sheet_id}", use_container_width=True):
+        st.session_state.pop(f"cs_kickoff_show_{sheet_id}", None)
+        st.rerun()
 
 
 # ----------------------------------------------------------------------------
