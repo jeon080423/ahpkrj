@@ -4488,13 +4488,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 resp_data["age"] = st.text_input(f"{age_label} " + _("(세)", "(Years)"), value="", placeholder=_("예: 30", "e.g. 30"), key="survey_resp_age_text")
             
     if demographics.get("gender"):
-        _gender_lbl = _("성별 *", "Gender *")
+        _gender_lbl = _("성별", "Gender")
         resp_data["gender"] = st.radio(f"{sq_idx}) " + _gender_lbl, [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
         sq_idx += 1
     
     # 경력년수: 개방형 vs 5년 단위 선택형
     if demographics.get("experience"):
-        _exp_lbl = _("경력년수 *", "Years of Experience *")
+        _exp_lbl = _("경력년수", "Years of Experience")
         exp_label = f"{sq_idx}) " + _exp_lbl
         sq_idx += 1
         exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
@@ -4512,7 +4512,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
     #     sq_idx += 1
         
     if demographics.get("email"):
-        _email_lbl = _("이메일 *", "Email *")
+        _email_lbl = _("이메일", "Email")
         email_label = f"{sq_idx}) " + _email_lbl
         email_options = [_("직접 입력", "Enter directly"), _("응답거절", "Refuse to respond")]
         email_choice = st.radio(
