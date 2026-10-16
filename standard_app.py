@@ -10690,6 +10690,14 @@ with contextlib.nullcontext():
                                                 ws_cr.write_number(cr_row_idx, 3, cr_val, formats['num'])
                                                 ws_cr.write(cr_row_idx, 4, status, formats['body'])
                                                 cr_row_idx += 1
+
+                                    # 엑셀 열 때 종합분석 시트가 먼저 보이도록 설정
+                                    try:
+                                        _comp_sheet_name = _('종합분석', 'Comprehensive Analysis')
+                                        if _comp_sheet_name in writer.sheets:
+                                            writer.sheets[_comp_sheet_name].activate()
+                                    except Exception:
+                                        pass
     
                             if st.session_state.user_role == 'official':
                                 if data_source == _("📂 엑셀 파일 직접 업로드", "Upload Excel File") and uploaded_file is not None:
