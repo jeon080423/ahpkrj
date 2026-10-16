@@ -11752,6 +11752,8 @@ with contextlib.nullcontext():
                                     survey_title_display = s[1]
                                     break
                             st.success(_(f" 현재 배포된 설문을 불러왔습니다: **{survey_title_display}**", f" Loaded deployed survey: **{survey_title_display}**"))
+                            _deployed_url = f"https://ahpkrj.streamlit.app/?mode=survey&survey_id={linked_sheet_id}"
+                            st.link_button(_("🌐 배포된 설문 보기", "View Deployed Survey"), _deployed_url)
 
                             # [신규] 연동된 구글 스프레드시트 바로가기 및 온라인 설문 링크 제시
                             base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
