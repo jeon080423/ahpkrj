@@ -11340,10 +11340,17 @@ with contextlib.nullcontext():
     
 
     with main_tab_survey:
-        survey_sub_deploy, survey_sub_status = st.tabs([
+        survey_sub_deploy, survey_sub_status, survey_sub_projects = st.tabs([
             _("설문 작성 및 배포", "Create & Deploy Survey"),
-            _("응답 현황", "Responses")
+            _("응답 현황", "Responses"),
+            _("📁 프로젝트 관리", "Projects")
         ])
+        with survey_sub_projects:
+            try:
+                from project_manager import render_project_manager
+                render_project_manager()
+            except Exception as e:
+                st.error(f"프로젝트 관리 로드 실패: {e}")
         with survey_sub_deploy:
             @st.fragment
             def _survey_setup_fragment():
