@@ -3000,10 +3000,17 @@ def improve_consistency(matrix, threshold, min_val, max_val, max_iter=500, learn
     return current_matrix, cr, iterations, was_corrected
 
 def parse_input_value(val):
-    if val == 0: return 1.0
-    elif val < 0: return abs(val)
-    elif val == 1: return 1.0
-    else: return 1.0 / val
+    """펀칭값(-9~-2, 1, 2~9)을 AHP 분석값으로 변환
+    - 음수(-9~-2): 왼쪽 선호 → 절댓값 (9~2)
+    - 1: 동등 → 1.0
+    - 양수(2~9): 오른쪽 선호 → 역수 (1/2~1/9)
+    """
+    if val < 0:
+        return abs(val)
+    elif val == 1:
+        return 1.0
+    else:  # val >= 2
+        return 1.0 / val
 
 def infer_factors_from_columns(cols):
     m = len(cols)
@@ -3082,6 +3089,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         raw_values = []
         col_idx = 0
         has_format_error = False
+        format_error_detail = ""
         for i in range(n):
             for j in range(i + 1, n):
                 if col_idx < len(comp_cols):
@@ -3090,10 +3098,26 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
                     
                     try:
                         num_val = float(raw_val)
-                        if pd.isna(num_val) or not (-9 <= num_val <= 9):
+                        # 유효값: -9~-2, 1, 2~9 (정수)
+                        # -1, 0은 입력 불가 / 범위를 벗어난 값도 오류
+                        valid_values = set(list(range(-9, -1)) + [1] + list(range(2, 10)))
+                        if pd.isna(num_val) or int(num_val) != num_val or int(num_val) not in valid_values:
                             has_format_error = True
+                            # 오류 상세 기록 (사용자 안내용)
+                            if not pd.isna(num_val):
+                                try:
+                                    iv = int(num_val)
+                                    if iv == 0 or iv == -1:
+                                        format_error_detail = f"'{comp_cols[col_idx]}' 컬럼에 허용되지 않은 값 '{raw_val}'이(가) 있습니다. 동등은 1로 입력하세요."
+                                    elif not (-9 <= iv <= 9):
+                                        format_error_detail = f"'{comp_cols[col_idx]}' 컬럼의 값 '{raw_val}'이(가) 허용 범위(-9~9)를 벗어났습니다."
+                                    else:
+                                        format_error_detail = f"'{comp_cols[col_idx]}' 컬럼의 값 '{raw_val}'이(가) 올바르지 않습니다."
+                                except:
+                                    format_error_detail = f"'{comp_cols[col_idx]}' 컬럼에 숫자가 아닌 값 '{raw_val}'이(가) 있습니다."
                     except (ValueError, TypeError):
                         has_format_error = True
+                        format_error_detail = f"'{comp_cols[col_idx]}' 컬럼에 숫자가 아닌 값 '{raw_val}'이(가) 있습니다."
                     
                     if not has_format_error:
                         ahp_val = parse_input_value(num_val)
@@ -3106,7 +3130,7 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
             ex_res = meta_data.copy()
             for k, col_name in enumerate(comp_cols):
                 ex_res[col_name] = raw_values[k] if k < len(raw_values) else np.nan
-            ex_res["CR"] = "데이터 오류(Format Error)"
+            ex_res["CR"] = f"데이터 오류(Format Error): {format_error_detail}" if format_error_detail else "데이터 오류(Format Error)"
             excluded_list.append(ex_res)
             continue
             

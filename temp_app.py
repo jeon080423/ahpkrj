@@ -1658,10 +1658,17 @@ def improve_consistency(matrix, threshold, min_val, max_val, max_iter=500, learn
     return current_matrix, cr, iterations, was_corrected
 
 def parse_input_value(val):
-    if val == 0: return 1.0
-    elif val < 0: return abs(val)
-    elif val == 1: return 1.0
-    else: return 1.0 / val
+    """펀칭값(-9~-2, 1, 2~9)을 AHP 분석값으로 변환
+    - 음수(-9~-2): 왼쪽 선호 → 절댓값 (9~2)
+    - 1: 동등 → 1.0
+    - 양수(2~9): 오른쪽 선호 → 역수 (1/2~1/9)
+    """
+    if val < 0:
+        return abs(val)
+    elif val == 1:
+        return 1.0
+    else:  # val >= 2
+        return 1.0 / val
 
 def infer_factors_from_columns(cols):
     m = len(cols)
