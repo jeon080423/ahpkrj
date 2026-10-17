@@ -3012,6 +3012,40 @@ def parse_input_value(val):
     else:  # val >= 2
         return 1.0 / val
 
+def convert_df_punching_to_ahp(df, comp_col_names=None):
+    """데이터프레임의 펀칭값을 AHP 분석값으로 변환한 복사본 반환
+    - comp_col_names가 None이면 ID, Type, 제출시간 등을 제외한 모든 컬럼을 변환 대상으로 간주
+    - 변환 불가 값(NaN, 문자 등)은 그대로 유지
+    """
+    import pandas as pd
+    import numpy as np
+    result = df.copy()
+    # 변환 제외 컬럼
+    exclude = {'id', 'type', '제출시간', 'timestamp', '타임스탬프', '기타', 'other', '보상'}
+    for col in result.columns:
+        c_str = str(col).strip()
+        c_lower = c_str.lower()
+        if c_lower in exclude or c_str.endswith('_기타') or c_str.endswith('(기타)'):
+            continue
+        if comp_col_names is not None and col not in comp_col_names:
+            continue
+        def _conv(v):
+            try:
+                if pd.isna(v):
+                    return v
+                num = float(v)
+                if int(num) != num:
+                    return v
+                iv = int(num)
+                valid = set(list(range(-9, -1)) + [1] + list(range(2, 10)))
+                if iv not in valid:
+                    return v
+                return parse_input_value(iv)
+            except (ValueError, TypeError):
+                return v
+        result[col] = result[col].apply(_conv)
+    return result
+
 def infer_factors_from_columns(cols):
     m = len(cols)
     delta = 1 + 8 * m
@@ -3209,10 +3243,17 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
     excluded_df = pd.DataFrame(excluded_list)
     return results_df, factors, excluded_count, excluded_df
 
-def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2):
+def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2, to_ahp_values=False):
+    """템플릿 구조 엑셀 생성
+    - to_ahp_values=True이면 쌍대비교 펀칭값을 AHP 분석값으로 변환하여 저장
+    """
     import io
     import pandas as pd
-    
+
+    # AHP 변환값으로 저장 옵션
+    if to_ahp_values and raw_df is not None and not raw_df.empty:
+        raw_df = convert_df_punching_to_ahp(raw_df)
+
     excel_buffer = io.BytesIO()
     with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
         base_cols = ["ID", "Type"]
@@ -4000,11 +4041,12 @@ def render_survey_status_dashboard(survey_id):
         display_df.index = range(1, len(display_df) + 1)
         st.dataframe(display_df, use_container_width=True, height=280)
 
-        # 엑셀 다운로드
+        # 엑셀 다운로드 (쌍대비교값은 AHP 분석값으로 변환하여 저장)
         excel_buffer = io.BytesIO()
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
             display_df.to_excel(writer, index=False, sheet_name="Demographic_Data")
-            live_df.to_excel(writer, index=False, sheet_name="Raw_Data")
+            live_df_ahp = convert_df_punching_to_ahp(live_df)
+            live_df_ahp.to_excel(writer, index=False, sheet_name="Raw_Data_AHP")
 
         col_dl1, col_dl2 = st.columns([1, 3])
         with col_dl1:
@@ -10106,6 +10148,19 @@ with contextlib.nullcontext():
     
                                         integrated_df_excel.to_excel(writer, sheet_name='Group_Comparison', startrow=s_row_cp, index=False)
                                         add_borders_to_data(ws_comp, s_row_cp, 0, integrated_df_excel, border_fmt)
+
+                                        # [2026-10-18 추가] 개인별 AHP 변환값 시트
+                                        try:
+                                            _raw_for_ahp = None
+                                            if "live_df" in st.session_state and st.session_state["live_df"] is not None:
+                                                _raw_for_ahp = st.session_state["live_df"]
+                                            elif "ahp_df_main" in st.session_state and st.session_state["ahp_df_main"] is not None:
+                                                _raw_for_ahp = st.session_state["ahp_df_main"]
+                                            if _raw_for_ahp is not None and not _raw_for_ahp.empty:
+                                                _ahp_converted = convert_df_punching_to_ahp(_raw_for_ahp)
+                                                _ahp_converted.to_excel(writer, sheet_name='Individual_AHP_Values', index=False)
+                                        except Exception:
+                                            pass
                                 
                                         num_format_3 = workbook.add_format({'num_format': '0.000', 'border': 1, 'align': 'center'})
                                         for r in range(len(integrated_df_excel)):
