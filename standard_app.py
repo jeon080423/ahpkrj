@@ -3163,7 +3163,12 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
             excluded_count += 1
             ex_res = meta_data.copy()
             for k, col_name in enumerate(comp_cols):
-                ex_res[col_name] = raw_values[k] if k < len(raw_values) else np.nan
+                _rv = raw_values[k] if k < len(raw_values) else np.nan
+                try:
+                    _rv = parse_input_value(float(_rv))
+                except (ValueError, TypeError):
+                    pass
+                ex_res[col_name] = _rv
             ex_res["CR"] = f"데이터 오류(Format Error): {format_error_detail}" if format_error_detail else "데이터 오류(Format Error)"
             excluded_list.append(ex_res)
             continue
@@ -3183,20 +3188,22 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
             excluded_count += 1
             ex_res = meta_data.copy()
             for k, col_name in enumerate(comp_cols):
-                ex_res[col_name] = raw_values[k]
+                _rv = raw_values[k]
+                try:
+                    _rv = parse_input_value(float(_rv))
+                except (ValueError, TypeError):
+                    pass
+                ex_res[col_name] = _rv
             ex_res["CR"] = final_cr
             excluded_list.append(ex_res)
             continue
 
-        # 보정 후 Rawdata (역변환: 상삼각 행렬 값을 정수 펀칭 스케일로 변환)
+        # 보정 후 데이터 (AHP 값 그대로 저장, 2026-10-18 변경: 펀칭값으로 역변환하지 않음)
         final_raw_values = []
         for i in range(n):
             for j in range(i + 1, n):
                 val = final_matrix[i, j]
-                if val == 1.0: final_raw_val = 1
-                elif val > 1.0: final_raw_val = -int(round(val)) # 왼쪽 우선 (음수)
-                else: final_raw_val = int(round(1.0/val)) # 오른쪽 우선 (양수)
-                final_raw_values.append(final_raw_val)
+                final_raw_values.append(round(float(val), 4))
 
         _unused_cr, final_ci, _unused_lambda = calculate_consistency(final_matrix, method)
         if ahp_method == 'fuzzy':
@@ -3207,9 +3214,13 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
         # 결과 딕셔너리 구성 (요청사항 5 재배치 반영)
         res = meta_data.copy()
         
-        # [수정] 1. 보정 전 Rawdata 삽입
+        # [수정] 1. 보정 전 데이터 삽입 (AHP 변환값으로 저장, 2026-10-18)
         for k, col_name in enumerate(comp_cols):
-            res[f"Raw_Orig_{col_name}"] = raw_values[k]
+            try:
+                _ov = parse_input_value(float(raw_values[k]))
+            except (ValueError, TypeError):
+                _ov = raw_values[k]
+            res[f"Raw_Orig_{col_name}"] = _ov
         
         # [수정] 2. Original_CI, Original_CR 순서 배치
         res["Original_CI"] = orig_ci
@@ -10177,18 +10188,7 @@ with contextlib.nullcontext():
                                         integrated_df_excel.to_excel(writer, sheet_name='Group_Comparison', startrow=s_row_cp, index=False)
                                         add_borders_to_data(ws_comp, s_row_cp, 0, integrated_df_excel, border_fmt)
 
-                                        # [2026-10-18 추가] 개인별 AHP 변환값 시트
-                                        try:
-                                            _raw_for_ahp = None
-                                            if "live_df" in st.session_state and st.session_state["live_df"] is not None:
-                                                _raw_for_ahp = st.session_state["live_df"]
-                                            elif "ahp_df_main" in st.session_state and st.session_state["ahp_df_main"] is not None:
-                                                _raw_for_ahp = st.session_state["ahp_df_main"]
-                                            if _raw_for_ahp is not None and not _raw_for_ahp.empty:
-                                                _ahp_converted = convert_df_punching_to_ahp(_raw_for_ahp)
-                                                _ahp_converted.to_excel(writer, sheet_name='Individual_AHP_Values', index=False)
-                                        except Exception:
-                                            pass
+
                                 
                                         num_format_3 = workbook.add_format({'num_format': '0.000', 'border': 1, 'align': 'center'})
                                         for r in range(len(integrated_df_excel)):
