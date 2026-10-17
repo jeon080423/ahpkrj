@@ -3939,6 +3939,27 @@ def render_survey_status_dashboard(survey_id):
     with m5:
         st.metric("📈 실시간 완료율", completion_rate)
 
+    # 목표 표본 수 및 종료일자 표시 (2026-10-18 추가)
+    try:
+        _target = int(survey_meta.get("Target_Response_Count") or 0)
+    except (ValueError, TypeError):
+        _target = 0
+    _deadline = str(survey_meta.get("Collection_Deadline") or "").strip()
+    if _target > 0 or _deadline:
+        t1, t2 = st.columns(2)
+        with t1:
+            if _target > 0:
+                _pct = min(completed / _target, 1.0) if _target else 0
+                st.metric("🎯 목표 표본 수", f"{completed} / {_target}명", f"{_pct*100:.0f}%")
+                st.progress(_pct)
+            else:
+                st.metric("🎯 목표 표본 수", "미설정")
+        with t2:
+            if _deadline:
+                st.metric("📅 종료일자", _deadline)
+            else:
+                st.metric("📅 종료일자", "미설정")
+
     st.markdown('<div style="margin: 18px 0;"></div>', unsafe_allow_html=True)
 
     # 4. 데이터프레임 파싱
