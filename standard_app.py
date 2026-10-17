@@ -4452,7 +4452,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
 
             # 주관식으로 명시된 경우: 직접 입력 칸 오른쪽에 '모름/비해당' 라디오 버튼 제시
             if tq_q_type == "text":
-                st.markdown(f'<div style="font-size: 14px; font-weight: 400; line-height: 1.5; margin-bottom: 4px; color: inherit;">{sq_idx}) {clean_q}</div>', unsafe_allow_html=True)
+                import re as _re_unit
+                # (단위: ...) 부분을 파란색 볼드로 강조
+                _styled_q = clean_q
+                if "단위" in clean_q:
+                    _styled_q = _re_unit.sub(
+                        r'(\(단위[^)]*\))',
+                        r'<span style="color: #1e40af; font-weight: 700;">\1</span>',
+                        clean_q
+                    )
+                # 위 패턴이 없으면 "(...)" 괄호 부분 전체를 파란색으로 (단위 안내로 추정)
+                st.markdown(f'<div style="font-size: 14px; font-weight: 400; line-height: 1.5; margin-bottom: 4px; color: inherit;">{sq_idx}) {_styled_q}</div>', unsafe_allow_html=True)
                 col_input, col_opt = st.columns([3, 1])
                 is_unknown = st.session_state.get(f"survey_resp_type_unknown_{i}", False)
                 with col_input:
@@ -4466,10 +4476,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         )
                         ans = "모름/비해당"
                     else:
+                        # 단위 안내가 있는 문항은 예시를 플레이스홀더에 회색으로 표시
+                        _ph_example = ""
+                        if "단위" in clean_q and ("년" in clean_q or "년" in str(tq_q)):
+                            _ph_example = _("예: 5 (숫자만 입력)", "e.g., 5 (numbers only)")
+                        elif "업종" in clean_q:
+                            _ph_example = _("예: 제조업", "e.g., Manufacturing")
+                        _placeholder_text = _ph_example if _ph_example else _("내용을 직접 입력하세요", "Enter details directly")
                         user_input = st.text_input(
                             f"{sq_idx}) {clean_q}",
                             key=f"survey_resp_type_{i}",
-                            placeholder=_("내용을 직접 입력하세요", "Enter details directly"),
+                            placeholder=_placeholder_text,
                             label_visibility="collapsed"
                         )
                         ans = user_input.strip() if user_input else ""
