@@ -5596,14 +5596,25 @@ if "preview_id" in q_params or "survey_id" in q_params:
             if demographics.get("experience") and resp_data.get("experience") is None: missing = True
             if demographics.get("email") and not resp_data.get("email"): missing = True
             # 유형 질문(소속 등) 필수값
+            # [2026-10-18 버그 수정] 기타 옵션이 있는 문항은 types에 2개 항목(답변+기타텍스트)을 추가하므로
+            # 문항 인덱스가 아닌 실제 리스트 인덱스로 오프셋을 추적해야 함
             _type_qs = demographics.get("type_questions", [])
             _resp_types = resp_data.get("types", [])
             if _type_qs:
+                _type_idx = 0  # resp_data["types"] 내 실제 인덱스
                 for _ti, _tq in enumerate(_type_qs):
-                    _ans = _resp_types[_ti] if _ti < len(_resp_types) else ""
+                    _ans = _resp_types[_type_idx] if _type_idx < len(_resp_types) else ""
                     if not _ans or (isinstance(_ans, str) and not _ans.strip()):
                         missing = True
                         break
+                    # 기타 옵션이 있는 객관식 문항은 추가 항목(기타 텍스트)을 건너뜀
+                    _tq_opts = _tq.get("opts", []) if isinstance(_tq, dict) else []
+                    _has_etc = any("기타" in str(opt) or "other" in str(opt).lower() for opt in _tq_opts)
+                    _tq_type = _tq.get("q_type", "radio") if isinstance(_tq, dict) else "radio"
+                    if _tq_type != "text" and _has_etc:
+                        _type_idx += 2
+                    else:
+                        _type_idx += 1
             if rewards_info.get("enabled") and not resp_data.get("reward_contact"): missing = True
             
             if agree_check not in ["동의", "Agree"]:
