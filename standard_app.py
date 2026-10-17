@@ -7994,7 +7994,7 @@ def show_reset_survey_dialog(sheet_id, survey_title):
     
     st.markdown(_(
         f"선택된 설문: **{survey_title}**\n\n"
-        "이 작업은 설문 문항 및 설정(Survey_Metadata)은 그대로 보존하고, **수집된 모든 응답 데이터(Raw_Data, Demographic_Data의 2행 이하)만 완전히 삭제**합니다.\n\n"
+        "이 작업은 설문 문항 및 설정(Survey_Metadata)은 그대로 보존하고, **수집된 모든 응답 데이터(Raw_Data, Demographic_Data, Main_Criteria 및 기준별 시트의 2행 이하)만 완전히 삭제**합니다.\n\n"
         "💡 **언제 사용하나요?** 테스트 목적으로 입력한 가짜/테스트 응답을 깨끗이 비우고, 실제 대상자 모집을 시작하기 직전에 유용합니다.",
         f"Selected Survey: **{survey_title}**\n\n"
         "This will preserve survey structure and settings, but **permanently delete all collected response rows**.\n\n"

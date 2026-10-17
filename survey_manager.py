@@ -2231,6 +2231,31 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
         except Exception:
             pass
 
+        # 2-2. Main_Criteria 및 기준별 하위 시트 처리 (2026-10-18 추가)
+        # 응답 저장 시 Raw_Data/Demographic_Data 외에도 Main_Criteria와
+        # 각 기준명 시트(예: 외형적 독립성, 실질적 독립성)에 분할 저장되므로 함께 초기화
+        criteria_deleted_count = 0
+        try:
+            all_sheets = run_gspread_with_retry(spreadsheet.worksheets)
+            # 보존해야 할 시트 (설문 구조/메타데이터/백업)
+            protected = {"Survey_Metadata", "Survey_Images", "Raw_Data", "Demographic_Data"}
+            for ws in all_sheets:
+                title = ws.title
+                # 백업 시트는 건드리지 않음
+                if title in protected or "_Backup_" in title or title.startswith("Raw_Backup_") or title.startswith("Demo_Backup_"):
+                    continue
+                try:
+                    vals = run_gspread_with_retry(ws.get_all_values)
+                    if len(vals) > 1:
+                        criteria_deleted_count += len(vals) - 1
+                        run_gspread_with_retry(ws.delete_rows, 2, len(vals))
+                        if ws.row_count < 50:
+                            run_gspread_with_retry(ws.add_rows, 50)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
         # 3. 로컬 SQLite DB 백업 저장 (surveys.db)
         if raw_deleted_count > 0 or demo_deleted_count > 0:
             try:
