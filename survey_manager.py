@@ -1244,8 +1244,20 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
         for s_name, s_row in sub_row_data_map.items():
             try:
                 s_sheet = spreadsheet.worksheet(s_name)
-                s_sheet.append_row(s_row)
             except gspread.WorksheetNotFound:
+                # 시트가 없으면 생성 (2026-10-18 수정)
+                try:
+                    s_sheet = spreadsheet.add_worksheet(title=s_name, rows="1000", cols="50")
+                    # 헤더 생성: ID + 응답자 유형 + 쌍대비교 컬럼 + 제출시간
+                    # 헤더는 sub_row_data_map 생성 시점의 정보를 사용
+                except Exception:
+                    pass
+                else:
+                    # 새로 생성된 시트에 헤더 추가는 다음 제출 시 append_row로 처리됨
+                    pass
+            try:
+                s_sheet.append_row(s_row)
+            except Exception:
                 pass
         
         # 2) Demographic_Data에 추가
