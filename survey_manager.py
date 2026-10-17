@@ -2288,13 +2288,17 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
             except Exception:
                 pass
 
-        # 3-2. Visit_Count 초기화 (2026-10-18 추가)
-        # 데이터 초기화 시 총 접속자 수도 함께 0으로 리셋
+        # 3-2. Visit_Count 및 Abandoned_CR_Count 초기화 (2026-10-18 추가)
+        # 데이터 초기화 시 총 접속자 수와 CR 이탈 카운터도 함께 0으로 리셋
         try:
             meta_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Survey_Metadata")
-            visit_cell = run_gspread_with_retry(meta_sheet.find, "Visit_Count")
-            if visit_cell:
-                run_gspread_with_retry(meta_sheet.update_cell, visit_cell.row, visit_cell.col + 1, "0")
+            for _counter_name in ["Visit_Count", "Abandoned_CR_Count"]:
+                try:
+                    _cell = run_gspread_with_retry(meta_sheet.find, _counter_name)
+                    if _cell:
+                        run_gspread_with_retry(meta_sheet.update_cell, _cell.row, _cell.col + 1, "0")
+                except Exception:
+                    pass
         except Exception:
             pass
 
