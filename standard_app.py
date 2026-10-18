@@ -5630,6 +5630,30 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.session_state[_started_flag] = True
             except Exception:
                 pass
+            # [중복 방지] 제출 버튼 더블클릭 방지용 JavaScript (2026-10-18)
+            # 버튼 클릭 즉시 비활성화하여 서버에 중복 요청이 가지 않도록 함
+            st.markdown("""
+            <script>
+            (function() {
+                const btns = window.parent.document.querySelectorAll('button[kind="primary"]');
+                btns.forEach(function(btn) {
+                    if (btn.innerText.includes('설문지 제출하기') || btn.innerText.includes('Submit Survey')) {
+                        if (!btn.dataset.dblGuard) {
+                            btn.dataset.dblGuard = '1';
+                            btn.addEventListener('click', function() {
+                                const self = this;
+                                setTimeout(function() {
+                                    self.disabled = true;
+                                    self.style.opacity = '0.5';
+                                    self.style.cursor = 'not-allowed';
+                                }, 50);
+                            });
+                        }
+                    }
+                });
+            })();
+            </script>
+            """, unsafe_allow_html=True)
             submit_btn = st.button(_("설문지 제출하기", "Submit Survey"), type="primary")
         if submit_btn:
             # 필수값 유효성 검증
