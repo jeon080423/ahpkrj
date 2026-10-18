@@ -5747,6 +5747,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     st.stop()
             
             # 저장 진행
+            saving_key = f"survey_saving_{survey_id_param}"
+            # [중복 방지] 이미 저장 진행 중이면 건너뜀 (2026-10-18 추가)
+            if st.session_state.get(saving_key):
+                st.warning(_("이미 제출 처리 중입니다. 잠시만 기다려 주세요.", "Your submission is already being processed. Please wait."))
+                st.stop()
             with st.spinner(_("응답을 안전하게 전송 중입니다...", "Submitting your response safely...")):
                 if is_preview_mode:
                     import time
@@ -5754,6 +5759,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     st.session_state[f"survey_submitted_{survey_id_param}"] = True
                     st.rerun()
                 else:
+                    # 저장 시작 플래그 설정 (실패 시 해제하여 재시도 가능)
+                    st.session_state[saving_key] = True
                     if tier_level == 3:
                         from survey_manager_v3 import save_response_to_sheet_v3
                         success = save_response_to_sheet_v3(
@@ -5776,6 +5783,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         st.rerun()
                     else:
                         st.error(_("데이터 저장 중 서버 에러가 발생했습니다. 잠시 후 다시 시도해 주세요.", "A server error occurred while saving data. Please try again later."))
+                        # 저장 실패 시 플래그 해제하여 재시도 가능하도록 함 (2026-10-18)
+                        st.session_state[saving_key] = False
                     
     st.stop()
 
