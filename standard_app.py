@@ -5677,7 +5677,13 @@ if "preview_id" in q_params or "survey_id" in q_params:
             if missing:
                 st.error(_("입력되지 않은 필수 문항(*)이 있습니다. 폼을 다시 한 번 확인해 주세요.", "There are missing required fields (*). Please check the form again."))
                 st.stop()
-                
+
+            # [2026-10-18] 이메일 형식 검증 추가
+            _email_val = (resp_data.get("email") or "").strip()
+            if _email_val and _email_val != "응답거절" and not validate_email(_email_val):
+                st.error(_("올바른 이메일 형식이 아닙니다. 이메일 주소를 다시 확인해 주세요.", "Invalid email format. Please check your email address."))
+                st.stop()
+
             # CR 계산 및 마법사 로직
             if cr_limit is not None:
                 cr_failed = False
