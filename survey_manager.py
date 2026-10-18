@@ -1223,9 +1223,19 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
     try:
         spreadsheet = client.open_by_key(spreadsheet_id)
         
-        # 1) Raw_Data에 추가
+        # [중복 방지] Raw_Data에서 같은 ID가 이미 저장되어 있는지 확인 (2026-10-18 추가)
+        # 제출 버튼 연속 클릭 등으로 같은 응답이 여러 번 저장되는 것을 방지
         try:
             raw_sheet = spreadsheet.worksheet("Raw_Data")
+            existing_ids = run_gspread_with_retry(raw_sheet.col_values, 1)
+            if resp_id in existing_ids:
+                # 이미 저장된 응답이므로 중복 저장 건너뜀 (성공으로 처리)
+                return True
+        except Exception:
+            pass  # 확인 실패 시 정상 저장 진행
+        
+        # 1) Raw_Data에 추가
+        try:
             r_hdr = run_gspread_with_retry(raw_sheet.row_values, 1)
             if r_hdr and len(r_hdr) > len(raw_row_data):
                 diff = len(r_hdr) - len(raw_row_data)

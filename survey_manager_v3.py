@@ -441,6 +441,15 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
         if not client: return False
         spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
         
+        # [중복 방지] Raw_Data에서 같은 ID가 이미 저장되어 있는지 확인 (2026-10-18 추가)
+        try:
+            _dup_check_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+            _existing_ids = run_gspread_with_retry(_dup_check_sheet.col_values, 1)
+            if resp_id in _existing_ids:
+                return True  # 이미 저장된 응답이므로 중복 저장 건너뜀
+        except Exception:
+            pass
+        
         try:
             raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
             r_hdr = run_gspread_with_retry(raw_sheet.row_values, 1)
@@ -810,6 +819,15 @@ def save_yeta_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers,
         client = get_survey_gspread_client()
         if not client: return False
         spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
+        
+        # [중복 방지] Raw_Data에서 같은 ID가 이미 저장되어 있는지 확인 (2026-10-18 추가)
+        try:
+            _dup_check_sheet2 = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
+            _existing_ids2 = run_gspread_with_retry(_dup_check_sheet2.col_values, 1)
+            if resp_id in _existing_ids2:
+                return True  # 이미 저장된 응답이므로 중복 저장 건너뜀
+        except Exception:
+            pass
         
         try:
             raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
