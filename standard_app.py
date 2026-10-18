@@ -5747,11 +5747,17 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     st.stop()
             
             # 저장 진행
+            import time
             saving_key = f"survey_saving_{survey_id_param}"
-            # [중복 방지] 이미 저장 진행 중이면 건너뜀 (2026-10-18 추가)
+            saving_time_key = f"survey_saving_time_{survey_id_param}"
+            # [중복 방지] 이미 저장 진행 중이면 건너뜀 (2026-10-18 추가, 20초 타임아웃)
             if st.session_state.get(saving_key):
-                st.warning(_("이미 제출 처리 중입니다. 잠시만 기다려 주세요.", "Your submission is already being processed. Please wait."))
-                st.stop()
+                _saved_at = st.session_state.get(saving_time_key, 0)
+                if time.time() - _saved_at < 20:
+                    st.warning(_("이미 제출 처리 중입니다. 잠시만 기다려 주세요.", "Your submission is already being processed. Please wait."))
+                    st.stop()
+                # 20초 초과 시 플래그 만료 처리 (멈춤 상태에서 복구)
+                st.session_state[saving_key] = False
             with st.spinner(_("응답을 안전하게 전송 중입니다...", "Submitting your response safely...")):
                 if is_preview_mode:
                     import time
@@ -5761,6 +5767,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 else:
                     # 저장 시작 플래그 설정 (실패 시 해제하여 재시도 가능)
                     st.session_state[saving_key] = True
+                    st.session_state[saving_time_key] = time.time()
                     if tier_level == 3:
                         from survey_manager_v3 import save_response_to_sheet_v3
                         success = save_response_to_sheet_v3(
