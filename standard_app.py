@@ -8541,22 +8541,40 @@ with contextlib.nullcontext():
                 pass
             return r['role']
         display_df["상태"] = display_df.apply(_disp_status, axis=1)
-        st.dataframe(
-            display_df,
-            column_config={
-                "id": "회원 ID",
-                "role": "권한",
-                "signup_date": "가입일",
-                "pw": "비밀번호",
-                "survey_count": "배포 횟수",
-                "last_survey_link": st.column_config.LinkColumn("최종 배포 설문지 링크", display_text="설문지 바로가기"),
-                "expiry_date": "만료일",
-                "agree_info": "동의여부",
-                "상태": "상태"
-            },
-            hide_index=True,
-            use_container_width=True
-        )
+        # [2026-10-19] 가입자 목록에 전환 버튼 배치 (새 탭에서 해당 계정으로 전환)
+        _rows_html = ""
+        for _, _r in display_df.iterrows():
+            _uid_esc = str(_r['id']).replace('"', '&quot;')
+            _token = issue_login_token(str(_r['id']))
+            _switch_url = f"?login_user={_uid_esc}&login_token={_token}"
+            _survey_link = f'<a href="{_r["last_survey_link"]}" target="_blank">설문지 바로가기</a>' if _r['last_survey_link'] else "-"
+            _rows_html += f"""<tr>
+                <td>{_r['id']}</td>
+                <td>{_r['role']}</td>
+                <td>{_r['signup_date']}</td>
+                <td>{_r['survey_count']}</td>
+                <td>{_survey_link}</td>
+                <td>{_r['expiry_date']}</td>
+                <td>{_r['상태']}</td>
+                <td><a href="{_switch_url}" target="_blank" style="display:inline-block;background:#ff4b4b;color:#fff;padding:4px 12px;border-radius:6px;text-decoration:none;font-size:0.85rem;font-weight:600;">🔑 전환</a></td>
+            </tr>"""
+        st.components.v1.html(f"""
+        <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+            <thead><tr style="background:#f5f5f5;">
+                <th style="padding:8px;border:1px solid #ddd;">회원 ID</th>
+                <th style="padding:8px;border:1px solid #ddd;">권한</th>
+                <th style="padding:8px;border:1px solid #ddd;">가입일</th>
+                <th style="padding:8px;border:1px solid #ddd;">배포 횟수</th>
+                <th style="padding:8px;border:1px solid #ddd;">최종 배포 설문지</th>
+                <th style="padding:8px;border:1px solid #ddd;">만료일</th>
+                <th style="padding:8px;border:1px solid #ddd;">상태</th>
+                <th style="padding:8px;border:1px solid #ddd;">계정 전환</th>
+            </tr></thead>
+            <tbody>{_rows_html}</tbody>
+        </table>
+        </div>
+        """, height=min(600, 120 + len(display_df) * 42), scrolling=True)
     
         with st.expander("회원 정보 수정 (비밀번호 초기화 포함)"):
             edit_id = st.selectbox("수정할 회원 ID", users_df['id'].unique())
