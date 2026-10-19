@@ -7875,8 +7875,27 @@ with st.sidebar:
     if st.button(_("환불 및 취소 신청", "Request Refund & Cancellation"), key="sidebar_refund_btn", use_container_width=True):
         show_refund_dialog()
 
-    if st.session_state.user_id is not None and st.session_state.user_role == 'temp':
-        if st.button(_("⭐ 정식 사용자로 전환하기", "⭐ Upgrade to Paid License Now"), key="sidebar_upgrade_btn", use_container_width=True):
+    # [2026-10-19] 요금제 전환 UX 개선: 현재 플랜 표시 + temp/free 모두에게 전환 CTA 제공
+    _uid = st.session_state.get("user_id")
+    _urole = st.session_state.get("user_role")
+    if _uid is not None and _urole in ('temp', 'free'):
+        _tier = get_current_tier()
+        if _tier == 'Free':
+            _plan_label = _("무료 플랜", "Free Plan")
+            _plan_desc = _("3표본까지 분석 가능", "Up to 3 samples")
+            _badge_color = "#6b7280"
+        else:
+            _plan_label = _tier
+            _plan_desc = ""
+            _badge_color = "#6b7280"
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 10px; padding: 12px 14px; margin: 10px 0;">
+            <div style="font-size: 0.8rem; color: #92400e; font-weight: 600;">{_('현재 요금제', 'Current Plan')}</div>
+            <div style="font-size: 1.05rem; font-weight: 800; color: #1f2937; margin: 2px 0;">{_plan_label}</div>
+            <div style="font-size: 0.78rem; color: #78716c;">{_plan_desc}</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button(_("🚀 유료로 전환하고 무제한 분석하기", "🚀 Upgrade for Unlimited Analysis"), key="sidebar_upgrade_btn", use_container_width=True, type="primary"):
             # '분석 요금제' 탭으로 이동 (로그인 상태 유지)
             st.session_state["_goto_tab"] = _("요금제", "Pricing")
             st.rerun()
@@ -11329,9 +11348,13 @@ with contextlib.nullcontext():
                                 st.components.v1.html(paypal_html, height=180)
                             else:
                                 st.markdown(_("### 💳 무제한 분석 및 즉시 해제", "### 💳 Upgrade to Official User for Unlimited Analysis"))
-                                st.markdown("정식 사용자로 승격하시면 **표본 수 제한(3개)이 즉시 해제**되며 모든 분석 기능을 무제한으로 사용하실 수 있습니다.")
-                                st.error("⛔ **현재 데이터는 3표본을 초과하여 분석이 차단되었습니다.**\n\n지금 바로 업그레이드하고 끊김 없이 분석을 이어가세요!")
-                                if st.button("🚀 지금 업그레이드하고 무제한 분석하기", type="primary", use_container_width=True):
+                                _n_total = len(df_main) if 'df_main' in dir() and df_main is not None else 0
+                                st.warning(_("⚠️ 무료 플랜은 **3표본까지만** 분석할 수 있습니다. 현재 데이터는 **{n}개**로 3개를 초과했습니다.",
+                                             "⚠️ The Free plan can analyze **up to 3 samples**. Your data has **{n}**, exceeding the limit.").format(n=_n_total if _n_total else "?"))
+                                st.markdown(_("유료로 전환하시면:", "By upgrading:"))
+                                st.markdown(_("- ✅ **표본 수 제한 즉시 해제** — 전체 데이터 분석 가능\n- ✅ T-Test/ANOVA 집단 비교 (Standard 이상)\n- ✅ 퍼지 AHP (Pro)",
+                                               "- ✅ **Instant limit removal** — analyze all your data\n- ✅ T-Test/ANOVA group comparison (Standard+)\n- ✅ Fuzzy AHP (Pro)"))
+                                if st.button(_("🚀 지금 업그레이드하고 이어서 분석하기", "🚀 Upgrade Now and Continue"), type="primary", use_container_width=True):
                                     # '분석 요금제' 탭으로 이동 (로그인 상태 유지)
                                     st.session_state["_goto_tab"] = _("요금제", "Pricing")
                                     st.rerun()
