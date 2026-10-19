@@ -12008,7 +12008,7 @@ with contextlib.nullcontext():
                             _deployed_url = f"https://ahpkrj.streamlit.app/?mode=survey&survey_id={linked_sheet_id}"
                             st.link_button(_("🌐 배포된 설문 보기", "View Deployed Survey"), _deployed_url)
 
-                            # [신규] 연동된 구글 스프레드시트 바로가기 및 온라인 설문 링크 제시
+                            # [신규] 연동된 구글 시트 바로가기 및 온라인 설문 링크 제시
                             base_url = st.query_params.get("base_url", ["https://ahpkrj.streamlit.app/"])[0] if isinstance(st.query_params.get("base_url"), list) else "https://ahpkrj.streamlit.app/"
                             if "localhost" in base_url or "127.0.0.1" in base_url:
                                 active_survey_url = f"{base_url}?survey_id={linked_sheet_id}"
@@ -12024,7 +12024,7 @@ with contextlib.nullcontext():
                             ), unsafe_allow_html=True)
 
                             gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
-                            btn_label = _("연동된 구글 스프레드시트 바로가기", "Open Linked Google Sheet")
+                            btn_label = _("연동된 구글 시트 바로가기", "Open Linked Google Sheet")
                             st.markdown(
                                 f"<a href=\"{gs_link}\" target=\"_blank\" "
                                 "style=\"display:block;text-align:center;text-decoration:none;color:#31333F;"
@@ -13201,7 +13201,7 @@ with contextlib.nullcontext():
 
                                                 <div class="gs-nav-btn-box2">
                                                     <a href="{sheet_url}" target="_blank">
-                                                        📊 연동된 구글 스프레드시트 바로가기 (응답 데이터 실시간 확인)
+                                                        📊 연동된 구글 시트 바로가기 (응답 데이터 실시간 확인)
                                                     </a>
                                                 </div>
                                                 ''', unsafe_allow_html=True)
