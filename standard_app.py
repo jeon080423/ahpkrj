@@ -6637,6 +6637,7 @@ def get_portone_custom_services_html(user_id=None):
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
             const opt6 = document.getElementById("svc_opt_6");
+            const optExt = document.getElementById("svc_opt_ext");
             
             let total = 0;
             let count = 0;
@@ -6646,6 +6647,7 @@ def get_portone_custom_services_html(user_id=None):
             if (opt4.checked) {{ total += parseInt(opt4.value); count++; }}
             if (opt5.checked) {{ total += parseInt(opt5.value); count++; }}
             if (opt6.checked) {{ total += parseInt(opt6.value); count++; }}
+            if (optExt && optExt.checked) {{ total += parseInt(optExt.value); count++; }}
             
             document.getElementById("totalPriceDisplay").innerText = total.toLocaleString() + "원";
             if (count > 0) {{
@@ -6668,6 +6670,7 @@ def get_portone_custom_services_html(user_id=None):
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
             const opt6 = document.getElementById("svc_opt_6");
+            const optExt = document.getElementById("svc_opt_ext");
             
             let total = 0;
             let items = [];
@@ -6677,11 +6680,15 @@ def get_portone_custom_services_html(user_id=None):
             if (opt4.checked) {{ total += parseInt(opt4.value); items.push(opt4.getAttribute("data-name")); }}
             if (opt5.checked) {{ total += parseInt(opt5.value); items.push(opt5.getAttribute("data-name")); }}
             if (opt6.checked) {{ total += parseInt(opt6.value); items.push(opt6.getAttribute("data-name")); }}
+            if (optExt && optExt.checked) {{ total += parseInt(optExt.value); items.push(optExt.getAttribute("data-name")); }}
             
             if (total === 0) {{
                 alert("결제하실 부가 서비스 대행 옵션을 하나 이상 선택해주세요.");
                 return;
             }}
+            
+            // [2026-10-19] addMonths 정의: 1개월 이용 연장 선택 시 1, 그 외 0
+            const addMonths = (optExt && optExt.checked) ? 1 : 0;
             
             if ({is_logged_in}) {{
                 openPaymentWindow(total, items.join(", "), addMonths);
@@ -7343,6 +7350,7 @@ def get_paypal_custom_services_html(user_id=None):
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
             const opt6 = document.getElementById("svc_opt_6");
+            const optExt = document.getElementById("svc_opt_ext");
             
             let total = 0;
             let count = 0;
@@ -7352,6 +7360,11 @@ def get_paypal_custom_services_html(user_id=None):
             if (opt3.checked) {{ total += parseInt(opt3.value); count++; items.push(opt3.getAttribute("data-name")); }}
             if (opt4.checked) {{ total += parseInt(opt4.value); count++; items.push(opt4.getAttribute("data-name")); }}
             if (opt5.checked) {{ total += parseInt(opt5.value); count++; items.push(opt5.getAttribute("data-name")); }}
+            if (opt6 && opt6.checked) {{ total += parseInt(opt6.value); count++; items.push(opt6.getAttribute("data-name")); }}
+            if (optExt && optExt.checked) {{ total += parseInt(optExt.value); count++; items.push(optExt.getAttribute("data-name")); }}
+            
+            // [2026-10-19] addMonths 계산: 1개월 연장 선택 시 1, 그 외 0
+            const addMonths = (optExt && optExt.checked) ? 1 : 0;
             
             document.getElementById("totalPriceDisplay").innerText = "$" + total.toLocaleString() + " USD";
             
@@ -7361,10 +7374,10 @@ def get_paypal_custom_services_html(user_id=None):
                 document.getElementById("statusDesc").innerText = "Please select the proxy services you need.";
             }}
             
-            renderPaypalButton(total, items.join(", "));
+            renderPaypalButton(total, items.join(", "), addMonths);
         }}
         
-        function renderPaypalButton(amount, planName) {{
+        function renderPaypalButton(amount, planName, addMonths) {{
             const container = document.getElementById("paypal-button-container");
             container.innerHTML = "";
             
