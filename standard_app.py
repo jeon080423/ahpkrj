@@ -1422,6 +1422,8 @@ def init_db():
         # 컬럼 순서: id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link
         c.execute("INSERT OR IGNORE INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
                   ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
+        # [2026-10-19] shjeon 계정은 항상 관리자로 강제 설정
+        c.execute("UPDATE users SET role='admin' WHERE id='shjeon'")
         conn.commit()
 
         # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (세션당 1회, 설문/미리보기 페이지 제외)
@@ -1439,6 +1441,12 @@ def init_db():
                     cell = sheet.find('shjeon')
                     if not cell:
                         sheet.append_row(['shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''])
+                    else:
+                        # [2026-10-19] shjeon 계정은 항상 관리자로 강제 설정
+                        try:
+                            sheet.update_cell(cell.row, 2, 'admin')
+                        except Exception:
+                            pass
             except Exception:
                 pass
     except sqlite3.IntegrityError:
