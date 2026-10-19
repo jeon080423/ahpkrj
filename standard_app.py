@@ -12025,15 +12025,8 @@ with contextlib.nullcontext():
 
                             gs_link = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
                             btn_label = _("연동된 구글 시트 바로가기", "Open Linked Google Sheet")
-                            st.markdown(
-                                f"<a href=\"{gs_link}\" target=\"_blank\" "
-                                "style=\"display:block;text-align:center;text-decoration:none;color:#31333F;"
-                                "background-color:#FFFFFF;border:1px solid rgba(49,51,63,0.2);"
-                                "border-radius:0.5rem;padding:0.5rem 1rem;font-size:1rem;"
-                                "font-weight:400;line-height:1.6;margin-bottom:0.5rem;cursor:pointer;\">"
-                                f"\U0001F4CA {btn_label}</a>",
-                                unsafe_allow_html=True,
-                            )
+                            # [2026-10-19] st.link_button으로 변경 — 아래 버튼들과 곡률/스타일 완전 동일
+                            st.link_button(f"\U0001F4CA {btn_label}", gs_link, use_container_width=True)
 
                         if st.button(_("✨ 처음부터 새 설문 작성하기", "✨ Start a new survey from scratch"), type="secondary", use_container_width=True):
                             confirm_new_survey()
