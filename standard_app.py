@@ -2884,6 +2884,30 @@ def get_current_tier():
     elif 'Basic' in pt: return 'Basic'
     return 'Free'
 
+def apply_sample_limit(df, source_label=""):
+    """[2026-10-19] 등급별 분석 표본 수 제한 헬퍼 (방어 다층화용).
+
+    - Free: 최대 3표본 (처음 접수된 3행만 분석)
+    - Basic: 최대 10표본 (처음 접수된 10행만 분석)
+    - Standard/Pro: 무제한
+    유료 전환 시 user_role/plan_type이 바뀌면 자동으로 제한 해제됨 (별도 해제 로직 불필요).
+    source_label: 경고 메시지에 표시할 데이터 출처 (예: "온라인 설문 연동", "엑셀 업로드").
+    """
+    if df is None or getattr(df, 'empty', True):
+        return df
+    tier = get_current_tier()
+    limit = 3 if tier == 'Free' else (10 if tier == 'Basic' else None)
+    if limit is not None and len(df) > limit:
+        df = df.head(limit).copy()
+        src = f" ({source_label})" if source_label else ""
+        if tier == 'Free':
+            st.warning(_(f"⚠️ 무료 사용자는{src} 최대 3표본까지만 분석할 수 있습니다. 처음 접수된 3명(행)의 응답만 분석에 사용됩니다.",
+                         f"⚠️ Free users can only analyze up to 3 samples{src}. Only the first 3 responses will be analyzed."))
+        else:
+            st.warning(_(f"⚠️ 베이직 요금제는{src} 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
+                         f"⚠️ Basic users can only analyze up to 10 samples{src}. Only the first 10 responses will be analyzed."))
+    return df
+
 # -----------------------------------------------------------------------------
 # Saaty(1980) AHP Functions
 # -----------------------------------------------------------------------------
@@ -8828,12 +8852,9 @@ with contextlib.nullcontext():
                     sheet_names = excel_obj.sheet_names
                     df_main = pd.read_excel(uploaded_file, sheet_name=sheet_names[0])
                     df_main = preprocess_uploaded_df(df_main)
-                    
-                    # [신규] Basic 요금제 표본수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
-                    if get_current_tier() == 'Basic' and len(df_main) > 10:
-                        df_main = df_main.head(10)
-                        st.warning(_("⚠️ 베이직 요금제는 엑셀 업로드 시 최대 10표본까지만 분석할 수 있습니다. 처음 10개 표본만 분석에 사용됩니다.",
-                                     "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 samples will be analyzed."))
+
+                    # [2026-10-19] 등급별 표본 수 제한 (헬퍼로 일원화: Free 3 / Basic 10)
+                    df_main = apply_sample_limit(df_main, source_label="엑셀 업로드")
                     
                     if "Type" not in df_main.columns and len(df_main.columns) > 1:
                         col1 = df_main.columns[1]
@@ -8870,15 +8891,15 @@ with contextlib.nullcontext():
                             if "demographic" in sn_lower:
                                 demo_df = pd.read_excel(uploaded_file, sheet_name=sn)
                                 demo_df = preprocess_uploaded_df(demo_df)
-                                if get_current_tier() == 'Basic' and len(demo_df) > 10:
-                                    demo_df = demo_df.head(10)
+                                # [2026-10-19] 등급별 표본 수 제한 (헬퍼로 일원화: Free 3 / Basic 10)
+                                demo_df = apply_sample_limit(demo_df, source_label="엑셀 업로드")
                                 st.session_state["demo_df"] = demo_df
                             continue
                             
                         df_sheet = pd.read_excel(uploaded_file, sheet_name=sn)
                         df_sheet = preprocess_uploaded_df(df_sheet)
-                        if get_current_tier() == 'Basic' and len(df_sheet) > 10:
-                            df_sheet = df_sheet.head(10)
+                        # [2026-10-19] 등급별 표본 수 제한 (헬퍼로 일원화: Free 3 / Basic 10)
+                        df_sheet = apply_sample_limit(df_sheet, source_label="엑셀 업로드")
                             
                         if "Type" not in df_sheet.columns and len(df_sheet.columns) > 1:
                             col1 = df_sheet.columns[1]
@@ -9079,16 +9100,8 @@ with contextlib.nullcontext():
 
                                         raw_df = pd.DataFrame(parsed_records)
 
-                                        # [신규] 사용자 등급에 따른 표본 수 제한 (무료 사용자: 최대 3표본)
-                                        if st.session_state.get('user_role') == 'free' and len(raw_df) > 3:
-                                            raw_df = raw_df.head(3)
-                                            st.warning(_("⚠️ 무료 사용자는 온라인 설문 연동 시 최대 3표본까지만 분석할 수 있습니다. 처음 접수된 3명(행)의 응답만 분석에 사용됩니다.", "⚠️ Free users can only analyze up to 3 samples. Only the first 3 responses will be analyzed."))
-
-                                        # [신규] Basic 요금제 표본 수 제한 (최대 10표본으로 슬라이싱하여 분석 허용)
-                                        if get_current_tier() == 'Basic' and len(raw_df) > 10:
-                                            raw_df = raw_df.head(10)
-                                            st.warning(_("⚠️ 베이직 요금제는 온라인 설문 연동 시 최대 10표본까지만 분석할 수 있습니다. 처음 접수된 10명(행)의 응답만 분석에 사용됩니다.",
-                                                         "⚠️ Basic users can only analyze up to 10 samples. Only the first 10 responses will be analyzed."))
+                                        # [2026-10-19] 등급별 표본 수 제한 (헬퍼로 일원화: Free 3 / Basic 10)
+                                        raw_df = apply_sample_limit(raw_df, source_label="온라인 설문 연동")
 
                                         # [신규] 그룹 분석 기준 변수 맵 구성 (인구통계 질문 + Demographic_Data 시트 항목, 주관식 기타 입력값 제외)
                                         group_vars_map = {}
@@ -9284,7 +9297,13 @@ with contextlib.nullcontext():
                             with st.spinner(_("3계층(소분류 포함) AHP 종합 분석 수행 중...", "Performing 3-Tier AHP...")):
                                 from ahp_utils_v3 import run_ahp_analysis_v3
                                 sub_sub_dfs = st.session_state.get("ahp_sub_sub_dfs", {})
-                                
+
+                                # [2026-10-19] 최종 방어선: 등급별 표본 수 제한을 분석 직전에 재적용
+                                # (세션에 무제한 데이터가 남아있는 경우 소분류 누락 방지)
+                                df_main = apply_sample_limit(df_main, source_label="3계층 분석")
+                                sub_dfs = {k: apply_sample_limit(v) for k, v in sub_dfs.items()}
+                                sub_sub_dfs = {k: apply_sample_limit(v) for k, v in sub_sub_dfs.items()}
+
                                 # 인구통계 요약본 생성하여 전달
                                 demo_summary_df_v3 = None
                                 if "demo_df" in st.session_state and st.session_state["demo_df"] is not None:
@@ -9715,6 +9734,9 @@ with contextlib.nullcontext():
                         else:
                         
                             with st.spinner(_("계층 분석 수행 중...", "Performing Analytic Hierarchy Process (AHP)...")):
+                                # [2026-10-19] 최종 방어선: 등급별 표본 수 제한을 분석 직전에 재적용
+                                df_main = apply_sample_limit(df_main, source_label="2계층 분석")
+                                sub_dfs = {k: apply_sample_limit(v) for k, v in sub_dfs.items()}
                                 # 1. 메인 시트 분석 시도
                                 try:
                                     main_results_df, main_factors, main_excluded, main_excluded_df = process_single_sheet(

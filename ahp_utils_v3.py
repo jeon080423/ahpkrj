@@ -904,18 +904,50 @@ def run_ahp_analysis_v3(df_main, sub_dfs, sub_sub_dfs, cr_threshold, max_iter_va
     with pd.ExcelWriter(output_res, engine='xlsxwriter') as writer:
         workbook = writer.book
         
-        # [신규 추가] 인구통계 결과 엑셀 시트 출력
+        # [신규 추가] 인구통계 결과 엑셀 시트 출력 (2계층과 동일한 합계 행 포함)
         if demo_summary_df is not None:
             demo_summary_df.to_excel(writer, sheet_name='Result_Demographics', index=False)
             # Result_Demographics 엑셀 서식 적용
             ws_demo = writer.sheets['Result_Demographics']
             header_format_demo = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#4F81BD', 'font_color': '#FFFFFF', 'border': 1})
             body_format_demo = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1})
+            pct_format_demo = workbook.add_format({'align': 'center', 'valign': 'vcenter', 'border': 1, 'num_format': '0.0'})
+            total_format_demo = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#D3D3D3', 'border': 1})
+            total_pct_format_demo = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'bg_color': '#D3D3D3', 'border': 1, 'num_format': '0.0'})
             for col_num, value in enumerate(demo_summary_df.columns.values):
                 ws_demo.write(0, col_num, value, header_format_demo)
-            for row in range(len(demo_summary_df)):
+            # 항목별로 그룹화하여 합계 행 추가 (2계층과 동일 형식)
+            _excel_row = 1
+            _prev_field = None
+            _group_pct_sum = 0.0
+            for _idx in range(len(demo_summary_df)):
+                _field = demo_summary_df.iloc[_idx, 0]
+                _pct = demo_summary_df.iloc[_idx, 3]
+                # 새 항목 시작 시 이전 그룹의 합계 행 출력
+                if _prev_field is not None and _field != _prev_field:
+                    ws_demo.write(_excel_row, 0, _prev_field, total_format_demo)
+                    ws_demo.write(_excel_row, 1, "합계", total_format_demo)
+                    ws_demo.write(_excel_row, 2, "-", total_format_demo)
+                    ws_demo.write(_excel_row, 3, _group_pct_sum, total_pct_format_demo)
+                    _excel_row += 1
+                    _group_pct_sum = 0.0
+                # 데이터 행 출력 (비율 컬럼은 소수점 1자리 표시)
                 for col in range(len(demo_summary_df.columns)):
-                    ws_demo.write(row+1, col, demo_summary_df.iloc[row, col], body_format_demo)
+                    _val = demo_summary_df.iloc[_idx, col]
+                    if col == 3:
+                        ws_demo.write(_excel_row, col, _val, pct_format_demo)
+                    else:
+                        ws_demo.write(_excel_row, col, _val, body_format_demo)
+                _excel_row += 1
+                _group_pct_sum += _pct if isinstance(_pct, (int, float)) else 0
+                _prev_field = _field
+            # 마지막 그룹의 합계 행 출력
+            if _prev_field is not None:
+                ws_demo.write(_excel_row, 0, _prev_field, total_format_demo)
+                ws_demo.write(_excel_row, 1, "합계", total_format_demo)
+                ws_demo.write(_excel_row, 2, "-", total_format_demo)
+                ws_demo.write(_excel_row, 3, _group_pct_sum, total_pct_format_demo)
+                _excel_row += 1
             ws_demo.set_column('A:A', 30)
             ws_demo.set_column('B:D', 20)
         
