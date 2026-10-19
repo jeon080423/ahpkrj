@@ -12628,8 +12628,23 @@ with contextlib.nullcontext():
 
 
 
-                        # 섹션 6: 최종 미리보기 및 배포
-                        render_section_header(_("섹션 6: 저장 전 최종 미리보기 및 배포", "Section 6: Final Preview & Deployment Before Saving"))
+                        # 섹션 6: 수집 목표 설정
+                        render_section_header(_("섹션 6: 수집 목표 설정", "Section 6: Collection Goal Setup"))
+                        _goal_sheet_id = st.session_state.get("editing_survey_id")
+                        if _goal_sheet_id:
+                            try:
+                                from collection_support import render_goal_setting_form
+                                from survey_manager import load_survey_metadata as _load_goal_meta
+                                _goal_meta = _load_goal_meta(_goal_sheet_id) or {}
+                                render_goal_setting_form(_goal_sheet_id, _goal_meta, key_prefix="deploy")
+                            except Exception as _ge:
+                                st.warning(_("목표 설정을 불러오지 못했습니다.", "Could not load goal settings."))
+                        else:
+                            st.info(_("설문을 배포한 뒤 이 섹션에서 수집 목표(목표 응답 수·마감일)를 설정할 수 있습니다. 기존 설문을 수정하는 경우 목표를 바로 설정할 수 있습니다.",
+                                      "After deploying the survey, you can set collection goals (target responses & deadline) in this section. When editing an existing survey, you can set goals right away."))
+
+                        # 섹션 7: 최종 미리보기 및 배포
+                        render_section_header(_("섹션 7: 저장 전 최종 미리보기 및 배포", "Section 7: Final Preview & Deployment Before Saving"))
 
                         # [추가] 구글 스프레드시트 연동 설정
                         if st.session_state.get('editing_survey_id'):

@@ -103,7 +103,7 @@ def render_collection_kickoff(sheet_id, short_url, survey_title=""):
     st.divider()
     # 배포 직후 안내: 목표 설정과 공유 도구는 진행현황 탭에서
     with st.expander("응답 수집 시작하기", expanded=True):
-        hint("수집 목표 설정·QR 코드·초대 문구는 '응답 현황' 탭에서 확인할 수 있습니다.")
+        hint("수집 목표 설정은 '설문 작성 및 배포' 탭의 섹션 6에서, QR 코드·초대 문구는 '자료수집 도구' 탭에서 확인할 수 있습니다.")
 
 
 def render_sharing_tools(sheet_id, short_url, survey_title="", key_prefix="cs"):
@@ -197,7 +197,7 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
             st.progress(pct)
         else:
             st.metric("완료 응답", f"{completed_count}명")
-            st.caption("자료수집 도구 탭에서 목표를 설정하세요.")
+            st.caption("설문 작성 및 배포 탭의 섹션 6에서 목표를 설정하세요.")
     with p2:
         days = _days_remaining(deadline_str)
         if days is None:
@@ -213,8 +213,8 @@ def render_collection_progress(sheet_id, survey_meta, completed_count, visit_cou
         st.metric("방문 대비 완료율", f"{rate:.1f}%", f"방문 {visit_count}명")
 
 
-def render_collection_tools(sheet_id, survey_meta, completed_count, visit_count=0):
-    """자료수집 도구 탭: 1. 목표 설정, 3. 다음 행동, 4. 공유 도구."""
+def render_goal_setting_form(sheet_id, survey_meta, key_prefix="cs"):
+    """수집 목표 설정 폼 (재사용 가능). 자료수집 도구·설문 작성 및 배포 탭에서 공유."""
     meta = survey_meta or {}
     try:
         target = int(meta.get("Target_Response_Count") or 0)
@@ -222,14 +222,12 @@ def render_collection_tools(sheet_id, survey_meta, completed_count, visit_count=
         target = 0
     deadline_str = str(meta.get("Collection_Deadline") or "").strip()
 
-    # ---- 1. 수집 목표 설정 ----
-    section_title("1. 수집 목표 설정")
     try:
         default_dl = (datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
                       if deadline_str else None)
     except Exception:
         default_dl = None
-    with st.form(key=f"cs_goal_form_{sheet_id}", clear_on_submit=False):
+    with st.form(key=f"{key_prefix}_goal_form_{sheet_id}", clear_on_submit=False):
         fc1, fc2 = st.columns(2)
         with fc1:
             form_target = st.number_input(
@@ -261,11 +259,20 @@ def render_collection_tools(sheet_id, survey_meta, completed_count, visit_count=
         hint(f"현재 설정: 목표 {target}명 / 마감일 {deadline_str or '미설정'}")
     else:
         hint("목표가 설정되지 않았습니다.")
+    return target, deadline_str
 
-    st.divider()
 
-    # ---- 3. 다음 행동 ----
-    section_title("3. 다음 행동")
+def render_collection_tools(sheet_id, survey_meta, completed_count, visit_count=0):
+    """자료수집 도구 탭: 1. 다음 행동, 2. 공유 도구."""
+    meta = survey_meta or {}
+    try:
+        target = int(meta.get("Target_Response_Count") or 0)
+    except (ValueError, TypeError):
+        target = 0
+    deadline_str = str(meta.get("Collection_Deadline") or "").strip()
+
+    # ---- 1. 다음 행동 ----
+    section_title("1. 다음 행동")
     action_title, action_desc, action_hint = _next_action_card(
         completed_count, visit_count, target, _days_remaining(deadline_str))
     with st.container(border=True):
@@ -275,8 +282,8 @@ def render_collection_tools(sheet_id, survey_meta, completed_count, visit_count=
 
     st.divider()
 
-    # ---- 4. 공유 도구 (QR·초대·리마인드 문구) ----
-    section_title("4. 공유 도구")
+    # ---- 2. 공유 도구 (QR·초대·리마인드 문구) ----
+    section_title("2. 공유 도구")
     # 설문 URL 구성
     try:
         from survey_manager import get_survey_short_url
