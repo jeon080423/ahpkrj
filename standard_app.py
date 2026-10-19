@@ -8541,22 +8541,31 @@ with contextlib.nullcontext():
                 pass
             return r['role']
         display_df["상태"] = display_df.apply(_disp_status, axis=1)
-        # [2026-10-19] 가입자 목록에 전환 버튼 배치 (새 탭에서 해당 계정으로 전환)
+        # [2026-10-19] 가입자 목록에 전환 버튼 + 스프레드시트 바로가기 배치 (새 탭에서 열기)
+        import re as _re
+        _btn_style = "display:inline-block;background:#ff4b4b;color:#fff;padding:4px 12px;border-radius:6px;text-decoration:none;font-size:0.85rem;font-weight:600;white-space:nowrap;"
         _rows_html = ""
         for _, _r in display_df.iterrows():
             _uid_esc = str(_r['id']).replace('"', '&quot;')
             _token = issue_login_token(str(_r['id']))
             _switch_url = f"?login_user={_uid_esc}&login_token={_token}"
             _survey_link = f'<a href="{_r["last_survey_link"]}" target="_blank">설문지 바로가기</a>' if _r['last_survey_link'] else "-"
+            # 설문 URL에서 survey_id(=구글 시트 ID) 추출 → 스프레드시트 바로가기
+            _sheet_btn = "-"
+            _m = _re.search(r'survey_id=([A-Za-z0-9_-]+)', str(_r['last_survey_link'] or ''))
+            if _m:
+                _sheet_url = f"https://docs.google.com/spreadsheets/d/{_m.group(1)}"
+                _sheet_btn = f'<a href="{_sheet_url}" target="_blank" style="{_btn_style}">📊 스프레드시트</a>'
             _rows_html += f"""<tr>
                 <td>{_r['id']}</td>
                 <td>{_r['role']}</td>
                 <td>{_r['signup_date']}</td>
                 <td>{_r['survey_count']}</td>
                 <td>{_survey_link}</td>
+                <td>{_sheet_btn}</td>
                 <td>{_r['expiry_date']}</td>
                 <td>{_r['상태']}</td>
-                <td><a href="{_switch_url}" target="_blank" style="display:inline-block;background:#ff4b4b;color:#fff;padding:4px 12px;border-radius:6px;text-decoration:none;font-size:0.85rem;font-weight:600;">🔑 전환</a></td>
+                <td><a href="{_switch_url}" target="_blank" style="{_btn_style}">🔑 전환</a></td>
             </tr>"""
         st.components.v1.html(f"""
         <div style="overflow-x:auto;">
@@ -8567,6 +8576,7 @@ with contextlib.nullcontext():
                 <th style="padding:8px;border:1px solid #ddd;">가입일</th>
                 <th style="padding:8px;border:1px solid #ddd;">배포 횟수</th>
                 <th style="padding:8px;border:1px solid #ddd;">최종 배포 설문지</th>
+                <th style="padding:8px;border:1px solid #ddd;">연동 스프레드시트</th>
                 <th style="padding:8px;border:1px solid #ddd;">만료일</th>
                 <th style="padding:8px;border:1px solid #ddd;">상태</th>
                 <th style="padding:8px;border:1px solid #ddd;">계정 전환</th>
