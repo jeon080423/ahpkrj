@@ -7876,11 +7876,9 @@ with st.sidebar:
         show_refund_dialog()
 
     # [2026-10-19] 요금제 전환 UX 개선: 현재 플랜 표시 + temp/free 모두에게 전환 CTA 제공
-    # [2026-10-19] 관리자 모드에서만 표시
     _uid = st.session_state.get("user_id")
     _urole = st.session_state.get("user_role")
-    if (st.session_state.get('admin_mode', False) and _urole == 'admin'
-            and _uid is not None):
+    if _uid is not None and _urole in ('temp', 'free'):
         _tier = get_current_tier()
         if _tier == 'Free':
             _plan_label = _("무료 플랜", "Free Plan")
