@@ -1429,6 +1429,8 @@ def init_db():
                   ('shjeon', 'admin', signup_date_str, '@jsh2143033', '9999-12-31', 'Y', 0, ''))
         # [2026-10-19] shjeon 계정은 항상 관리자로 강제 설정
         c.execute("UPDATE users SET role='admin' WHERE id='shjeon'")
+        # [2026-10-20] 이사님 본인 계정(jeon080423@gmail.com)도 항상 관리자로 강제 설정 (shjeon 비밀번호 불일치로 관리자 접근이 막히는 문제 해결)
+        c.execute("UPDATE users SET role='admin' WHERE id='jeon080423@gmail.com'")
         conn.commit()
 
         # [추가] 관리자 계정이 구글 시트에 없는 경우 자동 추가 (세션당 1회, 설문/미리보기 페이지 제외)
@@ -1452,6 +1454,13 @@ def init_db():
                             sheet.update_cell(cell.row, 2, 'admin')
                         except Exception:
                             pass
+                    # [2026-10-20] jeon080423@gmail.com 계정도 시트에서 항상 관리자로 강제 설정
+                    try:
+                        cell_owner = sheet.find('jeon080423@gmail.com')
+                        if cell_owner:
+                            sheet.update_cell(cell_owner.row, 2, 'admin')
+                    except Exception:
+                        pass
             except Exception:
                 pass
     except sqlite3.IntegrityError:
