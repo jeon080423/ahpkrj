@@ -1336,6 +1336,11 @@ def init_db():
         conn.commit()
     except Exception:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN marketing_agree TEXT DEFAULT 'N'")
+        conn.commit()
+    except Exception:
+        pass
 
     c.execute('''CREATE TABLE IF NOT EXISTS saved_analyses
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, filename TEXT, save_date TEXT, file_data BLOB)''')
@@ -2165,6 +2170,59 @@ def send_approval_email(user_email):
         print(f"send_approval_email Error: {e}")
         return False
 
+def send_welcome_email(user_email, marketing_agree=False):
+    """신규 가입자에게 환영 안내 메일을 자동 발송한다.
+    마케팅 섹션(요금제 안내·활용 팁 예고)은 수신 동의한 가입자에게만 포함한다."""
+    sender_email = "jeon080423@gmail.com"
+    password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
+    recipient_email = user_email
+    subject = "[AHP 마스터] 회원가입을 환영합니다! 시작 가이드 안내"
+    body = """안녕하세요. AHP 마스터에 가입해 주셔서 감사합니다.
+
+AHP 마스터(https://www.ahpmaster.com)는 웹 브라우저에서 바로 사용하는 AHP 분석 자동화 서비스입니다.
+복잡한 엑셀 수식 없이도 가중치 계산, 일관성 검증(CR), 결과 시각화까지 한 번에 처리할 수 있습니다.
+
+■ 무료로 바로 시작하기
+
+1. AHP 분석: 엑셀 양식을 다운로드해 쌍대비교 값을 입력하고 업로드하면 가중치와 CR이 자동 계산됩니다.
+   (무료 플랜은 3개 표본까지 분석 가능)
+2. 설문지 만들기: AHP 설문지를 웹에서 직접 작성하고 배포할 수 있습니다.
+3. 무료 온라인 설문 수집: 구글 시트와 실시간 연동되어 응답이 자동으로 저장됩니다.
+
+■ 더 알아보기
+
+- 사용 가이드: https://morison.tistory.com (AHP 분석 카테고리)
+- 문의: https://www.ahpmaster.com 문의 탭 또는 카카오톡 채널 'AHPkr'
+"""
+    if marketing_agree:
+        body += """
+■ 유료 플랜 안내
+
+더 많은 표본 분석과 고급 기능(T-Test/ANOVA, 퍼지 AHP 등)이 필요하시면
+앱 내 '요금제' 탭에서 플랜을 확인해 보세요.
+(Basic 30만원 / Standard 50만원 / Pro 95만원, 각 2개월)
+
+앞으로 유용한 AHP 활용 팁을 메일로 전해드리겠습니다.
+"""
+    body += """
+감사합니다.
+
+AHP 마스터 드림
+https://www.ahpmaster.com
+"""
+    msg = MIMEText(body, 'plain', 'utf-8')
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"send_welcome_email Error: {e}")
+        return False
+
 # 아라비아 숫자를 한국어 금액 명칭으로 변환 (예: 500000 -> 일금오십만원정)
 def num_to_kor(num):
     units = ["", "십", "백", "천"]
@@ -2410,7 +2468,7 @@ def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9
     except Exception as e:
         st.error(f"Google Sheets 로깅 오류: {e}")
 
-def add_user(user_id, pw, role, agree_info="Y", customer_type="standard"):
+def add_user(user_id, pw, role, agree_info="Y", customer_type="standard", marketing_agree=False):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     # [수정] 대한민국 시간 기준 가입일 설정 (날짜만)
@@ -2418,14 +2476,27 @@ def add_user(user_id, pw, role, agree_info="Y", customer_type="standard"):
     expiry_date = "9999-12-31"
     hashed_pw = hash_password(pw)
     plan_type = 'yeta_free' if customer_type == 'yeta' else 'free'
+    marketing_val = 'Y' if marketing_agree else 'N'
     try:
+        # 마케팅 수신 동의 컬럼이 없으면 추가 (기존 DB 호환)
+        try:
+            c.execute("ALTER TABLE users ADD COLUMN marketing_agree TEXT DEFAULT 'N'")
+            conn.commit()
+        except Exception:
+            pass
         # [수정] 구글 시트 순서에 맞춰 DB 저장 (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type)
-        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, "", plan_type, customer_type))
+        c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type, customer_type, marketing_agree) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                  (user_id, role, signup_date, hashed_pw, expiry_date, agree_info, 0, "", plan_type, customer_type, marketing_val))
         conn.commit()
         # 12개 컬럼 호출에 맞춰 기본 빈값 및 고객 종류 전달
         log_to_sheets(user_id, role, signup_date, hashed_pw, agree_info, expiry_date, 0, "", "", "", "", customer_type)
         success = True
+        # 신규 가입 환영 메일 자동 발송 (실패해도 가입은 유지)
+        # 마케팅 섹션(요금제 안내 등)은 수신 동의한 가입자에게만 포함
+        try:
+            send_welcome_email(user_id, marketing_agree=marketing_agree)
+        except Exception:
+            pass
     except sqlite3.IntegrityError:
         success = False
     finally:
@@ -7783,7 +7854,7 @@ with st.sidebar:
                     else:
                         restore_from_deleted_sheet(s_id.strip())
                         # 가입 시 무조건 'temp' 권한으로 배정
-                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type, marketing_agree=agreements.get("agree_marketing", False)):
                             st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
                             import time
                             time.sleep(2)

@@ -94,6 +94,41 @@ This AHP Master service collects and uses the following personal information:
 Do you agree to the above terms?
 """
 
+# 마케팅(광고성 정보) 수신 동의 안내 — 선택 사항
+MARKETING_AGREEMENT = """
+=== 광고성 정보 수신 동의서 (선택) ===
+
+AHP 마스터는 유용한 서비스 소식·활용 팁·요금제 안내 등 광고성 정보를
+이메일로 보내드릴 수 있습니다.
+
+【 수신하는 정보 】
+- 서비스 업데이트 소식 및 활용 팁
+- 요금제·이벤트 안내
+
+【 전송 방법 】 이메일
+
+【 철회 방법 】 언제든 문의 창구를 통해 수신 거부가 가능합니다.
+
+※ 선택 사항이므로 동의하지 않아도 회원가입 및 서비스 이용에 제한이 없습니다.
+"""
+
+MARKETING_AGREEMENT_EN = """
+=== Marketing Information Consent (Optional) ===
+
+AHP Master may send you marketing information by email,
+including service news, usage tips, and plan/event announcements.
+
+【 Information sent 】
+- Service updates and usage tips
+- Plan and event announcements
+
+【 Delivery method 】 Email
+
+【 Opt-out 】 You can withdraw consent at any time via our contact channel.
+
+※ This is optional. You can register and use the service without agreeing.
+"""
+
 def show_agreement_ui():
     """
     회원가입 시 개인정보 수집 및 이용 동의서 UI 표시
@@ -163,6 +198,22 @@ def show_agreement_ui():
             "✓ I agree to the collection and use of personal information",
             key="agree_personal_info"
         )
+
+        st.markdown(
+            """
+            <div style='margin-top: 5px; margin-bottom: 1px;'>
+                <span style='font-size: 0.95rem; font-weight: bold; color: #0f172a;'> Marketing Consent (Optional)</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        with st.expander("View Marketing Consent", expanded=False):
+            st.text(MARKETING_AGREEMENT_EN)
+
+        agree_marketing = st.checkbox(
+            "✓ I agree to receive marketing information by email (optional)",
+            key="agree_marketing"
+        )
     else:
         st.markdown(
             """
@@ -190,9 +241,26 @@ def show_agreement_ui():
             "✓ 개인정보 수집·이용에 동의합니다",
             key="agree_personal_info"
         )
-        
+
+        st.markdown(
+            """
+            <div style='margin-top: 5px; margin-bottom: 1px;'>
+                <span style='font-size: 0.95rem; font-weight: bold; color: #0f172a;'> 광고성 정보 수신 동의 (선택)</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        with st.expander("수신 동의서 전문 보기", expanded=False):
+            st.text(MARKETING_AGREEMENT)
+
+        agree_marketing = st.checkbox(
+            "✓ 이메일로 유용한 소식·활용 팁·요금제 안내를 받겠습니다 (선택)",
+            key="agree_marketing"
+        )
+
     return {
-        "agree_personal_info": agree_personal_info
+        "agree_personal_info": agree_personal_info,
+        "agree_marketing": agree_marketing
     }
 
 def fix_base64_padding(data):

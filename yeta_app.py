@@ -844,7 +844,7 @@ section[data-testid="stSidebar"] > div:first-child {
                         st.error("비밀번호는 문자+특수문자여야 합니다.")
                     else:
                         restore_from_deleted_sheet(s_id.strip())
-                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type):
+                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type, marketing_agree=agreements.get("agree_marketing", False)):
                             st.success("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.")
                             time.sleep(2)
                             st.rerun()
