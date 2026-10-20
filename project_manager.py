@@ -128,7 +128,7 @@ def _create_new_project(title, admin_id, sheet_url):
                 admin_email=admin_id,
                 ahp_model={"name": title, "factors": [], "sub_factors": {}},
                 scale_type="9점",
-                demographics=[],
+                demographics={},
                 definition_map={},
                 cr_limit=0.1,
                 cr_guide_method="auto",

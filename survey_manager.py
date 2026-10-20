@@ -110,6 +110,9 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
     사용자가 등록한 본인 구글 시트(기존 스프레드시트 ID)를 기반으로 설문지를 연동합니다.
     등록된 시트가 없으면 배포를 진행하지 않고 예외를 발생시킵니다.
     """
+    if not isinstance(demographics, dict): demographics = {}
+    if not isinstance(rewards_info, dict): rewards_info = {}
+    if not isinstance(definition_map, dict): definition_map = {}
     client = get_survey_gspread_client()
     if not client:
         raise Exception("Google Sheets API 인증 실패. secrets 설정을 확인해 주세요.")
