@@ -8484,6 +8484,31 @@ with contextlib.nullcontext():
     
         st.subheader(_(" 가입자 현황 및 관리", " Registered Users & Admin Control"))
         
+        # [2026-10-20] 관리자 전용: 구글 시트 편집 권한 부여 유틸리티
+        with st.expander(_("🔑 구글 시트 편집 권한 부여", "🔑 Grant Google Sheet Edit Permission"), expanded=False):
+            st.caption(_("서비스 계정(AHPMASTER) 권한으로 특정 구글 시트에 편집 권한을 부여합니다. 설문 시트의 중복 응답을 직접 정리할 때 사용합니다.",
+                         "Grants edit permission on a Google Sheet via the service account (AHPMASTER). Used when cleaning up duplicate survey responses directly."))
+            grant_sheet_id = st.text_input(_("스프레드시트 ID 또는 URL", "Spreadsheet ID or URL"), key="grant_sheet_id_input")
+            grant_email = st.text_input(_("편집 권한을 받을 이메일", "Email to receive edit permission"), value="jeon080423@gmail.com", key="grant_email_input")
+            if st.button(_("📝 편집 권한 부여 실행", "📝 Grant Edit Permission"), key="btn_grant_edit_perm"):
+                if not grant_sheet_id.strip() or "@" not in grant_email:
+                    st.error(_("시트 ID와 올바른 이메일을 입력해 주세요.", "Please enter a sheet ID and a valid email."))
+                else:
+                    _sid = grant_sheet_id.strip()
+                    # URL 형태면 ID만 추출
+                    import re as _re
+                    _m = _re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", _sid)
+                    if _m:
+                        _sid = _m.group(1)
+                    with st.spinner(_("편집 권한 부여 중...", "Granting edit permission...")):
+                        try:
+                            _gclient = get_gspread_client()
+                            _spread = _gclient.open_by_key(_sid)
+                            _spread.share(grant_email.strip(), perm_type='user', role='writer', notify=False)
+                            st.success(_(f"✅ {grant_email}에 편집 권한을 부여했습니다.", f"✅ Edit permission granted to {grant_email}."))
+                        except Exception as _ge:
+                            st.error(_(f"권한 부여 실패: {_ge}", f"Grant failed: {_ge}"))
+
         col_sync1, col_sync2 = st.columns([2, 8])
         with col_sync1:
             if st.button("🔄 구글 시트와 동기화"):
