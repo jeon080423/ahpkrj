@@ -33,11 +33,8 @@ def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwar
 def get_survey_gspread_client(user_id=None):
     from google.oauth2.service_account import Credentials
     import gspread
-    """gspread 클라이언트를 반환합니다. 사용자 OAuth 우선, 없을 시 서비스 계정 사용."""
-    if user_id:
-        user_client = get_user_gspread_client(user_id)
-        if user_client:
-            return user_client
+    """gspread 클라이언트를 반환합니다. 서비스 계정 전용입니다.
+    (user_id 인자는 기존 호출부 호환을 위해 남겨 두며 사용하지 않습니다.)"""
             
     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
     
@@ -110,10 +107,10 @@ def get_survey_gspread_client(user_id=None):
 
 def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_method, rewards_info, description="", existing_sheet_id=None, user_id=None, show_hierarchy=True):
     """
-    고유한 Google Sheet를 동적으로 신규 생성하고 관리자 계정에 쓰기 권한을 부여하거나,
-    사용자가 전달한 기존 구글 시트 ID를 기반으로 설문지를 연동합니다.
+    사용자가 등록한 본인 구글 시트(기존 스프레드시트 ID)를 기반으로 설문지를 연동합니다.
+    등록된 시트가 없으면 배포를 진행하지 않고 예외를 발생시킵니다.
     """
-    client = get_survey_gspread_client(user_id=user_id)
+    client = get_survey_gspread_client()
     if not client:
         raise Exception("Google Sheets API 인증 실패. secrets 설정을 확인해 주세요.")
     
@@ -178,83 +175,8 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         demo_sheet, is_demo_new = get_or_create_ws("Demographic_Data", rows="1000", cols="20")
             
     else:
-        # [추가] 서비스 계정의 구글 드라이브 용량 초과 방지를 위한 사전 휴지통 비우기 및 오래된 파일 정리
-        try:
-            from googleapiclient.discovery import build
-            drive_service = build('drive', 'v3', credentials=client.auth)
-            drive_service.files().emptyTrash().execute()
-        except Exception as e_trash:
-            pass
-     
-        # 1. 스프레드시트 신규 생성 (파일명: [사용자ID_배포날짜] 설문제목)
-        import datetime
-        now_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        user_tag = user_id or admin_email or "User"
-        sheet_title = f"[{user_tag}_{now_date}] {title}" if title else f"[{user_tag}_{now_date}] AHP 설문"
-        try:
-            spreadsheet = run_gspread_with_retry(client.create, sheet_title)
-        except Exception as e:
-            # [2026-10-20 수정] 진단: 실제로 어떤 클라이언트로 생성을 시도했는지 표시
-            # (기존에는 user_id 존재 여부만으로 '사용자 OAuth'라고 표시해 실제 원인과 달랐음)
-            _used_user_oauth = False
-            if user_id:
-                try:
-                    _used_user_oauth = get_user_gspread_client(user_id) is not None
-                except Exception:
-                    _used_user_oauth = False
-            _diag = f"사용자 OAuth({user_id})" if _used_user_oauth else "서비스 계정"
-            _hint = ""
-            if "storage quota" in str(e).lower() or "storagequotaexceeded" in str(e).lower():
-                if _used_user_oauth:
-                    _hint = " 연동된 구글 계정의 드라이브 용량이 가득 찼습니다. 해당 계정의 드라이브를 정리하거나, 사이드바의 '구글 드라이브 연동'에서 용량이 있는 계정으로 다시 연동해 주세요."
-                else:
-                    _hint = " 구글 드라이브 연동이 되어 있지 않거나 연동 토큰이 만료되어 서비스 계정으로 생성을 시도했습니다. 사이드바의 '구글 드라이브 연동'에서 본인 구글 계정을 연동한 뒤 다시 시도해 주세요."
-            raise Exception(f"[{_diag}로 시트 생성 시도] {e}{_hint}")
-        
-        # 2. 담당자 이메일에 편집자 권한 부여 및 링크 전체 공개 편집자 설정
-        if admin_email and "@" in admin_email:
-            try:
-                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
-            except Exception as e:
-                st.warning(f"설문조사 담당자 이메일 공유 설정 중 문제 발생: {e}")
-        try:
-            spreadsheet.share(None, perm_type='anyone', role='reader')
-        except Exception:
-            pass
-     
-        # 3. Sheet 1: Survey_Metadata 생성 및 설정
-        meta_sheet = spreadsheet.sheet1
-        run_gspread_with_retry(meta_sheet.update_title, "Survey_Metadata")
-        
-        # 4. Sheet 2: Raw_Data 생성
-        raw_sheet = run_gspread_with_retry(spreadsheet.add_worksheet, title="Raw_Data", rows="1000", cols="50")
-        is_raw_new = True
+        raise Exception("배포하려면 본인 구글 스프레드시트를 먼저 등록해 주세요. 본인 구글 드라이브에서 빈 스프레드시트를 만들고 서비스 계정 이메일을 편집자로 공유한 뒤, 그 스프레드시트 URL을 입력해 주세요.")
 
-        # 5. Sheet 3: Demographic_Data 생성
-        demo_sheet = run_gspread_with_retry(spreadsheet.add_worksheet, title="Demographic_Data", rows="1000", cols="20")
-        is_demo_new = True
-
-        ws_map = {
-            "Survey_Metadata": meta_sheet,
-            "Raw_Data": raw_sheet,
-            "Demographic_Data": demo_sheet
-        }
-
-        def get_or_create_ws(title, rows="1000", cols="50"):
-            if title in ws_map:
-                return ws_map[title], False
-            try:
-                new_ws = run_gspread_with_retry(spreadsheet.add_worksheet, title=title, rows=rows, cols=cols)
-                ws_map[title] = new_ws
-                return new_ws, True
-            except Exception:
-                try:
-                    fallback_ws = run_gspread_with_retry(spreadsheet.worksheet, title)
-                    ws_map[title] = fallback_ws
-                    return fallback_ws, False
-                except Exception:
-                    raise
-        
     metadata = [
         ["Field", "Value"],
         ["Title", title],
@@ -1723,110 +1645,6 @@ def calculate_matrix_cr(factors, answers):
     except Exception:
         pass
     return cr
-
-def get_user_gspread_client(user_id):
-    """
-    사용자의 Google OAuth 2.0 자격증명이 데이터베이스에 저장되어 있으면 이를 로드하여 gspread 클라이언트를 반환합니다.
-    만약 토큰이 만료된 경우 자동으로 갱신(Refresh)하고 데이터베이스를 업데이트합니다.
-    """
-    if not user_id:
-        return None
-    import sqlite3
-    import json
-    from google.oauth2.credentials import Credentials as OAuthCredentials
-    from google.auth.transport.requests import Request
-    
-    try:
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        c.execute("SELECT token, refresh_token, token_uri, client_id, client_secret, scopes, expiry FROM user_google_credentials WHERE user_id = ?", (user_id,))
-        row = c.fetchone()
-        conn.close()
-        
-        if row:
-            token, refresh_token, token_uri, client_id, client_secret, scopes_str, expiry = row
-            scopes = json.loads(scopes_str) if scopes_str else None
-
-            # [2026-10-20 수정] DB에 문자열로 저장된 expiry를 datetime으로 변환.
-            # 문자열인 채로 Credentials에 넣으면 creds.expired 접근 시 TypeError가 발생해
-            # 사용자 OAuth가 항상 실패하고 서비스 계정으로 폴백되던 버그가 있었음.
-            from datetime import datetime as _dt_cls, timezone as _tz_cls
-            expiry_dt = None
-            if expiry:
-                try:
-                    expiry_dt = _dt_cls.fromisoformat(str(expiry).replace("Z", "+00:00"))
-                    if expiry_dt.tzinfo is not None:
-                        expiry_dt = expiry_dt.astimezone(_tz_cls.utc).replace(tzinfo=None)
-                except Exception:
-                    expiry_dt = None
-            if expiry_dt is None and refresh_token:
-                # 파싱 실패 시 과거 시각으로 두어 강제 갱신 유도
-                expiry_dt = _dt_cls(2000, 1, 1)
-
-            # Credentials 객체 빌드
-            creds = OAuthCredentials(
-                token=token,
-                refresh_token=refresh_token,
-                token_uri=token_uri,
-                client_id=client_id,
-                client_secret=client_secret,
-                scopes=scopes,
-                expiry=expiry_dt
-            )
-
-            # 만료 시 자동 갱신
-            if creds.expired and creds.refresh_token:
-                try:
-                    creds.refresh(Request())
-                    # 갱신된 정보 저장
-                    conn = sqlite3.connect('users.db')
-                    c = conn.cursor()
-                    c.execute("UPDATE user_google_credentials SET token = ?, expiry = ? WHERE user_id = ?",
-                              (creds.token, creds.expiry.isoformat() if hasattr(creds.expiry, 'isoformat') else str(creds.expiry), user_id))
-                    conn.commit()
-                    conn.close()
-                except Exception as re:
-                    # 갱신 실패(토큰 폐기 등) 시 깨진 클라이언트를 반환하지 않고 폴백
-                    st.warning(f"사용자 구글 토큰 자동 갱신 실패: {re}")
-                    return None
-
-            return gspread.authorize(creds)
-    except Exception as e:
-        st.warning(f"사용자 구글 OAuth 계정 정보를 불러오는 데 실패했습니다: {e}")
-    return None
-
-def get_google_oauth_flow(redirect_uri):
-    """구글 OAuth 2.0 Flow 객체를 반환합니다."""
-    # [2026-10-20] Drive 전용 시크릿이 없으면 로그인 전용 시크릿으로 폴백
-    # (기존에는 Drive 시크릿이 없으면 None을 반환해 연동 자체가 불가능했음)
-    client_id = st.secrets.get("GOOGLE_CLIENT_ID") or st.secrets.get("google_oauth", {}).get("client_id") or st.secrets.get("GOOGLE_LOGIN_CLIENT_ID")
-    client_secret = st.secrets.get("GOOGLE_CLIENT_SECRET") or st.secrets.get("google_oauth", {}).get("client_secret") or st.secrets.get("GOOGLE_LOGIN_CLIENT_SECRET")
-    
-    if not client_id or not client_secret:
-        return None
-        
-    client_config = {
-        "web": {
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
-        }
-    }
-    
-    from google_auth_oauthlib.flow import Flow
-    scopes = [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive'
-    ]
-    flow = Flow.from_client_config(
-        client_config,
-        scopes=scopes,
-        redirect_uri=redirect_uri
-    )
-    return flow
-
 
 def get_google_login_flow(redirect_uri):
     """구글 로그인(인증)용 OAuth 2.0 Flow 객체를 반환합니다. Drive 연동용과 분리."""

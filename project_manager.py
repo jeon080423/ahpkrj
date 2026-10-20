@@ -3,7 +3,7 @@ project_manager.py — 프로젝트(설문) 생성·목록·전환·삭제 관�
 
 기존 "새 설문 작성하기"는 연동된 시트를 덮어쓰는 방식이라
 기존 프로젝트가 삭제되는 문제가 있었다.
-이 모듈은 새 Google Sheet를 별도로 생성하여
+이 모듈은 사용자가 등록한 본인 Google Sheet를 연동하여
 기존 프로젝트를 유지한 채 추가 프로젝트를 만드는 흐름을 제공한다.
 
 standard_app.py에서 가볍게 import하여 사용한다.
@@ -87,12 +87,17 @@ def render_project_manager():
         hint("기존 프로젝트는 그대로 유지됩니다.")
         new_title = st.text_input("프로젝트 이름", key="pm_new_title",
                                   placeholder="예: 2026년 고객만족도 조사")
+        new_sheet_url = st.text_input("연동할 구글 스프레드시트 URL", key="pm_new_sheet_url",
+                                      placeholder="https://docs.google.com/spreadsheets/d/...")
+        hint("본인 구글 드라이브에서 빈 스프레드시트를 만들고, 서비스 계정 이메일을 편집자로 공유한 뒤 그 URL을 입력하세요.")
         if st.button("새 프로젝트 생성", key="pm_create",
                      type="primary", use_container_width=True):
             if not new_title or not new_title.strip():
                 st.error("프로젝트 이름을 입력하세요.")
+            elif not new_sheet_url or not new_sheet_url.strip():
+                st.error("연동할 구글 스프레드시트 URL을 입력해 주세요. 본인 구글 시트를 먼저 등록해야 프로젝트를 만들 수 있습니다.")
             else:
-                _create_new_project(new_title.strip(), user_id)
+                _create_new_project(new_title.strip(), user_id, new_sheet_url.strip())
 
     st.divider()
 
@@ -105,14 +110,19 @@ def render_project_manager():
             st.error(f"드라이브 정리 로드 실패: {e}")
 
 
-def _create_new_project(title, admin_id):
-    """기존 프로젝트를 건드리지 않고 새 Google Sheet로 프로젝트를 생성한다."""
+def _create_new_project(title, admin_id, sheet_url):
+    """기존 프로젝트를 건드리지 않고, 사용자가 등록한 본인 Google Sheet에 프로젝트를 생성한다."""
     try:
         from survey_manager import (
             create_survey_sheet, save_admin_survey_to_gsheet,
         )
         with st.spinner("새 프로젝트를 생성하는 중..."):
-            # 최소 기본값으로 빈 설문 시트 생성 (상세 설정은 설문 작성 탭에서)
+            # 사용자가 등록한 본인 시트에 최소 기본값으로 설문 구조 생성 (상세 설정은 설문 작성 탭에서)
+            sheet_id_input = (sheet_url or "").strip()
+            if "docs.google.com/spreadsheets" in sheet_id_input:
+                _parts = sheet_id_input.split("/d/")
+                if len(_parts) > 1:
+                    sheet_id_input = _parts[1].split("/")[0]
             result = create_survey_sheet(
                 title=title,
                 admin_email=admin_id,
@@ -124,7 +134,7 @@ def _create_new_project(title, admin_id):
                 cr_guide_method="auto",
                 rewards_info={},
                 description="",
-                existing_sheet_id=None,  # 새 시트 생성
+                existing_sheet_id=sheet_id_input,  # 사용자가 등록한 본인 시트 연동
                 user_id=admin_id,
             )
             new_sheet_id = result.get("spreadsheet_id") if isinstance(result, dict) else None

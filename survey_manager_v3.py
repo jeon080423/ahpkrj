@@ -71,53 +71,8 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
         demo_sheet, is_demo_new = get_or_create_ws("Demographic_Data", rows="1000", cols="20")
             
     else:
-        try:
-            from googleapiclient.discovery import build
-            drive_service = build('drive', 'v3', credentials=client.auth)
-            drive_service.files().emptyTrash().execute()
-        except Exception as e_trash:
-            pass
-     
-        import datetime
-        now_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        user_tag = user_id or admin_email or "User"
-        sheet_title = f"[{user_tag}_{now_date}] {title}" if title else f"[{user_tag}_{now_date}] AHP 설문_V3"
-        spreadsheet = run_gspread_with_retry(client.create, sheet_title)
-        
-        if admin_email and "@" in admin_email:
-            try:
-                spreadsheet.share(admin_email, perm_type='user', role='writer', notify=True)
-            except Exception as e:
-                st.warning(f"설문조사 담당자 이메일 공유 중 문제 발생: {e}")
-     
-        meta_sheet = spreadsheet.sheet1
-        run_gspread_with_retry(meta_sheet.update_title, "Survey_Metadata")
-        raw_sheet = run_gspread_with_retry(spreadsheet.add_worksheet, title="Raw_Data", rows="1000", cols="50")
-        demo_sheet = run_gspread_with_retry(spreadsheet.add_worksheet, title="Demographic_Data", rows="1000", cols="20")
-        is_raw_new = True
-        is_demo_new = True
+        raise Exception("배포하려면 본인 구글 스프레드시트를 먼저 등록해 주세요. 본인 구글 드라이브에서 빈 스프레드시트를 만들고 서비스 계정 이메일을 편집자로 공유한 뒤, 그 스프레드시트 URL을 입력해 주세요.")
 
-        ws_map = {
-            "Survey_Metadata": meta_sheet,
-            "Raw_Data": raw_sheet,
-            "Demographic_Data": demo_sheet
-        }
-
-        def get_or_create_ws(title, rows="1000", cols="50"):
-            if title in ws_map:
-                return ws_map[title], False
-            try:
-                new_ws = run_gspread_with_retry(spreadsheet.add_worksheet, title=title, rows=rows, cols=cols)
-                ws_map[title] = new_ws
-                return new_ws, True
-            except Exception:
-                try:
-                    fallback_ws = run_gspread_with_retry(spreadsheet.worksheet, title)
-                    ws_map[title] = fallback_ws
-                    return fallback_ws, False
-                except Exception:
-                    raise
-        
     metadata = [
         ["Field", "Value"],
         ["Title", title],
