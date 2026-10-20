@@ -4920,7 +4920,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         tq_opts = [_("전문가", "Expert"), _("일반", "General"), _("공무원", "Public Official"), _("기타", "Other")]
                 tq_opts = [translate_factor_if_default(opt) for opt in tq_opts]
                 has_etc_opt = any("기타" in str(opt) or "other" in str(opt).lower() for opt in tq_opts)
-                ans = st.radio(f"{sq_idx}) {clean_q}", tq_opts, index=0, key=f"survey_resp_type_{i}", horizontal=True)
+                ans = st.radio(f"{sq_idx}) {clean_q}", tq_opts, index=None, key=f"survey_resp_type_{i}", horizontal=True)
                 resp_data["types"].append(ans)
                 if has_etc_opt:
                     is_etc_chosen = "기타" in str(ans) or "other" in str(ans).lower()
@@ -4950,7 +4950,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             type_opts = [translate_factor_if_default(opt) for opt in type_opts]
             
         has_etc_opt = any("기타" in str(opt) or "other" in str(opt).lower() for opt in type_opts)
-        ans = st.radio(f"{sq_idx}) {type_q}", type_opts, index=0, key="survey_resp_type", horizontal=True)
+        ans = st.radio(f"{sq_idx}) {type_q}", type_opts, index=None, key="survey_resp_type", horizontal=True)
         resp_data["types"].append(ans)
         if has_etc_opt:
             is_etc_chosen = "기타" in str(ans) or "other" in str(ans).lower()
@@ -4979,7 +4979,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         age_type = demographics.get("age_type", "개방형 (숫자 직접 입력)")
         if age_type == "10세 단위 선택형":
             age_options = [_("20대 미만", "Under 20s"), _("20대 (20~29세)", "20s (20-29)"), _("30대 (30~39세)", "30s (30-39)"), _("40대 (40~49세)", "40s (40-49)"), _("50대 (50~59세)", "50s (50-59)"), _("60대 이상", "60s or older")]
-            resp_data["age"] = st.radio(age_label, age_options, index=0, key="survey_resp_age", horizontal=True)
+            resp_data["age"] = st.radio(age_label, age_options, index=None, key="survey_resp_age", horizontal=True)
         else:
             col1, col2 = st.columns([1, 3])
             with col1:
@@ -4987,7 +4987,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
             
     if demographics.get("gender"):
         _gender_lbl = _("성별", "Gender")
-        resp_data["gender"] = st.radio(f"{sq_idx}) " + _gender_lbl, [_("남자", "Male"), _("여자", "Female")], key="survey_resp_gender", horizontal=True)
+        resp_data["gender"] = st.radio(f"{sq_idx}) " + _gender_lbl, [_("남자", "Male"), _("여자", "Female")], index=None, key="survey_resp_gender", horizontal=True)
         sq_idx += 1
     
     # 경력년수: 개방형 vs 5년 단위 선택형
@@ -4998,7 +4998,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         exp_type = demographics.get("experience_type", "개방형 (숫자 직접 입력)")
         if exp_type == "5년 단위 선택형":
             exp_options = [_("5년 미만", "Less than 5 years"), _("5년 이상 ~ 10년 미만", "5 to 10 years"), _("10년 이상 ~ 15년 미만", "10 to 15 years"), _("15년 이상 ~ 20년 미만", "15 to 20 years"), _("20년 이상", "20 years or more")]
-            resp_data["experience"] = st.radio(exp_label, exp_options, index=0, key="survey_resp_experience", horizontal=True)
+            resp_data["experience"] = st.radio(exp_label, exp_options, index=None, key="survey_resp_experience", horizontal=True)
         else:
             col1, col2 = st.columns([1, 3])
             with col1:
@@ -5016,7 +5016,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         email_choice = st.radio(
             email_label,
             email_options,
-            index=0,
+            index=None,
             key="survey_resp_email_choice",
             horizontal=True
         )
@@ -5948,7 +5948,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 reward_contact = st.text_input(_("답례품 지급용 연락처(휴대폰 번호 또는 이메일) *", "Contact for Reward (Mobile number or Email) *"), key="survey_reward_contact")
                 resp_data["reward_contact"] = reward_contact
                 
-            agree_check = st.radio(radio_label, [_("동의", "Agree"), _("비동의", "Disagree")], index=1, key="survey_agree_check")
+            agree_check = st.radio(radio_label, [_("동의", "Agree"), _("비동의", "Disagree")], index=None, key="survey_agree_check")
         
         # 마법사 상태 확인
         wizard_state_key = f"cr_wizard_state_{survey_id_param}"
