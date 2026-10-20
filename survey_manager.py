@@ -1797,8 +1797,10 @@ def get_user_gspread_client(user_id):
 
 def get_google_oauth_flow(redirect_uri):
     """구글 OAuth 2.0 Flow 객체를 반환합니다."""
-    client_id = st.secrets.get("GOOGLE_CLIENT_ID") or st.secrets.get("google_oauth", {}).get("client_id")
-    client_secret = st.secrets.get("GOOGLE_CLIENT_SECRET") or st.secrets.get("google_oauth", {}).get("client_secret")
+    # [2026-10-20] Drive 전용 시크릿이 없으면 로그인 전용 시크릿으로 폴백
+    # (기존에는 Drive 시크릿이 없으면 None을 반환해 연동 자체가 불가능했음)
+    client_id = st.secrets.get("GOOGLE_CLIENT_ID") or st.secrets.get("google_oauth", {}).get("client_id") or st.secrets.get("GOOGLE_LOGIN_CLIENT_ID")
+    client_secret = st.secrets.get("GOOGLE_CLIENT_SECRET") or st.secrets.get("google_oauth", {}).get("client_secret") or st.secrets.get("GOOGLE_LOGIN_CLIENT_SECRET")
     
     if not client_id or not client_secret:
         return None

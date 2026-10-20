@@ -8286,22 +8286,25 @@ with st.sidebar:
                         include_granted_scopes='false',
                         prompt='consent'
                     )
+                    # [2026-10-20] iframe 컴포넌트 대신 본문 링크(target=_top)로 렌더링
+                    # (iframe 방식은 자동화·일부 브라우저에서 보이지 않거나 이동이 막힘)
                     import html as _html_drv
-                    import streamlit.components.v1 as _comp_drv
                     _drv_btn_text = _("구글 드라이브 연동하기", "Link Google Drive") if not _has_link else _("구글 드라이브 다시 연동하기", "Re-link Google Drive")
-                    _drv_btn_html = (
-                        f'<a href="{_html_drv.escape(_drv_url, quote=True)}" target="_self" '
-                        'style="display:flex;align-items:center;justify-content:center;gap:10px;'
+                    st.markdown(
+                        f'<a href="{_html_drv.escape(_drv_url, quote=True)}" target="_top" '
+                        'style="display:flex;align-items:center;justify-content:center;'
                         'width:100%;height:40px;background:#FFFFFF;'
                         'border:1px solid #747775;border-radius:4px;'
                         'text-decoration:none;cursor:pointer;box-sizing:border-box;'
                         'font-family:Roboto,Arial,sans-serif;font-size:14px;font-weight:500;'
-                        'color:#1F1F1F;padding:0 12px;">'
-                        f'<span>{_html_drv.escape(_drv_btn_text)}</span></a>'
+                        'color:#1F1F1F;">'
+                        f'{_html_drv.escape(_drv_btn_text)}</a>',
+                        unsafe_allow_html=True
                     )
-                    _comp_drv.html(_drv_btn_html, height=48, scrolling=False)
-            except Exception:
-                pass
+                else:
+                    st.caption(_("연동 설정(서버 Secrets의 구글 OAuth 정보)이 없어 버튼을 만들 수 없습니다.", "Link is unavailable: Google OAuth is not configured on the server."))
+            except Exception as _drv_err:
+                st.caption(f"연동 버튼 생성 실패: {_drv_err}")
 
         # [위치 이동] 1. 비밀번호 변경 expander
         with st.expander(_("비밀번호 변경", "Change Password")):
