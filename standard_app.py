@@ -8905,7 +8905,7 @@ with contextlib.nullcontext():
         import re as _re
         _btn_style = "display:inline-block;background:#ff4b4b;color:#fff;padding:4px 12px;border-radius:6px;text-decoration:none;font-size:0.85rem;font-weight:600;white-space:nowrap;"
         _rows_html = ""
-        for _, _r in display_df.iterrows():
+        for _idx, _r in display_df.iterrows():
             _uid_esc = str(_r['id']).replace('"', '&quot;')
             _token = issue_login_token(str(_r['id']))
             _switch_url = f"?login_user={_uid_esc}&login_token={_token}"
