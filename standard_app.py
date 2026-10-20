@@ -3357,6 +3357,238 @@ def process_single_sheet(df, cr_threshold, max_iter, learning_rate, method='geom
     excluded_df = pd.DataFrame(excluded_list)
     return results_df, factors, excluded_count, excluded_df
 
+
+def compute_alternative_analysis(df_main, sub_dfs, sub_sub_dfs, alt_dfs, model,
+                                 cr_threshold, max_iter, learning_rate,
+                                 method='geometric', ahp_method='traditional'):
+    """[2026-10-20] 대안 평가 종합 분석.
+
+    개인별 최하위(leaf) 요인의 글로벌 가중치 × 잎별 대안 국지 가중치를 합산해
+    응답자별 대안 종합점수를 구하고, 그룹 종합점수는 개인 점수의 평균(산술/기하)으로 집계한다.
+    모든 잎의 대안 응답과 기준 가중치가 모두 있는 응답자만 포함한다.
+    반환: dict 또는 None(분석 불가 시)
+    """
+    try:
+        from survey_manager_v3 import get_leaf_criteria_v3
+    except Exception:
+        return None
+    alternatives = model.get("alternatives", []) or []
+    if len(alternatives) < 2 or not alt_dfs:
+        return None
+    leaves = get_leaf_criteria_v3(model)
+    if not leaves:
+        return None
+
+    def _run(df):
+        if df is None or len(df) == 0:
+            return None, []
+        res, facs, _exc, _edf = process_single_sheet(df, cr_threshold, max_iter, learning_rate, method, ahp_method)
+        return res, facs
+
+    def _indiv_weights(res):
+        out = {}
+        if res is None or res.empty:
+            return out
+        for _, r in res.iterrows():
+            rid = str(r.get("ID", ""))
+            out[rid] = {c[7:]: float(r[c]) for c in res.columns if c.startswith("Weight_")}
+        return out
+
+    def _group_weights(res, facs):
+        if res is None or res.empty or not facs:
+            return {}
+        wcols = [f"Weight_{f}" for f in facs]
+        if method == 'arithmetic':
+            s = res[wcols].mean(axis=0)
+        else:
+            s = pd.Series(gmean(res[wcols].values, axis=0), index=wcols)
+        tot = float(s.sum())
+        if tot <= 0:
+            return {}
+        return {f: float(s[f"Weight_{f}"]) / tot for f in facs}
+
+    # 1) 기준 가중치 (개인별·그룹)
+    main_res, main_facs = _run(df_main)
+    if main_res is None or main_res.empty:
+        return None
+    main_indiv = _indiv_weights(main_res)
+    main_group = _group_weights(main_res, main_facs)
+
+    sub_indiv, sub_group = {}, {}
+    for parent, sdf in (sub_dfs or {}).items():
+        res, facs = _run(sdf)
+        if res is not None and not res.empty:
+            sub_indiv[parent] = _indiv_weights(res)
+            sub_group[parent] = _group_weights(res, facs)
+    ss_indiv, ss_group = {}, {}
+    for parent, sdf in (sub_sub_dfs or {}).items():
+        res, facs = _run(sdf)
+        if res is not None and not res.empty:
+            ss_indiv[parent] = _indiv_weights(res)
+            ss_group[parent] = _group_weights(res, facs)
+
+    subs_map = model.get("subs", {}) or {}
+    ss_map = model.get("sub_subs", {}) or {}
+
+    def _leaf_chain(leaf):
+        for mc in model.get("main", []):
+            subs = subs_map.get(mc, []) or []
+            if not subs:
+                if leaf == mc:
+                    return (mc, None, False)
+                continue
+            for sc in subs:
+                ss = ss_map.get(sc, []) or []
+                if len(ss) >= 2:
+                    if leaf in ss:
+                        return (mc, sc, True)
+                elif leaf == sc:
+                    return (mc, sc, False)
+        return None
+
+    # 2) 잎 글로벌 가중치 (개인별·그룹)
+    indiv_leaf_w = {}
+    for rid, mw in main_indiv.items():
+        indiv_leaf_w[rid] = {}
+        for leaf in leaves:
+            chain = _leaf_chain(leaf)
+            if not chain:
+                continue
+            mc, sc, is_ss = chain
+            w = mw.get(mc, 0.0)
+            if sc is not None:
+                w *= sub_indiv.get(mc, {}).get(rid, {}).get(sc, 0.0)
+                if is_ss:
+                    w *= ss_indiv.get(sc, {}).get(rid, {}).get(leaf, 0.0)
+            indiv_leaf_w[rid][leaf] = w
+    group_leaf_w = {}
+    for leaf in leaves:
+        chain = _leaf_chain(leaf)
+        if not chain:
+            continue
+        mc, sc, is_ss = chain
+        w = main_group.get(mc, 0.0)
+        if sc is not None:
+            w *= sub_group.get(mc, {}).get(sc, 0.0)
+            if is_ss:
+                w *= ss_group.get(sc, {}).get(leaf, 0.0)
+        group_leaf_w[leaf] = w
+
+    # 3) 대안 가중치 (개인별·잎별, 그룹·잎별)
+    alt_indiv, alt_group = {}, {}
+    for leaf in leaves:
+        adf = alt_dfs.get(leaf)
+        if adf is None:
+            return None
+        res, facs = _run(adf)
+        if res is None or res.empty:
+            return None
+        alt_indiv[leaf] = _indiv_weights(res)
+        alt_group[leaf] = _group_weights(res, facs)
+
+    # 4) 개인별 종합점수 (모든 잎 완비 응답자만)
+    type_map = {}
+    if main_res is not None and "Type" in main_res.columns:
+        for _, r in main_res.iterrows():
+            type_map[str(r.get("ID", ""))] = r.get("Type", "")
+    indiv_rows = []
+    for rid, leaf_ws in indiv_leaf_w.items():
+        if any(leaf not in alt_indiv or rid not in alt_indiv[leaf] for leaf in leaves):
+            continue
+        scores = {a: 0.0 for a in alternatives}
+        for leaf in leaves:
+            gw = leaf_ws.get(leaf, 0.0)
+            for a in alternatives:
+                scores[a] += gw * alt_indiv[leaf][rid].get(a, 0.0)
+        tot = sum(scores.values())
+        if tot > 0:
+            scores = {a: v / tot for a, v in scores.items()}
+        top_alt = max(scores, key=scores.get) if scores else ""
+        indiv_rows.append({"ID": rid, "Type": type_map.get(rid, ""),
+                           **{f"Score_{a}": scores[a] for a in alternatives},
+                           "1위 대안": top_alt})
+    indiv_df = pd.DataFrame(indiv_rows)
+    if indiv_df.empty:
+        return None
+
+    # 5) 그룹 종합점수 (개인 점수 평균 후 정규화)
+    score_cols = [f"Score_{a}" for a in alternatives]
+    if method == 'arithmetic':
+        grp_s = indiv_df[score_cols].mean(axis=0)
+    else:
+        grp_s = pd.Series(gmean(indiv_df[score_cols].values, axis=0), index=score_cols)
+    tot = float(grp_s.sum())
+    group_scores = {a: (float(grp_s[f"Score_{a}"]) / tot if tot > 0 else 0.0) for a in alternatives}
+
+    return {
+        "alternatives": alternatives,
+        "leaves": leaves,
+        "group_scores": group_scores,
+        "indiv_df": indiv_df,
+        "leaf_alt_group": alt_group,
+        "leaf_group_global": group_leaf_w,
+        "n_used": len(indiv_df),
+    }
+
+
+def build_alternative_excel(alt_result):
+    """[2026-10-20] 대안 평가 전용 엑셀 생성 (종합순위/요인별 가중치/기여도/개인별 종합점수)."""
+    import io as _io
+    buf = _io.BytesIO()
+    alts = alt_result["alternatives"]
+    leaves = alt_result["leaves"]
+    g_scores = alt_result["group_scores"]
+
+    rank_rows = sorted(g_scores.items(), key=lambda kv: kv[1], reverse=True)
+    rank_df = pd.DataFrame([
+        {"순위": i + 1, "대안": a, "종합 가중치": round(s, 4), "비율(%)": round(s * 100, 2)}
+        for i, (a, s) in enumerate(rank_rows)
+    ])
+
+    leaf_rows = []
+    for leaf in leaves:
+        row = {"최하위 요인": leaf,
+               "글로벌 가중치": round(alt_result["leaf_group_global"].get(leaf, 0.0), 4)}
+        for a in alts:
+            row[a] = round(alt_result["leaf_alt_group"].get(leaf, {}).get(a, 0.0), 4)
+        leaf_rows.append(row)
+    leaf_df = pd.DataFrame(leaf_rows)
+
+    contrib_rows = []
+    for leaf in leaves:
+        gw = alt_result["leaf_group_global"].get(leaf, 0.0)
+        row = {"최하위 요인": leaf}
+        for a in alts:
+            row[a] = round(gw * alt_result["leaf_alt_group"].get(leaf, {}).get(a, 0.0), 4)
+        contrib_rows.append(row)
+    contrib_df = pd.DataFrame(contrib_rows)
+
+    indiv = alt_result["indiv_df"].copy()
+    indiv = indiv.rename(columns={f"Score_{a}": a for a in alts})
+    for a in alts:
+        if a in indiv.columns:
+            indiv[a] = indiv[a].round(4)
+
+    with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+        rank_df.to_excel(writer, index=False, sheet_name="(대안) 종합순위")
+        leaf_df.to_excel(writer, index=False, sheet_name="(대안) 요인별 가중치")
+        contrib_df.to_excel(writer, index=False, sheet_name="(대안) 요인별 기여도")
+        indiv.to_excel(writer, index=False, sheet_name="(대안) 개인별 종합점수")
+        from openpyxl.styles import Font, PatternFill, Alignment
+        hdr_font = Font(bold=True, color="FFFFFF")
+        hdr_fill = PatternFill("solid", fgColor="1F4E79")
+        for ws in writer.book.worksheets:
+            for cell in ws[1]:
+                cell.font = hdr_font
+                cell.fill = hdr_fill
+                cell.alignment = Alignment(horizontal="center")
+            for col_cells in ws.columns:
+                maxlen = max((len(str(c.value)) if c.value is not None else 0) for c in col_cells)
+                ws.column_dimensions[col_cells[0].column_letter].width = min(max(12, maxlen + 4), 42)
+    buf.seek(0)
+    return buf.getvalue()
+
+
 def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2, to_ahp_values=False):
     """템플릿 구조 엑셀 생성
     - to_ahp_values=True이면 쌍대비교 펀칭값을 AHP 분석값으로 변환하여 저장
@@ -9358,6 +9590,35 @@ with contextlib.nullcontext():
                                             for sub_c, ss_pairs in sub_sub_pairs_by_sub.items():
                                                 st.session_state["ahp_sub_sub_dfs"][sub_c] = raw_df[["ID", "Type"] + ss_pairs].copy()
 
+                                        # [2026-10-20] 6. 대안 평가 데이터프레임 구성 (Alt 시트가 있는 설문만)
+                                        st.session_state["ahp_alt_dfs"] = {}
+                                        st.session_state["ahp_alternatives"] = []
+                                        st.session_state["alt_analysis_result"] = None
+                                        _alt_model_ld = survey_meta.get("AHP_Model_JSON", {}) if survey_meta else {}
+                                        _alts_ld = _alt_model_ld.get("alternatives", []) or []
+                                        if len(_alts_ld) >= 2:
+                                            try:
+                                                from survey_manager_v3 import get_leaf_criteria_v3 as _glc_ld
+                                                _alt_pairs_ld = [f"{_alts_ld[i]}_{_alts_ld[j]}" for i in range(len(_alts_ld)) for j in range(i + 1, len(_alts_ld))]
+                                                for _leaf_ld in _glc_ld(_alt_model_ld):
+                                                    try:
+                                                        _alt_ws = spreadsheet.worksheet(f"Alt_{_leaf_ld}"[:31])
+                                                        _alt_vals = _alt_ws.get_all_values()
+                                                        if len(_alt_vals) > 1:
+                                                            _adf_ld = pd.DataFrame(_alt_vals[1:], columns=_alt_vals[0])
+                                                            for _pc_ld in _alt_pairs_ld:
+                                                                if _pc_ld in _adf_ld.columns:
+                                                                    _adf_ld[_pc_ld] = pd.to_numeric(_adf_ld[_pc_ld], errors='coerce')
+                                                            _adf_ld = apply_sample_limit(_adf_ld, source_label="대안 평가")
+                                                            st.session_state["ahp_alt_dfs"][_leaf_ld] = _adf_ld
+                                                    except Exception:
+                                                        pass
+                                                if st.session_state["ahp_alt_dfs"]:
+                                                    st.session_state["ahp_alternatives"] = _alts_ld
+                                                    st.session_state["ahp_alt_model"] = _alt_model_ld
+                                            except Exception:
+                                                pass
+
                                         sheet_names_list = ["Main_Criteria"] + list(st.session_state["ahp_sub_dfs"].keys())
                                         if tier_level == 3:
                                             sheet_names_list += list(st.session_state["ahp_sub_sub_dfs"].keys())
@@ -11535,6 +11796,59 @@ with contextlib.nullcontext():
             
         st.markdown("---")
     
+        # [2026-10-20] 대안 평가 분석 섹션 (Alt 시트가 로드된 온라인 설문 전용)
+        _alt_dfs_ui = st.session_state.get("ahp_alt_dfs", {}) or {}
+        _alt_names_ui = st.session_state.get("ahp_alternatives", []) or []
+        if _alt_dfs_ui and len(_alt_names_ui) >= 2:
+            st.markdown("---")
+            st.subheader(_("🎯 대안 평가 분석", "🎯 Alternative Evaluation Analysis"))
+            st.caption(_("최하위 요인별 대안 쌍대비교 응답을 집계해 대안 종합 우선순위를 산출합니다.",
+                         "Aggregates alternative pairwise responses per leaf criterion to rank alternatives."))
+            if st.button(_("🎯 대안 종합 분석 실행", "🎯 Run Alternative Analysis"), key="btn_run_alt_analysis", type="primary"):
+                with st.spinner(_("대안 종합 분석 수행 중...", "Computing alternative priorities...")):
+                    _res_alt_ui = compute_alternative_analysis(
+                        st.session_state.get("ahp_df_main"),
+                        st.session_state.get("ahp_sub_dfs", {}) or {},
+                        st.session_state.get("ahp_sub_sub_dfs", {}) or {},
+                        _alt_dfs_ui,
+                        st.session_state.get("ahp_alt_model", {}),
+                        cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method)
+                    st.session_state["alt_analysis_result"] = _res_alt_ui
+            _res_alt_ui = st.session_state.get("alt_analysis_result")
+            if _res_alt_ui:
+                _alts_ui = _res_alt_ui["alternatives"]
+                _gs_ui = _res_alt_ui["group_scores"]
+                _order_ui = sorted(_gs_ui, key=_gs_ui.get, reverse=True)
+                st.markdown(_(f"**최종 대안 순위 (집단, n={_res_alt_ui['n_used']})**",
+                               f"**Final Alternative Ranking (Group, n={_res_alt_ui['n_used']})**"))
+                _rank_df_ui = pd.DataFrame([{"순위": i + 1, "대안": a, "종합 가중치": round(_gs_ui[a], 4)} for i, a in enumerate(_order_ui)])
+                st.dataframe(_rank_df_ui, use_container_width=True, hide_index=True)
+                try:
+                    _fig_alt = px.bar(_rank_df_ui.sort_values("종합 가중치", ascending=True), x="종합 가중치", y="대안",
+                                      orientation="h", title=_("대안 종합 우선순위 (그룹)", "Group Alternative Priorities"),
+                                      text_auto=".4f")
+                    st.plotly_chart(_fig_alt, use_container_width=True)
+                except Exception:
+                    pass
+                with st.expander(_("📊 요인별 대안 가중치 (그룹)", "📊 Alternative Weights per Criterion (Group)")):
+                    _leaf_df_ui = pd.DataFrame([{_("최하위 요인", "Leaf Criterion"): leaf,
+                                                 _("글로벌 가중치", "Global Weight"): round(_res_alt_ui["leaf_group_global"].get(leaf, 0.0), 4),
+                                                 **{a: round(_res_alt_ui["leaf_alt_group"].get(leaf, {}).get(a, 0.0), 4) for a in _alts_ui}}
+                                                for leaf in _res_alt_ui["leaves"]])
+                    st.dataframe(_leaf_df_ui, use_container_width=True, hide_index=True)
+                with st.expander(_("👤 개인별 대안 종합점수", "👤 Individual Alternative Scores")):
+                    _ind_ui = _res_alt_ui["indiv_df"].rename(columns={f"Score_{a}": a for a in _alts_ui})
+                    st.dataframe(_ind_ui, use_container_width=True, hide_index=True)
+                st.download_button(
+                    label=_("📥 대안 평가 결과 다운로드 (.xlsx)", "📥 Download Alternative Results (.xlsx)"),
+                    data=build_alternative_excel(_res_alt_ui),
+                    file_name="AHP_Alternative_Result.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    type="primary", use_container_width=True, key="dl_alt_result")
+            elif "alt_analysis_result" in st.session_state:
+                st.warning(_("대안 응답이 분석 기준(CR 등)을 만족하지 못해 결과를 산출할 수 없습니다.",
+                             "Alternative responses did not meet analysis criteria (e.g., CR)."))
+
         if st.session_state.user_role == 'official':
             with st.expander(_("나의 분석 보관함 (중요: 반드시 컴퓨터에 백업해 주세요)", "My Analysis Storage (Important: Please backup to your computer)")):
                 my_analyses = get_user_analyses(st.session_state.user_id)
