@@ -2177,7 +2177,7 @@ def send_welcome_email(user_email, marketing_agree=False):
     password = st.secrets.get("EMAIL_PASSWORD", "csuh xxru wqdy mttt")
     recipient_email = user_email
     subject = "[AHP 마스터] 회원가입을 환영합니다! 시작 가이드 안내"
-    body = """안녕하세요. AHP 마스터에 가입해 주셔서 감사합니다.
+    body = """안녕하세요. AHPMASTER 전상현 실장입니다. 가입해 주셔서 감사합니다.
 
 AHP 마스터(https://www.ahpmaster.com)는 웹 브라우저에서 바로 사용하는 AHP 분석 자동화 서비스입니다.
 복잡한 엑셀 수식 없이도 가중치 계산, 일관성 검증(CR), 결과 시각화까지 한 번에 처리할 수 있습니다.
