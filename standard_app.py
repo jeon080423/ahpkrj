@@ -2192,7 +2192,7 @@ AHP 마스터(https://www.ahpmaster.com)는 웹 브라우저에서 바로 사용
 ■ 더 알아보기
 
 - 사용 가이드: https://morison.tistory.com (AHP 분석 카테고리)
-- 문의: jeon080423@gmail.com 또는 카카오톡 채널 'AHPkr'
+- 문의: jeon080423@gmail.com 또는 카카오톡 ID 'AHPkr' 친구 추가
 """
     if marketing_agree:
         body += """
