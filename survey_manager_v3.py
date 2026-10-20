@@ -244,6 +244,20 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
                     r1 = run_gspread_with_retry(ss_sheet.row_values, 1)
                     if not r1:
                         run_gspread_with_retry(ss_sheet.append_row, ["ID"] + type_headers + ss_pairs + ["제출시간"])
+    # [2026-10-20] 대안 평가 시트 생성 (최하위 요인별로 대안 쌍대비교 저장)
+    alternatives = ahp_model.get("alternatives", []) or []
+    if len(alternatives) >= 2:
+        alt_pairs = [f"{alternatives[i]}_{alternatives[j]}"
+                     for i in range(len(alternatives)) for j in range(i + 1, len(alternatives))]
+        for leaf in get_leaf_criteria_v3(ahp_model):
+            alt_sheet_name = f"Alt_{leaf}"[:31]
+            a_sheet, is_a_new = get_or_create_ws(alt_sheet_name, rows="1000", cols="20")
+            if is_a_new:
+                run_gspread_with_retry(a_sheet.append_row, ["ID"] + type_headers + alt_pairs + ["제출시간"])
+            else:
+                r1 = run_gspread_with_retry(a_sheet.row_values, 1)
+                if not r1:
+                    run_gspread_with_retry(a_sheet.append_row, ["ID"] + type_headers + alt_pairs + ["제출시간"])
     # Demographic Data 헤더 생성
     demo_headers = ["ID"] + type_headers
     demo_cols = []
@@ -302,6 +316,34 @@ def create_survey_sheet_v3(title, admin_email, ahp_model, scale_type, demographi
 
     return spreadsheet.id
 
+def get_leaf_criteria_v3(model):
+    """[2026-10-20] 모델의 최하위(leaf) 요인 목록을 순서대로 반환한다.
+    - 소분류가 있는 중분류 → 소분류 항목 자체가 leaf
+    - 소분류가 없는 중분류 → 중분류가 leaf
+    - 중분류가 없는 대분류 → 대분류가 leaf (단독 최하위 요인)
+    """
+    leaves = []
+    sub_map = model.get("subs", {}) or {}
+    sub_sub_map = model.get("sub_subs", {}) or {}
+    for main_c in model.get("main", []) or []:
+        subs = sub_map.get(main_c, []) or []
+        if not subs:
+            leaves.append(main_c)
+            continue
+        for sub_c in subs:
+            sub_subs = sub_sub_map.get(sub_c, []) or []
+            if len(sub_subs) >= 2:
+                leaves.extend(sub_subs)
+            else:
+                leaves.append(sub_c)
+    return leaves
+
+
+def alt_pair_key(leaf, a, b):
+    """[2026-10-20] 대안 쌍대비교 답변 키 (기준 키와 충돌 방지용 접두사 포함)."""
+    return f"ALT::{leaf}::{a}_{b}"
+
+
 def generate_pairwise_combinations_v3(model):
     combinations = []
     
@@ -338,7 +380,19 @@ def generate_pairwise_combinations_v3(model):
                     "factors": sub_subs,
                     "pairs": [(sub_subs[i], sub_subs[j]) for i in range(len(sub_subs)) for j in range(i + 1, len(sub_subs))]
                 })
-            
+
+    # 4. 대안 평가 (2026-10-20): 최하위 요인별로 대안 쌍대비교 조합 추가
+    alternatives = model.get("alternatives", []) or []
+    if len(alternatives) >= 2:
+        for leaf in get_leaf_criteria_v3(model):
+            combinations.append({
+                "type": "alt",
+                "parent": leaf,
+                "factors": alternatives,
+                "pairs": [(alternatives[i], alternatives[j]) for i in range(len(alternatives)) for j in range(i + 1, len(alternatives))],
+                "key_prefix": f"ALT::{leaf}::"
+            })
+
     return combinations
 
 def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demographics_settings, model, rewards_info):
@@ -396,6 +450,19 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
                 ss_row.append(kst_now)
                 sub_row_data_map[str(sub_c)[:31]] = ss_row
                         
+    # [2026-10-20] 4. 대안 평가 답변 (최하위 요인별 대안 쌍대비교)
+    alternatives = model.get("alternatives", []) or []
+    alt_row_data_map = {}
+    if len(alternatives) >= 2:
+        for leaf in get_leaf_criteria_v3(model):
+            a_row = [resp_id] + resp_types
+            for i in range(len(alternatives)):
+                for j in range(i + 1, len(alternatives)):
+                    pk = alt_pair_key(leaf, alternatives[i], alternatives[j])
+                    a_row.append(ahp_answers.get(pk, 1))
+            a_row.append(kst_now)
+            alt_row_data_map[f"Alt_{leaf}"[:31]] = a_row
+
     raw_row_data.append(kst_now)
     
     demo_row_data = [resp_id] + resp_types
@@ -472,7 +539,15 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
                 run_gspread_with_retry(s_sheet.append_row, s_row)
             except Exception:
                 pass
-        
+
+        # [2026-10-20] 대안 평가 시트 저장
+        for a_name, a_row in alt_row_data_map.items():
+            try:
+                a_sheet = run_gspread_with_retry(spreadsheet.worksheet, a_name)
+                run_gspread_with_retry(a_sheet.append_row, a_row)
+            except Exception:
+                pass
+
         try:
             demo_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Demographic_Data")
             d_hdr = run_gspread_with_retry(demo_sheet.row_values, 1)

@@ -374,6 +374,25 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
                         run_gspread_with_retry(ss_sheet.append_row, ["ID"] + type_headers + ss_pairs + ["제출시간"])
 
 
+    # [2026-10-20] 대안 평가 시트 생성 (최하위 요인별로 대안 쌍대비교 저장)
+    _alternatives = ahp_model.get("alternatives", []) or []
+    if len(_alternatives) >= 2:
+        _alt_pairs = [f"{_alternatives[i]}_{_alternatives[j]}"
+                      for i in range(len(_alternatives)) for j in range(i + 1, len(_alternatives))]
+        for _mc in main_criteria:
+            _subs = sub_criteria_map.get(_mc, []) or []
+            _leaves = _subs if _subs else [_mc]
+            for _leaf in _leaves:
+                _alt_sheet_name = f"Alt_{_leaf}"[:31]
+                _a_sheet, _is_a_new = get_or_create_ws(_alt_sheet_name, rows="1000", cols="20")
+                if _is_a_new:
+                    run_gspread_with_retry(_a_sheet.append_row, ["ID"] + type_headers + _alt_pairs + ["제출시간"])
+                else:
+                    _r1 = run_gspread_with_retry(_a_sheet.row_values, 1)
+                    if not _r1:
+                        run_gspread_with_retry(_a_sheet.append_row, ["ID"] + type_headers + _alt_pairs + ["제출시간"])
+
+
     # 2. Demographic_Data 헤더 구성: ID, Type, (Demographic Fields...), 사전순위지정, (답례품_연락처...), 제출시간
     demo_headers = ["ID"] + type_headers
     
@@ -1150,6 +1169,22 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
                 ss_row.append(kst_now)
                 sub_row_data_map[str(sub_c)[:31]] = ss_row
                 
+    # [2026-10-20] 쌍대비교 대안 평가 응답값 배치 (최하위 요인별)
+    _alternatives = model.get("alternatives", []) or []
+    alt_row_data_map = {}
+    if len(_alternatives) >= 2:
+        for _mc in main_criteria:
+            _subs = sub_criteria_map.get(_mc, []) or []
+            _leaves = _subs if _subs else [_mc]
+            for _leaf in _leaves:
+                _a_row = [resp_id] + resp_types
+                for _i in range(len(_alternatives)):
+                    for _j in range(_i + 1, len(_alternatives)):
+                        _pk = f"ALT::{_leaf}::{_alternatives[_i]}_{_alternatives[_j]}"
+                        _a_row.append(ahp_answers.get(_pk, 1))
+                _a_row.append(kst_now)
+                alt_row_data_map[f"Alt_{_leaf}"[:31]] = _a_row
+
     raw_row_data.append(kst_now)
     
     # 3. Demographic_Data 행 데이터 구성 (ID, Type, 인구통계 필드, 사전순위, 답례품 연락처, 제출시간)
@@ -1269,6 +1304,14 @@ def save_response_to_sheet(spreadsheet_id, respondent_info, ahp_answers, demogra
                 s_sheet.append_row(s_row)
             except Exception:
                 pass
+
+        # [2026-10-20] 대안 평가 시트에 분할 추가
+        for a_name, a_row in alt_row_data_map.items():
+            try:
+                a_sheet = spreadsheet.worksheet(a_name)
+                a_sheet.append_row(a_row)
+            except Exception:
+                pass
         
         # 2) Demographic_Data에 추가
         try:
@@ -1355,7 +1398,22 @@ def generate_pairwise_combinations(model):
                 "factors": subs,
                 "pairs": [(subs[i], subs[j]) for i in range(len(subs)) for j in range(i + 1, len(subs))]
             })
-            
+
+    # 3. 대안 평가 (2026-10-20): 최하위 요인별로 대안 쌍대비교 조합 추가
+    alternatives = model.get("alternatives", []) or []
+    if len(alternatives) >= 2:
+        for main_c_one in main_c:
+            subs = sub_map.get(main_c_one, []) or []
+            leaves = subs if subs else [main_c_one]
+            for leaf in leaves:
+                combinations.append({
+                    "type": "alt",
+                    "parent": leaf,
+                    "factors": alternatives,
+                    "pairs": [(alternatives[i], alternatives[j]) for i in range(len(alternatives)) for j in range(i + 1, len(alternatives))],
+                    "key_prefix": f"ALT::{leaf}::"
+                })
+
     return combinations
 
 def generate_hierarchy_tree_text(ahp_model, tier_level=2, lang="ko", translator=None):
