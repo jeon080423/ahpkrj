@@ -8484,31 +8484,6 @@ with contextlib.nullcontext():
     
         st.subheader(_(" 가입자 현황 및 관리", " Registered Users & Admin Control"))
         
-        # [2026-10-20] 관리자 전용: 구글 시트 편집 권한 부여 유틸리티
-        with st.expander(_("🔑 구글 시트 편집 권한 부여", "🔑 Grant Google Sheet Edit Permission"), expanded=False):
-            st.caption(_("서비스 계정(AHPMASTER) 권한으로 특정 구글 시트에 편집 권한을 부여합니다. 설문 시트의 중복 응답을 직접 정리할 때 사용합니다.",
-                         "Grants edit permission on a Google Sheet via the service account (AHPMASTER). Used when cleaning up duplicate survey responses directly."))
-            grant_sheet_id = st.text_input(_("스프레드시트 ID 또는 URL", "Spreadsheet ID or URL"), key="grant_sheet_id_input")
-            grant_email = st.text_input(_("편집 권한을 받을 이메일", "Email to receive edit permission"), value="jeon080423@gmail.com", key="grant_email_input")
-            if st.button(_("📝 편집 권한 부여 실행", "📝 Grant Edit Permission"), key="btn_grant_edit_perm"):
-                if not grant_sheet_id.strip() or "@" not in grant_email:
-                    st.error(_("시트 ID와 올바른 이메일을 입력해 주세요.", "Please enter a sheet ID and a valid email."))
-                else:
-                    _sid = grant_sheet_id.strip()
-                    # URL 형태면 ID만 추출
-                    import re as _re
-                    _m = _re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", _sid)
-                    if _m:
-                        _sid = _m.group(1)
-                    with st.spinner(_("편집 권한 부여 중...", "Granting edit permission...")):
-                        try:
-                            _gclient = get_gspread_client()
-                            _spread = _gclient.open_by_key(_sid)
-                            _spread.share(grant_email.strip(), perm_type='user', role='writer', notify=False)
-                            st.success(_(f"✅ {grant_email}에 편집 권한을 부여했습니다.", f"✅ Edit permission granted to {grant_email}."))
-                        except Exception as _ge:
-                            st.error(_(f"권한 부여 실패: {_ge}", f"Grant failed: {_ge}"))
-
         col_sync1, col_sync2 = st.columns([2, 8])
         with col_sync1:
             if st.button("🔄 구글 시트와 동기화"):
@@ -8773,6 +8748,31 @@ with contextlib.nullcontext():
                     st.error(f"설정 저장 실패: {e}")
                 finally:
                     conn.close()
+
+        # [2026-10-20] 관리자 전용: 구글 시트 편집 권한 부여 유틸리티 ('가입자 현황 및 최종 배포 링크' 섹션 맨 아래)
+        with st.expander(_("🔑 구글 시트 편집 권한 부여", "🔑 Grant Google Sheet Edit Permission"), expanded=False):
+            st.caption(_("서비스 계정(AHPMASTER) 권한으로 특정 구글 시트에 편집 권한을 부여합니다. 설문 시트의 중복 응답을 직접 정리할 때 사용합니다.",
+                         "Grants edit permission on a Google Sheet via the service account (AHPMASTER). Used when cleaning up duplicate survey responses directly."))
+            grant_sheet_id = st.text_input(_("스프레드시트 ID 또는 URL", "Spreadsheet ID or URL"), key="grant_sheet_id_input")
+            grant_email = st.text_input(_("편집 권한을 받을 이메일", "Email to receive edit permission"), value="jeon080423@gmail.com", key="grant_email_input")
+            if st.button(_("📝 편집 권한 부여 실행", "📝 Grant Edit Permission"), key="btn_grant_edit_perm"):
+                if not grant_sheet_id.strip() or "@" not in grant_email:
+                    st.error(_("시트 ID와 올바른 이메일을 입력해 주세요.", "Please enter a sheet ID and a valid email."))
+                else:
+                    _sid = grant_sheet_id.strip()
+                    # URL 형태면 ID만 추출
+                    import re as _re
+                    _m = _re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", _sid)
+                    if _m:
+                        _sid = _m.group(1)
+                    with st.spinner(_("편집 권한 부여 중...", "Granting edit permission...")):
+                        try:
+                            _gclient = get_gspread_client()
+                            _spread = _gclient.open_by_key(_sid)
+                            _spread.share(grant_email.strip(), perm_type='user', role='writer', notify=False)
+                            st.success(_(f"✅ {grant_email}에 편집 권한을 부여했습니다.", f"✅ Edit permission granted to {grant_email}."))
+                        except Exception as _ge:
+                            st.error(_(f"권한 부여 실패: {_ge}", f"Grant failed: {_ge}"))
 
         st.divider()
     
@@ -12061,6 +12061,12 @@ with contextlib.nullcontext():
                                 tier_choice_label = _("3계층 (대분류 ➔ 중분류 ➔ 소분류)", "3-Tier (Main ➔ Sub ➔ Sub-sub)") if tier_val == 3 else _("2계층 (대분류 ➔ 중분류)", "2-Tier (Main ➔ Sub)")
                                 st.session_state["tab2_tier_choice"] = tier_choice_label
 
+                                # [2026-10-20] 대안 목록 복원
+                                _edit_alts = ahp_model.get("alternatives", [])
+                                st.session_state.edit_alternatives_input = ", ".join(_edit_alts) if isinstance(_edit_alts, list) else str(_edit_alts)
+                                st.session_state.pop("tab2_alt_input", None)
+                                st.session_state.pop("tab2_use_alt", None)
+
                                 definitions = meta.get("Definitions", {})
                                 st.session_state.edit_definitions = definitions
                             st.session_state.survey_auto_loaded = True
@@ -12550,6 +12556,42 @@ with contextlib.nullcontext():
                         if isinstance(saved_show_h, str):
                             saved_show_h = (saved_show_h.lower() != "false")
                         show_hierarchy = bool(saved_show_h)
+
+                        # [2026-10-20] 대안 평가(대안 선정) 설정
+                        st.markdown("---")
+                        st.markdown(_("##### 🎯 대안 평가 (대안 선정) 설정", "##### 🎯 Alternative Evaluation (Selection)"))
+                        _edit_alt_val = st.session_state.get("edit_alternatives_input", "")
+                        use_alternatives = st.checkbox(
+                            _("대안 평가 사용 — 응답자가 최하위 요인별로 대안을 쌍대비교합니다", "Use alternative evaluation — respondents pairwise-compare alternatives per leaf criterion"),
+                            value=bool(_edit_alt_val),
+                            key="tab2_use_alt",
+                        )
+                        alt_list = []
+                        if use_alternatives:
+                            _alt_input_val = st.text_input(
+                                _("대안 목록 (쉼표로 구분, 2~5개 권장)", "Alternatives (comma separated, 2~5 recommended)"),
+                                value=_edit_alt_val,
+                                placeholder=_("예: 대안 A, 대안 B, 대안 C", "e.g., Option A, Option B, Option C"),
+                                key="tab2_alt_input",
+                            )
+                            alt_list = [x.strip().replace("_", " ") for x in _alt_input_val.split(",") if x.strip()]
+                            if len(alt_list) <= 1:
+                                st.markdown(_("🚨 :red[**경고:** 쌍대비교를 위해서는 대안이 최소 2개 이상 입력되어야 합니다.]", "🚨 :red[**Warning:** At least 2 alternatives are required for pairwise comparison.]"))
+                            else:
+                                _n_alt_pairs = len(alt_list) * (len(alt_list) - 1) // 2
+                                _leaf_cnt = 0
+                                for _mc in main_list:
+                                    _m_subs = model_structure["subs"].get(_mc, [])
+                                    if not _m_subs:
+                                        _leaf_cnt += 1
+                                    else:
+                                        for _sc in _m_subs:
+                                            _ss = model_structure.get("sub_subs", {}).get(_sc, [])
+                                            _leaf_cnt += len(_ss) if len(_ss) >= 2 else 1
+                                st.info(_(
+                                    f"📊 대안 비교 문항이 추가됩니다: 최하위 요인 {_leaf_cnt}개 × 요인당 {_n_alt_pairs}문항 = 총 {_leaf_cnt * _n_alt_pairs}문항",
+                                    f"📊 Alternative questions will be added: {_leaf_cnt} leaf criteria × {_n_alt_pairs} per criterion = {_leaf_cnt * _n_alt_pairs} questions total"))
+                        model_structure["alternatives"] = alt_list
 
                         # ── 계층 구조 트리 시각화 ──────────────────────────────
                         if main_list:
@@ -13142,6 +13184,12 @@ with contextlib.nullcontext():
                                                     if len(parts) > 1:
                                                         target_sheet_id = parts[1].split("/")[0]
 
+                                                # [2026-10-20] 대안 평가 요금 게이트: 스탠다드·프로 포함, 무료·베이직은 애드온 필요
+                                                if len(model_structure.get("alternatives", []) or []) >= 2:
+                                                    _alt_tier = get_current_tier()
+                                                    if _alt_tier not in ("Standard", "Pro"):
+                                                        raise Exception("ALT_TIER_GATE: 대안 평가(대안 선정)는 스탠다드·프로 요금제에 포함된 기능입니다. 무료·베이직 회원은 대안 평가 애드온 구매 후 사용하실 수 있습니다. (요금제 탭에서 업그레이드하거나 문의해 주세요.)")
+
                                                 import os
                                                 override_flag = 'sonwook_override.flag'
                                                 if survey_admin_email == 'sonwook@gmail.com' and not target_sheet_id and os.path.exists(override_flag):
@@ -13295,13 +13343,16 @@ with contextlib.nullcontext():
                                                 </div>
                                                 ''', unsafe_allow_html=True)
                                             except Exception as ex:
-                                                st.error(f"구글 시트 연동 실패: {ex}")
-                                                import streamlit.components.v1 as components
-                                                error_msg = str(ex).replace("'", "\\'").replace("\\n", " ")
-                                                if any(token in str(ex) for token in ["429", "RESOURCE_EXHAUSTED", "Quota exceeded", "Rate Limit"]):
-                                                    components.html(f"<script>alert('⏳ 구글 API 분당 요청 한도(429 Rate Limit)가 일시적으로 초과되었습니다.\\n\\n구글 API 정책상 서비스 계정의 1분당 API 요청 횟수(분당 60회)가 일시적으로 초과되어 발생한 대기 현상입니다.\\n서비스 계정 편집자 공유 권한 문제는 아니오니 안심하시기 바랍니다.\\n\\n약 30초~1분 정도 잠시 기다리신 후 [구글 시트 연동] 버튼을 다시 클릭해 주시기 바랍니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
+                                                if "ALT_TIER_GATE" in str(ex):
+                                                    st.error("🎯 " + str(ex).replace("ALT_TIER_GATE: ", ""))
                                                 else:
-                                                    components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp-master-v2@ahp-login.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
+                                                    st.error(f"구글 시트 연동 실패: {ex}")
+                                                    import streamlit.components.v1 as components
+                                                    error_msg = str(ex).replace("'", "\\'").replace("\\n", " ")
+                                                    if any(token in str(ex) for token in ["429", "RESOURCE_EXHAUSTED", "Quota exceeded", "Rate Limit"]):
+                                                        components.html(f"<script>alert('⏳ 구글 API 분당 요청 한도(429 Rate Limit)가 일시적으로 초과되었습니다.\\n\\n구글 API 정책상 서비스 계정의 1분당 API 요청 횟수(분당 60회)가 일시적으로 초과되어 발생한 대기 현상입니다.\\n서비스 계정 편집자 공유 권한 문제는 아니오니 안심하시기 바랍니다.\\n\\n약 30초~1분 정도 잠시 기다리신 후 [구글 시트 연동] 버튼을 다시 클릭해 주시기 바랍니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
+                                                    else:
+                                                        components.html(f"<script>alert('❌ 구글 스프레드시트 연동에 실패했습니다.\\n\\n입력하신 URL의 스프레드시트에 접근할 수 없습니다.\\n안내된 서비스 계정 이메일(ahp-master-v2@ahp-login.iam.gserviceaccount.com)을 반드시 [편집자]로 추가하고 공유해 주셔야 연동 및 배포가 가능합니다.\\n\\n상세 에러: {error_msg}');</script>", height=0, width=0)
 
 
             _survey_setup_fragment()
