@@ -4511,7 +4511,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         # 서로 다른 부모 그룹에 반복되면 요인명만으로 만든 키가 충돌합니다.
         for comb_idx, comb in enumerate(combinations):
             for pair_idx, (left_f, right_f) in enumerate(comb["pairs"]):
-                pair_key = f"{left_f}_{right_f}"
+                pair_key = comb.get("key_prefix", "") + f"{left_f}_{right_f}"
                 widget_key = f"pair_ans_{comb_idx}_{pair_idx}_{pair_key.replace(' ', '_')}"
                 if widget_key not in st.session_state:
                     st.session_state[widget_key] = None
@@ -4539,6 +4539,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
         for sub_f in sub_list:
             if sub_f not in all_factors:
                 all_factors.append(sub_f)
+    for alt_f in ahp_model.get("alternatives", []) or []:
+        if alt_f not in all_factors:
+            all_factors.append(alt_f)
                 
     factor_colors = {}
     for i, f_name in enumerate(all_factors):
@@ -5127,6 +5130,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(소분류) 요인 비교"), f"Sub-sub-criteria Comparison under [{parent_trans}]")
                 elif comb['type'] == 'sub':
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 하위(중분류) 요인 비교"), f"Sub-criteria Comparison under [{parent_trans}]")
+                elif comb['type'] == 'alt':
+                    parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _((f"[{parent_trans}] 기준 대안 비교"), (f"Alternative Comparison under [{parent_trans}]"))
                 else:
                     parent_lbl = f"{ahp_section_prefix}.{comp_idx}. " + _("대분류(핵심) 요인 비교", "Main Criteria (Core) Comparison")
                 # [2026-10-09] 박한라 요청: shjeon 설문에서는 4-n. 형식 소제목
@@ -5377,14 +5382,14 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 group_factors = comb["factors"]
                 comb_missing_count = 0
                 for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
-                    k = f"{p_left}_{p_right}"
+                    k = comb.get("key_prefix", "") + f"{p_left}_{p_right}"
                     p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{k.replace(' ', '_')}"
                     if st.session_state.get(p_widget_key, None) is None:
                         comb_missing_count += 1
 
                 # 3단 컬럼 배치: [왼쪽 요인명 컬럼 (15%)] - [척도 라디오 버튼 영역 컬럼 (70%)] - [오른쪽 요인명 컬럼 (15%)]
                 for pair_idx, (left_f, right_f) in enumerate(comb["pairs"]):
-                    pair_key = f"{left_f}_{right_f}"
+                    pair_key = comb.get("key_prefix", "") + f"{left_f}_{right_f}"
                     # comb_idx/pair_idx를 포함해 동일한 요인명이 여러 그룹에
                     # 존재해도 Streamlit 위젯 키가 절대 중복되지 않도록 합니다.
                     clean_id = f"{comb_idx}_{pair_idx}_{pair_key.replace(' ', '_')}"
@@ -5437,10 +5442,11 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 group_answers = {}
                                 for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
                                     k = f"{p_left}_{p_right}"
-                                    p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{k.replace(' ', '_')}"
+                                    _wk = comb.get("key_prefix", "") + k
+                                    p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{_wk.replace(' ', '_')}"
                                     val = st.session_state.get(p_widget_key, None)
                                     group_answers[k] = val
-                                    if k != pair_key and val is None:
+                                    if _wk != pair_key and val is None:
                                         other_missing = True
                                 
                                 min_cr_opt = 1
@@ -5450,7 +5456,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 if len(group_factors) > 2 and not other_missing:
                                     for opt in clean_options:
                                         test_answers = group_answers.copy()
-                                        test_answers[pair_key] = opt
+                                        test_answers[f"{left_f}_{right_f}"] = opt
                                         test_cr = calculate_matrix_cr(group_factors, test_answers)
                                         if test_cr <= cr_limit:
                                             valid_options.add(opt)
@@ -5527,7 +5533,8 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     group_unanswered = 0
                     for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
                         k = f"{p_left}_{p_right}"
-                        p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{k.replace(' ', '_')}"
+                        _wk = comb.get("key_prefix", "") + k
+                        p_widget_key = f"pair_ans_{comb_idx}_{p_idx}_{_wk.replace(' ', '_')}"
                         val = st.session_state.get(p_widget_key, None)
                         cur_group_answers[k] = val
                         if val is None:
@@ -5564,12 +5571,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             if worst_pair:
                                 for p_idx, (p_left, p_right) in enumerate(comb["pairs"]):
                                     if p_left == p1 and p_right == p2:
-                                        pk = f"{p_left}_{p_right}"
+                                        pk = comb.get("key_prefix", "") + f"{p_left}_{p_right}"
                                         target_clean_id = f"{comb_idx}_{p_idx}_{pk.replace(' ', '_')}"
                                         target_ans_key = f"pair_ans_{target_clean_id}"
                                         break
                                     elif p_left == p2 and p_right == p1:
-                                        pk = f"{p_left}_{p_right}"
+                                        pk = comb.get("key_prefix", "") + f"{p_left}_{p_right}"
                                         target_clean_id = f"{comb_idx}_{p_idx}_{pk.replace(' ', '_')}"
                                         target_ans_key = f"pair_ans_{target_clean_id}"
                                         if sug_v != 1: sug_v = -sug_v
@@ -5817,6 +5824,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
                 failed_factors = []
                 failed_group_name = ""
                 failed_cr = 0.0
+                _failed_alt_leaf = None  # [2026-10-20] 대안 평가 CR 실패 시 해당 최하위 요인 기록
                 
                 # 대분류 CR 체크
                 main_cr = calculate_matrix_cr(main_criteria, ahp_answers)
@@ -5838,10 +5846,50 @@ if "preview_id" in q_params or "survey_id" in q_params:
                                 failed_cr = sub_cr
                                 break
 
+                # [2026-10-20] 대안 평가 CR 체크 (최하위 요인별 대안 쌍대비교)
+                if not cr_failed:
+                    _alts_chk = ahp_model.get("alternatives", []) or []
+                    if len(_alts_chk) >= 3:
+                        _leaf_list_chk = []
+                        _subs_map_chk = ahp_model.get("subs", {}) or {}
+                        _ss_map_chk = ahp_model.get("sub_subs", {}) or {}
+                        for _mc_chk in ahp_model.get("main", []):
+                            _subs_chk = _subs_map_chk.get(_mc_chk, []) or []
+                            if not _subs_chk:
+                                _leaf_list_chk.append(_mc_chk)
+                            else:
+                                for _sc_chk in _subs_chk:
+                                    _ss_chk = _ss_map_chk.get(_sc_chk, []) or []
+                                    if len(_ss_chk) >= 2:
+                                        _leaf_list_chk.extend(_ss_chk)
+                                    else:
+                                        _leaf_list_chk.append(_sc_chk)
+                        for _leaf_chk in _leaf_list_chk:
+                            _alt_ans_chk = {}
+                            for _ai in range(len(_alts_chk)):
+                                for _aj in range(_ai + 1, len(_alts_chk)):
+                                    _alt_ans_chk[f"{_alts_chk[_ai]}_{_alts_chk[_aj]}"] = ahp_answers.get(f"ALT::{_leaf_chk}::{_alts_chk[_ai]}_{_alts_chk[_aj]}")
+                            _alt_cr_chk = calculate_matrix_cr(_alts_chk, _alt_ans_chk)
+                            if _alt_cr_chk > cr_limit:
+                                cr_failed = True
+                                failed_factors = _alts_chk
+                                failed_group_name = _(f"{_leaf_chk} 기준 대안 평가", f"Alternatives under {_leaf_chk}")
+                                failed_cr = _alt_cr_chk
+                                _failed_alt_leaf = _leaf_chk
+                                break
+
                 if cr_failed:
+                    # [2026-10-20] 대안 평가 실패 시 추천 계산용으로 평문 키 답변 뷰 구성
+                    _suggest_answers = ahp_answers
+                    if _failed_alt_leaf:
+                        _suggest_answers = {}
+                        for _ai in range(len(failed_factors)):
+                            for _aj in range(_ai + 1, len(failed_factors)):
+                                _pk_plain = f"{failed_factors[_ai]}_{failed_factors[_aj]}"
+                                _suggest_answers[_pk_plain] = ahp_answers.get(f"ALT::{_failed_alt_leaf}::{_pk_plain}")
                     if cr_guide_method == "post_wizard":
                         from survey_manager import get_cr_fix_suggestion
-                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers, cr_limit=cr_limit)
+                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, _suggest_answers, cr_limit=cr_limit)
                         
                         if worst_pair:
                             st.session_state[f"cr_wizard_state_{survey_id_param}"] = {
@@ -5855,12 +5903,12 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             st.rerun()
                     elif cr_guide_method == "realtime":
                         from survey_manager import get_cr_fix_suggestion
-                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, ahp_answers, cr_limit=cr_limit)
+                        worst_pair, current_val, suggested_val = get_cr_fix_suggestion(failed_factors, _suggest_answers, cr_limit=cr_limit)
                         if worst_pair:
                             for comb_idx_t, comb_t in enumerate(combinations):
                                 for p_idx_t, (p_left_t, p_right_t) in enumerate(comb_t["pairs"]):
                                     if (p_left_t == worst_pair[0] and p_right_t == worst_pair[1]) or (p_left_t == worst_pair[1] and p_right_t == worst_pair[0]):
-                                        pk_t = f"{p_left_t}_{p_right_t}"
+                                        pk_t = comb_t.get("key_prefix", "") + f"{p_left_t}_{p_right_t}"
                                         target_clean_id = f"{comb_idx_t}_{p_idx_t}_{pk_t.replace(' ', '_')}"
                                         st.session_state["scroll_target"] = target_clean_id
                                         st.session_state["highlight_target"] = target_clean_id
