@@ -1383,7 +1383,12 @@ def init_db():
         pass
         
     c.execute('''CREATE TABLE IF NOT EXISTS user_google_credentials
-                  (user_id TEXT PRIMARY KEY, token TEXT, refresh_token TEXT, token_uri TEXT, client_id TEXT, client_secret TEXT, scopes TEXT, expiry TEXT)''')
+                  (user_id TEXT PRIMARY KEY, token TEXT, refresh_token TEXT, token_uri TEXT, client_id TEXT, client_secret TEXT, scopes TEXT, expiry TEXT, account_email TEXT)''')
+    # [2026-10-20] 기존 DB에 account_email 컬럼이 없으면 추가 (연동된 실제 구글 계정 기록용)
+    try:
+        c.execute("ALTER TABLE user_google_credentials ADD COLUMN account_email TEXT")
+    except Exception:
+        pass
     
     c.execute('''CREATE TABLE IF NOT EXISTS survey_backup_responses
                   (id INTEGER PRIMARY KEY AUTOINCREMENT, survey_id TEXT, respondent_id TEXT, response_json TEXT, saved_to_sheet INTEGER DEFAULT 0, created_at TEXT)''')
@@ -4110,29 +4115,60 @@ if "code" in q_params and st.session_state.get('user_id'):
         try:
             flow.fetch_token(code=code_val)
             creds = flow.credentials
-            
+
+            # [2026-10-20] 실제로 인증한 구글 계정 이메일 확인 (Drive about)
+            _linked_email = None
+            try:
+                from googleapiclient.discovery import build as _gbuild
+                _drv = _gbuild('drive', 'v3', credentials=creds)
+                _about = _drv.about().get(fields='user(emailAddress)').execute()
+                _linked_email = (_about.get('user') or {}).get('emailAddress')
+            except Exception:
+                _linked_email = None
+
             import sqlite3
             import json
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
+            # 재연동 시 refresh_token이 새로 발급되지 않으면 기존 토큰 유지
+            _new_refresh = creds.refresh_token
+            if not _new_refresh:
+                try:
+                    c.execute("SELECT refresh_token FROM user_google_credentials WHERE user_id = ?", (st.session_state.user_id,))
+                    _old = c.fetchone()
+                    if _old:
+                        _new_refresh = _old[0]
+                except Exception:
+                    pass
             c.execute("""
-                INSERT OR REPLACE INTO user_google_credentials 
-                (user_id, token, refresh_token, token_uri, client_id, client_secret, scopes, expiry)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT OR REPLACE INTO user_google_credentials
+                (user_id, token, refresh_token, token_uri, client_id, client_secret, scopes, expiry, account_email)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 st.session_state.user_id,
                 creds.token,
-                creds.refresh_token,
+                _new_refresh,
                 creds.token_uri,
                 creds.client_id,
                 creds.client_secret,
                 json.dumps(creds.scopes),
-                creds.expiry.isoformat() if hasattr(creds.expiry, 'isoformat') else str(creds.expiry)
+                creds.expiry.isoformat() if hasattr(creds.expiry, 'isoformat') else str(creds.expiry),
+                _linked_email
             ))
             conn.commit()
             conn.close()
-            
-            st.success("🎉 구글 계정 연동이 완료되었습니다!")
+
+            # 캐시된 gspread 클라이언트 초기화 (새 연동 정보로 재생성되도록)
+            try:
+                from survey_manager import get_survey_gspread_client
+                get_survey_gspread_client.clear()
+            except Exception:
+                pass
+
+            if _linked_email:
+                st.success(f"🎉 구글 계정 연동이 완료되었습니다! (연동 계정: {_linked_email})")
+            else:
+                st.success("🎉 구글 계정 연동이 완료되었습니다!")
             st.query_params.clear()
             st.rerun()
         except Exception as oauth_err:
@@ -8211,6 +8247,61 @@ with st.sidebar:
                     pass
             st.rerun()
 
+
+        # [2026-10-20] 구글 드라이브 연동 상태 표시 및 (재)연동 버튼
+        with st.expander(_("구글 드라이브 연동", "Google Drive Link")):
+            _link_email = None
+            _has_link = False
+            try:
+                import sqlite3 as _sq_link
+                _lconn = _sq_link.connect('users.db')
+                _lcur = _lconn.cursor()
+                try:
+                    _lcur.execute("SELECT account_email FROM user_google_credentials WHERE user_id = ?", (st.session_state.user_id,))
+                except Exception:
+                    _lcur.execute("SELECT NULL FROM user_google_credentials WHERE user_id = ?", (st.session_state.user_id,))
+                _lrow = _lcur.fetchone()
+                _lconn.close()
+                if _lrow:
+                    _has_link = True
+                    _link_email = _lrow[0]
+            except Exception:
+                pass
+            if _has_link:
+                if _link_email:
+                    st.success(_(f"연동됨: {_link_email}", f"Linked: {_link_email}"))
+                else:
+                    st.success(_("연동됨 (계정 정보 없음 — 다시 연동하면 계정이 표시됩니다)", "Linked (re-link to show the account)"))
+                st.caption(_("새 설문의 구글 시트는 연동된 계정의 드라이브에 생성됩니다. 계정을 바꾸려면 아래 버튼으로 다시 연동하세요.", "New survey sheets are created in the linked account's Drive. Use the button below to link a different account."))
+            else:
+                st.warning(_("연동되어 있지 않습니다. 연동하지 않으면 새 설문 시트를 만들 수 없습니다.", "Not linked. You cannot create new survey sheets without linking."))
+            try:
+                from survey_manager import get_google_oauth_flow as _get_drv_flow
+                import os as _os_drv
+                _drv_redirect = "http://localhost:8501/" if _os_drv.name == 'nt' else "https://ahpkrj.streamlit.app/"
+                _drv_flow = _get_drv_flow(_drv_redirect)
+                if _drv_flow:
+                    _drv_url, _drv_state = _drv_flow.authorization_url(
+                        access_type='offline',
+                        include_granted_scopes='false',
+                        prompt='consent'
+                    )
+                    import html as _html_drv
+                    import streamlit.components.v1 as _comp_drv
+                    _drv_btn_text = _("구글 드라이브 연동하기", "Link Google Drive") if not _has_link else _("구글 드라이브 다시 연동하기", "Re-link Google Drive")
+                    _drv_btn_html = (
+                        f'<a href="{_html_drv.escape(_drv_url, quote=True)}" target="_self" '
+                        'style="display:flex;align-items:center;justify-content:center;gap:10px;'
+                        'width:100%;height:40px;background:#FFFFFF;'
+                        'border:1px solid #747775;border-radius:4px;'
+                        'text-decoration:none;cursor:pointer;box-sizing:border-box;'
+                        'font-family:Roboto,Arial,sans-serif;font-size:14px;font-weight:500;'
+                        'color:#1F1F1F;padding:0 12px;">'
+                        f'<span>{_html_drv.escape(_drv_btn_text)}</span></a>'
+                    )
+                    _comp_drv.html(_drv_btn_html, height=48, scrolling=False)
+            except Exception:
+                pass
 
         # [위치 이동] 1. 비밀번호 변경 expander
         with st.expander(_("비밀번호 변경", "Change Password")):

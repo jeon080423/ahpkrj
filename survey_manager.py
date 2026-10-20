@@ -194,9 +194,22 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         try:
             spreadsheet = run_gspread_with_retry(client.create, sheet_title)
         except Exception as e:
-            # 진단: 어떤 계정으로 생성을 시도했는지 표시
-            _diag = "서비스 계정" if not user_id else f"사용자 OAuth({user_id})"
-            raise Exception(f"[{_diag}로 시트 생성 시도] {e}")
+            # [2026-10-20 수정] 진단: 실제로 어떤 클라이언트로 생성을 시도했는지 표시
+            # (기존에는 user_id 존재 여부만으로 '사용자 OAuth'라고 표시해 실제 원인과 달랐음)
+            _used_user_oauth = False
+            if user_id:
+                try:
+                    _used_user_oauth = get_user_gspread_client(user_id) is not None
+                except Exception:
+                    _used_user_oauth = False
+            _diag = f"사용자 OAuth({user_id})" if _used_user_oauth else "서비스 계정"
+            _hint = ""
+            if "storage quota" in str(e).lower() or "storagequotaexceeded" in str(e).lower():
+                if _used_user_oauth:
+                    _hint = " 연동된 구글 계정의 드라이브 용량이 가득 찼습니다. 해당 계정의 드라이브를 정리하거나, 사이드바의 '구글 드라이브 연동'에서 용량이 있는 계정으로 다시 연동해 주세요."
+                else:
+                    _hint = " 구글 드라이브 연동이 되어 있지 않거나 연동 토큰이 만료되어 서비스 계정으로 생성을 시도했습니다. 사이드바의 '구글 드라이브 연동'에서 본인 구글 계정을 연동한 뒤 다시 시도해 주세요."
+            raise Exception(f"[{_diag}로 시트 생성 시도] {e}{_hint}")
         
         # 2. 담당자 이메일에 편집자 권한 부여 및 링크 전체 공개 편집자 설정
         if admin_email and "@" in admin_email:
@@ -1733,7 +1746,23 @@ def get_user_gspread_client(user_id):
         if row:
             token, refresh_token, token_uri, client_id, client_secret, scopes_str, expiry = row
             scopes = json.loads(scopes_str) if scopes_str else None
-            
+
+            # [2026-10-20 수정] DB에 문자열로 저장된 expiry를 datetime으로 변환.
+            # 문자열인 채로 Credentials에 넣으면 creds.expired 접근 시 TypeError가 발생해
+            # 사용자 OAuth가 항상 실패하고 서비스 계정으로 폴백되던 버그가 있었음.
+            from datetime import datetime as _dt_cls, timezone as _tz_cls
+            expiry_dt = None
+            if expiry:
+                try:
+                    expiry_dt = _dt_cls.fromisoformat(str(expiry).replace("Z", "+00:00"))
+                    if expiry_dt.tzinfo is not None:
+                        expiry_dt = expiry_dt.astimezone(_tz_cls.utc).replace(tzinfo=None)
+                except Exception:
+                    expiry_dt = None
+            if expiry_dt is None and refresh_token:
+                # 파싱 실패 시 과거 시각으로 두어 강제 갱신 유도
+                expiry_dt = _dt_cls(2000, 1, 1)
+
             # Credentials 객체 빌드
             creds = OAuthCredentials(
                 token=token,
@@ -1742,9 +1771,9 @@ def get_user_gspread_client(user_id):
                 client_id=client_id,
                 client_secret=client_secret,
                 scopes=scopes,
-                expiry=expiry
+                expiry=expiry_dt
             )
-            
+
             # 만료 시 자동 갱신
             if creds.expired and creds.refresh_token:
                 try:
@@ -1757,8 +1786,10 @@ def get_user_gspread_client(user_id):
                     conn.commit()
                     conn.close()
                 except Exception as re:
+                    # 갱신 실패(토큰 폐기 등) 시 깨진 클라이언트를 반환하지 않고 폴백
                     st.warning(f"사용자 구글 토큰 자동 갱신 실패: {re}")
-            
+                    return None
+
             return gspread.authorize(creds)
     except Exception as e:
         st.warning(f"사용자 구글 OAuth 계정 정보를 불러오는 데 실패했습니다: {e}")
