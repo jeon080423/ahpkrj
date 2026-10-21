@@ -9680,6 +9680,15 @@ with contextlib.nullcontext():
                                                             for _pc_ld in _alt_pairs_ld:
                                                                 if _pc_ld in _adf_ld.columns:
                                                                     _adf_ld[_pc_ld] = pd.to_numeric(_adf_ld[_pc_ld], errors='coerce')
+                                                            # [2026-10-21 버그수정] Alt 시트의 소속 등 인구통계 컬럼이 쌍대비교 컬럼으로 오인되어
+                                                            # 전 응답자가 형식 오류로 제외되던 문제 — 대분류/중분류 df와 동일하게 ID·Type·대안 쌍 컬럼만 유지
+                                                            _type_src_ld = [c for c in _adf_ld.columns if c not in ["ID", "제출시간"] + _alt_pairs_ld and not str(c).endswith("_기타")]
+                                                            _type_vals_ld = _adf_ld[_type_src_ld[0]] if _type_src_ld else ""
+                                                            _rebuilt_ld = {"ID": _adf_ld["ID"], "Type": _type_vals_ld}
+                                                            for _pc_ld in _alt_pairs_ld:
+                                                                if _pc_ld in _adf_ld.columns:
+                                                                    _rebuilt_ld[_pc_ld] = _adf_ld[_pc_ld]
+                                                            _adf_ld = pd.DataFrame(_rebuilt_ld)
                                                             _adf_ld = apply_sample_limit(_adf_ld, source_label="대안 평가")
                                                             st.session_state["ahp_alt_dfs"][_leaf_ld] = _adf_ld
                                                     except Exception:
