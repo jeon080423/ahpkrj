@@ -405,20 +405,11 @@ def _fetch_survey_metadata_from_sheets(spreadsheet_id):
     if not client:
         raise Exception("구글 시트 API 클라이언트를 초기화할 수 없습니다.")
         
-    max_retries = 3
-    records = None
-    for attempt in range(max_retries):
-        try:
-            spreadsheet = client.open_by_key(spreadsheet_id)
-            meta_sheet = spreadsheet.worksheet("Survey_Metadata")
-            records = meta_sheet.get_all_records()
-            break
-        except Exception as e:
-            if attempt < max_retries - 1:
-                time.sleep(1.5 ** attempt)  # 1s, 1.5s
-                client = get_survey_gspread_client()
-            else:
-                raise e
+    # [2026-10-21 할당량 대응] 짧은 자체 재시도(1~1.5초)로는 분당 쿼터 초과를 흡수하지 못해
+    # 공통 재시도 헬퍼(지수 백오프 2→16초 + 지터, 5회)로 교체
+    spreadsheet = run_gspread_with_retry(client.open_by_key, spreadsheet_id)
+    meta_sheet = spreadsheet.worksheet("Survey_Metadata")
+    records = run_gspread_with_retry(meta_sheet.get_all_records)
     
     meta_dict = {}
     for row in records:

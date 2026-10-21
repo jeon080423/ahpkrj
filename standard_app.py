@@ -9714,9 +9714,28 @@ with contextlib.nullcontext():
                             g_client = get_survey_gspread_client()
                             if survey_meta and g_client:
                                 try:
-                                    spreadsheet = g_client.open_by_key(selected_sheet_id)
+                                    spreadsheet = run_gspread_with_retry(g_client.open_by_key, selected_sheet_id)
                                     raw_sheet = spreadsheet.worksheet("Raw_Data")
-                                    all_rows = raw_sheet.get_all_values()
+                                    # [2026-10-21 할당량 대응] Raw/Demographic/Alt 시트를 batchGet 1회로 일괄 조회해
+                                    # 읽기 요청 수를 대폭 줄이고(개별 조회 반복 시 분당 60회 쿼터 초과 빈발), 429는 재시도 헬퍼로 흡수
+                                    _batch_vals = {}
+                                    try:
+                                        _titles_ld = [w.title for w in spreadsheet.worksheets()]
+                                        _ranges_ld = [t for t in ("Raw_Data", "Demographic_Data") if t in _titles_ld]
+                                        _model_pre = survey_meta.get("AHP_Model_JSON", {}) or {}
+                                        if len(_model_pre.get("alternatives", []) or []) >= 2:
+                                            from survey_manager_v3 import get_leaf_criteria_v3 as _glc_pre
+                                            for _lf_pre in _glc_pre(_model_pre):
+                                                _t_pre = f"Alt_{_lf_pre}"[:31]
+                                                if _t_pre in _titles_ld and _t_pre not in _ranges_ld:
+                                                    _ranges_ld.append(_t_pre)
+                                        _res_ld = run_gspread_with_retry(spreadsheet.batch_get, [f"'{t}'" for t in _ranges_ld])
+                                        _batch_vals = {t: [list(r) for r in (v or [])] for t, v in zip(_ranges_ld, _res_ld)}
+                                    except Exception:
+                                        _batch_vals = {}
+                                    all_rows = _batch_vals.get("Raw_Data")
+                                    if all_rows is None:
+                                        all_rows = run_gspread_with_retry(raw_sheet.get_all_values)
                                 
                                     if len(all_rows) > 1:
                                         ahp_model = survey_meta["AHP_Model_JSON"]
@@ -9844,8 +9863,10 @@ with contextlib.nullcontext():
 
                                         # Demographic_Data 시트에서 추가 인구통계(성별, 경력 등) 병합
                                         try:
-                                            demo_sheet = spreadsheet.worksheet("Demographic_Data")
-                                            demo_all_vals = demo_sheet.get_all_values()
+                                            demo_all_vals = _batch_vals.get("Demographic_Data")
+                                            if demo_all_vals is None:
+                                                demo_sheet = spreadsheet.worksheet("Demographic_Data")
+                                                demo_all_vals = run_gspread_with_retry(demo_sheet.get_all_values)
                                             if len(demo_all_vals) > 1:
                                                 from survey_manager import clean_and_align_sheet_rows
                                                 demo_df_loaded, clean_demo_m, demo_rep = clean_and_align_sheet_rows(demo_all_vals, survey_meta=survey_meta, is_demo=True)
@@ -9892,8 +9913,10 @@ with contextlib.nullcontext():
                                                 _alt_pairs_ld = [f"{_alts_ld[i]}_{_alts_ld[j]}" for i in range(len(_alts_ld)) for j in range(i + 1, len(_alts_ld))]
                                                 for _leaf_ld in _glc_ld(_alt_model_ld):
                                                     try:
-                                                        _alt_ws = spreadsheet.worksheet(f"Alt_{_leaf_ld}"[:31])
-                                                        _alt_vals = _alt_ws.get_all_values()
+                                                        _alt_vals = _batch_vals.get(f"Alt_{_leaf_ld}"[:31])
+                                                        if _alt_vals is None:
+                                                            _alt_ws = spreadsheet.worksheet(f"Alt_{_leaf_ld}"[:31])
+                                                            _alt_vals = run_gspread_with_retry(_alt_ws.get_all_values)
                                                         if len(_alt_vals) > 1:
                                                             _adf_ld = pd.DataFrame(_alt_vals[1:], columns=_alt_vals[0])
                                                             for _pc_ld in _alt_pairs_ld:
