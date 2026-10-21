@@ -1593,12 +1593,14 @@ def sync_db_from_sheets(silent=False):
                             agree_info = expiry_date
                         expiry_date = "9999-12-31"
 
+                    # [2026-10-21] plan_type(M열)이 시트에 명시된 경우 등급 영속화
+                    sheet_plan_type = str(row[12]).strip() if len(row) >= 13 else ""
                     # 이미 존재하는지 확인 후 없으면 INSERT, 있으면 정보 보정 업데이트
-                    c.execute("SELECT id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link FROM users WHERE id=?", (user_id,))
+                    c.execute("SELECT id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type FROM users WHERE id=?", (user_id,))
                     db_user = c.fetchone()
                     if not db_user:
                         c.execute("INSERT INTO users (id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, plan_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                                  (user_id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, None))
+                                  (user_id, role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, sheet_plan_type or None))
                         cnt += 1
                     else:
                         db_role, db_signup_date, db_pw, db_expiry_date, db_agree_info, db_survey_count, db_last_link = db_user[1], db_user[2], db_user[3], db_user[4], db_user[5], db_user[6], db_user[7]
@@ -1612,6 +1614,10 @@ def sync_db_from_sheets(silent=False):
                                 WHERE id=?
                             """, (role, signup_date, pw, expiry_date, agree_info, survey_count, last_survey_link, user_id))
                             cnt += 1
+                        # [2026-10-21] 시트에 plan_type이 명시돼 있으면 DB 등급도 보정 (DB 재생성 시 등급 유실 방지)
+                        db_plan_type = db_user[8] if len(db_user) > 8 else None
+                        if sheet_plan_type and str(db_plan_type or "").strip() != sheet_plan_type:
+                            c.execute("UPDATE users SET plan_type=? WHERE id=?", (sheet_plan_type, user_id))
             
             conn.commit()
             
@@ -2472,9 +2478,9 @@ def log_to_sheets(user_id, role, signup_date, pw, agree_info="Y", expiry_date="9
             except Exception:
                 headers = []
             
-            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university', 'customer_type']
-            if len(headers) < 12 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university', 'customer_type']):
-                sheet.update(range_name='A1:L1', values=[expected_headers])
+            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university', 'customer_type', 'plan_type']
+            if len(headers) < 13 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university', 'customer_type', 'plan_type']):
+                sheet.update(range_name='A1:M1', values=[expected_headers])
             # ----------------------------------------
             
             # [수정] 구글 시트 12개 컬럼 순서 보장
@@ -2806,9 +2812,9 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
             except Exception:
                 headers = []
             
-            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university', 'customer_type']
-            if len(headers) < 12 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university', 'customer_type']):
-                sheet.update(range_name='A1:L1', values=[expected_headers])
+            expected_headers = ['id', 'role', 'signup_date', 'pw', 'expiry_date', 'agree_info', 'survey_count', 'last_survey_link', 'event_applied', 'thesis_title', 'university', 'customer_type', 'plan_type']
+            if len(headers) < 13 or not all(h in headers for h in ['event_applied', 'thesis_title', 'university', 'customer_type', 'plan_type']):
+                sheet.update(range_name='A1:M1', values=[expected_headers])
             # ----------------------------------------
 
             cell = sheet.find(user_id)
@@ -2846,6 +2852,8 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
                     agree_info, survey_count_val, last_survey_link_val,
                     event_applied_val, thesis_title_val, university_val, final_cust_type
                 ]])
+                if plan_type is not None:
+                    sheet.update(range_name=f'M{row_num}', values=[[plan_type]])
             else:
                 final_pw = new_pw if (new_pw and new_pw != "") else ""
                 final_signup_date = db_signup_date or kst_today
@@ -2853,7 +2861,7 @@ def update_user_full_info(user_id, new_pw, new_role, new_expiry, plan_type=None,
                 thesis_title_val = thesis_title if thesis_title is not None else ""
                 university_val = university if university is not None else ""
                 final_cust_type = customer_type or db_customer_type or "standard"
-                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, "", event_applied_val, thesis_title_val, university_val, final_cust_type])
+                sheet.append_row([user_id, new_role, final_signup_date, final_pw, new_expiry, "Y", 0, "", event_applied_val, thesis_title_val, university_val, final_cust_type, plan_type if plan_type is not None else ""])
     except Exception as e:
         st.error(f"구글 시트 사용자 정보 수정 반영 오류: {e}")
 
