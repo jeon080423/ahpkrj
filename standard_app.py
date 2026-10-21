@@ -12359,6 +12359,9 @@ with contextlib.nullcontext():
                         st.session_state.get("ahp_alt_model", {}),
                         cr_threshold, max_iter_val, learning_rate, mean_method, ahp_method)
                     st.session_state["alt_analysis_result"] = _res_alt_ui
+                    # [2026-10-21 통합] 결과 엑셀은 페이지 상단에서 먼저 생성되므로, 대안 시트를
+                    # 통합 파일에 반영하려면 분석 직후 1회 재실행해 엑셀을 다시 생성해야 한다
+                    st.rerun()
             _res_alt_ui = st.session_state.get("alt_analysis_result")
             if _res_alt_ui:
                 _alts_ui = _res_alt_ui["alternatives"]
