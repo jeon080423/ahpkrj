@@ -333,7 +333,10 @@ def generate_pairwise_combinations_v3(model):
                     "type": "sub_sub",
                     "parent": sub_c,
                     "factors": sub_subs,
-                    "pairs": [(sub_subs[i], sub_subs[j]) for i in range(len(sub_subs)) for j in range(i + 1, len(sub_subs))]
+                    "pairs": [(sub_subs[i], sub_subs[j]) for i in range(len(sub_subs)) for j in range(i + 1, len(sub_subs))],
+                    # [2026-10-21 버그수정] 소분류 항목명이 여러 중분류 아래에서 반복되면(예: 대안을 소분류로 배치)
+                    # 답변 키가 충돌해 마지막 그룹 답변으로 덮어써지던 문제 → 부모(중분류) 접두사로 구분
+                    "key_prefix": f"SS::{sub_c}::"
                 })
 
     # 4. 대안 평가 (2026-10-20): 최하위 요인별로 대안 쌍대비교 조합 추가
@@ -399,7 +402,8 @@ def save_response_to_sheet_v3(spreadsheet_id, respondent_info, ahp_answers, demo
                 ss_row = [resp_id] + resp_types
                 for i in range(len(sub_subs)):
                     for j in range(i + 1, len(sub_subs)):
-                        pair_key = f"{sub_subs[i]}_{sub_subs[j]}"
+                        # [2026-10-21 버그수정] 폼 수집 키(SS::{중분류}::)와 동일하게 부모 접두사로 조회
+                        pair_key = f"SS::{sub_c}::{sub_subs[i]}_{sub_subs[j]}"
                         raw_row_data.append(ahp_answers.get(pair_key, 1))
                         ss_row.append(ahp_answers.get(pair_key, 1))
                 ss_row.append(kst_now)

@@ -3611,6 +3611,62 @@ def build_alternative_excel(alt_result):
     return buf.getvalue()
 
 
+
+def _ss_blocks_in_order(ahp_model):
+    """[2026-10-21 버그수정] 소분류 블록을 모델 순서(대분류→중분류)대로 반환: [(중분류, [쌍 이름...]), ...]"""
+    blocks = []
+    sub_map = ahp_model.get("subs", {}) or {}
+    ss_map = ahp_model.get("sub_subs", {}) or {}
+    for main_c in ahp_model.get("main", []) or []:
+        for sub_c in sub_map.get(main_c, []) or []:
+            sss = ss_map.get(sub_c, []) or []
+            if len(sss) >= 2:
+                pairs = [f"{sss[i]}_{sss[j]}" for i in range(len(sss)) for j in range(i + 1, len(sss))]
+                blocks.append((sub_c, pairs))
+    return blocks
+
+
+def _extract_ss_block_df(df, base_cols, blocks, sub_c, pairs):
+    """[2026-10-21 버그수정] 소분류(잎)별 쌍대비교 블록을 df에서 분리해 평문 쌍 이름 컬럼으로 반환.
+    - 접두(SS::{중분류}::) 컬럼이 있으면 선택 후 접두사를 벗긴다.
+    - 평문 컬럼이 중복 등장하면(구 Raw_Data 형식) 모델 순서 기준 해당 블록을 위치로 선택한다.
+    - 어느 쪽도 아니면 기존 동작처럼 존재하는 평문 컬럼만 선택한다.
+    """
+    base_sel = [c for c in base_cols if c in df.columns]
+    prefixed = [f"SS::{sub_c}::{p}" for p in pairs]
+    if all(p in df.columns for p in prefixed):
+        out = df[base_sel + prefixed].copy()
+        out.columns = base_sel + list(pairs)
+        return out
+    col_list = list(df.columns)
+    if all(p in col_list for p in pairs) and any(col_list.count(p) > 1 for p in pairs):
+        occ_map = {}
+        for b_sub, b_pairs in blocks:
+            if b_sub == sub_c and list(b_pairs) == list(pairs):
+                break
+            for p in b_pairs:
+                occ_map[p] = occ_map.get(p, 0) + 1
+        base_idx = [i for i, c in enumerate(col_list) if c in base_cols]
+        pick = []
+        ok = True
+        for p in pairs:
+            occ = [i for i, c in enumerate(col_list) if c == p]
+            want = occ_map.get(p, 0)
+            if len(occ) == 1:
+                pick.append(occ[0])
+            elif want < len(occ):
+                pick.append(occ[want])
+            else:
+                ok = False
+                break
+        if ok:
+            out = df.iloc[:, base_idx + pick].copy()
+            out.columns = base_sel + list(pairs)
+            return out
+    plain_sel = [p for p in pairs if p in df.columns]
+    return df[base_sel + plain_sel].copy()
+
+
 def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2, to_ahp_values=False):
     """템플릿 구조 엑셀 생성
     - to_ahp_values=True이면 쌍대비교 펀칭값을 AHP 분석값으로 변환하여 저장
@@ -3654,6 +3710,7 @@ def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2, to_ahp_va
         # 3. Sub-sub Criteria (Tier 3)
         if int(tier_level) == 3:
             sub_sub_map = ahp_model.get("sub_subs", {})
+            _ss_blocks = _ss_blocks_in_order(ahp_model)
             for main_c, subs in sub_criteria_map.items():
                 for sub_c in subs:
                     sub_subs = sub_sub_map.get(sub_c, [])
@@ -3662,9 +3719,7 @@ def export_to_template_excel(raw_df, demo_df, ahp_model, tier_level=2, to_ahp_va
                         for i in range(len(sub_subs)):
                             for j in range(i + 1, len(sub_subs)):
                                 sub_sub_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
-                        ss_cols = [c for c in base_cols if c in raw_df.columns] + [p for p in sub_sub_pairs if p in raw_df.columns]
-                        
-                        df_sub_sub = raw_df[ss_cols].copy()
+                        df_sub_sub = _extract_ss_block_df(raw_df, base_cols, _ss_blocks, sub_c, sub_sub_pairs)
                         safe_sheet_name = str(sub_c)[:31]
                         df_sub_sub.to_excel(writer, index=False, sheet_name=safe_sheet_name)
                         
@@ -9438,7 +9493,9 @@ with contextlib.nullcontext():
                                                 for sub_c in subs:
                                                     sub_subs = [s.strip() for s in sub_sub_map.get(sub_c, [])]
                                                     if len(sub_subs) >= 2:
-                                                        pairs = [f"{sub_subs[i]}_{sub_subs[j]}"
+                                                        # [2026-10-21 버그수정] 소분류 쌍 이름이 중분류마다 반복되므로
+                                                        # 위치 기반 파싱값을 담을 레코드 키를 부모 접두사로 구분 (중복 덮어쓰기 방지)
+                                                        pairs = [f"SS::{sub_c}::{sub_subs[i]}_{sub_subs[j]}"
                                                                  for i in range(len(sub_subs))
                                                                  for j in range(i + 1, len(sub_subs))]
                                                         sub_sub_pairs_by_sub[sub_c] = pairs
@@ -9560,7 +9617,11 @@ with contextlib.nullcontext():
                                         st.session_state["ahp_sub_sub_dfs"] = {}
                                         if tier_level == 3:
                                             for sub_c, ss_pairs in sub_sub_pairs_by_sub.items():
-                                                st.session_state["ahp_sub_sub_dfs"][sub_c] = raw_df[["ID", "Type"] + ss_pairs].copy()
+                                                # [2026-10-21 버그수정] 잎별 df는 기존 분석 코드와 호환되도록 접두사를 벗긴 쌍 이름으로 복원
+                                                _ss_df = raw_df[["ID", "Type"] + ss_pairs].copy()
+                                                _ss_prefix = f"SS::{sub_c}::"
+                                                _ss_df.columns = ["ID", "Type"] + [p[len(_ss_prefix):] if p.startswith(_ss_prefix) else p for p in ss_pairs]
+                                                st.session_state["ahp_sub_sub_dfs"][sub_c] = _ss_df
 
                                         # [2026-10-20] 6. 대안 평가 데이터프레임 구성 (Alt 시트가 있는 설문만)
                                         st.session_state["ahp_alt_dfs"] = {}
@@ -14098,6 +14159,7 @@ with contextlib.nullcontext():
                                             
                                             if tier_level == 3:
                                                 sub_sub_map = ahp_model.get("sub_subs", {})
+                                                _ss_blocks_dl = _ss_blocks_in_order(ahp_model)
                                                 for main_c, subs in sub_criteria_map.items():
                                                     for sub_c in subs:
                                                         sub_subs = sub_sub_map.get(sub_c, [])
@@ -14106,8 +14168,7 @@ with contextlib.nullcontext():
                                                             for i in range(len(sub_subs)):
                                                                 for j in range(i + 1, len(sub_subs)):
                                                                     sub_sub_pairs.append(f"{sub_subs[i]}_{sub_subs[j]}")
-                                                            ss_cols = [c for c in base_cols if c in live_df.columns] + [p for p in sub_sub_pairs if p in live_df.columns]
-                                                            df_ss_dl = live_df[ss_cols].copy()
+                                                            df_ss_dl = _extract_ss_block_df(live_df, base_cols, _ss_blocks_dl, sub_c, sub_sub_pairs)
                                                             df_ss_dl.to_excel(writer, index=False, sheet_name=sub_c[:31])
                                             parsed_ok = True
                             
