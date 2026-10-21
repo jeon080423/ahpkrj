@@ -5432,11 +5432,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         sc_desc_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{sc_desc}</p>' if sc_desc else ""
                         ssc_container_html = f'<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{ssc_rows_html}</div>' if ssc_rows_html else ""
                         
+                        # [2026-10-21 수정] 섹션 제목에 이미 요인명이 있어 카드 안 h4는 중복 표시되어 제거
                         card_html = f"""
                         <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
-                            <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                                {sc_factor_trans}
-                            </h4>
                             {sc_desc_html}
                             {ssc_container_html}
                         </div>
@@ -5479,10 +5477,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         sub_container_html = f'{_var_def_lbl}<div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{sub_rows_html}</div>' if (sub_rows_html and not _is_shjeon_survey) else ""
                         
                         # [2026-10-09] 박한라 요청: shjeon 4-n 카드에서는 개념명·개념설명 숨김
-                        _shjeon_h4 = "" if _is_shjeon_survey else f"""
-                            <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                                {main_factor_trans}
-                            </h4>"""
+                        # [2026-10-21 수정] 섹션 제목(예: [기술 요인] 하위 요인 비교)에 이미 요인명이 있어
+                        # 카드 안 h4는 전 설문에서 중복 표시 → 제거 (기존 shjeon 숨김 동작과 동일하게 통일)
+                        _shjeon_h4 = ""
                         _shjeon_desc = "" if _is_shjeon_survey else main_desc_html
                         # [2026-10-12] 박한라 요청: shjeon 설문에서 정의 카드 도형도 모두 삭제
                         _shjeon_card_empty = _is_shjeon_survey and not _shjeon_h4 and not _shjeon_desc and not sub_container_html
@@ -5524,11 +5521,9 @@ if "preview_id" in q_params or "survey_id" in q_params:
                         text_color = palette["text"]
                         border = palette["border"]
                         leaf_trans = translate_factor_if_default(leaf_factor)
+                        # [2026-10-21 수정] 섹션 제목([잎] 기준 대안 비교)에 이미 요인명이 있어 카드 안 h4 제거 — 다른 정의 카드와 통일
                         card_html = f"""
                         <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
-                            <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                                {leaf_trans}
-                            </h4>
                             <p style="margin: 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{leaf_desc}</p>
                         </div>
                         """
