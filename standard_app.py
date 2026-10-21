@@ -3654,21 +3654,21 @@ def write_alternative_sheets(wb, alt_result):
     is_tier3 = any(ch and len(ch) >= 3 and ch[2] for ch in chains.values())
 
     F = {
-        "title": wb.add_format({"bold": True, "font_size": 14, "font_name": "NanumGothic"}),
-        "section": wb.add_format({"bold": True, "font_size": 12, "font_name": "NanumGothic"}),
-        "header": wb.add_format({"bold": True, "align": "center", "valign": "vcenter", "bg_color": "000000", "font_color": "FFFFFF", "border": 1, "font_name": "NanumGothic"}),
-        "body": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "font_name": "NanumGothic"}),
-        "body_left": wb.add_format({"align": "left", "valign": "vcenter", "border": 1, "font_name": "NanumGothic"}),
-        "num3": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000", "font_name": "NanumGothic"}),
-        "num4": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.0000", "font_name": "NanumGothic"}),
-        "pct2": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.00", "font_name": "NanumGothic"}),
-        "sum": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "font_name": "NanumGothic"}),
-        "sum_num4": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "num_format": "0.0000", "font_name": "NanumGothic"}),
-        "diag": wb.add_format({"num_format": "0", "align": "center", "valign": "vcenter", "bg_color": "E7E6E6", "border": 1, "font_name": "NanumGothic"}),
-        "yellow_num": wb.add_format({"bg_color": "FFFF00", "border": 1, "align": "center", "valign": "vcenter", "num_format": "0.000", "font_name": "NanumGothic"}),
-        "note": wb.add_format({"italic": True, "font_color": "666666", "font_size": 9, "font_name": "NanumGothic"}),
-        "wrap": wb.add_format({"text_wrap": True, "valign": "top", "font_name": "NanumGothic"}),
-        "rowhead": wb.add_format({"bold": True, "align": "center", "valign": "vcenter", "border": 1, "bg_color": "F2F2F2", "font_name": "NanumGothic"}),
+        "title": wb.add_format({"bold": True, "font_size": 14}),
+        "section": wb.add_format({"bold": True, "font_size": 12}),
+        "header": wb.add_format({"bold": True, "align": "center", "valign": "vcenter", "bg_color": "000000", "font_color": "FFFFFF", "border": 1}),
+        "body": wb.add_format({"align": "center", "valign": "vcenter", "border": 1}),
+        "body_left": wb.add_format({"align": "left", "valign": "vcenter", "border": 1}),
+        "num3": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000"}),
+        "num4": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000"}),
+        "pct2": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.0"}),
+        "sum": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1}),
+        "sum_num4": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000"}),
+        "diag": wb.add_format({"num_format": "0", "align": "center", "valign": "vcenter", "bg_color": "E7E6E6", "border": 1}),
+        "yellow_num": wb.add_format({"bg_color": "FFFF00", "border": 1, "align": "center", "valign": "vcenter", "num_format": "0.000"}),
+        "note": wb.add_format({"italic": True, "font_color": "666666", "font_size": 9}),
+        "wrap": wb.add_format({"text_wrap": True, "valign": "top"}),
+        "rowhead": wb.add_format({"bold": True, "align": "center", "valign": "vcenter", "border": 1, "bg_color": "F2F2F2"}),
     }
 
     def _table(ws, start_row, headers, rows, fmts, widths=None):
