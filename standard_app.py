@@ -3614,13 +3614,12 @@ def compute_alternative_analysis(df_main, sub_dfs, sub_sub_dfs, alt_dfs, model,
 
 
 def write_alternative_sheets(wb, alt_result):
-    """[2026-10-21] 대안 평가 보고서 시트들을 xlsxwriter 워크북(wb)에 추가한다.
+    """[2026-10-21] 대안 평가 보고서 시트를 xlsxwriter 워크북(wb)에 추가한다.
 
-    보고서 표준 구성(계층구조도 / 표본·CR 검증 요약 / 표1 계층별 가중치 /
-    표2 대안 종합점수(Synthesis) / 민감도 분석)을 반영하고, 잎별 상세·개인별
-    점수·일관성 요약을 함께 제공한다. 단독 다운로드와 본 결과 파일 통합이
-    이 함수를 공용으로 사용한다. alt_result의 선택 키(factor_group, model,
-    leaf_detail)가 없는 구 결과 dict도 .get 기본값으로 처리한다.
+    시트 수를 줄이기 위해 주제별로 통합하고, 각 시트 안에서는 번호를 붙인
+    섹션을 아래로 나열한다 (종합분석 / 가중치·종합점수 / 민감도분석 /
+    잎별 상세분석 / 개인별 결과 — 총 5개). 본 결과 파일 통합과 단독
+    다운로드가 이 함수를 공용으로 사용한다.
     """
     alts = list(alt_result.get("alternatives", []) or [])
     leaves = list(alt_result.get("leaves", []) or [])
@@ -3643,7 +3642,6 @@ def write_alternative_sheets(wb, alt_result):
     ss_cr = fg.get("ss_cr", {}) or {}
     leaf_local = fg.get("leaf_local", {}) or {}
     chains = {k: tuple(v) for k, v in (fg.get("leaf_chain", {}) or {}).items()}
-    # 구 결과 등 factor_group이 없으면 잎 글로벌 가중치로부터 상위 가중치를 복원
     if not main_w:
         for lf in leaves:
             ch = chains.get(lf)
@@ -3660,10 +3658,9 @@ def write_alternative_sheets(wb, alt_result):
         "body": wb.add_format({"align": "center", "valign": "vcenter", "border": 1}),
         "body_left": wb.add_format({"align": "left", "valign": "vcenter", "border": 1}),
         "num3": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000"}),
-        "num4": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000"}),
-        "pct2": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.0"}),
+        "pct1": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.0"}),
         "sum": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1}),
-        "sum_num4": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000"}),
+        "sum_num": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000"}),
         "diag": wb.add_format({"num_format": "0", "align": "center", "valign": "vcenter", "bg_color": "E7E6E6", "border": 1}),
         "yellow_num": wb.add_format({"bg_color": "FFFF00", "border": 1, "align": "center", "valign": "vcenter", "num_format": "0.000"}),
         "note": wb.add_format({"italic": True, "font_color": "666666", "font_size": 9}),
@@ -3680,7 +3677,7 @@ def write_alternative_sheets(wb, alt_result):
             for c, (val, fmt_key) in enumerate(zip(row, fmts)):
                 if val is None or (isinstance(val, float) and pd.isna(val)):
                     ws.write_blank(r, c, None, F["body"])
-                elif fmt_key in ("num3", "num4", "pct2", "sum_num4", "yellow_num"):
+                elif fmt_key in ("num3", "pct1", "sum_num", "yellow_num"):
                     ws.write_number(r, c, float(val), F[fmt_key])
                 else:
                     ws.write(r, c, val, F[fmt_key])
@@ -3697,11 +3694,11 @@ def write_alternative_sheets(wb, alt_result):
     leaves_by_global = sorted(leaves, key=lambda lf: -float(leaf_global.get(lf, 0.0)))
     global_rank = {lf: i + 1 for i, lf in enumerate(leaves_by_global)}
 
-    # ---------- (대안) 종합분석 ----------
+    # ========== 시트 1: (대안) 종합분석 ==========
     ws = wb.add_worksheet("(대안) 종합분석")
     ws.write(0, 0, "대안 평가 종합 분석 결과", F["title"])
-    r = 2
-    ws.write(r, 0, "[분석 정보 및 표본·일관성 검증 요약]", F["section"]); r += 1
+    r = 2; sec = 1
+    ws.write(r, 0, f"{sec}. 분석 정보 및 표본·일관성 검증 요약", F["section"]); sec += 1; r += 1
     cr_range = f"{min(leaf_crs):.3f} ~ {max(leaf_crs):.3f}" if leaf_crs else "-"
     info_rows = [
         ("유효 표본 수", f"{n_used}명"),
@@ -3715,12 +3712,12 @@ def write_alternative_sheets(wb, alt_result):
     ]
     r = _table(ws, r, ["항목", "내용"], [[k, v] for k, v in info_rows], ["body", "body"], widths=[34, 30])
     r += 1
-    ws.write(r, 0, "1) 최종 대안 순위 (개인 점수 집계)", F["section"]); r += 1
+    ws.write(r, 0, f"{sec}. 최종 대안 순위 (개인 점수 집계)", F["section"]); sec += 1; r += 1
     r = _table(ws, r, ["순위", "대안", "종합 가중치", "비율(%)"],
                [[i + 1, a, s, s * 100] for i, (a, s) in enumerate(rank_rows)],
-               ["body", "body", "num4", "pct2"], widths=[34, 30, 16, 14])
+               ["body", "body", "num3", "pct1"], widths=[34, 30, 16, 14])
     ws.write(r, 0, "합계", F["sum"]); ws.write(r, 1, "", F["sum"])
-    ws.write_number(r, 2, float(sum(g_scores.values())), F["sum_num4"])
+    ws.write_number(r, 2, float(sum(g_scores.values())), F["sum_num"])
     ws.write_number(r, 3, float(sum(g_scores.values()) * 100), F["sum"]); r += 2
     grp_rows = []
     if not indiv.empty and "Type" in indiv.columns and indiv["Type"].astype(str).str.strip().ne("").any():
@@ -3729,15 +3726,11 @@ def write_alternative_sheets(wb, alt_result):
             top = alts[int(max(range(len(vals)), key=lambda i: vals[i]))] if vals else ""
             grp_rows.append([grp, len(gdf)] + vals + [top])
     if len(grp_rows) >= 2:
-        ws.write(r, 0, "2) 그룹별 대안 종합점수 (개인 점수 평균)", F["section"]); r += 1
+        ws.write(r, 0, f"{sec}. 그룹별 대안 종합점수 (개인 점수 평균)", F["section"]); sec += 1; r += 1
         r = _table(ws, r, ["그룹", "인원"] + alts + ["그룹 내 1위"], grp_rows,
-                   ["body", "body"] + ["num4"] * len(alts) + ["body"])
+                   ["body", "body"] + ["num3"] * len(alts) + ["body"])
         r += 1
-    ws.write(r, 0, "※ 세부 결과는 '(대안) 표1 가중치분석', '(대안) 표2 종합점수', '(대안) 민감도분석' 시트를 참조하십시오.", F["note"])
-
-    # ---------- (대안) 계층구조 ----------
-    ws = wb.add_worksheet("(대안) 계층구조")
-    ws.write(0, 0, "대안 평가 계층구조 (목표 - 평가기준 - 대안)", F["title"])
+    ws.write(r, 0, f"{sec}. 계층구조 (목표 - 평가기준 - 대안)", F["section"]); sec += 1; r += 1
     hrows = [["목표", "최종 대안 선정", "", None, None]]
     for m in mains:
         mw = float(main_w.get(m, 0.0))
@@ -3747,24 +3740,27 @@ def write_alternative_sheets(wb, alt_result):
             if is_tier3 and sc in ss_w:
                 hrows.append(["2계층", sc, m, sl, (mw * sl) if sl is not None else None])
                 for lf in [x for x in leaves if chains.get(x, (None, None, None))[1] == sc]:
-                    ll = leaf_local.get(lf)
-                    hrows.append(["3계층 (최하위)", lf, sc, ll, float(leaf_global.get(lf, 0.0))])
+                    hrows.append(["3계층 (최하위)", lf, sc, leaf_local.get(lf), float(leaf_global.get(lf, 0.0))])
             else:
                 hrows.append(["2계층 (최하위)", sc, m, sl, float(leaf_global.get(sc, 0.0))])
         if not (subs_map.get(m, []) or []):
             hrows.append(["1계층 (최하위)", m, "목표", 1.0, float(leaf_global.get(m, 0.0))])
     for a in alts:
         hrows.append(["대안", a, "모든 최하위 요인", None, None])
-    _table(ws, 2, ["계층", "요인", "상위 요인", "부분가중치(Local)", "종합가중치(Global)"], hrows,
-           ["body", "body_left", "body", "num4", "num4"], widths=[16, 30, 18, 18, 18])
+    r = _table(ws, r, ["계층", "요인", "상위 요인", "부분가중치(Local)", "종합가중치(Global)"], hrows,
+               ["body", "body_left", "body", "num3", "num3"], widths=[34, 30, 18, 18, 18])
+    r += 1
+    ws.write(r, 0, "※ 가중치 상세는 '(대안) 가중치·종합점수', 강건성 검증은 '(대안) 민감도분석' 시트를 참조하십시오.", F["note"])
 
-    # ---------- (대안) 표1 가중치분석 ----------
-    ws = wb.add_worksheet("(대안) 표1 가중치분석")
-    ws.write(0, 0, "[표 1] 평가기준 계층별 가중치 및 우선순위 분석 결과", F["title"])
+    # ========== 시트 2: (대안) 가중치·종합점수 ==========
+    ws = wb.add_worksheet("(대안) 가중치·종합점수")
+    ws.write(0, 0, "대안 평가 가중치 및 종합점수", F["title"])
+    r = 2
+    ws.write(r, 0, "1. [표 1] 평가기준 계층별 가중치 및 우선순위 분석 결과", F["section"]); r += 1
     if is_tier3:
         headers = ["1계층", "1계층 가중치", "1계층 CR", "중분류", "중분류 부분가중치", "중분류 CR",
                    "소분류 (최하위)", "소분류 부분가중치", "종합가중치(Global)", "종합 순위"]
-        fmts = ["body", "num4", "num3", "body", "num4", "num3", "body", "num4", "num4", "body"]
+        fmts = ["body", "num3", "num3", "body", "num3", "num3", "body", "num3", "num3", "body"]
         rows = []
         for m in mains:
             group_leaves = [lf for lf in leaves_by_global if chains.get(lf, (None,))[0] == m]
@@ -3776,11 +3772,11 @@ def write_alternative_sheets(wb, alt_result):
                     main_cr if gi == 0 else None,
                     _sc, (sub_w.get(m, {}) or {}).get(_sc), ss_cr.get(_sc),
                     lf, leaf_local.get(lf), float(leaf_global.get(lf, 0.0)), global_rank[lf]])
-        r = _table(ws, 2, headers, rows, fmts, widths=[16, 14, 11, 16, 16, 11, 18, 16, 16, 10])
+        r = _table(ws, r, headers, rows, fmts, widths=[16, 14, 11, 16, 16, 11, 18, 16, 16, 10])
     else:
         headers = ["1계층", "1계층 가중치", "1계층 CR", "2계층 (최하위 요인)", "부분가중치(Local)",
                    "2계층 CR", "종합가중치(Global)", "종합 순위"]
-        fmts = ["body", "num4", "num3", "body", "num4", "num3", "num4", "body"]
+        fmts = ["body", "num3", "num3", "body", "num3", "num3", "num3", "body"]
         rows = []
         for m in mains:
             group_leaves = [lf for lf in leaves_by_global if chains.get(lf, (None,))[0] == m]
@@ -3793,20 +3789,18 @@ def write_alternative_sheets(wb, alt_result):
                     main_cr if gi == 0 else None,
                     lf, leaf_local.get(lf), sub_cr.get(m),
                     float(leaf_global.get(lf, 0.0)), global_rank[lf]])
-        r = _table(ws, 2, headers, rows, fmts, widths=[16, 14, 11, 22, 16, 11, 16, 10])
+        r = _table(ws, r, headers, rows, fmts, widths=[16, 14, 11, 22, 16, 11, 16, 10])
     ws.write(r, 0, "합계", F["sum"])
-    ws.write_number(r, 1, float(sum(main_w.get(m, 0.0) for m in mains)), F["sum_num4"])
-    r += 2
+    ws.write_number(r, 1, float(sum(main_w.get(m, 0.0) for m in mains)), F["sum_num"])
+    r += 1
     ws.write(r, 0, "※ 부분가중치(Local)는 직속 상위 요인 내에서의 상대적 중요도이며, 종합가중치(Global) = 상위 가중치 × 부분가중치입니다.", F["note"])
-
-    # ---------- (대안) 표2 종합점수 ----------
-    ws = wb.add_worksheet("(대안) 표2 종합점수")
-    ws.write(0, 0, "[표 2] 평가기준별 대안 선호도 및 최종 종합점수 (Synthesis)", F["title"])
+    r += 2
+    ws.write(r, 0, "2. [표 2] 평가기준별 대안 선호도 및 최종 종합점수 (Synthesis)", F["section"]); r += 1
     headers = ["평가기준 (최하위 요인)", "종합가중치(Wi)"]
     for a in alts:
         headers += [f"{a} 선호도", f"{a} 기여도"]
     headers += ["대안 평가 CR"]
-    fmts = ["body", "num4"] + ["num4", "num4"] * len(alts) + ["num3"]
+    fmts = ["body", "num3"] + ["num3", "num3"] * len(alts) + ["num3"]
     rows = []
     for lf in leaves_by_global:
         gw = float(leaf_global.get(lf, 0.0))
@@ -3816,13 +3810,13 @@ def write_alternative_sheets(wb, alt_result):
             row += [pref, gw * pref]
         row.append((leaf_detail.get(lf, {}) or {}).get("group_cr"))
         rows.append(row)
-    r = _table(ws, 2, headers, rows, fmts, widths=[24, 15] + [13, 13] * len(alts) + [13])
+    r = _table(ws, r, headers, rows, fmts, widths=[24, 15] + [13, 13] * len(alts) + [13])
     contrib_tot = {a: sum(float(leaf_global.get(lf, 0.0)) * float(leaf_alt_group.get(lf, {}).get(a, 0.0)) for lf in leaves) for a in alts}
     ws.write(r, 0, "종합점수 (계층 결합)", F["sum"])
-    ws.write_number(r, 1, float(sum(leaf_global.get(lf, 0.0) for lf in leaves)), F["sum_num4"])
+    ws.write_number(r, 1, float(sum(leaf_global.get(lf, 0.0) for lf in leaves)), F["sum_num"])
     for ai, a in enumerate(alts):
         ws.write_blank(r, 2 + ai * 2, None, F["sum"])
-        ws.write_number(r, 3 + ai * 2, contrib_tot[a], F["sum_num4"])
+        ws.write_number(r, 3 + ai * 2, contrib_tot[a], F["sum_num"])
     ws.write_blank(r, 2 + len(alts) * 2, None, F["sum"]); r += 1
     ws.write(r, 0, "종합점수 비율(%)", F["sum"])
     ws.write_blank(r, 1, None, F["sum"])
@@ -3836,12 +3830,12 @@ def write_alternative_sheets(wb, alt_result):
     for ai, a in enumerate(alts):
         ws.write_blank(r, 2 + ai * 2, None, F["sum"])
         ws.write(r, 3 + ai * 2, f"{syn_rank[a]}순위", F["sum"])
-    ws.write_blank(r, 2 + len(alts) * 2, None, F["sum"]); r += 2
+    ws.write_blank(r, 2 + len(alts) * 2, None, F["sum"]); r += 1
     ws.write(r, 0, "참고: 앱 종합 가중치 (개인 점수 집계)", F["body"])
     ws.write_blank(r, 1, None, F["body"])
     for ai, a in enumerate(alts):
         ws.write_blank(r, 2 + ai * 2, None, F["body"])
-        ws.write_number(r, 3 + ai * 2, float(g_scores.get(a, 0.0)), F["num4"])
+        ws.write_number(r, 3 + ai * 2, float(g_scores.get(a, 0.0)), F["num3"])
     ws.write_blank(r, 2 + len(alts) * 2, None, F["body"]); r += 1
     aip_rank = {a: i + 1 for i, (a, _s) in enumerate(rank_rows)}
     ws.write(r, 0, "참고: 앱 최종 우선순위", F["body"])
@@ -3849,10 +3843,19 @@ def write_alternative_sheets(wb, alt_result):
     for ai, a in enumerate(alts):
         ws.write_blank(r, 2 + ai * 2, None, F["body"])
         ws.write(r, 3 + ai * 2, f"{aip_rank.get(a, '')}순위", F["body"])
-    ws.write_blank(r, 2 + len(alts) * 2, None, F["body"]); r += 2
+    ws.write_blank(r, 2 + len(alts) * 2, None, F["body"]); r += 1
     ws.write(r, 0, "※ 기여도 = 해당 기준의 종합가중치(Wi) × 대안 선호도. '계층 결합' 종합점수는 기준 가중치와 대안 선호도를 결합한 값이고, 앱 종합 가중치는 응답자 개인별 종합점수를 집계한 값으로 집계 방식 차이만큼 결과가 다를 수 있습니다.", F["note"])
+    r += 2
+    ws.write(r, 0, "3. 최하위 요인별 대안 국지 가중치 (그룹)", F["section"]); r += 1
+    leaf_rows = []
+    for lf in leaves:
+        vals = [float(leaf_alt_group.get(lf, {}).get(a, 0.0)) for a in alts]
+        leaf_rows.append([lf, float(leaf_global.get(lf, 0.0))] + vals + [sum(vals)])
+    _table(ws, r, ["최하위 요인", "글로벌 가중치"] + alts + ["행 합계"],
+           leaf_rows, ["body", "num3"] + ["num3"] * len(alts) + ["num3"],
+           widths=[24, 15] + [13] * len(alts) + [12])
 
-    # ---------- (대안) 민감도분석 ----------
+    # ========== 시트 3: (대안) 민감도분석 ==========
     if len(mains) >= 2 and main_w:
         top_main = max(mains, key=lambda m: float(main_w.get(m, 0.0)))
         w0 = float(main_w.get(top_main, 0.0))
@@ -3867,7 +3870,7 @@ def write_alternative_sheets(wb, alt_result):
                     if m == top_main:
                         scale[m] = w_top / w0
                     else:
-                        scale[m] = (float(main_w.get(m, 0.0)) * (1 - w_top) / (1 - w0)) / float(main_w.get(m, 0.0)) if float(main_w.get(m, 0.0)) > 0 else 0.0
+                        scale[m] = (1 - w_top) / (1 - w0) if float(main_w.get(m, 0.0)) > 0 else 0.0
                 out = {}
                 for a in alts:
                     tot = 0.0
@@ -3908,7 +3911,7 @@ def write_alternative_sheets(wb, alt_result):
             hdr_row = r
             r = _table(ws, r, [f"{top_main} 가중치"] + alts + ["1위 대안"],
                        [[w] + [sens[i][a] for a in alts] + [max(alts, key=lambda a: sens[i][a])] for i, w in enumerate(steps)],
-                       ["num3"] + ["num4"] * len(alts) + ["body"],
+                       ["num3"] + ["num3"] * len(alts) + ["body"],
                        widths=[16] + [14] * len(alts) + [12])
             chart = wb.add_chart({"type": "line"})
             for ai, a in enumerate(alts):
@@ -3926,33 +3929,18 @@ def write_alternative_sheets(wb, alt_result):
             ws.insert_chart(hdr_row, 3 + len(alts), chart)
             ws.write(r + 1, 0, "※ 다른 1계층 요인의 가중치는 현재 비율을 유지하며 비례 조정됩니다. 종합점수는 계층 결합(표2) 방식입니다.", F["note"])
 
-    # ---------- (대안) 요인별 가중치 ----------
-    ws = wb.add_worksheet("(대안) 요인별 가중치")
-    ws.write(0, 0, "최하위 요인별 대안 국지 가중치 (그룹)", F["title"])
-    leaf_rows = []
-    for lf in leaves:
-        vals = [float(leaf_alt_group.get(lf, {}).get(a, 0.0)) for a in alts]
-        leaf_rows.append([lf, float(leaf_global.get(lf, 0.0))] + vals + [sum(vals)])
-    _table(ws, 2, ["최하위 요인", "글로벌 가중치"] + alts + ["행 합계"],
-           leaf_rows, ["body", "num4"] + ["num4"] * len(alts) + ["num4"],
-           widths=[22, 16] + [14] * len(alts) + [12])
-
-    # ---------- 잎별 상세 시트 ----------
-    used_names = {"(대안) 종합분석", "(대안) 계층구조", "(대안) 표1 가중치분석", "(대안) 표2 종합점수",
-                  "(대안) 민감도분석", "(대안) 요인별 가중치", "(대안) 개인별 종합점수", "(대안) 일관성 요약"}
-    for lf in leaves:
+    # ========== 시트 4: (대안) 잎별 상세분석 ==========
+    ws = wb.add_worksheet("(대안) 잎별 상세분석")
+    ws.write(0, 0, "최하위 요인별 대안 평가 상세 (종합 행렬 · 개인별 가중치)", F["title"])
+    r = 2
+    for li, lf in enumerate(leaves):
         det = leaf_detail.get(lf) or {}
         res = det.get("res")
+        ws.write(r, 0, f"{li + 1}. [{lf}] 대안 평가 상세", F["section"]); r += 1
+        ws.write(r, 0, f"분석 제외 사례수: {int(det.get('excluded_count', 0) or 0)}건"); r += 1
         if res is None or (hasattr(res, "empty") and res.empty):
+            ws.write(r, 0, "유효 응답이 없습니다."); r += 2
             continue
-        sname = f"(대안) {lf}"[:31]
-        base = sname; k = 2
-        while sname in used_names:
-            sname = (base[:28] + f"_{k}")[:31]; k += 1
-        used_names.add(sname)
-        ws = wb.add_worksheet(sname)
-        ws.write(0, 0, f"분석 제외 사례수: {int(det.get('excluded_count', 0) or 0)}건", F["section"])
-        r = 2
         gmat = det.get("group_matrix")
         if gmat is not None:
             ws.write(r, 0, f"[{lf} 기준 대안 평가 종합 행렬]", F["section"]); r += 1
@@ -3996,27 +3984,17 @@ def write_alternative_sheets(wb, alt_result):
                 ws.write_number(r, 2 + len(alts) + kcr, crv, F["yellow_num"] if crv > float(cr_thr) else F["num3"])
             ws.write(r, 4 + len(alts), "보정" if bool(row.get("Corrected", False)) else "", F["body"])
             r += 1
-        ws.set_column(0, 0, 18); ws.set_column(1, 1, 14)
-        for ci in range(len(alts) + 3):
-            ws.set_column(2 + ci, 2 + ci, 13)
+        r += 1
+    ws.set_column(0, 0, 18); ws.set_column(1, 1, 14)
+    for ci in range(len(alts) + 3):
+        ws.set_column(2 + ci, 2 + ci, 13)
 
-    # ---------- (대안) 개인별 종합점수 ----------
-    ws = wb.add_worksheet("(대안) 개인별 종합점수")
-    ws.write(0, 0, "개인별 대안 종합점수", F["title"])
-    if not indiv.empty:
-        irows = []
-        for _, row in indiv.iterrows():
-            irows.append([str(row.get("ID", "")), str(row.get("Type", ""))]
-                         + [float(row.get(f"Score_{a}", 0.0) or 0.0) for a in alts]
-                         + [str(row.get("1위 대안", ""))])
-        _table(ws, 2, ["ID", "Type"] + alts + ["1위 대안"], irows,
-               ["body", "body"] + ["num4"] * len(alts) + ["body"],
-               widths=[18, 14] + [14] * len(alts) + [12])
-
-    # ---------- (대안) 일관성 요약 ----------
+    # ========== 시트 5: (대안) 개인별 결과 ==========
+    ws = wb.add_worksheet("(대안) 개인별 결과")
+    ws.write(0, 0, "개인별 대안 평가 결과", F["title"])
+    r = 2
     if leaf_detail:
-        ws = wb.add_worksheet("(대안) 일관성 요약")
-        ws.write(0, 0, "최하위 요인별 일관성(CR) 요약", F["title"])
+        ws.write(r, 0, "1. 최하위 요인별 일관성(CR) 요약", F["section"]); r += 1
         crows = []
         for lf in leaves:
             det = leaf_detail.get(lf) or {}
@@ -4028,10 +4006,21 @@ def write_alternative_sheets(wb, alt_result):
             corr_n = int(res.get("Corrected").astype(bool).sum()) if "Corrected" in res.columns else 0
             crows.append([lf, len(res), int(det.get("excluded_count", 0) or 0),
                           float(ocr.mean()), float(fcr.mean()), float(fcr.max()), corr_n])
-        rr = _table(ws, 2, ["최하위 요인", "유효 응답", "제외", "평균 Original CR", "평균 Final CR", "최대 Final CR", "보정된 응답 수"],
-                    crows, ["body", "body", "body", "num3", "num3", "num3", "body"],
-                    widths=[22, 12, 10, 17, 15, 15, 15])
-        ws.write(rr + 1, 0, "※ Final CR은 임계값 초과 시 자동 보정을 거친 뒤의 값입니다. 보정 후에도 임계값을 넘은 응답은 제외됩니다.", F["note"])
+        r = _table(ws, r, ["최하위 요인", "유효 응답", "제외", "평균 Original CR", "평균 Final CR", "최대 Final CR", "보정된 응답 수"],
+                   crows, ["body", "body", "body", "num3", "num3", "num3", "body"],
+                   widths=[22, 12, 10, 17, 15, 15, 15])
+        ws.write(r, 0, "※ Final CR은 임계값 초과 시 자동 보정을 거친 뒤의 값입니다. 보정 후에도 임계값을 넘은 응답은 제외됩니다.", F["note"])
+        r += 2
+    ws.write(r, 0, f"{2 if leaf_detail else 1}. 개인별 대안 종합점수", F["section"]); r += 1
+    if not indiv.empty:
+        irows = []
+        for _, row in indiv.iterrows():
+            irows.append([str(row.get("ID", "")), str(row.get("Type", ""))]
+                         + [float(row.get(f"Score_{a}", 0.0) or 0.0) for a in alts]
+                         + [str(row.get("1위 대안", ""))])
+        _table(ws, r, ["ID", "Type"] + alts + ["1위 대안"], irows,
+               ["body", "body"] + ["num3"] * len(alts) + ["body"],
+               widths=[22, 14] + [14] * len(alts) + [12])
     return True
 
 
