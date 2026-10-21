@@ -5495,6 +5495,44 @@ if "preview_id" in q_params or "survey_id" in q_params:
                             </div>
                             """
                             st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
+                elif comb['type'] == 'alt':
+                    # [2026-10-21 수정] 대안 비교에서는 대분류 요인 정의 전체를 반복 표시하지 않는다.
+                    # 기준이 되는 최하위(잎) 요인의 정의만 카드로 보여준다 — 응답자가 어떤 기준으로
+                    # 대안을 비교해야 하는지 알 수 있게 하기 위함. 기존에는 전용 분기가 없어
+                    # else(대분류 비교용)로 떨어져 섹션마다 대분류 정의 카드가 반복됐다.
+                    leaf_factor = comb['parent']
+                    leaf_desc = translate_definition_if_default(leaf_factor, definitions.get(leaf_factor, "")) if definitions else ""
+                    if leaf_desc and not _is_shjeon_survey:
+                        _main_idx_alt = 0
+                        _mains_alt = ahp_model.get("main", []) or []
+                        _subs_alt = ahp_model.get("subs", {}) or {}
+                        _sub_subs_alt = ahp_model.get("sub_subs", {}) or {}
+                        for _mi_alt, _mc_alt in enumerate(_mains_alt):
+                            if leaf_factor == _mc_alt or leaf_factor in (_subs_alt.get(_mc_alt, []) or []):
+                                _main_idx_alt = _mi_alt
+                                break
+                            _found_alt = False
+                            for _sub_alt in (_subs_alt.get(_mc_alt, []) or []):
+                                if leaf_factor in (_sub_subs_alt.get(_sub_alt, []) or []):
+                                    _main_idx_alt = _mi_alt
+                                    _found_alt = True
+                                    break
+                            if _found_alt:
+                                break
+                        palette = PASTEL_PALETTES[_main_idx_alt % len(PASTEL_PALETTES)]
+                        bg = palette["bg"]
+                        text_color = palette["text"]
+                        border = palette["border"]
+                        leaf_trans = translate_factor_if_default(leaf_factor)
+                        card_html = f"""
+                        <div style="background-color: {bg}; border: 1px solid {border}; border-left: 6px solid {text_color}; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 8px 0; color: {text_color}; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                                {leaf_trans}
+                            </h4>
+                            <p style="margin: 0; color: #475569; font-size: 0.95rem; font-style: italic; font-weight: 500;">{leaf_desc}</p>
+                        </div>
+                        """
+                        st.markdown(card_html.replace("\n", " "), unsafe_allow_html=True)
                 else:
                     main_rows_html = ""
                     if definitions:
