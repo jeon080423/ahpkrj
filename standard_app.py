@@ -3407,6 +3407,21 @@ def compute_alternative_analysis(df_main, sub_dfs, sub_sub_dfs, alt_dfs, model,
         res, facs, _exc, _edf = process_single_sheet(df, cr_threshold, max_iter, learning_rate, method, ahp_method)
         return res, facs
 
+    def _run_full(df):
+        """대안 잎 전용: 제외 건수·제외 df·집단 종합 행렬까지 함께 반환 (엑셀 상세 표용)."""
+        if df is None or len(df) == 0:
+            return None, [], 0, None, None, None, None
+        res, facs, exc_cnt, exc_df = process_single_sheet(df, cr_threshold, max_iter, learning_rate, method, ahp_method)
+        gmat, gcr, gci = None, None, None
+        if res is not None and not res.empty and "Matrix_Object" in res.columns:
+            try:
+                _mats = np.stack(res["Matrix_Object"].values)
+                gmat = np.mean(_mats, axis=0) if method == 'arithmetic' else gmean(_mats, axis=0)
+                gcr, gci, _lam = calculate_consistency(gmat, method)
+            except Exception:
+                gmat, gcr, gci = None, None, None
+        return res, facs, exc_cnt, exc_df, gmat, gcr, gci
+
     def _indiv_weights(res):
         out = {}
         if res is None or res.empty:
@@ -3498,15 +3513,19 @@ def compute_alternative_analysis(df_main, sub_dfs, sub_sub_dfs, alt_dfs, model,
 
     # 3) 대안 가중치 (개인별·잎별, 그룹·잎별)
     alt_indiv, alt_group = {}, {}
+    leaf_detail = {}
     for leaf in leaves:
         adf = alt_dfs.get(leaf)
         if adf is None:
             return None
-        res, facs = _run(adf)
+        res, facs, exc_cnt, exc_df, gmat, gcr, gci = _run_full(adf)
         if res is None or res.empty:
             return None
         alt_indiv[leaf] = _indiv_weights(res)
         alt_group[leaf] = _group_weights(res, facs)
+        leaf_detail[leaf] = {"res": res, "factors": facs, "excluded_count": exc_cnt,
+                             "excluded_df": exc_df, "group_matrix": gmat,
+                             "group_cr": gcr, "group_ci": gci}
 
     # 4) 개인별 종합점수 (모든 잎 완비 응답자만)
     type_map = {}
@@ -3550,66 +3569,271 @@ def compute_alternative_analysis(df_main, sub_dfs, sub_sub_dfs, alt_dfs, model,
         "leaf_alt_group": alt_group,
         "leaf_group_global": group_leaf_w,
         "n_used": len(indiv_df),
+        # [2026-10-21] 엑셀 상세화용 추가 정보 (구 결과 dict와 하위 호환: 빌더에서 .get 사용)
+        "leaf_alt_indiv": alt_indiv,
+        "leaf_detail": leaf_detail,
+        "settings": {"cr_threshold": cr_threshold, "method": method, "ahp_method": ahp_method},
     }
 
 
 def build_alternative_excel(alt_result):
-    """[2026-10-20] 대안 평가 전용 엑셀 생성 (종합순위/요인별 가중치/기여도/개인별 종합점수)."""
+    """[2026-10-21 개편] 대안 평가 전용 엑셀 생성.
+
+    일반 AHP 분석 엑셀(AHP_Result.xlsx)과 같은 형식·디자인 언어로 구성한다:
+    종합분석(분석 정보·최종 순위·그룹별 점수·기여 요약) / 종합순위(+1위 빈도) /
+    요인별 가중치 / 요인별 기여도 / 잎별 상세 시트(종합 행렬·개인별 가중치·CR) /
+    개인별 종합점수 / 일관성 요약. 서식은 xlsxwriter로 헤더(검정)·테두리·합계행
+    (회색)·일관성 초과 강조(노랑) 등 본 분석 엑셀과 동일하게 적용한다.
+    alt_result에 leaf_detail이 없는 구 결과 dict도 .get 기본값으로 처리한다.
+    """
     import io as _io
     buf = _io.BytesIO()
-    alts = alt_result["alternatives"]
-    leaves = alt_result["leaves"]
-    g_scores = alt_result["group_scores"]
+    alts = list(alt_result.get("alternatives", []) or [])
+    leaves = list(alt_result.get("leaves", []) or [])
+    g_scores = alt_result.get("group_scores", {}) or {}
+    leaf_global = alt_result.get("leaf_group_global", {}) or {}
+    leaf_alt_group = alt_result.get("leaf_alt_group", {}) or {}
+    indiv = (alt_result.get("indiv_df") if alt_result.get("indiv_df") is not None else pd.DataFrame()).copy()
+    leaf_detail = alt_result.get("leaf_detail", {}) or {}
+    settings = alt_result.get("settings", {}) or {}
+    cr_thr = settings.get("cr_threshold", 0.1)
+    method_lbl = "기하평균" if settings.get("method", "geometric") == "geometric" else "산술평균"
+    n_used = alt_result.get("n_used", len(indiv))
+
+    import xlsxwriter
+    wb = xlsxwriter.Workbook(buf, {"in_memory": True})
+    F = {
+        "title": wb.add_format({"bold": True, "font_size": 14, "font_name": "NanumGothic"}),
+        "section": wb.add_format({"bold": True, "font_size": 12, "font_name": "NanumGothic"}),
+        "header": wb.add_format({"bold": True, "align": "center", "valign": "vcenter", "bg_color": "000000", "font_color": "FFFFFF", "border": 1, "font_name": "NanumGothic"}),
+        "body": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "font_name": "NanumGothic"}),
+        "body_left": wb.add_format({"align": "left", "valign": "vcenter", "border": 1, "font_name": "NanumGothic"}),
+        "num3": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000", "font_name": "NanumGothic"}),
+        "num4": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.0000", "font_name": "NanumGothic"}),
+        "pct2": wb.add_format({"align": "center", "valign": "vcenter", "border": 1, "num_format": "0.00", "font_name": "NanumGothic"}),
+        "sum": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "font_name": "NanumGothic"}),
+        "sum_num3": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "num_format": "0.000", "font_name": "NanumGothic"}),
+        "sum_num4": wb.add_format({"bold": True, "bg_color": "D3D3D3", "align": "center", "valign": "vcenter", "border": 1, "num_format": "0.0000", "font_name": "NanumGothic"}),
+        "diag": wb.add_format({"num_format": "0", "align": "center", "valign": "vcenter", "bg_color": "E7E6E6", "border": 1, "font_name": "NanumGothic"}),
+        "yellow_num": wb.add_format({"bg_color": "FFFF00", "border": 1, "align": "center", "valign": "vcenter", "num_format": "0.000", "font_name": "NanumGothic"}),
+        "note": wb.add_format({"italic": True, "font_color": "666666", "font_size": 9, "font_name": "NanumGothic"}),
+        "rowhead": wb.add_format({"bold": True, "align": "center", "valign": "vcenter", "border": 1, "bg_color": "F2F2F2", "font_name": "NanumGothic"}),
+    }
+
+    def _write_table(ws, start_row, headers, rows, fmts, widths=None):
+        """헤더 행 + 데이터 행을 쓰고 다음 빈 행 번호를 반환."""
+        r = start_row
+        for c, h in enumerate(headers):
+            ws.write(r, c, h, F["header"])
+        r += 1
+        for row in rows:
+            for c, (val, fmt_key) in enumerate(zip(row, fmts)):
+                if val is None or (isinstance(val, float) and pd.isna(val)):
+                    ws.write_blank(r, c, None, F["body"])
+                elif fmt_key in ("num3", "num4", "pct2", "sum_num3", "sum_num4", "yellow_num"):
+                    ws.write_number(r, c, float(val), F[fmt_key])
+                else:
+                    ws.write(r, c, val, F[fmt_key])
+            r += 1
+        if widths:
+            for c, w in enumerate(widths):
+                ws.set_column(c, c, w)
+        return r
 
     rank_rows = sorted(g_scores.items(), key=lambda kv: kv[1], reverse=True)
-    rank_df = pd.DataFrame([
-        {"순위": i + 1, "대안": a, "종합 가중치": round(s, 4), "비율(%)": round(s * 100, 2)}
-        for i, (a, s) in enumerate(rank_rows)
-    ])
+    total_excluded = sum(int((leaf_detail.get(lf, {}) or {}).get("excluded_count", 0) or 0) for lf in leaves)
 
-    leaf_rows = []
-    for leaf in leaves:
-        row = {"최하위 요인": leaf,
-               "글로벌 가중치": round(alt_result["leaf_group_global"].get(leaf, 0.0), 4)}
-        for a in alts:
-            row[a] = round(alt_result["leaf_alt_group"].get(leaf, {}).get(a, 0.0), 4)
-        leaf_rows.append(row)
-    leaf_df = pd.DataFrame(leaf_rows)
-
+    # ---------- 시트 1: 종합분석 ----------
+    ws = wb.add_worksheet("(대안) 종합분석")
+    ws.write(0, 0, "대안 평가 종합 분석 결과", F["title"])
+    r = 2
+    ws.write(r, 0, "[분석 정보]", F["section"]); r += 1
+    info_rows = [
+        ("분석 응답 수", f"{n_used}명"),
+        ("대안", ", ".join(alts)),
+        ("최하위(잎) 요인 수", f"{len(leaves)}개"),
+        ("집계 방식", f"{method_lbl} (개인 점수 집계)"),
+        ("일관성(CR) 임계값", f"{cr_thr}"),
+        ("분석 제외 사례수 (잎별 합계)", f"{total_excluded}건"),
+    ]
+    r = _write_table(ws, r, ["항목", "내용"], [[k, v, ] for k, v in info_rows],
+                     ["body", "body"], widths=[30, 46])
+    r += 1
+    _sec = 1
+    ws.write(r, 0, f"{_sec}) 최종 대안 순위", F["section"]); _sec += 1; r += 1
+    rows = [[i + 1, a, s, s * 100] for i, (a, s) in enumerate(rank_rows)]
+    r = _write_table(ws, r, ["순위", "대안", "종합 가중치", "비율(%)"], rows,
+                     ["body", "body", "num4", "pct2"], widths=[30, 46, 16, 14])
+    ws.write(r, 0, "합계", F["sum"]); ws.write(r, 1, "", F["sum"])
+    ws.write_number(r, 2, float(sum(g_scores.values())), F["sum_num4"])
+    ws.write_number(r, 3, float(sum(g_scores.values()) * 100), F["sum"]); r += 2
+    # 그룹별 점수 (Type이 2개 이상일 때만)
+    grp_rows = []
+    if not indiv.empty and "Type" in indiv.columns and indiv["Type"].astype(str).str.strip().ne("").any():
+        for grp, gdf in indiv.groupby(indiv["Type"].astype(str)):
+            vals = [float(gdf[f"Score_{a}"].mean()) if f"Score_{a}" in gdf.columns else 0.0 for a in alts]
+            top = alts[int(max(range(len(vals)), key=lambda i: vals[i]))] if vals else ""
+            grp_rows.append([grp, len(gdf)] + vals + [top])
+    if len(grp_rows) >= 2:
+        ws.write(r, 0, f"{_sec}) 그룹별 대안 종합점수 (개인 점수 평균)", F["section"]); _sec += 1; r += 1
+        r = _write_table(ws, r, ["그룹", "인원"] + alts + ["그룹 내 1위"], grp_rows,
+                         ["body", "body"] + ["num4"] * len(alts) + ["body"])
+        r += 1
+    ws.write(r, 0, f"{_sec}) 요인별 기여 요약", F["section"]); r += 1
+    contrib_head = ["최하위 요인", "글로벌 가중치"] + [f"{a} 기여도" for a in alts] + ["잎 내 1위 대안"]
     contrib_rows = []
-    for leaf in leaves:
-        gw = alt_result["leaf_group_global"].get(leaf, 0.0)
-        row = {"최하위 요인": leaf}
-        for a in alts:
-            row[a] = round(gw * alt_result["leaf_alt_group"].get(leaf, {}).get(a, 0.0), 4)
-        contrib_rows.append(row)
-    contrib_df = pd.DataFrame(contrib_rows)
+    for lf in leaves:
+        gw = float(leaf_global.get(lf, 0.0))
+        cvals = [gw * float(leaf_alt_group.get(lf, {}).get(a, 0.0)) for a in alts]
+        top = alts[int(max(range(len(cvals)), key=lambda i: cvals[i]))] if cvals else ""
+        contrib_rows.append([lf, gw] + cvals + [top])
+    r = _write_table(ws, r, contrib_head, contrib_rows,
+                     ["body", "num4"] + ["num4"] * len(alts) + ["body"])
+    r += 1
+    ws.write(r, 0, "※ 종합 가중치는 개인별 대안 종합점수를 집계한 값이며, 요인별 기여도는 그룹 가중치 기준 분해값으로 집계 방식 차이만큼 소폭 다를 수 있습니다.", F["note"])
 
-    indiv = alt_result["indiv_df"].copy()
-    indiv = indiv.rename(columns={f"Score_{a}": a for a in alts})
-    for a in alts:
-        if a in indiv.columns:
-            indiv[a] = indiv[a].round(4)
+    # ---------- 시트 2: 종합순위 ----------
+    ws = wb.add_worksheet("(대안) 종합순위")
+    ws.write(0, 0, "대안 종합순위", F["title"])
+    r = 2
+    r = _write_table(ws, r, ["순위", "대안", "종합 가중치", "비율(%)"],
+                     [[i + 1, a, s, s * 100] for i, (a, s) in enumerate(rank_rows)],
+                     ["body", "body", "num4", "pct2"], widths=[10, 18, 16, 14])
+    ws.write(r, 0, "합계", F["sum"]); ws.write(r, 1, "", F["sum"])
+    ws.write_number(r, 2, float(sum(g_scores.values())), F["sum_num4"])
+    ws.write_number(r, 3, float(sum(g_scores.values()) * 100), F["sum"]); r += 2
+    if not indiv.empty and "1위 대안" in indiv.columns:
+        ws.write(r, 0, "개인별 1위 대안 빈도", F["section"]); r += 1
+        vc = indiv["1위 대안"].astype(str).value_counts()
+        freq_rows = [[a, int(vc.get(a, 0)), (int(vc.get(a, 0)) / len(indiv) * 100) if len(indiv) else 0.0] for a in alts]
+        r = _write_table(ws, r, ["대안", "1위 응답자 수", "비율(%)"], freq_rows, ["body", "body", "pct2"])
 
-    with pd.ExcelWriter(buf, engine="openpyxl") as writer:
-        rank_df.to_excel(writer, index=False, sheet_name="(대안) 종합순위")
-        leaf_df.to_excel(writer, index=False, sheet_name="(대안) 요인별 가중치")
-        contrib_df.to_excel(writer, index=False, sheet_name="(대안) 요인별 기여도")
-        indiv.to_excel(writer, index=False, sheet_name="(대안) 개인별 종합점수")
-        from openpyxl.styles import Font, PatternFill, Alignment
-        hdr_font = Font(bold=True, color="FFFFFF")
-        hdr_fill = PatternFill("solid", fgColor="1F4E79")
-        for ws in writer.book.worksheets:
-            for cell in ws[1]:
-                cell.font = hdr_font
-                cell.fill = hdr_fill
-                cell.alignment = Alignment(horizontal="center")
-            for col_cells in ws.columns:
-                maxlen = max((len(str(c.value)) if c.value is not None else 0) for c in col_cells)
-                ws.column_dimensions[col_cells[0].column_letter].width = min(max(12, maxlen + 4), 42)
+    # ---------- 시트 3: 요인별 가중치 ----------
+    ws = wb.add_worksheet("(대안) 요인별 가중치")
+    ws.write(0, 0, "최하위 요인별 대안 국지 가중치 (그룹)", F["title"])
+    leaf_rows = []
+    for lf in leaves:
+        vals = [float(leaf_alt_group.get(lf, {}).get(a, 0.0)) for a in alts]
+        leaf_rows.append([lf, float(leaf_global.get(lf, 0.0))] + vals + [sum(vals)])
+    _write_table(ws, 2, ["최하위 요인", "글로벌 가중치"] + alts + ["행 합계"],
+                 leaf_rows, ["body", "num4"] + ["num4"] * len(alts) + ["num4"],
+                 widths=[22, 16] + [14] * len(alts) + [12])
+
+    # ---------- 시트 4: 요인별 기여도 ----------
+    ws = wb.add_worksheet("(대안) 요인별 기여도")
+    ws.write(0, 0, "최하위 요인별 대안 기여도 (글로벌 가중치 × 국지 가중치)", F["title"])
+    contrib_only = [[lf, float(leaf_global.get(lf, 0.0))] + [float(leaf_global.get(lf, 0.0)) * float(leaf_alt_group.get(lf, {}).get(a, 0.0)) for a in alts] for lf in leaves]
+    r = _write_table(ws, 2, ["최하위 요인", "글로벌 가중치"] + alts, contrib_only,
+                     ["body", "num4"] + ["num4"] * len(alts), widths=[22, 16] + [14] * len(alts))
+    ws.write(r, 0, "기여도 합계 (요인 분해 기준)", F["sum"])
+    ws.write_number(r, 1, float(sum(leaf_global.get(lf, 0.0) for lf in leaves)), F["sum_num4"])
+    for ci, a in enumerate(alts):
+        ws.write_number(r, 2 + ci, float(sum(row[2 + ci] for row in contrib_only)), F["sum_num4"])
+
+    # ---------- 시트 5+: 잎별 상세 ----------
+    used_names = {"(대안) 종합분석", "(대안) 종합순위", "(대안) 요인별 가중치", "(대안) 요인별 기여도", "(대안) 개인별 종합점수", "(대안) 일관성 요약"}
+    for lf in leaves:
+        det = leaf_detail.get(lf) or {}
+        res = det.get("res")
+        if res is None or (hasattr(res, "empty") and res.empty):
+            continue
+        sname = f"(대안) {lf}"[:31]
+        base = sname; k = 2
+        while sname in used_names:
+            sname = (base[:28] + f"_{k}")[:31]; k += 1
+        used_names.add(sname)
+        ws = wb.add_worksheet(sname)
+        ws.write(0, 0, f"분석 제외 사례수: {int(det.get('excluded_count', 0) or 0)}건", F["section"])
+        r = 2
+        gmat = det.get("group_matrix")
+        if gmat is not None:
+            ws.write(r, 0, f"[{lf} 기준 대안 평가 종합 행렬]", F["section"]); r += 1
+            hdr = [""] + alts + ["", "전체 일관성 지표", ""]
+            for c, h in enumerate(hdr):
+                if h:
+                    ws.write(r, c, h, F["header"])
+            r += 1
+            gmat_arr = np.asarray(gmat, dtype=float)
+            for i, a in enumerate(alts):
+                ws.write(r, 0, a, F["rowhead"])
+                for j in range(len(alts)):
+                    if i == j:
+                        ws.write_number(r, 1 + j, 1.0, F["diag"])
+                    else:
+                        ws.write_number(r, 1 + j, float(gmat_arr[i, j]), F["num3"])
+                if i == 0:
+                    ws.write(r, 2 + len(alts), "전체 CI", F["body"])
+                    if det.get("group_ci") is not None:
+                        ws.write_number(r, 3 + len(alts), float(det["group_ci"]), F["num3"])
+                if i == 1:
+                    ws.write(r, 2 + len(alts), "전체 CR", F["body"])
+                    if det.get("group_cr") is not None:
+                        ws.write_number(r, 3 + len(alts), float(det["group_cr"]), F["num3"])
+                r += 1
+            r += 1
+        ws.write(r, 0, "[개인별 가중치 및 일관성]", F["section"]); r += 1
+        p_headers = ["ID", "Type"] + [f"Weight_{a}" for a in alts] + ["Original_CR", "Final_CR", "보정 여부"]
+        p_rows = []
+        res_sorted = res.sort_values("ID") if "ID" in res.columns else res
+        for _, row in res_sorted.iterrows():
+            ocr = float(row.get("Original_CR", 0.0) or 0.0)
+            fcr = float(row.get("Final_CR", 0.0) or 0.0)
+            prow = [str(row.get("ID", "")), str(row.get("Type", ""))]
+            prow += [float(row.get(f"Weight_{a}", 0.0) or 0.0) for a in alts]
+            prow += [ocr, fcr, "보정" if bool(row.get("Corrected", False)) else ""]
+            p_rows.append(prow)
+        hdr_row = r
+        for c, h in enumerate(p_headers):
+            ws.write(hdr_row, c, h, F["header"])
+        r += 1
+        for prow in p_rows:
+            ws.write(r, 0, prow[0], F["body"]); ws.write(r, 1, prow[1], F["body"])
+            for ci in range(len(alts)):
+                ws.write_number(r, 2 + ci, prow[2 + ci], F["num3"])
+            for kcr, crv in enumerate(prow[2 + len(alts):2 + len(alts) + 2]):
+                ws.write_number(r, 2 + len(alts) + kcr, crv, F["yellow_num"] if crv > float(cr_thr) else F["num3"])
+            ws.write(r, 4 + len(alts), prow[-1], F["body"])
+            r += 1
+        ws.set_column(0, 0, 18); ws.set_column(1, 1, 14)
+        for ci in range(len(alts) + 3):
+            ws.set_column(2 + ci, 2 + ci, 13)
+
+    # ---------- 개인별 종합점수 ----------
+    ws = wb.add_worksheet("(대안) 개인별 종합점수")
+    ws.write(0, 0, "개인별 대안 종합점수", F["title"])
+    if not indiv.empty:
+        irows = []
+        for _, row in indiv.iterrows():
+            irows.append([str(row.get("ID", "")), str(row.get("Type", ""))]
+                         + [float(row.get(f"Score_{a}", 0.0) or 0.0) for a in alts]
+                         + [str(row.get("1위 대안", ""))])
+        _write_table(ws, 2, ["ID", "Type"] + alts + ["1위 대안"], irows,
+                     ["body", "body"] + ["num4"] * len(alts) + ["body"],
+                     widths=[18, 14] + [14] * len(alts) + [12])
+
+    # ---------- 일관성 요약 ----------
+    if leaf_detail:
+        ws = wb.add_worksheet("(대안) 일관성 요약")
+        ws.write(0, 0, "최하위 요인별 일관성(CR) 요약", F["title"])
+        crows = []
+        for lf in leaves:
+            det = leaf_detail.get(lf) or {}
+            res = det.get("res")
+            if res is None or (hasattr(res, "empty") and res.empty):
+                continue
+            ocr = pd.to_numeric(res.get("Original_CR"), errors="coerce")
+            fcr = pd.to_numeric(res.get("Final_CR"), errors="coerce")
+            corr_n = int(res.get("Corrected").astype(bool).sum()) if "Corrected" in res.columns else 0
+            crows.append([lf, len(res), int(det.get("excluded_count", 0) or 0),
+                          float(ocr.mean()), float(fcr.mean()), float(fcr.max()), corr_n])
+        _write_table(ws, 2, ["최하위 요인", "유효 응답", "제외", "평균 Original CR", "평균 Final CR", "최대 Final CR", "보정된 응답 수"],
+                     crows, ["body", "body", "body", "num3", "num3", "num3", "body"],
+                     widths=[22, 12, 10, 17, 15, 15, 15])
+        ws.write(9 + len(crows), 0, "※ Final CR은 임계값 초과 시 자동 보정을 거친 뒤의 값입니다. 보정 후에도 임계값을 넘은 응답은 제외됩니다.", F["note"])
+
+    wb.close()
     buf.seek(0)
     return buf.getvalue()
-
 
 
 def _ss_blocks_in_order(ahp_model):
