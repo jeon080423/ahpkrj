@@ -105,7 +105,7 @@ def get_survey_gspread_client(user_id=None):
         st.error(f"gspread 인증 에러: {e}")
         return None
 
-def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_method, rewards_info, description="", existing_sheet_id=None, user_id=None, show_hierarchy=True):
+def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics, definition_map, cr_limit, cr_guide_method, rewards_info, description="", existing_sheet_id=None, user_id=None, show_hierarchy=True, alt_guide=""):
     """
     사용자가 등록한 본인 구글 시트(기존 스프레드시트 ID)를 기반으로 설문지를 연동합니다.
     등록된 시트가 없으면 배포를 진행하지 않고 예외를 발생시킵니다.
@@ -194,6 +194,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
         ["CR_Guide_Enabled", str(cr_guide_method == "realtime")],
         ["CR_Guide_Method", str(cr_guide_method)],
         ["Show_Hierarchy", str(show_hierarchy)],
+        ["Alt_Guide", alt_guide],
         ["Rewards_Info", json.dumps(rewards_info, ensure_ascii=False)],
         ["Visit_Count", "0"],
         ["Abandoned_CR_Count", "0"],
@@ -380,6 +381,7 @@ def create_survey_sheet(title, admin_email, ahp_model, scale_type, demographics,
             "CR_Guide_Enabled": bool(cr_guide_method == "realtime"),
             "CR_Guide_Method": str(cr_guide_method),
             "Show_Hierarchy": bool(show_hierarchy),
+            "Alt_Guide": alt_guide,
             "Rewards_Info": rewards_info
         }
         c.execute("INSERT OR REPLACE INTO survey_metadata_cache (survey_id, metadata_json, updated_at) VALUES (?, ?, datetime('now'))",

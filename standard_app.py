@@ -5806,6 +5806,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
 
             comp_idx = 1
             _shjeon_sec4_shown = False
+            _alt_intro_shown = False
             _shjeon_sec4_idx = 0
             for comb_idx, comb in enumerate(combinations):
                 parent_trans = translate_factor_if_default(comb['parent'])
@@ -5831,6 +5832,34 @@ if "preview_id" in q_params or "survey_id" in q_params:
                     st.markdown(f"#### 4-{_shjeon_sec4_idx}. {_clean} 상대적 중요도 평가")
                 elif not _is_shjeon_survey:
                     st.markdown(f"#### {parent_lbl}")
+
+                # [2026-10-22] 대안 비교 섹션 도입부 — 첫 대안 섹션에서만 안내문(Alt_Guide)과
+                # 대안 정의를 1회 표시한다. 잎 요인 정의는 아래 'alt' 분기 카드가 섹션마다 표시한다.
+                if comb['type'] == 'alt' and not _alt_intro_shown:
+                    _alt_intro_shown = True
+                    _alt_guide_txt = survey_meta.get("Alt_Guide", "") or ""
+                    _alt_defs_html = ""
+                    if definitions:
+                        for _alt_nm in (ahp_model.get("alternatives", []) or []):
+                            _alt_df = translate_definition_if_default(_alt_nm, definitions.get(_alt_nm, ""))
+                            if _alt_df:
+                                _alt_nm_tr = translate_factor_if_default(_alt_nm)
+                                _alt_defs_html += f"""
+                                <div style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #f1f5f9;">
+                                    <span style="color: #334155; font-weight: bold; min-width: 140px; font-size: 0.9rem; border-right: 2px solid #cbd5e1; padding-right: 8px; display: inline-block;">{_alt_nm_tr}</span>
+                                    <span style="color: #334155; font-size: 0.88rem; padding-left: 4px; flex: 1;">{_alt_df}</span>
+                                </div>
+                                """
+                    if _alt_guide_txt or _alt_defs_html:
+                        _guide_p_html = f'<p style="margin: 0 0 12px 0; color: #475569; font-size: 0.95rem; font-weight: 500;">{_alt_guide_txt}</p>' if _alt_guide_txt else ""
+                        _defs_box_html = f'<h5 style="margin: 0 0 12px 0; color: #1e293b; font-size: 1.0rem; font-weight: bold;">{_("대안의 정의", "Alternative Definitions")}</h5><div style="display: flex; flex-direction: column; gap: 2px; background-color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{_alt_defs_html}</div>' if _alt_defs_html else ""
+                        _alt_intro_html = f"""
+                        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 6px solid #64748b; padding: 16px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;">
+                            {_guide_p_html}
+                            {_defs_box_html}
+                        </div>
+                        """
+                        st.markdown(_alt_intro_html.replace("\n", " "), unsafe_allow_html=True)
                 
                 # [수정] 평가 요인 정의 및 설명을 각 척도 평가 바로 위쪽으로 이동
                 if comb['type'] == 'sub_sub':
@@ -12968,6 +12997,7 @@ with contextlib.nullcontext():
 
                                 definitions = meta.get("Definitions", {})
                                 st.session_state.edit_definitions = definitions
+                                st.session_state.edit_alt_guide = meta.get("Alt_Guide", "") or ""
                             st.session_state.survey_auto_loaded = True
                             st.rerun()
 
@@ -13492,6 +13522,22 @@ with contextlib.nullcontext():
                                     f"📊 Alternative questions will be added: {_leaf_cnt} leaf criteria × {_n_alt_pairs} per criterion = {_leaf_cnt * _n_alt_pairs} questions total"))
                         model_structure["alternatives"] = alt_list
 
+                        # [2026-10-22] 대안 평가 안내문 — 대안 비교 섹션 시작 시 응답자에게 표시.
+                        # 대안 정의는 섹션 4에서 요인 정의와 함께 입력받아 Definitions에 저장한다.
+                        alt_guide_text = ""
+                        if use_alternatives and len(alt_list) >= 2:
+                            _default_alt_guide = _(
+                                "지금부터는 각 세부기준의 관점에서 대안들을 서로 비교합니다. 각 섹션에서는 제시된 기준 하나의 관점에서만 판단해 주시고, 다른 기준의 중요성은 고려하지 마십시오. 모든 대안에 동일한 조건이 적용되는 상황을 가정하고, 어느 대안을 우선해야 하는지 평가해 주십시오.",
+                                "From here, you will compare the alternatives from the perspective of each detailed criterion. In each section, please judge only from the perspective of the given criterion, without considering other criteria. Assume that the same conditions apply to all alternatives, and evaluate which alternative should be given priority."
+                            )
+                            _edit_alt_guide_val = st.session_state.get("edit_alt_guide", "")
+                            alt_guide_text = st.text_area(
+                                _("대안 평가 안내문 (대안 비교 섹션 시작 시 응답자에게 표시됩니다)", "Alternative Evaluation Guide (shown to respondents when the alternative comparison section begins)"),
+                                value=_edit_alt_guide_val if _edit_alt_guide_val else _default_alt_guide,
+                                key="tab2_alt_guide",
+                                height=110,
+                            )
+
                         # ── 계층 구조 트리 시각화 ──────────────────────────────
                         if main_list:
                             st.markdown("---")
@@ -13611,6 +13657,19 @@ with contextlib.nullcontext():
 
 
 
+
+                        # [2026-10-22] 대안 정의 입력 — 요인 정의와 같은 Definitions 맵에 대안명으로 저장.
+                        # 응답 화면의 첫 대안 비교 섹션에서 안내문과 함께 표시된다.
+                        if alt_list:
+                            st.markdown(_("####  :blue[**대안 (비교 대상) 상세 설명**]", "####  :blue[**Alternative (Comparison Target) Descriptions**]"))
+                            with st.container(border=True):
+                                for _alt_k, _alt_name in enumerate(alt_list):
+                                    _edit_alt_def_val = st.session_state.get("edit_definitions", {}).get(_alt_name)
+                                    definitions_map[_alt_name] = st.text_input(
+                                        _(f"대안 [{_alt_name}] 설명 입력", f"Enter description for alternative [{_alt_name}]"),
+                                        value=_edit_alt_def_val if _edit_alt_def_val is not None else "",
+                                        key=f"def_alt_{_alt_name}_{_alt_k}"
+                                    )
 
                     with st.container():
                         # 섹션 5: 척도 인터페이스 설정
@@ -13857,6 +13916,7 @@ with contextlib.nullcontext():
                             "Scale_Type": scale_option,
                             "Demographics": demographics_settings,
                             "Definitions": definitions_map,
+                            "Alt_Guide": alt_guide_text,
                             "CR_Limit": cr_limit,
                             "CR_Guide_Method": cr_guide_method,
                             "Show_Hierarchy": show_hierarchy,
@@ -14037,7 +14097,7 @@ with contextlib.nullcontext():
                                                 cr_limit=cr_limit, cr_guide_method=cr_guide_method,
                                                 rewards_info=rewards_info, description=survey_desc,
                                                 existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id,
-                                                show_hierarchy=show_hierarchy
+                                                show_hierarchy=show_hierarchy, alt_guide=alt_guide_text
                                             )
                                         else:
                                             create_survey_sheet(
@@ -14047,7 +14107,7 @@ with contextlib.nullcontext():
                                                 cr_limit=cr_limit, cr_guide_method=cr_guide_method,
                                                 rewards_info=rewards_info, description=survey_desc,
                                                 existing_sheet_id=_s_sheet_id, user_id=st.session_state.user_id,
-                                                show_hierarchy=show_hierarchy
+                                                show_hierarchy=show_hierarchy, alt_guide=alt_guide_text
                                             )
                                         st.session_state._survey_cache_dirty = True
                                         st.success(_("✅ 저장 완료!", "✅ Saved successfully!"))
@@ -14110,7 +14170,7 @@ with contextlib.nullcontext():
                                                         description=survey_desc,
                                                         existing_sheet_id=target_sheet_id,
                                                         user_id=st.session_state.user_id,
-                                                        show_hierarchy=show_hierarchy
+                                                        show_hierarchy=show_hierarchy, alt_guide=alt_guide_text
                                                     )
                                                 else:
                                                     sheet_id = create_survey_sheet(
@@ -14126,7 +14186,7 @@ with contextlib.nullcontext():
                                                         description=survey_desc,
                                                         existing_sheet_id=target_sheet_id,
                                                         user_id=st.session_state.user_id,
-                                                        show_hierarchy=show_hierarchy
+                                                        show_hierarchy=show_hierarchy, alt_guide=alt_guide_text
                                                     )
 
 
