@@ -1178,7 +1178,9 @@ def get_gspread_client():
     creds = Credentials.from_service_account_info(auth_info, scopes=scope)
     return gspread.authorize(creds)
 
-def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwargs):
+def run_gspread_with_retry(func, *args, max_retries=6, initial_backoff=2, **kwargs):
+    # [2026-10-24] max_retries 5→6: 백오프 합계(2+4+8+16+32≈62초+지터)가 분당 쿼터 윈도우(60초)를
+    # 넘겨야 쿼터 소진 상황에서도 재시도가 성공할 수 있음 (5회·약 31초로는 윈도우 리셋 전에 포기했음)
     """
     구글 시트 API 호출 시 429(RESOURCE_EXHAUSTED) 등 일시적 오류 발생 시
     지수 백오프(Exponential Backoff) 및 지터(Jitter)를 적용하여 재시도하는 헬퍼 함수.
@@ -9948,12 +9950,12 @@ with contextlib.nullcontext():
                             if survey_meta and g_client:
                                 try:
                                     spreadsheet = run_gspread_with_retry(g_client.open_by_key, selected_sheet_id)
-                                    raw_sheet = spreadsheet.worksheet("Raw_Data")
+                                    raw_sheet = run_gspread_with_retry(spreadsheet.worksheet, "Raw_Data")
                                     # [2026-10-21 할당량 대응] Raw/Demographic/Alt 시트를 batchGet 1회로 일괄 조회해
                                     # 읽기 요청 수를 대폭 줄이고(개별 조회 반복 시 분당 60회 쿼터 초과 빈발), 429는 재시도 헬퍼로 흡수
                                     _batch_vals = {}
                                     try:
-                                        _titles_ld = [w.title for w in spreadsheet.worksheets()]
+                                        _titles_ld = [w.title for w in run_gspread_with_retry(spreadsheet.worksheets)]
                                         _ranges_ld = [t for t in ("Raw_Data", "Demographic_Data") if t in _titles_ld]
                                         _model_pre = survey_meta.get("AHP_Model_JSON", {}) or {}
                                         if len(_model_pre.get("alternatives", []) or []) >= 2:
@@ -9964,7 +9966,11 @@ with contextlib.nullcontext():
                                                     _ranges_ld.append(_t_pre)
                                         _res_ld = run_gspread_with_retry(spreadsheet.batch_get, [f"'{t}'" for t in _ranges_ld])
                                         _batch_vals = {t: [list(r) for r in (v or [])] for t, v in zip(_ranges_ld, _res_ld)}
-                                    except Exception:
+                                    except Exception as _batch_err:
+                                        # [2026-10-24] 429(쿼터 소진)면 개별 조회 폴백으로 추가 요청을 만들지 말고
+                                        # 그대로 올려보내 안내 메시지로 처리 (폴백이 쿼터를 더 소진시켜 실패를 확정했음)
+                                        if "429" in str(_batch_err) or "RESOURCE_EXHAUSTED" in str(_batch_err) or "RATE_LIMIT" in str(_batch_err):
+                                            raise
                                         _batch_vals = {}
                                     all_rows = _batch_vals.get("Raw_Data")
                                     if all_rows is None:
@@ -10208,7 +10214,10 @@ with contextlib.nullcontext():
                                     else:
                                         st.warning(_("가져올 설문 응답 데이터가 시트에 존재하지 않습니다 (헤더만 존재).", "No survey responses found in the sheet."))
                                 except Exception as g_err:
-                                    st.error(f"구글 시트 로드 실패: {g_err}")
+                                    if "429" in str(g_err) or "RESOURCE_EXHAUSTED" in str(g_err) or "RATE_LIMIT" in str(g_err):
+                                        st.error("구글 시트 요청이 일시적으로 한도(분당 60회)를 초과했습니다. 약 1분 뒤에 다시 시도해 주세요.")
+                                    else:
+                                        st.error(f"구글 시트 로드 실패: {g_err}")
                             else:
                                 st.error(_("설문 메타데이터 또는 구글 API 클라이언트를 로드할 수 없습니다.", "Failed to load survey metadata or Google client."))
 

@@ -6,7 +6,9 @@ import uuid
 import streamlit as st
 from google.oauth2.service_account import Credentials
 
-def run_gspread_with_retry(func, *args, max_retries=5, initial_backoff=2, **kwargs):
+def run_gspread_with_retry(func, *args, max_retries=6, initial_backoff=2, **kwargs):
+    # [2026-10-24] max_retries 5→6: 백오프 합계(2+4+8+16+32≈62초+지터)가 분당 쿼터 윈도우(60초)를
+    # 넘겨야 쿼터 소진 상황에서도 재시도가 성공할 수 있음 (5회·약 31초로는 윈도우 리셋 전에 포기했음)
     """
     구글 시트 API 호출 시 429(RESOURCE_EXHAUSTED) 등 일시적 오류 발생 시
     지수 백오프(Exponential Backoff) 및 지터(Jitter)를 적용하여 재시도하는 헬퍼 함수.
