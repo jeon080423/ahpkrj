@@ -1771,7 +1771,7 @@ def delete_admin_survey(survey_id, admin_id):
     return True
 
 @st.cache_data(ttl=60, show_spinner=False)
-def get_admin_surveys_from_gsheet(admin_id):
+def _get_admin_surveys_from_gsheet_uncached(admin_id):
     import gspread
     client = get_survey_gspread_client()
     if not client: return []
@@ -1794,6 +1794,22 @@ def get_admin_surveys_from_gsheet(admin_id):
                 surveys.append((str(r.get('survey_id')), str(r.get('title')), str(r.get('created_at'))))
         surveys.sort(key=lambda x: x[2], reverse=True)
         return surveys
+    except Exception as e:
+        print("get_admin_surveys_from_gsheet error:", e)
+        return []
+
+
+# [2026-10-24 할당량 대응] 설문 목록 조회는 분석·모니터링 화면이 다시 그려질 때마다(위젯 조작마다)
+# 호출되는데 캐시가 없어 클릭 한 번에 마스터 시트 읽기 3회가 발생, 1분이면 쿼터(60회)를 혼자서도
+# 소진했음. 120초 TTL 캐시로 감싸고, 신규 설문은 각 화면이 SQLite 목록과 병합하므로 즉시 노출에는 영향 없음.
+@st.cache_data(ttl=120, show_spinner=False)
+def _get_admin_surveys_from_gsheet_cached(admin_id):
+    return _get_admin_surveys_from_gsheet_uncached(admin_id)
+
+
+def get_admin_surveys_from_gsheet(admin_id):
+    try:
+        return _get_admin_surveys_from_gsheet_cached(str(admin_id or ""))
     except Exception as e:
         print("get_admin_surveys_from_gsheet error:", e)
         return []

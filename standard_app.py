@@ -1257,7 +1257,7 @@ def save_short_code_to_gs(short_code, survey_id, title, admin_id):
     except Exception as e:
         pass
 
-def sync_short_codes_from_gs():
+def _sync_short_codes_from_gs_impl():
     try:
         client = get_gspread_client()
         if client and get_main_spreadsheet_id():
@@ -1283,6 +1283,20 @@ def sync_short_codes_from_gs():
             except gspread.exceptions.WorksheetNotFound:
                 pass
     except Exception as e:
+        pass
+
+
+# [2026-10-24 할당량 대응] 단축코드 동기화도 분석·모니터링 화면 렌더링 때마다 마스터 시트를
+# 읽고 있어(3회/렌더링) 쿼터 소진의 한 축이었음. 실제 동기화는 5분에 1회만 수행하도록 캐시로 감쌈.
+@st.cache_data(ttl=300, show_spinner=False)
+def _sync_short_codes_from_gs_cached():
+    _sync_short_codes_from_gs_impl()
+
+
+def sync_short_codes_from_gs():
+    try:
+        _sync_short_codes_from_gs_cached()
+    except Exception:
         pass
 
 # 설문/미리보기 페이지 여부 조기 감지 (Google Sheets API 절약용)
