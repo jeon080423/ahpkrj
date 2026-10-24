@@ -128,6 +128,49 @@
             </div>
             <p id="note-install" class="text-sm text-gray-400 mt-6 mb-12">별도의 설치 없이 웹 브라우저에서 바로 실행됩니다.</p>
 
+            <!-- 유튜브 영상 섹션 (가입 현황 위쪽, 2026-10-25 추가: videos.json에서 최신 영상을 읽어 썸네일 카드로 렌더링) -->
+            <div id="youtube-section" class="max-w-4xl mx-auto mt-4 mb-12 text-left">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">AHPMASTER 유튜브 영상</h3>
+                    <a href="https://www.youtube.com/@jsh214qqqqqq" target="_blank" rel="noopener" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">채널 바로가기 →</a>
+                </div>
+                <div id="youtube-grid" class="grid sm:grid-cols-2 gap-4"></div>
+            </div>
+            <script>
+                (function () {
+                    fetch('./videos.json')
+                        .then(function (r) { return r.json(); })
+                        .then(function (videos) {
+                            var section = document.getElementById('youtube-section');
+                            var grid = document.getElementById('youtube-grid');
+                            if (!section || !grid || !videos || !videos.length) {
+                                if (section) section.style.display = 'none';
+                                return;
+                            }
+                            videos.slice(0, 6).forEach(function (v) {
+                                if (!v || !/^[A-Za-z0-9_-]{11}$/.test(v.id || '')) return;
+                                var a = document.createElement('a');
+                                a.href = v.url; a.target = '_blank'; a.rel = 'noopener';
+                                a.className = 'block bg-white/70 rounded-2xl border border-gray-200/80 shadow-md hover:shadow-lg transition overflow-hidden';
+                                var img = document.createElement('img');
+                                img.src = 'https://i.ytimg.com/vi/' + v.id + '/hqdefault.jpg';
+                                img.alt = v.title || ''; img.loading = 'lazy';
+                                img.className = 'w-full aspect-video object-cover';
+                                var p = document.createElement('p');
+                                p.textContent = v.title || '';
+                                p.className = 'px-4 py-3 text-sm font-semibold text-gray-900 leading-snug';
+                                a.appendChild(img); a.appendChild(p);
+                                grid.appendChild(a);
+                            });
+                            if (!grid.children.length && section) section.style.display = 'none';
+                        })
+                        .catch(function () {
+                            var section = document.getElementById('youtube-section');
+                            if (section) section.style.display = 'none';
+                        });
+                })();
+            </script>
+
             <!-- 2칼럼 격자 컨테이너: 가입 현황 + 가이드 배너 -->
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-12 text-left">
                 <!-- 🟢 실시간 가입 현황 카드 -->
