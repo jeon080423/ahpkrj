@@ -1,1 +1,68 @@
-[{"date":"2026-10-28","id":"qa6sptRRTPQ","title":"표 방향만 바꿨는데 1등이 꼴찌가 됐다","url":"https://youtu.be/qa6sptRRTPQ"},{"date":"2026-10-27","id":"XjgReNNcpU8","title":"1순위가 정해졌는데 실행은 3순위부터?","url":"https://youtu.be/XjgReNNcpU8"},{"date":"2026-10-26","id":"WO2iR6Vb5Nc","title":"작은 숫자라고 버리면 안 되는 이유 — 가중치 0.02와 소수 의견","url":"https://youtu.be/WO2iR6Vb5Nc"},{"date":"2026-10-25","id":"etgz11WYz3M","title":"가중치는 나왔는데, 1등은 누구?","url":"https://youtu.be/etgz11WYz3M"},{"date":"2026-10-24","id":"XgDGKucf4jg","title":"[AHP 실전] 가중치 동점 처리 실전 기준 — CR 0.1이 안 나올 때 강도를 의심하라","url":"https://www.youtube.com/watch?v=XgDGKucf4jg"},{"date":"2026-10-23","id":"OnBBktgcrnI","title":"[AHP 실전] 가중치 0.03, 빼도 될까? 1년 뒤에도 1순위일까 — 재측정 시점","url":"https://www.youtube.com/watch?v=OnBBktgcrnI"},{"date":"2026-10-22","id":"zx7E2mf33Gg","title":"[AHP 실전] 계층은 몇 층까지 쌓아야 할까? — 응답 시간으로 보는 데이터 검수법","url":"https://www.youtube.com/watch?v=zx7E2mf33Gg"},{"date":"2026-10-22","id":"CitzCdmxzTA","title":"[AHP 실전] CR 0.1이 안 나오는 이유: 엑셀 입력 실수 3가지 + 순환 잡아내는 법","url":"https://www.youtube.com/watch?v=CitzCdmxzTA"},{"date":"2026-10-21","id":"-lY_w9XrKWQ","title":"AHP만 있는 게 아니다: TOPSIS·DEA·PROMETHEE 고르는 법 + BSC KPI 가중치 실전","url":"https://www.youtube.com/watch?v=-lY_w9XrKWQ"},{"date":"2026-10-19","id":"T0UJWPGohJw","title":"[AHP 실전] 쌍대비교가 전부 '동등'이면? — 무관심 응답 잡는 법 + AHP×IPA 우선순위 실전","url":"https://www.youtube.com/watch?v=T0UJWPGohJw"}]
+[
+  {
+    "date": "2026-10-29",
+    "id": "CCg7jSRPstg",
+    "title": "1등은 정했는데, 2등까지 뽑을까? 대안 탈락 기준 정하는 법",
+    "url": "https://youtu.be/CCg7jSRPstg"
+  },
+  {
+    "date": "2026-10-28",
+    "id": "qa6sptRRTPQ",
+    "title": "표 방향만 바꿨는데 1등이 꼴찌가 됐다",
+    "url": "https://youtu.be/qa6sptRRTPQ"
+  },
+  {
+    "date": "2026-10-27",
+    "id": "XjgReNNcpU8",
+    "title": "1순위가 정해졌는데 실행은 3순위부터?",
+    "url": "https://youtu.be/XjgReNNcpU8"
+  },
+  {
+    "date": "2026-10-26",
+    "id": "WO2iR6Vb5Nc",
+    "title": "작은 숫자라고 버리면 안 되는 이유 — 가중치 0.02와 소수 의견",
+    "url": "https://youtu.be/WO2iR6Vb5Nc"
+  },
+  {
+    "date": "2026-10-25",
+    "id": "etgz11WYz3M",
+    "title": "가중치는 나왔는데, 1등은 누구?",
+    "url": "https://youtu.be/etgz11WYz3M"
+  },
+  {
+    "date": "2026-10-24",
+    "id": "XgDGKucf4jg",
+    "title": "[AHP 실전] 가중치 동점 처리 실전 기준 — CR 0.1이 안 나올 때 강도를 의심하라",
+    "url": "https://www.youtube.com/watch?v=XgDGKucf4jg"
+  },
+  {
+    "date": "2026-10-23",
+    "id": "OnBBktgcrnI",
+    "title": "[AHP 실전] 가중치 0.03, 빼도 될까? 1년 뒤에도 1순위일까 — 재측정 시점",
+    "url": "https://www.youtube.com/watch?v=OnBBktgcrnI"
+  },
+  {
+    "date": "2026-10-22",
+    "id": "zx7E2mf33Gg",
+    "title": "[AHP 실전] 계층은 몇 층까지 쌓아야 할까? — 응답 시간으로 보는 데이터 검수법",
+    "url": "https://www.youtube.com/watch?v=zx7E2mf33Gg"
+  },
+  {
+    "date": "2026-10-22",
+    "id": "CitzCdmxzTA",
+    "title": "[AHP 실전] CR 0.1이 안 나오는 이유: 엑셀 입력 실수 3가지 + 순환 잡아내는 법",
+    "url": "https://www.youtube.com/watch?v=CitzCdmxzTA"
+  },
+  {
+    "date": "2026-10-21",
+    "id": "-lY_w9XrKWQ",
+    "title": "AHP만 있는 게 아니다: TOPSIS·DEA·PROMETHEE 고르는 법 + BSC KPI 가중치 실전",
+    "url": "https://www.youtube.com/watch?v=-lY_w9XrKWQ"
+  },
+  {
+    "date": "2026-10-19",
+    "id": "T0UJWPGohJw",
+    "title": "[AHP 실전] 쌍대비교가 전부 '동등'이면? — 무관심 응답 잡는 법 + AHP×IPA 우선순위 실전",
+    "url": "https://www.youtube.com/watch?v=T0UJWPGohJw"
+  }
+]
