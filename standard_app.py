@@ -2065,7 +2065,7 @@ def show_upgrade_dialog():
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
-            st.components.v1.html(get_portone_payment_html(user_id, "Basic (2개월)", 300000, 2, inner_html="", is_best=False), height=70)
+            st.components.v1.html(get_portone_payment_html(user_id, "Basic (2개월)", 300000, 2, inner_html="", is_best=False, show_addons=False), height=70)
             
         with col2:
             st.markdown("""
@@ -2082,7 +2082,7 @@ def show_upgrade_dialog():
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
-            st.components.v1.html(get_portone_payment_html(user_id, "Standard (2개월)", 500000, 2, inner_html="", is_best=True), height=70)
+            st.components.v1.html(get_portone_payment_html(user_id, "Standard (2개월)", 500000, 2, inner_html="", is_best=True, show_addons=False), height=70)
             
         with col3:
             st.markdown("""
@@ -2098,7 +2098,7 @@ def show_upgrade_dialog():
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
-            st.components.v1.html(get_portone_payment_html(user_id, "Pro (2개월)", 950000, 2, inner_html="", is_best=False), height=70)
+            st.components.v1.html(get_portone_payment_html(user_id, "Pro (2개월)", 950000, 2, inner_html="", is_best=False, show_addons=False), height=70)
             
     st.markdown("---")
     st.info(_("💳 연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행(사이드바의 발행 탭 이용) 모두 100% 지원됩니다.", 
@@ -7135,7 +7135,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
     </html>
     """
 
-def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2, inner_html="", is_best=False):
+def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=500000, months=2, inner_html="", is_best=False, show_addons=True):
     import hashlib
     import datetime
     login_token = issue_login_token(user_id, force_new=False)
@@ -7147,6 +7147,9 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     else:
         safe_email = "customer@ahp.kr"
         order_name = f"{plan_name}"
+
+    plan_short = plan_name.split(" (")[0]
+    box_height = "600px" if show_addons else "500px"
     
     event_cfg = get_event_settings()
     is_cfg_active = event_cfg["active"]
@@ -7168,6 +7171,24 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
     
+    # [2026-10-30] 요금제 하위 부가 옵션 (부가 서비스 대행에서 이동)
+    # AHP 온라인 설문 셋팅(50,000원) / AHP 기본 결과 분석 대행(50,000원)
+    addon_ui_html = ""
+    if show_addons:
+        addon_ui_html = """
+        <div style="margin: 2px 0 6px 0; padding: 8px 10px; background: #fafafa; border: 1px solid #eee; border-radius: 6px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #888; margin-bottom: 5px;">+ 부가 옵션 (선택 시 요금에 추가)</div>
+            <label style="display: flex; align-items: flex-start; cursor: pointer; margin-bottom: 5px; font-size: 0.78rem; color: #333;">
+                <input type="checkbox" class="plan-addon" value="50000" data-name="AHP 온라인 설문 셋팅" onchange="updatePlanPrice()" style="margin: 2px 6px 0 0; accent-color: #ff4b4b;">
+                <span>AHP 온라인 설문 셋팅(수정 2회) <span style="color: #888;">+50,000원</span></span>
+            </label>
+            <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.78rem; color: #333;">
+                <input type="checkbox" class="plan-addon" value="50000" data-name="AHP 기본 결과 분석 대행" onchange="updatePlanPrice()" style="margin: 2px 6px 0 0; accent-color: #ff4b4b;">
+                <span>AHP 기본 결과 분석 대행 <span style="color: #888;">+50,000원</span></span>
+            </label>
+        </div>
+        """
+
     event_ui_html = ""
     if is_event_active:
         event_ui_html = f"""
@@ -7207,7 +7228,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            height: 500px; 
+            height: {box_height}; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -7234,43 +7255,88 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
       <div class="pricing-box">
           {best_badge}
           <div style="height: 260px; box-sizing: border-box;">{inner_html}</div>
+          {addon_ui_html}
           {event_ui_html}
-          <button class="btn" onclick="openPaymentWindow()">결제 {plan_name.split(" (")[0]}</button>
+          <button class="btn" id="plan-pay-btn" onclick="openPaymentWindow()">결제 {plan_short} ({amount:,}원)</button>
       </div>
       <script>
         let isEventApplied = false;
         const originalAmount = {amount};
+        const eventDiscount = {event_discount};
+        let addonAmount = 0;
         let finalAmount = originalAmount;
+
+        // [2026-10-30] 요금제 하위 부가 옵션 금액 합산
+        function getAddonAmount() {{
+            let sum = 0;
+            const cbs = document.querySelectorAll(".plan-addon");
+            for (let i = 0; i < cbs.length; i++) {{
+                if (cbs[i].checked) sum += parseInt(cbs[i].value, 10);
+            }}
+            return sum;
+        }}
+
+        function getAddonNames() {{
+            const names = [];
+            const cbs = document.querySelectorAll(".plan-addon");
+            for (let i = 0; i < cbs.length; i++) {{
+                if (cbs[i].checked) names.push(cbs[i].getAttribute("data-name"));
+            }}
+            return names;
+        }}
+
+        function recalcFinal() {{
+            addonAmount = getAddonAmount();
+            finalAmount = originalAmount - (isEventApplied ? eventDiscount : 0) + addonAmount;
+
+            // iframe 밖 메인 문서의 요금제 가격 표시도 함께 업데이트
+            let priceSpanOuter = null;
+            if (originalAmount === 300000) {{
+                priceSpanOuter = window.parent.document.getElementById("basic-price-display-span");
+            }} else if (originalAmount === 500000) {{
+                priceSpanOuter = window.parent.document.getElementById("standard-price-display-span");
+            }} else if (originalAmount === 950000) {{
+                priceSpanOuter = window.parent.document.getElementById("pro-price-display-span");
+            }}
+            if (priceSpanOuter) {{
+                priceSpanOuter.innerText = finalAmount.toLocaleString();
+            }}
+
+            // 결제 버튼에 합산 금액 표시
+            const payBtn = document.getElementById("plan-pay-btn");
+            if (payBtn) {{
+                payBtn.innerText = "결제 {plan_short} (" + finalAmount.toLocaleString() + "원)";
+            }}
+        }}
+
+        function updatePlanPrice() {{
+            recalcFinal();
+        }}
 
         function toggleEvent() {{
             const agreeCheckbox = document.getElementById("event-agree");
             const inputDiv = document.getElementById("event-inputs");
-            const priceSpan = window.parent.document.getElementById("price-display-span");
-            
+
             if (agreeCheckbox && agreeCheckbox.checked) {{
                 if (inputDiv) inputDiv.style.display = "flex";
-                finalAmount = originalAmount - {event_discount};
                 isEventApplied = true;
             }} else {{
                 if (inputDiv) inputDiv.style.display = "none";
-                finalAmount = originalAmount;
                 isEventApplied = false;
                 if (document.getElementById("univ-name")) document.getElementById("univ-name").value = "";
                 if (document.getElementById("thesis-title")) document.getElementById("thesis-title").value = "";
             }}
-            
-            // iframe 밖의 메인 문서에 정의된 가격 텍스트도 변경을 시도합니다.
-            // basic-price-display-span, standard-price-display-span 등으로 찾아봅니다.
-            let priceSpanOuter = null;
-            if (originalAmount === 350000) {{
-                priceSpanOuter = window.parent.document.getElementById("basic-price-display-span");
-            }} else if (originalAmount === 500000) {{
-                priceSpanOuter = window.parent.document.getElementById("standard-price-display-span");
+
+            recalcFinal();
+        }}
+
+        function buildOrderName() {{
+            const names = getAddonNames();
+            let base = "{order_name}";
+            if (names.length > 0) {{
+                base += " + " + names.join(" + ");
             }}
-            
-            if (priceSpanOuter) {{
-                priceSpanOuter.innerText = finalAmount.toLocaleString();
-            }}
+            return base;
         }}
 
         function openPaymentWindow() {{
@@ -7346,7 +7412,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
               storeId: "store-e653cab4-7da6-4bcb-9968-63f77d048c5d",
               channelKey: "channel-key-4279e2d9-c986-47cb-b190-ab1f9bb71215",
               paymentId: _payId,
-              orderName: "{order_name}",
+              orderName: buildOrderName(),
               totalAmount: finalAmount,
               currency: "CURRENCY_KRW",
               payMethod: "CARD",
@@ -7472,12 +7538,6 @@ def get_portone_custom_services_html(user_id=None):
               <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 2px 0 1px 0; list-style: none;">[설문 구축]</li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_1" value="50000" data-name="온라인 설문 셋팅(수정 2회)" onchange="updatePrice()">
-                      <span>AHP 온라인 설문 셋팅(수정 2회) <span style="color: #666; font-size: 0.75rem;">(50,000원/건)</span></span>
-                  </label>
-              </li>
-              <li class="svc-item">
-                  <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_4" value="50000" data-name="웹설문 문구 수정 대행" onchange="updatePrice()">
                       <span>웹설문 문구 수정 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원/회)</span></span>
                   </label>
@@ -7489,12 +7549,6 @@ def get_portone_custom_services_html(user_id=None):
                   </label>
               </li>
               <li style="font-size: 0.7rem; font-weight: 700; color: #999; margin: 4px 0 1px 0; list-style: none;">[분석]</li>
-              <li class="svc-item">
-                  <label style="display: flex; align-items: flex-start;">
-                      <input type="checkbox" id="svc_opt_2" value="50000" data-name="기본 결과 분석 대행" onchange="updatePrice()">
-                      <span>AHP 기본 결과 분석 대행 <span style="color: #666; font-size: 0.75rem;">(50,000원/건)</span></span>
-                  </label>
-              </li>
               <li class="svc-item">
                   <label style="display: flex; align-items: flex-start;">
                       <input type="checkbox" id="svc_opt_6" value="100000" data-name="기본 분석 외 추가 분석" onchange="updatePrice()">
@@ -7523,8 +7577,6 @@ def get_portone_custom_services_html(user_id=None):
       
       <script>
         function updatePrice() {{
-            const opt1 = document.getElementById("svc_opt_1");
-            const opt2 = document.getElementById("svc_opt_2");
             const opt3 = document.getElementById("svc_opt_3");
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
@@ -7533,8 +7585,6 @@ def get_portone_custom_services_html(user_id=None):
             
             let total = 0;
             let count = 0;
-            if (opt1.checked) {{ total += parseInt(opt1.value); count++; }}
-            if (opt2.checked) {{ total += parseInt(opt2.value); count++; }}
             if (opt3.checked) {{ total += parseInt(opt3.value); count++; }}
             if (opt4.checked) {{ total += parseInt(opt4.value); count++; }}
             if (opt5.checked) {{ total += parseInt(opt5.value); count++; }}
@@ -7556,8 +7606,6 @@ def get_portone_custom_services_html(user_id=None):
         updatePrice();
         
         function handlePayAction() {{
-            const opt1 = document.getElementById("svc_opt_1");
-            const opt2 = document.getElementById("svc_opt_2");
             const opt3 = document.getElementById("svc_opt_3");
             const opt4 = document.getElementById("svc_opt_4");
             const opt5 = document.getElementById("svc_opt_5");
@@ -7566,8 +7614,6 @@ def get_portone_custom_services_html(user_id=None):
             
             let total = 0;
             let items = [];
-            if (opt1.checked) {{ total += parseInt(opt1.value); items.push(opt1.getAttribute("data-name")); }}
-            if (opt2.checked) {{ total += parseInt(opt2.value); items.push(opt2.getAttribute("data-name")); }}
             if (opt3.checked) {{ total += parseInt(opt3.value); items.push(opt3.getAttribute("data-name")); }}
             if (opt4.checked) {{ total += parseInt(opt4.value); items.push(opt4.getAttribute("data-name")); }}
             if (opt5.checked) {{ total += parseInt(opt5.value); items.push(opt5.getAttribute("data-name")); }}
@@ -14964,7 +15010,7 @@ with contextlib.nullcontext():
                         </ul>
                     """
                     if st.session_state.user_id:
-                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 300000, 2, inner_html=inner_1, is_best=False), height=520)
+                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 300000, 2, inner_html=inner_1, is_best=False), height=620)
                     else:
                         st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
 
@@ -14984,7 +15030,7 @@ with contextlib.nullcontext():
                         </ul>
                     """
                     if st.session_state.user_id:
-                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=520)
+                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=620)
                     else:
                         st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
 
@@ -14993,7 +15039,7 @@ with contextlib.nullcontext():
                     inner_6 = """
                         <h3 style='margin-top: 0 !important; margin-bottom: 0;'>Pro</h3>
                         <span style='color: #888; font-size: 1.1rem;'>2개월</span>
-                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'>950,000원</h2>
+                        <h2 style='margin-top: 15px; margin-bottom: 5px; color: #ff4b4b;'><span id='pro-price-display-span'>950,000</span>원</h2>
                         <p style='font-size: 0.85rem; color: #666; min-height: 40px;'>고도화된 퍼지 AHP 분석과 최우선 기술 지원이 필요한 전문 학술지 투고 및 연구 기관에 적합합니다.</p>
                         <hr style='margin: 10px 0;'>
                         <ul style='font-size: 0.9rem; padding-left: 20px; color: #333; line-height: 1.6;'>
@@ -15005,7 +15051,7 @@ with contextlib.nullcontext():
                         </ul>
                     """
                     if st.session_state.user_id:
-                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (2개월)", 950000, 2, inner_html=inner_6, is_best=False), height=520)
+                        st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (2개월)", 950000, 2, inner_html=inner_6, is_best=False), height=620)
                     else:
                         st.components.v1.html(get_login_redirect_html("Pro (2개월)", inner_html=inner_6, is_best=False), height=520)
 
