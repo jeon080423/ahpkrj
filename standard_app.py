@@ -7038,7 +7038,7 @@ if st.session_state.get('user_id') is not None and st.session_state.get('user_ro
 # 3. Sidebar (Auth & Settings) - 항상 표시되도록 위치 조정
 # =============================================================================
 
-def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False, lang="ko"):
+def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best=False, lang="ko", show_addons=True):
     import datetime
     event_cfg = get_event_settings()
     is_cfg_active = event_cfg["active"]
@@ -7057,6 +7057,26 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
     
     border_css = "border: 2px solid #ff4b4b;" if is_best else "border: 1px solid #ddd;"
     best_badge = "<div style='position: absolute; top: -12px; right: 15px; background-color: #ff4b4b; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;'>BEST</div>" if is_best else ""
+
+    # [2026-10-30] 요금제 하위 부가 옵션 (미리보기용 — 결제는 로그인 후)
+    plan_short = plan_name.split(" (")[0]
+    base_amount = {"Basic": 300000, "Standard": 500000, "Pro": 950000}.get(plan_short, 0)
+    box_height = "600px" if (show_addons and lang == "ko") else "500px"
+    addon_ui_html = ""
+    if show_addons and lang == "ko":
+        addon_ui_html = """
+        <div style="margin: 2px 0 6px 0; padding: 8px 10px; background: #fafafa; border: 1px solid #eee; border-radius: 6px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #888; margin-bottom: 5px;">+ 부가 옵션 (선택 시 요금에 추가)</div>
+            <label style="display: flex; align-items: flex-start; cursor: pointer; margin-bottom: 5px; font-size: 0.78rem; color: #333;">
+                <input type="checkbox" class="plan-addon" value="50000" data-name="AHP 온라인 설문 셋팅" onchange="updatePlanPricePreview()" style="margin: 2px 6px 0 0; accent-color: #ff4b4b;">
+                <span>AHP 온라인 설문 셋팅(수정 2회) <span style="color: #888;">+50,000원</span></span>
+            </label>
+            <label style="display: flex; align-items: flex-start; cursor: pointer; font-size: 0.78rem; color: #333;">
+                <input type="checkbox" class="plan-addon" value="50000" data-name="AHP 기본 결과 분석 대행" onchange="updatePlanPricePreview()" style="margin: 2px 6px 0 0; accent-color: #ff4b4b;">
+                <span>AHP 기본 결과 분석 대행 <span style="color: #888;">+50,000원</span></span>
+            </label>
+        </div>
+        """
     
     event_ui_html = ""
     if is_event_active:
@@ -7086,7 +7106,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
             padding: 15px; 
             border-radius: 10px; 
             {border_css}
-            height: 500px; 
+            height: {box_height}; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -7113,10 +7133,31 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
       <div class="pricing-box">
           {best_badge}
           <div style="height: 260px; box-sizing: border-box;">{inner_html}</div>
+          {addon_ui_html}
           {event_ui_html}
           <button class="btn" onclick="redirectSignup()">{btn_label}</button>
       </div>
       <script>
+        // [2026-10-30] 부가 옵션 미리보기: 바깥 가격 표시만 업데이트 (결제는 로그인 후)
+        function updatePlanPricePreview() {{
+            let sum = {base_amount};
+            const cbs = document.querySelectorAll(".plan-addon");
+            for (let i = 0; i < cbs.length; i++) {{
+                if (cbs[i].checked) sum += parseInt(cbs[i].value, 10);
+            }}
+            let priceSpanOuter = null;
+            if ({base_amount} === 300000) {{
+                priceSpanOuter = window.parent.document.getElementById("basic-price-display-span");
+            }} else if ({base_amount} === 500000) {{
+                priceSpanOuter = window.parent.document.getElementById("standard-price-display-span");
+            }} else if ({base_amount} === 950000) {{
+                priceSpanOuter = window.parent.document.getElementById("pro-price-display-span");
+            }}
+            if (priceSpanOuter) {{
+                priceSpanOuter.innerText = sum.toLocaleString();
+            }}
+        }}
+
         function redirectSignup() {{
             const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
             for (let i = 0; i < tabs.length; i++) {{
@@ -15012,7 +15053,7 @@ with contextlib.nullcontext():
                     if st.session_state.user_id:
                         st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Basic (2개월)", 300000, 2, inner_html=inner_1, is_best=False), height=620)
                     else:
-                        st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=520)
+                        st.components.v1.html(get_login_redirect_html("Basic (2개월)", inner_html=inner_1, is_best=False), height=620)
 
                 # 3개월
                 with col_p2:
@@ -15032,7 +15073,7 @@ with contextlib.nullcontext():
                     if st.session_state.user_id:
                         st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Standard (2개월)", 500000, 2, inner_html=inner_3, is_best=True), height=620)
                     else:
-                        st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=520)
+                        st.components.v1.html(get_login_redirect_html("Standard (2개월)", inner_html=inner_3, is_best=True), height=620)
 
                 # 6개월
                 with col_p3:
@@ -15053,7 +15094,7 @@ with contextlib.nullcontext():
                     if st.session_state.user_id:
                         st.components.v1.html(get_portone_payment_html(st.session_state.user_id, "Pro (2개월)", 950000, 2, inner_html=inner_6, is_best=False), height=620)
                     else:
-                        st.components.v1.html(get_login_redirect_html("Pro (2개월)", inner_html=inner_6, is_best=False), height=520)
+                        st.components.v1.html(get_login_redirect_html("Pro (2개월)", inner_html=inner_6, is_best=False), height=620)
 
                 # 부가 서비스 대행
                 with col_p4:
