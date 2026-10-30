@@ -7132,7 +7132,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
     <body>
       <div class="pricing-box">
           {best_badge}
-          <div style="height: 260px; box-sizing: border-box;">{inner_html}</div>
+          <div style="min-height: 260px; box-sizing: border-box;">{inner_html}</div>
           {addon_ui_html}
           {event_ui_html}
           <button class="btn" onclick="redirectSignup()">{btn_label}</button>
@@ -7295,7 +7295,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     <body>
       <div class="pricing-box">
           {best_badge}
-          <div style="height: 260px; box-sizing: border-box;">{inner_html}</div>
+          <div style="min-height: 260px; box-sizing: border-box;">{inner_html}</div>
           {addon_ui_html}
           {event_ui_html}
           <button class="btn" id="plan-pay-btn" onclick="openPaymentWindow()">결제 {plan_short} ({amount:,}원)</button>
