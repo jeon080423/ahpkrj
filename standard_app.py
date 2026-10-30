@@ -7145,16 +7145,16 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
             for (let i = 0; i < cbs.length; i++) {{
                 if (cbs[i].checked) sum += parseInt(cbs[i].value, 10);
             }}
-            let priceSpanOuter = null;
+            let priceSpan = null;
             if ({base_amount} === 300000) {{
-                priceSpanOuter = window.parent.document.getElementById("basic-price-display-span");
+                priceSpan = document.getElementById("basic-price-display-span");
             }} else if ({base_amount} === 500000) {{
-                priceSpanOuter = window.parent.document.getElementById("standard-price-display-span");
+                priceSpan = document.getElementById("standard-price-display-span");
             }} else if ({base_amount} === 950000) {{
-                priceSpanOuter = window.parent.document.getElementById("pro-price-display-span");
+                priceSpan = document.getElementById("pro-price-display-span");
             }}
-            if (priceSpanOuter) {{
-                priceSpanOuter.innerText = sum.toLocaleString();
+            if (priceSpan) {{
+                priceSpan.innerText = sum.toLocaleString();
             }}
         }}
 
@@ -7330,17 +7330,17 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             addonAmount = getAddonAmount();
             finalAmount = originalAmount - (isEventApplied ? eventDiscount : 0) + addonAmount;
 
-            // iframe 밖 메인 문서의 요금제 가격 표시도 함께 업데이트
-            let priceSpanOuter = null;
+            // [2026-10-30] 카드 상단 요금 표시(span은 iframe 내부 inner_html에 있음) 업데이트
+            let priceSpan = null;
             if (originalAmount === 300000) {{
-                priceSpanOuter = window.parent.document.getElementById("basic-price-display-span");
+                priceSpan = document.getElementById("basic-price-display-span");
             }} else if (originalAmount === 500000) {{
-                priceSpanOuter = window.parent.document.getElementById("standard-price-display-span");
+                priceSpan = document.getElementById("standard-price-display-span");
             }} else if (originalAmount === 950000) {{
-                priceSpanOuter = window.parent.document.getElementById("pro-price-display-span");
+                priceSpan = document.getElementById("pro-price-display-span");
             }}
-            if (priceSpanOuter) {{
-                priceSpanOuter.innerText = finalAmount.toLocaleString();
+            if (priceSpan) {{
+                priceSpan.innerText = finalAmount.toLocaleString();
             }}
 
             // 결제 버튼에 합산 금액 표시
