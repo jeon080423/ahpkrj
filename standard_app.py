@@ -7065,7 +7065,7 @@ def get_login_redirect_html(plan_name="정식 사용자", inner_html="", is_best
     addon_ui_html = ""
     if show_addons and lang == "ko":
         addon_ui_html = """
-        <div style="margin: 2px 0 6px 0; padding: 8px 10px; background: #fafafa; border: 1px solid #eee; border-radius: 6px;">
+        <div style="margin: 14px 0 8px 0; padding: 8px 10px; background: #fafafa; border: 1px solid #eee; border-radius: 6px;">
             <div style="font-size: 0.72rem; font-weight: 700; color: #888; margin-bottom: 5px;">+ 부가 옵션 (선택 시 요금에 추가)</div>
             <label style="display: flex; align-items: flex-start; cursor: pointer; margin-bottom: 5px; font-size: 0.78rem; color: #333;">
                 <input type="checkbox" class="plan-addon" value="50000" data-name="AHP 온라인 설문 셋팅" onchange="updatePlanPricePreview()" style="margin: 2px 6px 0 0; accent-color: #ff4b4b;">
@@ -7217,7 +7217,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
     addon_ui_html = ""
     if show_addons:
         addon_ui_html = """
-        <div style="margin: 2px 0 6px 0; padding: 8px 10px; background: #fafafa; border: 1px solid #eee; border-radius: 6px;">
+        <div style="margin: 14px 0 8px 0; padding: 8px 10px; background: #fafafa; border: 1px solid #eee; border-radius: 6px;">
             <div style="font-size: 0.72rem; font-weight: 700; color: #888; margin-bottom: 5px;">+ 부가 옵션 (선택 시 요금에 추가)</div>
             <label style="display: flex; align-items: flex-start; cursor: pointer; margin-bottom: 5px; font-size: 0.78rem; color: #333;">
                 <input type="checkbox" class="plan-addon" value="50000" data-name="AHP 온라인 설문 셋팅" onchange="updatePlanPrice()" style="margin: 2px 6px 0 0; accent-color: #ff4b4b;">
