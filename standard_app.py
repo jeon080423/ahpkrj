@@ -7189,7 +7189,6 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
         safe_email = "customer@ahp.kr"
         order_name = f"{plan_name}"
 
-    plan_short = plan_name.split(" (")[0]
     box_height = "600px" if show_addons else "500px"
     
     event_cfg = get_event_settings()
@@ -7298,7 +7297,7 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
           <div style="min-height: 260px; box-sizing: border-box;">{inner_html}</div>
           {addon_ui_html}
           {event_ui_html}
-          <button class="btn" id="plan-pay-btn" onclick="openPaymentWindow()">결제 {plan_short} ({amount:,}원)</button>
+          <button class="btn" id="plan-pay-btn" onclick="openPaymentWindow()">결제</button>
       </div>
       <script>
         let isEventApplied = false;
@@ -7341,12 +7340,6 @@ def get_portone_payment_html(user_id, plan_name="정식 사용자", amount=50000
             }}
             if (priceSpan) {{
                 priceSpan.innerText = finalAmount.toLocaleString();
-            }}
-
-            // 결제 버튼에 합산 금액 표시
-            const payBtn = document.getElementById("plan-pay-btn");
-            if (payBtn) {{
-                payBtn.innerText = "결제 {plan_short} (" + finalAmount.toLocaleString() + "원)";
             }}
         }}
 
