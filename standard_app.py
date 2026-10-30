@@ -7508,7 +7508,7 @@ def get_portone_custom_services_html(user_id=None):
             padding: 15px; 
             border-radius: 10px; 
             border: 1px solid #ddd;
-            height: 500px; 
+            height: 600px; 
             position: relative;
             display: flex;
             flex-direction: column;
@@ -15098,7 +15098,7 @@ with contextlib.nullcontext():
 
                 # 부가 서비스 대행
                 with col_p4:
-                    st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=520)
+                    st.components.v1.html(get_portone_custom_services_html(st.session_state.user_id), height=620)
 
             st.markdown("<br><br>", unsafe_allow_html=True)
 
