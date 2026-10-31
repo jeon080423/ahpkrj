@@ -8709,51 +8709,76 @@ with st.sidebar:
                         st.error(_("등록되지 않은 아이디입니다.", "ID is not registered."))
 
         with tab_signup_side:
-            signup_type = st.radio(
-                _("가입 구분 선택", "Select Registration Type"),
+            # [2026-10-31] 가입 단계 요금제 선택 → 가입 후 자동 로그인 → 유료 선택 시 요금제 탭으로 바로 이동
+            signup_plan = st.radio(
+                _("이용 계획 선택", "Select Your Plan"),
                 options=[
-                    _("무료 회원가입", "Free Registration"),
-                    _("정식(유료) 회원가입", "Official (Paid) Registration")
+                    _("일단 무료로 시작", "Start Free"),
+                    _("Basic — 30만원/2개월", "Basic — KRW 300,000/2 months"),
+                    _("Standard — 50만원/2개월", "Standard — KRW 500,000/2 months"),
+                    _("Pro — 95만원/2개월", "Pro — KRW 950,000/2 months"),
                 ],
-                horizontal=True,
-                key="main_signup_type"
+                key="main_signup_plan"
             )
+            st.caption(_(
+                "💳 연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.",
+                "💳 Research/corporate card payments and quotations/receipts are fully supported."
+            ))
 
-            if signup_type == _("정식(유료) 회원가입", "Official (Paid) Registration"):
-                st.info(_(
-                    "💡 **정식(유료) 라이선스 이용 안내**\n\n"
-                    "1. 먼저 **'무료 회원가입'**을 선택하여 계정을 생성해 주세요.\n"
-                    "2. 생성한 계정으로 로그인한 후, 왼쪽 사이드바의 **결제 연동** 또는 상단의 **'서비스 요금'** 탭을 통해 결제를 완료하시면 즉시 정식 라이선스로 업그레이드됩니다.\n\n"
-                    "💳 *연구비/법인카드 결제 및 견적서/계산서(간이과세자) 발행이 100% 지원됩니다.*",
-                    "💡 **Official (Paid) License Info**\n\n"
-                    "1. Please first select **'Free Registration'** to create your account.\n"
-                    "2. Log in with your new account and complete the payment through the **Payment System** in the left sidebar or the **'Service Pricing'** tab to instantly upgrade to an official license.\n\n"
-                    "💳 *Supports Research/Corporate Cards, and Quotations (100% supported).*"
-                ))
-            else:
-                agreements = show_agreement_ui()
-                s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
-                s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
+            agreements = show_agreement_ui()
+            s_id = st.text_input(_("아이디 (이메일 주소)", "Username (Email Address)"), key="main_s_id")
+            s_pw = st.text_input(_("비밀번호", "Password"), type="password", key="main_s_pw")
 
-                s_cust_type = "standard"
+            s_cust_type = "standard"
 
-                if st.button(_("가입신청", "Register"), key="main_btn_signup"):
-                    if not agreements.get("agree_personal_info"):
-                        st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
-                    elif not validate_email(s_id):
-                        st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
-                    elif not validate_password(s_pw):
-                        st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
-                    else:
-                        restore_from_deleted_sheet(s_id.strip())
-                        # 가입 시 무조건 'temp' 권한으로 배정
-                        if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type, marketing_agree=agreements.get("agree_marketing", False)):
-                            st.success(_("회원가입이 완료되었습니다! 사이드바의 '로그인' 탭에서 로그인해 주시기 바랍니다.", "Registration successful! Please log in using the 'Login' tab in the sidebar."))
-                            import time
-                            time.sleep(2)
-                            st.rerun()
+            if st.button(_("가입신청", "Register"), key="main_btn_signup"):
+                if not agreements.get("agree_personal_info"):
+                    st.error(_("개인정보 수집·이용에 동의해야 가입신청할 수 있습니다.", "You must agree to the privacy policy to register."))
+                elif not validate_email(s_id):
+                    st.error(_("올바른 이메일 형식이 아닙니다.", "Invalid email format."))
+                elif not validate_password(s_pw):
+                    st.error(_("비밀번호는 문자+특수문자여야 합니다.", "Password must contain both letters and special characters."))
+                else:
+                    restore_from_deleted_sheet(s_id.strip())
+                    # 가입 시 무조건 'temp' 권한으로 배정
+                    if add_user(s_id.strip(), s_pw, 'temp', agree_info="Y", customer_type=s_cust_type, marketing_agree=agreements.get("agree_marketing", False)):
+                        # [2026-10-31] 가입 즉시 자동 로그인 (로그인 핸들러와 동일한 세션 설정)
+                        new_uid = s_id.strip()
+                        st.session_state.user_id = new_uid
+                        st.session_state.user_role = 'temp'
+                        st.session_state.expiry_date = "9999-12-31"
+                        st.session_state.logout_requested = False
+                        st.session_state._survey_cache_dirty = True
+                        st.session_state.pop('_cached_user_surveys', None)
+                        st.session_state.survey_auto_loaded = False
+                        st.session_state.plan_type = 'free'
+                        st.query_params["login_user"] = new_uid
+                        st.query_params["login_token"] = issue_login_token(new_uid)
+                        st.query_params["last_activity"] = str(int(time.time()))
+                        try:
+                            import survey_manager
+                            survey_manager.log_user_action(new_uid, "회원가입 (자동 로그인)")
+                        except:
+                            pass
+                        _paid_plans = {
+                            _("Basic — 30만원/2개월", "Basic — KRW 300,000/2 months"): "Basic",
+                            _("Standard — 50만원/2개월", "Standard — KRW 500,000/2 months"): "Standard",
+                            _("Pro — 95만원/2개월", "Pro — KRW 950,000/2 months"): "Pro",
+                        }
+                        if signup_plan in _paid_plans:
+                            st.session_state["_goto_tab"] = _("요금제", "Pricing")
+                            st.session_state["_goto_plan"] = _paid_plans[signup_plan]
+                            st.success(_(
+                                f"회원가입이 완료되었습니다! {_paid_plans[signup_plan]} 요금제 결제로 이동합니다.",
+                                f"Registration complete! Taking you to the {_paid_plans[signup_plan]} plan checkout."
+                            ))
                         else:
-                            st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
+                            st.success(_("회원가입이 완료되었습니다! 환영합니다.", "Registration complete! Welcome."))
+                        import time
+                        time.sleep(1.5)
+                        st.rerun()
+                    else:
+                        st.error(_("이미 존재하는 아이디입니다.", "ID already exists."))
 
                 st.info(_("🔒 **개인정보 보호 안내**\n\nAHP 마스터는 사용자의 이름, 전화번호 등 불필요한 개인정보를 수집하지 않습니다. 또한 입력하신 비밀번호는 강력하게 암호화되어 저장되므로 관리자도 알 수 없습니다. 안심하고 이용해 주세요.", "🔒 **Privacy Protection Notice**\n\nAHP Master does not collect unnecessary personal information such as names or phone numbers. Furthermore, your password is strongly encrypted and stored securely, so even the administrator cannot access it. Please use our service with peace of mind."))
 
@@ -15023,6 +15048,13 @@ with contextlib.nullcontext():
         ])
 
         with svc_tab_pricing:
+            # [2026-10-31] 가입 직후 유료 플랜 선택 시 1회성 안내 배너
+            _goto_plan = st.session_state.pop("_goto_plan", None)
+            if _goto_plan:
+                st.info(_(
+                    f"가입 시 선택하신 **{_goto_plan}** 요금제입니다. 아래 카드의 결제 버튼을 누르면 바로 결제됩니다.",
+                    f"You selected the **{_goto_plan}** plan at signup. Press the payment button on the card below to check out."
+                ))
 
             if st.session_state.lang == 'en':
                 st.components.v1.html(get_unified_english_pricing_html(st.session_state.user_id), height=560)
