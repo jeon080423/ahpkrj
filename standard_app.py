@@ -7811,6 +7811,13 @@ def get_portone_custom_services_html(user_id=None):
 
 
 def get_unified_english_pricing_html(user_id):
+    # [2026-10-31 DEBUG] 함수 도달 여부 확인용 임시 예외 (테스트 후 제거)
+    try:
+        if st.query_params.get("debug_pricing") == "1":
+            raise Exception("DEBUG: get_unified_english_pricing_html reached")
+    except Exception as e:
+        if "DEBUG:" in str(e):
+            raise
     is_logged_in = "true" if user_id else "false"
     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
     
