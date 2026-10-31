@@ -15110,7 +15110,7 @@ with contextlib.nullcontext():
 
     with main_tab_service:
         svc_tab_pricing, svc_tab_quote, svc_tab_invoice = st.tabs([
-            _("서비스 요금", "Pricing"),
+            _("서비스 요금", "Plans"),
             _("견적서 출력", "Estimate"),
             _("계산서/영수증", "Invoice")
         ])
