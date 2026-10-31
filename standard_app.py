@@ -162,11 +162,16 @@ def _(ko_text, en_text):
 
 @st.cache_data(show_spinner=False)
 def _translate_single_chunk(text, target_lang='en', _retry=0):
-    """단일 청크 번역 (내부용). 실패 시 원문 반환. 429 rate limit 시 재시도."""
-    try:
+    """단일 청크 번역 (내부용). 실패 시 원문 반환. 429 rate limit 시 재시도. 네트워크 타임아웃 10초 (2026-10-31 버그 수정)."""
+    import concurrent.futures
+    def _do_translate():
         from deep_translator import GoogleTranslator
         translator = GoogleTranslator(source='ko', target=target_lang)
         return translator.translate(str(text))
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+            fut = ex.submit(_do_translate)
+            return fut.result(timeout=10)
     except Exception as e:
         err = str(e).lower()
         # Rate limit(429/TooManyRequests)이면 잠시 대기 후 재시도 (최대 3회)
@@ -15114,7 +15119,15 @@ with contextlib.nullcontext():
                 ))
 
             if st.session_state.lang == 'en':
-                st.components.v1.html(get_unified_english_pricing_html(st.session_state.user_id), height=560)
+                try:
+                    import time as _tmod
+                    _pt0 = _tmod.time()
+                    _en_pricing_html = get_unified_english_pricing_html(st.session_state.user_id)
+                    print(f"[pricing-en] HTML generated in {_tmod.time()-_pt0:.2f}s, len={len(_en_pricing_html)}")
+                    st.components.v1.html(_en_pricing_html, height=560)
+                except Exception as _pe:
+                    print(f"[pricing-en] ERROR: {_pe}")
+                    st.error("Pricing is temporarily unavailable. Please try again in a moment.")
             else:
                 col_p1, col_p2, col_p3, col_p4 = st.columns(4)
                 # 1개월
