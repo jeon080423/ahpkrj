@@ -91,7 +91,7 @@
                         English
                     </a>
                     <!-- 🔥 블로그로 연결 -->
-                    <a href="https://morison.tistory.com/" target="_blank" class="bg-[#2563EB] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-blue-700 transition shadow-md hover:shadow-blue-400/25 text-sm">
+                    <a href="https://morison.tistory.com/" target="_blank" class="blog-link bg-[#2563EB] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-blue-700 transition shadow-md hover:shadow-blue-400/25 text-sm">
                         Blog
                     </a>
                     <!-- 🎬 유튜브 채널로 연결 -->
@@ -265,16 +265,16 @@
             <div>
                 <h2 class="text-2xl font-bold mb-8 text-center">AHP 분석 전문가 칼럼 (가이드)</h2>
                 <div class="grid md:grid-cols-2 gap-4">
-                    <a href="https://morison.tistory.com/" target="_blank" class="block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
+                    <a href="https://morison.tistory.com/" target="_blank" class="blog-link block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
                         <span class="font-bold text-gray-800">AHP 분석 방법: 단계별 가이드 (예시 포함) ➔</span>
                     </a>
-                    <a href="https://morison.tistory.com/" target="_blank" class="block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
+                    <a href="https://morison.tistory.com/" target="_blank" class="blog-link block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
                         <span class="font-bold text-gray-800">퍼지 AHP란? 일반 AHP와의 차이와 활용 사례 ➔</span>
                     </a>
-                    <a href="https://morison.tistory.com/" target="_blank" class="block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
+                    <a href="https://morison.tistory.com/" target="_blank" class="blog-link block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
                         <span class="font-bold text-gray-800">논문에서 AHP 결과 보고하는 법 (차트 포함) ➔</span>
                     </a>
-                    <a href="https://morison.tistory.com/" target="_blank" class="block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
+                    <a href="https://morison.tistory.com/" target="_blank" class="blog-link block p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition">
                         <span class="font-bold text-gray-800">AHP 일관성 비율(CR) 0.1 미만으로 맞추는 팁 ➔</span>
                     </a>
                 </div>
@@ -351,6 +351,10 @@
             document.getElementById('btn-start-yeta').innerText = t.btnStartYeta;
             // 예타 버튼은 한국어 모드에서만 표시 (2026-10-31 사용자 지시)
             document.getElementById('btn-start-yeta').style.display = (lang === 'en') ? 'none' : '';
+            // 블로그 링크: 영문 모드에서는 티스토리 영어 AHP 카테고리로 (2026-10-31 사용자 지시)
+            document.querySelectorAll('.blog-link').forEach(a => {
+                a.href = (lang === 'en') ? 'https://morison.tistory.com/category/AHP%20English' : 'https://morison.tistory.com/';
+            });
             document.getElementById('note-install').innerText = t.noteInstall;
             document.getElementById('guide-title').innerText = t.guideTitle;
             document.getElementById('guide-desc').innerText = t.guideDesc;
