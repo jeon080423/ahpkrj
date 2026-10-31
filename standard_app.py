@@ -2246,6 +2246,44 @@ AHP 마스터(https://www.ahpmaster.com)는 웹 브라우저에서 바로 사용
 AHP 마스터 드림
 https://www.ahpmaster.com
 """
+    # 하단 영문 안내 (2026-10-31 사용자 지시)
+    body += """
+------------------------------------------------------------
+[English]
+
+Hello. This is Sang-hyun Jeon from AHPMASTER. Thank you for signing up.
+
+AHPMASTER (https://www.ahpmaster.com) is a web-based AHP analysis automation service.
+Without complex Excel formulas, you can handle weight calculation, consistency verification (CR), and result visualization all at once.
+
+■ Getting started for free
+
+1. AHP Analysis: Download the Excel template, enter your pairwise comparison values, and upload — weights and CR are calculated automatically.
+   (The free plan supports analysis of up to 3 samples)
+2. Create Surveys: Build and distribute AHP questionnaires directly on the web.
+3. Free Online Survey Collection: Real-time integration with Google Sheets saves responses automatically.
+
+■ Learn more
+
+- User guide: https://morison.tistory.com/category/AHP%20English (AHP English category)
+- Contact: jeon080423@gmail.com or add KakaoTalk ID 'AHPkr' as a friend
+"""
+    if marketing_agree:
+        body += """
+■ Paid plan information
+
+If you need analysis of more samples and advanced features (T-Test/ANOVA, Fuzzy AHP, etc.),
+please check the plans in the app's 'Pricing' tab.
+(Basic KRW 300,000 / Standard KRW 500,000 / Pro KRW 950,000, each for 2 months)
+
+We will be sending you useful AHP tips by email going forward.
+"""
+    body += """
+Thank you.
+
+AHPMASTER Team
+https://www.ahpmaster.com
+"""
     msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = sender_email
