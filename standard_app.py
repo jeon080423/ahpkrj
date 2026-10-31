@@ -9762,15 +9762,21 @@ with contextlib.nullcontext():
     # -------------------------------------------------------------------------
     if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
         st.stop()
-    # [수정] _goto_tab 세션 스테이트로 동적 탭 전환 지원
-    _tab_default = st.session_state.pop("_goto_tab", _("AHP 분석 하기", "AHP Analysis"))
+    # [수정] _goto_tab 세션 스테이트로 동적 탭 전환 지원 (2026-10-31: default 파라미터가 탭 hang 유발하여 제거)
+    _tab_default = st.session_state.pop("_goto_tab", None)
     main_tab1, main_tab_coding, main_tab_survey, main_tab_service, main_tab_consulting = st.tabs([
         _("AHP 분석 하기", "AHP Analysis"), 
         _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
         _("AHP 설문지 작성·배포(무료)", "Free AHP Survey Creation & Deploy"),
         _("요금제", "Pricing"),
         _("컨설팅 문의", "Consulting")
-    ], default=_tab_default)
+    ])
+    # 가입 시 유료 플랜 선택한 경우 요금제 탭으로 안내하는 배너
+    if _tab_default:
+        st.info(_(
+            f"가입 시 선택하신 **{_tab_default}** 요금제 결제는 아래 '요금제' 탭에서 진행해 주세요.",
+            f"To complete payment for the **{_tab_default}** plan you selected at signup, please use the 'Pricing' tab below."
+        ))
         
     with main_tab1:
         tab1_main_col, tab1_settings_col = st.columns([3.0, 1.1], gap="large")
