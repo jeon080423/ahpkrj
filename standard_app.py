@@ -4595,10 +4595,10 @@ if "code" in q_params and not st.session_state.get('user_id'):
                 del st.query_params["code"]
             except KeyError:
                 pass
-            st.success(f"환영합니다, {_g_email}님! (Google 계정으로 로그인)")
+            st.success(_(f"환영합니다, {_g_email}님! (Google 계정으로 로그인)", f"Welcome, {_g_email}! (Signed in with Google)"))
             st.rerun()
         except Exception as _g_err:
-            st.error(f"구글 로그인 실패: {_g_err}")
+            st.error(_(f"구글 로그인 실패: {_g_err}", f"Google sign-in failed: {_g_err}"))
             st.query_params.clear()
 
 
@@ -4715,9 +4715,9 @@ def render_survey_status_dashboard(survey_id):
     # 2. 액션 바 (새로고침 버튼)
     col_act1, col_act2 = st.columns([3, 1])
     with col_act1:
-        st.caption(f"📍 대상 설문 ID: `{survey_id}`" + (f" | 담당자: `{admin_email}`" if admin_email else ""))
+        st.caption(_(f"📍 대상 설문 ID: `{survey_id}`", f"📍 Survey ID: `{survey_id}`") + (_(f" | 담당자: `{admin_email}`", f" | Owner: `{admin_email}`") if admin_email else ""))
     with col_act2:
-        if st.button("🔄 실시간 현황 새로고침", type="primary", use_container_width=True):
+        if st.button(_("🔄 실시간 현황 새로고침", "🔄 Refresh Live Status"), type="primary", use_container_width=True):
             fetch_survey_live_dashboard_payload.clear(survey_id)
             st.rerun()
 
@@ -4832,16 +4832,16 @@ def render_survey_status_dashboard(survey_id):
                 fig_type.update_layout(height=320, margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_type, use_container_width=True)
             else:
-                st.info("소속 정보 컬럼을 분석 중입니다.")
+                st.info(_("소속 정보 컬럼을 분석 중입니다.", "Analyzing demographic columns."))
         else:
-            st.info("수집된 응답자 상세 정보가 없습니다.")
+            st.info(_("수집된 응답자 상세 정보가 없습니다.", "No respondent details collected yet."))
 
     # 6. 응답자 목록 및 데이터 다운로드
     # NOTE (2026-10-13): 상단 "완료 응답자" 수는 Raw_Data 기준이므로, 목록도 Raw_Data(live_df)를
     # 기준으로 삼고 인구통계 정보는 ID로 left-join 한다.
     # (Demographic_Data 쓰기 누락 시 목록이 실제보다 적게 표시되던 불일치 수정)
     st.markdown('<div style="margin: 20px 0;"></div>', unsafe_allow_html=True)
-    st.subheader("📋 실시간 응답자 목록 및 데이터")
+    st.subheader(_("📋 실시간 응답자 목록 및 데이터", "📋 Live Respondent List & Data"))
 
     if live_df is not None and not live_df.empty:
         # 기준: Raw_Data의 응답자 ID (완료 응답자 수와 일치 보장)
@@ -4862,7 +4862,7 @@ def render_survey_status_dashboard(survey_id):
                     on="_join_id", how="left"
                 )
             list_df = list_df.drop(columns=["_join_id"])
-        st.caption(f"총 {len(list_df)}명의 응답자 (상단 완료 응답자 수와 일치)")
+        st.caption(_(f"총 {len(list_df)}명의 응답자 (상단 완료 응답자 수와 일치)", f"{len(list_df)} respondents (matches completed count above)"))
 
         # 개인정보 보호: 성명 또는 이메일 마스킹
         display_df = list_df.copy()
@@ -4897,14 +4897,18 @@ def render_survey_status_dashboard(survey_id):
                 type="secondary"
             )
     else:
-        st.info("현재까지 수집된 완료 응답자가 없습니다.")
+        st.info(_("현재까지 수집된 완료 응답자가 없습니다.", "No completed responses collected yet."))
 
     # 7. 하단 안내
-    st.markdown("""
+    st.markdown(_("""
     <div style="text-align: center; color: #64748b; font-size: 13px; margin-top: 40px; padding: 20px 0 10px 0; border-top: 1px solid #e2e8f0;">
         🔒 <strong>AHP Master 실시간 모니터링 대시보드</strong> &bull; 본 페이지는 읽기 전용으로 설문 진행 상황을 실시간 확인할 수 있습니다.
     </div>
-    """, unsafe_allow_html=True)
+    """, """
+    <div style="text-align: center; color: #64748b; font-size: 13px; margin-top: 40px; padding: 20px 0 10px 0; border-top: 1px solid #e2e8f0;">
+        🔒 <strong>AHP Master Live Monitoring Dashboard</strong> &bull; This page is read-only; monitor survey progress in real time.
+    </div>
+    """), unsafe_allow_html=True)
 
 
 _raw_mode = q_params.get("mode", "")
@@ -4935,7 +4939,7 @@ if "preview_id" in q_params or "survey_id" in q_params:
         if isinstance(preview_id_param, list):
             preview_id_param = preview_id_param[0]
             
-        st.info("⚠️ [미리보기 모드] 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.")
+        st.info(_("⚠️ [미리보기 모드] 이 화면은 응답자가 보게 될 화면의 실시간 미리보기입니다. 입력된 데이터는 제출되지 않습니다.", "⚠️ [Preview Mode] This is a live preview of what respondents will see. Entered data will not be submitted."))
         
         preview_file_path = f"temp_previews/{preview_id_param}.json"
         if os.path.exists(preview_file_path):
@@ -8888,7 +8892,7 @@ with st.sidebar:
             # '분석 요금제' 탭으로 이동 (로그인 상태 유지)
             st.session_state["_goto_tab"] = _("요금제", "Pricing")
             st.rerun()
-    st.markdown("""
+    st.markdown(_("""
     <div style="line-height: 1.4; font-size: 0.95rem;">
       <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
       <h3 style="margin-top: -5px; margin-bottom: 8px;">사업자정보</h3>
@@ -8903,7 +8907,22 @@ with st.sidebar:
         통신판매업 신고번호: 간이과세자<br>
       </div>
     </div>
-    """, unsafe_allow_html=True)
+    """, """
+    <div style="line-height: 1.4; font-size: 0.95rem;">
+      <hr style="margin-top: 15px; margin-bottom: 15px; border: 0; border-top: 1px solid #ddd;">
+      <h3 style="margin-top: -5px; margin-bottom: 8px;">Business Information</h3>
+      <div style="font-size: 0.85rem; color: #555;">
+        Business Name: 프레쉬인사이트<br>
+        CEO: 전상현<br>
+        Business Registration No.: 683-27-00122<br>
+        Address: 인천시 부평구 원길로 12, 가동 203호<br>
+        Phone: 0507-1347-2610<br>
+        Email: jeon080423@gmail.com<br>
+        Privacy Officer: 전상현<br>
+        Mail-order Business Report: 간이과세자<br>
+      </div>
+    </div>
+    """), unsafe_allow_html=True)
 
 
 
@@ -9232,7 +9251,7 @@ def show_reset_survey_dialog(sheet_id, survey_title):
     
     confirm_text = st.text_input(
         _("확인을 위해 아래에 **초기화** 또는 **RESET**을 직접 입력하세요:",
-          "Type **초기화** or **RESET** below to confirm:"),
+          "Type **RESET** below to confirm:"),
         key="txt_reset_confirm"
     )
     
@@ -12483,7 +12502,7 @@ with contextlib.nullcontext():
                                     st.session_state["_goto_tab"] = _("요금제", "Pricing")
                                     st.rerun()
             except Exception as e:
-                st.error(f"파일 처리 오류 발생: {e}")
+                st.error(_(f"파일 처리 오류 발생: {e}", f"File processing error: {e}"))
             
         st.markdown("---")
     
@@ -12635,7 +12654,7 @@ with contextlib.nullcontext():
             
             # 계층 구조 설정 (2계층 기준과 동일하게 전체 공개)
             tier_level = 2
-            st.markdown("#####  계층 구조 설정")
+            st.markdown(_("#####  계층 구조 설정", "##### Hierarchy Setup"))
             tier_choice = st.radio(
                 _("계층 레벨을 선택하세요.", "Select Hierarchy Level."),
                 [_("2계층 (대분류 - 중분류)", "2-Tier (Main - Sub)"),
@@ -12845,7 +12864,7 @@ with contextlib.nullcontext():
                 from project_manager import render_project_manager
                 render_project_manager()
             except Exception as e:
-                st.error(f"프로젝트 관리 로드 실패: {e}")
+                st.error(_(f"프로젝트 관리 로드 실패: {e}", f"Failed to load project manager: {e}"))
         with survey_sub_tools:
             try:
                 from collection_support import render_collection_tools
@@ -12874,10 +12893,10 @@ with contextlib.nullcontext():
                 except Exception:
                     pass
                 if not _tool_surveys:
-                    st.info("도구를 사용할 설문이 없습니다. 먼저 설문을 배포해 주세요.")
+                    st.info(_("도구를 사용할 설문이 없습니다. 먼저 설문을 배포해 주세요.", "No surveys available for tools. Please deploy a survey first."))
                 else:
                     _tool_options = {f"{r[1]} ({r[2]})": r[0] for r in _tool_surveys}
-                    _tool_label = st.selectbox("설문 선택", list(_tool_options.keys()),
+                    _tool_label = st.selectbox(_("설문 선택", "Select Survey"), list(_tool_options.keys()),
                                                key="tool_survey_select")
                     _tool_sid = _tool_options[_tool_label].strip()
                     _tool_meta = _load_meta_tool(_tool_sid) or {}
@@ -13964,7 +13983,7 @@ with contextlib.nullcontext():
                                 deploy_opts.append(_("기존 배포했던 설문 URL 재사용 (덮어쓰기)", "Reuse Existing Deployed Survey URL (Overwrite)"))
                         
                             if len(deploy_opts) > 1:
-                                st.markdown("##### 🔗 배포 방식 선택 (Deployment Method)")
+                                st.markdown(_("##### 🔗 배포 방식 선택 (Deployment Method)", "##### 🔗 Deployment Method"))
                                 deploy_option = st.radio(
                                     _("배포 방식을 선택해 주세요.", "Please select a deployment method."),
                                     options=deploy_opts,
@@ -14504,7 +14523,7 @@ with contextlib.nullcontext():
                         st.error(f"설문 목록 조회 실패: {e}")
 
                     if not admin_surveys:
-                        st.warning("배포된 설문지가 존재하지 않습니다. '온라인 설문지 제작' 탭에서 설문을 먼저 배포해 주세요.")
+                        st.warning(_("배포된 설문지가 존재하지 않습니다. '온라인 설문지 제작' 탭에서 설문을 먼저 배포해 주세요.", "No surveys have been deployed. Please deploy a survey from the 'Online Survey Builder' tab first."))
                     else:
                         tab3_main_col, tab3_side_col = st.columns([3.0, 1.1], gap="large")
                         with tab3_main_col:
@@ -14521,7 +14540,7 @@ with contextlib.nullcontext():
                             survey_title = selected_survey_info[1]
                             created_at = selected_survey_info[2]
                     
-                            st.success(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})")
+                            st.success(_(f" 현재 선택된 설문: **{survey_title}** (배포일시: {created_at})", f" Selected survey: **{survey_title}** (Deployed: {created_at})"))
                             st.divider()
 
                         with tab3_side_col:
