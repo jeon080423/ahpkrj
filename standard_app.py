@@ -12705,10 +12705,10 @@ with contextlib.nullcontext():
 
                             for sub_c in sub_list:
                                 sub_sub_input = st.text_input(
-                                    f"▶ '{sub_c}'의 소분류 (쉼표 구분)", 
+                                    _(f"▶ '{sub_c}'의 소분류 (쉼표 구분)", f"▶ Sub-factors of '{sub_c}' (comma-separated)"),
                                     value=default_sub_subs.get(sub_c, ""),
-                                    placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
-                                    help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
+                                    placeholder=_("예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)", "e.g., Item1, Item2 (leave blank if no sub-factors)"),
+                                    help=_("입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.", "If left blank, this item will be treated as a 2-level hierarchy."),
                                     key=f"tab1_sub_sub_{sub_c}"
                                 )
                                 parsed_sub_subs = [x.strip().replace("_", " ") for x in sub_sub_input.split(",") if x.strip()]
@@ -13613,10 +13613,10 @@ with contextlib.nullcontext():
                                         elif sub_c in ["유지비용", "Maintenance Cost"]: sub_sub_val = _("통신요금, AS비용", "Telecom Fee, A/S Cost")
                         
                                         sub_sub_input = st.text_input(
-                                            f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", 
+                                            _(f"👉 '{sub_c}'의 하위 요인 (쉼표 구분)", f"👉 Sub-factors of '{sub_c}' (comma-separated)"),
                                             value=st.session_state.get("edit_sub_sub_inputs", {}).get(sub_c, sub_sub_val),
-                                            placeholder="예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)",
-                                            help="입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.",
+                                            placeholder=_("예: 항목1, 항목2 (※ 하위 요인이 없다면 비워두세요)", "e.g., Item1, Item2 (leave blank if no sub-factors)"),
+                                            help=_("입력칸을 비워두면 이 항목은 자동으로 2계층 구조로 간주되어 분석됩니다.", "If left blank, this item will be treated as a 2-level hierarchy."),
                                             key=f"sub_sub_{sub_c}"
                                         )
                                         # 소분류가 입력된 경우에만 저장, 없으면 무시
