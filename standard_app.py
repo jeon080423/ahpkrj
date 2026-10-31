@@ -7811,6 +7811,13 @@ def get_portone_custom_services_html(user_id=None):
 
 
 def get_unified_english_pricing_html(user_id):
+    # [2026-10-31 DEBUG] 함수 도달 여부 확인용 임시 예외 (테스트 후 제거)
+    try:
+        if st.query_params.get("debug_pricing") == "1":
+            raise Exception("DEBUG: get_unified_english_pricing_html reached")
+    except Exception as e:
+        if "DEBUG:" in str(e):
+            raise
     is_logged_in = "true" if user_id else "false"
     paypal_client_id = st.secrets.get("PAYPAL_CLIENT_ID", "sb")
     
@@ -9764,12 +9771,11 @@ with contextlib.nullcontext():
         st.stop()
     # [수정] _goto_tab 세션 스테이트로 동적 탭 전환 지원 (2026-10-31: default 파라미터가 탭 hang 유발하여 제거)
     _tab_default = st.session_state.pop("_goto_tab", None)
-    # [2026-10-31 TEST] 탭 순서 변경 테스트 - Pricing을 2번으로 이동
-    main_tab1, main_tab_service, main_tab_coding, main_tab_survey, main_tab_consulting = st.tabs([
+    main_tab1, main_tab_coding, main_tab_survey, main_tab_service, main_tab_consulting = st.tabs([
         _("AHP 분석 하기", "AHP Analysis"), 
-        _("요금제", "Pricing"),
         _("데이터 입력 양식 만들기", "Create Data Entry Template"), 
         _("AHP 설문지 작성·배포(무료)", "Free AHP Survey Creation & Deploy"),
+        _("요금제", "Pricing"),
         _("컨설팅 문의", "Consulting")
     ])
     # 가입 시 유료 플랜 선택한 경우 요금제 탭으로 안내하는 배너
@@ -15110,6 +15116,17 @@ with contextlib.nullcontext():
 
 
     with main_tab_service:
+        # [2026-10-31 FIX] 영어 모드: 서브탭 hang 우회를 위해 PayPal 요금제 직접 표시
+        if st.session_state.get('lang', 'ko') == 'en':
+            _goto_plan_en = st.session_state.pop("_goto_plan", None)
+            if _goto_plan_en:
+                st.info(f"You selected the **{_goto_plan_en}** plan at signup. Press the payment button on the card below to check out.")
+            try:
+                _en_html = get_unified_english_pricing_html(st.session_state.user_id)
+                st.components.v1.html(_en_html, height=560)
+            except Exception:
+                st.error("Pricing is temporarily unavailable. Please try again in a moment.")
+            st.stop()
         svc_tab_pricing, svc_tab_quote, svc_tab_invoice = st.tabs([
             _("서비스 요금", "Plans"),
             _("견적서 출력", "Estimate"),
@@ -15117,6 +15134,13 @@ with contextlib.nullcontext():
         ])
 
         with svc_tab_pricing:
+            # [2026-10-31 DEBUG] 최소 테스트: 쿼리 파라미터로 내용 단순화
+            try:
+                if st.query_params.get("test_minimal") == "1":
+                    st.write("MINIMAL TEST: Pricing tab renders OK")
+                    st.stop()
+            except:
+                pass
             # [2026-10-31] 가입 직후 유료 플랜 선택 시 1회성 안내 배너
             _goto_plan = st.session_state.pop("_goto_plan", None)
             if _goto_plan:
