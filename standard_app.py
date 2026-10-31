@@ -15141,6 +15141,13 @@ with contextlib.nullcontext():
 
         with svc_tab_pricing:
             _dbg_point("E-in-svc_tab_pricing")
+            # [2026-10-31 DEBUG] 최소 테스트: 쿼리 파라미터로 내용 단순화
+            try:
+                if st.query_params.get("test_minimal") == "1":
+                    st.write("MINIMAL TEST: Pricing tab renders OK")
+                    st.stop()
+            except:
+                pass
             # [2026-10-31] 가입 직후 유료 플랜 선택 시 1회성 안내 배너
             _goto_plan = st.session_state.pop("_goto_plan", None)
             if _goto_plan:
@@ -15148,6 +15155,16 @@ with contextlib.nullcontext():
                     f"가입 시 선택하신 **{_goto_plan}** 요금제입니다. 아래 카드의 결제 버튼을 누르면 바로 결제됩니다.",
                     f"You selected the **{_goto_plan}** plan at signup. Press the payment button on the card below to check out."
                 ))
+
+            # [2026-10-31 TEST] 최소 렌더링 테스트 (쿼리 파라미터 test=minimal)
+            _test_minimal = False
+            try:
+                _test_minimal = (st.query_params.get("test") == "minimal")
+            except:
+                pass
+            if _test_minimal:
+                st.success("Minimal test: Pricing tab content renders correctly.")
+                st.stop()
 
             if st.session_state.lang == 'en':
                 try:
