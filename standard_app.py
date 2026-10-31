@@ -15118,14 +15118,18 @@ with contextlib.nullcontext():
     with main_tab_service:
         # [2026-10-31 FIX] 영어 모드: 서브탭 hang 우회를 위해 PayPal 요금제 직접 표시
         if st.session_state.get('lang', 'ko') == 'en':
+            st.write("DEBUG: English mode detected, rendering PayPal pricing...")
             _goto_plan_en = st.session_state.pop("_goto_plan", None)
             if _goto_plan_en:
                 st.info(f"You selected the **{_goto_plan_en}** plan at signup. Press the payment button on the card below to check out.")
             try:
+                st.write("DEBUG: Calling get_unified_english_pricing_html...")
                 _en_html = get_unified_english_pricing_html(st.session_state.user_id)
+                st.write(f"DEBUG: HTML generated, len={len(_en_html)}")
                 st.components.v1.html(_en_html, height=560)
-            except Exception:
-                st.error("Pricing is temporarily unavailable. Please try again in a moment.")
+                st.write("DEBUG: HTML rendered")
+            except Exception as _e:
+                st.error(f"Pricing error: {str(_e)}")
             st.stop()
         svc_tab_pricing, svc_tab_quote, svc_tab_invoice = st.tabs([
             _("서비스 요금", "Plans"),
