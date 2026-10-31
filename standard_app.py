@@ -1,12 +1,5 @@
 import streamlit as st
 
-# [2026-10-31 DEBUG] hang 위치 추적용 faulthandler (진단 후 제거 예정)
-import faulthandler as _fh
-try:
-    _fh.cancel_dump_traceback_later()
-except:
-    pass
-_fh.dump_traceback_later(45, exit=True)
 
 # Force rebuild 2026-01-24 v3 (Merged Sync & Restore)
 # Force deploy 2026-02-07
