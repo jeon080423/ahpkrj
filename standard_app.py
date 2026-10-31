@@ -9771,6 +9771,15 @@ with contextlib.nullcontext():
         st.stop()
     # [수정] _goto_tab 세션 스테이트로 동적 탭 전환 지원 (2026-10-31: default 파라미터가 탭 hang 유발하여 제거)
     _tab_default = st.session_state.pop("_goto_tab", None)
+    # [2026-10-31 DEBUG] 탭 hang 위치 추적용 헬퍼
+    def _dbg_point(name):
+        try:
+            if st.query_params.get("debug_pricing") == "1":
+                raise Exception(f"DEBUG-POINT:{name}")
+        except Exception as e:
+            if "DEBUG-POINT:" in str(e):
+                raise
+    _dbg_point("A-before-main-tabs")
     # [2026-10-31 DEBUG] 탭 hang 위치 추적
     print(f"[tab-debug] creating main tabs, lang={st.session_state.get('lang')}")
     main_tab1, main_tab_coding, main_tab_survey, main_tab_service, main_tab_consulting = st.tabs([
@@ -9780,6 +9789,7 @@ with contextlib.nullcontext():
         _("요금제", "Pricing"),
         _("컨설팅 문의", "Consulting")
     ])
+    _dbg_point("B-after-main-tabs")
     print(f"[tab-debug] main tabs created")
     # 가입 시 유료 플랜 선택한 경우 요금제 탭으로 안내하는 배너
     if _tab_default:
@@ -15120,14 +15130,17 @@ with contextlib.nullcontext():
 
     print(f"[tab-debug] entering main_tab_service block")
     with main_tab_service:
+        _dbg_point("C-in-main_tab_service")
         svc_tab_pricing, svc_tab_quote, svc_tab_invoice = st.tabs([
             _("서비스 요금", "Plans"),
             _("견적서 출력", "Estimate"),
             _("계산서/영수증", "Invoice")
         ])
+        _dbg_point("D-after-sub-tabs")
         print(f"[tab-debug] service sub-tabs created")
 
         with svc_tab_pricing:
+            _dbg_point("E-in-svc_tab_pricing")
             # [2026-10-31] 가입 직후 유료 플랜 선택 시 1회성 안내 배너
             _goto_plan = st.session_state.pop("_goto_plan", None)
             if _goto_plan:
