@@ -39,9 +39,12 @@ try:
     from core.session import get_session
 except ImportError:
     # 폴백: 직접 정의 (모듈 경로 문제 시)
-    def _(ko, en):
+    def _(ko, en, ja=None):
         try:
-            if st.session_state.get('lang', 'ko') == 'en':
+            lang = st.session_state.get('lang', 'ko')
+            if lang == 'ja':
+                return ja if ja is not None else en
+            if lang == 'en':
                 return en
         except:
             pass

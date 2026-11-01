@@ -32,9 +32,13 @@ import gspread
 # ============================================================
 
 # 원본: standard_app.py L155-L161
-def _(ko_text, en_text):
+# [2026-11-01] 일본어 지원 추가 (3인자)
+def _(ko_text, en_text, ja_text=None):
     try:
-        if st.session_state.get('lang', 'ko') == 'en':
+        lang = st.session_state.get('lang', 'ko')
+        if lang == 'ja':
+            return ja_text if ja_text is not None else en_text
+        if lang == 'en':
             return en_text
     except:
         pass
