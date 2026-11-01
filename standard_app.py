@@ -8631,7 +8631,7 @@ with st.sidebar:
 
     # [2026-10-31] Pricing 독립 페이지 링크
     st.markdown(
-        f'<a href="/pricing" target="_blank" style="text-decoration: none;">'
+        f'<a href="/Pricing" target="_blank" style="text-decoration: none;">'
         f'<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); '
         f'color: white; padding: 12px; border-radius: 8px; text-align: center; '
         f'margin: 10px 0; font-weight: bold;">'
