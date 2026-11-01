@@ -10,6 +10,10 @@ AHPMASTER 분석 모듈
 주의: 이 모듈은 st.session_state를 직접 사용합니다.
 """
 import streamlit as st
+import os
+# 모듈 기준 repo root 경로 (sample_data 접근용)
+_MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(os.path.dirname(_MODULE_DIR))
 
 # core 모듈 import (Phase 1)
 try:
@@ -67,8 +71,8 @@ def render_analysis_module():
     sample_excel = create_sample_excel()
         
     is_en = st.session_state.get('lang', 'ko') == 'en'
-    tahp_path = "sample_data/E_TAHP_Result.xlsx" if is_en else "sample_data/K_TAHP_Result.xlsx"
-    fahp_path = "sample_data/E_FAHP_Result.xlsx" if is_en else "sample_data/K_FAHP_Result.xlsx"
+    tahp_path = os.path.join(_REPO_ROOT, "sample_data/E_TAHP_Result.xlsx") if is_en else os.path.join(_REPO_ROOT, "sample_data/K_TAHP_Result.xlsx")
+    fahp_path = os.path.join(_REPO_ROOT, "sample_data/E_FAHP_Result.xlsx") if is_en else os.path.join(_REPO_ROOT, "sample_data/K_FAHP_Result.xlsx")
         
     tahp_data, tahp_err = _load_example_file(tahp_path)
     fahp_data, fahp_err = _load_example_file(fahp_path)
