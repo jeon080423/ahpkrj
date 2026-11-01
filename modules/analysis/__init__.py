@@ -18,13 +18,35 @@ try:
     from core.session import get_session
 except ImportError:
     # 폴백: 직접 정의 (모듈 경로 문제 시)
-    def _(ko, en):
+    def _(ko, en, ja=None):
         try:
-            if st.session_state.get('lang', 'ko') == 'en':
+            lang = st.session_state.get('lang', 'ko')
+            if lang == 'ja':
+                return ja if ja is not None else en
+            if lang == 'en':
                 return en
         except:
             pass
         return ko
+
+# Analysis helpers (NameError 방지: standard_app.py에서 추출된 의존 함수들)
+try:
+    from .helpers import (
+        _load_example_file, apply_sample_limit, build_alternative_excel,
+        calculate_anova_and_posthoc, calculate_consistency, calculate_expert_consensus,
+        calculate_pairwise_ttest, calculate_weights, compute_alternative_analysis,
+        create_sample_excel, create_sample_excel_v3, delete_analysis, fuzzy_ahp_analysis,
+        get_analysis_file, get_ri, get_user_analyses, improve_consistency,
+        infer_factors_from_columns, parse_input_value, process_single_sheet,
+        render_ahp_analysis_settings, run_gspread_with_retry, saaty_to_fuzzy,
+        save_analysis_to_db, show_cr_distortion_dialog, show_reset_survey_dialog,
+        show_warning_dialog, sync_short_codes_from_gs, write_alternative_sheets,
+        gmean, add_borders_to_data, write_custom_ahp_table,
+        ttest_rel, f_oneway, STATSMODELS_AVAILABLE,
+    )
+except ImportError as _e:
+    # helpers 로드 실패 시 원본 standard_app.py의 정의를 사용 (폴백)
+    pass
 
 
 def render_analysis_module():
