@@ -11,6 +11,27 @@ AHPMASTER 설문 모듈
 """
 import streamlit as st
 
+# 명시적 import (Phase 2 NameError 수정, 2026-11-01)
+# 원본 standard_app.py는 LazyLoader 패턴 사용 — 모듈 독립성을 위해 직접 import
+import numpy as np
+import pandas as pd
+from scipy.stats import gmean
+import json
+import os
+
+# 9개 헬퍼 함수 (팀 2 리뷰 NameError 11건 수정용)
+from .helpers import (
+    translate_definition_if_default,
+    sync_short_codes_from_gs,
+    update_user_survey_distribution,
+    calculate_consistency,
+    process_single_sheet,
+    _ss_blocks_in_order,
+    _extract_ss_block_df,
+    export_to_template_excel,
+    show_reset_survey_dialog,
+)
+
 # core 모듈 import (Phase 1)
 try:
     from core.auth import get_current_tier, check_tier, is_admin_mode
