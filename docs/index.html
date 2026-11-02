@@ -314,7 +314,7 @@
                 planSuffix: "개월"
             },
             en: {
-                langToggle: "日本語",
+                langToggle: "한국어",
                 heroTitle: 'Reliable <span class="gradient-text">AHP Analysis & Software</span>,<br/>Start with AHP Master.',
                 heroDesc: 'AHP analysis completed directly in your web browser without complex Excel formulas.<br>Guarantees the highest reliability from academic research to preliminary feasibility studies.',
                 btnStartStandard: 'Start General/Academic Analysis',
@@ -333,27 +333,6 @@
                 tickerTitle: "Live Registrations",
                 tickerHeading: "Recent Official Registrations",
                 planSuffix: " Months"
-            },
-            ja: {
-                langToggle: "한국어",
-                heroTitle: '信頼できる<span class="gradient-text">AHP分析ソフトウェア</span>、<br/>AHPマスターで始めましょう。',
-                heroDesc: '複雑なExcel数式なしで、Webブラウザで完結するAHP分析。<br>一般的な学術研究から予備的妥当性評価まで、最高の信頼性を保証します。',
-                btnStartStandard: '一般・学術AHP分析を始める',
-                btnStartYeta: '予備的妥当性総合評価(AHP)分析',
-                noteInstall: 'インストール不要で、Webブラウザですぐに実行できます。',
-                guideTitle: 'AHP一対比較オンラインアンケート作成・無料配布ガイド',
-                guideDesc: 'AHP研究設計で最も難しい一対比較尺度の構成から、リアルタイム回答同期、CR値管理ノウハウまでを網羅した実務マニュアルを無料公開しています。',
-                guideLinkText: 'ガイドブック全文を見る <span class="transition-transform group-hover:translate-x-1 text-sm">→</span>',
-                featuresTitle: '研究レベルを高める主要機能',
-                feat1Title: 'KDI標準の予備的妥当性分析',
-                feat1Desc: '極端値の除外（最高・最低点）、幾何平均の算出、定量データ（B/C比）の一対比較尺度への変換など、KDI予備的妥当性指針を完全に自動化し、究極の利便性を提供します。',
-                feat2Title: 'ファジィAHPと学術的専門性',
-                feat2Desc: '従来の一対比較分析はもちろん、不確実性を考慮したファジィ(Fuzzy)AHPまでワンクリックで完璧に処理し、学術論文レベルの専門的な統計を算出します。',
-                feat3Title: '論文用高度可視化',
-                feat3Desc: 'バイオリンプロット(Violin Plot)、レーダーチャート、CR（一貫性比率）分布など、学位・学術誌論文にそのまま挿入可能な高品質チャートをリアルタイムで提供します。',
-                tickerTitle: "リアルタイム登録状況",
-                tickerHeading: "正式ユーザーの最近の登録状況",
-                planSuffix: "ヶ月"
             }
         };
 
@@ -370,8 +349,8 @@
             document.getElementById('hero-desc').innerHTML = t.heroDesc;
             document.getElementById('btn-start-standard').innerText = t.btnStartStandard;
             document.getElementById('btn-start-yeta').innerText = t.btnStartYeta;
-            // 예타 버튼은 한국어 모드에서만 표시 (2026-10-31 사용자 지시, 2026-11-01 일본어 모드도 숨김)
-            document.getElementById('btn-start-yeta').style.display = (lang === 'en' || lang === 'ja') ? 'none' : '';
+            // 예타 버튼은 한국어 모드에서만 표시 (2026-10-31 사용자 지시)
+            document.getElementById('btn-start-yeta').style.display = (lang === 'en') ? 'none' : '';
             // 블로그 링크: 영문 모드에서는 티스토리 영어 AHP 카테고리로 (2026-10-31 사용자 지시)
             document.querySelectorAll('.blog-link').forEach(a => {
                 a.href = (lang === 'en') ? 'https://morison.tistory.com/category/AHP%20English' : 'https://morison.tistory.com/';
@@ -408,8 +387,7 @@
 
         document.getElementById('lang-toggle').addEventListener('click', function(e) {
             e.preventDefault();
-            // 2026-11-01: 일본어 추가로 3개 언어 순환 (ko → en → ja → ko)
-            const nextLang = currentLang === 'ko' ? 'en' : (currentLang === 'en' ? 'ja' : 'ko');
+            const nextLang = currentLang === 'ko' ? 'en' : 'ko';
             updateLanguage(nextLang);
         });
 
@@ -505,7 +483,7 @@
                         <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded border ${badgeClass}">${item.plan}</span>
                         <span class="text-[10px] text-gray-400 font-medium">${formattedDate}</span>
                     </div>
-                    <span class="text-[11px] text-gray-400 font-semibold period-text" data-months="${item.period}">${item.period}${currentLang === 'ko' ? '개월' : (currentLang === 'ja' ? 'ヶ月' : ' Months')}</span>
+                    <span class="text-[11px] text-gray-400 font-semibold period-text" data-months="${item.period}">${item.period}${currentLang === 'ko' ? '개월' : ' Months'}</span>
                 `;
                 tickerList.appendChild(li);
             });
