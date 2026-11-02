@@ -2211,6 +2211,34 @@ def send_approval_email(user_email):
         print(f"send_approval_email Error: {e}")
         return False
 
+def send_payment_notification_email(user_email, plan_name, months, payment_id="", pay_method="PortOne"):
+    """결제 완료 시 관리자에게 알림 메일을 발송한다. (2026-11-02 추가)"""
+    sender_email = "jeon080423@gmail.com"
+    password = st.secrets["email"]["app_password"]
+    recipient_email = sender_email
+    subject = f"[AHP 마스터] 유료 전환 알림 - {user_email}"
+    body = (
+        f"유료 결제가 완료되어 정식 사용자로 전환되었습니다.\n\n"
+        f"- 사용자: {user_email}\n"
+        f"- 요금제: {plan_name}\n"
+        f"- 기간: {months}개월\n"
+        f"- 결제수단: {pay_method}\n"
+        f"- 결제ID: {payment_id}\n"
+    )
+    msg = MIMEText(body, 'plain', 'utf-8')
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        print(f"[Payment] 관리자 알림 메일 발송 완료: {user_email}")
+        return True
+    except Exception as e:
+        print(f"send_payment_notification_email Error: {e}")
+        return False
+
 def send_welcome_email(user_email, marketing_agree=False):
     """신규 가입자에게 환영 안내 메일을 자동 발송한다.
     마케팅 섹션(요금제 안내·활용 팁 예고)은 수신 동의한 가입자에게만 포함한다."""
@@ -6967,7 +6995,13 @@ if "portone_paid" in q_params and "user_id" in q_params:
             thesis_title=thesis_title_param, 
             university=university_param
         )
-        
+
+        # [2026-11-02] 결제 완료 관리자 알림 메일 발송
+        try:
+            send_payment_notification_email(user_id_param, plan_name_param, months_param, payment_id_param, "PortOne")
+        except Exception as _e:
+            print(f"[Payment] 알림 메일 발송 실패: {_e}")
+
         import hashlib
         login_token = issue_login_token(user_id_param)
         html_code = f"""
@@ -7054,7 +7088,13 @@ if "paypal_order_id" in q_params:
                 target_role = current_role
                 
             update_user_full_info(target_user, None, target_role, new_expiry_date, plan_type=plan_name_param)
-            
+
+            # [2026-11-02] 결제 완료 관리자 알림 메일 발송
+            try:
+                send_payment_notification_email(target_user, plan_name_param, months_param, order_id_val, "PayPal")
+            except Exception as _e:
+                print(f"[Payment] 알림 메일 발송 실패: {_e}")
+
             if st.session_state.get("user_id") == target_user:
                 st.session_state.user_role = target_role
                 st.session_state.expiry_date = new_expiry_date
