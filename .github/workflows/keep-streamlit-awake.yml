@@ -1,0 +1,60 @@
+# Streamlit Community Cloud keep-alive
+# 무료 앱은 12시간 무트래픽이면 슬립. 단순 HTTP GET은 정적 HTML만 받고
+# 앱을 깨우지 못하므로, 실제 헤드리스 브라우저로 방문해야 함.
+# 6시간마다 실행 → 12시간 기준에 2배 여유.
+
+name: Keep Streamlit apps awake
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # 6시간마다 (UTC)
+  workflow_dispatch:  # 수동 실행 버튼
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install chromium --only-shell
+
+      - name: Visit apps (wake if sleeping)
+        run: |
+          python - <<'EOF'
+          from playwright.sync_api import sync_playwright
+
+          URLS = [
+              "https://ahpkrj.streamlit.app",
+              "https://marisk.streamlit.app/",
+              "https://wdelnlectdarsyvcarksmz.streamlit.app/",
+          ]
+          WAKE_PHRASES = ("gone to sleep", "get this app back up")
+
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              page = browser.new_page()
+              try:
+                  for url in URLS:
+                      try:
+                          page.goto(url, wait_until="domcontentloaded", timeout=120000)
+                          page.wait_for_timeout(8000)
+                          body = (page.inner_text("body") or "").lower()
+                          if any(ph in body for ph in WAKE_PHRASES):
+                              btn = page.get_by_role("button", name="Yes, get this app back up!")
+                              if btn.count() == 0:
+                                  btn = page.locator("button:has-text('back up')")
+                              if btn.count() > 0:
+                                  btn.first.click()
+                                  page.wait_for_timeout(90000)
+                                  print(f"{url} WOKEN", flush=True)
+                              else:
+                                  print(f"{url} SLEEPING_NOBUTTON", flush=True)
+                          else:
+                              print(f"{url} AWAKE", flush=True)
+                      except Exception as e:
+                          print(f"{url} FAILED: {type(e).__name__}: {str(e)[:100]}", flush=True)
+              finally:
+                  browser.close()
+          EOF
