@@ -2130,6 +2130,7 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
         raw_values = []
         raw_deleted_count = 0
         backup_sheet_name = None
+        errors = []  # [2026-11-05] 실패 내역을 수집해 성공 여부를 정확히 판단
         
         # 1. Raw_Data 처리
         try:
@@ -2143,17 +2144,24 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
                     backup_sheet_name = f"Raw_Backup_{now_str}"
                     try:
                         run_gspread_with_retry(spreadsheet.duplicate_sheet, raw_sheet.id, new_sheet_name=backup_sheet_name)
-                    except Exception:
-                        pass
+                    except Exception as be:
+                        errors.append(f"Raw_Data 백업 생성 실패: {be}")
                 
                 # B. 2행부터 마지막 행까지 삭제
-                run_gspread_with_retry(raw_sheet.delete_rows, 2, len(raw_values))
+                try:
+                    run_gspread_with_retry(raw_sheet.delete_rows, 2, len(raw_values))
+                except Exception as de:
+                    errors.append(f"Raw_Data 행 삭제 실패: {de}")
+                    raw_deleted_count = 0  # 삭제 실패 시 카운트 리셋
                 
                 # C. 여유 행 확보
-                if raw_sheet.row_count < 50:
-                    run_gspread_with_retry(raw_sheet.add_rows, 50)
+                try:
+                    if raw_sheet.row_count < 50:
+                        run_gspread_with_retry(raw_sheet.add_rows, 50)
+                except Exception:
+                    pass
         except Exception as r_err:
-            pass
+            errors.append(f"Raw_Data 처리 실패: {r_err}")
 
         # 2. Demographic_Data 처리
         demo_values = []
@@ -2167,14 +2175,22 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
                 if create_backup:
                     try:
                         run_gspread_with_retry(spreadsheet.duplicate_sheet, demo_sheet.id, new_sheet_name=f"Demo_Backup_{now_str}")
-                    except Exception:
-                        pass
+                    except Exception as be:
+                        errors.append(f"Demographic_Data 백업 생성 실패: {be}")
                 
-                run_gspread_with_retry(demo_sheet.delete_rows, 2, len(demo_values))
-                if demo_sheet.row_count < 50:
-                    run_gspread_with_retry(demo_sheet.add_rows, 50)
-        except Exception:
-            pass
+                try:
+                    run_gspread_with_retry(demo_sheet.delete_rows, 2, len(demo_values))
+                except Exception as de:
+                    errors.append(f"Demographic_Data 행 삭제 실패: {de}")
+                    demo_deleted_count = 0
+                
+                try:
+                    if demo_sheet.row_count < 50:
+                        run_gspread_with_retry(demo_sheet.add_rows, 50)
+                except Exception:
+                    pass
+        except Exception as d_err:
+            errors.append(f"Demographic_Data 처리 실패: {d_err}")
 
         # 2-2. Main_Criteria 및 기준별 하위 시트 처리 (2026-10-18 추가)
         # 응답 저장 시 Raw_Data/Demographic_Data 외에도 Main_Criteria와
@@ -2192,14 +2208,20 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
                 try:
                     vals = run_gspread_with_retry(ws.get_all_values)
                     if len(vals) > 1:
-                        criteria_deleted_count += len(vals) - 1
-                        run_gspread_with_retry(ws.delete_rows, 2, len(vals))
-                        if ws.row_count < 50:
-                            run_gspread_with_retry(ws.add_rows, 50)
-                except Exception:
-                    pass
-        except Exception:
-            pass
+                        try:
+                            run_gspread_with_retry(ws.delete_rows, 2, len(vals))
+                            criteria_deleted_count += len(vals) - 1
+                        except Exception as cde:
+                            errors.append(f"'{title}' 시트 행 삭제 실패: {cde}")
+                        try:
+                            if ws.row_count < 50:
+                                run_gspread_with_retry(ws.add_rows, 50)
+                        except Exception:
+                            pass
+                except Exception as ce:
+                    errors.append(f"'{title}' 시트 조회 실패: {ce}")
+        except Exception as ws_err:
+            errors.append(f"시트 목록 조회 실패: {ws_err}")
 
         # 3. 로컬 SQLite DB 백업 저장 (surveys.db)
         if raw_deleted_count > 0 or demo_deleted_count > 0:
@@ -2230,10 +2252,10 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
                     _cell = run_gspread_with_retry(meta_sheet.find, _counter_name)
                     if _cell:
                         run_gspread_with_retry(meta_sheet.update_cell, _cell.row, _cell.col + 1, "0")
-                except Exception:
-                    pass
-        except Exception:
-            pass
+                except Exception as me:
+                    errors.append(f"{_counter_name} 초기화 실패: {me}")
+        except Exception as meta_err:
+            errors.append(f"Survey_Metadata 접근 실패: {meta_err}")
 
         # 4. 작업 로그 기록
         try:
@@ -2241,12 +2263,25 @@ def reset_survey_responses(spreadsheet_id, create_backup=True, user_id=None):
         except Exception:
             pass
 
+        # [2026-11-05] 삭제 실패 시 success=False 반환 (기존에는 실패해도 무조건 True 반환하는 버그)
+        total_deleted = raw_deleted_count + demo_deleted_count + criteria_deleted_count
+        if errors and total_deleted == 0:
+            return {
+                "success": False,
+                "error": "응답 데이터 삭제에 실패했습니다: " + "; ".join(errors[:3]),
+                "deleted_count": 0,
+                "demo_deleted_count": 0,
+                "errors": errors
+            }
+
         return {
             "success": True,
             "deleted_count": raw_deleted_count,
             "demo_deleted_count": demo_deleted_count,
+            "criteria_deleted_count": criteria_deleted_count,
             "backup_sheet_name": backup_sheet_name,
-            "backup_time": now_str
+            "backup_time": now_str,
+            "warnings": errors if errors else None
         }
 
     except Exception as e:

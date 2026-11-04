@@ -9362,14 +9362,22 @@ def show_reset_survey_dialog(sheet_id, survey_title):
                 res = reset_survey_responses(sheet_id, create_backup=do_backup, user_id=st.session_state.get("user_id"))
                 if res.get("success"):
                     deleted_cnt = res.get("deleted_count", 0)
+                    demo_cnt = res.get("demo_deleted_count", 0)
+                    crit_cnt = res.get("criteria_deleted_count", 0)
+                    total_cnt = deleted_cnt + demo_cnt + crit_cnt
                     backup_name = res.get("backup_sheet_name")
-                    msg_ko = f"✅ 총 {deleted_cnt}건의 응답 데이터가 성공적으로 초기화되었습니다!"
+                    msg_ko = f"✅ 총 {total_cnt}건의 응답 데이터가 성공적으로 초기화되었습니다!"
                     if backup_name:
                         msg_ko += f"\n(구글 시트에 백업 시트 '{backup_name}' 생성 완료)"
-                    msg_en = f"✅ Successfully cleared {deleted_cnt} responses!"
+                    msg_en = f"✅ Successfully cleared {total_cnt} responses!"
                     if backup_name:
                         msg_en += f"\n(Backup sheet '{backup_name}' created in Google Sheet)"
                     st.success(_(msg_ko, msg_en))
+                    # [2026-11-05] 부분 실패 경고 표시
+                    warnings = res.get("warnings")
+                    if warnings:
+                        st.warning(_("⚠️ 일부 작업에서 문제가 발생했습니다:\n" + "\n".join(f"- {w}" for w in warnings[:5]),
+                                     "⚠️ Some operations had issues:\n" + "\n".join(f"- {w}" for w in warnings[:5])))
                     
                     # 로컬 세션 상태 초기화
                     for k in ["ahp_df_main", "ahp_sub_dfs", "ahp_sub_sub_dfs", "live_df", "demo_df", "survey_stats"]:
