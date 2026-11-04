@@ -9324,43 +9324,50 @@ def show_reset_survey_dialog(sheet_id, survey_title):
         "⚠️ **Warning**: Deleted data cannot be recovered. Enabling the 'Auto-backup Sheet' option is strongly recommended."
     ))
     
-    do_backup = st.checkbox(
-        _("🛡️ 초기화 전 구글 시트 내에 백업 시트('Raw_Backup_날짜시간') 자동 생성 (권장)",
-          "🛡️ Automatically create a backup sheet in Google Sheets before reset (Recommended)"),
-        value=True,
-        key="chk_reset_backup"
-    )
-    
-    agree = st.checkbox(
-        _("위 내용을 충분히 확인하였으며, 응답 데이터를 삭제하고 초기화하는 데 동의합니다.",
-          "I have read and understood the warning, and I agree to delete response data."),
-        value=False,
-        key="chk_reset_agree"
-    )
-    
-    confirm_text = st.text_input(
-        _("확인을 위해 아래에 **초기화** 또는 **RESET**을 직접 입력하세요:",
-          "Type **RESET** below to confirm:"),
-        key="txt_reset_confirm"
-    )
-    
-    is_confirmed = agree and (confirm_text.strip() in ["초기화", "RESET", "reset"])
-    
-    col_c1, col_c2 = st.columns(2)
-    with col_c1:
-        if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True, key="btn_cancel_reset"):
-            st.session_state["show_reset_dialog"] = False  # [2026-11-05] 다이얼로그 닫힘 플래그 정리
+    # [2026-11-05] st.form으로 감싸서 자동 새로고침이 중간에 개입하지 못하도록 함
+    # form 내부 위젯은 submit 버튼을 누르기 전까지 리런을 발생시키지 않음
+    with st.form(key="reset_confirm_form"):
+        do_backup = st.checkbox(
+            _("🛡️ 초기화 전 구글 시트 내에 백업 시트('Raw_Backup_날짜시간') 자동 생성 (권장)",
+              "🛡️ Automatically create a backup sheet in Google Sheets before reset (Recommended)"),
+            value=True,
+        )
+        
+        agree = st.checkbox(
+            _("위 내용을 충분히 확인하였으며, 응답 데이터를 삭제하고 초기화하는 데 동의합니다.",
+              "I have read and understood the warning, and I agree to delete response data."),
+            value=False,
+        )
+        
+        confirm_text = st.text_input(
+            _("확인을 위해 아래에 **초기화** 또는 **RESET**을 직접 입력하세요:",
+              "Type **RESET** below to confirm:"),
+        )
+        
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            cancel_btn = st.form_submit_button(_("❌ 취소", "❌ Cancel"), use_container_width=True)
+        with col_c2:
+            # form 내에서는 disabled를 직접 제어할 수 없으므로, submit 후 검증
+            exec_btn = st.form_submit_button(
+                _("🗑️ 영구 초기화 실행", "🗑️ Execute Permanent Reset"),
+                type="primary",
+                use_container_width=True,
+            )
+        
+        if cancel_btn:
+            st.session_state["show_reset_dialog"] = False
             st.rerun()
-    with col_c2:
-        if st.button(
-            _("🗑️ 영구 초기화 실행", "🗑️ Execute Permanent Reset"),
-            type="primary",
-            use_container_width=True,
-            disabled=not is_confirmed,
-            key="btn_exec_reset"
-        ):
-            with st.spinner(_("구글 시트 응답 데이터를 안전하게 초기화 중입니다...", "Resetting survey response data safely...")):
-                res = reset_survey_responses(sheet_id, create_backup=do_backup, user_id=st.session_state.get("user_id"))
+        
+        if exec_btn:
+            # 유효성 검증
+            if not agree:
+                st.error(_("삭제 동의 체크박스를 체크해주세요.", "Please check the agreement checkbox."))
+            elif confirm_text.strip() not in ["초기화", "RESET", "reset"]:
+                st.error(_("확인 텍스트가 올바르지 않습니다. '초기화' 또는 'RESET'을 입력하세요.", "Confirmation text is incorrect. Please type '초기화' or 'RESET'."))
+            else:
+                with st.spinner(_("구글 시트 응답 데이터를 안전하게 초기화 중입니다...", "Resetting survey response data safely...")):
+                    res = reset_survey_responses(sheet_id, create_backup=do_backup, user_id=st.session_state.get("user_id"))
                 if res.get("success"):
                     deleted_cnt = res.get("deleted_count", 0)
                     demo_cnt = res.get("demo_deleted_count", 0)
