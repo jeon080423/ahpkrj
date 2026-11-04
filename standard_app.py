@@ -9349,6 +9349,7 @@ def show_reset_survey_dialog(sheet_id, survey_title):
     col_c1, col_c2 = st.columns(2)
     with col_c1:
         if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True, key="btn_cancel_reset"):
+            st.session_state["show_reset_dialog"] = False  # [2026-11-05] 다이얼로그 닫힘 플래그 정리
             st.rerun()
     with col_c2:
         if st.button(
@@ -9380,7 +9381,7 @@ def show_reset_survey_dialog(sheet_id, survey_title):
                                      "⚠️ Some operations had issues:\n" + "\n".join(f"- {w}" for w in warnings[:5])))
                     
                     # 로컬 세션 상태 초기화
-                    for k in ["ahp_df_main", "ahp_sub_dfs", "ahp_sub_sub_dfs", "live_df", "demo_df", "survey_stats"]:
+                    for k in ["ahp_df_main", "ahp_sub_dfs", "ahp_sub_sub_dfs", "live_df", "demo_df", "survey_stats", "show_reset_dialog", "reset_dialog_sheet_id", "reset_dialog_title"]:
                         st.session_state.pop(k, None)
                     import time
                     time.sleep(2.0)
@@ -10477,8 +10478,20 @@ with contextlib.nullcontext():
                     with st.expander(_("⚙️ 설문 응답 데이터 초기화 및 백업 관리", "⚙️ Survey Response Data Reset & Backup"), expanded=False):
                         st.caption(_("테스트로 수집된 응답을 비우고 본 조사를 새로 시작할 때 사용합니다. 설문 설정 및 문항은 유지됩니다.",
                                      "Clears test submissions before starting the real survey. Settings and questions are preserved."))
+                        # [2026-11-05] 다이얼로그가 위젯 조작 시 닫히는 문제 수정 — 세션 상태로 열림 유지
                         if st.button(_("🗑️ 응답 로우데이터 초기화 마법사 열기", "🗑️ Open Response Data Reset Wizard"), type="secondary", use_container_width=True, key="btn_open_reset_tab1"):
-                            show_reset_survey_dialog(selected_sheet_id, selected_survey_label)
+                            st.session_state["show_reset_dialog"] = True
+                            st.session_state["reset_dialog_sheet_id"] = selected_sheet_id
+                            st.session_state["reset_dialog_title"] = selected_survey_label
+                            st.rerun()
+                        # 세션 상태 플래그로 다이얼로그 유지 (버튼 클릭 후 리런에도 열림)
+                        if st.session_state.get("show_reset_dialog"):
+                            _dlg_sheet = st.session_state.get("reset_dialog_sheet_id")
+                            _dlg_title = st.session_state.get("reset_dialog_title", "")
+                            if _dlg_sheet:
+                                show_reset_survey_dialog(_dlg_sheet, _dlg_title)
+                            else:
+                                st.session_state["show_reset_dialog"] = False
                 
                     if "ahp_df_main" in st.session_state:
                         df_main = st.session_state["ahp_df_main"]
