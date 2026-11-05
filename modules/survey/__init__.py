@@ -1779,8 +1779,20 @@ Thank you deeply for your valuable participation.
                 with col_dash_btn1:
                     do_load_dash = st.button(_("🔄 실시간 설문 대시보드 및 응답 데이터 불러오기 / 새로고침", "🔄 Load/Refresh Live Survey Dashboard & Responses"), type="primary", use_container_width=True)
                 with col_dash_btn2:
+                    # [2026-11-05] 다이얼로그가 위젯 조작 시 닫히는 문제 수정 — 세션 상태로 열림 유지
                     if st.button(_("🗑️ 응답 데이터 초기화", "🗑️ Reset Responses"), type="secondary", use_container_width=True, key="btn_open_reset_tab3"):
-                        show_reset_survey_dialog(selected_sheet_id, survey_title)
+                        st.session_state["show_reset_dialog"] = True
+                        st.session_state["reset_dialog_sheet_id"] = selected_sheet_id
+                        st.session_state["reset_dialog_title"] = survey_title
+                        st.rerun()
+                    # 세션 상태 플래그로 다이얼로그 유지 (버튼 클릭 후 리런에도 열림)
+                    if st.session_state.get("show_reset_dialog"):
+                        _dlg_sheet = st.session_state.get("reset_dialog_sheet_id")
+                        _dlg_title = st.session_state.get("reset_dialog_title", "")
+                        if _dlg_sheet:
+                            show_reset_survey_dialog(_dlg_sheet, _dlg_title)
+                        else:
+                            st.session_state["show_reset_dialog"] = False
 
                 if do_load_dash:
                     from survey_manager import get_survey_stats, get_survey_gspread_client, load_survey_metadata, clean_and_align_sheet_rows
