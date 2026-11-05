@@ -949,7 +949,9 @@ def update_user_survey_distribution(user_id, survey_link):
         logging.error(f"update_user_survey_distribution Error: {e}")
 
 
-# 원본: standard_app.py L9281-L9352
+
+# [2026-11-05] standard_app.py의 수정된 다이얼로그와 동기화 — @st.dialog + st.form + width="large"
+@st.dialog(_("🗑️ 설문 응답 로우데이터 초기화", "🗑️ Reset Survey Response Data"), width="large")
 def show_reset_survey_dialog(sheet_id, survey_title):
     from survey_manager import reset_survey_responses
     
@@ -967,55 +969,71 @@ def show_reset_survey_dialog(sheet_id, survey_title):
         "⚠️ **Warning**: Deleted data cannot be recovered. Enabling the 'Auto-backup Sheet' option is strongly recommended."
     ))
     
-    do_backup = st.checkbox(
-        _("🛡️ 초기화 전 구글 시트 내에 백업 시트('Raw_Backup_날짜시간') 자동 생성 (권장)",
-          "🛡️ Automatically create a backup sheet in Google Sheets before reset (Recommended)"),
-        value=True,
-        key="chk_reset_backup"
-    )
-    
-    agree = st.checkbox(
-        _("위 내용을 충분히 확인하였으며, 응답 데이터를 삭제하고 초기화하는 데 동의합니다.",
-          "I have read and understood the warning, and I agree to delete response data."),
-        value=False,
-        key="chk_reset_agree"
-    )
-    
-    confirm_text = st.text_input(
-        _("확인을 위해 아래에 **초기화** 또는 **RESET**을 직접 입력하세요:",
-          "Type **RESET** below to confirm:"),
-        key="txt_reset_confirm"
-    )
-    
-    is_confirmed = agree and (confirm_text.strip() in ["초기화", "RESET", "reset"])
-    
-    col_c1, col_c2 = st.columns(2)
-    with col_c1:
-        if st.button(_("❌ 취소", "❌ Cancel"), use_container_width=True, key="btn_cancel_reset"):
+    # [2026-11-05] st.form으로 감싸서 자동 새로고침이 중간에 개입하지 못하도록 함
+    # form 내부 위젯은 submit 버튼을 누르기 전까지 리런을 발생시키지 않음
+    with st.form(key="reset_confirm_form"):
+        do_backup = st.checkbox(
+            _("🛡️ 초기화 전 구글 시트 내에 백업 시트('Raw_Backup_날짜시간') 자동 생성 (권장)",
+              "🛡️ Automatically create a backup sheet in Google Sheets before reset (Recommended)"),
+            value=True,
+        )
+        
+        agree = st.checkbox(
+            _("위 내용을 충분히 확인하였으며, 응답 데이터를 삭제하고 초기화하는 데 동의합니다.",
+              "I have read and understood the warning, and I agree to delete response data."),
+            value=False,
+        )
+        
+        confirm_text = st.text_input(
+            _("확인을 위해 아래에 **초기화** 또는 **RESET**을 직접 입력하세요:",
+              "Type **RESET** below to confirm:"),
+        )
+        
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            cancel_btn = st.form_submit_button(_("❌ 취소", "❌ Cancel"), use_container_width=True)
+        with col_c2:
+            # form 내에서는 disabled를 직접 제어할 수 없으므로, submit 후 검증
+            exec_btn = st.form_submit_button(
+                _("🗑️ 영구 초기화 실행", "🗑️ Execute Permanent Reset"),
+                type="primary",
+                use_container_width=True,
+            )
+        
+        if cancel_btn:
+            st.session_state["show_reset_dialog"] = False
             st.rerun()
-    with col_c2:
-        if st.button(
-            _("🗑️ 영구 초기화 실행", "🗑️ Execute Permanent Reset"),
-            type="primary",
-            use_container_width=True,
-            disabled=not is_confirmed,
-            key="btn_exec_reset"
-        ):
-            with st.spinner(_("구글 시트 응답 데이터를 안전하게 초기화 중입니다...", "Resetting survey response data safely...")):
-                res = reset_survey_responses(sheet_id, create_backup=do_backup, user_id=st.session_state.get("user_id"))
+        
+        if exec_btn:
+            # 유효성 검증
+            if not agree:
+                st.error(_("삭제 동의 체크박스를 체크해주세요.", "Please check the agreement checkbox."))
+            elif confirm_text.strip() not in ["초기화", "RESET", "reset"]:
+                st.error(_("확인 텍스트가 올바르지 않습니다. '초기화' 또는 'RESET'을 입력하세요.", "Confirmation text is incorrect. Please type '초기화' or 'RESET'."))
+            else:
+                with st.spinner(_("구글 시트 응답 데이터를 안전하게 초기화 중입니다...", "Resetting survey response data safely...")):
+                    res = reset_survey_responses(sheet_id, create_backup=do_backup, user_id=st.session_state.get("user_id"))
                 if res.get("success"):
                     deleted_cnt = res.get("deleted_count", 0)
+                    demo_cnt = res.get("demo_deleted_count", 0)
+                    crit_cnt = res.get("criteria_deleted_count", 0)
+                    total_cnt = deleted_cnt + demo_cnt + crit_cnt
                     backup_name = res.get("backup_sheet_name")
-                    msg_ko = f"✅ 총 {deleted_cnt}건의 응답 데이터가 성공적으로 초기화되었습니다!"
+                    msg_ko = f"✅ 총 {total_cnt}건의 응답 데이터가 성공적으로 초기화되었습니다!"
                     if backup_name:
                         msg_ko += f"\n(구글 시트에 백업 시트 '{backup_name}' 생성 완료)"
-                    msg_en = f"✅ Successfully cleared {deleted_cnt} responses!"
+                    msg_en = f"✅ Successfully cleared {total_cnt} responses!"
                     if backup_name:
                         msg_en += f"\n(Backup sheet '{backup_name}' created in Google Sheet)"
                     st.success(_(msg_ko, msg_en))
+                    # [2026-11-05] 부분 실패 경고 표시
+                    warnings = res.get("warnings")
+                    if warnings:
+                        st.warning(_("⚠️ 일부 작업에서 문제가 발생했습니다:\n" + "\n".join(f"- {w}" for w in warnings[:5]),
+                                     "⚠️ Some operations had issues:\n" + "\n".join(f"- {w}" for w in warnings[:5])))
                     
                     # 로컬 세션 상태 초기화
-                    for k in ["ahp_df_main", "ahp_sub_dfs", "ahp_sub_sub_dfs", "live_df", "demo_df", "survey_stats"]:
+                    for k in ["ahp_df_main", "ahp_sub_dfs", "ahp_sub_sub_dfs", "live_df", "demo_df", "survey_stats", "show_reset_dialog", "reset_dialog_sheet_id", "reset_dialog_title"]:
                         st.session_state.pop(k, None)
                     import time
                     time.sleep(2.0)
@@ -1024,3 +1042,16 @@ def show_reset_survey_dialog(sheet_id, survey_title):
                     st.error(_(f"초기화 실패: {res.get('error')}", f"Reset failed: {res.get('error')}"))
 
 
+def render_ahp_analysis_settings():
+    ahp_method = 'traditional'
+    mean_method = 'geometric'
+    cr_threshold = 0.1
+    max_iter_val = 500
+    learning_rate = 0.6
+    if st.session_state.get('admin_mode', False) and st.session_state.get('user_role') == 'admin':
+        pass
+    else:
+        with st.container(border=True):
+            st.markdown(f'<h4 style="color:black; font-family:Arial, sans-serif; font-weight:bold; margin-top:0; margin-bottom:15px; font-size:1.1rem;">{_("AHP 분석 설정", "Analysis Settings")}</h4>', unsafe_allow_html=True)
+            ahp_method_label = st.radio(_("분석 기법", "Analysis Method"), (_('일반 AHP (Traditional AHP)', 'Traditional AHP'), _('퍼지 AHP (Fuzzy AHP)', 'Fuzzy AHP')), index=0)
+            ahp_method = 'traditional' if '일반' in ahp_method_label or 'Traditional' in ahp_method_label else 'fuzzy'
