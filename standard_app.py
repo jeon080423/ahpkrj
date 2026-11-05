@@ -9306,7 +9306,7 @@ A composite index representing the overall distortion level.
 
 
 # ---------- Reset Survey Response Data Dialog ----------
-@st.dialog(_("🗑️ 설문 응답 로우데이터 초기화", "🗑️ Reset Survey Response Data"))
+@st.dialog(_("🗑️ 설문 응답 로우데이터 초기화", "🗑️ Reset Survey Response Data"), width="large")
 def show_reset_survey_dialog(sheet_id, survey_title):
     from survey_manager import reset_survey_responses
     
