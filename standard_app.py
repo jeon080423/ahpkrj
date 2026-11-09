@@ -2261,6 +2261,7 @@ AHP 마스터(https://www.ahpmaster.com)는 웹 브라우저에서 바로 사용
 ■ 더 알아보기
 
 - 사용 가이드: https://morison.tistory.com (AHP 분석 카테고리)
+- 유튜브 채널: https://www.youtube.com/@jsh214qqqqqq (매일 AHP 팟캐스트)
 - 문의: jeon080423@gmail.com 또는 카카오톡 ID 'AHPkr' 친구 추가
 """
     if marketing_agree:
@@ -2299,6 +2300,7 @@ Without complex Excel formulas, you can handle weight calculation, consistency v
 ■ Learn more
 
 - User guide: https://morison.tistory.com/category/AHP%20English (AHP English category)
+- YouTube channel: https://www.youtube.com/@jsh214qqqqqq (Daily AHP podcast)
 - Contact: jeon080423@gmail.com or add KakaoTalk ID 'AHPkr' as a friend
 """
     if marketing_agree:
