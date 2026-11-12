@@ -8760,8 +8760,11 @@ with st.sidebar:
                     except Exception:
                         _g_logo_tag = ""
                     _g_btn_text = _("Google 계정으로 로그인", "Sign in with Google")
+                    # [2026-11-12 fix] 구글 OAuth는 iframe 내 로딩을 차단(403)하므로
+                    # 버튼 링크를 최상위 창으로 열어 구글 계정 선택 화면으로 이동하게 함.
+                    # (기존 target="_self"는 st.components iframe 안에서 구글을 열어 403/빈 화면)
                     _g_btn_html = (
-                        f'<a href="{_html_mod.escape(_auth_url, quote=True)}" target="_self" '
+                        f'<a href="{_html_mod.escape(_auth_url, quote=True)}" target="_top" '
                         'style="display:flex;align-items:center;justify-content:center;gap:10px;'
                         'width:100%;height:44px;background:#FFFFFF;'
                         'border:1px solid #747775;border-radius:4px;'
