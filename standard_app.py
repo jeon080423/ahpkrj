@@ -8760,11 +8760,13 @@ with st.sidebar:
                     except Exception:
                         _g_logo_tag = ""
                     _g_btn_text = _("Google 계정으로 로그인", "Sign in with Google")
-                    # [2026-11-12 fix] 구글 OAuth는 iframe 내 로딩을 차단(403)하므로
-                    # 버튼 링크를 최상위 창으로 열어 구글 계정 선택 화면으로 이동하게 함.
-                    # (기존 target="_self"는 st.components iframe 안에서 구글을 열어 403/빈 화면)
+                    # [2026-11-12 fix] 구글 OAuth는 iframe 내 로딩을 차단(403)하므로 새 탭에서 연다.
+                    # target="_self"는 iframe 안에서 구글을 열어 403/빈 화면,
+                    # target="_top"은 Streamlit 컴포넌트 iframe의 sandbox가 최상위 이동을
+                    # 막아 클릭이 무응답. 새 탭(_blank)은 sandbox의 allow-popups로 동작하고,
+                    # 구글 인증 후 리다이렉트(ahpkrj.streamlit.app)로 새 탭에서 로그인 완료됨.
                     _g_btn_html = (
-                        f'<a href="{_html_mod.escape(_auth_url, quote=True)}" target="_top" '
+                        f'<a href="{_html_mod.escape(_auth_url, quote=True)}" target="_blank" rel="noopener" '
                         'style="display:flex;align-items:center;justify-content:center;gap:10px;'
                         'width:100%;height:44px;background:#FFFFFF;'
                         'border:1px solid #747775;border-radius:4px;'
